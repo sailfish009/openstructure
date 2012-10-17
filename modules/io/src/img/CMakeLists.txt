@@ -5,18 +5,15 @@ map_io_spi_handler.cc
 map_io_situs_handler.cc
 map_io_mrc_handler.cc
 map_io_dm3_handler.cc
-map_io_tiff_handler.cc
 map_io_dat_handler.cc
 map_io_ipl_handler.cc
-map_io_jpk_handler.cc
 map_io_nanoscope_handler.cc
-map_io_png_handler.cc
 map_io_df3_handler.cc
 convert_vax_data.c
 image_format.cc
-tiff_util.cc
 PARENT_SCOPE
 )
+
 
 set(OST_IO_IMG_HEADERS
 load_map.hh
@@ -40,3 +37,10 @@ tiff_util.hh
 jpk_util.hh
 PARENT_SCOPE
 )
+
+if (ENABLE_TIFF_PNG)
+  list(OST_IO_IMG_SOURCES map_io_jpk_handler.cc
+       map_io_png_handler.cc map_io_iff_handler.cc tiff_util.cc)
+  list(OST_IO_IMG_HEADERS map_io_jpk_handler.hh
+       map_io_png_handler.hh map_io_iff_handler.hh tiff_util.hh)
+endif()

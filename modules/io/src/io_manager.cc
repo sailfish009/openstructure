@@ -33,10 +33,14 @@
 #  include  <ost/io/img/map_io_mrc_handler.hh>
 #  include  <ost/io/img/map_io_dm3_handler.hh>
 #  include  <ost/io/img/map_io_situs_handler.hh>
+#if OST_TIFF_ENABLED
 #  include  <ost/io/img/map_io_tiff_handler.hh>
-#  include  <ost/io/img/map_io_png_handler.hh>
-#  include  <ost/io/img/map_io_dat_handler.hh>
 #  include  <ost/io/img/map_io_jpk_handler.hh>
+#endif
+#if OST_PNG_ENABLED
+#  include  <ost/io/img/map_io_png_handler.hh>
+#endif
+#  include  <ost/io/img/map_io_dat_handler.hh>
 #  include  <ost/io/img/map_io_nanoscope_handler.hh>
 #  include  <ost/io/img/map_io_df3_handler.hh>
 #  include  <ost/io/img/map_io_ipl_handler.hh>
@@ -61,9 +65,13 @@ IOManager::IOManager()
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIOSitusHandlerFactory));
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIOMrcHandlerFactory));
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIODm3HandlerFactory));
+#if OST_TIFF_ENABLED
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIOTiffHandlerFactory));
-  RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIOPngHandlerFactory));
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIOJpkHandlerFactory));
+#endif
+#if OST_PNG_ENABLED
+  RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIOPngHandlerFactory));
+#endif
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIODatHandlerFactory));
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIONanoscopeHandlerFactory));
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIODF3HandlerFactory));

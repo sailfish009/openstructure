@@ -23,10 +23,14 @@
 #include  <ost/io/img/map_io_mrc_handler.hh>
 #include  <ost/io/img/map_io_dm3_handler.hh>
 #include  <ost/io/img/map_io_situs_handler.hh>
+#if OST_TIFF_ENABLED
 #include  <ost/io/img/map_io_tiff_handler.hh>
-#include  <ost/io/img/map_io_png_handler.hh>
-#include  <ost/io/img/map_io_dat_handler.hh>
 #include  <ost/io/img/map_io_jpk_handler.hh>
+#endif
+#if OST_PNG_ENABLED
+#include  <ost/io/img/map_io_png_handler.hh>
+#endif
+#include  <ost/io/img/map_io_dat_handler.hh>
 #include  <ost/io/img/map_io_nanoscope_handler.hh>
 #include  <ost/io/img/map_io_ipl_handler.hh>
 #include  <ost/io/img/image_format.hh>
@@ -58,10 +62,6 @@ img::ImageHandle  load_image2(const String& loc, const ImageFormatBase& formatst
 
 void export_map_io()
 {
-  class_<boost::logic::tribool>("tribool", init<boost::logic::tribool>())
-    .def(init<bool>())
-  ;
-  implicitly_convertible<bool,boost::logic::tribool>();
 
   enum_<Endianess>("Endianess")
         .value("OST_BIG_ENDIAN", OST_BIG_ENDIAN)
@@ -133,7 +133,11 @@ void export_map_io()
     .def("SetNormalizeOnSave", &Situs::SetNormalizeOnSave)
     .def("GetNormalizeOnSave", &Situs::GetNormalizeOnSave)
   ;
-
+#if OST_TIFF_ENABLED
+  class_<boost::logic::tribool>("tribool", init<boost::logic::tribool>())
+    .def(init<bool>())
+  ;
+  implicitly_convertible<bool,boost::logic::tribool>();
   class_<TIF, bases<ImageFormatBase> >("TIF", init<boost::logic::tribool,Format,bool,bool,int>
 				       ((arg("normalize_on_save") =  boost::logic::tribool(boost::logic::indeterminate),arg("format")=OST_DEFAULT_FORMAT,arg("signed")=false,arg("phasecolor")=false,arg("subimage") = -1)))
     .def("SetNormalizeOnSave", &TIF::SetNormalizeOnSave)
@@ -149,12 +153,19 @@ void export_map_io()
     .def("SetSubimage", &TIF::SetSubimage)
     .def("GetSubimage", &TIF::GetSubimage)
   ;
+  class_<JPK, bases<TIF> >("JPK", init<boost::logic::tribool,Format,bool,bool,int>
+           ((arg("normalize_on_save") =  boost::logic::tribool(boost::logic::indeterminate),arg("format")=OST_DEFAULT_FORMAT,arg("signed")=false,arg("phasecolor")=false,arg("subimage") = -1)))
+  ;
 
+  class_<Nanoscope, bases<ImageFormatBase> >("Nanoscope", init <int>(arg("subimage")=-1))
+#endif
+
+#if OST_PNG_ENABLED
   class_<PNG, bases<ImageFormatBase> >("PNG", init<bool>(arg("normalize_on_save") = false))
     .def("SetNormalizeOnSave", &PNG::SetNormalizeOnSave)
     .def("GetNormalizeOnSave", &PNG::GetNormalizeOnSave)
   ;
-
+#endif
   class_<DAT, bases<ImageFormatBase> >("DAT", init<bool,Format,bool,Endianess>((arg("normalize_on_save") = false,arg("format")=OST_DEFAULT_FORMAT,arg("signed")=false,arg("endianess") = OST_LOCAL_ENDIAN)))
     .def("SetNormalizeOnSave", &DAT::SetNormalizeOnSave)
     .def("GetNormalizeOnSave", &DAT::GetNormalizeOnSave)
@@ -171,11 +182,6 @@ void export_map_io()
     .def("GetBitDepth", &IPL::GetBitDepth)
   ;
 
-  class_<JPK, bases<TIF> >("JPK", init<boost::logic::tribool,Format,bool,bool,int>
-           ((arg("normalize_on_save") =  boost::logic::tribool(boost::logic::indeterminate),arg("format")=OST_DEFAULT_FORMAT,arg("signed")=false,arg("phasecolor")=false,arg("subimage") = -1)))
-  ;
-
-  class_<Nanoscope, bases<ImageFormatBase> >("Nanoscope", init <int>(arg("subimage")=-1))
   ;
 
   def("SaveImage",save_image1);

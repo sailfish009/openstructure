@@ -29,10 +29,14 @@
 #include  <ost/io/img/map_io_mrc_handler.hh>
 #include  <ost/io/img/map_io_dm3_handler.hh>
 #include  <ost/io/img/map_io_situs_handler.hh>
+#if OST_TIFF_ENABLED
 #include  <ost/io/img/map_io_tiff_handler.hh>
-#include  <ost/io/img/map_io_png_handler.hh>
-#include  <ost/io/img/map_io_dat_handler.hh>
 #include  <ost/io/img/map_io_jpk_handler.hh>
+#endif
+#if OST_PNG_ENABLED
+#include  <ost/io/img/map_io_png_handler.hh>
+#endif
+#include  <ost/io/img/map_io_dat_handler.hh>
 #include  <ost/io/img/map_io_nanoscope_handler.hh>
 #include  <ost/io/img/map_io_ipl_handler.hh>
 #include  <ost/img/alg/normalizer_factory.hh>
@@ -60,10 +64,12 @@ BOOST_AUTO_TEST_CASE(test_io_img)
   float_formats["CCP4 (float)"]=new MRC;
   float_formats["MRC (float)"]=new MRC(false,MRC_OLD_FORMAT);
   float_formats["SPIDER"]= new Spider;
+#if OST_TIFF_ENABLED
   float_formats["JPK (float)"]= new JPK(false,OST_FLOAT_FORMAT);
   float_formats["JPK (double)"]= new JPK(false,OST_DOUBLE_FORMAT);
   float_formats["TIF (float)"]= new TIF(false,OST_FLOAT_FORMAT);
   float_formats["TIF (double)"]= new TIF(false,OST_DOUBLE_FORMAT);
+#endif
   for(std::map<String,ImageFormatBase*>::iterator it=float_formats.begin();it!=float_formats.end();++it){
     ost::io::SaveImage(testimage,fname,*(it->second));
     ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(it->second));
@@ -83,8 +89,10 @@ BOOST_AUTO_TEST_CASE(test_io_img)
   //int 16 formats
   std::map<String,ImageFormatBase*> int_formats;
   int_formats["IPL (16 bit)"]=new IPL(true,OST_BIT16_FORMAT);
+#if OST_TIFF_ENABLED
   int_formats["TIF (16 bit)"]=new TIF;
   int_formats["JPK (16 bit)"]=new JPK;
+#endif
   // int_formats["DF3"]=new DF3(true);
   for(std::map<String,ImageFormatBase*>::iterator it=int_formats.begin();it!=int_formats.end();++it){
     ost::io::SaveImage(testimage,fname,*(it->second));
@@ -135,9 +143,13 @@ BOOST_AUTO_TEST_CASE(test_io_img)
 
   //byte formats  
   std::map<String,ImageFormatBase*> byte_formats;
+#if OST_PNG_ENABLED
   byte_formats["PNG"]=new PNG;
-  byte_formats["JPK (byte)"]= new JPK(true,OST_BIT8_FORMAT);
+#endif
+#if OST_TIFF_ENABLED
   byte_formats["TIF (byte)"]= new TIF(true,OST_BIT8_FORMAT);
+  byte_formats["JPK (byte)"]= new JPK(true,OST_BIT8_FORMAT);
+#endif
   for(std::map<String,ImageFormatBase*>::iterator it=byte_formats.begin();it!=byte_formats.end();++it){
     ost::io::SaveImage(testimage,fname,*(it->second));
     ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(it->second));

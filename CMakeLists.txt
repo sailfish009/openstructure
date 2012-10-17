@@ -37,6 +37,8 @@ option(USE_MESA "use software rendered Mesa instead of hardware GL"
       OFF)
 option(ENABLE_IMG "whether the image processing module should be compiled"
        ON)
+option(ENABLE_PNG_TIFF "whether the img module should compiled with PNG/TIFF support"
+       ON)
 option(ENABLE_INFO "whether openstructure should be compiled with support for the info library"
        ON)
 option(USE_NUMPY "whether numpy support is added"
@@ -86,6 +88,10 @@ if (USE_DOUBLE_PRECISION)
 else()
   set(_DOUBLE_PREC OFF)
   set(_DOUBLE_PREC OFF)
+endif()
+
+if (NOT ENABLE_TIFF_PNG)
+  set(ENABLE_GFX OFF)
 endif()
 
 if (NOT ENABLE_INFO)
@@ -199,7 +205,9 @@ if (ENABLE_GFX)
 endif()
 
 if (ENABLE_IMG OR ENABLE_GFX)
-  find_package(PNG REQUIRED)
+  if (ENABLE_TIFF_PNG)
+    find_package(PNG REQUIRED)
+  endif()
 else()
   set (PNG_LIBRARY "")
 endif()
@@ -213,7 +221,9 @@ endif()
 
 if (ENABLE_IMG)
   find_package(FFTW REQUIRED)
+if (ENABLE_TIFF_PNG)
   find_package(TIFF REQUIRED)
+endif()
 endif()
 
 
