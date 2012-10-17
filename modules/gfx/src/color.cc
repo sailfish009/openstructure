@@ -26,169 +26,418 @@
 
 namespace ost { namespace gfx {
 
-namespace {
-// maps hsv to rgb (0-1)
-geom::Vec3 HSVtoRGB(const geom::Vec3& hsv)
+Color::Color()
 {
-  geom::Vec3 rgb;
-  if (hsv[1]<1e-9){
-    rgb[0]=hsv[2];
-    rgb[1]=hsv[2];
-    rgb[2]=hsv[2];
-  } else {
-    double var_h=hsv[0]*6.0<6.0?hsv[0]*6.0:0.0;
-    int var_i =static_cast<int>(var_h);
-    double var_1 = hsv[2]*(1-hsv[1]);
-    double var_2 = hsv[2]*(1-hsv[1]*( var_h -var_i));
-    double var_3 = hsv[2]*(1-hsv[1]*(1-(var_h-var_i)));
-    switch(var_i){
-    case 0:
-      rgb[0]=hsv[2];
-      rgb[1]=var_3;
-      rgb[2]=var_1;
-      break;
-    case 1:
-      rgb[0] = var_2;
-      rgb[1] = hsv[2];
-      rgb[2] = var_1;
-      break;
-    case 2:
-      rgb[0] = var_1;
-      rgb[1] = hsv[2];
-      rgb[2] = var_3;
-      break;
-    case 3:
-      rgb[0] = var_1 ; 
-      rgb[1] = var_2 ; 
-      rgb[2] = hsv[2];
-      break;
-    case 4:
-      rgb[0] = var_3 ;
-      rgb[1] = var_1 ;
-      rgb[2] = hsv[2];
-      break;
-    case 5:
-      rgb[0] = hsv[2];
-      rgb[1] = var_1 ;
-      rgb[2] = var_2;
-      break;
-    }
-  }
-  return rgb;
+  rgba_[0]=1.0;
+  rgba_[1]=1.0;
+  rgba_[2]=1.0;
+  rgba_[3]=1.0;
+  rgb_dirty_=false;
+  hsv_dirty_=true;
 }
 
-// maps rgb (0-1) to hsv
-geom::Vec3 RGBtoHSV(const geom::Vec3& rgb)
+Color::Color(float r, float g, float b, float a) 
 {
-  geom::Vec3 hsv;
-  double var_R = ( rgb[0] / 255.0 );
-  double var_G = ( rgb[1] / 255.0 );
-  double var_B = ( rgb[2] / 255.0 );
-
-  double var_Min = std::min(std::min( var_R, var_G), var_B );
-  double var_Max = std::max(std::max( var_R, var_G), var_B );
-  double del_Max = var_Max - var_Min;
-
-  hsv[2] = var_Max;
-
-  if ( del_Max < 1.0e-9 ){
-    hsv[0] = 0.0;
-    hsv[1] = 0.0;
-  } else {
-    hsv[1] = del_Max / var_Max;
-    double del_R = ( ( ( var_Max - var_R ) / 6.0 ) + ( del_Max / 2.0 ) ) / del_Max;
-    double del_G = ( ( ( var_Max - var_G ) / 6.0 ) + ( del_Max / 2.0 ) ) / del_Max;
-    double del_B = ( ( ( var_Max - var_B ) / 6.0 ) + ( del_Max / 2.0 ) ) / del_Max;
-    
-    if ( var_R == var_Max ){
-      hsv[0] = del_B - del_G;
-    } else if ( var_G == var_Max ){
-      hsv[0] = ( 1.0 / 3.0 ) + del_R - del_B;
-    } else if ( var_B == var_Max ){
-      hsv[0] = ( 2.0 / 3.0 ) + del_G - del_R;
-    }
-    if ( hsv[0] < 0 ){
-      hsv[0] += 1;
-    }
-    if ( hsv[0] > 1 ){
-      hsv[0] -= 1;
-    }
-  }
-  return hsv;
+  rgba_[0]=r;
+  rgba_[1]=g;
+  rgba_[2]=b;
+  rgba_[3]=a;
+  rgb_dirty_=false;
+  hsv_dirty_=true;
 }
-} // anon ns
-
-geom::Vec3 Color::ToHSV()
+  
+void Color::SetRGB(float r, float g, float b)
 {
-  return RGBtoHSV(geom::Vec3(rgba[0],rgba[1],rgba[2]));
+  rgba_[0]=r;
+  rgba_[1]=g;
+  rgba_[2]=b;
+  rgb_dirty_=false;
+  hsv_dirty_=true;
 }
 
-
-Color HSV(double h, double s, double v)
+geom::Vec3 Color::GetRGB() const
 {
-  geom::Vec3 rgb=HSVtoRGB(geom::Vec3(h,s,v));
-  return Color(rgb[0],rgb[1],rgb[2]);
+  if(rgb_dirty_) to_rgb();
+  return geom::Vec3(rgba_);
 }
 
-std::ostream& operator<<(std::ostream& s, const Color& c)
+geom::Vec4 Color::GetRGBA() const
 {
-  s << "{" << c.Red() << "," << c.Green() << "," << c.Blue() << "," << c.Alpha() << "}";
-  return s;
+  if(rgb_dirty_) to_rgb();
+  return geom::Vec3(rgba_);
 }
 
+float Color::GetRed() const
+{
+  if(rgb_dirty_) to_rgb();
+  return rgba_[0];
+}
+
+void Color::SetRed(float x)
+{
+  if(rgb_dirty_) to_rgb();
+  rgba_[0]=x;
+  hsv_dirty_=true;
+}
+
+float Color::GetGreen() const
+{
+  if(rgb_dirty_) to_rgb();
+  return rgba_[1];
+}
+
+void Color::SetGreen(float x)
+{
+  if(rgb_dirty_) to_rgb();
+  rgba_[1]=x;
+  hsv_dirty_=true;
+}
+
+float Color::GetBlue() const
+{
+  if(rgb_dirty_) to_rgb();
+  return rgba_[2];
+}
+
+void Color::SetBlue(float x)
+{
+  if(rgb_dirty_) to_rgb();
+  rgba_[2]=x;
+  hsv_dirty_=true;
+}
+
+void Color::SetHSV(float h, float s, float v)
+{
+  hsv_[0]=h;
+  hsv_[1]=s;
+  hsv_[2]=v;
+  hsv_dirty_=false;
+  rgb_dirty_=true;
+}
+
+geom::Vec3 Color::GetHSV() const
+{
+  if(hsv_dirty_) to_hsv();
+  return geom::Vec3(hsv_);
+}
+
+geom::Vec4 Color::GetHSVA() const
+{
+  if(hsv_dirty_) to_hsv();
+  return geom::Vec4(hsv_[0],hsv_[1],hsv_[2],rgba_[3]);
+}
+
+float Color::GetHue() const
+{
+  if(hsv_dirty_) to_hsv();
+  return hsv_[0];
+}
+
+void Color::SetHue(float x)
+{
+  if(hsv_dirty_) to_hsv();
+  hsv_[0]=x;
+  rgb_dirty_=true;
+}
+
+float Color::GetSat() const
+{
+  if(hsv_dirty_) to_hsv();
+  return hsv_[1];
+}
+
+void Color::SetSat(float x)
+{
+  if(hsv_dirty_) to_hsv();
+  hsv_[1]=x;
+  rgb_dirty_=true;
+}
+
+float Color::GetVal() const
+{
+  if(hsv_dirty_) to_hsv();
+  return hsv_[2];
+}
+
+void Color::SetVal(float x)
+{
+  if(hsv_dirty_) to_hsv();
+  hsv_[2]=x;
+  rgb_dirty_=true;
+}
+
+float Color::GetAlpha() const
+{
+  return rgba_[3];
+}
+
+void Color::SetAlpha(float x)
+{
+  rgba_[3]=x;
+}
+
+////////////////////////////////////
+// operators
+
+Color::operator const float* () const 
+{
+  if(rgb_dirty_) to_rgb();
+  return rgba_;
+}
+
+Color::operator float* () 
+{
+  if(rgb_dirty_) to_rgb();
+  hsv_dirty_=true; 
+  return rgba_;
+}
 
 Color& Color::operator*=(float rhs)
 {
-  rgba[0]*=rhs;
-  rgba[1]*=rhs;
-  rgba[2]*=rhs;
-  rgba[3]*=rhs; 
+  if(rgb_dirty_) to_rgb();
+  rgba_[0]*=rhs;
+  rgba_[1]*=rhs;
+  rgba_[2]*=rhs;
+  rgba_[3]*=rhs; 
+  hsv_dirty_=true; 
   return *this;
 }
 
 Color& Color::operator+=(float rhs)
 {
-  rgba[0]+=rhs;
-  rgba[1]+=rhs;
-  rgba[2]+=rhs;
-  rgba[3]+=rhs;
+  if(rgb_dirty_) to_rgb();
+  rgba_[0]+=rhs;
+  rgba_[1]+=rhs;
+  rgba_[2]+=rhs;
+  rgba_[3]+=rhs;
+  hsv_dirty_=true; 
   return *this;
 }
   
 Color& Color::operator+=(const Color& rhs)
 {
-  rgba[0]+=rhs[0];
-  rgba[1]+=rhs[1];
-  rgba[2]+=rhs[2];
-  rgba[3]+=rhs[3];  
+  if(rgb_dirty_) to_rgb();
+  rgba_[0]+=rhs[0];
+  rgba_[1]+=rhs[1];
+  rgba_[2]+=rhs[2];
+  rgba_[3]+=rhs[3];  
+  hsv_dirty_=true; 
   return *this;  
 }
 
 Color& Color::operator-=(const Color& rhs)
 {
-  rgba[0]-=rhs[0];
-  rgba[1]-=rhs[1];
-  rgba[2]-=rhs[2];
-  rgba[3]-=rhs[3];  
+  if(rgb_dirty_) to_rgb();
+  rgba_[0]-=rhs[0];
+  rgba_[1]-=rhs[1];
+  rgba_[2]-=rhs[2];
+  rgba_[3]-=rhs[3];  
+  hsv_dirty_=true; 
   return *this;
 }
 
 Color& Color::operator-=(float rhs)
 {
-  rgba[0]-=rhs;
-  rgba[1]-=rhs;
-  rgba[2]-=rhs;
-  rgba[3]-=rhs;
+  if(rgb_dirty_) to_rgb();
+  rgba_[0]-=rhs;
+  rgba_[1]-=rhs;
+  rgba_[2]-=rhs;
+  rgba_[3]-=rhs;
+  hsv_dirty_=true; 
   return *this;
 }
 
 Color& Color::operator/=(float rhs)
 {
-  rgba[0]/=rhs;
-  rgba[1]/=rhs;
-  rgba[2]/=rhs;
-  rgba[3]/=rhs;  
+  if(rgb_dirty_) to_rgb();
+  rgba_[0]/=rhs;
+  rgba_[1]/=rhs;
+  rgba_[2]/=rhs;
+  rgba_[3]/=rhs;  
+  hsv_dirty_=true; 
   return *this;
+}
+
+//////////////////////////////////////
+// private methods
+
+void Color::to_rgb() const
+{
+  float hh=fmod(hsv_[0],1.0);
+  if(hh<0.0) hh+=1.0;
+  float ss=std::min(1.0f,std::max(0.0f,hsv_[1]));
+  float vv=std::min(1.0f,std::max(0.0f,hsv_[2]));
+  if (ss<1e-9){
+    rgba_[0]=vv;
+    rgba_[1]=vv;
+    rgba_[2]=vv;
+  } else {
+    float var_h=hh*6.0;
+    int var_i =static_cast<int>(var_h);
+    float var_1 = vv*(1-ss);
+    float var_2 = vv*(1-ss*( var_h - static_cast<float>(var_i)));
+    float var_3 = vv*(1-ss*(1-(var_h-static_cast<float>(var_i))));
+    switch(var_i){
+    case 0:
+      rgba_[0]=vv;
+      rgba_[1]=var_3;
+      rgba_[2]=var_1;
+      break;
+    case 1:
+      rgba_[0] = var_2;
+      rgba_[1] = vv;
+      rgba_[2] = var_1;
+      break;
+    case 2:
+      rgba_[0] = var_1;
+      rgba_[1] = vv;
+      rgba_[2] = var_3;
+      break;
+    case 3:
+      rgba_[0] = var_1 ; 
+      rgba_[1] = var_2 ; 
+      rgba_[2] = vv;
+      break;
+    case 4:
+      rgba_[0] = var_3 ;
+      rgba_[1] = var_1 ;
+      rgba_[2] = vv;
+      break;
+    case 5:
+      rgba_[0] = vv;
+      rgba_[1] = var_1 ;
+      rgba_[2] = var_2;
+      break;
+    }
+  }
+  rgb_dirty_=false;
+}
+
+void Color::to_hsv() const
+{
+  float rr = std::min(1.0f,std::max(0.0f,rgba_[0]));
+  float gg = std::min(1.0f,std::max(0.0f,rgba_[1]));
+  float bb = std::min(1.0f,std::max(0.0f,rgba_[2]));
+
+  float vmin = std::min(std::min(rr, gg), bb);
+  float vmax = std::max(std::max(rr, gg), bb);
+  float vdelta = vmax - vmin;
+
+  hsv_[2] = vmax;
+
+  if (vdelta < 1.0e-9) {
+    hsv_[0] = 0.0;
+    hsv_[1] = 0.0;
+  } else {
+    hsv_[1] = vdelta / vmax;
+    float dr = (((vmax - rr) / 6.0) + (vdelta / 2.0)) / vdelta;
+    float dg = (((vmax - gg) / 6.0) + (vdelta / 2.0)) / vdelta;
+    float db = (((vmax - bb) / 6.0) + (vdelta / 2.0)) / vdelta;
+    
+    if (rr == vmax) {
+      hsv_[0] = db - dg;
+    } else if (gg == vmax) {
+      hsv_[0] = (1.0 / 3.0) + dr - db;
+    } else if (bb == vmax) {
+      hsv_[0] = (2.0 / 3.0) + dg - dr;
+    }
+    if (hsv_[0] < 0.0) {
+      hsv_[0] += 1.0;
+    }
+    if (hsv_[0] > 1.0) {
+      hsv_[0] -= 1.0;
+    }
+  }
+  hsv_dirty_=false;
+}
+
+////////////////////////////////////
+// stand alone functions
+
+Color RGB(float r, float g, float b)
+{
+  Color nrvo;
+  nrvo.SetRGB(r,g,b);
+  return nrvo;
+}
+
+Color RGBb(uchar r, uchar g, uchar b)
+{
+  static float f=1.0/255.0;
+  Color nrvo;
+  nrvo.SetRGB(static_cast<float>(r)*f,static_cast<float>(g)*f,static_cast<float>(b)*f);
+  return nrvo;
+}
+
+Color RGBi(unsigned int r, unsigned int g, unsigned int b)
+{
+  static float f=1.0/65535.0;
+  Color nrvo;
+  nrvo.SetRGB(static_cast<float>(r)*f,static_cast<float>(g)*f,static_cast<float>(b)*f);
+  return nrvo;
+}
+
+Color RGBA(float r, float g, float b, float a)
+{
+  Color nrvo;
+  nrvo.SetRGB(r,g,b);
+  nrvo.SetAlpha(a);
+  return nrvo;
+}
+
+Color RGBAb(uchar r, uchar g, uchar b, uchar a)
+{
+  static float f=1.0/255.0;
+  Color nrvo;
+  nrvo.SetRGB(static_cast<float>(r)*f,static_cast<float>(g)*f,static_cast<float>(b)*f);
+  nrvo.SetAlpha(static_cast<float>(a)*f);
+  return nrvo;
+}
+
+Color RGBAi(unsigned int r, unsigned int g, unsigned int b, unsigned a)
+{
+  static float f=1.0/65535.0;
+  Color nrvo;
+  nrvo.SetRGB(static_cast<float>(r)*f,static_cast<float>(g)*f,static_cast<float>(b)*f);
+  nrvo.SetAlpha(static_cast<float>(a)*f);
+  return nrvo;
+}
+
+Color HSV(float h, float s, float v)
+{
+  Color nrvo;
+  nrvo.SetHSV(h,s,v);
+  return nrvo;
+}
+
+Color HSVi(int r, int g, int b)
+{
+  static float f=1.0/65535.0;
+  Color nrvo;
+  nrvo.SetHSV(static_cast<float>(r)*f,static_cast<float>(g)*f,static_cast<float>(b)*f);
+  return nrvo;
+}
+
+Color HSVA(float h, float s, float v, float a)
+{
+  Color nrvo;
+  nrvo.SetHSV(h,s,v);
+  nrvo.SetAlpha(a);
+  return nrvo;
+}
+
+Color HSVAi(int r, int g, int b, int a)
+{
+  static float f=1.0/65535.0;
+  Color nrvo;
+  nrvo.SetHSV(static_cast<float>(r)*f,static_cast<float>(g)*f,static_cast<float>(b)*f);
+  return nrvo;
+}
+
+std::ostream& operator<<(std::ostream& s, const Color& c)
+{
+  s << "Color(r=" << c.GetRed() << ",g=" <<c.GetGreen() << ",b=" << c.GetBlue() << ",h=" << c.GetHue() << ",s=" << c.GetSat() << ",v=" << c.GetVal() << ",a=" << c.GetAlpha() << ")";
+  return s;
 }
 
 }} // ns

@@ -258,3 +258,15 @@ The RuleBasedBuilder class
      
      :rtype: list of :class:`~ost.mol.AtomHandle` instances
 
+Changing the default builder
+---------------------------------------------------------------------------------
+
+The default builder can be specified with :func:`SetDefaultBuilder`. Before being
+able to set a builder, it needs to be registered with :func:`RegisterBuilder`.
+By default, there is always a builder called "HEURISTIC" registered. If, for some
+reason your are currently using the :class:`RuleBasedBuilder` and you would like
+to switch to that builder, call
+
+.. code-block:: python
+
+  conop.SetDefaultBuilder("HEURISTIC")

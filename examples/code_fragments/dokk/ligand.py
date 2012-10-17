@@ -100,7 +100,7 @@ class Ligand:
       shift_vec = geom.Vec3(float(self.config.start["POSX"]),
                             float(self.config.start["POSY"]),
                             float(self.config.start["POSZ"]))
-      transf = mol.Transform()
+      transf = geom.Transform()
       transf.SetTrans(shift_vec)
       edi.SetTransform(transf.GetMatrix())
       self.RotateAxis(geom.Vec3(1,0,0), float(self.config.start["ROTX"]))

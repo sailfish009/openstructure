@@ -84,11 +84,12 @@ MapSlab::MapSlab(const String& name, const img::MapHandle& mh, const geom::Plane
   maxv_ = stat.GetMaximum();
 }
 
-geom::AlignedCuboid MapSlab::GetBoundingBox() const
+geom::AlignedCuboid MapSlab::GetBoundingBox(bool use_tf) const
 {
   geom::Vec3 minc = plane_.At(-1.0,-1.0);
   geom::Vec3 maxc = plane_.At(1.0,1.0);
-  return geom::AlignedCuboid(minc,maxc);
+  geom::AlignedCuboid bb(minc,maxc);
+  return use_tf ? transform_.Apply(bb) : bb;
 }
 
 geom::Vec3 MapSlab::GetCenter() const

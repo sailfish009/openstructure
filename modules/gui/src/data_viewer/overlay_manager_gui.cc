@@ -135,6 +135,7 @@ void OverlayManagerGUI::OnAddOverlay(OverlayManager* m, int id)
   OverlayPtr ov = m->RetrieveOverlay(id);
   connect(ov.get(),SIGNAL(InfoTextChanged(const QString&)),this,SLOT(SetInfoText(const QString&)));
   OverlayEntry oe;
+  oe.row=0.0;
   oe.a=new OverlayCustomActCheckBox(id,m);
   connect(oe.a,SIGNAL(toggled(bool)),oe.a,SLOT(OnToggle(bool)));
   active_group_->addButton(oe.a);

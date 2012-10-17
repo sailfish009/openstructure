@@ -47,8 +47,14 @@ class DLLEXPORT_OST_IO PDBReader {
     char        chain;
     mol::ResNum num;
   };
+  struct CompndEntry {
+    CompndEntry(std::vector<String>  c, int n): chains(c), mol_id(n) {}
+    std::vector<String> chains;
+    int mol_id;
+  };
   typedef std::vector<HSEntry> HSList;
   typedef std::vector<HetEntry>  HetList;
+  typedef std::vector<CompndEntry> CompndList;
 public:
   PDBReader(const String& filename, const IOProfile& profile);
   PDBReader(const boost::filesystem::path& loc, const IOProfile& profile);
@@ -57,18 +63,22 @@ public:
   bool HasNext();
 
   void Import(mol::EntityHandle& ent,
-	      const String& restrict_chains="");
+        const String& restrict_chains="");
   void SetReadSeqRes(bool flag) { read_seqres_=flag; }
   bool GetReadSeqRes() const { return read_seqres_; }
   
   seq::SequenceList GetSeqRes() const { return seqres_; }
 private:
   void ParseSeqRes(const StringRef& line, int line_num);
+   /// \brief parses the CHAIN and MOL_ID part of COMPND records
+  void ParseCompndEntry(const StringRef& line, int line_num);
   void ClearState();
   void AssignSecStructure(mol::EntityHandle ent);
+  /// \brief Adds an IntProp "mol_id" to the ChainHandle based on COMPND records
+  void AssignMolIds(mol::EntityHandle ent);
   void ParseAndAddAtom(const StringRef& line, int line_num,
                        mol::EntityHandle& h, const StringRef& record_type);
-
+  void ThrowFaultTolerant(const String& msg);
   /// \brief parses the common part of ATOM, HETATM and ANISOU records
   bool ParseAtomIdent(const StringRef& line, int line_num, 
                       String& chain_name, StringRef& res, 
@@ -98,6 +108,11 @@ private:
   boost::iostreams::filtering_stream<boost::iostreams::input>  in_;
   String curr_line_;
   HetList  hets_;
+  CompndList compnds_;
+  std::pair <bool, int> mol_id_;
+  bool skip_next_;
+  bool data_continues_;
+  String old_key_;
   // this needs to be set to true for reading pqr
   // file (i.e. pdb formatted file with charges in occupacy
   // column, and radii in b-factor column)

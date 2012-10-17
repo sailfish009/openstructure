@@ -5,6 +5,7 @@ export_bond.cc
 export_chain.cc
 export_chain_view.cc
 export_coord_group.cc
+export_coord_frame.cc
 export_editors.cc
 export_entity.cc
 export_entity_view.cc
@@ -21,4 +22,6 @@ wrap_mol.cc
 export_entity_property_mapper.cc
 )
 
-pymod(NAME mol CPP ${OST_BASE_PYMOD_SOURCES} PY __init__.py)
+if (NOT ENABLE_STATIC)
+  pymod(NAME mol CPP ${OST_BASE_PYMOD_SOURCES} PY __init__.py)
+endif()

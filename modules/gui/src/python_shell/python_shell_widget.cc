@@ -113,6 +113,8 @@ PythonShellWidget::PythonShellWidget(QWidget* parent):
 
 void PythonShellWidget::setup_readonly_state_machine_()
 {
+  QFlags<Qt::KeyboardModifier> DNG_ANY_MODIFIERS = Qt::ControlModifier | Qt::KeypadModifier| Qt::ShiftModifier| Qt::MetaModifier;
+  QFlags<Qt::KeyboardModifier> DNG_CONTROL_OR_META_MODIFIERS =  Qt::ControlModifier | Qt::MetaModifier;
   State* readonly=new State;
   State* mixed=new State;
   readonly_machine_->addState(mixed);
@@ -134,17 +136,23 @@ void PythonShellWidget::setup_readonly_state_machine_()
                                                 new EditPositionGuard(this,EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER,
                                                                            EditPositionGuard::SMALLER)));
 
-  readonly->addTransition(new KeyEventTransition(QEvent::KeyPress,
-                                                  Qt::Key_Backspace,
-                                                  Qt::NoModifier,
-                                                  readwrite_state_,
-                                                  true));
+  readonly->addTransition(new KeyEventTransition(Qt::Key_Backspace,
+                                                 Qt::NoModifier,
+                                                 readwrite_state_,
+                                                 true));
 
-  readonly->addTransition(new KeyEventTransition(QEvent::KeyPress,
-                                                  Qt::Key_Any,
-                                                  Qt::NoModifier,
-                                                  readwrite_state_,
-                                                  false));
+  readonly->addTransition(new KeyEventTransition(Qt::Key_Any,
+                                                 Qt::NoModifier,
+                                                 readwrite_state_,
+                                                 false));
+
+  KeyEventTransition* select_all_tr_ro=new KeyEventTransition(Qt::Key_A,
+                                                           DNG_CONTROL_OR_META_MODIFIERS,
+                                                           readonly,
+                                                           true);
+  readonly->addTransition(select_all_tr_ro);
+  connect(select_all_tr_ro,SIGNAL(triggered()),this,SLOT(handle_select_all_()));
+
 
   readwrite_state_->addTransition(new SignalTransition(this,
                                                       SIGNAL(cursorPositionChanged()),
@@ -168,30 +176,83 @@ void PythonShellWidget::setup_readonly_state_machine_()
                                                         new EditPositionGuard(this,EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER,
                                                                                    EditPositionGuard::SMALLER)));
 
-  readwrite_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,
-                                                         Qt::Key_Backspace,
-                                                         Qt::NoModifier,
-                                                         readwrite_state_,
-                                                         true,
-                                                         new EditPositionGuard(this,EditPositionGuard::EQUAL,
-                                                                                    EditPositionGuard::ANCHOREQUAL)));
+  KeyEventTransition* backspace_tr=new KeyEventTransition(Qt::Key_Backspace,
+                                                          Qt::NoModifier,
+                                                          readwrite_state_,
+                                                          true);
+  readwrite_state_->addTransition(backspace_tr);
+  connect(backspace_tr,SIGNAL(triggered()),this,SLOT(handle_backspace_()));
+
+  KeyEventTransition* delete_tr=new KeyEventTransition(Qt::Key_Delete,
+                                                          Qt::NoModifier,
+                                                          readwrite_state_,
+                                                          true);
+  readwrite_state_->addTransition(delete_tr);
+  connect(delete_tr,SIGNAL(triggered()),this,SLOT(handle_delete_()));
+
+  KeyEventTransition* backspace_tr2=new KeyEventTransition(Qt::Key_Backspace,
+                                                          DNG_ANY_MODIFIERS,
+                                                          readwrite_state_,
+                                                          true);
+  readwrite_state_->addTransition(backspace_tr2);
+  connect(backspace_tr2,SIGNAL(triggered()),this,SLOT(handle_backspace_()));
+
+  KeyEventTransition* delete_tr2=new KeyEventTransition(Qt::Key_Delete,
+                                                          DNG_ANY_MODIFIERS,
+                                                          readwrite_state_,
+                                                          true);
+  readwrite_state_->addTransition(delete_tr2);
+  connect(delete_tr2,SIGNAL(triggered()),this,SLOT(handle_delete_()));
+
+  KeyEventTransition* tab_tr=new KeyEventTransition(Qt::Key_Tab,
+                                                    Qt::NoModifier,
+                                                    readwrite_state_,
+                                                    true);
+  readwrite_state_->addTransition(tab_tr);
+  connect(tab_tr,SIGNAL(triggered()),this,SLOT(handle_completion_()));
+
+  KeyEventTransition* wrap_to_fc_tr=new KeyEventTransition(Qt::Key_W,
+                                                            DNG_CONTROL_OR_META_MODIFIERS,
+                                                            readwrite_state_,
+                                                            true);
+  readwrite_state_->addTransition(wrap_to_fc_tr);
+  connect(wrap_to_fc_tr,SIGNAL(triggered()),this,SLOT(handle_wrap_to_function_()));
+
+  KeyEventTransition* output_toggle_tr=new KeyEventTransition(Qt::Key_H,
+                                                            DNG_CONTROL_OR_META_MODIFIERS,
+                                                            readwrite_state_,
+                                                            true);
+  readwrite_state_->addTransition(output_toggle_tr);
+  connect(output_toggle_tr,SIGNAL(triggered()),this,SLOT(handle_output_toggle_()));
+
+  KeyEventTransition* select_all_tr_rw=new KeyEventTransition(Qt::Key_A,
+                                                           DNG_CONTROL_OR_META_MODIFIERS,
+                                                           readwrite_state_,
+                                                           true);
+  readwrite_state_->addTransition(select_all_tr_rw);
+  connect(select_all_tr_rw,SIGNAL(triggered()),this,SLOT(handle_select_all_rw_()));
 
   mixed->addTransition(new SignalTransition(this,
-                                             SIGNAL(cursorPositionChanged()),
-                                             readwrite_state_,
-                                             new EditPositionGuard(this,EditPositionGuard::EQUAL |EditPositionGuard::BIGGER,
-                                                                        EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER)));
+                                            SIGNAL(cursorPositionChanged()),
+                                            readwrite_state_,
+                                            new EditPositionGuard(this,EditPositionGuard::EQUAL |EditPositionGuard::BIGGER,
+                                                                       EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER)));
 
-  KeyEventTransition* kt1=new KeyEventTransition(QEvent::KeyPress,
-                                                 Qt::Key_Backspace,
+  KeyEventTransition* kt1=new KeyEventTransition(Qt::Key_Backspace,
                                                  Qt::NoModifier,
                                                  readwrite_state_,
                                                  true);
   mixed->addTransition(kt1);
   connect(kt1,SIGNAL(triggered()),this,SLOT(OnMixedToReadwrite()));
 
-  KeyEventTransition* kt2=new KeyEventTransition(QEvent::KeyPress,
-                                                 Qt::Key_Any,
+  KeyEventTransition* select_all_tr=new KeyEventTransition(Qt::Key_A,
+                                                           DNG_CONTROL_OR_META_MODIFIERS,
+                                                           readonly,
+                                                           true);
+  mixed->addTransition(select_all_tr);
+  connect(select_all_tr,SIGNAL(triggered()),this,SLOT(handle_select_all_()));
+
+  KeyEventTransition* kt2=new KeyEventTransition(Qt::Key_Any,
                                                  Qt::NoModifier,
                                                  readwrite_state_,
                                                  false);
@@ -208,11 +269,11 @@ void PythonShellWidget::setup_state_machine_()
 {
   #ifdef __APPLE__
     QFlags<Qt::KeyboardModifier> DNG_ARROW_MODIFIERS = Qt::KeypadModifier;
-    QFlags<Qt::KeyboardModifier> DNG_ENTER_MODIFIERS = Qt::NoModifier;
   #else
     QFlags<Qt::KeyboardModifier> DNG_ARROW_MODIFIERS = Qt::NoModifier;
-    QFlags<Qt::KeyboardModifier> DNG_ENTER_MODIFIERS = Qt::KeypadModifier;
   #endif
+  QFlags<Qt::KeyboardModifier> DNG_ANY_MODIFIERS = Qt::ControlModifier | Qt::KeypadModifier| Qt::ShiftModifier| Qt::MetaModifier;
+  QFlags<Qt::KeyboardModifier> DNG_CONTROL_OR_META_MODIFIERS =  Qt::ControlModifier | Qt::MetaModifier;
   State* single_line=new State;
   State* multi_line_inactive=new State;
   State* completing=new State;
@@ -234,152 +295,136 @@ void PythonShellWidget::setup_state_machine_()
   connect(history_down,SIGNAL(entered()),this,SLOT(OnHistoryDownStateEntered()));
   connect(executing,SIGNAL(entered()),this,SLOT(OnExecuteStateEntered()));
 
-  KeyEventTransition* tr1=new KeyEventTransition(QEvent::KeyPress,
-                                                 Qt::Key_Return,
-                                                 Qt::NoModifier,
-                                                 executing,
-                                                 true,
-                                                 new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
-  single_line->addTransition(tr1);
-  KeyEventTransition* tr3=new KeyEventTransition(QEvent::KeyPress,
-                                                 Qt::Key_Return,
+
+  // single line transitions
+  single_line->addTransition(new KeyEventTransition(Qt::Key_Return,
+                                                    Qt::NoModifier,
+                                                    executing,
+                                                    true,
+                                                    new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR)));
+
+  KeyEventTransition* tr3=new KeyEventTransition(Qt::Key_Return,
                                                  Qt::NoModifier,
                                                  multiline_active_state_,
                                                  true,
                                                  new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
   single_line->addTransition(tr3);
-  KeyEventTransition* keypad_enter1=new KeyEventTransition(QEvent::KeyPress,
-                                                           Qt::Key_Enter,
-                                                           DNG_ENTER_MODIFIERS| Qt::NoModifier,
-                                                           multiline_active_state_,
-                                                           true);
-  single_line->addTransition(keypad_enter1);
-  connect(keypad_enter1,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
-  KeyEventTransition* keypad_enter2=new KeyEventTransition(QEvent::KeyPress,
-                                                           Qt::Key_Enter,
-                                                           DNG_ENTER_MODIFIERS| Qt::ShiftModifier,
-                                                           multiline_active_state_,
-                                                           true);
-  single_line->addTransition(keypad_enter2);
-  connect(keypad_enter2,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
-  KeyEventTransition* keypad_enter3=new KeyEventTransition(QEvent::KeyPress,
-                                                           Qt::Key_Enter,
-                                                           DNG_ENTER_MODIFIERS| Qt::MetaModifier,
-                                                           multiline_active_state_,
-                                                           true);
-  single_line->addTransition(keypad_enter3);
-  connect(keypad_enter3,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
-  
-  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,
-                                                    Qt::Key_Return,
-                                                    Qt::ControlModifier,
-                                                    multiline_active_state_,
-                                                    false));
-  // just to make OSX happy we also add the transitions with Meta (-> Ctrl o OSX)
-  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,
-                                                    Qt::Key_Return,
-                                                    Qt::MetaModifier,
-                                                    multiline_active_state_,
-                                                    false));
-                                                 
-  connect(tr3,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
-  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,DNG_ARROW_MODIFIERS,history_up));
-  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,DNG_ARROW_MODIFIERS,history_down));
+  connect(tr3,SIGNAL(triggered()),this,SLOT(NewLineAtEnd()));
 
-  KeyEventTransition* tr4=new KeyEventTransition(QEvent::KeyPress,
-                                                 Qt::Key_Return,
-                                                 Qt::NoModifier,
-                                                 executing,
-                                                 true,
-                                                 new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
-  multi_line_inactive->addTransition(tr4);
-  KeyEventTransition* tr6=new KeyEventTransition(QEvent::KeyPress,
-                                                 Qt::Key_Return,
+  KeyEventTransition* keypad_enter_sl=new KeyEventTransition(Qt::Key_Enter,
+                                                             DNG_ANY_MODIFIERS,
+                                                             multiline_active_state_,
+                                                             true);
+  single_line->addTransition(keypad_enter_sl);
+  connect(keypad_enter_sl,SIGNAL(triggered()),this,SLOT(NewLineAtCursor()));
+  
+  KeyEventTransition* ctrl_return_sl=new KeyEventTransition(Qt::Key_Return,
+                                                            DNG_CONTROL_OR_META_MODIFIERS,
+                                                            multiline_active_state_,
+                                                            true);
+  single_line->addTransition(ctrl_return_sl);
+  connect(ctrl_return_sl,SIGNAL(triggered()),this,SLOT(NewLineAtCursor()));
+
+  single_line->addTransition(new KeyEventTransition(Qt::Key_Up,DNG_ARROW_MODIFIERS,history_up));
+  single_line->addTransition(new KeyEventTransition(Qt::Key_Down,DNG_ARROW_MODIFIERS,history_down));
+
+  KeyEventTransition* clear_all_tr_sl=new KeyEventTransition(Qt::Key_D,Qt::ControlModifier,single_line);
+  single_line->addTransition(clear_all_tr_sl);
+  connect(clear_all_tr_sl,SIGNAL(triggered()),this,SLOT(handle_clear_all_()));
+
+  single_line->addTransition(new KeyEventTransition(Qt::Key_Left,
+                                                    DNG_ARROW_MODIFIERS,
+                                                    single_line,
+                                                    true,
+                                                    new EditPositionGuard(this,EditPositionGuard::EQUAL,
+                                                                               EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER)));
+
+  //multi line inactive transitions
+  multi_line_inactive->addTransition(new KeyEventTransition(Qt::Key_Return,
+                                                            Qt::NoModifier,
+                                                            executing,
+                                                            true,
+                                                            new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR)));
+
+  KeyEventTransition* tr6=new KeyEventTransition(Qt::Key_Return,
                                                  Qt::NoModifier,
                                                  multiline_active_state_,
                                                  true,
                                                  new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
   multi_line_inactive->addTransition(tr6);
-  connect(tr6,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Left,DNG_ARROW_MODIFIERS,multiline_active_state_));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Right,DNG_ARROW_MODIFIERS,multiline_active_state_));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Return,Qt::ControlModifier,multiline_active_state_));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,DNG_ARROW_MODIFIERS,history_up));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,DNG_ARROW_MODIFIERS,history_down));
-  KeyEventTransition* keypad_enter4=new KeyEventTransition(QEvent::KeyPress,
-                                                           Qt::Key_Enter,
-                                                           DNG_ENTER_MODIFIERS| Qt::NoModifier,
-                                                           multiline_active_state_,
-                                                           true);
-  multi_line_inactive->addTransition(keypad_enter4);
-  connect(keypad_enter4,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
-  KeyEventTransition* keypad_enter5=new KeyEventTransition(QEvent::KeyPress,
-                                                           Qt::Key_Enter,
-                                                           DNG_ENTER_MODIFIERS| Qt::ShiftModifier,
-                                                           multiline_active_state_,
-                                                           true);
-  multi_line_inactive->addTransition(keypad_enter5);
-  connect(keypad_enter5,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
-  KeyEventTransition* keypad_enter6=new KeyEventTransition(QEvent::KeyPress,
-                                                           Qt::Key_Enter,
-                                                           DNG_ENTER_MODIFIERS | Qt::MetaModifier,
-                                                           multiline_active_state_,
-                                                           true);
-  multi_line_inactive->addTransition(keypad_enter6);
-  connect(keypad_enter6,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,
-                                                            Qt::Key_Return,
-                                                            Qt::ControlModifier,
-                                                            multiline_active_state_,
-                                                            false));
-  // just to make OSX happy we also add the transitions with Meta (-> Ctrl o OSX)
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,
-                                                            Qt::Key_Return,
-                                                            Qt::MetaModifier,
+  connect(tr6,SIGNAL(triggered()),this,SLOT(NewLineAtEnd()));
+
+  KeyEventTransition* clear_all_tr_mli=new KeyEventTransition(Qt::Key_D,Qt::ControlModifier,single_line);
+  multi_line_inactive->addTransition(clear_all_tr_mli);
+  connect(clear_all_tr_mli,SIGNAL(triggered()),this,SLOT(handle_clear_all_()));
+
+  multi_line_inactive->addTransition(new KeyEventTransition(Qt::Key_Left,DNG_ARROW_MODIFIERS,multiline_active_state_));
+  multi_line_inactive->addTransition(new KeyEventTransition(Qt::Key_Right,DNG_ARROW_MODIFIERS,multiline_active_state_));
+  multi_line_inactive->addTransition(new KeyEventTransition(Qt::Key_Up,DNG_ARROW_MODIFIERS,history_up));
+  multi_line_inactive->addTransition(new KeyEventTransition(Qt::Key_Down,DNG_ARROW_MODIFIERS,history_down));
+
+  KeyEventTransition* keypad_enter_mli=new KeyEventTransition(Qt::Key_Enter,
+                                                              DNG_ANY_MODIFIERS,
+                                                              multiline_active_state_,
+                                                              true);
+  multi_line_inactive->addTransition(keypad_enter_mli);
+  connect(keypad_enter_mli,SIGNAL(triggered()),this,SLOT(NewLineAtCursor()));
+
+  KeyEventTransition* ctrl_return_mli=new KeyEventTransition(Qt::Key_Return,
+                                                             DNG_CONTROL_OR_META_MODIFIERS,
+                                                             multiline_active_state_,
+                                                             true);
+  multi_line_inactive->addTransition(ctrl_return_mli);
+  connect(ctrl_return_mli,SIGNAL(triggered()),this,SLOT(NewLineAtCursor()));
+
+  multi_line_inactive->addTransition(new SignalTransition(this,
+                                                          SIGNAL(cursorPositionChanged()),
+                                                          multiline_active_state_,
+                                                          new EditPositionGuard(this,EditPositionGuard::EQUAL |EditPositionGuard::BIGGER,
+                                                                                     EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER)));
+
+  multi_line_inactive->addTransition(new KeyEventTransition(Qt::Key_Delete,
+                                                            Qt::NoModifier,
                                                             multiline_active_state_,
                                                             false));
 
-  KeyEventTransition* tr7=new KeyEventTransition(QEvent::KeyPress,
-                                                 Qt::Key_Return,
-                                                 Qt::NoModifier,
-                                                 executing,
-                                                 true,
-                                                 new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
-  multiline_active_state_->addTransition(tr7);
-  KeyEventTransition* tr8=new KeyEventTransition(QEvent::KeyPress,
-                                                 Qt::Key_Return,
+  //mutli line active transitions
+  multiline_active_state_->addTransition(new KeyEventTransition(Qt::Key_Left,
+                                                                DNG_ARROW_MODIFIERS,
+                                                                multiline_active_state_,
+                                                                true,
+                                                                new EditPositionGuard(this,EditPositionGuard::EQUAL,
+                                                                                           EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER)));
+
+  multiline_active_state_->addTransition(new KeyEventTransition(Qt::Key_Return,
+                                                                Qt::NoModifier,
+                                                                executing,
+                                                                true,
+                                                                new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR)));
+
+  KeyEventTransition* tr8=new KeyEventTransition(Qt::Key_Return,
                                                  Qt::NoModifier,
                                                  multiline_active_state_,
                                                  true,
                                                  new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
   multiline_active_state_->addTransition(tr8);
-  connect(tr8,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
+  connect(tr8,SIGNAL(triggered()),this,SLOT(NewLineAtEnd()));
 
-  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Escape,Qt::NoModifier,multi_line_inactive));
-  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::ControlModifier | DNG_ARROW_MODIFIERS,history_up));
-  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::ControlModifier | DNG_ARROW_MODIFIERS,history_down));
-  KeyEventTransition* keypad_enter7=new KeyEventTransition(QEvent::KeyPress,
-                                                           Qt::Key_Enter,
-                                                           DNG_ENTER_MODIFIERS | Qt::NoModifier,
+  KeyEventTransition* clear_all_tr_mla=new KeyEventTransition(Qt::Key_D,Qt::ControlModifier,single_line);
+  multiline_active_state_->addTransition(clear_all_tr_mla);
+  connect(clear_all_tr_mla,SIGNAL(triggered()),this,SLOT(handle_clear_all_()));
+  multiline_active_state_->addTransition(new KeyEventTransition(Qt::Key_Escape,Qt::NoModifier,multi_line_inactive));
+  multiline_active_state_->addTransition(new KeyEventTransition(Qt::Key_Up,Qt::ControlModifier,history_up));
+  multiline_active_state_->addTransition(new KeyEventTransition(Qt::Key_Down,Qt::ControlModifier,history_down));
+
+  KeyEventTransition* keypad_enter7=new KeyEventTransition(Qt::Key_Enter,
+                                                           DNG_ANY_MODIFIERS,
                                                            multiline_active_state_,
                                                            true);
   multiline_active_state_->addTransition(keypad_enter7);
-  connect(keypad_enter7,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
-  KeyEventTransition* keypad_enter8=new KeyEventTransition(QEvent::KeyPress,
-                                                           Qt::Key_Enter,
-                                                           DNG_ENTER_MODIFIERS | Qt::ShiftModifier,
-                                                           multiline_active_state_,
-                                                           true);
-  multiline_active_state_->addTransition(keypad_enter8);
-  connect(keypad_enter8,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
-  KeyEventTransition* keypad_enter9=new KeyEventTransition(QEvent::KeyPress,
-                                                           Qt::Key_Enter,
-                                                           DNG_ENTER_MODIFIERS | Qt::MetaModifier,
-                                                           multiline_active_state_,
-                                                           true);
-  multiline_active_state_->addTransition(keypad_enter9);
-  connect(keypad_enter9,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  connect(keypad_enter7,SIGNAL(triggered()),this,SLOT(NewLineAtCursor()));
 
+  // history transitions
   history_up->addTransition(new AutomaticTransition(multi_line_inactive,new HistoryGuard(&history_,EDITMODE_MULTILINE_INACTIVE)));
   history_up->addTransition(new AutomaticTransition(single_line,new HistoryGuard(&history_,EDITMODE_SINGLELINE)));
   history_down->addTransition(new AutomaticTransition(multi_line_inactive,new HistoryGuard(&history_,EDITMODE_MULTILINE_INACTIVE)));
@@ -418,11 +463,11 @@ void PythonShellWidget::OnMixedToReadwrite()
 
 }
 
-void PythonShellWidget::OnKeypadEnterTransition()
+void PythonShellWidget::NewLineAtCursor()
 {
   insertPlainText(QString(QChar::LineSeparator));
 }
-void PythonShellWidget::OnEnterTransition()
+void PythonShellWidget::NewLineAtEnd()
 {
   QTextCursor cursor=textCursor();
   cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
@@ -476,7 +521,7 @@ void PythonShellWidget::OnExecuteStateEntered()
   QString command=GetCommand();
 
   QString command_trimmed=command.trimmed();
-  if (command_trimmed.size()>0) {
+  if (! command_trimmed.isEmpty()) {
     unsigned int id=PythonInterpreter::Instance().RunCommand(command);
     output_blocks_.insert(id,textCursor().block());
     history_.AppendCommand(command_trimmed,get_block_edit_mode_());
@@ -500,20 +545,6 @@ int PythonShellWidget::GetTabWidth() const {
 
 
 
-void PythonShellWidget::wrap_into_function_(const QString& command)
-{
-  QString tmp_command=command;
-  tmp_command.replace(QString(QChar::LineSeparator),
-                      QString(QChar::LineSeparator)+QString("\t"));
-  QString tmp="def func():"+QString(QChar::LineSeparator)+"\t";
-  tmp+=tmp_command;
-  set_command_(tmp);
-  QTextCursor tc=textCursor();
-  tc.setPosition(document()->lastBlock().position()+QString("def ").length());
-  tc.setPosition(document()->lastBlock().position()+
-                 QString("def func").length(),QTextCursor::KeepAnchor);
-  setTextCursor(tc);
-}
 
 void PythonShellWidget::Recomplete(const QString& completion)
 {
@@ -679,128 +710,113 @@ void PythonShellWidget::Complete(bool inline_completion)
 
 
 
-bool PythonShellWidget::handle_custom_commands_(QKeyEvent* event)
+void PythonShellWidget::handle_output_toggle_()
 {
-  if ((event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)) && 
-      event->key() == Qt::Key_H) {
-    set_output_visible_(!output_visible_);
-    return true;
-  }
+  set_output_visible_(!output_visible_);
+}
 
-  if ((event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)) && 
-      event->key() == Qt::Key_W) {
-    wrap_into_function_(textCursor().selectedText());
-    return true;
-  }
+void PythonShellWidget::handle_wrap_to_function_()
+{
+  QString tmp_command=textCursor().selectedText();
+  tmp_command.replace(QString(QChar::LineSeparator),
+                      QString(QChar::LineSeparator)+QString("\t"));
+  QString tmp="def func():"+QString(QChar::LineSeparator)+"\t";
+  tmp+=tmp_command;
+  set_command_(tmp);
+  QTextCursor tc=textCursor();
+  tc.setPosition(document()->lastBlock().position()+QString("def ").length());
+  tc.setPosition(document()->lastBlock().position()+
+                 QString("def func").length(),QTextCursor::KeepAnchor);
+  setTextCursor(tc);
+}
+
   // custom handling of CTRL+A to select only text in edit or output section
-  if (event->modifiers() == Qt::ControlModifier && 
-      event->key() == Qt::Key_A) {
-    QTextCursor cursor=textCursor();
-    if(cursor.position()<GetEditStartBlock().position()){
-      // select all output
-      cursor.setPosition(0);
-      cursor.setPosition(GetEditStartBlock().position(),QTextCursor::KeepAnchor);
-      setTextCursor(cursor);
-    }else{
-      //select whole edit section
-      cursor.setPosition(GetEditStartBlock().position());
-      cursor.movePosition(QTextCursor::End,QTextCursor::KeepAnchor);
-      setTextCursor(cursor);
-    }
-    return true;
-  }
-  return false;
+void PythonShellWidget::handle_select_all_rw_()
+{
+  //select whole edit section
+  QTextCursor cursor=textCursor();
+  cursor.setPosition(GetEditStartBlock().position());
+  cursor.movePosition(QTextCursor::End,QTextCursor::KeepAnchor);
+  setTextCursor(cursor);
+}
+
+void PythonShellWidget::handle_select_all_()
+{
+  // select all output
+  QTextCursor cursor=textCursor();
+  cursor.setPosition(0);
+  cursor.setPosition(GetEditStartBlock().position(),QTextCursor::KeepAnchor);
+  setTextCursor(cursor);
 }
 
 
-bool PythonShellWidget::handle_completion_(QKeyEvent* event)
+void PythonShellWidget::handle_completion_()
 {
-  if(event->key() == Qt::Key_Tab){
-    QRegExp rx("^\\s*$"); // only white spaces from beginning of line
-    QTextCursor cursor= textCursor();
-    cursor.clearSelection();
-    cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
-    QString command=cursor.selectedText();
-    if(!command.contains(rx)){
-      Complete();
-      return true;
+  QRegExp rx("^\\s*$"); // only white spaces from beginning of line
+  QTextCursor cursor= textCursor();
+  cursor.clearSelection();
+  cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+  QString command=cursor.selectedText();
+  if(!command.contains(rx)){
+    Complete();
+    return;
+  }
+  insertPlainText(QString('\t'));
+}
+
+
+void PythonShellWidget::handle_clear_all_()
+{
+  handle_select_all_rw_();
+  handle_delete_();
+}
+
+void PythonShellWidget::handle_delete_()
+{
+  // BZDNG-238
+  // Letting Qt do the handling of the backspace key leads to a crash when
+  // editing a multiline block mode and doing the following:
+  //
+  //   (a) Hit Ctrl+A
+  //   (b) Hit Backspace|Delete
+  //   (c) Hit Return
+  //
+  // see http://bugreports.qt.nokia.com/browse/QTBUG-18500
+  //
+  // If we emulate the deletion of the text manually all is fine.
+  QTextCursor cursor=this->textCursor();
+  int pos=block_edit_start_.position();
+  if (cursor.hasSelection()) {
+    cursor.removeSelectedText();
+  } else {
+    cursor.deleteChar();
+  }
+  QTextCursor tc=this->textCursor();
+  tc.setPosition(pos);
+  block_edit_start_=tc.block();
+}
+
+void PythonShellWidget::handle_backspace_()
+{
+  // BZDNG-238
+  // see above
+  QTextCursor cursor=this->textCursor();
+  int pos=block_edit_start_.position();
+  if (cursor.hasSelection()) {
+    cursor.removeSelectedText();
+  } else {
+    if (cursor.position()>this->GetEditStartBlock().position()) {
+      cursor.deletePreviousChar();
     }
-  }  
-  return false;
+  }
+  QTextCursor tc=this->textCursor();
+  tc.setPosition(pos);
+  block_edit_start_=tc.block();
 }
 
 QTextBlock PythonShellWidget::GetEditStartBlock()
 {
   return block_edit_start_;
-}
-
-
-void PythonShellWidget::keyPressEvent(QKeyEvent* event)
-{
-  // BZDNG-238
-  // Letting Qt do the handling of the backspace key leads to a crash when
-  // editing a multiline block mode and doing the following:
-  // 
-  //   (a) Hit Ctrl+A
-  //   (b) Hit Backspace|Delete
-  //   (c) Hit Return
-  //
-  // If we emulate the deletion of the text manually all is fine.
-  if (event->key()==Qt::Key_Backspace || event->key()==Qt::Key_Delete) {
-    QTextCursor cursor=this->textCursor();
-    if (cursor.hasSelection()) {
-      cursor.removeSelectedText();
-    } else {
-      if (cursor.position()>this->GetEditStartBlock().position()) {
-        if (event->key()==Qt::Key_Backspace) {
-          cursor.deletePreviousChar();          
-        } else {
-          cursor.deleteChar();
-        }
-      }
-    }
-    QTextCursor tc=this->textCursor();
-    tc.setPosition(block_edit_start_.position());
-    block_edit_start_=tc.block();
-    event->accept();
-    return;
-  }
-  // BZDNG-173
-  if (event->key()==Qt::Key_Left) {
-    if (this->textCursor().position()==GetEditStartBlock().position() ||
-        this->textCursor().anchor()==GetEditStartBlock().position()) {
-      event->accept();
-      return;
-    }
-  }
-  if (this->handle_custom_commands_(event)){
-    event->accept();
-    return;
-  }
-  if (this->handle_completion_(event)){
-    event->accept();    
-    return;
-  }
-  QPlainTextEdit::keyPressEvent(event);
-}
-
-
-void PythonShellWidget::mouseReleaseEvent(QMouseEvent * event)
-{
-  QTextCursor mouse_cursor=cursorForPosition(event->pos());
-  if (get_block_edit_mode_()==EDITMODE_MULTILINE_INACTIVE &&
-      event->button() == Qt::LeftButton &&
-      mouse_cursor.position()>=document()->lastBlock().position()) {
-    // switch to active edit mode upon mouse click in edit section
-    set_block_edit_mode_(EDITMODE_MULTILINE_ACTIVE);
-  }
-  if (event->button() == Qt::MidButton && 
-      mouse_cursor.position()<document()->lastBlock().position()) {
-    // fix cursor position before inserting text
-    setTextCursor(mouse_cursor);
-    return;
-  }
-  QPlainTextEdit::mouseReleaseEvent(event);
 }
 
 
@@ -862,13 +878,14 @@ void PythonShellWidget::insertFromMimeData(const QMimeData * source)
     lines[i]=QString(num_spaces, '\t')+right;
   }
   text=lines.join(QString(1, QChar::LineSeparator));
-  if(lines.size()>0){
+  if(! lines.empty()){
     machine_->setActive(multiline_active_state_);
   }
   QPlainTextEdit::insertFromMimeData(source);
-  if(lines.size()>0){
+  if(! lines.empty()){
     set_block_type_(block_edit_start_,document()->lastBlock(),BLOCKTYPE_BLOCKEDIT);
   }
+  setFocus();
 }
 
 GutterBlockList PythonShellWidget::GetGutterBlocks(const QRect& rect)

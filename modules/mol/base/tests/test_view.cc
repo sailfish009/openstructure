@@ -21,14 +21,15 @@
  */
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <ost/mol/mol.hh>
 
 
 using namespace ost;
 using namespace ost::mol;
 
-struct Fixture {
-  Fixture() {
+struct FixtureView {
+  FixtureView() {
     e=CreateEntity();
     XCSEditor editor=e.EditXCS();
     c=editor.InsertChain("A");
@@ -50,11 +51,11 @@ struct Fixture {
   AtomHandle ad;
 };
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 BOOST_AUTO_TEST_CASE(gen_full_view) 
 {
-  Fixture f;
+  FixtureView f;
 
   EntityView ev = f.e.CreateFullView();
   BOOST_CHECK_EQUAL(ev.GetChainCount(),f.e.GetChainCount());
@@ -90,4 +91,4 @@ BOOST_AUTO_TEST_CASE(gen_full_view)
   BOOST_CHECK_EQUAL(av1.GetHashCode(), av3.GetHashCode());  
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

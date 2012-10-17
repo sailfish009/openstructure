@@ -158,14 +158,18 @@ class TubeWidget(RenderModeWidget):
     self.GetOptions().SetTubeRatio(value/10.0)
 
   def UpdateRadiusGui(self,value):
-    if(abs(value*10.0 - self.radius_slider_.value())>=self.radius_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.radius_slider_.value())>=self.radius_slider_.singleStep()):
       self.radius_slider_.setValue(value*10.0)
-    self.radius_spinbox_.setValue(value)
+    if(abs(value - self.radius_spinbox_.value())>=self.radius_spinbox_.singleStep()):
+      self.radius_spinbox_.setValue(value)
   
   def UpdateRatioGui(self,value):
-    if(abs(value*10.0 - self.ratio_slider_.value())>=self.ratio_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.ratio_slider_.value())>=self.ratio_slider_.singleStep()):
       self.ratio_slider_.setValue(value*10.0)
-    self.ratio_spinbox_.setValue(value)
+    if(abs(value - self.ratio_spinbox_.value())>=self.ratio_spinbox_.singleStep()):
+      self.ratio_spinbox_.setValue(value)
 
   def GetText(self):
     return self.text_

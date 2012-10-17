@@ -54,7 +54,7 @@ typedef enum {
 class DLLEXPORT_OST_CONOP Builder {
 public:
   
-  Builder(): dialect_(PDB_DIALECT), strict_(false) { }
+  Builder(): dialect_(PDB_DIALECT), strict_(false), bond_feasibility_check_(true) { }
   virtual ~Builder();
   
   ///  \brief add any missing atoms to the residue based on its key,
@@ -143,9 +143,17 @@ public:
   /// |brief Connect \p atom with all atoms for whith IsBondFeasible() and 
   ///    AreResiduesConsecutive() returns true
   void DistanceBasedConnect(mol::AtomHandle atom);
+   
+  /// \brief Set bond feasibility check flag
+  void SetBondFeasibilityCheck(bool b_feas_flag) { bond_feasibility_check_ = b_feas_flag; }
+  
+  /// \brief Get bond feasibility check flag
+  bool GetBondFeasibilityCheck() const { return bond_feasibility_check_; }  
+  
 private:
   Dialect dialect_;
   bool    strict_;
+  bool    bond_feasibility_check_; 
 };
 
 

@@ -29,6 +29,16 @@
 
 namespace ost { namespace img { namespace gui {
 
+class ParentDataObserver: public DataObserver
+{
+public:
+  ParentDataObserver(const Data& d):DataObserver(d){}
+  virtual void ObserverRelease()
+  {
+   // Noop as parent takes care of this.
+  }
+};
+
 class DLLEXPORT_OST_GUI FFTPanel: public DataViewerPanelBase
 {
 Q_OBJECT
@@ -39,6 +49,7 @@ public:
   void SetFFTSize(unsigned int size);
   unsigned int GetFFTSize();
   virtual void ObserverUpdate();
+  virtual void SetData(const Data& parent_data);
 
 public slots:
   void SetPosition(const Point& p);
@@ -48,8 +59,8 @@ protected:
   void update_fft();
   unsigned int size_;
   Point parent_position_;
-  const Data& parent_data_;
   ImageHandle fft_data_;
+  ParentDataObserver parent_observer_;
 };
 
 }}}  //ns

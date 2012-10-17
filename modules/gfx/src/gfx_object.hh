@@ -33,13 +33,14 @@
 #include <ost/config.hh>
 #include <ost/gfx/module_config.hh>
 
-#include <ost/mol/transform.hh>
+#include <ost/geom/transform.hh>
 
 #include "gfx_object_fw.hh"
 #include "gfx_object_base.hh"
 #include "gfx_prim.hh"
 #include "vertex_array.hh"
 #include "input.hh"
+#include "exporter_fw.hh"
 
 namespace ost { namespace gfx {
 
@@ -56,7 +57,8 @@ public:
   virtual void DeepSwap(GfxObj& go);
   virtual void RenderGL(RenderPass pass);
   virtual void RenderPov(PovState& pov);
-  virtual void Apply(GfxNodeVisitor& v,GfxNodeVisitor::Stack st);
+  virtual void Export(Exporter* ex);
+  virtual void Apply(GfxNodeVisitor& v, GfxNodeVisitor::Stack st);
   virtual int GetType() const;
   //
 
@@ -75,12 +77,22 @@ public:
   virtual void SetAALines(bool f);
   virtual void SetLineHalo(float f);
   virtual void SetOutline(bool f);
+  virtual bool GetOutline() const {return outline_flag_;};
   virtual void SetOutlineMode(int m);
+  virtual int GetOutlineMode() const {return outline_mode_;}
   virtual void SetOutlineWidth(float f);
+  virtual float GetOutlineWidth() const;
   virtual void SetOutlineExpandFactor(float f);
+  virtual float GetOutlineExpandFactor() const;
   virtual void SetOutlineExpandColor(const Color& c);
+  virtual Color GetOutlineExpandColor() const;
   virtual void SetOpacity(float f);
   virtual float GetOpacity() const {return opacity_;}
+  virtual void SetSolid(bool f);
+  virtual bool GetSolid() const {return solid_;}
+  virtual void SetSolidColor(const Color& c);
+  virtual Color GetSolidColor() const {return solid_color_;}
+  
   virtual void ColorBy(const mol::EntityView& ev, 
                        const String& prop,
                        const Gradient& g, float minv, float maxv);
@@ -94,17 +106,29 @@ public:
 
   // new gfx obj virtual interface starts here
 
-  /// \brief returns the left-bottom-front and the right-top-back corner
-  /// that encompasses all graphical elements in this object
-  /// 
-  /// the bounding box is in local coordinates. to obtain the coordinates in
-  /// the scene, multiply the bounding box by the object's transformation
-  ///  matrix.
-  virtual geom::AlignedCuboid GetBoundingBox() const;
+  /*!
+    \brief returns the bounding box of this object
 
-  /// \brief adjust the given limits according to the represented data
+    The bounding box, i.e. the left-bottom-front and the right-top-back corner
+    of the object, is obtained with this method. The single boolean parameter
+    denotes whether to return local coordinates or global scene coordinates; 
+    global scene coordinates are local coordinates with the object's transformation
+    (if present) applied. The default is false, i.e. return local coordinates.
+  */
+  virtual geom::AlignedCuboid GetBoundingBox(bool use_tf=false) const;
+
+  /*!
+    \brief adjust minimum and maximum extent based on graphical object
+
+    this routine will adjust the provided minimum and maximum points
+    based on the vertices of the underlying graphical representation,
+    combining the given Transform with the object transform.
+
+    If derived classes do not implement this method then the limits
+    will be adjusted based on the Cuboid returned by GetBoundingBox(true)
+  */
   virtual void ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
-                             const mol::Transform& tf) const;
+                             const geom::Transform& tf) const;
 
   // implemented in derived classes for the actual GL rendering
   /*
@@ -112,6 +136,15 @@ public:
     be implemented, the rest is taken care of by GfxObj::RenderGL
   */
   virtual void CustomRenderGL(RenderPass pass);
+
+  // implemented in derived classes to deal with initialization etc
+  // called just before CustomRenderGL is called
+  // the boolean flag indicated that a re-build was requested
+  virtual void CustomPreRenderGL(bool rebuild);
+
+  // implemented in derived classes for first GL initialization
+  // which should be done here, not in the ctor
+  virtual void InitGL();
 
   // implemented in derived classes for the actual POVray export
   virtual void CustomRenderPov(PovState& pov);
@@ -140,9 +173,9 @@ public:
   void Clear();
   
   /// \brief get transform
-  const mol::Transform& GetTF() const;
+  const geom::Transform& GetTF() const;
   /// \brief set transform
-  void SetTF(const mol::Transform& tf);
+  void SetTF(const geom::Transform& tf);
   
   // add a label at the given position
   void AddLabel(const String& s, const geom::Vec3& pos, const Color& col, float psize);
@@ -181,7 +214,6 @@ public:
  protected:
   
   void PreRenderGL(bool flag);
-  virtual void CustomPreRenderGL(bool flag);
 
  private:
   GfxObj(const GfxObj& o);
@@ -198,7 +230,7 @@ public:
   RenderMode::Type render_mode_;
   unsigned int debug_flags_;
  
-  mol::Transform transform_;
+  geom::Transform transform_;
   bool rebuild_;
   bool refresh_;
   float line_width_;
@@ -214,6 +246,9 @@ public:
   float smoothf_;
   bool outline_flag_;
   int outline_mode_;
+
+  bool solid_;
+  Color solid_color_;
 
   boost::ptr_vector<gfx::ColorOp> c_ops_;
 

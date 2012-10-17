@@ -23,13 +23,23 @@
 /*
   Author: Marco Biasini
  */
+#include <boost/iostreams/filtering_stream.hpp>
+
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <map>
 #include <ost/string_ref.hh>
 #include <ost/io/module_config.hh>
 
 namespace ost { namespace io {
+
+
+typedef enum {
+  STAR_DIAG_WARNING,
+  STAR_DIAG_ERROR
+} StarDiagType;
+
 
 class DLLEXPORT_OST_IO StarDataItem {
 public:
@@ -71,6 +81,12 @@ public:
   {
     return index_map_.size();
   }
+  void Clear()
+  {
+    category_.clear();
+    index_map_.clear();
+  }
+
   const String& GetCategory() const { return category_; }
 private:
   String                category_;
@@ -95,8 +111,14 @@ private:
 ///     a list of column names and values.
 class DLLEXPORT_OST_IO StarParser {
 public:
-  StarParser(std::istream& istream);
-  
+  /// \brief create a StarParser
+  ///
+  /// \param stream input stream
+  /// \param item_as_row if true, data-items are first gathered (identifier as
+  ///                    header, values as row) and then parsed like a loop
+  ///                    (OnBeginLoop(), OnDataRow(), OnEndLoop())
+  explicit StarParser(std::istream& stream, bool items_as_row=false);
+  explicit StarParser(const String& filename, bool items_as_row=false);
   virtual ~StarParser() { }
 // callback interface
 public:
@@ -108,7 +130,7 @@ public:
   /// \brief invoked when leaving a loop
   /// 
   /// OnEndLoop() is only invoked, when OnBeginLoop() returned true.
-  virtual void OnEndLoop() { }  
+  virtual void OnEndLoop() { }
   /// \brief invoked when a data row in a loop is encountered.
   /// \param header describes the row format
   /// \param columns contains the data columns
@@ -127,6 +149,75 @@ public:
   /// \brief called when leaving a datasection. Will only be invoked when 
   ///     OnBeginData() returned true.
   virtual void OnEndData() { }
+
+  /// \brief try to convert a value to Real, on failure raise an exception.
+  ///
+  /// \param data value to be converted
+  /// \param name to be included in the message
+  ///
+  /// \return converted value
+  Real TryGetReal(const StringRef& data, const String& name) const;
+
+  /// \brief try to convert a value to float, on failure raise an exception.
+  ///
+  /// \param data value to be converted
+  /// \param name to be included in the message
+  ///
+  /// \return converted value
+  float TryGetFloat(const StringRef& data, const String& name) const;
+
+  /// \brief try to convert a value to float, on failure raise an exception.
+  ///
+  /// \param data value to be converted
+  /// \param name to be included in the message
+  /// \param may_fail decides if an exception is raised (false) or not (true)
+  ///
+  /// \return converted value
+  std::pair<bool, float> TryGetFloat(const StringRef& data,
+                                     const String& name,
+                                     bool may_fail) const;
+
+  /// \brief try to convert a value to integer, on failure raise an exception.
+  ///
+  /// \param data value to be converted
+  /// \param name to be included in the message
+  ///
+  /// \return converted value
+  int TryGetInt(const StringRef& data, const String& name) const;
+
+  /// \brief try to convert a value to integer, exception can be turned off.
+  ///
+  /// \param data value to be converted
+  /// \param name to be included in the message
+  /// \param may_fail decides if an exception is raised (false) or not (true)
+  ///
+  /// \return pair with value and indicator if conversion worked
+  std::pair<bool, int> TryGetInt(const StringRef& data,
+                                 const String& name,
+                                 bool may_fail) const;
+
+  /// \brief try to convert a value to bool, on failure raise an exception.
+  ///
+  /// \param data value to be converted
+  /// \param name to be included in the message
+  ///
+  /// \return converted value
+  bool TryGetBool(const StringRef& data, const String& name) const;
+
+  /// \brief format diagnostic and returns it as a string.
+  String FormatDiagnostic(StarDiagType type, const String& message,
+                          int line=-1) const;
+
+  void SetFilename(const String& filename)
+  {
+    filename_ = filename;
+  }
+
+  /// \brief retrieve the line, the parser is currently working on
+  int GetCurrentLinenum() const
+  {
+    return line_num_;
+  }
 public:
   void Parse();
   
@@ -135,6 +226,14 @@ public:
                         std::vector<StringRef>& parts, bool clear=true);
 private:
   void ParseLoop();
+  /// \brief Calls the loop parsing functions on the last data item fetched to
+  ///        be read as loop
+  void ParseLastDataItemRow();
+  /// \brief Calls functions for parsing a data item, either as singleton
+  ///        (default) or loop.
+  void ParseDataItemOrRow(StarDataItem& item);
+  /// \brief If enabled, calls ParseLastDataItemRow()
+  void ParseEndDataItemRow();
 private:
   /// \brief read next line, replacing the current line
   bool NextLine(StringRef& str)
@@ -162,15 +261,25 @@ private:
     assert(has_current_line_);
     has_current_line_=false;
   }
+
+  void ParseDataItemIdent(const StringRef ident,
+                          StringRef& cat, StringRef& name);
   void ParseGlobal();
   void ParseData();
   void ParseDataItem();
   void DiagnoseUnknown();
   bool ParseMultilineValue(String& value, bool skip=false);
-  std::istream& stream_;
+  std::ifstream fstream_;
+  boost::iostreams::filtering_stream<boost::iostreams::input> stream_;
+  String        filename_;
   int           line_num_;
   bool          has_current_line_;
   String        current_line_;
+  bool          items_as_row_;
+  StarLoopDesc  items_row_header_;
+  bool          file_open_;
+  std::vector<StringRef> items_row_columns_;
+  std::vector<String> items_row_values_;
 };
  
 }}

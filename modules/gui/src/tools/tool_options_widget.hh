@@ -87,6 +87,7 @@ private:
   QWidget* MakeIntWidget(ToolOptionInt* opts);
   QWidget* MakeEnumWidget(ToolOptionEnum* opts);  
   QWidget* MakeFloatWidget(ToolOptionFloat* opts);  
+  QWidget* MakeButtonWidget(ToolOptionButton* opts);
   ToolOptions* options_;
 };
 

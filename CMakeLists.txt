@@ -3,14 +3,27 @@
 #-------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake_support)
+project(OpenStructure CXX C)
+set (OST_VERSION_MAJOR 1)
+set (OST_VERSION_MINOR 2)
+set (OST_VERSION_PATCH 2)
+set (OST_VERSION_STRING ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR}.${OST_VERSION_PATCH} )
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
 include(OST)
 
-project(OpenStructure CXX C)
+
+if (CMAKE_COMPILER_IS_GNUCXX)  
+  exec_program(gcc ARGS --version OUTPUT_VARIABLE CMAKE_C_COMPILER_VERSION)
+  if(CMAKE_C_COMPILER_VERSION MATCHES ".*4\\.[5-9].*")
+    set(OST_GCC_45 true)
+  else()   
+    set(OST_GCC_45 false)  
+  endif()
+endif()
 
 option(USE_SHADER "whether to compile with shader support"
        OFF)
-option(SET_RPATH "embed rpath upon make install"
+option(USE_RPATH "embed rpath upon make install"
        OFF)
 option(COMPILE_TMTOOLS "whether to compile the tmalign and tmscore programs"
        OFF)
@@ -20,16 +33,24 @@ option(ENABLE_GUI "whether the graphical user interface should be enabled"
        ON)
 option(ENABLE_GFX "whether graphics support should be enabled"
       ON)
+option(USE_MESA "use software rendered Mesa instead of hardware GL"
+      OFF)
 option(ENABLE_IMG "whether the image processing module should be compiled"
        ON)
+option(ENABLE_INFO "whether openstructure should be compiled with support for the info library"
+       ON)
+option(USE_NUMPY "whether numpy support is added"
+      OFF)
 option(USE_DOUBLE_PRECISION "whether to compile in double precision" 
        OFF)
 option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
       OFF)
 option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some boost/boost_python combinations" OFF)
-option(DEPLOYMENT "switch on deployment settings" OFF)
-option(COMPILE_TESTS "wheter unit tests should be compiled by default" OFF)
+option(COMPILE_TESTS "whether unit tests should be compiled by default" OFF)
 option(ENABLE_STATIC "whether static libraries should be compiled" OFF)
+option(DEBIAN_STYLE_LIBEXEC "whether 'libexec' should be put under 'lib/openstructure" OFF)
+option(HIDDEN_VISIBILITY "on gcc, use -fvisibility=hidden" OFF)
+
 if (CXX)
   set(CMAKE_CXX_COMPILER ${CXX})
 endif()
@@ -41,6 +62,7 @@ endif()
 if (FORTRAN_COMPILER)
   set(CMAKE_FORTRAN_COMPILER ${FORTRAN_COMPILER})
 endif()
+
 
 
 if (PREFIX)
@@ -66,8 +88,18 @@ else()
   set(_DOUBLE_PREC OFF)
 endif()
 
+if (NOT ENABLE_INFO)
+  set(ENABLE_GFX OFF)
+endif()
+
 if (NOT ENABLE_GFX)
   set(ENABLE_GUI OFF)
+endif()
+
+if (ENABLE_INFO)
+  set(_INFO ON)
+else()
+  set(_INFO OFF)
 endif()
 
 if (ENABLE_GUI)
@@ -87,6 +119,11 @@ if (USE_SHADER)
 else()
   set(_SHADER OFF)
 endif()
+if (USE_NUMPY)
+  set(_NUMPY ON)
+else()
+  set(_NUMPY OFF)
+endif()
 if (COMPILE_TMTOOLS)
   set(_TM_TOOLS ON)
 else()
@@ -103,10 +140,18 @@ else()
   set(_PROFILE OFF)
 endif()
 
+if (DEBIAN_STYLE_LIBEXEC)
+  set(_DEBIAN_STYLE_LIBEXEC ON)
+else()
+  set(_DEBIAN_STYLE_LIBEXEC OFF)
+endif()
+
+add_definitions(-DEIGEN2_SUPPORT)
+
 if (COMPOUND_LIB)
   set(_COMP_LIB "${COMPOUND_LIB}")
   if (NOT IS_ABSOLUTE "${COMPOUND_LIB}")
-    set(COMPOUND_LIB "${CMAKE_CURRENT_SOURCE_DIR}/${COMPOUND_LIB}")
+    set(COMPOUND_LIB "${CMAKE_CURRENT_BINARY_DIR}/${COMPOUND_LIB}")
   endif()
 else()
   set(_COMP_LIB "NONE")
@@ -122,102 +167,49 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-set(STAGE_DIR "${CMAKE_BINARY_DIR}/stage")
-set(EXECUTABLE_OUTPUT_PATH ${STAGE_DIR}/bin)
-set(HEADER_STAGE_PATH ${STAGE_DIR}/include)
-set(SHARED_DATA_PATH ${STAGE_DIR}/share/openstructure)
-include_directories("${HEADER_STAGE_PATH}")
-link_directories(${LIB_STAGE_PATH})
-
-
-
-if (UNIX AND NOT APPLE)
-  check_architecture()
-endif()
-set (ARCH ${CMAKE_NATIVE_ARCH})
-if ("${ARCH}" MATCHES "64")
-  set(LIB_DIR lib64)
-  set(LIB_STAGE_PATH "${STAGE_DIR}/lib64")
-else()
-  set(LIB_DIR lib)
-  set(LIB_STAGE_PATH "${STAGE_DIR}/lib")
-endif()
-
-file(MAKE_DIRECTORY ${STAGE_DIR} 
-     ${EXECUTABLE_OUTPUT_PATH} 
+setup_stage()
+file(MAKE_DIRECTORY ${STAGE_DIR}
+     ${EXECUTABLE_OUTPUT_PATH}
      ${HEADER_STAGE_PATH}
-     ${LIB_STAGE_PATH})
+     ${LIB_STAGE_PATH}
+     ${LIBEXEC_STAGE_PATH})
 
-if (WIN32)
-   # add_definitions(-DBOOST_TEST_INCLUDED)
-   
-   add_definitions(-D_USE_MATH_DEFINES -D_CRT_SECURE_NO_DEPRECATE 
-                   -D_SCL_SECURE_NO_DEPRECATE -DNOMINMAX)
-   add_definitions(-Zc:wchar_t-)   #  
-  # add_definitions(-MDd -vmg -EHsc -GR)
-  #GR:Uses the __fastcall calling convention (x86 only).
-  #-EHsc to specify the synchronous exception handling mode/
-  #-vmg Uses full generality for pointers to members.
-  add_definitions(-DBOOST_ZLIB_BINARY=zdll)
-  #add_definitions(-NODEFAULTLIB:LIBCMTD.lib)
+setup_compiler_flags()
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+
+if (ENABLE_STATIC AND UNIX AND NOT APPLE)
+  set (CMAKE_FIND_LIBRARY_SUFFIXES .a)
 endif()
 
-function(get_compiler_version _OUTPUT_VERSION)
-  exec_program(${CMAKE_CXX_COMPILER} 
-               ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
-               OUTPUT_VARIABLE _COMPILER_VERSION
-  )
-  string(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
-    _COMPILER_VERSION ${_COMPILER_VERSION})
+setup_boost()
 
-  set(${_OUTPUT_VERSION} ${_COMPILER_VERSION} PARENT_SCOPE)
-endfunction()
+if (ENABLE_INFO)        
+  find_package(Qt4 4.5.0 REQUIRED)
+endif()
 
-if (CMAKE_COMPILER_IS_GNUCXX)
-  get_compiler_version(_GCC_VERSION)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-  if (_GCC_VERSION MATCHES "44")
-    # gcc 4.4. is very strict about aliasing rules. the shared_count
-    # implementation that is used boost's shared_ptr violates these rules. To
-    # silence the warnings and prevent miscompiles, enable
-    #  -fno-strict-aliasing
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+if (ENABLE_GFX)
+  if(USE_MESA)
+    find_package(Mesa REQUIRED)
+    set(_USE_MESA ON)
+  else()
+    find_package(OpenGL REQUIRED)
+    set(_USE_MESA OFF)
   endif()
 endif()
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-set(_BOOST_MIN_VERSION 1.37)
-
-find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS python REQUIRED)
-set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
-find_package(Boost ${_BOOST_MIN_VERSION} 
-             COMPONENTS unit_test_framework REQUIRED)
-set(BOOST_UNIT_TEST_LIBRARIES ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
-if (ENABLE_STATIC)
-  set(Boost_USE_STATIC_LIBS ON)
+if (ENABLE_IMG OR ENABLE_GFX)
+  find_package(PNG REQUIRED)
+else()
+  set (PNG_LIBRARY "")
 endif()
-find_package(Boost ${_BOOST_MIN_VERSION} 
-             COMPONENTS filesystem system REQUIRED)
-set(BOOST_LIBRARIES ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
-find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS iostreams REQUIRED)
-set(BOOST_IOSTREAM_LIBRARIES ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
-find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS program_options REQUIRED)
-set(BOOST_PROGRAM_OPTIONS ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
-find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS regex REQUIRED)
-set(BOOST_REGEX_LIBRARIES ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
 
-        
-find_package(Qt4 4.5.0 REQUIRED)
-find_package(OpenGL REQUIRED)
-find_package(PNG REQUIRED)
 find_package(Eigen 2.0.0 REQUIRED)
 find_package(Python 2.4 REQUIRED)
+
+if(USE_NUMPY)
+  find_package(Numpy REQUIRED)
+endif()
 
 if (ENABLE_IMG)
   find_package(FFTW REQUIRED)
@@ -230,10 +222,15 @@ if (ENABLE_STATIC)
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost ${_BOOST_MIN_VERSION} 
                COMPONENTS filesystem system iostreams regex REQUIRED)
-  message(${Boost_LIBRARIES})
   find_package(ZLIB REQUIRED)
-  set(STATIC_LIBRARIES ${Boost_LIBRARIES} ${FFTW_LIBRARIES} ${TIFF_LIBRARIES} 
-      ${PNG_LIBRARIES} ${ZLIB_LIBRARIES})
+   
+  if (UNIX AND NOT APPLE)
+    set(STATIC_LIBRARIES ${Boost_LIBRARIES} ${FFTW_LIBRARIES} ${TIFF_LIBRARIES} 
+        ${PNG_LIBRARY} ${ZLIB_LIBRARY})
+  else ()
+    set(STATIC_LIBRARIES ${Boost_LIBRARIES} ${FFTW_LIBRARIES} ${TIFF_LIBRARIES} 
+        ${PNG_LIBRARY} ${ZLIB_LIBRARY})
+  endif()
 endif()
 
 if (ENABLE_GUI)
@@ -242,7 +239,23 @@ if (ENABLE_GUI)
 endif()
 
 if (ENABLE_SPNAV)
-  find_package(SpNav REQUIRED)
+  #find_package(SpNav REQUIRED)
+  set(_SPNAV ON)
+else()
+  set(_SPNAV OFF)
+endif()
+
+if (CMAKE_COMPILER_IS_GNUCXX)
+  # do not write back into cache, otherwise the compile command line gets expanded
+  # with multiple -fno-strict-aliasing flags, triggering a complete rebuild whenever
+  # cmake is run
+  set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-strict-aliasing")
+  if(HIDDEN_VISIBILITY) 
+    set (CMAKE_CXX_FLAGS "-fvisibility=hidden")
+    set (_HIDDEN_VIS ON)
+  else(HIDDEN_VISIBILITY)
+    set (_HIDDEN_VIS OFF)
+  endif(HIDDEN_VISIBILITY)
 endif()
 
 # basic environment
@@ -250,14 +263,18 @@ include_directories(${Boost_INCLUDE_DIRS}
                     ${FFTW_INCLUDE_PATH} 
                     ${EIGEN2_INCLUDE_DIR}
                     ${TIFF_INCLUDE_DIR}
-                    ${SPNAV_INCLUDE_DIR}
+                    ${PNG_INCLUDE_DIR}
                     )
+if(USE_NUMPY)
+include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
+endif()
+
 if (UNIX)
   SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
   SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
   if(USE_RPATH)
     set(_USE_RPATH ON)
-    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
+    SET(CMAKE_INSTALL_RPATH "$ORIGIN/../${LIB_DIR}")
     SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
   else()
     set(_USE_RPATH OFF)
@@ -266,27 +283,46 @@ if (UNIX)
   endif() 
 endif()
 
+if (ENABLE_STATIC)
+  SET(CMAKE_SKIP_BUILD_RPATH TRUE)
+  SET(LINK_SEARCH_END_STATIC TRUE) 
+endif()
 
 add_subdirectory(modules)
 add_subdirectory(scripts)
+add_subdirectory(tools)
+# deployment has to come last, to ensure that all install commands are run before deployment
+# magic is done
 add_subdirectory(deployment)
-set(FILES_TO_BE_REMOVED CMakeFiles stage tests)
+
+set(FILES_TO_BE_REMOVED ${CMAKE_SOURCE_DIR}/stage tests)
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
-                         "${FILES_TO_BE_REMOVED}")
+                             "${FILES_TO_BE_REMOVED}")
+
 
 #ost_match_boost_python_version(${PYTHON_LIBRARIES})
 
 message(STATUS 
         "OpenStructure will be built with the following options:\n"
-        "   Install Prefix                  (-PREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
-        "   RPath in install            (-DUSE_RPATH) : ${_USE_RPATH}\n"
-        "   Graphical interface        (-DENABLE_GUI) : ${_UI}\n"
-        "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
-        "   Image Processing support   (-DENABLE_IMG) : ${_IMG}\n"
-        "   Shader support             (-DUSE_SHADER) : ${_SHADER}\n"
-        "   Optimize                     (-DOPTIMIZE) : ${_OPT}\n"
-        "   Profiling support             (-DPROFILE) : ${_PROFILE}\n"
-        "   Double Precision (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
-        "   Compound Lib             (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
-        "   TMAlign and TMScore   (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
-        "   Static Libraries       (-DENABLE_STATIC)  : ${ENABLE_STATIC}")
+        "   Install Prefix                       (-DPREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
+        "   RPath in install                  (-DUSE_RPATH) : ${_USE_RPATH}\n"
+        "   Info support                    (-DENABLE_INFO) : ${_INFO}\n"
+        "   Graphical interface              (-DENABLE_GUI) : ${_UI}\n"
+        "   OpenGL support                   (-DENABLE_GFX) : ${_OPENGL}\n"
+        "   OpenGL via Mesa                    (-DUSE_MESA) : ${_USE_MESA}\n"
+        "   Image Processing support         (-DENABLE_IMG) : ${_IMG}\n"
+        "   Shader support                   (-DUSE_SHADER) : ${_SHADER}\n"
+        "   Numpy support                     (-DUSE_NUMPY) : ${_NUMPY}\n"
+        "   SpaceNav Device support        (-DENABLE_SPNAV) : ${_SPNAV}\n"
+        "   Optimize                           (-DOPTIMIZE) : ${_OPT}\n"
+        "   Profiling support                   (-DPROFILE) : ${_PROFILE}\n"
+        "   Double Precision       (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
+        "   Compound Lib                   (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
+        "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
+        "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
+        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}")
+if (CMAKE_COMPILER_IS_GNUCXX)
+   message(STATUS
+        "   Hidden object visibility  (-DHIDDEN_VISIBILITY) :        ${_HIDDEN_VIS}")
+endif()
+

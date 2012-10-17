@@ -38,12 +38,13 @@ class DLLEXPORT_OST_MOL InMemCoordSource : public CoordSource {
 public:
   InMemCoordSource(const AtomHandleList& atoms);
   
-  virtual uint GetFrameCount();
+  virtual uint GetFrameCount() const;
   
   virtual CoordFramePtr GetFrame(uint frame_id) const;
   
   void AddFrame(const CoordFramePtr& frame);
   virtual void AddFrame(const std::vector<geom::Vec3>& coords);
+  virtual void AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& cell_size,const geom::Vec3& cell_angles);
   virtual void InsertFrame(int pos, const std::vector<geom::Vec3>& coords);
   
 private:

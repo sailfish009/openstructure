@@ -1,3 +1,6 @@
+set(SUBST_DICT OST_VERSION_MAJOR=${OST_VERSION_MAJOR} OST_VERSION_MINOR=${OST_VERSION_MINOR} 
+    OST_VERSION_PATCH=${OST_VERSION_PATCH})
+
 set(OST_CONFIG_HEADERS
 base.hh
 config.hh
@@ -5,14 +8,25 @@ dllexport.hh
 version.hh
 )
 
-
 set(animations_enabled 0)
+
 if (USE_SHADER)
   set(shader_support 1)
 else()
   set(shader_support 0)
 endif()
 
+if (USE_MESA)
+  set(mesa_support 1)
+else()
+  set(mesa_support 0)
+endif()
+
+if (USE_NUMPY)
+  set(numpy_support 1)
+else()
+  set(numpy_support 0)
+endif()
 if (PROFILE)
   set(profiling_enabled 1)
 else()
@@ -38,21 +52,26 @@ if (_STATICPROPS)
 else()
   set(static_props 0)
 endif()
-if (ENABLE_SPNAV)
-  set(spnav_enabled 1)
-else()
-  set(spnav_enabled 0)
-endif()
 if (FFTW_USE_THREADS)
   set(fftw_use_threads 1)
 else()
   set(fftw_use_threads 0)
 endif()
+if (_DEBIAN_STYLE_LIBEXEC)
+  set(debian_style_libexec 1)
+else()
+  set(debian_style_libexec 0)
+endif()
+if (ENABLE_INFO)
+  set(info_enabled 1)
+else()
+  set(info_enabled 0)
+endif()
 
 set(config_hh_generator "CMake")
 set(CONFIG_HH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/config.hh")
+set(VERSION_HH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/version.hh")
 configure_file(config.hh.in ${CONFIG_HH_FILE})
+configure_file(version.hh.in ${VERSION_HH_FILE})
 add_custom_target(ost_config)
-stage_headers("${OST_CONFIG_HEADERS}" "ost" 
-              "ost_config" "" "ost")
-install(FILES ${OST_CONFIG_HEADERS} DESTINATION include/ost)
+stage_and_install_headers("${OST_CONFIG_HEADERS}" "ost" "ost_config")

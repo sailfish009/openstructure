@@ -21,6 +21,7 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
 
+#include <ost/message.hh>
 #include <ost/conop/compound.hh>
 #include <ost/conop/compound_lib.hh>
 using namespace ost::mol;
@@ -44,7 +45,7 @@ Compound::Dialect tr_dialect(const String& dialect)
   }
   std::stringstream ss;
   ss << "unknown compound dialect '" << dialect << "'";
-  throw std::runtime_error(ss.str());
+  throw ost::Error(ss.str());
 }
 
 void set_dialect(CompoundPtr compound, const String& dialect)
@@ -57,15 +58,26 @@ char get_chemclass(CompoundPtr compound)
   return char(compound->GetChemClass());
 }
 
+
 void set_chemclass(CompoundPtr compound, char cc)
 {
   compound->SetChemClass(ChemClass(cc));
+}
+
+char get_chemtype(CompoundPtr compound)
+{
+  return char(compound->GetChemType());
 }
 
 CompoundPtr find_compound(CompoundLibPtr comp_lib, 
                           const String& tlc, const String& dialect)
 {
   return comp_lib->FindCompound(tlc, tr_dialect(dialect));
+}
+
+String get_creation_date(CompoundLibPtr comp_lib)
+{
+  return comp_lib->GetCreationDate().ToString();
 }
 
 }
@@ -78,20 +90,24 @@ void export_Compound() {
     .def("GetOneLetterCode", &Compound::GetOneLetterCode)
 
     .add_property("three_letter_code", make_function(&Compound::GetID, return_value_policy<copy_const_reference>()))
+    .add_property("name", 
+                  make_function(&Compound::GetName, 
+                 return_value_policy<copy_const_reference>()))
     .add_property("id", make_function(&Compound::GetID, return_value_policy<copy_const_reference>()))    
     .add_property("one_letter_code", &Compound::GetOneLetterCode, 
                   &Compound::SetOneLetterCode)                  
     .def("GetAtomSpecs", &Compound::GetAtomSpecs,
          return_value_policy<copy_const_reference>())
-    .def("bond_specs", make_function(&Compound::GetBondSpecs,
+    .add_property("bond_specs", make_function(&Compound::GetBondSpecs,
          return_value_policy<copy_const_reference>()))         
-    .def("atom_specs", make_function(&Compound::GetAtomSpecs,
+    .add_property("atom_specs", make_function(&Compound::GetAtomSpecs,
          return_value_policy<copy_const_reference>()))
     .def("AddAtom", &Compound::AddAtom)
     .def("AddBond", &Compound::AddBond)
     .def("IsPeptideLinking", &Compound::IsPeptideLinking)
     .add_property("chem_class", &get_chemclass,
                   &set_chemclass)
+    .add_property("chem_type", &get_chemtype)
     .add_property("formula",make_function(&Compound::GetFormula, 
                   return_value_policy<copy_const_reference>()),
                   &Compound::SetFormula)
@@ -120,6 +136,8 @@ void export_Compound() {
     .def("FindCompound", &find_compound, 
          (arg("tlc"), arg("dialect")="PDB"))
     .def("ClearCache", &CompoundLib::ClearCache)
+    .def("GetOSTVersionUsed", &CompoundLib::GetOSTVersionUsed)
+    .def("GetCreationDate", &get_creation_date, (arg("comp_lib")))
   ;
   
   class_<AtomSpecList>("AtomSpecList", init<>())

@@ -12,6 +12,7 @@ message.cc
 symop.cc
 symop_data.cc
 test_utils/compare_files.cc
+boost_filesystem_helper.cc
 )
 
 set(OST_BASE_HEADERS
@@ -37,15 +38,15 @@ string_ref.hh
 pod_vector.hh
 fixed_string.hh
 tri_matrix.hh
+boost_filesystem_helper.hh
 )
 
 set(OST_EXPORT_HELPERS
 generic_property_def.hh 
 pair_to_tuple_conv.hh 
-vector.hh
 )
 module(NAME base SOURCES ${OST_BASE_SOURCES} 
        HEADERS ${OST_EXPORT_HELPERS} IN_DIR export_helper 
        compare_files.hh IN_DIR test_utils ${OST_BASE_HEADERS}
-       DEPENDS_ON geom
+       DEPENDS_ON ost_geom
        HEADER_OUTPUT_DIR ost)

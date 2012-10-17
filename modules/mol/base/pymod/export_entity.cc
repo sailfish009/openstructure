@@ -31,6 +31,10 @@ using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
 
+#if OST_NUMPY_SUPPORT_ENABLED
+#include <numpy/arrayobject.h>
+#endif
+
 namespace {
 EntityHandle create1() {  return CreateEntity(); }
 
@@ -42,11 +46,6 @@ typedef BondHandle (EntityHandle::*Connect2)(const AtomHandle&,
                                              Real, Real);
 
 typedef EntityView (EntityHandle::*QueryMethod)(const Query&, uint) const;
-QueryMethod select_query=&EntityHandle::Select;
-StringMethod select_string=&EntityHandle::Select;
-//Connect1 conn1=&EntityHandle::Connect;
-//Connect2 conn2=&EntityHandle::Connect;
-
 
 Real (EntityHandle::*get_angle1)(const AtomHandle&, const AtomHandle&, const AtomHandle&) const = &EntityHandle::GetAngle;
 Real (EntityHandle::*get_angle2)(const AtomView&, const AtomView&, const AtomView&) const = &EntityHandle::GetAngle;
@@ -66,10 +65,62 @@ ICSEditor depr_request_ics_editor(EntityHandle e, EditMode m)
 }
 
 
+#if OST_NUMPY_SUPPORT_ENABLED
+
+bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
+{
+  return a1.GetIndex()<a2.GetIndex();
 }
+PyObject* get_pos2(EntityHandle& entity, bool id_sorted)
+{
+  npy_intp dims[]={entity.GetAtomCount(),3};
+  PyObject* na = PyArray_SimpleNew(2,dims,NPY_FLOAT);
+  npy_float* nad = reinterpret_cast<npy_float*>(PyArray_DATA(na));
+  if(id_sorted) {
+    AtomHandleList alist = entity.GetAtomList();
+    std::sort(alist.begin(),alist.end(),less_index);
+    for(AtomHandleList::const_iterator it=alist.begin();it!=alist.end();++it,nad+=3) {
+      geom::Vec3 pos=(*it).GetPos();
+      nad[0]=static_cast<npy_float>(pos[0]);
+      nad[1]=static_cast<npy_float>(pos[1]);
+      nad[2]=static_cast<npy_float>(pos[2]);
+    }
+  } else {
+    for(AtomHandleIter it=entity.AtomsBegin();it!=entity.AtomsEnd();++it,nad+=3) {
+      geom::Vec3 pos=(*it).GetPos();
+      nad[0]=static_cast<npy_float>(pos[0]);
+      nad[1]=static_cast<npy_float>(pos[1]);
+      nad[2]=static_cast<npy_float>(pos[2]);
+    }
+  }
+  return na;
+}
+
+PyObject* get_pos1(EntityHandle& entity)
+{
+  return get_pos2(entity,true);
+}
+
+#endif
+
+geom::Mat4 depr_get_transformation_matrix(const EntityHandle& eh)
+{
+  return eh.GetTransformationMatrix();
+}
+
+bool depr_is_transformation_identity(const EntityHandle& eh)
+{
+  return eh.IsTransformationIdentity();
+}
+
+} // ns
 
 void export_Entity()
 {
+#if OST_NUMPY_SUPPORT_ENABLED
+  import_array();
+#endif
+
   class_<EntityBase> ent_base("EntityBase", no_init);
   ent_base
     .def(self_ns::str(self))
@@ -87,10 +138,22 @@ void export_Entity()
          return_value_policy<copy_const_reference>())
   ;
   generic_prop_def<EntityBase>(ent_base);
+
+  EntityView (EntityHandle::*select1)(const Query&) const = &EntityHandle::Select;
+  EntityView (EntityHandle::*select2)(const Query&, QueryFlags) const = &EntityHandle::Select;
+  EntityView (EntityHandle::*select3)(const String&) const = &EntityHandle::Select;
+  EntityView (EntityHandle::*select4)(const String&, QueryFlags) const = &EntityHandle::Select;
   
   class_<EntityHandle, bases<EntityBase> >("EntityHandle", init<>())
-    .def("Select",select_query, (arg("query"), arg("flags")=0))
-    .def("Select",select_string, (arg("query"), arg("flags")=0))
+    .def("Select",select1)
+    .def("Select",select2)
+    .def("Select",select3)
+    .def("Select",select4)
+    .def("SetDefaultQueryFlags",&EntityHandle::SetDefaultQueryFlags)
+    .def("GetDefaultQueryFlags",&EntityHandle::GetDefaultQueryFlags)
+    .add_property("default_query_flags",
+                  &EntityHandle::GetDefaultQueryFlags,
+                  &EntityHandle::SetDefaultQueryFlags)
     .def("FindChain", &EntityHandle::FindChain)
     .def("FindResidue", &EntityHandle::FindResidue)
     .def("FindAtom", &EntityHandle::FindAtom)
@@ -100,6 +163,7 @@ void export_Entity()
     .def("GetMass", &EntityHandle::GetMass)
     .def("GetCenterOfMass", &EntityHandle::GetCenterOfMass)
     .def("GetCenterOfAtoms", &EntityHandle::GetCenterOfAtoms)
+    .def("GetAtomPosList", &EntityHandle::GetAtomPosList)
     .def("GetGeometricCenter", geom_center<EntityHandle>)
     .add_property("geometric_center", geom_center<EntityHandle>)
 
@@ -134,19 +198,24 @@ void export_Entity()
     .add_property("bonds", &EntityHandle::GetBondList)
     .def("GetBounds", &EntityHandle::GetBounds)
     .add_property("bounds", &EntityHandle::GetBounds)
-    .def("GetTransformationMatrix", &EntityHandle::GetTransformationMatrix,
-         return_value_policy<copy_const_reference>())
-    .add_property("transform", 
-                   make_function(&EntityHandle::GetTransformationMatrix, 
-                                 return_value_policy<copy_const_reference>()))    
-
+    .def("GetTransformationMatrix", depr_get_transformation_matrix)
+    .def("IsTransformationIdentity",depr_is_transformation_identity)
+    .def("GetTransform",&EntityHandle::GetTransform)
+    .def("SetTransform",&EntityHandle::SetTransform)
+    .add_property("transform",&EntityHandle::GetTransform,&EntityHandle::SetTransform)
+    .def("HasTransform",&EntityHandle::HasTransform)
+    .def("ClearTransform",&EntityHandle::ClearTransform)
     .def("EditXCS", &EntityHandle::EditXCS, arg("mode")=UNBUFFERED_EDIT)
     .def("EditICS", &EntityHandle::EditICS, arg("mode")=UNBUFFERED_EDIT)
     .def("RequestXCSEditor", &depr_request_xcs_editor, arg("mode")=UNBUFFERED_EDIT)
     .def("RequestICSEditor", &depr_request_ics_editor, arg("mode")=UNBUFFERED_EDIT)  
-    .def("IsTransformationIdentity",&EntityHandle::IsTransformationIdentity)
     .def(self==self)
     .def(self!=self)
+#if OST_NUMPY_SUPPORT_ENABLED
+    .def("GetPositions",get_pos1)
+    .def("GetPositions",get_pos2)
+    .add_property("positions",get_pos1)
+#endif
   ;
 
   def("CreateEntity",create1);
@@ -155,3 +224,4 @@ void export_Entity()
     .def(vector_indexing_suite<EntityHandleList>())
   ;
 }
+

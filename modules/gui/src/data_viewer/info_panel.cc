@@ -46,27 +46,27 @@ InfoPanelLabel::InfoPanelLabel(const QString& t, QWidget* parent):
 
 InfoPanel::InfoPanel(QWidget* parent):
   QWidget(parent),
-  image_extent_(new InfoPanelLabel),
-  image_size_(new InfoPanelLabel),
-  image_sampling_(new InfoPanelLabel),
-  image_type_(new InfoPanelLabel),
-  mouse_xy_(new InfoPanelLabel),
-  mouse_val_(new InfoPanelLabel),
-  click_xy_(new InfoPanelLabel),
-  click_val_(new InfoPanelLabel),
-  selection_xy_(new InfoPanelLabel),
-  size_xy_(new InfoPanelLabel),
-  distance_(new InfoPanelLabel),
-  popupmenu_(new QMenu),
+  image_extent_(new InfoPanelLabel("",this)),
+  image_size_(new InfoPanelLabel("",this)),
+  image_sampling_(new InfoPanelLabel("",this)),
+  image_type_(new InfoPanelLabel("",this)),
+  mouse_xy_(new InfoPanelLabel("",this)),
+  mouse_val_(new InfoPanelLabel("",this)),
+  click_xy_(new InfoPanelLabel("",this)),
+  click_val_(new InfoPanelLabel("",this)),
+  selection_xy_(new InfoPanelLabel("",this)),
+  size_xy_(new InfoPanelLabel("",this)),
+  distance_(new InfoPanelLabel("",this)),
+  popupmenu_(new QMenu(this)),
   amp_pha_(false),
   click_(geom::Vec2())
 {
   QFont fnt=font();
   fnt.setPointSize(font().pointSize()-1);
   setFont(fnt);
-  int maxw = QFontMetrics(fnt).width("(9999,9999,1) to (9999,9999,1)");
-  setMaximumWidth(maxw);
-  setMinimumWidth(maxw);
+  //int maxw = QFontMetrics(fnt).width("(9999,9999,1) to (9999,9999,1)");
+  //setMaximumWidth(maxw);
+  //setMinimumWidth(maxw);
 
   QFont fnt2(fnt);
   fnt2.setWeight(QFont::Bold);

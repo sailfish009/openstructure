@@ -89,9 +89,10 @@ mol::AtomHandleList RuleBasedBuilder::GetUnknownAtoms(mol::ResidueHandle res)
   if (!last_compound_) {
     return unknown;
   }
+  mol::AtomHandleList atoms=res.GetAtomList();
+  last_residue_=mol::ResidueHandle();
   this->ReorderAtoms(res, last_compound_);
   AtomSpecList::const_iterator j=last_compound_->GetAtomSpecs().begin();
-  mol::AtomHandleList atoms=res.GetAtomList();
   mol::AtomHandleList::iterator i=atoms.begin();
   for (mol::AtomHandleList::iterator 
        i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
@@ -120,6 +121,7 @@ void RuleBasedBuilder::FillResidueProps(mol::ResidueHandle residue)
   if (!last_compound_)
     return;
   residue.SetChemClass(last_compound_->GetChemClass());
+  residue.SetChemType(last_compound_->GetChemType());
   residue.SetOneLetterCode(last_compound_->GetOneLetterCode());
 };
 
@@ -153,6 +155,7 @@ void RuleBasedBuilder::ReorderAtoms(mol::ResidueHandle residue,
   mol::impl::AtomImplList::iterator i=impl->GetAtomList().begin();
   for (; i!=impl->GetAtomList().end(); ++i) {
     mol::impl::AtomImplPtr atom=*i;
+    atom->SetState(std::numeric_limits<unsigned int>::max());
     int index=compound->GetAtomSpecIndex(atom->GetName());
     if (index==-1) {
       if (!this->OnUnknownAtom(mol::AtomHandle(atom))) {
@@ -170,6 +173,7 @@ void RuleBasedBuilder::ReorderAtoms(mol::ResidueHandle residue,
     LOG_WARNING("residue " << residue << " doesn't look like a standard " 
                 << residue.GetKey() << " (" << compound->GetFormula() << ")");
     residue.SetChemClass(mol::ChemClass(mol::ChemClass::UNKNOWN));
+    residue.SetChemType(mol::ChemType(mol::ChemType::UNKNOWN));
     residue.SetOneLetterCode('?');
   }
 }
@@ -233,12 +237,22 @@ void RuleBasedBuilder::ConnectAtomsOfResidue(mol::ResidueHandle rh)
       const BondSpec& bond=*j;
       mol::AtomHandle a1=this->LocateAtom(atoms, bond.atom_one);
       mol::AtomHandle a2=this->LocateAtom(atoms, bond.atom_two);
-      if (a1.IsValid() && a2.IsValid() && this->IsBondFeasible(a1, a2)) {
-        if (this->GetStrictHydrogenMode() && 
-            (a1.GetElement()=="H" || a2.GetElement()=="D")) {
-          continue;
+      if (a1.IsValid() && a2.IsValid()) { 
+        if (this->GetBondFeasibilityCheck()==false) {
+          if (this->GetStrictHydrogenMode() && (a1.GetElement()=="H" || 
+                                                a2.GetElement()=="D")) {
+            continue;
+          }
+          e.Connect(a1, a2, bond.order);
+        } else { 
+          if (IsBondFeasible(a1, a2)) {
+            if (this->GetStrictHydrogenMode() && (a1.GetElement()=="H" || 
+                                                  a2.GetElement()=="D")) {
+              continue;
+            }
+            e.Connect(a1, a2, bond.order);
+          }
         }
-        e.Connect(a1, a2, bond.order);
       }
   }
   for (mol::AtomHandleList::iterator i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
@@ -255,29 +269,36 @@ void RuleBasedBuilder::ConnectResidueToNext(mol::ResidueHandle rh,
   if (!next.IsValid()) {
     return;
   }
+
   Compound::Dialect dialect=this->GetDialect()==PDB_DIALECT ? Compound::PDB : Compound::CHARMM;
+
   mol::XCSEditor e=rh.GetEntity().EditXCS(mol::BUFFERED_EDIT);
   CompoundPtr mc=compound_lib_->FindCompound(rh.GetName(), dialect);
   CompoundPtr nc=compound_lib_->FindCompound(next.GetName(), dialect);
   if (!(mc && nc))
     return;
+
   // check if both of the residues are able to form a peptide bond.
-  if (!mc->IsPeptideLinking())
-    return;
-  if (!nc->IsPeptideLinking())
-    return;
-  // If we have an OXT then there is no peptide bond connecting the two
-  // residues.
-  if (rh.FindAtom("OXT"))
-    return;
-  mol::AtomHandle c=rh.FindAtom("C");
-  mol::AtomHandle n=next.FindAtom("N");
-  // Give subclasses a chance to give us their opinions on the feasibility of
-  // the peptide bond.
-  if (c.IsValid() && n.IsValid() && this->DoesPeptideBondExist(c, n)) {
-    e.Connect(c, n, 1);
-    rh.SetIsProtein(true);
-    next.SetIsProtein(true);
+  if (mc->IsPeptideLinking() && nc->IsPeptideLinking()) {
+    // If we have an OXT then there is no peptide bond connecting the two
+    // residues.
+    if (rh.FindAtom("OXT"))
+      return;
+    mol::AtomHandle c=rh.FindAtom("C");
+    mol::AtomHandle n=next.FindAtom("N");
+    // Give subclasses a chance to give us their opinions on the feasibility of
+    // the peptide bond.
+    if (c.IsValid() && n.IsValid() && this->DoesPeptideBondExist(c, n)) {
+      e.Connect(c, n, 1);
+      rh.SetIsProtein(true);
+      next.SetIsProtein(true);
+    }
+  } else if (mc->IsNucleotideLinking() && nc->IsNucleotideLinking()) {
+    mol::AtomHandle c=rh.FindAtom("O3'");
+    mol::AtomHandle n=next.FindAtom("P");
+    if (c.IsValid() && n.IsValid() && this->IsBondFeasible(c, n)) {
+      e.Connect(c, n, 1);
+    }
   }
 }
 

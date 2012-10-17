@@ -5,7 +5,30 @@ from ost import io, seq
 import ost
 import re
 import os
+
 class AlignedPatch:
+  """
+  An aligned patch, aka. HSP
+
+  .. attribute:: aln
+
+    The local alignment. Sequence offset of both sequences in the alignment are
+    set to the starting position in the query and target sequence, respectively.
+
+    :type: :class:`~ost.seq.AlignmentHandle`
+
+  .. attribute:: bit_score
+
+    The bit score of the HSP
+
+  .. attribute:: score
+
+    The score of the HSP
+
+  .. attribute:: evalue
+
+    The E-value of the HSP
+  """
   def __init__(self, aln, bit_score, score, evalue):
     self.aln=aln
     self.bit_score=bit_score
@@ -16,16 +39,51 @@ class BlastHit:
   """
   A positive match found by BLAST.
   
-  Each blast hit consists of one or more aligned patches. 
+  Each blast hit consists of one or more HSPs, encoded by the
+  :class:`AlignedPatch` class.
   
+  .. attribute:: identifier
+
+    The identifier of the matching sequence
+
+  .. attribute:: aligned_patches
+
+    list of :class:`AlignedPatch` instances holding the actual HSPs.
   """
   def __init__(self, identifier, aligned_patches):
     self.identifier=identifier
     self.aligned_patches=aligned_patches
 
+class BlastError(RuntimeError):
+  """
+  Raised when something goes wrong during parsing/execution of the blast
+  executable.
+
+  .. attribute:: brief
+
+    Short explanation of the problem
+
+  .. attribute:: details
+
+    If set, explains in more detail what caused the error. Might be empty.
+  """
+  def __init__(self, brief, details):
+    self.brief=brief
+    self.details=details
+
+  def __str__(self):
+    if self.details:
+      return '%s\n%s' % (self.brief, self.details)
+    else:
+      return self.brief
+
 def ParseBlastOutput(string):
   """
-  Parses the blast output and returns a list of BlastHits
+  Parses the blast output and returns a list of :class:`BlastHit` instances.
+
+  :raises: :class:`BlastError` if the output could not be parsed.
+
+  This functions is only capable of dealing with the BLAST XML output.
   """
   def _GetText(node):
     rc=''
@@ -57,8 +115,7 @@ def ParseBlastOutput(string):
   try:
     doc=minidom.parseString(string)
   except Exception, e:
-    ost.LogError('Error while parsing BLAST output: %s' % str(e))
-    return None
+    raise BlastError('Error while parsing BLAST output: %s' % str(e), '')
   hits=[]
   query_id=_GetValue(doc, 'BlastOutput_query-def')
   for hit in doc.getElementsByTagName('Hit'):
@@ -68,18 +125,20 @@ def ParseBlastOutput(string):
     hits.append(BlastHit(hit_id, aligned_patches))
   return hits
 
-
-
-class BlastError(RuntimeError):
-  def __init__(self, brief, details):
-    self.brief=brief
-    self.details=details
-
-  def __str__(self):
-    if self.details:
-      return '%s\n%s' % (self.brief, self.details)
-    else:
-      return self.brief
+def BlastVersion(blast_location=None):
+  """
+  Returns the version of the BLAST executable, e.g. 2.2.24 as a string
+  """
+  blastall_exe=settings.Locate('blastall', explicit_file_name=blast_location)
+  blast_pipe=subprocess.Popen(blastall_exe, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+  lines=blast_pipe.stdout.readlines()
+  pattern=re.compile(r'blastall (\d+\.\d+\.\d+)\s+arguments:\s*')
+  for line in lines:
+    m=pattern.match(line)
+    if m:
+      return m.group(1)
+  raise IOError("could not determine blast version for '%s'" % blastall_exe)
 
 def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
          blast_location=None):
@@ -91,7 +150,8 @@ def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
   :type query: :class:`seq.ConstSequenceHandle`
   
   :param database: The filename of the sequence database. Make sure that 
-      formatdb has been run on the database and the <database>.pin file exists.
+      formatdb has been run on the database and the <database>.pin or
+      <database>.pal file exists.
   :param matrix: The substitution matrix to be used. Must be one of 'BLOSUM45',
      'BLOSUM62', 'BLOSUM80', 'PAM30', 'PAM70'.
   :param gap_open: Gap opening penalty. Note that only a subset of gap opening 
@@ -100,11 +160,17 @@ def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
   :param gap_ext: Gap extension penalty. Only a subset of gap extension 
      penalties are supported for each of the substitution matrices. Consult the 
      blast docs for more information.
+
+  :raises: :class:`~ost.settings.FileNotFound` if the BLAST executable could not 
+           be found
+  :raises: :class:`BlastError` if there was a problem during execution of BLAST.
+  :raises: :class:`ValueError` if the substitution matrix is invalid
+  :raises: :class:`IOError` if the database does not exist
   """
   subst_mats=('BLOSUM45', 'BLOSUM62', 'BLOSUM80', 'PAM30', 'PAM70',)
   if matrix not in subst_mats:
     raise ValueError('matrix must be one of %s' % ', '.join(subst_mats))
-  if not os.path.exists('%s.pin' % database):
+  if not os.path.exists('%s.pin' % database) and not os.path.exists('%s.pal' % database):
     raise IOError("Database %s does not exist" % database)
   blastall_exe=settings.Locate('blastall', explicit_file_name=blast_location)
   args=[blastall_exe, '-d', database, '-p', 'blastp', 

@@ -55,12 +55,14 @@ typedef boost::shared_ptr<MapIso> MapIsoP;
 /// \sa gfx::MapSlab
 class DLLEXPORT_OST_GFX MapIso: public GfxObj {
 public:
-  MapIso(const String& name, const img::MapHandle& mh,float level);
-  MapIso(const String& name, const img::XtalMapPtr& map, float level);
+  MapIso(const String& name, const img::MapHandle& mh,float level, uint a=0);
+  MapIso(const String& name, const img::XtalMapPtr& map, float level, uint a=0);
   
   ~MapIso();
-  virtual geom::AlignedCuboid GetBoundingBox() const;
-                             
+  
+  /// returns bounding box of iso-contour object, not overall map
+  virtual geom::AlignedCuboid GetBoundingBox(bool use_global=false) const;
+
   virtual geom::Vec3 GetCenter() const;
   
   virtual void CustomRenderGL(RenderPass pass);
@@ -208,6 +210,9 @@ private:
   float                         near_slab_;
   float                         far_slab_;
   bool                          slabbing_;
+  mutable geom::AlignedCuboid   bb_;
+  mutable bool                  recalc_bb_;
+  uint                          alg_;
 };
 
 }}

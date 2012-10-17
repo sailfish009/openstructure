@@ -19,6 +19,7 @@
 #ifndef OST_QUERY_ERROR_HH
 #define OST_QUERY_ERROR_HH
 
+#include <ost/message.hh>
 #include <ost/range.hh>
 #include <ost/mol/module_config.hh>
 
@@ -35,7 +36,7 @@ struct DLLEXPORT_OST_MOL QueryErrorDesc {
   Range       range;
 };
 
-class DLLEXPORT_OST_MOL QueryError : public std::exception {
+class DLLEXPORT_OST_MOL QueryError : public ost::Error {
 public:
   QueryError(const String& query, const QueryErrorDesc& desc) throw();    
 

@@ -1,4 +1,3 @@
-
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
@@ -44,7 +43,8 @@ CartoonRenderOptions::CartoonRenderOptions(bool force_tube):
   strand_ecc_(0.3),
   strand_profile_(1),
   strand_mode_(0),
-  color_blend_mode_(0)
+  color_blend_mode_(0),
+  twist_hack_(true)
 {}
 
 RenderMode::Type CartoonRenderOptions::GetRenderMode(){
@@ -79,6 +79,8 @@ void CartoonRenderOptions::ApplyRenderOptions(RenderOptionsPtr render_options){
   strand_ecc_=options->GetStrandEcc();
   strand_profile_=options->GetStrandProfileType();
   strand_mode_=options->GetStrandMode();
+  color_blend_mode_=options->GetColorBlendMode();
+  twist_hack_=options->GetTwistHack();
   this->NotifyStateChange();
 }
 
@@ -287,6 +289,12 @@ float CartoonRenderOptions::GetMaxRad() const{
   max_rad=std::max(max_rad,strand_width_);
   max_rad=std::max(max_rad,strand_thickness_);
   return max_rad;
+}
+
+void CartoonRenderOptions::SetTwistHack(bool f) 
+{
+  twist_hack_=f;
+  this->NotifyStateChange();
 }
 
 }} // ns

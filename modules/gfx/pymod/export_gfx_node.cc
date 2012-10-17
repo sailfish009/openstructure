@@ -21,7 +21,7 @@
 
 using namespace boost::python;
 
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 #include <ost/gfx/gfx_node.hh>
 
 
@@ -41,7 +41,7 @@ void export_GfxNode()
 
   class_<GfxNodeVector>("GfxNodeList", init<>())
     .def(vector_indexing_suite<GfxNodeVector, true>())
-    .def(ost::VectorAdditions<GfxNodeVector>())
+    .def(geom::VectorAdditions<GfxNodeVector>())
   ;
   class_<GfxNode, GfxNodeP, 
          boost::noncopyable>("GfxNode", init<const String&>())

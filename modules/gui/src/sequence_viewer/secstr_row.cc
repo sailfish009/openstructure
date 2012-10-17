@@ -98,7 +98,7 @@ void SecStrRow::DoubleClicked(int column)
   if(column>0){
     column-=1;
     const QVarLengthArray<mol::SecStructure>& sec = this->secstr_;
-    if(sec.size()>0 && column < sec.size()){
+    if(! sec.isEmpty()>0 && column < sec.size()){
       const mol::SecStructure& src_str = sec[column];
       QVarLengthArray<bool> src_type(3);
       src_type[0] = src_str.IsHelical();

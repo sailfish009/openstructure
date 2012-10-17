@@ -24,16 +24,28 @@
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 using namespace geom;
 
-BOOST_AUTO_TEST_SUITE( geom )
+BOOST_AUTO_TEST_SUITE( geom );
 
 
 BOOST_AUTO_TEST_CASE(line_init2)
 {
   Line3 line(geom::Vec2(0,0), geom::Vec2(2,0));
   BOOST_CHECK_EQUAL(geom::Length(line.GetDirection()), 1.0);
+}
+
+BOOST_AUTO_TEST_CASE(rectangle2)
+{
+  Rectangle2 rect;
+  try{
+    BOOST_CHECK_THROW(rect[2]=geom::Vec2(0,0), OutOfRangeException);
+  }catch(...)
+  {
+    BOOST_ERROR("Failed to catch OutOfRangeException");
+  }
 }
 
 BOOST_AUTO_TEST_CASE(is_on_line2)
@@ -54,4 +66,4 @@ BOOST_AUTO_TEST_CASE(is_on_line2)
   BOOST_CHECK(!IsOnLine(line, geom::Vec2(3,2.1)));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

@@ -143,7 +143,13 @@ void MAEReader::Import(mol::EntityHandle& ent)
               else if(line2=="r_m_z_coord") i_atom_zpos=pid;
               else if(line2=="s_m_pdb_residue_name") i_res_name=pid;
               else if(line2=="i_m_residue_number") i_res_num=pid;
-              else if(line2=="s_m_pdb_segment_name") i_chain_name=pid;
+              else if(line2=="s_m_chain_name") i_chain_name=pid;
+              else if(line2=="s_m_pdb_segment_name") {
+                // only use this one if s_m_chain_name is not present
+                if(i_chain_name<0) {
+                  i_chain_name=pid;
+                }
+              }
             }
           }
         }
@@ -291,7 +297,23 @@ void MAEReader::parse_and_add_atom(mol::EntityHandle ent,
 
   if(update_residue) {
     if (!(curr_residue_=curr_chain_.FindResidue(rnum))) {
-      curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
+      if(curr_chain_.GetResidueCount()>0) {
+        int loc=curr_chain_.GetResidueCount()-1;
+        for(;loc>=0;--loc) {
+          if(curr_chain_.GetResidueByIndex(loc).GetNumber()<rnum) break;
+        }
+        if(loc<0) {
+          curr_residue_=editor.InsertResidueBefore(curr_chain_,0,rnum,rkey);
+        } else {
+          curr_residue_=editor.InsertResidueAfter(curr_chain_,loc,rnum,rkey);
+        }
+        if(!curr_residue_) {
+          // this should not happen...
+          curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
+        }
+      } else {
+        curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
+      }
       assert(curr_residue_.IsValid());
       LOG_TRACE(" new residue " << curr_residue_);
       ++residue_count_;

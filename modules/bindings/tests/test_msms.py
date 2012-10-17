@@ -42,7 +42,5 @@ if __name__ == "__main__":
   version = msms.GetVersion(msms_exe=None, msms_env='MSMSSERVER')
   if version!=VERSION_REQUIRED:
     print "MSMS version (%s) does not match required version %s: ignoring unit tests"%(version, VERSION_REQUIRED)
-  try:
-    unittest.main()
-  except Exception, e:
-    print e
+  from ost import testutils
+  testutils.RunTests()

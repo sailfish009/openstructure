@@ -66,16 +66,14 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_handle_ov,
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_view_ov,
                                 save_ent_view, 2, 3)
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(save_charmm_trj_ov,
-                                SaveCHARMMTraj, 3, 4)
-
 }
 
 void export_pdb_io();
+void export_mmcif_io();
 #if OST_IMG_ENABLED
 void export_map_io();
 #endif
-BOOST_PYTHON_MODULE(_io)
+BOOST_PYTHON_MODULE(_ost_io)
 {
   class_<IOManager, boost::noncopyable>("IOManager", no_init)
   ;
@@ -111,13 +109,17 @@ BOOST_PYTHON_MODULE(_io)
 
   def("LoadCRD", &LoadCRD);
   def("LoadCHARMMTraj_", &LoadCHARMMTraj, (arg("ent"), arg("trj_filename"), 
-      arg("stride")=1, arg("lazy_load")=false));
-  def("SaveCHARMMTraj",SaveCHARMMTraj,save_charmm_trj_ov());
-
+                                           arg("stride")=1, arg("lazy_load")=false,
+                                           arg("detect_swap")=true,arg("swap_bytes")=false))
+;
   def("LoadMAE", &LoadMAE);
 
   export_pdb_io();
+  export_mmcif_io();
 #if OST_IMG_ENABLED  
   export_map_io();
 #endif
+  def("SaveCHARMMTraj", &SaveCHARMMTraj, 
+      (arg("traj"), arg("pdb_filename"), arg("dcd_filename"), arg("stride")=1, 
+       arg("profile")=IOProfile()));
 }

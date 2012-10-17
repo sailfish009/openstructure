@@ -37,7 +37,7 @@ TraceRenderer::TraceRenderer(BackboneTrace* trace):
 
 void TraceRenderer::PrepareRendering() 
 {
-  TraceRendererBase::PrepareRendering();
+  TraceRendererBase::PrepareRendering(false);
   va_.Clear();
   this->PrepareRendering(trace_subset_, va_, false);
   sel_va_.Clear();
@@ -64,7 +64,7 @@ void TraceRenderer::PrepareRendering(BackboneTrace& trace_subset,
         const NodeEntryList& nl=trace_subset.GetList(node_list);
         for(unsigned int i=0;i<nl.size();++i) {
           mol::AtomHandle ah=nl[i].atom;
-          if(sel_.FindAtom(ah).IsValid()) {
+          if(sel_.ViewForHandle(ah).IsValid()) {
             geom::Vec3 apos = ah.GetPos();
             va.AddSphere(SpherePrim(apos,
                                     options_->GetTubeRadius()+0.05,

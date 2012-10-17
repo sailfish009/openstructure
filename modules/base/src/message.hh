@@ -20,25 +20,21 @@
 /*
   messages and logs
 
-  Authors: Ansgar Philippsen, Andteas Schenk
+  Authors: Ansgar Philippsen, Andreas Schenk
 */
 
 #ifndef OST_MESSAGE_HH
 #define OST_MESSAGE_HH
 
-#include <exception>
+#include <stdexcept>
 #include <ost/module_config.hh>
 
 namespace ost {
 
 
-class DLLEXPORT Error: virtual public std::exception {
+class DLLEXPORT Error: public std::runtime_error {
 public:
   Error(const String& m);
-  ~Error() throw();
-  virtual const char* what() const throw();
-protected:
-  String mesg_;
 };
 
 } // namespace

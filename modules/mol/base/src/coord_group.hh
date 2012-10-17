@@ -25,9 +25,13 @@
 
 #include <vector>
 #include <boost/shared_array.hpp>
-
 #include "atom_handle.hh"
 #include "coord_source.hh"
+
+namespace geom {
+  // we should really have fw headers...
+  class Transform;
+}
 
 namespace ost { namespace mol {
 
@@ -36,6 +40,8 @@ class DLLEXPORT_OST_MOL CoordGroupHandle {
 public:
   /// \brief create empty, invalid handle
   CoordGroupHandle();
+  /// \brief used internally
+  CoordGroupHandle(CoordSourcePtr source);
 
   /// \brief return trajectories entity handle
   EntityHandle GetEntity() const;
@@ -49,10 +55,25 @@ public:
   /// \brief number of frames
   uint GetFrameCount() const;
 
+  /// \brief time in ps between frames, default 0.0
+  float GetDelta() const;
+
+  /// \brief set time between each frame in ps
+  void SetDelta(float d);
+
+  /// \brief start time in ps, default 0.0
+  float GetStartTime() const;
+
+  /// \rbrief set start time in ps
+  void SetStartTime(float t);
+
   /// \brief assign positions to the given frame - order and count must match 
   ///      initial atomlist
   void SetFramePositions(uint frame, const std::vector<geom::Vec3>& clist);
 
+  /// \brief get the positions of all the atoms in the given frame
+  geom::Vec3List GetFramePositions(uint frame);  
+  
   /// \brief copy atom positions of given frame to stored atoms in entity
   void CopyFrame(uint frame);
   
@@ -65,8 +86,10 @@ public:
   void Capture(uint frame);
   
   /// \brief add frame 
-  void AddFrame(const std::vector<geom::Vec3>& clist);
-
+  //void AddFrame(const std::vector<geom::Vec3>& clist);
+  void AddFrame(const geom::Vec3List& clist);
+  void AddFrame(const geom::Vec3List& clist,const geom::Vec3& cell_size,const geom::Vec3& cell_angles);
+  
   void AddFrames(const CoordGroupHandle& cg);
   /// \brief set an indidivial atom position in the given frame
   void SetAtomPos(uint frame, AtomHandle atom, const geom::Vec3& pos);
@@ -82,15 +105,18 @@ public:
   
   AtomHandleList GetAtomList() const;
   CoordFramePtr GetFrame(uint frame) const;
+  CoordFrame GetFrame2(uint frame);
   
   /// \brief return a filtered coord group, containing only the atoms in the 
   ///     view
-  CoordGroupHandle Filter(const EntityView& selected) const;
-  
-  CoordGroupHandle(CoordSourcePtr source);
+  CoordGroupHandle Filter(const EntityView& selected,int first=0,int last=-1) const;
+
+  /// \brief apply in-place transform to each coordinate in each frame
+  void ApplyTransform(const geom::Transform& tf);
+
+
 private:
   void CheckValidity() const;
-
   CoordSourcePtr source_;
 };
 

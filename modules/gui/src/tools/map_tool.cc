@@ -110,7 +110,7 @@ void MapTool::MouseMove(const MouseEvent& event)
             mi->SetVisibleExtent(new_ext);
           }
         } else if(gfx::MapSlab* ms = dynamic_cast<gfx::MapSlab*>(np.get())) {
-          mol::Transform tf = gfx::Scene::Instance().GetTransform();
+          geom::Transform tf = gfx::Scene::Instance().GetTransform();
           geom::Plane plane = ms->GetPlane();
           if(event.GetButtons()==MouseEvent::LeftButton) {
             if (event.IsShiftPressed()) {

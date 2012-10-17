@@ -19,7 +19,6 @@
 #ifndef OST_IO_ENTITY_IO_PLUGIN_MAE_H
 #define OST_IO_ENTITY_IO_PLUGIN_MAE_H
 
-
 #include <ost/mol/entity_handle.hh>
 #include <ost/mol/chain_handle.hh>
 #include <ost/mol/residue_handle.hh>

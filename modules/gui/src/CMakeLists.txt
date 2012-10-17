@@ -98,6 +98,7 @@ log_reader.hh
 )
 
 if (ENABLE_SPNAV)
+include_directories(${SPNAV_INCLUDE_DIR})
 set(OST_GUI_INPUT_HEADERS
 spnav_input.hh
   IN_DIR input
@@ -171,9 +172,9 @@ gl_win.hh
 scene_menu.hh
 gosty_app.hh
 admin.hh
+module_config.hh
 main.hh
 main_area.hh
-module_config.hh
 perspective.hh
 remote_site_loader.hh
 scene_selection.hh
@@ -389,6 +390,7 @@ tools/tool_bar.hh
 tools/tool_option.hh
 tools/tool_manager.hh
 tools/tool_options_widget.hh
+tools/measure_tool.hh
 tools/tool_options_win.hh
 )
 if (ENABLE_IMG)
@@ -427,20 +429,30 @@ if (ENABLE_IMG)
 endif()
 
 if (ENABLE_SPNAV)
+  set(spnav_enabled 1)
   list(APPEND OST_GUI_SOURCES
       input/spnav_input.cc
   )
   list(APPEND HEADERS_TO_BE_MOCCED
       input/spnav_input.hh
   )
+else()
+  set(spnav_enabled 0)
 endif()
+
+set(config_hh_generator "CMake")
+set(MODULE_CONFIG_HH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/module_config.hh")
+configure_file(module_config.hh.in ${MODULE_CONFIG_HH_FILE})
+# the resulting file, module_config.hh, is already included in OST_GUI_HEADERS
+
 if (APPLE)
   set(ADDITIONAL_LIBRARIES "-framework Security")
 endif()
 set(QT_USE_QTOPENGL 1)
 set(QT_USE_QTNETWORK 1)
 include(${QT_USE_FILE})
-qt4_wrap_cpp(OST_GUI_MOCS "${HEADERS_TO_BE_MOCCED}")
+qt4_wrap_cpp(OST_GUI_MOCS "${HEADERS_TO_BE_MOCCED}" 
+             OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
 module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
        HEADERS ${OST_GUI_TOOLS_HEADERS} IN_DIR tools
                ${OST_GUI_SEQUENCE_VIEWER_HEADERS} IN_DIR sequence_viewer
@@ -451,7 +463,7 @@ module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
                ${OST_GUI_INPUT_HEADERS}
                ${OST_GUI_DATA_VIEWER_HEADERS}
                ${OST_GUI_HEADERS}
-       DEPENDS_ON gfx io mol_alg seq_alg
+       DEPENDS_ON ost_gfx ost_io ost_mol_alg ost_seq_alg
        LINK ${QT_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES}
             ${SPNAV_LIBRARIES}
         NO_STATIC)
@@ -462,7 +474,8 @@ endif()
 
 include_directories(${PYTHON_INCLUDE_PATH})
 qt4_add_resources(OST_QT_RESOURCE dngr.qrc)
-qt4_wrap_cpp(OST_GOSTY_MOC "gosty.hh")
+qt4_wrap_cpp(OST_GOSTY_MOC "gosty.hh"
+             OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
 # if someone has ANY idea why windows already has the boost program options
 # symbols defined, please talk to Marco and Juergen. You will be rewarded with
 # dogfood for a lifetime!
@@ -470,5 +483,13 @@ if (NOT WIN32)
   set(LINK LINK ${BOOST_PROGRAM_OPTIONS_LIBRARIES})
 endif()
 
-executable(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC} ${OST_QT_RESOURCE} 
-           DEPENDS_ON gui ${LINK})
+executable_libexec(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC} ${OST_QT_RESOURCE} 
+           DEPENDS_ON ost_gui ${LINK})
+           
+file(GLOB MOC_CXX_FILES moc_*.cxx)
+
+if (MOC_CXX_FILES)
+  set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
+                           "${MOC_CXX_FILES}")
+endif()
+

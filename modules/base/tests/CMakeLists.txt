@@ -5,8 +5,11 @@ set(OST_BASE_UNIT_TESTS
   test_stutil.py
   test_symop.cc
   test_unit_cell.cc
+  test_table.py
+  test_log.py
   tests.cc
 )
 
-ost_unittest(base "${OST_BASE_UNIT_TESTS}")
-target_link_libraries(base_tests ost_mol)
+ost_unittest(MODULE base 
+             SOURCES "${OST_BASE_UNIT_TESTS}"
+             LINK ost_mol)

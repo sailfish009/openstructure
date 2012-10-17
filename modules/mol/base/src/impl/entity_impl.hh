@@ -31,7 +31,8 @@
 
 #include <ost/mol/entity_view.hh>
 #include <ost/unit_cell.hh>
-#include <ost/mol/transform.hh>
+#include <ost/geom/transform.hh>
+
 #include <ost/mol/residue_prop.hh>
 #include <ost/mol/impl/atom_impl_fw.hh>
 #include <ost/mol/impl/residue_impl_fw.hh>
@@ -93,7 +94,6 @@ public:
   Real GetMass() const;
   geom::Vec3 GetCenterOfMass() const;
   geom::Vec3 GetCenterOfAtoms() const;
-  
   /// \brief returns the axis-aligned bounding box of the entity
   geom::AlignedCuboid GetBounds() const;
   
@@ -111,7 +111,9 @@ public:
   /// \brief insert a new chain based on parameters of the given chain
   /// 
   /// The chain will have no residues and atoms
-  ChainImplPtr InsertChain(const ChainImplPtr& chain);
+  // force deep to be set explicitely, because it is better than implicit
+  // (and since we are on the impl level interface consistency isn't that critical)
+  ChainImplPtr InsertChain(const ChainImplPtr& chain, bool deep);
   ConnectorImplP Connect(const AtomImplPtr& first, const AtomImplPtr& second,
                          Real len, Real theta, Real phi,
                          unsigned char bond_order);
@@ -145,9 +147,12 @@ public:
   void UpdateFromXCS();
 
   void Apply(EntityVisitor& v);
-  void ApplyTransform(const geom::Mat4 transfmat);
+  void ApplyTransform(const geom::Transform& t);
 
-  void SetTransform(const geom::Mat4 transfmat);
+  void SetTransform(const geom::Transform& t);
+  const geom::Transform& GetTransform() const {return transform_;}
+  bool HasTransform() const {return has_transform_;}
+  void ClearTransform();
 
   void AttachObserver(const EntityObserverPtr& o);
   void DetachObserver(const EntityObserverPtr& o);
@@ -157,9 +162,15 @@ public:
   void UpdateOrganizer();
   
   AtomImplList FindWithin(const geom::Vec3& pos, Real radius) const;
+  // use query flag defaults
+  EntityView Select(const EntityHandle& h, const Query& q) const;
+  // override query flag defaults with given flags
   EntityView Select(const EntityHandle& h, const Query& q, 
                     QueryFlags flags) const;
   EntityView CreateFullView(const EntityHandle& h) const;
+  void SetDefaultQueryFlags(QueryFlags f) {default_query_flags_=f;}
+  QueryFlags GetDefaultQueryFlags() const {return default_query_flags_;}
+
 
   /// Get chain by name. Returns an invalid ChainImplPtr if no chain with the
   /// given name exists.
@@ -193,14 +204,6 @@ public:
 
   //! Get number of chains
   int GetChainCount() const;
-
-  //! Get transformation matrix
-  const geom::Mat4& GetTransfMatrix() const;
-
-  //! Get inverse transformation matrix
-  const geom::Mat4& GetInvTransfMatrix() const;
-
-  bool IsTransfIdentity() const;
 
   const ChainImplList& GetChainList() const { return chain_list_; }
 
@@ -252,6 +255,9 @@ public:
   
   void SetUnitCell(const UnitCell& unit_cell) { unit_cell_=unit_cell; }
   
+
+  void RenumberAllResidues(int start, bool keep_spacing);
+
 private:
   void DoCopy(EntityImplPtr dest);
   
@@ -264,10 +270,8 @@ private:
   ConnectorImplMap connector_map_;
   TorsionImplMap torsion_map_;
 
-  geom::Mat4 transformation_matrix_;
-  geom::Mat4 inverse_transformation_matrix_;
-  bool identity_transf_;
-
+  geom::Transform transform_;
+  bool has_transform_;
 
   SpatialAtomOrganizer atom_organizer_;
   FragmentImplList fragment_list_;
@@ -279,6 +283,8 @@ private:
   String name_;
   UnitCell unit_cell_;
   unsigned long next_index_;
+
+  QueryFlags default_query_flags_;
 
   template <bool always_true>
   EntityView do_selection(const EntityHandle&, const Query&, QueryFlags) const;

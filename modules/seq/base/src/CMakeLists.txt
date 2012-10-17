@@ -29,8 +29,13 @@ alignment_handle.cc
 sequence_op.cc
 views_from_sequences.cc
 )
-module(NAME seq SOURCES ${OST_SEQ_SOURCES} 
-       HEADERS ${OST_SEQ_IMPL_HEADERS} IN_DIR impl
-               ${OST_SEQ_HEADERS}
-       DEPENDS_ON info mol)
 
+if (ENABLE_INFO)
+  set(INFO_DEPS ost_info)
+endif()
+
+
+module(NAME seq SOURCES ${OST_SEQ_SOURCES} 
+         HEADERS ${OST_SEQ_IMPL_HEADERS} IN_DIR impl
+                 ${OST_SEQ_HEADERS}
+         DEPENDS_ON ost_mol ${INFO_DEPS})

@@ -200,7 +200,7 @@ The definition of the actual unit tests is done in separate .cc files. Create th
 
   BOOST_AUTO_TEST_SUITE_END()
   
-We again have to define the BOOST_TEST_DYN_LINK macro before including the bosot unit test headers. This will tell the boost unit test libraries that we intend to use dynamic linking. Then we include the functions and classes we would like to write unit tests for. In this file, all the normal Boost Test Library macros and functions can be used. (For example `BOOST_CHECK`, `BOOST_FAIL`, etc.)
+We again have to define the BOOST_TEST_DYN_LINK macro before including the boost unit test headers. This will tell the boost unit test libraries that we intend to use dynamic linking. Then we include the functions and classes we would like to write unit tests for. In this file, all the normal Boost Test Library macros and functions can be used. (For example `BOOST_CHECK`, `BOOST_FAIL`, etc.)
 
 Here is finally the build script skeleton that needs to be put into 
 `mod/tests/`:
@@ -261,7 +261,7 @@ The `mod/pymod` directory must obviously contain a `CMakeLists.txt` file:
   pymod(NAME mod OUTPUT_DIR ost/mod 
         CPP ${OST_MOD_PYMOD_SOURCES} PY __init__.py)
   
-The directory should also contain an `__init.py__` file with the
+The directory should also contain an `__init__.py` file with the
 following content:
 
 .. code-block:: python
@@ -269,7 +269,7 @@ following content:
   from _mod import *
     
 In case one wants to implement Python-only functionality for the new module, any
-number of function definitions can be added to the `__init.py__` file.
+number of function definitions can be added to the `__init__.py` file.
 
 That's it!. The next time the OpenStructure project is compiled, the new module 
 will be built and made available at both the C++ and the Python level.

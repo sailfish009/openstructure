@@ -22,11 +22,13 @@
 
 #include "sdf_writer.hh"
 
+#include <ost/boost_filesystem_helper.hh>
 #include <ost/mol/atom_view.hh>
 #include <ost/mol/residue_view.hh>
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/bond_handle.hh>
 #include <boost/regex.hpp>
+#include <boost/bind.hpp>
 
 namespace ost { namespace io {
 
@@ -38,7 +40,7 @@ namespace {
     public:
       SDFAtomWriter(std::ostream& ostream, std::map<long, int>& atom_indices)
       : ostr_(ostream), atom_indices_(atom_indices), counter_(0) {
-  atom_indices_.clear();
+        atom_indices_.clear();
       }
     private:
     public:
@@ -60,23 +62,61 @@ namespace {
 
   class SDFBondWriter : public mol::EntityViewVisitor {
   public:
-    SDFBondWriter(std::ostream& ostream, std::map<long, int>& atom_indices)
+    SDFBondWriter(std::ostream& ostream,
+                  const std::map<long, int>& atom_indices)
       : ostr_(ostream), atom_indices_(atom_indices), counter_(0) {
     }
   private:
+    // compare two atoms according to their indices (used for sorting)
+    bool CompareAtomIdx(const mol::AtomView& first,
+                        const mol::AtomView& second) {
+      std::map<long, int>::const_iterator aidx_first(
+                                  atom_indices_.find(first.GetHashCode()));
+      std::map<long, int>::const_iterator aidx_second(
+                                  atom_indices_.find(second.GetHashCode()));
+
+      if(aidx_first==atom_indices_.end() || aidx_second==atom_indices_.end()) {
+        throw IOException("Cannot write bond: atom idx not found for sorting");
+      }
+      return (aidx_first->second < aidx_second->second);
+    }
+
   public:
     virtual bool VisitAtom(const mol::AtomView& atom) {
-      counter_++;
+      ++counter_; // current atom index
+
+      // get all neighboring atoms and sort them according to their atom index
       mol::AtomViewList atoms = atom.GetBondPartners();
-      mol::AtomViewList::iterator atom_iter = atoms.begin();
-      for(; atom_iter != atoms.end(); ++atom_iter) {
-        int atom_index = atom_indices_.find((*atom_iter).GetHashCode())->second;
-        if(atom_index > counter_) {
-          int type = 1;
-          mol::BondHandle bond = atom.GetHandle().FindBondToAtom(atom_iter->GetHandle());
-          if(bond.IsValid()) type = bond.GetBondOrder();
+      std::sort(atoms.begin(), atoms.end(), bind(&SDFBondWriter::CompareAtomIdx,
+                                                 this, _1, _2));
+
+      // iterate all neighboring atoms and print bonds to all atoms with index
+      // larger than current atom index
+      for(mol::AtomViewList::iterator atom_iter = atoms.begin();
+          atom_iter != atoms.end(); ++atom_iter) {
+        std::map<long, int>::const_iterator aidx(
+                               atom_indices_.find((*atom_iter).GetHashCode()));
+
+        // check if index was found
+        if(aidx==atom_indices_.end()) {
+          throw IOException("Cannot write bond between " +
+                            atom.GetQualifiedName() + " and " +
+                            atom_iter->GetQualifiedName() +
+                            ": atom index not found");
+        }
+
+        // only print bonds to atoms with larger index than current index
+        if(aidx->second > counter_) {
+          mol::BondHandle bond(atom.GetHandle().FindBondToAtom(
+                                                   atom_iter->GetHandle()));
+          if(!bond.IsValid()) {
+            throw IOException("Bond is invalid between " +
+                              atom.GetQualifiedName() + " and " +
+                              atom_iter->GetQualifiedName());
+          }
+          int type = bond.GetBondOrder();
           ostr_ << format("%3i") % counter_
-                << format("%3i") % atom_index
+                << format("%3i") % aidx->second
                 << format("%3i") % type
                 << "  0  0  0"
                 << std::endl;
@@ -87,34 +127,35 @@ namespace {
 
   private:
     std::ostream&      ostr_;
-    std::map<long, int>& atom_indices_;
+    const std::map<long, int>& atom_indices_;
     int counter_;
   };
 }
 
 SDFWriter::SDFWriter(std::ostream& ostream)
-  : outfile_(), ostr_(ostream), counter_(0) {
+  : outfile_(), ostr_(ostream), counter_(0), atom_indices_() {
 }
 
 SDFWriter::SDFWriter(const String& filename)
-  : outfile_(filename.c_str()), ostr_(outfile_), counter_(0) {
+  : outfile_(filename.c_str()), ostr_(outfile_), counter_(0), atom_indices_() {
 }
 
 SDFWriter::SDFWriter(const boost::filesystem::path& filename): 
-#if BOOST_FILESYSTEM_VERSION==3
-  outfile_(filename.filename().string().c_str()), 
-#else
-  outfile_(filename.file_string().c_str()), 
-#endif
-  ostr_(outfile_), counter_(0) {
-}
+  outfile_(BFPathToString(filename).c_str()),
+  ostr_(outfile_), counter_(0), atom_indices_() {}
 
 void SDFWriter::Write(const mol::EntityView& ent) {
+  if (!ostr_) {
+    throw IOException("Can't write SDF file. Bad output stream");
+  }
   mol::EntityView non_const_view = ent;
   non_const_view.Apply(*this);
 }
 
 void SDFWriter::Write(const mol::EntityHandle& ent) {
+  if (!ostr_) {
+    throw IOException("Can't write SDF file. Bad output stream");
+  }
   mol::EntityView non_const_view = ent.CreateFullView();
   non_const_view.Apply(*this);
 }

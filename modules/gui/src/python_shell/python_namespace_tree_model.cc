@@ -19,7 +19,7 @@
 #include "python_interpreter.hh"
 #include "python_namespace_tree_model.hh"
 #include "python_namespace_tree_item.hh"
-#include <QDebug>
+
 namespace ost{namespace gui{
 
 PythonNamespaceTreeModel::PythonNamespaceTreeModel():

@@ -43,7 +43,7 @@ public:
   void AdvanceProgress(const void* process,unsigned long step=1);
   Real GetProgress();
   void AddCallback(void(*fpt)(void)){function_pointer_=fpt;}
-  bool IsActive(){return processes_.size()>0;}
+  bool IsActive(){return ! processes_.empty();}
 private:
   Progress();
   Real progress_;

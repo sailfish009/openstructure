@@ -19,6 +19,9 @@
 #include "gradient.hh"
 #include <iostream>
 #include <vector>
+#include <algorithm>
+
+#include <ost/log.hh>
 
 #include <ost/info/info.hh>
 #include <ost/info/info_fw.hh>
@@ -28,13 +31,18 @@
 namespace ost { namespace gfx {
 
 
-Gradient::Gradient() 
-{
-}
+Gradient::Gradient():
+  stops_(),
+  hsv_mode_(false)
+{}
 
 Gradient::Gradient(const String& name)
 {
   Gradient gradient = GradientManager::Instance().GetGradient(name);
+  // why doesn't this work:
+  //  stops_=gradient.stops_
+  // or even better
+  //  *this = gradient
   StopList stops = gradient.GetStops();
   for(unsigned int i = 0; i < stops.size(); i++){
     Stop stop = stops[i];
@@ -55,44 +63,61 @@ void Gradient::SetColorAt(float t, const Color& c)
 
 Color Gradient::GetColorAt(float t) const
 {
-  if (stops_.empty())
-    throw Error("Can not calculate color with 0 Stops set!");
+  if (stops_.empty()) {
+    return Color();
+  } else if(stops_.size()==1) {
+    return stops_[0].color;
+  }
   
   uint c=0;
-  while (t>=stops_[c].t && c<stops_.size()) {
+  while (c<stops_.size() && t>=stops_[c].t) {
     ++c;
   }
   if (c==0) {
     return stops_.front().color;
-  }
-  if (c==stops_.size()) {
+  } else if (c==stops_.size()) {
     return stops_.back().color;
   }
-  float d=stops_[c].t-stops_[c-1].t;
-  float tt=0.0;
-  if (d>0.0001) {
-    tt=(t-stops_[c-1].t)/d;
-  } 
-  return stops_[c-1].color*(1.0-tt)+stops_[c].color*tt;
+  float d = stops_[c].t-stops_[c-1].t;
+  float tt = d>0.001  ? (t-stops_[c-1].t)/d : 0.0;
+  if(hsv_mode_) {
+    geom::Vec4 v=stops_[c-1].color.GetHSVA()*(1.0-tt)+stops_[c].color.GetHSVA()*tt;
+    return HSVA(v[0],v[1],v[2],v[3]);
+  } else {
+    return stops_[c-1].color*(1.0-tt)+stops_[c].color*tt;
+  }
 }
 
-void Gradient::GradientToInfo(info::InfoGroup& group) const{
+void Gradient::GradientToInfo(info::InfoGroup& group) const
+{
   std::ostringstream ss;
 
   ss << stops_.size() << "\n";
 
-  for( std::vector<Stop>::size_type i = 0; i < stops_.size(); i++ ) {
+  for( StopList::size_type i = 0; i < stops_.size(); i++ ) {
     ss << stops_[i].t << "\t" << stops_[i].color.Red() << "\t" << stops_[i].color.Green() << "\t" << stops_[i].color.Blue() << "\t" << stops_[i].color.Alpha() << "\n";
   }
   group.SetTextData(ss.str());
+  group.SetAttribute("hsv_mode",hsv_mode_? "1" : "0");
 }
 
-StopList Gradient::GetStops() const{
+Gradient::StopList Gradient::GetStops() const{
 	return stops_;
 }
 
-gfx::Gradient Gradient::GradientFromInfo(const info::InfoGroup& group){
+Gradient Gradient::GradientFromInfo(const info::InfoGroup& group)
+{
   std::istringstream ss(group.GetTextData());
+  bool hsv_color=false;
+  if(group.HasAttribute("hsv_color")) {
+    String hsv_color_s = group.GetAttribute("hsv_color");
+    std::transform(hsv_color_s.begin(), hsv_color_s.end(), hsv_color_s.begin(), ::tolower);
+    if(hsv_color_s=="0" || hsv_color_s=="false" || hsv_color_s=="no" || hsv_color_s=="off") {
+      hsv_color=false;
+    } else {
+      hsv_color=true;
+    }
+  }
   Gradient grad;
 
   StopList::size_type size = 0;
@@ -100,10 +125,20 @@ gfx::Gradient Gradient::GradientFromInfo(const info::InfoGroup& group){
   float t, r, g, b, a;
   for( StopList::size_type i = 0; i < size; i++ ) {
     ss >> t >> r >> g >> b >> a;
-    Color c = Color(r,g,b,a);
+    Color c = hsv_color ? HSVA(r,g,b,a) : RGBA(r,g,b,a);
     grad.SetColorAt(t, c);
   }
 
+  if(group.HasAttribute("hsv_mode")) {
+    String hsv_mode_s = group.GetAttribute("hsv_mode");
+    std::transform(hsv_mode_s.begin(), hsv_mode_s.end(), hsv_mode_s.begin(), ::tolower);
+    if(hsv_mode_s=="0" || hsv_mode_s=="false" || hsv_mode_s=="no" || hsv_mode_s=="off") {
+      grad.SetHSVMode(false);
+    } else {
+      grad.SetHSVMode(true);
+    }
+  }
   return grad;
 }
+
 }}

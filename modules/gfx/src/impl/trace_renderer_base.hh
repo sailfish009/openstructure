@@ -43,7 +43,7 @@ public:
   
   virtual geom::AlignedCuboid GetBoundingBox() const;  
   
-  virtual void PrepareRendering();
+  virtual void PrepareRendering(bool twist_hack);
   virtual bool HasDataToRender() const;
   virtual void UpdateViews();  
   virtual void Apply(const gfx::ByElementColorOp& op);

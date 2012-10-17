@@ -34,7 +34,7 @@ namespace ost { namespace img { namespace image_state {
 
 /*
   one-time definition of the constructor adapters, allowing
-  zero to 10 ctor parameters to be automagically used. There
+  zero to 12 ctor parameters to be automagically used. There
   is probably a recursive way to do this more elegantly...
 
   this version includes a call to a base class to allow a name
@@ -52,14 +52,14 @@ namespace ost { namespace img { namespace image_state {
   template <class P0,                            \
             class P1>                            \
   CLASS (const P0& p0,                           \
-	 const P1& p1):                          \
+         const P1& p1):                          \
     FNC(p0,p1), BASE (FNC::GetAlgorithmName()) {}                                \
   /* 3 params */                                 \
   template <class P0,                            \
             class P1,                            \
             class P2>                            \
   CLASS (const P0& p0,                           \
-	 const P1& p1,                           \
+         const P1& p1,                           \
          const P2& p2):                          \
     FNC(p0,p1,p2), BASE (FNC::GetAlgorithmName()) {}                             \
   /* 4 params */                                 \
@@ -68,7 +68,7 @@ namespace ost { namespace img { namespace image_state {
             class P2,                            \
             class P3>                            \
   CLASS (const P0& p0,                           \
-	 const P1& p1,                           \
+         const P1& p1,                           \
          const P2& p2,                           \
          const P3& p3):                          \
     FNC(p0,p1,p2,p3), BASE (FNC::GetAlgorithmName()) {}                          \
@@ -79,7 +79,7 @@ namespace ost { namespace img { namespace image_state {
             class P3,                            \
             class P4>                            \
   CLASS (const P0& p0,                           \
-	 const P1& p1,                           \
+         const P1& p1,                           \
          const P2& p2,                           \
          const P3& p3,                           \
          const P4& p4):                          \
@@ -92,7 +92,7 @@ namespace ost { namespace img { namespace image_state {
             class P4,                            \
             class P5>                            \
   CLASS (const P0& p0,                           \
-	 const P1& p1,                           \
+         const P1& p1,                           \
          const P2& p2,                           \
          const P3& p3,                           \
          const P4& p4,                           \
@@ -107,7 +107,7 @@ namespace ost { namespace img { namespace image_state {
             class P5,                            \
             class P6>                            \
   CLASS (const P0& p0,                           \
-	 const P1& p1,                           \
+         const P1& p1,                           \
          const P2& p2,                           \
          const P3& p3,                           \
          const P4& p4,                           \
@@ -124,7 +124,7 @@ namespace ost { namespace img { namespace image_state {
             class P6,                            \
             class P7>                            \
   CLASS (const P0& p0,                           \
-	 const P1& p1,                           \
+         const P1& p1,                           \
          const P2& p2,                           \
          const P3& p3,                           \
          const P4& p4,                           \
@@ -143,7 +143,7 @@ namespace ost { namespace img { namespace image_state {
             class P7,                            \
             class P8>                            \
   CLASS (const P0& p0,                           \
-	 const P1& p1,                           \
+         const P1& p1,                           \
          const P2& p2,                           \
          const P3& p3,                           \
          const P4& p4,                           \
@@ -164,7 +164,7 @@ namespace ost { namespace img { namespace image_state {
             class P8,                            \
             class P9>                            \
   CLASS (const P0& p0,                           \
-	 const P1& p1,                           \
+         const P1& p1,                           \
          const P2& p2,                           \
          const P3& p3,                           \
          const P4& p4,                           \
@@ -187,7 +187,7 @@ namespace ost { namespace img { namespace image_state {
             class P9,                            \
             class PA>                            \
   CLASS (const P0& p0,                           \
-	 const P1& p1,                           \
+         const P1& p1,                           \
          const P2& p2,                           \
          const P3& p3,                           \
          const P4& p4,                           \
@@ -212,7 +212,7 @@ namespace ost { namespace img { namespace image_state {
             class PA,                            \
             class PB>                            \
   CLASS (const P0& p0,                           \
-	 const P1& p1,                           \
+         const P1& p1,                           \
          const P2& p2,                           \
          const P3& p3,                           \
          const P4& p4,                           \
@@ -221,8 +221,8 @@ namespace ost { namespace img { namespace image_state {
          const P7& p7,                           \
          const P8& p8,                           \
          const P9& p9,                           \
-         const P9& pa,                           \
-         const PA& pb):                          \
+         const PA& pa,                           \
+         const PB& pb):                          \
     FNC(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,pa,pb), BASE (FNC::GetAlgorithmName()) {}
 
 
@@ -356,8 +356,8 @@ private:
 */
 template <class FNC>
 class TEMPLATE_EXPORT ImageStateConstModIPAlgorithm: public FNC, 
-				     public ConstModIPAlgorithm,
-				     public ImageStateConstModIPVisitorBase {
+             public ConstModIPAlgorithm,
+             public ImageStateConstModIPVisitorBase {
 public:
   IMAGE_STATE_VISITOR_CTOR_ADAPTERS(ImageStateConstModIPAlgorithm, ConstModIPAlgorithm)
 
@@ -409,8 +409,8 @@ private:
 //! out-of-place modifying image state const visitor plus op algorithm
 template <class FNC>
 class TEMPLATE_EXPORT ImageStateConstModOPAlgorithm: public FNC, 
-				     public ConstModOPAlgorithm, 
-				     public ImageStateConstModOPVisitorBase {
+                                                     public ConstModOPAlgorithm,
+                                                     public ImageStateConstModOPVisitorBase {
 public:
 
   IMAGE_STATE_VISITOR_CTOR_ADAPTERS(ImageStateConstModOPAlgorithm, ConstModOPAlgorithm)

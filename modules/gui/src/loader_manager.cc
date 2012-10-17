@@ -30,12 +30,13 @@
 
 namespace ost { namespace gui {
 
-LoaderManager::LoaderManager()
+LoaderManager::LoaderManager():
+  site_loaders_(),
+  site_actions_(new QActionGroup(GostyApp::Instance()->GetPerspective()->GetMenuBar())),
+  default_site_()
+
 {
-  QMenuBar* menu_bar = GostyApp::Instance()->GetPerspective()->GetMenuBar();
-  site_actions_=new QActionGroup(menu_bar);
   site_actions_->setExclusive(true);
-  site_menu_=new QMenu();
 }
 
 void LoaderManager::AddRemoteSiteLoader(const QString& ident, RemoteSiteLoader* site_loader)
@@ -48,7 +49,6 @@ void LoaderManager::AddRemoteSiteLoader(const QString& ident, RemoteSiteLoader* 
   if(site_actions_->checkedAction()==NULL){
     action->setChecked(true);
   }
-  site_menu_->addAction(action);
 }
 
 void LoaderManager::RemoveRemoteSiteLoader(const QString& ident)
@@ -65,7 +65,6 @@ void LoaderManager::RemoveRemoteSiteLoader(const QString& ident)
   }
   if(action){
     site_actions_->removeAction(action);
-    site_menu_->removeAction(action);
   }
 }
 
@@ -93,10 +92,6 @@ std::vector<String> LoaderManager::GetSiteLoaderIdents()
     sites.push_back(keys.at(i).toStdString());
   }
   return sites;
-}
-
-QMenu* LoaderManager::GetSiteMenu(){
-  return site_menu_;
 }
 
 RemoteSiteLoader* LoaderManager::GetDefaultRemoteSiteLoader()

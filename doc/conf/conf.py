@@ -13,13 +13,12 @@
 
 import sys, os
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
+site_packs='python%d.%d/site-packages' % sys.version_info[0:2]
 sys.path.append(os.path.join(os.path.abspath('../..'), 
-                             'stage/lib/openstructure'))
+                             'stage/lib', site_packs))
 sys.path.append(os.path.join(os.path.abspath('../..'), 
-                             'stage/lib64/openstructure'))
+                             'stage/lib64', site_packs))
+print site_packs
 import ost
 # -- General configuration -----------------------------------------------------
 
@@ -43,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'OpenStructure'
-copyright = u'2010, OpenStructure authors'
+copyright = u'2011, OpenStructure authors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -79,7 +78,7 @@ exclude_trees = []
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-#add_module_names = True
+add_module_names = False
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.

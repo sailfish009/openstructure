@@ -59,6 +59,25 @@ char ConstSequenceHandle::operator[](int index) const
 
 
 
+const String& ConstSequenceHandle::GetRole() const
+{
+  this->CheckValidity();
+  return Impl()->GetRole();
+}
+
+
+const String& SequenceHandle::GetRole() const
+{
+  this->CheckValidity();
+  return Impl()->GetRole();
+}
+  
+void SequenceHandle::SetRole(const String& role) const
+{
+  this->CheckValidity();
+  Impl()->SetRole(role);
+}
+
 
 void ConstSequenceHandle::CheckValidity() const
 {
@@ -78,9 +97,10 @@ impl::SequenceImplPtr& ConstSequenceHandle::Impl() const
 }
 
 
-SequenceHandle CreateSequence(const String& name, const String& seq)
+SequenceHandle CreateSequence(const String& name, const String& seq, 
+                              const String& role)
 {
-  return SequenceHandle(impl::SequenceImpl::FromString(name, seq));
+  return SequenceHandle(impl::SequenceImpl::FromString(name, seq, role));
 }
 
 
@@ -206,6 +226,8 @@ void SequenceHandle::AttachView(const mol::EntityView& view,
   Impl()->AttachView(view, chain_name);   
 }
 
+#if(OST_INFO_ENABLED)
+
 /// \brief export sequence to info
 void  SequenceToInfo(const ConstSequenceHandle& sequence,
                      info::InfoGroup& group)
@@ -218,6 +240,9 @@ SequenceHandle SequenceFromInfo(info::InfoGroup& group)
 {
   return SequenceHandle(impl::SequenceImplFromInfo(group));
 }
+#endif
+
+
 
 std::ostream& operator<<(std::ostream& os, const ConstSequenceHandle& sequence)
 {
@@ -407,4 +432,23 @@ char SequenceHandle::operator[](size_t index) const
   return this->GetString()[index];
 }
 
+bool Match(const ConstSequenceHandle& s1, const ConstSequenceHandle& s2)
+{
+  return Match(s1.GetString(), s2.GetString());
+}
+
+bool Match(const String& s1, const String& s2)
+{
+  if (s1.size()!=s2.size()) {
+    return false;
+  }
+  for (size_t i=0; i<s1.size(); ++i) {
+    char c1=s1[i];
+    char c2=s2[i];
+    if (toupper(c1)!=toupper(c2) && toupper(c1)!='X' && toupper(c2)!='X') {
+      return false;
+    }
+  }
+  return true;
+}
 }}

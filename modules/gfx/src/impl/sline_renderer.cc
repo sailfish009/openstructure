@@ -53,7 +53,7 @@ RenderOptionsPtr SlineRenderer::GetOptions()
 
 void SlineRenderer::PrepareRendering()
 {
-  TraceRendererBase::PrepareRendering();
+  TraceRendererBase::PrepareRendering(false);
   if(state_>0) {
     prepare_rendering(trace_subset_, va_, spline_list_list_);
     rebuild_spline_obj(va_, spline_list_list_, false);

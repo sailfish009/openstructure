@@ -32,7 +32,12 @@ object spnav_get_instance()
 {
   static object sip_module=import("sip");
   static object pyqt4_module=import("PyQt4.QtCore");
-  return ost::gui::get_py_qobject<SpnavInput>(SpnavInput::Instance());
+  SpnavInput* si = SpnavInput::Instance();
+  if(si->isValid()) {
+    return ost::gui::get_py_qobject<SpnavInput>(si);
+  } else {
+    return object();
+  }
 }
 
 }

@@ -56,7 +56,7 @@ void export_Progress();
 void export_Map();
 
 // actual module definitions
-BOOST_PYTHON_MODULE(_img)
+BOOST_PYTHON_MODULE(_ost_img)
 {
   export_Data();
   export_DataAlgorithm();

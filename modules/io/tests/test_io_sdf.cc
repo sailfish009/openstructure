@@ -23,6 +23,8 @@
 #include <ost/io/io_exception.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 using boost::unit_test_framework::test_suite;
@@ -30,7 +32,7 @@ using boost::unit_test_framework::test_suite;
 using namespace ost;
 using namespace ost::io;
 
-BOOST_AUTO_TEST_SUITE( io )
+BOOST_AUTO_TEST_SUITE( io );
 
 BOOST_AUTO_TEST_CASE(test_sdf_import_handler)
 {
@@ -147,8 +149,8 @@ BOOST_AUTO_TEST_CASE(write_sdf)
     sdfh.Import(eh,"testfiles/sdf/compound.sdf");
     SaveEntity(eh, "testfiles/sdf/compound-out.sdf");
   }
-  BOOST_CHECK(compare_files("testfiles/sdf/compound.sdf",
-                            "testfiles/sdf/compound-out.sdf"));
+  BOOST_CHECK(compare_files("testfiles/sdf/compound-out.sdf",
+                            "testfiles/sdf/compound.sdf"));
 }
 
 BOOST_AUTO_TEST_CASE(write_sdf_view)
@@ -162,8 +164,8 @@ BOOST_AUTO_TEST_CASE(write_sdf_view)
     mol::EntityView ev = eh.Select("(ele=C or ele=N) and aname!='1'");
     SaveEntity(ev, "testfiles/sdf/compound-view-out.sdf");
   }
-  BOOST_CHECK(compare_files("testfiles/sdf/compound-view.sdf",
-                            "testfiles/sdf/compound-view-out.sdf"));
+  BOOST_CHECK(compare_files("testfiles/sdf/compound-view-out.sdf",
+                            "testfiles/sdf/compound-view.sdf"));
 }
 
 BOOST_AUTO_TEST_CASE(nonexisting_file)
@@ -252,4 +254,4 @@ BOOST_AUTO_TEST_CASE(empty_dataheader_error_sdf)
 }
 
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

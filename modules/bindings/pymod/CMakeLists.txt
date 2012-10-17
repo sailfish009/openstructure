@@ -9,5 +9,6 @@ clustalw.py
 utils.py
 naccess.py
 blast.py
+cadscore.py
 )
 pymod(NAME bindings PY ${OST_BINDINGS})

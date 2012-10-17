@@ -27,7 +27,6 @@
 #include <ost/img/alg/normalizer_factory.hh>
 #include <ost/io/img/image_format.hh>
 
-
 namespace ost { namespace io { namespace detail {
 /// \internal
 typedef void (*TIFFWarningHandler)(const char*, const char*, va_list);
@@ -49,7 +48,7 @@ struct tiff_warning_handler_wrapper {
 };
 
 /// \internal
-class complexint32_t:public std::complex<int32_t>{
+class complexint32:public std::complex<int32>{
 public:
 
   operator std::complex<Real>()
@@ -79,33 +78,31 @@ public:
 };
 
 /// \internal
-int32_t CustomTIFFReadProcIStream(void* thandle, void* tdata, int32_t tsize);
+tsize_t CustomTIFFReadProcIStream(thandle_t thandle, tdata_t  tdata, tsize_t tsize);
 /// \internal
-int32_t CustomTIFFReadProcIStream(void* thandle, void* tdata, int32_t tsize);
+tsize_t CustomTIFFReadProcOStream(thandle_t thandle, tdata_t  tdata, tsize_t tsize);
 /// \internal
-int32_t CustomTIFFReadProcOStream(void* thandle, void* tdata, int32_t tsize);
+tsize_t CustomTIFFWriteProcIStream(thandle_t thandle, tdata_t  tdata, tsize_t tsize);
 /// \internal
-int32_t CustomTIFFWriteProcIStream(void* thandle, void* tdata, int32_t tsize);
+tsize_t CustomTIFFWriteProcOStream(thandle_t thandle, tdata_t  tdata, tsize_t tsize);
 /// \internal
-int32_t CustomTIFFWriteProcOStream(void* thandle, void* tdata, int32_t tsize);
+toff_t CustomTIFFSeekProcIStream(thandle_t thandle, toff_t toff, int dir);
 /// \internal
-uint32_t CustomTIFFSeekProcIStream(void* thandle, uint32_t toff, int dir);
+toff_t CustomTIFFSeekProcOStream(thandle_t thandle, toff_t toff, int dir);
 /// \internal
-uint32_t CustomTIFFSeekProcOStream(void* thandle, uint32_t toff, int dir);
+int CustomTIFFCloseProc(thandle_t thandle);
 /// \internal
-int CustomTIFFCloseProc(void* thandle);
+toff_t CustomTIFFSizeProcIStream(thandle_t thandle);
 /// \internal
-uint32_t CustomTIFFSizeProcIStream(void* thandle);
+toff_t CustomTIFFSizeProcOStream(thandle_t thandle);
 /// \internal
-uint32_t CustomTIFFSizeProcOStream(void* thandle);
+int CustomTIFFMapFileProc(thandle_t thandle, tdata_t* tdata, toff_t* toff);
 /// \internal
-int CustomTIFFMapFileProc(void* thandle, void** tdata, uint32* toff);
-/// \internal
-void CustomTIFFUnmapFileProc(void* thandle, void* tdata, uint32 toff);
+void CustomTIFFUnmapFileProc(thandle_t thandle, tdata_t tdata, toff_t toff);
 
 /// \internal
 template<typename IN_TYPE,typename OUT_TYPE, class IST>
-void do_tiff_read(tdata_t buf,uint16 rps, uint32_t width, IST* is,int& current_row, int spp)
+void do_tiff_read(tdata_t buf,unsigned int rps, unsigned int width, IST* is,unsigned int& current_row, uint16 spp)
 {
   IN_TYPE* dp = static_cast<IN_TYPE*>(buf);
   for(uint r=0;r<rps;r++) {
@@ -118,7 +115,7 @@ void do_tiff_read(tdata_t buf,uint16 rps, uint32_t width, IST* is,int& current_r
 
 /// \internal
 template<typename IN_TYPE,typename OUT_TYPE, class IST>
-void do_tiff_write(TIFF *tif, IST* is,uint32_t rowsperstrip,uint32_t width,uint32_t height, uint32_t strip,const  img::NormalizerPtr& nptr)
+void do_tiff_write(TIFF *tif, IST* is,unsigned int rowsperstrip,unsigned int width, unsigned int height, unsigned int strip,const  img::NormalizerPtr& nptr)
 {
   uint datalength=rowsperstrip*width;
   if((strip+1)*rowsperstrip>height){

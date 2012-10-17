@@ -99,7 +99,7 @@ namespace {
 }
 using namespace ost::gui;
 
-BOOST_PYTHON_MODULE(_gui)
+BOOST_PYTHON_MODULE(_ost_gui)
 {
 
   boost::python::to_python_converter<QString, qstring_to_python_string>();

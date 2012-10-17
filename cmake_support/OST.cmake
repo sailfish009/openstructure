@@ -1,9 +1,47 @@
 #-------------------------------------------------------------------------------
-# Author: Marco Biasini, Juergen Haas
+# Authors: Marco Biasini, Juergen Haas, Andreas Schenk
 #
 # This file contains a bunch of useful macros to facilitate the build-system
 # configuration for the modules.
 #-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# map macro
+#
+# this function emulates a map/dict data type
+#-------------------------------------------------------------------------------
+
+function(map COMMAND MAPNAME)
+  set (_KEYS ${MAPNAME}_MAP_KEYS )
+  set (_VALUES ${MAPNAME}_MAP_VALUES)
+  if(${COMMAND} STREQUAL SET)
+    list(REMOVE_AT ARGN 0)
+    list(FIND ${_KEYS} ${ARGV2} _MAP_INDEX)
+    if(_MAP_INDEX EQUAL -1)
+      list(APPEND ${_KEYS} ${ARGV2})
+      set(${_KEYS} ${${_KEYS}} PARENT_SCOPE)
+      set(${_VALUES}_${ARGV2}  ${ARGN} PARENT_SCOPE)
+    else()
+      set(${_VALUES}_${ARGV2}  ${ARGN} PARENT_SCOPE)
+    endif()
+  elseif(${COMMAND} STREQUAL GET)
+    list(FIND ${_KEYS} ${ARGV2} _MAP_INDEX)
+    if(_MAP_INDEX EQUAL -1)
+      MESSAGE(FATAL_ERROR "Unknown key: " ${ARGV2})
+    endif()
+    set(${ARGV3} ${${_VALUES}_${ARGV2}} PARENT_SCOPE)
+  elseif(${COMMAND} STREQUAL KEYS)
+    set(${ARGV2} ${${_KEYS}} PARENT_SCOPE)
+  elseif(${COMMAND} STREQUAL CREATE)
+    set(${_KEYS}  "" PARENT_SCOPE)
+  elseif(${COMMAND} STREQUAL LENGTH)
+    list(LENGTH ${_KEYS} _L)
+    set(${ARGV2} ${_L} PARENT_SCOPE)
+  else()
+    MESSAGE(FATAL_ERROR "Unknown map command:" ${COMMAND})
+  endif()
+endfunction()
+
 
 #-------------------------------------------------------------------------------
 # check_architecture
@@ -69,7 +107,6 @@ endmacro()
 # content changed.
 #-------------------------------------------------------------------------------
 macro(copy_if_different FROM_DIR TO_DIR FILES TARGETS TARGET)
-  set(ADD_TARGETS "")
   foreach(SRC ${FILES})
       set(SRCFILE ${SRC})
       if("${FROM_DIR}" STREQUAL "" OR "${FROM_DIR}" STREQUAL "./")
@@ -86,40 +123,39 @@ macro(copy_if_different FROM_DIR TO_DIR FILES TARGETS TARGET)
       file(MAKE_DIRECTORY  ${TO_DIR})
       add_custom_command(TARGET "${TARGET}" PRE_BUILD
           DEPENDS ${FROM}
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FROM} ${TO}
-          COMMENT ""
-          )
-      list(APPEND ADD_TARGETS ${TO})
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FROM} ${TO})
   endforeach()
-  if (TARGETS)
-    set(${TARGETS} ${ADD_TARGETS})
+endmacro()
+
+
+#-------------------------------------------------------------------------------
+# parse_file_list
+#
+# this macro splits a list of files with IN_DIR statements and fills them into a map
+# where the key is the directory name
+#-------------------------------------------------------------------------------
+macro(parse_file_list FILELIST FILEMAP)
+  set(_EXPECT_IN_DIR FALSE)
+  map(CREATE ${FILEMAP})
+  set(_CURRENT_LIST)
+  foreach(_ITEM ${FILELIST})
+    if (_ITEM STREQUAL "IN_DIR")
+      set(_EXPECT_IN_DIR TRUE)
+    else()
+      if (_EXPECT_IN_DIR)
+        set(_EXPECT_IN_DIR FALSE)
+        map(SET ${FILEMAP} ${_ITEM} ${_CURRENT_LIST})
+        set(_CURRENT_LIST)
+      else()
+        list(APPEND _CURRENT_LIST "${_ITEM}")
+      endif()
+    endif()
+  endforeach()
+  if(_CURRENT_LIST)
+    map(SET ${FILEMAP} "." ${_CURRENT_LIST})
   endif()
 endmacro()
 
-#-------------------------------------------------------------------------------
-# stage_headers
-#-------------------------------------------------------------------------------
-macro(stage_headers HEADERS HEADER_INSTALL_DIR TARGET SUB)
-  set(FROM_DIR "./")
-  # introduce a helper target to make sure the headers are staged before
-  # building the library
-  string(REPLACE "/" "_" _SUB_NO_SLASH "${SUB}")
-  string(REPLACE "${PREFIX}_" "" _TARGET "${TARGET}")
-  #message("target before: ${TARGET} after: ${_TARGET}")
-  set(_TARGET_NAME ${_TARGET}_${_SUB_NO_SLASH}_headers)
-  set(_SUB ${SUB})
-  if (NOT _SUB)
-    set(_TARGET_NAME ${_TARGET}_headers)
-  endif()
-  add_custom_target("${_TARGET_NAME}" COMMENT "")
-  set(HEADER_DIR "${HEADER_STAGE_PATH}/${HEADER_INSTALL_DIR}")
-  copy_if_different("${FROM_DIR}" "${HEADER_DIR}"
-                    "${HEADERS}" ""
-                    "${_TARGET_NAME}")
-  add_dependencies("${TARGET}" "${_TARGET_NAME}")
-  set_target_properties("${_TARGET_NAME}" PROPERTIES
-                        EchoString "Staging headers ${TARGET}")
-endmacro()
 
 #-------------------------------------------------------------------------------
 # Synopsis:
@@ -142,26 +178,29 @@ macro(module)
             "invalid use of module(): a module name must be provided")
   endif()
 
-
+  if (ENABLE_STATIC AND _ARG_NO_STATIC)
+    return()
+  endif()
   if (_ARG_HEADER_OUTPUT_DIR)
     set(_HEADER_OUTPUT_DIR ${_ARG_HEADER_OUTPUT_DIR})
   else()
-    if (_ARG_PREFIX)
-      set(_HEADER_OUTPUT_DIR "${_ARG_PREFIX}/${_ARG_NAME}")
-    else()
-      set(_HEADER_OUTPUT_DIR "${_ARG_NAME}")
-    endif()
+    set(_HEADER_OUTPUT_DIR "${_ARG_PREFIX}/${_ARG_NAME}")
   endif()
-  if (_ARG_PREFIX)
-    set(_LIB_NAME ${_ARG_PREFIX}_${_ARG_NAME})
-  else()
-    set(_LIB_NAME ${_ARG_NAME})
-  endif()
+  set(_LIB_NAME ${_ARG_PREFIX}_${_ARG_NAME})
   string(TOUPPER ${_LIB_NAME} _UPPER_LIB_NAME)  
   #-----------------------------------------------------------------------------
   # create library  
   #-----------------------------------------------------------------------------
   file(MAKE_DIRECTORY ${LIB_STAGE_PATH})
+  file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
+  file(MAKE_DIRECTORY ${LIBEXEC_STAGE_PATH})
+  file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
+  if (NOT TARGET create_stage)
+    add_custom_target(create_stage COMMAND ${CMAKE_COMMAND} -E make_directory ${LIB_STAGE_PATH}
+                                   COMMAND ${CMAKE_COMMAND} -E make_directory ${EXECUTABLE_OUTPUT_PATH}
+                                   COMMAND ${CMAKE_COMMAND} -E make_directory ${LIBEXEC_STAGE_PATH}
+                                   COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/tests")
+  endif()
   if (WIN32)
     set(_ABS_FILE_PATTERN "^[A-Z]:/")
   else()
@@ -177,56 +216,51 @@ macro(module)
         list(APPEND _ABS_SOURCE_NAMES "${CMAKE_CURRENT_SOURCE_DIR}/${_SOURCE}")
       endif()
     endforeach()
-    add_library(${_LIB_NAME} SHARED ${_ABS_SOURCE_NAMES})
-
+    if (ENABLE_STATIC AND NOT _ARG_NO_STATIC)
+      add_library(${_LIB_NAME} STATIC ${_ABS_SOURCE_NAMES})
+    else()
+      add_library(${_LIB_NAME} SHARED ${_ABS_SOURCE_NAMES})
+    endif()
     set_target_properties(${_LIB_NAME} 
                           PROPERTIES OUTPUT_NAME ${_LIB_NAME}
                                      PROJECT_LABEL ${_ARG_NAME}
                                      EchoString   ${_ARG_NAME}
                                      MODULE_DEPS "${_ARG_DEPENDS_ON}")
     get_target_property(_DEFS ${_LIB_NAME} COMPILE_DEFINITIONS)
+    add_dependencies(${_LIB_NAME} create_stage)
     set_target_properties(${_LIB_NAME} PROPERTIES
                           COMPILE_DEFINITIONS OST_MODULE_${_UPPER_LIB_NAME})
+    set_target_properties(${_LIB_NAME} PROPERTIES
+                          VERSION ${OST_VERSION_STRING}
+                          SOVERSION ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR})    
     set_target_properties(${_LIB_NAME} PROPERTIES
                           LIBRARY_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
                           ARCHIVE_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
                           RUNTIME_OUTPUT_DIRECTORY ${LIB_STAGE_PATH})
-    if (ENABLE_STATIC AND NOT _ARG_NO_STATIC)
-      add_library(${_LIB_NAME}_static STATIC ${_ABS_SOURCE_NAMES})
-      set_target_properties(${_LIB_NAME}_static
-                            PROPERTIES OUTPUT_NAME ${_LIB_NAME}
-                                       PROJECT_LABEL ${_ARG_NAME}
-                                       EchoString   ${_ARG_NAME}
-                                       MODULE_DEPS "${_ARG_DEPENDS_ON}")
-      get_target_property(_DEFS ${_LIB_NAME}_static COMPILE_DEFINITIONS)
-      set_target_properties(${_LIB_NAME}_static PROPERTIES
-                            COMPILE_DEFINITIONS OST_MODULE_${_UPPER_LIB_NAME})
-      set_target_properties(${_LIB_NAME}_static PROPERTIES
-                            LIBRARY_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
-                            ARCHIVE_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
-                            RUNTIME_OUTPUT_DIRECTORY ${LIB_STAGE_PATH})
-      foreach(_DEPENDENCY ${_ARG_DEPENDS_ON})
-        target_link_libraries(${_LIB_NAME}_static ost_${_DEPENDENCY}_static)
-      endforeach()
-      target_link_libraries(${_LIB_NAME} ${ZLIB_LIBRARIES})
-    endif()
     if (APPLE)
       set_target_properties(${_LIB_NAME} PROPERTIES
-                            LINK_FLAGS "-Wl,-rpath,."
+                            LINK_FLAGS "-Wl,-rpath,@loader_path"
                             INSTALL_NAME_DIR "@rpath")
     endif()
     if (WIN32)
       #set_target_properties(${_LIB_NAME} PROPERTIES PREFIX "../")
       install(TARGETS ${_LIB_NAME} ARCHIVE DESTINATION "${LIB_DIR}")
     else()
-      install(TARGETS ${_LIB_NAME} LIBRARY DESTINATION "${LIB_DIR}")
+      if (ENABLE_STATIC)
+        install(TARGETS ${_LIB_NAME} ARCHIVE DESTINATION "${LIB_DIR}")
+      else()
+        install(TARGETS ${_LIB_NAME} LIBRARY DESTINATION "${LIB_DIR}")
+      endif()
     endif()                          
     if (_ARG_LINK)
       target_link_libraries(${_LIB_NAME} ${_ARG_LINK})
     endif()
     foreach(_DEPENDENCY ${_ARG_DEPENDS_ON})
-      target_link_libraries(${_LIB_NAME} ost_${_DEPENDENCY})
+      target_link_libraries(${_LIB_NAME} ${_DEPENDENCY})
     endforeach()
+    if (ENABLE_STATIC)
+      target_link_libraries(${_LIB_NAME} ${STATIC_LIBRARIES})
+    endif()
   else()
     add_custom_target("${_LIB_NAME}" ALL)
     set_target_properties("${_LIB_NAME}" PROPERTIES HEADER_ONLY 1 
@@ -236,45 +270,31 @@ macro(module)
   # stage headers  
   #-----------------------------------------------------------------------------
   if (_ARG_HEADERS)
-    set(_HEADERS)
-    set(_EXPECT_IN_DIR FALSE)
-    foreach(_HEADER ${_ARG_HEADERS})
-      if (_HEADER STREQUAL "IN_DIR")
-        set(_EXPECT_IN_DIR TRUE)
-      else()
-        if (_EXPECT_IN_DIR)
-          set(_EXPECT_IN_DIR FALSE)
-          set(_DIR ${_HEADER})
-          set(_ABS_HEADER_NAMES)
-          set(_HDR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_DIR}")
-          foreach(_HDR ${_HEADERS})
-            list(APPEND _ABS_HEADER_NAMES "${_HDR_SOURCE_DIR}/${_HDR}")
-          endforeach()
-          install(FILES ${_ABS_HEADER_NAMES} DESTINATION
-                  "include/${_HEADER_OUTPUT_DIR}/${_DIR}")
-          set(_HDR_STAGE_DIR "${_HEADER_OUTPUT_DIR}/${_DIR}")
-          stage_headers("${_ABS_HEADER_NAMES}" "${_HDR_STAGE_DIR}" 
-                        "${_LIB_NAME}" "${_DIR}")
-          set(_HEADERS)
-        else()
-          list(APPEND _HEADERS "${_HEADER}")
-        endif()
-      endif()
-    endforeach()
-    list(LENGTH _HEADERS _HEADER_LIST_LENGTH)
-    if (_HEADER_LIST_LENGTH GREATER 0)    
-      set(_ABS_HEADER_NAMES)   
-      set(_HDR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")       
-      foreach(_HDR ${_HEADERS})
-        list(APPEND _ABS_HEADER_NAMES "${_HDR_SOURCE_DIR}/${_HDR}")
-      endforeach()      
-      install(FILES ${_ABS_HEADER_NAMES} DESTINATION
-              "include/${_HEADER_OUTPUT_DIR}")
-      set(_HDR_STAGE_DIR "${_HEADER_OUTPUT_DIR}")
-      stage_headers("${_ABS_HEADER_NAMES}" "${_HDR_STAGE_DIR}" 
-                    "${_LIB_NAME}" "")
-    endif()
+    stage_and_install_headers("${_ARG_HEADERS}" "${_HEADER_OUTPUT_DIR}" "${_LIB_NAME}")
   endif()
+endmacro()
+
+#-------------------------------------------------------------------------------
+# macro stage_and_install_headers
+#-------------------------------------------------------------------------------
+macro(stage_and_install_headers HEADERLIST HEADER_OUTPUT_DIR TARGET)
+  add_custom_target("${TARGET}_headers" COMMENT "")
+  add_dependencies("${TARGET}" "${TARGET}_headers")
+  add_dependencies("${TARGET}_headers" create_stage)
+  parse_file_list("${HEADERLIST}" _HEADER_MAP)
+  map(KEYS _HEADER_MAP _HEADER_MAP_KEYS)
+  foreach(_DIR ${_HEADER_MAP_KEYS})
+    map(GET _HEADER_MAP ${_DIR} _HEADERS)
+    set(_HDR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_DIR}")
+    set(_ABS_HEADER_NAMES)
+    foreach(_HDR ${_HEADERS})
+      list(APPEND _ABS_HEADER_NAMES ${_HDR_SOURCE_DIR}/${_HDR})
+    endforeach()
+    set(_HDR_STAGE_DIR "${HEADER_OUTPUT_DIR}/${_DIR}")
+    set(_FULL_HEADER_DIR "${HEADER_STAGE_PATH}/${_HDR_STAGE_DIR}")
+    copy_if_different("" "${_FULL_HEADER_DIR}" "${_ABS_HEADER_NAMES}" "" "${TARGET}_headers")
+    install(FILES ${_ABS_HEADER_NAMES} DESTINATION "include/${_HDR_STAGE_DIR}")
+  endforeach()
 endmacro()
 
 
@@ -292,23 +312,73 @@ macro(executable)
     message(FATAL_ERROR "invalid use of executable(): a name must be provided")
   endif()
   add_executable(${_ARG_NAME} ${_ARG_SOURCES})
-  if (APPLE AND NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
+  if (APPLE AND NOT _ARG_NO_RPATH AND NOT ENABLE_STATIC)
     set_target_properties(${_ARG_NAME} PROPERTIES
-                          LINK_FLAGS "-Wl,-rpath,@loader_path/../lib")
+                          LINK_FLAGS "-Wl,-rpath,@loader_path/../lib/")
   endif()
   if (_ARG_LINK)
     target_link_libraries(${_ARG_NAME} ${_ARG_LINK})
   endif()
-  if (ENABLE_STATIC AND _ARG_STATIC)
-    set(TARGET_SUFFIX _static)
-    target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
-  endif()
   foreach(_DEP ${_ARG_DEPENDS_ON})
-    target_link_libraries(${_ARG_NAME} ost_${_DEP}${TARGET_SUFFIX})
+    target_link_libraries(${_ARG_NAME} ${_DEP})
   endforeach()
+  if (ENABLE_STATIC AND _ARG_STATIC)
+    target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
+    if (UNIX AND NOT APPLE)
+      if (OST_GCC_45)    
+        set_target_properties(${_ARG_NAME}
+                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
+                              LINK_FLAGS "-static-libgcc -static-libstdc++ -static -pthread")
+      else()
+        set_target_properties(${_ARG_NAME}
+                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
+                              LINK_FLAGS "-static-libgcc -static -pthread")
+      endif()        
+    endif()
+  endif()
   install(TARGETS ${_ARG_NAME} DESTINATION bin)
 endmacro()
 
+
+#-------------------------------------------------------------------------------
+# Synopsis
+#   executable_libexec(NAME exe_name SOURCES source1 source2 LINK link1 link2)
+#
+# Description:
+#  Compile, link and stage a C++ executable into the libexec directory
+#-------------------------------------------------------------------------------
+macro(executable_libexec)
+  parse_argument_list(_ARG 
+                      "NAME;SOURCES;LINK;DEPENDS_ON" "NO_RPATH;STATIC" ${ARGN})
+  if (NOT _ARG_NAME)
+    message(FATAL_ERROR "invalid use of executable(): a name must be provided")
+  endif()   
+  add_executable(${_ARG_NAME} ${_ARG_SOURCES})
+  set_target_properties(${_ARG_NAME}
+                        PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                       "${LIBEXEC_STAGE_PATH}")  
+  if (NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
+    if (APPLE)
+      set_target_properties(${_ARG_NAME} PROPERTIES
+                            LINK_FLAGS "-Wl,-rpath,@loader_path/../../lib")
+    elseif (UNIX)
+      set_target_properties(${_ARG_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN/../../${LIB_DIR}")
+    endif (APPLE)
+  endif (NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
+  if (_ARG_LINK)
+    target_link_libraries(${_ARG_NAME} ${_ARG_LINK})
+  endif()
+  if (ENABLE_STATIC AND _ARG_STATIC)
+    target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
+    set_target_properties(${_ARG_NAME}
+                          PROPERTIES LINK_SEARCH_END_STATIC TRUE)  
+
+  endif()
+  foreach(_DEP ${_ARG_DEPENDS_ON})
+    target_link_libraries(${_ARG_NAME} ${_DEP})
+  endforeach()
+  install(TARGETS ${_ARG_NAME} DESTINATION ${LIBEXEC_PATH})
+endmacro()
 
 #-------------------------------------------------------------------------------
 # Synopsis:
@@ -332,14 +402,16 @@ macro(substitute)
                     ${CMAKE_COMMAND} ${_SUBST_DICT}
                     -P ${CMAKE_SOURCE_DIR}/cmake_support/substitute.cmake)
 endmacro()
+
 #-------------------------------------------------------------------------------
 # Synopsis:
 #   script(NAME script_name INPUT input_name SUBSTITUTE key=val key=val
-#         [TARGET target])
+#          [OUTPUT_DIR dir] [TARGET target])
 #-------------------------------------------------------------------------------
 macro(script)
+  set(_ARG_OUTPUT_DIR bin)
   parse_argument_list(_ARG 
-                      "NAME;INPUT;SUBSTITUTE;TARGET" "" ${ARGN})
+                      "NAME;INPUT;SUBSTITUTE;TARGET;OUTPUT_DIR" "" ${ARGN})
   if (NOT _ARG_NAME)
     message(FATAL_ERROR "invalid use of executable(): a name must be provided")
   endif()
@@ -351,21 +423,77 @@ macro(script)
     if (NOT _ARG_INPUT)
       message(FATAL_ERROR "script() can only substitute when INPUT is present.")    
     endif()
-    substitute(IN_FILE ${_INPUT} OUT_FILE ${_ARG_NAME} 
+    substitute(IN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${_INPUT}" OUT_FILE ${_ARG_NAME} 
                DICT ${_ARG_SUBSTITUTE})
   endif()
-  install(FILES ${_ARG_NAME} DESTINATION bin 
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_ARG_NAME} DESTINATION ${_ARG_OUTPUT_DIR} 
           PERMISSIONS WORLD_EXECUTE GROUP_EXECUTE OWNER_EXECUTE 
                       WORLD_READ GROUP_READ OWNER_READ)
-  copy_if_different("./" "${EXECUTABLE_OUTPUT_PATH}" 
+  copy_if_different("./" "${STAGE_DIR}/${_ARG_OUTPUT_DIR}" 
                     "${_ARG_NAME}" "TARGETS" ${_ARG_TARGET})
   add_dependencies(${_ARG_TARGET} subst_${_ARG_NAME})
 endmacro()
 
 #-------------------------------------------------------------------------------
 # Synopsis:
+#   ui_to_python(libname stagedir[input_file1 ...])
+# Description:
+#   Calls pyuic on every input file. The resulting python files are stored in
+#   the variable with name out_files.
+#-------------------------------------------------------------------------------
+macro(ui_to_python LIBNAME PYMODDIR STAGEDIR)
+  set(_input_files ${ARGN})
+  add_custom_target("${LIBNAME}_ui" ALL)
+  add_dependencies("_${LIBNAME}" "${LIBNAME}_ui")
+  find_program(_PYUIC_EXECUTABLE
+    NAMES pyuic4-${PYTHON_VERSION} pyuic4 pyuic
+    PATHS  ENV PATH 
+  )  
+  if(NOT _PYUIC_EXECUTABLE)
+    message(FATAL_ERROR "Could not find pyuic command in " ${QT_BINARY_DIR} " for python version " ${PYTHON_VERSION})
+  endif(NOT _PYUIC_EXECUTABLE)
+  set(out_files)
+  foreach(input_file ${_input_files})
+    get_filename_component(_out_file ${input_file} NAME_WE)
+    get_filename_component(_in_file ${input_file} ABSOLUTE)
+    set(_out_file ${_out_file}_ui.py)
+    set(_abs_out_file ${STAGEDIR}/${_out_file})
+    add_custom_command(TARGET ${LIBNAME}_ui
+                       COMMAND ${_PYUIC_EXECUTABLE} -o ${_abs_out_file} ${_in_file}
+                       VERBATIM DEPENDS ${input_file}
+                       )
+    list(APPEND out_files ${_abs_out_file})
+  endforeach()
+  compile_py_files(_${LIBNAME} ${STAGEDIR} ${out_files})
+  install(FILES ${out_files} DESTINATION "${LIB_DIR}/${PYMODDIR}")
+endmacro()
+
+#-------------------------------------------------------------------------------
+# Synopsis:
+#   compile_py_files(module out_files [input_file1 ...])
+# Description:
+#   Calls pyuic on every input file. The resulting python files are stored in
+#   the variable with name out_files.
+#-------------------------------------------------------------------------------
+macro(compile_py_files module out_dir)
+  set(_input_files ${ARGN})
+  foreach(input_file ${_input_files})
+    get_filename_component(_out_file ${input_file} NAME_WE)
+    get_filename_component(_in_file ${input_file} ABSOLUTE)
+    set(_out_file ${out_dir}/${_out_file}.pyc)
+    get_filename_component(_in_name ${input_file} NAME)
+    file(MAKE_DIRECTORY  ${out_dir})
+    add_custom_command(TARGET ${module}
+                       COMMAND ${PYTHON_BINARY} -c "import py_compile;py_compile.compile(\"${_in_file}\",\"${_out_file}\",\"${_in_name}\",doraise=True)"
+                       VERBATIM DEPENDS ${input_file}
+                       )
+  endforeach()
+endmacro()
+
+#-------------------------------------------------------------------------------
+# Synopsis:
 #   pymod(NAME name CPP source1 source2 PY source source2 [IN_DIR dir] 
-#         source3 source4 [IN_DIR dir] [LINK link] [OUTPUT_DIR dir])
+#         source3 source4 [IN_DIR dir] [LINK link] [OUTPUT_DIR dir] [UI user_interface_files])
 #
 # Description:
 #  Define a python module consisting of C++ type wrappers and/or code written in 
@@ -378,27 +506,28 @@ macro(pymod)
   #-----------------------------------------------------------------------------
   set(_ARG_PREFIX ost)
   parse_argument_list(_ARG 
-                      "NAME;CPP;PY;LINK;OUTPUT_DIR;PREFIX" "" ${ARGN})
+                      "NAME;CPP;PY;LINK;OUTPUT_DIR;UI;PREFIX" "" ${ARGN})
   if (NOT _ARG_NAME)
     message(FATAL_ERROR "invalid use of pymod(): a name must be provided")
   endif()
-  if (_ARG_OUTPUT_DIR)
-    set(PYMOD_DIR "openstructure/${_ARG_OUTPUT_DIR}")
-  else()
-    if (_ARG_PREFIX)
-        set(PYMOD_DIR "openstructure/${_ARG_PREFIX}/${_ARG_NAME}")
-    else()
-      set(PYMOD_DIR "openstructure/${_ARG_NAME}")
-    endif()
+  if (ENABLE_STATIC)
+    return()
   endif()
+  if (_ARG_OUTPUT_DIR)
+    set(PYMOD_DIR "python${PYTHON_VERSION}/site-packages/${_ARG_OUTPUT_DIR}")
+  else()
+    set(PYMOD_DIR "python${PYTHON_VERSION}/site-packages/${_ARG_PREFIX}/${_ARG_NAME}")
+  endif()
+  set(_LIB_NAME ${_ARG_PREFIX}_${_ARG_NAME})
   set(PYMOD_STAGE_DIR "${LIB_STAGE_PATH}/${PYMOD_DIR}")
   file(MAKE_DIRECTORY ${PYMOD_STAGE_DIR})
+  include_directories(${PYTHON_INCLUDE_PATH})
   #-----------------------------------------------------------------------------
   # compile and link C++ wrappers
   #-----------------------------------------------------------------------------
   if (_ARG_CPP)
-    add_library("_${_ARG_NAME}" MODULE ${_ARG_CPP})
-    set_target_properties("_${_ARG_NAME}"
+    add_library("_${_LIB_NAME}" MODULE ${_ARG_CPP})
+    set_target_properties("_${_LIB_NAME}"
                           PROPERTIES ECHO_STRING
                           "Building Python Module ${_ARG_NAME}")
     if (_ARG_PREFIX)
@@ -410,88 +539,87 @@ macro(pymod)
     if (NOT _CUSTOM_CHECK)
       set(_PARENT_LIB_NAME "${_PARENT_NAME}")
     endif()
-    target_link_libraries("_${_ARG_NAME}" ${_PARENT_LIB_NAME} 
+    target_link_libraries("_${_LIB_NAME}" ${_PARENT_LIB_NAME} 
                           ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES})
-    if (_USE_RPATH)
-      set_target_properties("_${_ARG_NAME}"
-                            PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR}
-                            INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
-    else()
-      set_target_properties("_${_ARG_NAME}"
-                            PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR}
-                            INSTALL_RPATH "")
+
+    set_target_properties("_${_LIB_NAME}"
+                          PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR})
+ 
+    if (NOT ENABLE_STATIC)
+      if (_USE_RPATH)
+        string(REGEX REPLACE "/[^/]*" "/.." inv_pymod_path "/${PYMOD_DIR}")
+        set_target_properties("_${_LIB_NAME}"
+                              PROPERTIES INSTALL_RPATH "$ORIGIN${inv_pymod_path}/")
+      else()
+        set_target_properties("_${_LIB_NAME}"
+                              PROPERTIES INSTALL_RPATH "")
+      endif()
     endif()
     if (APPLE)
       file(RELATIVE_PATH _REL_PATH "${PYMOD_STAGE_DIR}" "${LIB_STAGE_PATH}")
-      set_target_properties(_${_ARG_NAME} PROPERTIES
-                            LINK_FLAGS "-Wl,-rpath,@${_REL_PATH}"
+      set_target_properties("_${_LIB_NAME}" PROPERTIES
+                            LINK_FLAGS "-Wl,-rpath,@loader_path/${_REL_PATH}"
                             INSTALL_NAME_DIR "@rpath")
     endif()                          
     if (NOT WIN32)
-      set_target_properties("_${_ARG_NAME}"
+      set_target_properties("_${_LIB_NAME}"
                           PROPERTIES PREFIX "")
     else ()
-      set_target_properties("_${_ARG_NAME}"
+      set_target_properties("_${_LIB_NAME}"
                           PROPERTIES PREFIX "../")
 
-      set_target_properties("_${_ARG_NAME}"
+      set_target_properties("_${_LIB_NAME}"
                           PROPERTIES SUFFIX ".pyd")
 
     endif()
-    install(TARGETS "_${_ARG_NAME}" LIBRARY DESTINATION
+    install(TARGETS "_${_LIB_NAME}" LIBRARY DESTINATION
             "${LIB_DIR}/${PYMOD_DIR}")
   else()
-    add_custom_target("_${_ARG_NAME}" ALL)
+    add_custom_target("_${_LIB_NAME}" ALL)
   endif()
+  #-----------------------------------------------------------------------------
+  # build ui files
+  #-----------------------------------------------------------------------------
+  if (_ARG_UI)
+    ui_to_python(${_LIB_NAME} ${PYMOD_DIR} ${PYMOD_STAGE_DIR} ${_ARG_UI})
+  endif()  
+  #-----------------------------------------------------------------------------
+  # compile python files
+  #-----------------------------------------------------------------------------
   if (_ARG_PY)
-    set(_PY_FILES)
-    set(_EXPECT_IN_DIR FALSE)
-    foreach(_PY_FILE ${_ARG_PY})
-      if (_PY_FILE STREQUAL "IN_DIR")
-        set(_EXPECT_IN_DIR TRUE)
-      else()
-        if (_EXPECT_IN_DIR)
-          set(_EXPECT_IN_DIR FALSE)
-          set(_DIR ${_PY_FILE})
-          set(_ABS_PY_FILES)
-          set(_PY_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_DIR}")
-          foreach(_PY ${_PY_FILES})
-            list(APPEND _ABS_PY_FILES "${_PY_SOURCE_DIR}/${_PY}")
-          endforeach()
-          install(FILES ${_ABS_PY_FILES} DESTINATION
-                  "${LIB_DIR}/${PYMOD_DIR}/${_DIR}")
-          string(REPLACE "/" "_" _DIR_NO_SLASH "${_DIR}")
-          add_custom_target("${_ARG_NAME}_${_DIR_NO_SLASH}_pymod" ALL)
-          copy_if_different("./" "${PYMOD_STAGE_DIR}/${_DIR}" 
-                            "${_ABS_PY_FILES}" "TARGETS"
-                            "${_ARG_NAME}_${_DIR_NO_SLASH}_pymod")
-          set(_PY_FILES)
-        else()
-          list(APPEND _PY_FILES "${_PY_FILE}")
-        endif()
-      endif()
+    parse_file_list("${_ARG_PY}" _PYFILE_MAP)
+    map(KEYS _PYFILE_MAP _PYFILE_MAP_KEYS)
+    foreach(_DIR ${_PYFILE_MAP_KEYS})
+      map(GET _PYFILE_MAP ${_DIR} _PY_FILES)
+      set(_ABS_PY_FILES)
+      set(_PY_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_DIR}")
+      foreach(_PY ${_PY_FILES})
+        list(APPEND _ABS_PY_FILES "${_PY_SOURCE_DIR}/${_PY}")
+      endforeach()
+      install(FILES ${_ABS_PY_FILES} DESTINATION "${LIB_DIR}/${PYMOD_DIR}/${_DIR}")
+      string(REPLACE "/" "_" _DIR_NO_SLASH "${_DIR}")
+      set(_PYMOD_TARGET "${_LIB_NAME}_${_DIR_NO_SLASH}_pymod")
+      string(REPLACE "_." "" _PYMOD_TARGET "${_PYMOD_TARGET}")
+      add_custom_target(${_PYMOD_TARGET} ALL)
+      copy_if_different("./" "${PYMOD_STAGE_DIR}/${_DIR}"
+                        "${_ABS_PY_FILES}" "TARGETS"
+                        "${_PYMOD_TARGET}")
+      compile_py_files(_${_LIB_NAME} ${PYMOD_STAGE_DIR}/${_DIR} ${_ABS_PY_FILES})
     endforeach()
-    if (_PY_FILES)
-      add_custom_target("${_ARG_NAME}_pymod" ALL)
-      copy_if_different("./" "${PYMOD_STAGE_DIR}" "${_PY_FILES}" "TARGETS"
-                        "${_ARG_NAME}_pymod")
-      add_dependencies("_${_ARG_NAME}" "${_ARG_NAME}_pymod")
-      include_directories(${PYTHON_INCLUDE_PATH})
-      install(FILES ${_PY_FILES} DESTINATION "${LIB_DIR}/${PYMOD_DIR}")
-      endif()
   endif()  
   get_target_property(_MOD_DEPS "${_PARENT_NAME}" MODULE_DEPS)
   if(_MOD_DEPS)
     foreach(dep ${_MOD_DEPS})
-       add_dependencies("_${_ARG_NAME}" "_${dep}")
+       add_dependencies("_${_LIB_NAME}" "_${dep}")
     endforeach()
   endif()
-
 endmacro()
 
 add_custom_target(check)
+add_custom_target(check_xml)
 if (WIN32)
   set_target_properties(check PROPERTIES EXCLUDE_FROM_ALL "1")
+  set_target_properties(check_xml PROPERTIES EXCLUDE_FROM_ALL "1")
 endif()
 
 #-------------------------------------------------------------------------------
@@ -499,8 +627,11 @@ endif()
 #
 # define a unit test
 #-------------------------------------------------------------------------------
-macro(ost_unittest MODULE SOURCE_FILES)
-    set(_SOURCES ${SOURCE_FILES})
+macro(ost_unittest)
+  set(_ARG_PREFIX ost)
+  parse_argument_list(_ARG 
+                      "MODULE;PREFIX;SOURCES;LINK" "" ${ARGN})
+    set(_SOURCES ${_ARG_SOURCES})
     set(CPP_TESTS)
     set(PY_TESTS)
     set(CMAKE_CURRENT_BINARY_DIR "${CMAKE_BINARY_DIR}/tests")
@@ -512,7 +643,7 @@ macro(ost_unittest MODULE SOURCE_FILES)
      endif()
     endforeach()
     set(_SOURCES ${CPP_TESTS})
-    set(_test_name "${MODULE}_tests")
+    set(_test_name "${_ARG_PREFIX}_${_ARG_MODULE}_tests")
     if(DEFINED CPP_TESTS)
       if(COMPILE_TESTS)
         add_executable(${_test_name} ${_SOURCES})
@@ -520,25 +651,35 @@ macro(ost_unittest MODULE SOURCE_FILES)
         add_executable(${_test_name} EXCLUDE_FROM_ALL ${_SOURCES})
       endif()
       if (WIN32)
-        target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "ost_${MODULE}")  
-        add_custom_target("${_test_name}_run"
+        target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "${_ARG_PREFIX}_${_ARG_MODULE}")  
+        add_custom_target("${_test_name}_run":
                         COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe || echo
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/..
-                        COMMENT "running checks for module ${MODULE}"
+                        COMMENT "running checks for module ${_ARG_MODULE}"
                         DEPENDS ${_test_name})
         add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe)
       else()
         target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES}
-                            "ost_${MODULE}")
+                            "${_ARG_PREFIX}_${_ARG_MODULE}")
         add_custom_target("${_test_name}_run"
-                        COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo 
+                        COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                        COMMENT "running checks for module ${MODULE}"
+                        COMMENT "running checks for module ${_ARG_MODULE}"
+                        DEPENDS ${_test_name})
+        add_custom_target("${_test_name}_run_xml"
+                        COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} --log_format=xml --log_level=all > ${_test_name}_log.xml || echo
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        COMMENT "running checks for module ${_ARG_MODULE}"
                         DEPENDS ${_test_name})
         add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} )
       endif()
+      
+      if (_ARG_LINK)
+        target_link_libraries("${_test_name}" ${_ARG_LINK})
+      endif()
 
       add_dependencies(check "${_test_name}_run")
+      add_dependencies(check_xml "${_test_name}_run_xml")
       set_target_properties(${_test_name}
                             PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                             "${CMAKE_CURRENT_BINARY_DIR}")
@@ -559,9 +700,15 @@ macro(ost_unittest MODULE SOURCE_FILES)
                   sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   COMMENT "running checks ${py_test}" VERBATIM)
+        add_custom_target("${py_test}_run_xml"
+                  sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} xml || echo"
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                  COMMENT "running checks ${py_test}" VERBATIM)
       endif()
-      add_dependencies("${py_test}_run" ost_scripts "_${MODULE}")
+      add_dependencies("${py_test}_run" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
+      add_dependencies("${py_test}_run_xml" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
       add_dependencies(check "${py_test}_run")
+      add_dependencies(check_xml "${py_test}_run_xml")
       if (WIN32)
         set_target_properties("${py_test}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
       endif()
@@ -649,25 +796,110 @@ int main( int argc, char ** argv ) {
 endmacro()
 
 
-macro(get_ost_rev)
-  if (NOT OST_REV)
-    if (NOT WIN32)
-      if (EXISTS .svn)
-        exec_program("svn" 
-                     ARGS "info |grep Revision|awk '{print $2}'"
-                     OUTPUT_VARIABLE OST_REV
-        )
-      endif()
-    else()
-      exec_program("svnversion.exe"
-                   ARGS ""
-                   OUTPUT_VARIABLE OST_REV
-      )    
-      string(REGEX REPLACE "[0-9][0-9][0-9][0-9]:" "" OST_REV ${OST_REV})
-      string(REGEX REPLACE "[A-Za-z]" "" OST_REV ${OST_REV})
+#-------------------------------------------------------------------------------
+# this macro sets up the stage directories
+#-------------------------------------------------------------------------------
+macro(setup_stage)
+  set(STAGE_DIR "${CMAKE_BINARY_DIR}/stage")
+  set(EXECUTABLE_OUTPUT_PATH ${STAGE_DIR}/bin  )
+  set(HEADER_STAGE_PATH ${STAGE_DIR}/include )
+  set(SHARED_DATA_PATH ${STAGE_DIR}/share/openstructure  )
+
+  if (UNIX AND NOT APPLE)
+    check_architecture()
+  endif()
+  set (ARCH ${CMAKE_NATIVE_ARCH})
+  if ("${ARCH}" MATCHES "64")
+    set(LIB_DIR lib64  )
+    set(LIB_STAGE_PATH "${STAGE_DIR}/lib64"  )
+  else()
+    set(LIB_DIR lib  )
+    set(LIB_STAGE_PATH "${STAGE_DIR}/lib"  )
+  endif()
+  if (_DEBIAN_STYLE_LIBEXEC)
+    set(LIBEXEC_PATH ${LIB_DIR}/openstructure/libexec  )
+  else()
+    set(LIBEXEC_PATH libexec/openstructure  )
+  endif()
+  if (_DEBIAN_STYLE_LIBEXEC)
+    set(LIBEXEC_STAGE_PATH ${LIB_STAGE_PATH}/openstructure/libexec  )
+  else()
+    set(LIBEXEC_STAGE_PATH ${STAGE_DIR}/libexec/openstructure  )
+  endif()
+
+  include_directories("${HEADER_STAGE_PATH}")
+  link_directories(${LIB_STAGE_PATH})
+
+endmacro()
+
+#-------------------------------------------------------------------------------
+# get compiler version
+#-------------------------------------------------------------------------------
+function(get_compiler_version _OUTPUT_VERSION)
+  exec_program(${CMAKE_CXX_COMPILER}
+               ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+               OUTPUT_VARIABLE _COMPILER_VERSION
+  )
+  string(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
+    _COMPILER_VERSION ${_COMPILER_VERSION})
+
+  set(${_OUTPUT_VERSION} ${_COMPILER_VERSION} PARENT_SCOPE)
+endfunction()
+
+
+
+macro(setup_compiler_flags)
+  if (WIN32)
+     # add_definitions(-DBOOST_TEST_INCLUDED)
+
+     add_definitions(-D_USE_MATH_DEFINES -D_CRT_SECURE_NO_DEPRECATE
+                     -D_SCL_SECURE_NO_DEPRECATE -DNOMINMAX)
+     add_definitions(-Zc:wchar_t-)   #
+    # add_definitions(-MDd -vmg -EHsc -GR)
+    #GR:Uses the __fastcall calling convention (x86 only).
+    #-EHsc to specify the synchronous exception handling mode/
+    #-vmg Uses full generality for pointers to members.
+    add_definitions(-DBOOST_ZLIB_BINARY=zdll)
+    #add_definitions(-NODEFAULTLIB:LIBCMTD.lib)
+  endif()
+
+
+  if (CMAKE_COMPILER_IS_GNUCXX)
+    get_compiler_version(_GCC_VERSION)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
+    if (_GCC_VERSION MATCHES "44")
+      # gcc 4.4. is very strict about aliasing rules. the shared_count
+      # implementation that is used boost's shared_ptr violates these rules. To
+      # silence the warnings and prevent miscompiles, enable
+      #  -fno-strict-aliasing
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing" )
     endif()
   endif()
-  if (OST_REV)
-    message("Revision: ${OST_REV}")
+endmacro()
+set(_BOOST_MIN_VERSION 1.31)
+
+macro(setup_boost)
+  find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS python REQUIRED)
+  set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
+  set(Boost_LIBRARIES)
+  find_package(Boost ${_BOOST_MIN_VERSION}
+               COMPONENTS unit_test_framework REQUIRED)
+  set(BOOST_UNIT_TEST_LIBRARIES ${Boost_LIBRARIES})
+  set(Boost_LIBRARIES)
+  if (ENABLE_STATIC)
+    set(Boost_USE_STATIC_LIBS ON)
   endif()
+  find_package(Boost ${_BOOST_MIN_VERSION}
+               COMPONENTS filesystem system REQUIRED)
+  set(BOOST_LIBRARIES ${Boost_LIBRARIES})
+  set(Boost_LIBRARIES)
+  find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS iostreams REQUIRED)
+  set(BOOST_IOSTREAM_LIBRARIES ${Boost_LIBRARIES})
+  set(Boost_LIBRARIES)
+  find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS program_options REQUIRED)
+  set(BOOST_PROGRAM_OPTIONS ${Boost_LIBRARIES})
+  set(Boost_LIBRARIES)
+  find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS regex REQUIRED)
+  set(BOOST_REGEX_LIBRARIES ${Boost_LIBRARIES})
+  set(Boost_LIBRARIES)
 endmacro()

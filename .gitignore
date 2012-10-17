@@ -12,6 +12,7 @@ CTestTestfile.cmake
 .*
 !.gitignore
 CMakeCache.txt
+version.hh
 config.hh
 *.pyc
 index.txt
@@ -22,6 +23,11 @@ pov_*test.pov
 pov_*test.inc
 *-out.pdb
 *-out.sdf
+*-out.crd
+*-out.pqr
+*-out.png
+*_out.dcd
+*_out.pdb
 CMakeLists.txt.user
 OpenStructure.cbp
 DartConfiguration.tcl
@@ -38,6 +44,7 @@ compounds.chemlib
 /deployment/macos/openstructure.dmg
 /scripts/dng
 *.vcproj
+/scripts/ost_config
 *.user
 *.dir
 *.sln
@@ -49,3 +56,11 @@ Debug
 *.cxx_parameters
 /deployment/win/create_archive.bat
 /install_manifest.txt
+/modules/gui/src/module_config.hh
+/modules/gui/src/dngr.qrc.depends
+*_out.csv
+*_out.tab
+*_out.pickle
+/modules/io/tests/temp_img.tmp
+PYTEST-*.xml
+ost_*_tests_log.xml

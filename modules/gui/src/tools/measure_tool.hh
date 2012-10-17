@@ -28,6 +28,7 @@
 #include <ost/gfx/color.hh>
 
 #include <QList>
+#include <QWidget>
 namespace ost { namespace gui {
 
 class DLLEXPORT_OST_GUI Measurement {
@@ -62,8 +63,10 @@ typedef std::vector<Measurement> MeasurementList;
 
 
 class DLLEXPORT_OST_GUI MeasureTool : public Tool {
+  Q_OBJECT
 public:
   MeasureTool();
+  virtual ~MeasureTool() {};
   
   int GetMeasureMode();
   virtual void Click(const MouseEvent& event);
@@ -74,6 +77,9 @@ public:
   Real GetLineWidth() const;
 
   void RenderGL();
+
+public slots:
+  void ClearMeasurements();
 
 private:
   int num_clicks_;

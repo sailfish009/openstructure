@@ -74,7 +74,7 @@ geom::AlignedCuboid CartoonRenderer::GetBoundingBox() const
   
 void CartoonRenderer::PrepareRendering()
 {
-  TraceRendererBase::PrepareRendering();
+  TraceRendererBase::PrepareRendering(options_->GetTwistHack());
   if(state_>0) {
     va_.Clear();
     this->prepare_rendering(trace_subset_, va_, spline_list_list_);
@@ -237,6 +237,8 @@ void CartoonRenderer::fudge_spline_obj(SplineEntryListList& olistlist)
           for(;lc<olist.size() && olist.at(lc).type==1;++lc) {
             nlist.push_back(olist.at(lc));
           }
+          // and remove the last one (better graphical appearance)
+          nlist.back().type=0;
         }
       }
       if(lc>=olist.size()) break;
@@ -323,21 +325,21 @@ void CartoonRenderer::rebuild_spline_obj(IndexedVertexArray& va,
                                       options_->GetStrandThickness()+factor,
                                       options_->GetStrandProfileType(),
                                       options_->GetStrandEcc())); // profile 2 = strand
- TraceProfile prof=profiles.back();
-// do not ever change this back to profiles.push_back(profiles.back()); it segfaults on windows 
-// or you will meet two new friends of yours :)
-// looks like a compiler bug
+    TraceProfile prof=profiles.back();
+    // do not ever change this back to profiles.push_back(profiles.back()); it segfaults on windows 
+    // or you will meet two new friends of yours :)
+    // looks like a compiler bug
     profiles.push_back(prof); // profile 3==2, strand    
     profiles.push_back(get_circ_profile(detail,
-                                      1.7*options_->GetStrandWidth()+factor,
+                                        1.7*options_->GetStrandWidth()+factor,
                                       1.1*options_->GetStrandThickness()+factor,
-                                      options_->GetStrandProfileType(),
-                                      options_->GetStrandEcc())); // profile 4 = arrow start
+                                        options_->GetStrandProfileType(),
+                                        options_->GetStrandEcc())); // profile 4 = arrow start
     profiles.push_back(get_circ_profile(detail,
-                                      0.01*options_->GetStrandWidth()+factor,
+                                        0.01*options_->GetStrandWidth()+factor,
                                       1.1*options_->GetStrandThickness()+factor,
-                                      options_->GetStrandProfileType(),
-                                      options_->GetStrandEcc())); // profile 5 = arrow end
+                                        options_->GetStrandProfileType(),
+                                        options_->GetStrandEcc())); // profile 5 = arrow end
 
   }
 
@@ -360,8 +362,9 @@ void CartoonRenderer::rebuild_spline_obj(IndexedVertexArray& va,
     if(slist.size()==2 && slist[0].type==6) {
       // make a cylinder
       va.AddCylinder(CylinderPrim(slist[0].position,slist[1].position,
-				  options_->GetHelixWidth(),
-				  slist[0].color1,slist[1].color1),
+                                  options_->GetHelixWidth(),
+                                  slist[0].color1,
+                                  slist[1].color1),
 		     options_->GetArcDetail(),true);
       continue;
     }
@@ -456,7 +459,7 @@ TraceProfile CartoonRenderer::transform_and_add_profile(const std::vector<TraceP
       norm=Normalize(norm);
     }
     tf_prof[c]=TraceProfileEntry(vec,norm);
-    Color col = se.color1;
+    RGBAColor col = se.color1;
     if(se.type==1) {
       if(se.nflip) {
         col = c<half ? se.color1 : se.color2;
@@ -521,7 +524,7 @@ void CartoonRenderer::cap_profile(const impl::TraceProfile& p,
                                   bool flipn, IndexedVertexArray& va)
 {
   geom::Vec3 norm=flipn ? -se.direction : se.direction;
-  VertexID pi0 = va.Add(se.position,norm, se.color1,geom::Vec2(0.5,0.5));
+  VertexID pi0 = va.Add(se.position,norm, se.color1, geom::Vec2(0.5,0.5));
   std::vector<VertexID> vertices(p.size());
   float fac=2.0*M_PI/static_cast<float>(p.size()-1);
   for(unsigned int i=0;i<p.size();++i) {

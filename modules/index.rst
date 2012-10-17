@@ -7,6 +7,7 @@ OpenStructure documentation
   
   install
   intro
+  users
   base/generic
   base/base
   geom/geom
@@ -18,15 +19,22 @@ OpenStructure documentation
   seq/base/seq
   seq/alg/seqalg
 
+  bindings/bindings
+
   io/io
   gfx/gfx
   gui/gui
   newmodule
   external
   contributing
+<<<<<<< HEAD
   base/symmetry
   img/base/xtal
   
+=======
+  table
+
+>>>>>>> origin/develop
 For Starters
 --------------------------------------------------------------------------------
 
@@ -40,7 +48,13 @@ For Starters
 Molecules
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 **Overview**: :doc:`molecules intro <intro-01>` | :doc:`mol overview <mol/base/mol>` | :doc:`graphical entity<gfx/entity>` | :doc:`entity <mol/base/entity>` | :doc:`queries <mol/base/query>` | :doc:`symmetry <base/symmetry>`
+=======
+**Overview**: :doc:`molecules intro <intro-01>` | :doc:`mol overview <mol/base/mol>` | :doc:`graphical entity<gfx/entity>` | :doc:`entity <mol/base/entity>` | :doc:`queries <mol/base/query>` | :doc:`algorithms <mol/alg/molalg>`
+
+**Trajectories**: :doc:`basics <mol/base/traj>` | :ref:`analysis <traj-analysis>`
+>>>>>>> origin/develop
 
 **Input/Output**: :ref:`loading and saving molecules <mol-io>`
 
@@ -54,6 +68,7 @@ Density Maps and Images
 
 **Overview**: :doc:`images intro <intro-02>` | :doc:`img module <img/base/img>` | :doc:`img.alg module <img/alg/alg>` | :doc:`crystallographic density maps <img/base/xtal>`
 
+**Input/Output**: :ref:`loading and saving density maps <img-io>`
 
 
 
@@ -85,7 +100,14 @@ Graphical User Interface
 **Widgets**: :doc:`python shell <gui/python_shell>` | :doc:`sequence viewer <gui/sequence_viewer>`
 
 
+Varia
+--------------------------------------------------------------------------------
 
+**Datasets:** :doc:`tabular data <table>`
+
+**Supported File Formats:** :doc:`structure formats<io/structure_formats>` | :doc:`sequence formats <io/sequence_formats>` | :doc:`image formats <io/image_formats>`
+
+**Users** :doc:`Reporting a problem <users>`
 
 Extending OpenStructure
 --------------------------------------------------------------------------------
@@ -93,7 +115,3 @@ Extending OpenStructure
 **Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>` | :doc:`instructions for developers <contributing>`
 
 
-
-
-
-  

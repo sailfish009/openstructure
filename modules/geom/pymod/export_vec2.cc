@@ -35,6 +35,15 @@ String vec2_repr(const geom::Vec2& v)
   return ss.str();
 }
 
+list vec2_data(const geom::Vec2& v)
+{
+  list nrvo;
+  for(size_t k=0;k<2;++k) {
+    nrvo.append(v.Data()[k]);
+  }
+  return nrvo;
+}
+
 void export_Vec2()
 {
   using namespace geom;
@@ -58,6 +67,8 @@ void export_Vec2()
     .def(self / Real())
     .def(self + self)
     .def(self - self)
+    .def(self == self)
+    .def(self != self)
     .def("__repr__", vec2_repr)
     .def(self_ns::str(self))
     .def("__getitem__",Vec2_getitem)
@@ -66,6 +77,7 @@ void export_Vec2()
     .def("GetY", &Vec2::GetY)
     .add_property("x", &Vec2::GetX, &Vec2::SetX)
     .add_property("y", &Vec2::GetY, &Vec2::SetY)
+    .add_property("data",vec2_data)
   ;
   class_<Vec2List>("Vec2List", init<>())
     .def(vector_indexing_suite<Vec2List>())

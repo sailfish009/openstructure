@@ -27,7 +27,7 @@ using namespace ost;
 using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 
 namespace {
   ChainHandle get_chain(AtomHandle& a)
@@ -52,6 +52,9 @@ void export_Atom()
     .def("GetIndex", &AtomBase::GetIndex)
     .add_property("pos",
                   make_function(&AtomBase::GetPos,
+                                return_value_policy<copy_const_reference>()))
+    .add_property("original_pos",
+                  make_function(&AtomBase::GetOriginalPos,
                                 return_value_policy<copy_const_reference>()))
     .add_property("name",
                   make_function(&AtomBase::GetName,
@@ -109,7 +112,7 @@ void export_Atom()
 
   class_<AtomHandleList>("AtomHandleList", no_init)
     .def(vector_indexing_suite<AtomHandleList>())
-    .def(ost::VectorAdditions<AtomHandleList>())
+    .def(geom::VectorAdditions<AtomHandleList>())
   ;
 }
 

@@ -50,7 +50,8 @@ SequenceModel::SequenceModel(QObject *parent)
   this->endInsertRows();
 }
 
-void SequenceModel::InsertSequence(QString& name, seq::SequenceHandle& seq){
+void SequenceModel::InsertSequence(QString& name, seq::SequenceHandle& seq)
+{
   int cols = this->columnCount();
   int new_cols = seq.GetLength();
   this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount());
@@ -63,7 +64,7 @@ void SequenceModel::InsertSequence(QString& name, seq::SequenceHandle& seq){
   this->endInsertRows();
 }
 
-void SequenceModel::InsertChain(QString& name, mol::ChainView& view){
+void SequenceModel::InsertChain(QString& name, mol::ChainView& view) {
   int cols = this->columnCount();
   int new_cols = view.GetResidueCount();
   this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount());
@@ -89,8 +90,10 @@ void SequenceModel::InsertAlignment(const seq::AlignmentHandle& alignment){
   this->endInsertRows();
 }
 
-void SequenceModel::InsertSequences(const QList<QString>& names, seq::SequenceList& list){
-  this->beginInsertRows(this->index(this->rowCount(),0),this->rowCount(),this->rowCount()+list.GetCount());
+void SequenceModel::InsertSequences(const QList<QString>& names, 
+                                    seq::SequenceList& list){
+  this->beginInsertRows(this->index(this->rowCount(),0),
+                        this->rowCount(),this->rowCount()+list.GetCount());
   objects_.append(new SequenceViewObject(list, names, this));
   this->endInsertRows();
 }
@@ -143,7 +146,7 @@ void SequenceModel::RemoveAlignment(const seq::AlignmentHandle& alignment){
   }
 }
 
-int SequenceModel::GetColumnCount() const{
+int SequenceModel::GetColumnCount() const {
   int cols = 0;
   for(int i = 0; i<objects_.size();i++){
     int ob_cols = objects_[i]->GetMaxColumnCount();
@@ -154,7 +157,8 @@ int SequenceModel::GetColumnCount() const{
   return cols;
 }
 
-SequenceViewObject* SequenceModel::GetItem(const gfx::EntityP& entity){
+SequenceViewObject* SequenceModel::GetItem(const gfx::EntityP& entity)
+{
   if(entity != NULL){
     for (int i = 0 ; i< objects_.size(); i++){
       if(SequenceViewObject* seq_view_object = qobject_cast<SequenceViewObject*>(objects_[i])){
@@ -167,7 +171,8 @@ SequenceViewObject* SequenceModel::GetItem(const gfx::EntityP& entity){
   return NULL;
 }
 
-AlignmentViewObject* SequenceModel::GetItem(const seq::AlignmentHandle& alignment){
+AlignmentViewObject* SequenceModel::GetItem(const seq::AlignmentHandle& alignment)
+{
   for (int i = 0 ; i< objects_.size(); i++){
     if(AlignmentViewObject* alignment_object = qobject_cast<AlignmentViewObject*>(objects_[i])){
       if(alignment == alignment_object->GetAlignment()){
@@ -178,7 +183,8 @@ AlignmentViewObject* SequenceModel::GetItem(const seq::AlignmentHandle& alignmen
   return NULL;
 }
 
-const PainterList& SequenceModel::GetPainters(const QModelIndex& index) const{
+const PainterList& SequenceModel::GetPainters(const QModelIndex& index) const
+{
   QPair<int, BaseViewObject*> pair = this->GetRowWithItem(index);
   if(pair.second){
     return pair.second->GetRow(pair.first)->GetPainters();
@@ -255,7 +261,8 @@ int SequenceModel::GetGlobalRow(BaseViewObject* obj, int row) const
   return glob_row;
 }
 
-QModelIndexList SequenceModel::GetModelIndexes(gfx::EntityP& entity, const mol::EntityView& view)
+QModelIndexList SequenceModel::GetModelIndexes(gfx::EntityP& entity, 
+                                               const mol::EntityView& view)
 {
   QModelIndexList list;
   if(BaseViewObject* object = this->GetItem(entity)){
@@ -275,7 +282,8 @@ QModelIndexList SequenceModel::GetModelIndexes(gfx::EntityP& entity, const mol::
   return list;
 }
 
-QModelIndexList SequenceModel::GetModelIndexes(const QString& subject, const QString& sequence_name)
+QModelIndexList SequenceModel::GetModelIndexes(const QString& subject, 
+                                               const QString& sequence_name)
 {
   QModelIndexList list;
   for (int i = 0; i<objects_.size(); i++){
@@ -295,7 +303,8 @@ QModelIndexList SequenceModel::GetModelIndexes(const QString& subject, const QSt
   return list;
 }
 
-void SequenceModel::SelectionChanged(const QItemSelection& sel, const QItemSelection& desel)
+void SequenceModel::SelectionChanged(const QItemSelection& sel, 
+                                     const QItemSelection& desel)
 {
   QMap<int,QPair<QSet<int>,QSet<int> > > sel_map;
   const QModelIndexList& sel_indexes = sel.indexes();

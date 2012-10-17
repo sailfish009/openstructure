@@ -84,11 +84,16 @@ public:
     // determine atom to add to list
     mol::AtomHandle ca = res.GetCentralAtom();
     if (ca) {
+      float rad=1.0;
+      // TODO: move this property to the rendering state
+      if(ca.HasProp("trace_rad")) {
+        rad=ca.GetFloatProp("trace_rad");
+      }
       NodeEntry entry={ca, GfxObj::Ele2Color(ca.GetElement()),
                        GfxObj::Ele2Color(ca.GetElement()),
                        geom::Vec3(), // this will be set by the gfx trace obj
                        res.GetCentralNormal(),
-                       1.0,
+                       rad,
                        geom::Vec3(),geom::Vec3(),geom::Vec3(), // for later use in NA rendering
                        false,id_counter_++};
       list_.push_back(entry);
@@ -164,7 +169,13 @@ void BackboneTrace::OnUpdatedPositions()
   for(NodeEntryListList::iterator nitnit=node_list_list_.begin();nitnit!=node_list_list_.end();++nitnit) {
     NodeEntryList& nlist=*nitnit;
     for(NodeEntryList::iterator nit=nlist.begin();nit!=nlist.end();++nit) {
-      nit->normal=nit->atom.GetResidue().GetCentralNormal();
+      mol::AtomHandle ca=nit->atom;
+      nit->normal=ca.GetResidue().GetCentralNormal();
+      if(ca.HasProp("trace_rad")) {
+        nit->rad=ca.GetFloatProp("trace_rad");
+      } else {
+        nit->rad=1.0;
+      }
     }
     PrepList(nlist);
   }
@@ -178,7 +189,7 @@ void BackboneTrace::AddNodeEntryList(const NodeEntryList& l)
   }
 }
 
-void BackboneTrace::PrepList(NodeEntryList& nelist)
+void BackboneTrace::PrepList(NodeEntryList& nelist) const
 {
   // orthogonalize the residue normals with
   // twist detection; important for later
@@ -206,8 +217,10 @@ void BackboneTrace::PrepList(NodeEntryList& nelist)
     orth=geom::Normalize(geom::Cross(dir,e1->normal));
     norm=geom::Normalize(geom::Cross(orth,dir));
     // twist check
-    if(geom::Dot(geom::Cross(e0->normal,dir),geom::Cross(norm,dir))<0.0) {
-      norm=-norm;
+    if(twist_hack_) {
+      if(geom::Dot(geom::Cross(e0->normal,dir),geom::Cross(norm,dir))<0.0) {
+        norm=-norm;
+      }
     }
     e1->normal=norm;
     // skip over shift for the last iteration
@@ -224,8 +237,10 @@ void BackboneTrace::PrepList(NodeEntryList& nelist)
   e2->direction=dir;
   orth=geom::Normalize(geom::Cross(dir,e2->normal));
   norm=geom::Normalize(geom::Cross(orth,dir));
-  if(geom::Dot(geom::Cross(e1->normal,dir),geom::Cross(norm,dir))<0.0) {
-    norm=-norm;
+  if(twist_hack_) {
+    if(geom::Dot(geom::Cross(e1->normal,dir),geom::Cross(norm,dir))<0.0) {
+      norm=-norm;
+    }
   }
   e2->normal=norm;
 }
@@ -239,7 +254,7 @@ BackboneTrace BackboneTrace::CreateSubset(const mol::EntityView& subview)
     NodeEntryList new_nlist;
     const NodeEntryList& nlist=*nitnit;
     for(NodeEntryList::const_iterator nit=nlist.begin();nit!=nlist.end();++nit) {
-      if(subview.FindAtom(nit->atom).IsValid()) {
+      if(subview.ViewForHandle(nit->atom).IsValid()) {
         if(!new_nlist.empty()) {
           if(!in_sequence(new_nlist.back().atom.GetResidue(),nit->atom.GetResidue(),seq_hack_)) {
             if(new_nlist.size()>1) {
@@ -264,6 +279,12 @@ void BackboneTrace::SetSeqHack(bool f)
 {
   seq_hack_=f;
   Rebuild();
+}
+
+void BackboneTrace::SetTwistHack(bool f)
+{
+  twist_hack_=f;
+  // don't issue Rebuild()
 }
 
 }}} // ns

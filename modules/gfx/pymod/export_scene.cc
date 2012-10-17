@@ -21,6 +21,7 @@ using namespace boost::python;
 
 #include <ost/gfx/gfx_object.hh>
 #include <ost/gfx/scene.hh>
+#include <ost/gfx/exporter.hh>
 using namespace ost;
 using namespace ost::gfx;
 
@@ -28,11 +29,12 @@ namespace {
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(scene_add_overloads, 
                                        Scene::Add, 1, 2)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(scene_autoslab_overloads, 
-                                       Scene::Autoslab, 0, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(scene_export_pov_overloads,
                                        Scene::ExportPov, 1,2)
 void (Scene::*apply)(const InputEvent&, bool)=&Scene::Apply;
+void (Scene::*autoslab1)()=&Scene::Autoslab;
+void (Scene::*autoslab2)(bool)=&Scene::Autoslab;
+void (Scene::*autoslab3)(bool,bool)=&Scene::Autoslab;
 
 Scene* get_scene()
 {
@@ -47,6 +49,25 @@ GfxObjP scene_getitem(Scene* scene, const String& item)
 {
   return scene->operator[](item);
 }
+
+geom::AlignedCuboid scene_get_bb1(Scene* scene)
+{
+  return scene->GetBoundingBox();
+}
+
+geom::AlignedCuboid scene_get_bb2(Scene* scene, bool use_tf)
+{
+  return scene->GetBoundingBox(use_tf);
+}
+
+geom::AlignedCuboid scene_get_bb3(Scene* scene, const geom::Transform& tf)
+{
+  return scene->GetBoundingBox(tf);
+}
+
+void (Scene::*scene_set_bg1)(const Color&) = &Scene::SetBackground;
+void (Scene::*scene_set_bg2)(const Gradient&) = &Scene::SetBackground;
+void (Scene::*scene_set_bg3)(const Bitmap&) = &Scene::SetBackground;
 
 } // anon ns
 
@@ -63,6 +84,7 @@ void export_Scene()
 
   void (Scene::* export1)(const String&, uint, uint, bool) = &Scene::Export;
   void (Scene::* export2)(const String&, bool) = &Scene::Export;
+  void (Scene::* export3)(Exporter*) const = &Scene::Export;
   void (Scene::*remove1)(const GfxNodeP&) = &Scene::Remove;
   void (Scene::*remove2)(const String&) = &Scene::Remove;
   void (Scene::*center_on1)(const String&) = &Scene::CenterOn;
@@ -78,12 +100,19 @@ void export_Scene()
   class_<Scene, boost::noncopyable>("SceneSingleton",no_init)
     .def("Add", &Scene::Add, 
          scene_add_overloads())
-    .def("Autoslab", &Scene::Autoslab, 
-         scene_autoslab_overloads())
+    .def("Autoslab", autoslab1)
     .def("AutoAutoslab",&Scene::AutoAutoslab)
     .def("GetAutoAutoslab",&Scene::GetAutoAutoslab)
-    .def("AutoslabMax",&Scene::AutoslabMax)
+    .add_property("auto_autoslab",&Scene::GetAutoAutoslab,&Scene::AutoAutoslab)
+    .def("SetAutoslabMode",&Scene::SetAutoslabMode)
+    .def("GetAutoslabMode",&Scene::GetAutoslabMode)
+    .add_property("autoslab_mode",&Scene::GetAutoslabMode,&Scene::SetAutoslabMode)
+    .def("Autoslab", autoslab2) // DEPRECATED
+    .def("Autoslab", autoslab3) // DEPRECATED
+    .def("AutoslabMax",&Scene::AutoslabMax) // DEPRECATED
     .def("Remove", remove1)
+    .def("Register", &Scene::Register)
+    .def("Unregister", &Scene::Unregister)
     .def("Remove", remove2)
     .add_property("viewport", &Scene::GetViewport)
     .def("RequestRedraw", &Scene::RequestRedraw)
@@ -99,10 +128,16 @@ void export_Scene()
     .def("Resize", &Scene::Resize)
     .def("HasNode", &Scene::HasNode)
     .def("GetBackground", &Scene::GetBackground)
-    .def("SetBackground", &Scene::SetBackground)
+    .def("SetBackground", scene_set_bg1)
+    .def("SetBackground", scene_set_bg2)
+    .def("SetBackground", scene_set_bg3)
     .add_property("bg",
                   &Scene::GetBackground, 
-                  &Scene::SetBackground)
+                  scene_set_bg1)
+    .def("GetProjection",&Scene::GetProjection)
+    .add_property("projection",&Scene::GetProjection)
+    .def("GetInvertedProjection",&Scene::GetInvertedProjection)
+    .add_property("inverted_projection",&Scene::GetInvertedProjection)
     .def("SetNear",&Scene::SetNear)
     .def("GetNear",&Scene::GetNear)
     .add_property("near", &Scene::GetNear, &Scene::SetNear)
@@ -116,6 +151,7 @@ void export_Scene()
     .def("SetFogColor",&Scene::SetFogColor)
     .def("GetFogColor",&Scene::GetFogColor)
     .add_property("fogcol", &Scene::GetFogColor, &Scene::SetFogColor)
+    .add_property("fog_color", &Scene::GetFogColor, &Scene::SetFogColor)
     .def("SetFOV",&Scene::SetFOV)
     .def("GetFOV",&Scene::GetFOV)
     .add_property("fov", &Scene::GetFOV, &Scene::SetFOV)
@@ -159,8 +195,9 @@ void export_Scene()
     .def("SetLightProp",set_light_prop1)
     .def("SetLightProp",set_light_prop2)
     .def("Apply", apply)
-    .def("Export",export1, arg("transparent")=true)
-    .def("Export",export2, arg("transparent")=true)
+    .def("Export",export1, arg("transparent")=false)
+    .def("Export",export2, arg("transparent")=false)
+    .def("Export",export3)
     .def("ExportPov",&Scene::ExportPov,
          scene_export_pov_overloads())
     .def("PushView",&Scene::PushView)
@@ -169,14 +206,26 @@ void export_Scene()
     .def("BlurSnapshot",&Scene::BlurSnapshot)
     .def("RemoveAll", &Scene::RemoveAll)
     .def("SetShadow",&Scene::SetShadow)
+    .add_property("shadow",&Scene::GetShadow,&Scene::SetShadow)
     .def("SetShadowQuality",&Scene::SetShadowQuality)
+    .add_property("shadow_quality",&Scene::GetShadowQuality,&Scene::SetShadowQuality)
     .def("SetShadowWeight",&Scene::SetShadowWeight)
+    .add_property("shadow_weight",&Scene::GetShadowWeight,&Scene::SetShadowWeight)
     .def("SetDepthDarkening",&Scene::SetDepthDarkening)
     .def("SetDepthDarkeningWeight",&Scene::SetDepthDarkeningWeight)
     .def("SetAmbientOcclusion",&Scene::SetAmbientOcclusion)
+    .add_property("ambient_occlusion",&Scene::GetAmbientOcclusion,&Scene::SetAmbientOcclusion)
+    .add_property("ao",&Scene::GetAmbientOcclusion,&Scene::SetAmbientOcclusion)
     .def("SetAmbientOcclusionWeight",&Scene::SetAmbientOcclusionWeight)
+    .add_property("ambient_occlusion_weight",&Scene::GetAmbientOcclusionWeight,&Scene::SetAmbientOcclusionWeight)
+    .add_property("ao_weight",&Scene::GetAmbientOcclusionWeight,&Scene::SetAmbientOcclusionWeight)
     .def("SetAmbientOcclusionMode",&Scene::SetAmbientOcclusionMode)
+    .add_property("ambient_occlusion_mode",&Scene::GetAmbientOcclusionMode,&Scene::SetAmbientOcclusionMode)
+    .add_property("ao_mode",&Scene::GetAmbientOcclusionMode,&Scene::SetAmbientOcclusionMode)
     .def("SetAmbientOcclusionQuality",&Scene::SetAmbientOcclusionQuality)
+    .add_property("ambient_occlusion_quality",&Scene::GetAmbientOcclusionQuality,&Scene::SetAmbientOcclusionQuality)
+    .add_property("ao_quality",&Scene::GetAmbientOcclusionQuality,&Scene::SetAmbientOcclusionQuality)
+    .add_property("ao_size",&Scene::GetAmbientOcclusionSize,&Scene::SetAmbientOcclusionSize)
     .def("AttachObserver",&Scene::AttachObserver)
     .def("StartOffscreenMode",&Scene::StartOffscreenMode)
     .def("StopOffscreenMode",&Scene::StopOffscreenMode)
@@ -185,5 +234,13 @@ void export_Scene()
     .add_property("root_node", &Scene::GetRootNode)
     .def("SetBeaconOff",&Scene::SetBeaconOff)
     .def("__getitem__",scene_getitem)
+    .add_property("show_center",&Scene::GetShowCenter, &Scene::SetShowCenter)
+    .add_property("fix_center",&Scene::GetFixCenter, &Scene::SetFixCenter)
+    .def("GetBoundingBox",scene_get_bb1)
+    .def("GetBoundingBox",scene_get_bb2)
+    .def("GetBoundingBox",scene_get_bb3)
+    .add_property("bounding_box",scene_get_bb1)
+    .add_property("export_aspect",&Scene::GetExportAspect,&Scene::SetExportAspect)
+    .add_property("show_export_aspect",&Scene::GetShowExportAspect,&Scene::SetShowExportAspect)
   ;
 }

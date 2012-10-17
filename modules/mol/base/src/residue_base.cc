@@ -44,6 +44,23 @@ const GenericPropContainerImpl* ResidueBase::GpImpl() const
   return Impl().get();
 }
 
+AtomHandle ResidueBase::GetCentralAtom() const 
+{
+  this->CheckValidity();
+  return AtomHandle(Impl()->GetCentralAtom());
+}
+
+void ResidueBase::SetCentralAtom(const AtomHandle& a)
+{
+  this->CheckValidity();
+  impl_->SetCentralAtom(a.Impl());
+}
+
+geom::Vec3 ResidueBase::GetCentralNormal() const 
+{
+  this->CheckValidity();
+  return impl_->GetCentralNormal();
+}
 
 const ResNum& ResidueBase::GetNumber() const {
   this->CheckValidity();
@@ -86,6 +103,18 @@ void ResidueBase::SetChemClass(ChemClass cc)
   this->CheckValidity();
   Impl()->SetChemClass(cc);
 }
+
+void ResidueBase::SetChemType(ChemType ct)
+{
+  this->CheckValidity();
+  Impl()->SetChemType(ct);
+}
+
+ChemType ResidueBase::GetChemType() const
+{
+  this->CheckValidity();
+  return Impl()->GetChemType();
+};
 
 SecStructure ResidueBase::GetSecStructure() const 
 {

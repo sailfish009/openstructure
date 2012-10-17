@@ -1,6 +1,7 @@
 set(OST_GFX_HEADERS
 render_pass.hh
 bitmap_io.hh
+collada_exporter.hh
 color.hh
 entity.hh
 entity_fw.hh
@@ -37,6 +38,9 @@ module_config.hh
 primitives.hh
 povray_fw.hh
 povray.hh
+exporter.hh
+exporter_fw.hh
+gost_exporter.hh
 )
 
 set(OST_GFX_COLOR_OPS_HEADERS
@@ -80,6 +84,7 @@ connect_renderer_base.hh
 mapped_property.hh
 entity_renderer_fw.hh
 tabulated_trig.hh
+fast_spheres.hh
 )
 
 
@@ -89,6 +94,7 @@ endif()
 
 set(OST_GFX_SOURCES
 bitmap_io.cc
+collada_exporter.cc
 color.cc
 primitives.cc
 entity.cc
@@ -108,6 +114,7 @@ vertex_array.cc
 vertex_array_helper.cc
 material.cc
 povray.cc
+gost_exporter.cc
 texture.cc
 color_ops/color_op.cc
 color_ops/by_element_color_op.cc
@@ -132,6 +139,7 @@ impl/trace_renderer_base.cc
 impl/mapped_property.cc
 impl/tabulated_trig.cc
 impl/trace_renderer.cc
+impl/fast_spheres.cc
 render_options/render_options.cc
 render_options/line_render_options.cc
 render_options/custom_render_options.cc
@@ -174,8 +182,13 @@ else()
 endif()
 
 if (UNIX AND NOT APPLE)
-  list(APPEND OST_GFX_SOURCES impl/glx_offscreen_buffer.cc)
-  list(APPEND OST_GFX_IMPL_HEADERS glx_offscreen_buffer.hh)
+  if(USE_MESA)
+    list(APPEND OST_GFX_SOURCES impl/mesa_offscreen_buffer.cc)
+    list(APPEND OST_GFX_IMPL_HEADERS mesa_offscreen_buffer.hh)
+  else()
+    list(APPEND OST_GFX_SOURCES impl/glx_offscreen_buffer.cc)
+    list(APPEND OST_GFX_IMPL_HEADERS glx_offscreen_buffer.hh)
+  endif()
 endif()
 
 if (APPLE)
@@ -189,25 +202,26 @@ if(WIN32)
 endif()
 
 if (USE_SHADER)
-  message("Compiling with Shader Support")
   list(APPEND OST_GFX_SOURCES shader.cc)
   list(APPEND OST_GFX_HEADERS shader.hh)
   list(APPEND OST_GFX_SOURCES impl/scene_fx.cc)
   list(APPEND OST_GFX_IMPL_HEADERS scene_fx.hh)
   if (NOT APPLE)
-    set(OST_GLEW_HEADERS
-       glew.h
-       glxew.h
-       wglew.h IN_DIR GL
-    )
-    list(APPEND OST_GFX_SOURCES GL/glew.c)
-    include_directories("${STAGE_DIR}/include/ost/gfx")
+    if (NOT USE_MESA)
+      set(OST_GLEW_HEADERS
+         glew.h
+         glxew.h
+         wglew.h IN_DIR GL
+      )
+      list(APPEND OST_GFX_SOURCES GL/glew.c)
+      include_directories("${STAGE_DIR}/include/ost/gfx")
+    endif()
   endif()  
 endif()
 
-set(OST_GFX_DEPENDENCIES "conop;seq")
+set(OST_GFX_DEPENDENCIES "ost_conop;ost_seq")
 if (ENABLE_IMG)
-  set(OST_GFX_DEPENDENCIES "${OST_GFX_DEPENDENCIES};img;img_alg")
+  set(OST_GFX_DEPENDENCIES "${OST_GFX_DEPENDENCIES};ost_img;ost_img_alg")
 endif()
 
 module(NAME gfx SOURCES ${OST_GFX_SOURCES} ${OST_GFX_MAP_SOURCES} 
@@ -221,6 +235,9 @@ module(NAME gfx SOURCES ${OST_GFX_SOURCES} ${OST_GFX_MAP_SOURCES}
 include_directories(${PNG_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR})
 
 # link against OpenGL and PNG libraries
+if(USE_MESA)
+  link_directories(${OPENGL_LIBRARY_DIR})
+endif()
 target_link_libraries(ost_gfx ${OPENGL_LIBRARIES} ${PNG_LIBRARIES})
 
 if (USE_SHADER)
@@ -228,16 +245,12 @@ if (USE_SHADER)
     shader/aaline_fs.glsl
     shader/amboccl_fs.glsl
     shader/basic_fs.glsl
-    shader/basic_hf_vs.glsl
-    shader/basic_lf_fs.glsl
-    shader/basic_lf_vs.glsl
     shader/basic_vs.glsl
     shader/beacon_fs.glsl
     shader/convolute1_fs.glsl
     shader/dumpnorm_fs.glsl
     shader/dumpnorm_vs.glsl
     shader/fast_sphere_fs.glsl
-    shader/fast_sphere_vs.glsl
     shader/fraglight_fs.glsl
     shader/fraglight_vs.glsl
     shader/iso_fs.glsl
@@ -249,13 +262,14 @@ if (USE_SHADER)
     shader/scenefx_vs.glsl
     shader/selfx_fs.glsl
     shader/selfx_vs.glsl
-    shader/toon2_fs.glsl
-    shader/toon_fs.glsl
-    shader/toon_vs.glsl
     shader/screenblur4_fs.glsl
     shader/test_tex_fs.glsl
+    shader/material_phong.glsl
+    shader/material_hemi.glsl
+    shader/material_toon1.glsl
+    shader/material_toon2.glsl
   )
-  copy_if_different("./" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
+  copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
                     "SHADER_TARGETS" ost_gfx)  
   install(FILES ${SHADER_FILES} DESTINATION "share/openstructure/shader")
 endif(USE_SHADER)
@@ -263,7 +277,7 @@ set(TEXTURE_FILES
   test_texture.png
   glyph_texture.png
 )
-copy_if_different("./" "${SHARED_DATA_PATH}/textures" "${TEXTURE_FILES}" 
+copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${SHARED_DATA_PATH}/textures" "${TEXTURE_FILES}" 
                   "TEXTURE_TARGETS" ost_gfx)  
 
 install(FILES ${TEXTURE_FILES} DESTINATION "share/openstructure/textures")

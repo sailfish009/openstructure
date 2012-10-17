@@ -27,41 +27,32 @@
 
 #include <ost/geom/geom.hh>
 
-#include "gfx.hh"
+#include "gfx_object.hh"
+#include "gfx_prim.hh"
 
 namespace ost { namespace gfx {
 
-class PrimList;
-
-typedef boost::shared_ptr<PrimList> PrimListP;
-
-/// \brief rudimentary graphical lines rendering.
-/// 
-/// The primitives may be rendered either with gfx::RenderMode::SIMPLE or 
-/// gfx::RenderMode::CUSTOM. The render mode can be changed with
-/// GfxObj::SetRenderMode().
-/// 
 /// \see gfx::Cuboid, \ref primitives.py "Displaying Lines and Quads",
 ///      gfx::Quad, \ref gradient.py "Gradient Example",
 ///      \ref random_lines.py "Random Lines"
 class DLLEXPORT_OST_GFX PrimList: public GfxObj 
 {
   struct PointEntry {
-    PointEntry(const geom::Vec3& p, const Color& c):
-      pos(p), color(c) {}
+    PointEntry(const geom::Vec3& p, float r, const Color& c):
+      pos(p), rad(r), col(c) {}
     geom::Vec3 pos;
-    Color color;
-    geom::Mat3 rotmat;
+    float rad;
+    Color col;
   };
 
   typedef std::vector<PointEntry> PointEntryList;
 
   struct LineEntry {
-    LineEntry(const geom::Vec3& p1, const geom::Vec3& p2, const Color& c):
-      pos1(p1), pos2(p2), color(c) {}
-    geom::Vec3 pos1,pos2;
-    Color color;
-    geom::Mat3 rotmat;
+    LineEntry(const geom::Vec3& p1, const geom::Vec3& p2, float r1, float r2, const Color& c1, const Color& c2):
+      pos1(p1), pos2(p2), rad1(r1), rad2(r2), col1(c1), col2(c2) {}
+    geom::Vec3 pos1, pos2;
+    float rad1, rad2;
+    Color col1, col2;
   };
 
   typedef std::vector<LineEntry> LineEntryList;
@@ -70,8 +61,10 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
   /// \brief create new prim list
   PrimList(const String& name);
 
+  virtual geom::AlignedCuboid GetBoundingBox(bool use_tf=true) const;
+
   virtual void ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
-                             const mol::Transform& tf) const;
+                             const geom::Transform& tf) const;
   /// \brief get center      
   virtual geom::Vec3 GetCenter() const;
 
@@ -81,19 +74,58 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
 
   virtual void OnRenderModeChange();
 
-  /// \brief  clear all prims
+  /// \brief clear all prims
   void Clear();
 
-  /// \brief add line as defined by two endpoints
-  void AddPoint(geom::Vec3& p, const Color& col=Color());
+  /*!
+     \brief add point
 
-  /// \brief add line as defined by two endpoints
-  void AddLine(geom::Vec3& p1, geom::Vec3& p2, const Color& col=Color());
+     python interface:
 
-  /// \brief cylinder diameter for custom rendering mode
+     PrimList.AddPoint(pos, color=gfx.Color())
+  */
+  void AddPoint(const geom::Vec3& p, const Color& col);
+
+  /*!
+    \brief add line
+
+    Python interface:
+
+    PrimList.AddLine(pos1,pos2,color=gfx.WHITE,color1=gfx.WHITE,color2=gfx.WHITE)
+  */
+  void AddLine(const geom::Vec3& p1, const geom::Vec3& p2, const Color& col1, const Color& col2);
+
+  /*!
+    \brief add sphere
+
+    Python interface:
+
+    PrimList.AddSphere(cen,radius=1.0,color=gfx.WHITE)
+  */
+  void AddSphere(const geom::Vec3& cen, float rad, const Color& col);
+
+  /*!
+    \brief add cylinder
+
+    Python interface:
+
+    PrimList.AddCyl(pos1,pos2,radius=1.0,radius1=1.0,radius2=1.0,color=gfx.WHITE,color1=gfx.WHITE,color2=gfx.WHITE)
+  */
+  void AddCyl(const geom::Vec3& p0, const geom::Vec3& p1, float r1, float r2, const Color& col1, const Color& col2);
+
+  /*!
+    \brief add text
+
+    Python interface:
+
+    PrimList.AddText(text,pos,color=gfx.WHITE,point_size=1.0)
+  */
+  void AddText(const std::string& text, const geom::Vec3& pos, const Color& col, float point_size);
+
+  /// defunct
   void SetDiameter(float d);
   
-  /// \brief sphere radius for points in custom rendering mode
+  /// defunct
   void SetRadius(float r);
 
   /// \brief set global prims color, overriding individual ones
@@ -105,19 +137,45 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
   void SetArcDetail(unsigned int d);
   unsigned int GetArcDetail() const {return arc_detail_;}
 
+  // TODO: add point and line pixel width
+
+  /*!
+    \brief add triangle mesh
+
+    v : pointer to nv*3 floats for the positions (mandatory)
+    n : pointer to nv*3 floats for the normals (may be NULL)
+    c : pointer to nv*4 floats for the colors (may be NULL)
+    nv: number of vertices, normals, and colors
+    i : pointer to ni*3 vertex indices
+    ni: number of index triplets
+
+    Python interface, using numpy arrays:
+
+      AddMesh(vertex_array, normal_array, color_array, index_array)
+
+    where normal_array and color_array may be None
+  */
+  void AddMesh(float* v, float* n, float* c, size_t nv, unsigned int* i, size_t ni);
+
  protected:
   virtual void CustomPreRenderGL(bool flag);
 
  private:
-  PointEntryList points_;
-  LineEntryList lines_;
-  float radius_;
-  float diameter_;
+  SpherePrimList points_;
+  CylinderPrimList lines_;
+  SpherePrimList spheres_;
+  CylinderPrimList cyls_;
+  TextPrimList texts_;
   unsigned int sphere_detail_;
   unsigned int arc_detail_;
+
+  IndexedVertexArray simple_va_;
+
+  std::vector<IndexedVertexArray> vas_;
   
-  void render_simple();
-  void render_custom();
+  void prep_simple_va();
+  void prep_va();
+  void render_text();
 };
 
 /// \example primitives.py

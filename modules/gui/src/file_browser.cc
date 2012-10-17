@@ -82,6 +82,7 @@ FileBrowser::FileBrowser(QWidget* parent):
       path=example_path;
     }    else{
       dir.cdUp();
+      dir.cdUp();
       example_path=dir.path()+"/examples";
       if (QDir(example_path).exists()) {
         path=example_path;
@@ -266,7 +267,7 @@ void FileBrowser::ShowContextMenu(const QPoint& pos){
     }
     menu->addAction(system_open_action);
   }
-  if(menu->actions().size()>0){
+  if(! menu->actions().empty()){
     menu->exec(QCursor::pos());
   }
 }

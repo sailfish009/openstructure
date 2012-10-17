@@ -22,6 +22,7 @@
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #include <ost/log.hh>
 using boost::unit_test_framework::test_suite;
@@ -65,6 +66,21 @@ ResidueHandle make_leu(ChainHandle chain)
   return res;
 }
 
+ResidueHandle make_defective_leu(ChainHandle chain) 
+{
+  XCSEditor e=chain.GetEntity().EditXCS();  
+  ResidueHandle res=e.AppendResidue(chain, "LEU");
+
+  e.InsertAtom(res, "N", geom::Vec3(19.003,32.473,60.366));
+  e.InsertAtom(res, "CA", geom::Vec3(18.330,32.402,61.664));
+  e.InsertAtom(res, "C", geom::Vec3(17.884,33.787,62.117));
+  e.InsertAtom(res, "O", geom::Vec3(17.853,34.091,63.308));
+  e.InsertAtom(res, "CB", geom::Vec3(19.269,31.793,102.710));
+  e.InsertAtom(res, "CG", geom::Vec3(19.695,30.340,62.501));
+  e.InsertAtom(res, "CD1", geom::Vec3(20.585,29.897,63.648));
+  e.InsertAtom(res, "CD2", geom::Vec3(18.461,29.459,62.420));
+  return res;
+}
 
 void verify_connectivity_x(const ResidueHandle& res) 
 {
@@ -140,7 +156,7 @@ void verify_connectivity(const ResidueHandle& res)
   }
 }
 
-BOOST_AUTO_TEST_SUITE( conop )
+BOOST_AUTO_TEST_SUITE( conop );
 
 
 BOOST_AUTO_TEST_CASE(name_based_connect) 
@@ -154,12 +170,25 @@ BOOST_AUTO_TEST_CASE(name_based_connect)
     heuristic_builder.FillAtomProps(*i);
   }
 
+  EntityHandle de=CreateEntity();
+  ChainHandle dc=de.EditXCS().InsertChain("A");
+  ResidueHandle dile=make_defective_leu(dc);
+  HeuristicBuilder dheuristic_builder;
+  dheuristic_builder.SetBondFeasibilityCheck(false);
+  for (AtomHandleIter i=de.AtomsBegin(),x=de.AtomsEnd(); i!=x; ++i) {
+    dheuristic_builder.FillAtomProps(*i);
+  }
+   
   BOOST_MESSAGE("running distance based checks on arginine");
   heuristic_builder.ConnectAtomsOfResidue(arg);
   verify_connectivity(arg);
   BOOST_MESSAGE("running distance based checks on leu");
   heuristic_builder.ConnectAtomsOfResidue(ile);
   verify_connectivity(ile);
+  
+  BOOST_MESSAGE("running distance based checks on defective leu");
+  dheuristic_builder.ConnectAtomsOfResidue(dile);
+  verify_connectivity(dile);  
 }
 
 BOOST_AUTO_TEST_CASE(test_assign_torsions){
@@ -190,4 +219,4 @@ BOOST_AUTO_TEST_CASE(test_assign_torsions){
   BOOST_CHECK(a2.GetPsiTorsion().IsValid());
 }
 
-BOOST_AUTO_TEST_SUITE_END( )
+BOOST_AUTO_TEST_SUITE_END( );

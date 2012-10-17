@@ -47,8 +47,11 @@ void PythonNamespaceTreeItem::DeleteChildren()
   children_.clear();
   initialized_=false;
 }
-unsigned int PythonNamespaceTreeItem::ChildCount() const
+unsigned int PythonNamespaceTreeItem::ChildCount()
 {
+  if(CanFetchMore()){
+    FetchMore();
+  }
   return children_.size();
 }
 
@@ -56,8 +59,11 @@ PythonNamespaceTreeItem* PythonNamespaceTreeItem::GetParent() const
 {
   return parent_;
 }
-PythonNamespaceTreeItem* PythonNamespaceTreeItem::GetChild(unsigned int index) const
+PythonNamespaceTreeItem* PythonNamespaceTreeItem::GetChild(unsigned int index) 
 {
+  if(CanFetchMore()){
+    FetchMore();
+  }
   return children_.value(index);
 }
 unsigned int PythonNamespaceTreeItem::GetRow() const
@@ -76,7 +82,7 @@ QString PythonNamespaceTreeItem::GetName()  const
 bool PythonNamespaceTreeItem::HasChildren() const 
 {
   if (initialized_) {
-    return children_.size()>0;
+    return ! children_.empty();
   } else {
     return true;
   }

@@ -34,14 +34,14 @@ void tiff_warning_handler(const char *mod, const char* fmt, va_list ap)
 {
   static char message[1024];
 #ifdef _MSC_VER
-  _snprintf(message,1024,fmt,ap);
+  _vsnprintf(message,1024,fmt,ap);
 #else
-  snprintf(message,1024,fmt,ap);
+  vsnprintf(message,1024,fmt,ap);
 #endif
   LOG_INFO(mod << ": " << message);
 }
 
-int32_t CustomTIFFReadProcIStream(void* thandle, void* tdata, int32_t tsize)
+tsize_t CustomTIFFReadProcIStream(thandle_t thandle, tdata_t tdata, tsize_t tsize)
 {
    std::istream* file= reinterpret_cast<std::istream*>(thandle);
    char* data= reinterpret_cast<char*>(tdata);
@@ -49,29 +49,29 @@ int32_t CustomTIFFReadProcIStream(void* thandle, void* tdata, int32_t tsize)
    return file->gcount();
 }
 
-int32_t CustomTIFFReadProcOStream(void* thandle, void* tdata, int32_t tsize)
+tsize_t CustomTIFFReadProcOStream(thandle_t thandle, tdata_t tdata, tsize_t tsize)
 {
   assert(false);
   return -1;
 }
 
-int32_t CustomTIFFWriteProcIStream(void* thandle, void* tdata, int32_t tsize)
+tsize_t CustomTIFFWriteProcIStream(thandle_t thandle, tdata_t tdata, tsize_t tsize)
 {
   assert(false);
   return -1;
 }
 
-int32_t CustomTIFFWriteProcOStream(void* thandle, void* tdata, int32_t tsize)
+tsize_t CustomTIFFWriteProcOStream(thandle_t thandle, tdata_t tdata, tsize_t tsize)
 {
    std::ostream* file= reinterpret_cast<std::ostream*>(thandle);
    char* data= reinterpret_cast<char*>(tdata);
-   int32_t before = file->tellp();
+   tsize_t before = file->tellp();
    file->write(data,tsize);
-   int32_t after = file->tellp();
+   tsize_t after = file->tellp();
    return after-before;
 }
 
-uint32_t CustomTIFFSeekProcIStream(void* thandle, uint32_t toff, int dir)
+toff_t CustomTIFFSeekProcIStream(thandle_t thandle, toff_t toff, int dir)
 {
   std::istream* stream= reinterpret_cast<std::istream*>(thandle);
 
@@ -89,7 +89,7 @@ uint32_t CustomTIFFSeekProcIStream(void* thandle, uint32_t toff, int dir)
   return stream->rdstate();
 }
 
-uint32_t CustomTIFFSeekProcOStream(void* thandle, uint32_t toff, int dir)
+toff_t CustomTIFFSeekProcOStream(thandle_t thandle, toff_t toff, int dir)
 {
   std::ostream* stream= reinterpret_cast<std::ostream*>(thandle);
 
@@ -106,38 +106,38 @@ uint32_t CustomTIFFSeekProcOStream(void* thandle, uint32_t toff, int dir)
   return stream->rdstate();
 }
 
-int CustomTIFFCloseProc(void* thandle)
+int CustomTIFFCloseProc(thandle_t thandle)
 {
   return 0;
 }
 
-uint32_t CustomTIFFSizeProcIStream(void* thandle)
+toff_t CustomTIFFSizeProcIStream(thandle_t thandle)
 {
    std::istream* stream= reinterpret_cast<std::istream*>(thandle);
-   uint32_t curr_pos = stream->tellg();
+   toff_t curr_pos = stream->tellg();
    stream->seekg(0,std::ios::end);
-   uint32_t size = stream->tellg();
+   toff_t size = stream->tellg();
    stream->seekg(curr_pos,std::ios::beg);
    return size;
 }
 
-uint32_t CustomTIFFSizeProcOStream(void* thandle)
+toff_t CustomTIFFSizeProcOStream(thandle_t thandle)
 {
    std::ostream* stream= reinterpret_cast<std::ostream*>(thandle);
-   uint32_t curr_pos = stream->tellp();
+   toff_t curr_pos = stream->tellp();
    stream->seekp(0,std::ios::end);
-   uint32_t size = stream->tellp();
+   toff_t size = stream->tellp();
    stream->seekp(curr_pos,std::ios::beg);
    return size;
 }
 
-int CustomTIFFMapFileProc(void* thandle, void** tdata, uint32* toff)
+int CustomTIFFMapFileProc(thandle_t thandle, tdata_t* tdata, toff_t* toff)
 {
   assert(false);
   return(0);
 }
 
-void CustomTIFFUnmapFileProc(void* thandle, void* tdata, uint32 toff)
+void CustomTIFFUnmapFileProc(thandle_t thandle, tdata_t tdata, toff_t toff)
 {
   assert(false);
 }

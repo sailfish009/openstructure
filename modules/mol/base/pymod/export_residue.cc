@@ -21,8 +21,9 @@
 
 using namespace boost::python;
 #include <ost/mol/chem_class.hh>
+#include <ost/mol/chem_type.hh>
 #include <ost/mol/mol.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 
@@ -43,16 +44,61 @@ namespace {
 
   void set_sec_struct1(ResidueBase* b, const SecStructure& s) {b->SetSecStructure(s);}
   void set_sec_struct2(ResidueBase* b, char c) {b->SetSecStructure(SecStructure(c));}
-  void set_chemclass1(ResidueBase* b, const ChemClass& cc) {b->SetChemClass(cc);}
-  void set_chemclass2(ResidueBase* b, char c) {b->SetChemClass(ChemClass(c));}
 
+  void set_chemclass(ResidueBase* b, object po)
+  {
+    extract<ChemClass> ex1(po);
+    if(ex1.check()) {
+      b->SetChemClass(ex1());
+    }
+    extract<char> ex2(po);
+    if(ex2.check()) {
+      b->SetChemClass(ChemClass(ex2()));
+    }
+    std::string st=extract<std::string>(po);
+    if(st.empty()) {
+      throw Error("expected non-empty string as chem class");
+    }
+    b->SetChemClass(ChemClass(st[0]));
+  }
 }
 
-//BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_insert_overloads,
-//                                       ResidueHandle::InsertAtom, 2, 3)
 void export_Residue()
 {
+  class_<ChemClass>("ChemClass", init<char>(args("chem_class")))
+    .def(self!=self)
+    .def(self==self)
+    .def("IsPeptideLinking", &ChemClass::IsPeptideLinking)
+    .def("IsNucleotideLinking", &ChemClass::IsNucleotideLinking)
+  ;
+  implicitly_convertible<char, ChemClass>();
   
+  object ct_class = class_<ChemType>("ChemType", init<char>(args("chem_type")))
+    .def(self!=self)
+    .def(self==self)
+    .def(self_ns::str(self))
+    .def("IsIon", &ChemType::IsIon)
+    .def("IsNucleotide", &ChemType::IsNucleotide)
+    .def("IsSaccharide", &ChemType::IsSaccharide)
+    .def("IsAminoAcid", &ChemType::IsAminoAcid)
+    .def("IsCoenzyme", &ChemType::IsCoenzyme)
+    .def("IsDrug", &ChemType::IsDrug)
+    .def("IsNonCanonical", &ChemType::IsNonCanonical)
+    .def("IsKnown", &ChemType::IsKnown)
+    .def("IsWater", &ChemType::IsWater)
+  ;
+  implicitly_convertible<char, ChemType>();
+  ct_class.attr("IONS")=char(ChemType::IONS);
+  ct_class.attr("NONCANONICALMOLS")=char(ChemType::NONCANONICALMOLS);
+  ct_class.attr("SACCHARIDES")=char(ChemType::SACCHARIDES);
+  ct_class.attr("NUCLEOTIDES")=char(ChemType::NUCLEOTIDES);
+  ct_class.attr("AMINOACIDS")=char(ChemType::AMINOACIDS);
+  ct_class.attr("COENZYMES")=char(ChemType::COENZYMES);
+  ct_class.attr("WATERCOORDIONS")=char(ChemType::WATERCOORDIONS);
+  ct_class.attr("DRUGS")=char(ChemType::DRUGS);
+  ct_class.attr("WATERS")=char(ChemType::WATERS);
+  ct_class.attr("UNKNOWN")=char(ChemType::UNKNOWN);
+
   class_<ResNum>("ResNum", init<int>(args("num")))
     .def(init<int,char>(args("num", "ins_code")))
     .def("GetNum", &ResNum::GetNum)
@@ -67,6 +113,10 @@ void export_Residue()
     .def(self<=self)
     .def(self==self)
     .def(self!=self)    
+    .def(self+=self)
+    .def(self-=self)
+    .def(self+self)
+    .def(self-self)
     .def(self+=int())
     .def(self-=int())
     .def(self+int())
@@ -121,19 +171,27 @@ void export_Residue()
     .def("SetOneLetterCode", &ResidueBase::SetOneLetterCode)
     .add_property("one_letter_code", &ResidueBase::GetOneLetterCode, 
                  &ResidueBase::SetOneLetterCode)  
-    .def("GetQualifedName", &ResidueBase::GetQualifiedName)
+    .def("GetQualifiedName", &ResidueBase::GetQualifiedName)
+    .add_property("qualified_name", &ResidueBase::GetQualifiedName)
     .def("IsPeptideLinking", &ResidueBase::IsPeptideLinking)
     .add_property("peptide_linking", &ResidueBase::IsPeptideLinking)
     
+    .def("GetCentralAtom", &ResidueBase::GetCentralAtom)
+    .def("SetCentralAtom", &ResidueBase::SetCentralAtom)
+    .add_property("central_atom", &ResidueBase::GetCentralAtom, &ResidueBase::SetCentralAtom)
+    .add_property("central_normal", &ResidueBase::GetCentralNormal)
+
     .def("GetKey", &ResidueBase::GetKey,
          return_value_policy<copy_const_reference>())
-     .def("GetName", &ResidueBase::GetName,
+    .def("GetName", &ResidueBase::GetName,
          return_value_policy<copy_const_reference>())
     .def("GetNumber", &ResidueBase::GetNumber,
          return_value_policy<copy_const_reference>())
     .def("GetChemClass", &ResidueBase::GetChemClass)
-    .def("SetChemClass", set_chemclass1)
-    .def("SetChemClass", set_chemclass2)
+    .add_property("chem_class", &ResidueBase::GetChemClass, set_chemclass)
+    .def("SetChemClass", set_chemclass)
+    .def("GetChemType", &ResidueBase::GetChemType)
+    .add_property("chem_type", &ResidueBase::GetChemType)
     .add_property("is_ligand", &ResidueBase::IsLigand, &ResidueBase::SetIsLigand)
     .def("IsLigand", &ResidueBase::IsLigand)
     .def("SetIsLigand", &ResidueBase::SetIsLigand)
@@ -148,7 +206,6 @@ void export_Residue()
     .add_property("name",
                    make_function(&ResidueBase::GetName,
                                  return_value_policy<copy_const_reference>()))
-    .add_property("qualified_name", &ResidueBase::GetQualifiedName)
     .def("IsValid", &ResidueBase::IsValid)
     .add_property("valid", &ResidueBase::IsValid) 
   ;
@@ -157,6 +214,7 @@ void export_Residue()
   class_<ResidueHandle, bases<ResidueBase> >("ResidueHandle", init<>())
     .def("GetChain",&ResidueHandle::GetChain)
     .add_property("chain", &ResidueHandle::GetChain)
+    .def("GetEntity",&ResidueHandle::GetEntity)
     .add_property("entity", &ResidueHandle::GetEntity)
     .def("GetAtomList", &ResidueHandle::GetAtomList)
     .def("GetIndex", &ResidueHandle::GetIndex)
@@ -203,7 +261,7 @@ void export_Residue()
 
   class_<ResidueHandleList>("ResidueHandleList", no_init)
     .def(vector_indexing_suite<ResidueHandleList>())
-    .def(ost::VectorAdditions<ResidueHandleList>())    
+    .def(geom::VectorAdditions<ResidueHandleList>())    
   ;
   
   def("InSequence", &InSequence);

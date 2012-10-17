@@ -22,34 +22,10 @@
 
 namespace geom {
 
-AlignedCuboid::AlignedCuboid(const Vec3& mmin, const Vec3& mmax):
-  min_(mmin), max_(mmax)
-{ }
-
-Vec3 AlignedCuboid::GetSize() const
-{
-  return max_-min_;
-}
-
-const Vec3& AlignedCuboid::GetMin() const
-{
-  return min_;
-}
-
-const Vec3& AlignedCuboid::GetMax() const
-{
-  return max_;
-}
-
 AlignedCuboid Union(const AlignedCuboid& lhs, const AlignedCuboid& rhs)
 {
   return AlignedCuboid(Min(lhs.GetMin(), rhs.GetMin()), 
                        Max(lhs.GetMax(), rhs.GetMax()));
-}
-
-Vec3 AlignedCuboid::GetCenter() const
-{
-  return (min_+max_)*0.5;
 }
 
 }

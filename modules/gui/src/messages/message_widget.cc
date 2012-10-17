@@ -61,6 +61,7 @@ MessageWidget::MessageWidget(QWidget* parent) :
   view_->setDragEnabled(true);
   view_->setContextMenuPolicy(Qt::CustomContextMenu);
   view_->setFrameShape(QFrame::NoFrame);
+  view_->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
   layout->addWidget(view_);
 
   connect(view_, SIGNAL(customContextMenuRequested(const QPoint&)), this,
@@ -215,7 +216,7 @@ void MessageWidget::ContextMenuRequested(const QPoint& pos) {
 
   QMenu* menu = new QMenu();
   menu->addAction(remove_selected_action);
-  if (menu->actions().size() > 0) {
+  if (! menu->actions().empty()) {
     menu->popup(view_->viewport()->mapToGlobal(pos));
   }
 }

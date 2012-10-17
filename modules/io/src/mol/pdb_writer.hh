@@ -43,7 +43,9 @@ class EntityHandle;
 
 namespace io {
 
+
 class DLLEXPORT_OST_IO PDBWriter {
+  typedef boost::iostreams::filtering_stream<boost::iostreams::output> OutStream;
 public:
   PDBWriter(const String& filename,
             const IOProfile& profile);
@@ -75,6 +77,8 @@ private:
   bool                charmm_style_;
   bool                is_pqr_;
   IOProfile           profile_;
+  String              filename_;
+  OutStream           out_;
 };
  
 }}

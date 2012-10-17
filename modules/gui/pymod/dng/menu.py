@@ -1,9 +1,12 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from ost import gui, gfx, io
+from ost import *
+from ost import gui
 from ost.gui.scene.loader_manager_widget import LoaderManagerWidget
 from ost.gui.init_splash import _InitSplash
 from ost.gui.dng import termuse
+from ost.gui.dng import superpositiondialog
+
 import sys
 class FileMenu(QMenu):
   def __init__(self, parent=None):
@@ -134,6 +137,8 @@ class SceneMenu(QMenu):
                   enabled=gui.ManyOf(gfx.GfxObj))
     gui.AddMenuAction(self, 'Fit To Screen', self._FitToScreen,
                   enabled=gui.OneOf(gfx.Entity))
+    gui.AddMenuAction(self, 'Superpose', self._SuperposeDialog,
+                      enabled=gui.TwoOf(gfx.Entity))
     gui.AddMenuAction(self, 'Save Snapshot', self._ExportScene)
     gui.AddMenuAction(self, 'Scene Clipping', self._ClipScene, shortcut='Ctrl+Shift+C')
     
@@ -169,7 +174,32 @@ class SceneMenu(QMenu):
   def _FitToScreen(self):
     sel=gui.SceneSelection.Instance()
     gfx.FitToScreen(sel.GetActiveNode(0))
-  
+
+  def _SuperposeDialog(self):
+    sel=gui.SceneSelection.Instance()
+    act_count=sel.GetActiveNodeCount()
+    # we now that there have to be 2 gfx.Entities, because of using TwoOf to
+    # enable menu entry!
+    i = 0;
+    gfx_ent_1 = sel.GetActiveNode(i)
+    while not isinstance(gfx_ent_1, gfx.Entity):
+      i += 1
+      gfx_ent_1 = sel.GetActiveNode(i)
+    i += 1
+    gfx_ent_2 = sel.GetActiveNode(i)
+    while not isinstance(gfx_ent_2, gfx.Entity):
+      i += 1
+      gfx_ent_2 = sel.GetActiveNode(i)
+    sd = superpositiondialog.SuperpositionDialog(gfx_ent_1, gfx_ent_2)
+    if sd.rmsd != None:
+      if sd.reference == 0:
+        gfx_ent_1.UpdatePositions()
+        gfx.Scene().CenterOn(gfx_ent_1)
+      else:
+        gfx_ent_2.UpdatePositions()
+        gfx.Scene().CenterOn(gfx_ent_2)
+      LogScript('RMSD: %.3f'%sd.rmsd)
+
 class WindowMenu(QMenu):
   def __init__(self, parent=None):
     QMenu.__init__(self, parent)

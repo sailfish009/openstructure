@@ -36,7 +36,6 @@ namespace ost { namespace img {
 
 Point::Point(const Size& s) { data_[0]=s[0]; data_[1]=s[1]; data_[2]=s[2]; }
 
-
 Point& Point::operator+=(const Size& s) 
 {
   data_[0]+=s[0];   

@@ -49,8 +49,6 @@ PNG::PNG(bool normalize_on_save):
     ImageFormatBase(FORMAT_STRING),
     normalize_on_save_(normalize_on_save)
 {
-    this->SetMinimum(0.0);
-    this->SetMaximum(255.0);
 }
 
 bool PNG::GetNormalizeOnSave() const
@@ -61,6 +59,15 @@ bool PNG::GetNormalizeOnSave() const
 void PNG::SetNormalizeOnSave(bool normalize_on_save)
 {
   normalize_on_save_ = normalize_on_save;
+}
+
+Real PNG::GetMaximum() const
+{
+  return 255.0;
+}
+Real PNG::GetMinimum() const
+{
+  return 0.0;
 }
 
 namespace detail {
@@ -219,12 +226,12 @@ void MapIOPngHandler::Export(const img::MapHandle& image, std::ostream& f,const 
 
   info_ptr = png_create_info_struct(png_ptr);
   if (info_ptr == NULL) {
-    png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
+    png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
     throw IOException("png: error creating info_struct");
   }
 
   if (setjmp(png_jmpbuf(png_ptr))) {
-    png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+    png_destroy_write_struct(&png_ptr, &info_ptr);
     throw IOException("png: error setting jmpbuf");
   }
 
@@ -286,7 +293,7 @@ void MapIOPngHandler::Export(const img::MapHandle& image, std::ostream& f,const 
 
   png_write_end(png_ptr, info_ptr);
 
-  png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
+  png_destroy_write_struct(&png_ptr, &info_ptr);
 
 }
 

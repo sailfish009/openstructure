@@ -187,6 +187,7 @@ HeuristicBuilder::HeuristicBuilder():
       emap_[def_entry.abbrev]=entry;
     }
   }
+  default_nucleotide_=LookupResEntry("G").first;
   LOG_DEBUG("done importing internal tables");
 }
 
@@ -209,19 +210,36 @@ void HeuristicBuilder::ConnectivityFromAtomNames(const mol::ResidueHandle& res,
                 << it2->GetName() << ") in connectivity table of "
                 << res.GetKey() << "... ");
        int conn=centry.Check(it1->GetName(),it2->GetName());
-       if (conn==1 && this->IsBondFeasible(*it1, *it2)) {
-         LOG_TRACE( "found");
-         editor.Connect(*it1,*it2);
-       } else if(conn==2 && this->IsBondFeasible(*it2, *it1)) {
-         LOG_TRACE( "found (reversed)");
-         editor.Connect(*it2,*it1);
+       if (conn==1) {
+	 if (this->GetBondFeasibilityCheck()==false) {
+           LOG_TRACE( "found");
+           editor.Connect(*it1,*it2);
+	 } else {  
+	   if (this->IsBondFeasible(*it1, *it2)) {
+	     LOG_TRACE( "found");
+             editor.Connect(*it1,*it2);
+	   } else {
+             LOG_TRACE( "not found");
+	   }  
+	 }	 
+       } else if (conn==2) {
+	 if (this->GetBondFeasibilityCheck()==false) {
+             LOG_TRACE( "found (reversed)");
+             editor.Connect(*it2,*it1);
+	 } else {
+           if(this->IsBondFeasible(*it2, *it1)) {
+             LOG_TRACE( "found (reversed)");             
+             editor.Connect(*it2,*it1);
+           }
+         }  
        } else {
-         LOG_TRACE( "not found");
+          LOG_TRACE( "not found");
        }
      }
    } else {
      unknown_atoms.push_back(*it1);
-   }
+     LOG_TRACE( "atom not found, pushing it to unknown atoms");
+   }	 
  }
 }
 
@@ -304,12 +322,20 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
       res0_ret.first=builder->DefaultPeptide();
       res0_ret.second=true;
     }
+    if (res0.FindAtom("C3'") && res0.FindAtom("P")) {
+      res0_ret.first=builder->DefaultNucleotide();
+      res0_ret.second=true;
+    }
   }
 
   if(!res1_ret.second) {
     if(res1.FindAtom("N") && res1.FindAtom("CA") && res1.FindAtom("C")) {
       LOG_TRACE("using default peptide for " << res1.GetKey());
       res1_ret.first=builder->DefaultPeptide();
+      res1_ret.second=true;
+    }
+    if (res1.FindAtom("C3'") && res1.FindAtom("P")) {
+      res1_ret.first=builder->DefaultNucleotide();
       res1_ret.second=true;
     }
   }
@@ -331,16 +357,19 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
       if(flag) {
         if (builder->DoesPeptideBondExist(res0_atom, res1_atom)) {
           editor.Connect(res0_atom,res1_atom);
-          res0.SetIsProtein(true);
-          res1.SetIsProtein(true);
+          if (res0_ret.first.GetChemClass().IsPeptideLinking()) {
+            res0.SetIsProtein(true);
+            res1.SetIsProtein(true);
+          }
         }
       } else {
         if (builder->DoesPeptideBondExist(res1_atom, res0_atom)) {
           editor.Connect(res1_atom, res0_atom);
-          res0.SetIsProtein(true);
-          res1.SetIsProtein(true);
+          if (res0_ret.first.GetChemClass().IsPeptideLinking()) {
+            res0.SetIsProtein(true);
+            res1.SetIsProtein(true);
+          }
         }
-
       }
     }
   } else {

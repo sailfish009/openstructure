@@ -25,10 +25,11 @@
 #include <ost/conop/module_config.hh>
 
 #include <ost/mol/chem_class.hh>
+#include <ost/mol/chem_type.hh>
 
 namespace ost { namespace conop {
 
-struct Date {
+struct DLLEXPORT_OST_CONOP Date {
   Date(int y, int m, int d):
     year(y), month(m), day(d)
   { }
@@ -51,21 +52,23 @@ struct Date {
   
   static Date FromString(const StringRef& str)
   {
-    assert(str[4]=='-');
-    assert(str[7]=='-');
-    std::pair<bool, int> year=str.substr(0,4).to_int();
-    std::pair<bool, int> month=str.substr(5,2).to_int();
-    std::pair<bool, int> day=str.substr(8, 2).to_int();
+    std::vector<StringRef> parts=str.split('-');
+    assert(parts.size()==3);
+    std::pair<bool, int> year=parts[0].to_int();
+    std::pair<bool, int> month=parts[1].to_int();
+    std::pair<bool, int> day=parts[2].to_int();
     assert(year.first); assert(month.first); assert(day.first);
     return Date(year.second, month.second, day.second);
   }
   
+  String ToString() const;
+
   int year;
   int month;
   int day;  
 };
 
-struct AtomSpec {
+struct DLLEXPORT_OST_CONOP AtomSpec {
   AtomSpec()
     : ordinal(0), is_leaving(false) {
   }
@@ -85,7 +88,7 @@ struct AtomSpec {
   }
 };
 
-struct BondSpec {
+struct DLLEXPORT_OST_CONOP BondSpec {
   BondSpec()
     : atom_one(0), atom_two(0), order(1) {
 
@@ -120,7 +123,7 @@ public:
   } Dialect;
   
   Compound(const String& id)
-    : olc_('?'), tlc_(id), chem_class_(), dialect_(Compound::PDB) {
+    : olc_('?'), tlc_(id), chem_class_(), chem_type_(), dialect_(Compound::PDB){
   }
 
   /// \brief three-letter code that is unique for every compound 
@@ -166,9 +169,26 @@ public:
     return chem_class_;
   }
 
+  void SetChemType(mol::ChemType chem_type) {
+    chem_type_=chem_type;
+  }
+
+  /// \brief PDB ligand classification from component dictionary
+  ///
+  /// The PDB classifies all compounds into 7 categories. This classification
+  /// is extracted from the PDB component dictionary (field: pdbx_type)
+  mol::ChemType GetChemType() const {
+    return chem_type_;
+  }
+
   bool IsPeptideLinking() const {
     return chem_class_.IsPeptideLinking();
   }
+
+  bool IsNucleotideLinking() const {
+    return chem_class_.IsNucleotideLinking();
+  }
+
   void AddAtom(const AtomSpec& atom) {
     atom_specs_.push_back(atom);
   }
@@ -183,9 +203,13 @@ public:
   
   int GetAtomSpecIndex(const String& name) const;
   
-  const String& GetFormula() { return formula_; }
+  const String& GetName() { return name_; }
+  
+  void SetName(const String& name) { name_=name; }
   
   void SetFormula(const String& formula) { formula_=formula; }
+
+  const String& GetFormula() { return formula_; }
   
   const BondSpecList& GetBondSpecs() const {
     return bond_specs_;
@@ -213,9 +237,11 @@ private:
   char                         olc_;
   String                       tlc_;
   String                       formula_;
+  String                       name_;
   AtomSpecList                 atom_specs_;
   BondSpecList                 bond_specs_;
   mol::ChemClass               chem_class_;
+  mol::ChemType                chem_type_;
   Dialect                      dialect_;  
   Date                         creation_date_;
   Date                         mod_date_;

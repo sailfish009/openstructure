@@ -21,12 +21,13 @@
 
 #include <iostream>
 #include <vector>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include "vec3.hh"
 #include "mat3.hh"
 #include "quat.hh"
 
+#include "module_config.hh"
 
 /*
   composite classes in 3D space
@@ -47,7 +48,7 @@ private:
   Vec3 ori_,dir_;
 };
 
-std::ostream& operator<<(std::ostream& s, const Line3& l);
+DLLEXPORT_OST_GEOM std::ostream& operator<<(std::ostream& s, const Line3& l);
 
 class DLLEXPORT_OST_GEOM Plane {
 public:
@@ -80,7 +81,7 @@ private:
   Real p_;
 };
 
-class DLLEXPORT Sphere {
+class DLLEXPORT_OST_GEOM Sphere {
 public:
   Sphere();
   Sphere(const Vec3& origin, Real r);
@@ -98,7 +99,7 @@ private:
 ///     half extent
 /// 
 /// \relates Cuboid
-class DLLEXPORT CuboidAxis {
+class DLLEXPORT_OST_GEOM CuboidAxis {
 public:
   CuboidAxis(): axis_(), half_extent_(0.0)
   { }
@@ -112,7 +113,7 @@ private:
 };
 
 /// \brief arbitrary oriented bounding cuboid
-class DLLEXPORT Cuboid {
+class DLLEXPORT_OST_GEOM Cuboid {
 public:
   Cuboid();
   Cuboid(const Vec3& center, const CuboidAxis& a, 
@@ -140,7 +141,7 @@ private:
   CuboidAxis      axes_[3];
 };
 
-class DLLEXPORT Rotation3
+class DLLEXPORT_OST_GEOM Rotation3
 {
 public:
   Rotation3();
@@ -184,8 +185,8 @@ private:
 
 typedef std::vector<Rotation3> Rotation3List;
 
-DLLEXPORT Rotation3List ImportEulerAngles (const boost::filesystem::path& loc);
-DLLEXPORT void ExportEulerAngles (const Rotation3List& rot_list,
+DLLEXPORT_OST_GEOM Rotation3List ImportEulerAngles (const boost::filesystem::path& loc);
+DLLEXPORT_OST_GEOM void ExportEulerAngles (const Rotation3List& rot_list,
                                   const boost::filesystem::path& loc);
 
 } // ns

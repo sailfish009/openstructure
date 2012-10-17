@@ -35,20 +35,21 @@ extern void export_Composite3();
 extern void export_Composite2_op();
 extern void export_Composite3_op();
 extern void export_Quat();
+extern void export_Transform();
 
-namespace {
+namespace details {
 #if (defined(OST_STATIC_PROPERTY_WORKAROUND))
 struct Axis_ {
-  int X() const { return geom::Axis::X; }
-  int Y() const { return geom::Axis::Y; }
-  int Z() const { return geom::Axis::Z; }    
+  int X() { return geom::Axis::X; }
+  int Y() { return geom::Axis::Y; }
+  int Z() { return geom::Axis::Z; }    
 };
 #else
 struct Axis_ {};
 #endif
 }
 
-BOOST_PYTHON_MODULE(_geom)
+BOOST_PYTHON_MODULE(_ost_geom)
 {
   export_Vec2();
   export_VecMat2_op();
@@ -64,20 +65,21 @@ BOOST_PYTHON_MODULE(_geom)
   export_Composite2_op();
   export_Composite3_op();
   export_Quat();
+  export_Transform();
 
 #if (defined(OST_STATIC_PROPERTY_WORKAROUND))
   // workaround for a problem with boost python and python 2.6.3/4
-  object axis=class_<Axis_>("Axis_")
-   .add_property("X", &Axis_::X)
-   .add_property("Y", &Axis_::Y)
-   .add_property("Z", &Axis_::Z)
+  class_<details::Axis_> axis("Axis_");
+  axis.add_property("X", &details::Axis_::X);
+  axis.add_property("Y", &details::Axis_::Y);
+  axis.add_property("Z", &details::Axis_::Z);
  ;
  scope().attr("Axis")=axis();
 #else
-  class_<Axis_>("Axis")
-    .def_readonly("X",geom::Axis::X)
-    .def_readonly("Y",geom::Axis::Y)
-    .def_readonly("Z",geom::Axis::Z)
+  class_<details::Axis_>("Axis")
+    .def_readonly("X", geom::Axis::X)
+    .def_readonly("Y", geom::Axis::Y)
+    .def_readonly("Z", geom::Axis::Z)
   ;
 #endif
 }

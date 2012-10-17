@@ -140,29 +140,32 @@ void Surface::Rebuild()
   recalc_bb_=true;
 }
 
-geom::AlignedCuboid Surface::GetBoundingBox() const
+geom::AlignedCuboid Surface::GetBoundingBox(bool use_tf) const
 {
-  static Vec3 minc,maxc;
+  static geom::AlignedCuboid bb;
   if(recalc_bb_) {
-    minc=Vec3(std::numeric_limits<float>::max(),
+    geom::Vec3 minc(std::numeric_limits<float>::max(),
                     std::numeric_limits<float>::max(),
                     std::numeric_limits<float>::max());
-    maxc=Vec3(-std::numeric_limits<float>::max(),
+    geom::Vec3 maxc(-std::numeric_limits<float>::max(),
                     -std::numeric_limits<float>::max(),
                     -std::numeric_limits<float>::max());
     
     std::vector<mol::SurfaceVertexID> svid_list = sh_.GetVertexIDList();
-    for(std::vector<mol::SurfaceVertexID>::const_iterator it=svid_list.begin();
-        it!=svid_list.end();++it) {
-      Vec3 pos = sh_.GetVertex(*it).position;
-      minc=Min(minc,pos);
-      maxc=Max(maxc,pos);
+    if(! svid_list.empty()) {
+      for(std::vector<mol::SurfaceVertexID>::const_iterator it=svid_list.begin();
+          it!=svid_list.end();++it) {
+        geom::Vec3 pos = sh_.GetVertex(*it).position;
+        minc=geom::Min(minc,pos);
+        maxc=geom::Max(maxc,pos);
+      }
+      minc-=geom::Vec3(1.0,1.0,1.0);
+      maxc+=geom::Vec3(1.0,1.0,1.0);
+      recalc_bb_=false;
+      bb=geom::AlignedCuboid(minc,maxc);
     }
-    minc-=Vec3(1.0,1.0,1.0);
-    maxc+=Vec3(1.0,1.0,1.0);
-    recalc_bb_=false;
   }
-  return geom::AlignedCuboid(minc,maxc);
+  return use_tf ? transform_.Apply(bb) : bb;
 }
 
 void Surface::CustomPreRenderGL(bool flag)
@@ -369,6 +372,11 @@ void Surface::CleanColorOps()
 void Surface::ReapplyColorOps()
 {
   GfxObj::ReapplyColorOps();
+}
+
+ost::mol::SurfaceHandle Surface::GetHandle() const
+{
+  return this->sh_;
 }
 
 }} // ns

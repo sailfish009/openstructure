@@ -9,7 +9,7 @@ def StripSidechain(edi, residue):
       edi.DeleteAtom(atom)
 
 def StripSidechains(entity):
-  edi=entity.RequestXCSEditor(mol.EditMode.BUFFERED_EDIT)
+  edi=entity.EditXCS(mol.EditMode.BUFFERED_EDIT)
   for c in e.GetChainList():
     residues=c.GetResidueList()
     for residue in residues:

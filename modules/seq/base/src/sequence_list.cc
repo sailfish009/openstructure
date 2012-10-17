@@ -22,7 +22,10 @@
  */
 
 #include <ost/invalid_handle.hh> 
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info.hh>
+#endif
 
 #include <ost/seq/impl/sequence_list_impl.hh>
 #include <ost/seq/sequence_list.hh>
@@ -180,6 +183,7 @@ int SequenceList::GetMaxLength() const
   return impl_->GetMaxLength();
 }
 
+#if(OST_INFO_ENABLED)
 /// \brief export sequence list to info
 void SequenceListToInfo(const ConstSequenceList& seq_list, 
                         info::InfoGroup& group)
@@ -192,6 +196,7 @@ SequenceList SequenceListFromInfo(info::InfoGroup& group)
 {
   return SequenceList(impl::SequenceListImplFromInfo(group));
 }
+#endif
 
 SequenceList::operator ConstSequenceList() const
 {

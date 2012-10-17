@@ -17,6 +17,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
+#include <ost/log.hh>
+
 #include "impl/entity_impl.hh"
 #include "bond_handle.hh"
 #include "torsion_handle.hh"
@@ -115,13 +117,38 @@ AtomHandleList EntityHandle::FindWithin(const geom::Vec3& pos,
   return handles;
 }
 
+void EntityHandle::SetDefaultQueryFlags(QueryFlags flags)
+{
+  this->CheckValidity();
+  Impl()->SetDefaultQueryFlags(flags);
+}
+
+QueryFlags EntityHandle::GetDefaultQueryFlags() const
+{
+  this->CheckValidity();
+  return Impl()->GetDefaultQueryFlags();
+}
+
+EntityView EntityHandle::Select(const Query& q) const
+{
+  this->CheckValidity();
+  return Impl()->Select(*this, q);
+}
+
+EntityView EntityHandle::Select(const String& q) const
+{
+  this->CheckValidity();
+  return Impl()->Select(*this, Query(q));
+}
+
 EntityView EntityHandle::Select(const Query& q, QueryFlags flags) const
 {
   this->CheckValidity();
   return Impl()->Select(*this, q, flags);
 }
 
-EntityView EntityHandle::Select(const String& q, QueryFlags flags) const {
+EntityView EntityHandle::Select(const String& q, QueryFlags flags) const 
+{
   this->CheckValidity();
   return Impl()->Select(*this, Query(q), flags);
 }
@@ -210,24 +237,62 @@ Real EntityHandle::GetAngle(const AtomView& a1, const AtomView& a2,
   return GetAngle(a1.GetHandle(), a2.GetHandle(), a3.GetHandle());
 }
 
-const geom::Mat4& EntityHandle::GetTransformationMatrix() const
-
+geom::Mat4 EntityHandle::GetTransformationMatrix() const
 {
+  static bool warn=true;
+  if(warn) {
+    LOG_WARNING("Entity::GetTransformationMatrix is deprecated, use GetTransform instead");
+    warn=false;
+  }
   this->CheckValidity();
-  return Impl()->GetTransfMatrix();
+  return Impl()->GetTransform().GetMatrix();
 }
 
 
-const geom::Mat4& EntityHandle::GetInvTransformationMatrix() const
+geom::Mat4 EntityHandle::GetInvTransformationMatrix() const
 {
+  static bool warn=true;
+  if(warn) {
+    LOG_WARNING("Entity::GetInvTransformationMatrix is deprecated, use GetTransform instead");
+    warn=false;
+  }
   this->CheckValidity();
-  return Impl()->GetInvTransfMatrix();
+  return Impl()->GetTransform().GetInvertedMatrix();
 }
 
 bool EntityHandle::IsTransformationIdentity() const
 {
+  static bool warn=true;
+  if(warn) {
+    LOG_WARNING("Entity::IsTransformationIdentity is deprecated, use HasTransform instead");
+    warn=false;
+  }
   this->CheckValidity();
-  return Impl()->IsTransfIdentity();
+  return !Impl()->HasTransform();
+}
+
+geom::Transform EntityHandle::GetTransform() const
+{
+  this->CheckValidity();
+  return Impl()->GetTransform();  
+}
+
+void EntityHandle::SetTransform(const geom::Transform& tf)
+{
+  this->CheckValidity();
+  Impl()->SetTransform(tf);  
+}
+
+bool EntityHandle::HasTransform() const
+{
+  this->CheckValidity();
+  return Impl()->HasTransform();  
+}
+
+void EntityHandle::ClearTransform()
+{
+  this->CheckValidity();
+  Impl()->ClearTransform();  
 }
 
 ResidueHandle EntityHandle::FindResidue(const String& chain_name,
@@ -337,6 +402,18 @@ AtomHandleList EntityHandle::GetAtomList() const
   return atoms;
 }
 
+geom::Vec3List EntityHandle::GetAtomPosList() const {
+  this->CheckValidity();
+  geom::Vec3List atom_pos_list;
+  atom_pos_list.reserve(this->GetAtomCount());
+  AtomHandleList atom_list=this->GetAtomList();
+  for (AtomHandleList::const_iterator a=atom_list.begin(), e=atom_list.end(); a!=e; ++a) {
+    atom_pos_list.push_back(a->GetPos());
+  }
+  return atom_pos_list;
+  //return Impl()->GetAtomPosList();
+}
+  
 EntityHandle EntityHandle::GetHandle() const
 {
   return *this;

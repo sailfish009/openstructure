@@ -16,36 +16,36 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
-from _gfx import *
+from _ost_gfx import *
+from py_gfx_obj import PyGfxObj
 
-WHITE=Color(1.0,1.0,1.0)
-BLACK=Color(0.0,0.0,0.0)
-GREY=Color(0.5,0.5,0.5)
-RED=Color(1.0,0.0,0.0)
-DARKRED=Color(0.5,0.0,0.0)
-LIGHTRED=Color(1.0,0.5,0.5)
-GREEN=Color(0.0,1.0,0.0)
-DARKGREEN=Color(0.0,0.5,0.0)
-LIGHTGREEN=Color(0.5,1.0,0.5)
-BLUE=Color(0.0,0.0,1.0)
-DARKBLUE=Color(0.0,0.0,0.5)
-LIGHTBLUE=Color(0.5,0.5,1.0)
-YELLOW=Color(1.0,1.0,0.0)
-DARKYELLOW=Color(0.5,0.5,0.0)
-LIGHTYELLOW=Color(1.0,1.0,0.5)
-CYAN=Color(0.0,1.0,1.0)
-DARKCYAN=Color(0.0,0.5,0.5)
-LIGHTCYAN=Color(0.5,1.0,1.0)
-MAGENTA=Color(1.0,0.0,1.0)
-DARKMAGENTA=Color(0.5,0.0,0.5)
-LIGHTMAGENTA=Color(1.0,0.5,1.0)
+WHITE=RGB(1.0,1.0,1.0)
+BLACK=RGB(0.0,0.0,0.0)
+GREY=RGB(0.5,0.5,0.5)
+RED=RGB(1.0,0.0,0.0)
+DARKRED=RGB(0.5,0.0,0.0)
+LIGHTRED=RGB(1.0,0.5,0.5)
+GREEN=RGB(0.0,1.0,0.0)
+DARKGREEN=RGB(0.0,0.5,0.0)
+LIGHTGREEN=RGB(0.5,1.0,0.5)
+BLUE=RGB(0.0,0.0,1.0)
+DARKBLUE=RGB(0.0,0.0,0.5)
+LIGHTBLUE=RGB(0.5,0.5,1.0)
+YELLOW=RGB(1.0,1.0,0.0)
+DARKYELLOW=RGB(0.5,0.5,0.0)
+LIGHTYELLOW=RGB(1.0,1.0,0.5)
+CYAN=RGB(0.0,1.0,1.0)
+DARKCYAN=RGB(0.0,0.5,0.5)
+LIGHTCYAN=RGB(0.5,1.0,1.0)
+MAGENTA=RGB(1.0,0.0,1.0)
+DARKMAGENTA=RGB(0.5,0.0,0.5)
+LIGHTMAGENTA=RGB(1.0,0.5,1.0)
 PURPLE=MAGENTA
 DARKPURPLE=DARKMAGENTA
 LIGHTPURPLE=LIGHTMAGENTA
-ORANGE=Color(1.0,0.5,0.0)
-DARKORANGE=Color(0.5,0.25,0.0)
-LIGHTORANGE=Color(1.0,0.75,0.5)
-
+ORANGE=RGB(1.0,0.5,0.0)
+DARKORANGE=RGB(0.5,0.25,0.0)
+LIGHTORANGE=RGB(1.0,0.75,0.5)
 
 def Stereo(mode,flip=None,alg=None):
   """
@@ -59,13 +59,13 @@ def Stereo(mode,flip=None,alg=None):
   :type param: int
   """
   if(flip):
-    _gfx.Scene().SetStereoFlip(flip)
+    Scene().SetStereoFlip(flip)
   if(alg):
-    _gfx.Scene().SetStereoAlg(alg)
+    Scene().SetStereoAlg(alg)
 
-  _gfx.Scene().SetStereoMode(mode)
+  Scene().SetStereoMode(mode)
 
-def FitToScreen(gfx_ent, width=None, height=None, margin=0.01):
+def FitToScreen(gfx_ent, width=None, height=None, margin=0.05):
   """
   Setup camera such that it is centered on the graphical entity and the entity 
   fits the entire viewport. The longest axes of the entity are aligned along 
@@ -184,3 +184,148 @@ def _Match(scene, pattern="*"):
   return GfxNodeListProxy(_Recurse("", Scene().root_node, pattern))
 
 SceneSingleton.Match=_Match
+
+def _to_vec3(p):
+  import ost.geom
+  if isinstance(p,ost.geom.Vec3):
+    return p
+  else:
+    try:
+      return ost.geom.Vec3(p[0],p[1],p[2])
+    except:
+      raise TypeError("expected either a sequence or a geom.Vec3 object")
+  
+
+def _primlist_add_point(self,pos,color=None):
+  pos=_to_vec3(pos)
+  if not color:
+    color=WHITE
+  self._add_point(pos,color)
+  
+def _primlist_add_line(self,pos1,pos2,color1=None,color2=None,color=None):
+  pos1=_to_vec3(pos1)
+  pos2=_to_vec3(pos2)
+  if not color:
+    color=WHITE
+  if not color1:
+    color1=color
+  if not color2:
+    color2=color1
+  self._add_line(pos1,pos2,color1,color2)
+
+def _primlist_add_sphere(self,cen,radius=1.0,color=None):
+  pos=_to_vec3(cen)
+  if not color:
+    color=WHITE
+  self._add_sphere(pos,radius,color)
+  
+def _primlist_add_cyl(self,pos1,pos2,radius1=None,radius2=None,radius=None,color1=None,color2=None,color=None,):
+  pos1=_to_vec3(pos1)
+  pos2=_to_vec3(pos2)
+  if radius is None:
+    radius=1.0
+  if radius1 is None:
+    radius1=radius
+  if radius2 is None:
+    radius2=radius1
+  if not color:
+    color=WHITE
+  if not color1:
+    color1=color
+  if not color2:
+    color2=color1
+  self._add_cyl(pos1,pos2,radius1,radius2,color1,color2)
+
+def _primlist_add_text(self,text,pos,color=None,point_size=None):
+  pos=_to_vec3(pos)
+  if not color:
+    color=WHITE
+  if not point_size:
+    point_size=1.0
+  self._add_text(text,pos,color,point_size)
+
+PrimList.AddPoint=_primlist_add_point
+PrimList.AddLine=_primlist_add_line
+PrimList.AddSphere=_primlist_add_sphere
+PrimList.AddCyl=_primlist_add_cyl
+PrimList.AddText=_primlist_add_text
+
+# entity reset
+
+def _entity_reset(self,*args,**kwargs):
+  import ost.mol as mol
+  eh=None
+  ev=None
+  qr=None
+  qf=None
+  for a in args:
+    if isinstance(a,mol.Query):
+      if qr:
+        raise TypeError("Reset: more than one query string given")
+      qr=a
+    elif isinstance(a,mol.EntityHandle):
+      if eh:
+        raise TypeError("Reset: more than one entity handle given")
+      eh=a
+    elif isinstance(a,mol.EntityView):
+      if ev:
+        raise TypeError("Reset: more than one entity view given")
+      ev=a
+    elif isinstance(a,str):
+      if qr:
+        raise TypeError("Reset: more than one query string given")
+      qr=mol.Query(a)
+    elif isinstance(a,int):
+      if qf:
+        raise TypeError("Reset: more than one QueryFlags given")
+      qf=a
+    else:
+      raise TypeError("Reset: unknown option of type '%s' given"%type(a))
+
+  for key,val in kwargs.iteritems():
+    if key=="entity":
+      if not isinstance(val,mol.EntityHandle):
+        raise TypeError("Reset: expected mol.EntityHandle for 'entity' option")
+      if eh:
+        raise TypeError("Reset: more than one entity handle given")
+      eh=val
+    elif key=="view":
+      if not isinstance(val,mol.EntityView):
+        raise TypeError("Reset: expected mol.EntityView for 'view' option")
+      if ev:
+        raise TypeError("Reset: more than one entity view given")
+      ev=val
+    elif key=="query":
+      if isinstance(val,mol.Query):
+        pass
+      elif isinstance(val,str):
+        val=mol.Query(val)
+      else:
+        raise TypeError("Reset: expected mol.Query or string for 'query' option")
+      if qr:
+        raise TypeError("Reset: more than one query string given")
+      qr=val
+    elif key=="query_flags":
+      if not isinstance(val,int):
+        raise TypeError("Reset: expected integer for 'query_flags' option")
+      if qf:
+        raise TypeError("Reset: more than one query flags given")
+      qf=val
+    else:
+      raise TypeError("Reset: unknown key '%s'"%key)
+        
+  if eh and ev:
+    raise TypeError("Reset: entity and view are mutually exclusive options")
+
+  if ev:
+    self._reset4(ev)
+  else:
+    if not eh:
+      eh = self.query_view.entity
+    if not qr:
+      qr = self.query_view.query
+    if not qf:
+      qf = self.query_view.GetFlags()
+    self._reset3(eh,qr,qf)
+
+Entity.Reset=_entity_reset

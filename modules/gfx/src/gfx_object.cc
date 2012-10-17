@@ -33,6 +33,7 @@
 
 #include "povray.hh"
 #include "impl/mapped_property.hh"
+#include "exporter.hh"
 
 #if OST_IMG_ENABLED
 #  include <ost/img/alg/stat.hh>
@@ -63,6 +64,8 @@ GfxObj::GfxObj(const String& name):
 #else
   outline_mode_(1),
 #endif
+  solid_(false),
+  solid_color_(RGB(0.7,0.7,0.7)),
   c_ops_(),
   labels_(),
   use_occlusion_(false)
@@ -127,6 +130,8 @@ void GfxObj::RenderGL(RenderPass pass)
       // there really needs to be a central place
       // where the va attributes are re-applied
       va_.SetOpacity(opacity_);
+      va_.SetSolid(solid_);
+      va_.SetSolidColor(solid_color_);
     }
   }
   if(IsVisible()) {
@@ -180,6 +185,9 @@ void GfxObj::RenderGL(RenderPass pass)
   }
 }
 
+void GfxObj::InitGL()
+{
+}
 
 void GfxObj::RenderPov(PovState& pov)
 {
@@ -192,6 +200,20 @@ void GfxObj::RenderPov(PovState& pov)
     }
     CustomRenderPov(pov);
     pov.end_obj();
+  }
+}
+
+
+void GfxObj::Export(Exporter* ex)
+{
+  if(IsVisible()) {
+    ex->NodeStart(GetName(),Exporter::OBJ);
+    // in the simplest case, just export va
+    if(rebuild_ || refresh_) {
+      PreRenderGL(true);
+    }
+    va_.Export(ex);
+    ex->NodeEnd(GetName());
   }
 }
 
@@ -322,10 +344,20 @@ void GfxObj::SetOutlineWidth(float f)
   Scene::Instance().RequestRedraw();
 }
 
+float GfxObj::GetOutlineWidth() const
+{
+  return va_.GetOutlineWidth();
+}
+
 void GfxObj::SetOutlineExpandFactor(float f)
 {
   va_.SetOutlineExpandFactor(f);
   Scene::Instance().RequestRedraw();
+}
+
+float GfxObj::GetOutlineExpandFactor() const
+{
+  return va_.GetOutlineExpandFactor();
 }
 
 void GfxObj::SetOutlineExpandColor(const Color& c)
@@ -334,11 +366,30 @@ void GfxObj::SetOutlineExpandColor(const Color& c)
   Scene::Instance().RequestRedraw();
 }
 
+Color GfxObj::GetOutlineExpandColor() const
+{
+  return va_.GetOutlineExpandColor();
+}
+
 void GfxObj::SetOpacity(float o)
 {
   opacity_=o;
   va_.SetOpacity(opacity_);
   FlagRefresh();
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetSolid(bool f)
+{
+  solid_=f;
+  va_.SetSolid(solid_);
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetSolidColor(const Color& c)
+{
+  solid_color_=c;
+  va_.SetSolidColor(solid_color_);
   Scene::Instance().RequestRedraw();
 }
 
@@ -361,34 +412,20 @@ void GfxObj::ColorBy(const img::MapHandle& mh,
 //////////////////////////////////////////////////
 // and now for the rest of the GfxObj interface
 
-geom::AlignedCuboid GfxObj::GetBoundingBox() const
+geom::AlignedCuboid GfxObj::GetBoundingBox(bool use_tf) const
 {
   return geom::AlignedCuboid(geom::Vec3(),geom::Vec3());
 }
 
 void GfxObj::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
-                           const mol::Transform& tf) const
+                           const geom::Transform& tf) const
 {
   try {
-    geom::AlignedCuboid coord_limits=this->GetBoundingBox();
+    geom::AlignedCuboid coord_limits=tf.Apply(this->GetBoundingBox(true));
     // update min/max by transforming all 8 corners of the bounding box and 
     // comparing it against the current min/max
-    geom::Vec3 mmin=coord_limits.GetMin();
-    geom::Vec3 mmax=coord_limits.GetMax();
-    geom::Vec3 t1=tf.Apply(geom::Vec3(mmin[0], mmin[1], mmin[2]));
-    geom::Vec3 t2=tf.Apply(geom::Vec3(mmin[0], mmax[1], mmin[2]));
-    geom::Vec3 t3=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmin[2]));
-    geom::Vec3 t4=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmin[2]));
-    geom::Vec3 t5=tf.Apply(geom::Vec3(mmin[0], mmin[1], mmax[2]));
-    geom::Vec3 t6=tf.Apply(geom::Vec3(mmin[0], mmax[1], mmax[2]));
-    geom::Vec3 t7=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmax[2]));
-    geom::Vec3 t8=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmax[2]));
-    minc = geom::Min(minc, geom::Min(t1, geom::Min(t2, geom::Min(t3, 
-                     geom::Min(t4, geom::Min(t5, geom::Min(t6, 
-                     geom::Min(t7, t8))))))));
-    maxc = geom::Max(maxc, geom::Max(t1, geom::Max(t2, geom::Max(t3, 
-                     geom::Max(t4, geom::Max(t5, geom::Max(t6,
-                     geom::Max(t7, t8))))))));
+    minc=geom::Min(minc,coord_limits.GetMin());
+    maxc=geom::Min(maxc,coord_limits.GetMax());
   } catch(Error& e) {
     // in case the object is empty...
   }
@@ -457,13 +494,13 @@ void GfxObj::OnInput(const InputEvent& e)
   }
 }
 
-const mol::Transform& GfxObj::GetTF() const
+const geom::Transform& GfxObj::GetTF() const
 {
   return transform_;
 }
 
 
-void GfxObj::SetTF(const mol::Transform& tf)
+void GfxObj::SetTF(const geom::Transform& tf)
 {
   transform_=tf;
 }
@@ -593,7 +630,7 @@ void GfxObj::render_labels() const
 }
 
 void GfxObj::ReapplyColorOps(){
-  if(c_ops_.size()>0){
+  if(! c_ops_.empty()){
     GfxObjP o=dyn_cast<GfxObj>(shared_from_this());
     for(boost::ptr_vector<gfx::ColorOp>::iterator it=c_ops_.begin();
       it!=c_ops_.end();++it) {

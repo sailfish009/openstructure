@@ -125,7 +125,7 @@ void ContextMenu::ShowMenu(const QPoint& pos)
 
   gfx::EntityP view_entity = gfx::EntityP();
   int cnt = 0;
-  if(indexes.size()>0){
+  if(! indexes.empty()){
     for(int i = 0; i < indexes.size(); i++){
       if(indexes[i].column()==0){
         cnt++;
@@ -209,7 +209,7 @@ void ContextMenu::ShowMenu(const QPoint& pos)
         }
     }
 
-    if(menu->actions().size()>0){
+    if(! menu->actions().empty()){
       menu->popup(pos);
     }
   }

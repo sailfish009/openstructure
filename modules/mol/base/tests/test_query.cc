@@ -21,6 +21,7 @@
  */
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <ost/mol/query.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/entity_view.hh>
@@ -101,7 +102,7 @@ void ensure_counts_v(EntityView src, const String& qs,
                       " for query String " << qs);
 }
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 BOOST_AUTO_TEST_CASE(test_query_parse_properties) 
 {
@@ -116,6 +117,7 @@ BOOST_AUTO_TEST_CASE(test_query_parse_properties)
   BOOST_CHECK(Query("x=3").IsValid());
   BOOST_CHECK(Query("y=4").IsValid());
   BOOST_CHECK(Query("z=6").IsValid());
+  BOOST_CHECK(Query("aindex=1").IsValid());
   BOOST_CHECK(Query("gatest=7").IsValid());
   BOOST_CHECK(Query("grtest=8").IsValid());
   BOOST_CHECK(Query("gctest=9").IsValid());
@@ -151,6 +153,10 @@ BOOST_AUTO_TEST_CASE(test_query_parse_value_type)
   BOOST_CHECK(Query("rnum=WTF").IsValid()==false);
   BOOST_CHECK(Query("rnum=3.0").IsValid()==false);
   BOOST_CHECK(Query("ele>=XXX").IsValid()==false);
+
+  BOOST_CHECK(Query("aindex=1,2").IsValid());
+  BOOST_CHECK(Query("aindex=1:10,12:20").IsValid());
+  BOOST_CHECK(Query("aindex>7").IsValid());
 }
 
 BOOST_AUTO_TEST_CASE(test_query_parse_logical_op) 
@@ -198,6 +204,7 @@ BOOST_AUTO_TEST_CASE(test_query_eval)
   ensure_counts(e, "cname=A", 1, 3, 27);
   ensure_counts(e, "aname=CA", 1, 3, 3);
   ensure_counts(e, "aname=SD", 1, 1, 1);
+  ensure_counts(e, "aindex=1,3,99", 1, 1, 2);
   ensure_counts(e, "rnum=1:2", 1, 2, 19);
   ensure_counts(e, "rnum=1,2", 1, 2, 19);
   ensure_counts(e, "rnum>3", 0, 0, 0);
@@ -263,15 +270,15 @@ BOOST_AUTO_TEST_CASE(test_query_throw)
   EntityHandle e=make_query_test_entity();
   BOOST_CHECK_NO_THROW(e.Select("gatestpropa:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("gatestpropa:1=1"));
-  BOOST_CHECK_THROW(e.Select("gatestpropa=1"), std::exception);
+  BOOST_CHECK_THROW(e.Select("gatestpropa=1"), ost::Error);
   BOOST_CHECK_NO_THROW(e.Select("grtestpropr:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("grtestpropr:1=1"));
-  BOOST_CHECK_THROW(e.Select("grtestpropr=1"), std::exception);
+  BOOST_CHECK_THROW(e.Select("grtestpropr=1"), ost::Error);
   BOOST_CHECK_NO_THROW(e.Select("gctestprop_c:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("gctestprop_c:1=1"));
-  BOOST_CHECK_THROW(e.Select("ganotsetprop=1"), std::exception);
-  BOOST_CHECK_THROW(e.Select("grnotsetprop=1"), std::exception);
-  BOOST_CHECK_THROW(e.Select("gcnotsetprop=1"), std::exception);
+  BOOST_CHECK_THROW(e.Select("ganotsetprop=1"), ost::Error);
+  BOOST_CHECK_THROW(e.Select("grnotsetprop=1"), ost::Error);
+  BOOST_CHECK_THROW(e.Select("gcnotsetprop=1"), ost::Error);
   BOOST_CHECK_NO_THROW(e.Select("ganotsetprop:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("grnotsetprop:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("gcnotsetprop:0=1"));
@@ -290,4 +297,4 @@ BOOST_AUTO_TEST_CASE(test_glob)
   ensure_counts(e, "rname=LEU and aname=?D?", 1, 1, 2);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

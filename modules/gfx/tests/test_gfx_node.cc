@@ -39,14 +39,18 @@ using namespace ost::gfx;
 struct GfxTestEnv {
   GfxTestEnv()
   {
+#if defined(__APPLE__)    
     // we know OST_ROOT is set for unit tests
     SetPrefixPath(getenv("OST_ROOT"));
     Scene::Instance().StartOffscreenMode(100, 100);
+#endif
   }
   
   ~GfxTestEnv()
   {
+#if defined(__APPLE__)
     Scene::Instance().StopOffscreenMode();
+#endif
   }
 
 };

@@ -109,7 +109,7 @@ QueryState::~QueryState()
 QueryState::QueryState(const QueryImpl& query, const EntityHandle& ref)
   : q_(query) {
   s_.resize(query.sel_values_.size(),boost::logic::indeterminate);
-  if (query.bracketed_expr_.size()>0) {
+  if (! query.bracketed_expr_.empty()) {
     r_.reset(new LazilyBoundData);
     r_->refs.resize(query.bracketed_expr_.size());
     for (size_t i=0;i<query.bracketed_expr_.size(); ++i) {
@@ -127,7 +127,7 @@ LazilyBoundRef& LazilyBoundRef::operator=(const LazilyBoundRef& rhs) {
 QueryState::QueryState(const QueryImpl& query, const EntityView& ref)
   : q_(query) {
   s_.resize(query.sel_values_.size(),boost::logic::indeterminate);
-  if (query.bracketed_expr_.size()>0) {
+  if (! query.bracketed_expr_.empty()) {
     r_.reset(new LazilyBoundData);
     r_->refs.resize(query.bracketed_expr_.size());
     for (size_t i=0;i<query.bracketed_expr_.size(); ++i) {
@@ -319,34 +319,38 @@ boost::logic::tribool QueryState::EvalAtom(const AtomImplPtr& a) {
     int int_value;
     switch (ss.sel_id) {
       case Prop::ANAME:
-        str_value = a->GetName();
+        str_value = a->Name();
         s_[*i] = cmp_string(ss.comp_op,str_value,
-			    boost::get<StringOrRegexParam>(ss.param));                  
+                            boost::get<StringOrRegexParam>(ss.param));
+        break;
+      case Prop::AINDEX:
+        int_value=(a->GetIndex());
+        s_[*i]=cmp_num<int>(ss.comp_op, int_value,boost::get<int>(ss.param));
         break;
       case Prop::AX:
-        float_value=(a->GetPos())[0];
+        float_value=(a->TransformedPos())[0];
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
-			     boost::get<float>(ss.param));
+        boost::get<float>(ss.param));
         break;
       case Prop::AY:
-        float_value=(a->GetPos())[1];
+        float_value=(a->TransformedPos())[1];
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
-			     boost::get<float>(ss.param));
+                             boost::get<float>(ss.param));
         break;
       case Prop::AZ:
-        float_value=(a->GetPos())[2];
+        float_value=(a->TransformedPos())[2];
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
-			     boost::get<float>(ss.param));
+                             boost::get<float>(ss.param));
         break;                
       case Prop::OCC:
         float_value=a->GetOccupancy();
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
-			     boost::get<float>(ss.param));
+                             boost::get<float>(ss.param));
         break;                        
       case Prop::ELE:
         str_value = a->GetElement();
         s_[*i] = cmp_string(ss.comp_op,str_value,
-			    boost::get<StringOrRegexParam>(ss.param));                          
+                            boost::get<StringOrRegexParam>(ss.param));                          
         break;
       case Prop::ABFAC:
         float_value=a->GetBFactor();
@@ -354,7 +358,7 @@ boost::logic::tribool QueryState::EvalAtom(const AtomImplPtr& a) {
                               boost::get<float>(ss.param));
         break;
       case Prop::WITHIN:
-        s_[*i]= this->do_within(a->GetPos(), 
+        s_[*i]= this->do_within(a->TransformedPos(), 
                                 boost::get<WithinParam>(ss.param),
                                 ss.comp_op);
         break;

@@ -156,6 +156,11 @@ void EntityRenderer::RenderPov(PovState& pov, const std::string& name)
   va_.RenderPov(pov,name);
 }
 
+void EntityRenderer::Export(Exporter* ex)
+{
+  va_.Export(ex);
+}
+
 bool EntityRenderer::HasSelection() const
 {
   return (sel_.IsValid() && sel_.GetAtomCount()>0);

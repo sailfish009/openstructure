@@ -22,6 +22,7 @@
 #include <ost/mol/module_config.hh>
 #include <ost/mol/impl/chain_impl_fw.hh>
 
+#include <ost/mol/chain_type.hh>
 #include <ost/generic_property.hh>
 
 namespace ost { namespace mol {
@@ -59,10 +60,35 @@ public:
   friend class ConstGenericPropContainer<ChainBase>;
   String GetName() const;
 
+  /// \brief Get the type of a chain.
+  ///
+  /// \return chain type of ChainType
+  ChainType GetType() const;
+
+  /// \brief Get information about a chain.
+  ///
+  /// \return description
+  String GetDescription() const;
+
   const impl::ChainImplPtr& Impl() const {
     return impl_;
   }
 
+  /// \brief whether the chain is a polymer
+  ///
+  /// True if one of IsPolysaccharide(), IsPolynucleotide(), IsPolypeptide() is 
+  /// true or the chain is of type CHAINTYPE_POLYMER.
+  bool IsPolymer() const;
+  
+  /// \brief whether the chain is a polysaccharide
+  bool IsPolysaccharide() const;
+  
+  /// \brief whether the chain is a polypeptide
+  bool IsPolypeptide() const;
+  
+  /// \brief whether the chain is a polynucleotide
+  bool IsPolynucleotide() const;
+  
   impl::ChainImplPtr& Impl() {
     return impl_;
   }

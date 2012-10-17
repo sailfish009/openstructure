@@ -51,24 +51,62 @@ public:
   void SetAtomOriginalPos(const AtomHandle& atom,
                           const geom::Vec3& position);
                    
+  /// \brief numpy float interface
+  /// 
+  /// the passed in float array must have a length of 3*alist.size()
+  void SetAtomOriginalPos(const AtomHandleList& alist,
+			  float *positions);
+
+  /// \brief numpy double interface
+  /// 
+  /// the passed in double array must have a length of 3*alist.size()
+  void SetAtomOriginalPos(const AtomHandleList& alist,
+			  double *positions);
+
   /// \brief set transformed position of atom
   /// 
   /// This function also updates the original coordinates
+  void SetAtomTransformedPos(const AtomHandle& atom,
+			     const geom::Vec3& position);
+
+  /// \brief numpy float interface
+  /// 
+  /// the passed in float array must have a length of 3*alist.size()
+  void SetAtomTransformedPos(const AtomHandleList& alist,
+			     float *positions);
+
+  /// \brief numpy double interface
+  /// 
+  /// the passed in double array must have a length of 3*alist.size()
+  void SetAtomTransformedPos(const AtomHandleList& alist,
+			     double *positions);
+
+  /// \brief same as SetAtomTransformedPos(AtomHandle, geom::Vec3)
   void SetAtomPos(const AtomHandle& atom,
-                   const geom::Vec3& position);
+		  const geom::Vec3& position);
+
+  /// \brief same as SetTransformedPos(AtomHandleList,float*)
+  void SetAtomPos(const AtomHandleList& alist,
+		  float *positions);
+
+  /// \brief same as SetTransformedPos(AtomHandleList,double*)
+  void SetAtomPos(const AtomHandleList& alist,
+		  double *positions);
 
   /// \brief apply additional transformation to all atoms
   /// 
   /// This transformation is applied \em after the transformation
   /// already stored in the entity
   void ApplyTransform(const geom::Mat4& transform); 
+  void ApplyTransform(const geom::Transform& transform); 
 
   /// \brief apply a new transformation to all atoms
-
   void SetTransform(const geom::Mat4& transform);
+  void SetTransform(const geom::Transform& transform);
 
   /// \brief immediately update internal coordinate system
   void UpdateICS();  
+
 protected:
    XCSEditor(const EntityHandle& ent, EditMode mode);
    

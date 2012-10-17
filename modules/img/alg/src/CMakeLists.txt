@@ -75,6 +75,7 @@ power_spectrum.hh
 randomize.hh
 smooth_mask_image.hh
 stat.hh
+stat_accumulator.hh
 stat_min_max.hh
 threshold.hh
 transcendentals.hh
@@ -93,9 +94,11 @@ line_average.hh
 rscrosscorr.hh
 )
 
+if(ENABLE_INFO)
 include(${QT_USE_FILE})
+endif()
 module(NAME img_alg SOURCES "${OST_IMG_ALG_SOURCES}" 
        HEADERS "${OST_IMG_ALG_HEADERS}" 
        HEADER_OUTPUT_DIR ost/img/alg
-       DEPENDS_ON img
+       DEPENDS_ON ost_img
        LINK ${FFTW_LIBRARIES} ${QT_QTCORE_LIBRARY})

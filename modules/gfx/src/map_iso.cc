@@ -59,13 +59,14 @@ int compute_downsampling_fact(const ost::img::ImageHandle& mh)
 namespace ost { namespace gfx {
 
 
-MapIso::MapIso(const String& name, const img::XtalMapPtr& map, float level):
+MapIso::MapIso(const String& name, const img::XtalMapPtr& map, float level, uint a):
   GfxObj(name),
   original_mh_(),
   downsampled_mh_(),
   octree_(new impl::MapOctree(false)),
   xtal_map_(map),
-  level_(level)
+  level_(level),
+  alg_(a)
 {
   this->SetVisibleExtent(img::Extent(img::Size(32,32,32)));
   this->Init();
@@ -73,13 +74,22 @@ MapIso::MapIso(const String& name, const img::XtalMapPtr& map, float level):
 
 
 MapIso::MapIso(const String& name, const img::MapHandle& mh, 
-               float level):
+               float level, uint a):
   GfxObj(name),
   original_mh_(mh),
   downsampled_mh_(),
   mh_(MapIso::DownsampleMap(mh)),
   octree_(new impl::MapOctree(mh_, false)),
-  level_(level)
+  stat_calculated_(false),
+  histogram_calculated_(false),
+  histogram_bin_count_(100),
+  level_(level),
+  normals_calculated_(false),
+  alg_(a),
+  debug_octree_(false),
+  color_(1.0,1.0,1.0),
+  bb_(),
+  recalc_bb_(true)
 {
   this->Init();
 }
@@ -103,7 +113,7 @@ void MapIso::Init()
   SetMatDiff(Color(1,1,1));
   SetMatSpec(Color(0.1,0.1,0.1));
   SetMatShin(32);
-  mol::Transform tf=this->GetTF();
+  geom::Transform tf=this->GetTF();
   tf.SetCenter(this->GetCenter());
   tf.SetTrans(this->GetCenter());  
   this->SetLineWidth(1.0);
@@ -116,28 +126,19 @@ void MapIso::Init()
   Rebuild();  
 }
 
-geom::AlignedCuboid MapIso::GetBoundingBox() const
+geom::AlignedCuboid MapIso::GetBoundingBox(bool use_tf) const
 {
-  if (this->HasXtalMap()) {
-    geom::Vec3 minc = xtal_map_->IndexToCoord(visible_extent_.GetStart());
-    geom::Vec3 maxc = xtal_map_->IndexToCoord(visible_extent_.GetEnd());
-    return geom::AlignedCuboid(minc,maxc);    
-  } else {
-    geom::Vec3 minc = mh_.IndexToCoord(visible_extent_.GetStart());
-    geom::Vec3 maxc = mh_.IndexToCoord(visible_extent_.GetEnd());
-    return geom::AlignedCuboid(minc,maxc);    
+  if(recalc_bb_) {
+    bb_=va_.GetBoundingBox();
+    recalc_bb_=false;
   }
-
+  return use_tf ? transform_.Apply(bb_) : bb_;
 }
 
 geom::Vec3 MapIso::GetCenter() const
 {
-  if (this->HasXtalMap()) {
-    return xtal_map_->IndexToCoord(visible_extent_.GetCenter());
-  } else {
-    geom::Vec3 nrvo = mh_.IndexToCoord(mh_.GetExtent().GetCenter());
-    return nrvo;    
-  }
+  if(recalc_bb_) GetBoundingBox();
+  return bb_.GetCenter();
 }
 
 
@@ -334,6 +335,7 @@ void MapIso::Rebuild()
   va_.DrawNormals(true);
 #endif  
   this->UpdateRenderParams();  
+  recalc_bb_=true;
 }
 
 void MapIso::SetLevel(float l)

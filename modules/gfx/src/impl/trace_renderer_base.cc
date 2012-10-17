@@ -50,8 +50,10 @@ inline void apply_color_op(TraceRendererBase* rend, BackboneTrace& trace_subset,
       for (unsigned int i=0; i<nl.size();++i) {
         if(nl[i].atom.IsValid()) {
           if (q.IsAtomSelected(nl[i].atom)) {
-            Color clr =get_col.ColorOfAtom(nl[i].atom);
-            set_node_entry_color(nl[i],mask,clr);
+            std::pair<bool,Color> clr =get_col.ColorOfAtom(nl[i].atom);
+            if(clr.first) {
+              set_node_entry_color(nl[i],mask,clr.second);
+            }
           }
         }
       }
@@ -61,9 +63,11 @@ inline void apply_color_op(TraceRendererBase* rend, BackboneTrace& trace_subset,
     for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
       NodeEntryList& nl=trace_subset.GetList(node_list);
       for (unsigned int i=0; i<nl.size();++i) {
-        if(view.FindAtom(nl[i].atom)){
-          Color clr =get_col.ColorOfAtom(nl[i].atom);
-          set_node_entry_color(nl[i],mask,clr);
+        if(view.ViewForHandle(nl[i].atom)){
+          std::pair<bool,Color> clr =get_col.ColorOfAtom(nl[i].atom);
+          if(clr.first) {
+            set_node_entry_color(nl[i],mask,clr.second);
+          }
         }
       }
     }
@@ -78,8 +82,11 @@ TraceRendererBase::TraceRendererBase(BackboneTrace* trace, int n):
 {
 }
 
-void TraceRendererBase::PrepareRendering()
+void TraceRendererBase::PrepareRendering(bool twist_hack)
 {
+  trace_->SetTwistHack(twist_hack);
+  trace_subset_.SetTwistHack(twist_hack);
+  if(this->HasSelection()) sel_subset_.SetTwistHack(twist_hack);
   if (state_ & DIRTY_VA) {
     trace_->OnUpdatedPositions();
     trace_subset_.OnUpdatedPositions();

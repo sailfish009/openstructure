@@ -16,10 +16,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
-from _mol import *
+from _ost_mol import *
 import ost.geom as _geom
 from ost.mol import alg
 
+
+def Transform(tf=None):
+  from ost import LogWarning
+  if Transform.mol_transform_warning_flag:
+    LogWarning("mol.Transform is deprecated, please use geom.Transform instead")
+    Transform.mol_transform_warning_flag=False
+  if tf:
+    return _geom.Transform(tf)
+  else:
+    return _geom.Transform()
+Transform.mol_transform_warning_flag=True
 
 def MergeCoordGroups(*coord_groups):
   """

@@ -21,11 +21,19 @@
 #include <Eigen/Array>
 #include <Eigen/SVD>
 #include <Eigen/LU>
+#include <ost/message.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/alg/superpose_frames.hh>
 
 namespace ost { namespace mol { namespace alg {
 
+namespace {
+bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
+{
+  return a1.GetIndex()<a2.GetIndex();
+}
+
+}
 
 typedef Eigen::Matrix<Real, 3, 3> EMat3;
 typedef Eigen::Matrix<Real, 1, 3> ECVec3;
@@ -35,26 +43,26 @@ typedef Eigen::Matrix<Real, Eigen::Dynamic, 3> EMatX3;
 
 
 inline geom::Vec3 rvec_to_gvec(const ERVec3 &vec) {
-  return *reinterpret_cast<const geom::Vec3*>(&vec);
+  return geom::Vec3(vec.data());
 }
 
 inline geom::Vec3 cvec_to_gvec(const ECVec3 &vec) {
-  return *reinterpret_cast<const geom::Vec3*>(&vec);
+  return geom::Vec3(vec.data());
 }
 
 inline geom::Mat3 emat_to_gmat(const EMat3 &mat)
 {
-  return *reinterpret_cast<const geom::Mat3*>(&mat);
+  return geom::Mat3(mat.data());
 }
 
 inline ERVec3 gvec_to_rvec(const geom::Vec3 &vec)
 {
-  return *reinterpret_cast<const ERVec3*>(&vec);
+  return ERVec3(&vec[0]);
 }
 
 inline ECVec3 gvec_to_cvec(const geom::Vec3 &vec)
 {
-  return *reinterpret_cast<const ECVec3*>(&vec);
+  return ECVec3(&vec[0]);
 }
 
 inline EMat3X row_sub(const EMat3X& m, const ERVec3& s)
@@ -75,9 +83,59 @@ inline EMatX3 col_sub(const EMatX3& m, const ECVec3& s)
   return r;
 }
 
-CoordGroupHandle SuperposeFrames(CoordGroupHandle cg, EntityView sel,
+  
+void AddSuperposedFrame(CoordGroupHandle& superposed, EMatX3& ref_mat,EMatX3& ref_centered,ECVec3& ref_center,CoordFramePtr frame,std::vector<unsigned long>& indices)
+{
+  // This function superposes and then adds a CoordFrame (frame) to a CoordGroup (superposed).
+  // ref_mat, ref_centered and ref_center contain respectively the positions, centered positions and
+  // vector to center of the reference points for superposition.
+  // indices is a vector of the indices of the atoms to be superposed on the reference positions
+  EMat3X frame_centered=EMat3X::Zero(3, indices.size());
+  EMat3X frame_mat=EMat3X::Zero(3, indices.size());
+  ERVec3 frame_center;
+  for (size_t j=0; j<indices.size(); ++j) {
+    frame_mat.col(j)=gvec_to_rvec((*frame)[indices[j]]);
+  }
+  std::vector<geom::Vec3> frame_data=*frame;
+  frame_center=frame_mat.rowwise().sum()/frame_mat.cols();
+  frame_centered=row_sub(frame_mat, frame_center);
+  //single value decomposition
+  Eigen::SVD<EMat3> svd(frame_centered*ref_centered);
+  EMat3 matrixVT=svd.matrixV().transpose();
+  //determine rotation
+  Real detv=matrixVT.determinant();
+  Real dett=svd.matrixU().determinant();
+  Real det=detv*dett;
+  EMat3 e_rot;
+  if (det<0) {
+    EMat3 tmat=EMat3::Identity();
+    tmat(2,2)=-1;
+    e_rot=(svd.matrixU()*tmat)*matrixVT;
+  }else{
+    e_rot=svd.matrixU()*matrixVT;
+  }
+  //  prepare rmsd calculation
+  geom::Vec3 shift=rvec_to_gvec(ref_center);
+  geom::Vec3 com_vec=-cvec_to_gvec(frame_center);
+  geom::Mat3 rot=emat_to_gmat(e_rot);
+  geom::Mat4 mat4_com, mat4_rot, mat4_shift;
+  mat4_rot.PasteRotation(rot);
+  mat4_shift.PasteTranslation(shift);
+  mat4_com.PasteTranslation(com_vec);
+  geom::Mat4 tf=geom::Mat4(mat4_shift*mat4_rot*mat4_com);
+  for (std::vector<geom::Vec3>::iterator c=frame_data.begin(), 
+       e2=frame_data.end(); c!=e2; ++c) {
+    *c=geom::Vec3(tf*geom::Vec4(*c));
+  }
+  superposed.AddFrame(frame_data);
+}  
+
+
+CoordGroupHandle SuperposeFrames(CoordGroupHandle& cg, EntityView& sel,
                                  int begin, int end, int ref)
 {
+  //This function superposes the frames of a CoordGroup (cg) with indices between begin and end
+  //onto the frame with index ref. The superposition is done on a selection of atoms given by the EntityView sel.
   int real_end=end==-1 ? cg.GetFrameCount() : end;
   CoordFramePtr ref_frame;
   std::vector<unsigned long> indices;
@@ -94,13 +152,12 @@ CoordGroupHandle SuperposeFrames(CoordGroupHandle cg, EntityView sel,
       indices.push_back(i->GetIndex());
     }
   }
-  CoordGroupHandle superposed=CreateCoordGroup(cg.GetEntity().GetAtomList());
+  mol::AtomHandleList alist(cg.GetEntity().GetAtomList());
+  std::sort(alist.begin(), alist.end(),less_index);
+  CoordGroupHandle superposed=CreateCoordGroup(alist);
   EMatX3 ref_mat=EMatX3::Zero(indices.size(), 3);
   EMatX3 ref_centered=EMatX3::Zero(indices.size(), 3);
-  EMat3X frame_centered=EMat3X::Zero(3, indices.size());
-  EMat3X frame_mat=EMat3X::Zero(3, indices.size());
   ECVec3 ref_center;
-  ERVec3 frame_center;
   if (ref!=-1) {
     ref_frame=cg.GetFrame(ref);
     for (size_t i=0; i<indices.size(); ++i) {
@@ -125,46 +182,61 @@ CoordGroupHandle SuperposeFrames(CoordGroupHandle cg, EntityView sel,
       ref_centered=col_sub(ref_mat, ref_center);
     }
     CoordFramePtr frame=cg.GetFrame(i);
-    for (size_t j=0; j<indices.size(); ++j) {
-      frame_mat.col(j)=gvec_to_rvec((*frame)[indices[j]]);
-    }
-    std::vector<geom::Vec3> frame_data=*frame;
-    frame_center=frame_mat.rowwise().sum()/frame_mat.cols();
-    frame_centered=row_sub(frame_mat, frame_center);
-    //single value decomposition
-    Eigen::SVD<EMat3> svd(frame_centered*ref_centered);
-    EMat3 matrixVT=svd.matrixV().transpose();
-    //determine rotation
-    Real detv=matrixVT.determinant();
-    Real dett=svd.matrixU().determinant();
-    Real det=detv*dett;
-    EMat3 e_rot;
-    if (det<0) {
-      EMat3 tmat=EMat3::Identity();
-      tmat(2,2)=-1;
-      e_rot=(svd.matrixU()*tmat)*matrixVT;
-    }else{
-      e_rot=svd.matrixU()*matrixVT;
-    }
-    //  prepare rmsd calculation
-    geom::Vec3 shift=rvec_to_gvec(ref_center);
-    geom::Vec3 com_vec=-cvec_to_gvec(frame_center);
-    geom::Mat3 rot=emat_to_gmat(e_rot);
-    geom::Mat4 mat4_com, mat4_rot, mat4_shift;
-    mat4_rot.PasteRotation(rot);
-    mat4_shift.PasteTranslation(shift);
-    mat4_com.PasteTranslation(com_vec);
-    geom::Mat4 tf=geom::Mat4(mat4_shift*mat4_rot*mat4_com);
-    for (std::vector<geom::Vec3>::iterator c=frame_data.begin(), 
-         e2=frame_data.end(); c!=e2; ++c) {
-      *c=geom::Vec3(tf*geom::Vec4(*c));
-    }
-    superposed.AddFrame(frame_data);
+    AddSuperposedFrame(superposed,ref_mat,ref_centered,ref_center,frame,indices);    
     if (ref==-1) {
       ref_frame=superposed.GetFrame(superposed.GetFrameCount()-1);
     }
   }
   return superposed;
 }
-
+  
+  
+CoordGroupHandle SuperposeFrames(CoordGroupHandle& cg, EntityView& sel,
+                                  EntityView& ref_view, int begin, int end)
+{
+  //This function superposes the frames of a CoordGroup (cg) with indices between begin and end,
+  //using a selection of atoms (sel), onto an EntityView (ref_view).
+  if (!ref_view.IsValid()){
+    throw ost::Error("Invalid reference view");
+  }
+  int real_end=end==-1 ? cg.GetFrameCount() : end;
+  CoordFramePtr ref_frame;
+  std::vector<unsigned long> indices;
+  if (!sel.IsValid()) {
+    indices.reserve(cg.GetAtomCount());
+    for (size_t i=0;i<cg.GetAtomCount(); ++i) {
+      indices.push_back(i);
+    }
+  } else {
+    AtomViewList atoms=sel.GetAtomList();
+    indices.reserve(atoms.size());
+    for (AtomViewList::const_iterator i=atoms.begin(), 
+         e=atoms.end(); i!=e; ++i) {
+      indices.push_back(i->GetIndex());
+    }
+  }
+  if (int(indices.size())!=ref_view.GetAtomCount()){
+    throw ost::Error("atom counts of the two views are not equal");
+  }
+  mol::AtomHandleList alist(cg.GetEntity().GetAtomList());
+  std::sort(alist.begin(), alist.end(),less_index);
+  CoordGroupHandle superposed=CreateCoordGroup(alist);
+  EMatX3 ref_mat=EMatX3::Zero(indices.size(), 3);
+  EMatX3 ref_centered=EMatX3::Zero(indices.size(), 3);
+  ECVec3 ref_center;
+  AtomViewList atoms=ref_view.GetAtomList();
+  int i=0;
+  for (AtomViewList::const_iterator a=atoms.begin(), 
+       e=atoms.end(); a!=e; a++, i++) {
+    ref_mat.row(i)=gvec_to_cvec((*a).GetPos());
+  }
+  ref_center=ref_mat.colwise().sum()/ref_mat.rows();
+  ref_centered=col_sub(ref_mat, ref_center);
+  for (int i=begin; i<real_end; ++i) {
+    CoordFramePtr frame=cg.GetFrame(i);
+    AddSuperposedFrame(superposed,ref_mat,ref_centered,ref_center,frame,indices);    
+  }
+  return superposed;
+}
+  
 }}}

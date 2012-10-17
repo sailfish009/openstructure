@@ -54,6 +54,7 @@
 #if OST_SHADER_SUPPORT_ENABLED
 #include "shader.hh"
 #endif
+#include "exporter.hh"
 
 namespace ost {
 
@@ -230,7 +231,7 @@ void Entity::Rebuild()
 
   // update center in transformation
   geom::Vec3 center=this->GetCenter();
-  Transform tf=this->GetTF();
+  geom::Transform tf=this->GetTF();
   tf.SetCenter(center);
   tf.SetTrans(center+GetTF().GetTrans()-GetTF().GetCenter());
   this->SetTF(tf);  
@@ -251,39 +252,11 @@ void Entity::UpdatePositions()
 
 
 
-geom::AlignedCuboid Entity::GetBoundingBox() const
+geom::AlignedCuboid Entity::GetBoundingBox(bool use_tf) const
 {
   this->UpdateIfNeeded();
-  return bbox_;
+  return use_tf ? transform_.Apply(bbox_) : bbox_;
 }
-
-void Entity::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
-                           const Transform& tf) const
-{
-  try {
-    geom::AlignedCuboid coord_limits=this->GetBoundingBox();
-    // update min/max by transforming all 8 corners of the bounding box and 
-    // comparing it against the current min/max
-    geom::Vec3 mmin=coord_limits.GetMin();
-    geom::Vec3 mmax=coord_limits.GetMax();
-    geom::Vec3 t1=tf.Apply(geom::Vec3(mmin[0], mmin[1], mmin[2]));
-    geom::Vec3 t2=tf.Apply(geom::Vec3(mmin[0], mmax[1], mmin[2]));
-    geom::Vec3 t3=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmin[2]));
-    geom::Vec3 t4=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmin[2]));
-    geom::Vec3 t5=tf.Apply(geom::Vec3(mmin[0], mmin[1], mmax[2]));
-    geom::Vec3 t6=tf.Apply(geom::Vec3(mmin[0], mmax[1], mmax[2]));
-    geom::Vec3 t7=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmax[2]));
-    geom::Vec3 t8=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmax[2]));
-    minc = geom::Min(minc, geom::Min(t1, geom::Min(t2, geom::Min(t3, 
-                     geom::Min(t4, geom::Min(t5, geom::Min(t6, 
-                     geom::Min(t7, t8))))))));
-    maxc = geom::Max(maxc, geom::Max(t1, geom::Max(t2, geom::Max(t3, 
-                     geom::Max(t4, geom::Max(t5, geom::Max(t6,
-                     geom::Max(t7, t8))))))));
-  } catch(Error& e) {
-    // in case the object is empty...
-  }
-} 
 
 void Entity::SetColorForAtom(const Color& col,
                              const AtomHandle& atom) 
@@ -401,6 +374,23 @@ void Entity::CustomRenderPov(PovState& pov)
   }
 }
 
+void Entity::Export(Exporter* ex)
+{
+  ex->NodeStart(GetName(),Exporter::OBJ);
+  // in the simplest case, just export va
+  if(rebuild_ || refresh_) {
+    PreRenderGL(true);
+  }
+
+  for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
+    if(it->second->IsEnabled() && it->second->HasDataToRender()){
+      it->second->Export(ex);
+    }
+  }
+  
+  ex->NodeEnd(GetName());
+}
+
 mol::AtomHandle Entity::PickAtom(const geom::Line3& line, Real line_width)
 {
   mol::AtomHandle picked_atom;
@@ -453,7 +443,7 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
         return true;
       }
       if(smode==1) {
-        AtomView av = sel_.FindAtom(sel.GetHandle());
+        AtomView av = sel_.ViewForHandle(sel.GetHandle());
         if(av.IsValid()) {
           LOG_DEBUG("de-selected atom: " << sel);
           sel_.RemoveAtom(av);
@@ -466,8 +456,8 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
         }
         result = sel.GetPos();
       } else if(smode==2) {
-        AtomView av=sel_.FindAtom(sel);
-        ResidueView rv=sel_.FindResidue(sel.GetResidue());
+        AtomView av=sel_.ViewForHandle(sel);
+        ResidueView rv=sel_.ViewForHandle(sel.GetResidue());
         if(av.IsValid() && rv.IsValid()) {
           LOG_DEBUG("de-selected residue: " << sel.GetResidue());
           sel_.RemoveResidue(rv);
@@ -482,7 +472,7 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
           return false;
         }
         ChainHandle chain=sel.GetHandle().GetResidue().GetChain();
-        ChainView cv = sel_.FindChain(chain);
+        ChainView cv = sel_.ViewForHandle(chain);
         if(cv.IsValid()) {
           LOG_DEBUG("de-selected chain: " << chain);
           sel_.RemoveChain(cv);
@@ -670,6 +660,12 @@ RenderModeTypes Entity::GetNotEmptyRenderModes(){
   return render_modes;
 }
 
+
+void Entity::SetRenderMode(RenderMode::Type mode, 
+                           const String& sel, bool keep)
+{
+  this->SetRenderMode(mode, this->GetView().Select(sel), keep);
+}
 void Entity::SetRenderMode(RenderMode::Type mode, 
                            const mol::EntityView& view, bool keep)
 {
@@ -698,7 +694,7 @@ void Entity::SetRenderMode(RenderMode::Type mode,
 mol::EntityView Entity::GetRenderView(RenderMode::Type mode)
 {
   EntityRenderer* rend = this->GetOrCreateRenderer(mode);
-  if(!rend) return mol::EntityView();
+  if (!rend) return this->GetView().CreateEmptyView();
   return rend->GetFullView();
 }
 
@@ -734,6 +730,11 @@ void Entity::SetVisible(const mol::EntityView& view, bool visible){
   this->FlagRebuild();
 }
 
+void Entity::SetVisible(const String& sel, bool visible)
+{
+  this->SetVisible(this->GetView().Select(sel), visible);
+}
+
 void Entity::SetColor(const Color& col, const String& selection)
 {
   UniformColorOp cop = UniformColorOp(selection, col);
@@ -747,7 +748,6 @@ void Entity::SetDetailColor(const Color& col, const String& selection)
   this->Apply(cop);
 }
 
-/// \brief set selection
 void Entity::SetSelection(const mol::EntityView& view)
 {
   if (!view.IsValid()) {
@@ -756,8 +756,8 @@ void Entity::SetSelection(const mol::EntityView& view)
     sel_=view;
   }
   this->UpdateSelection();
-  this->FlagRebuild();  
-  Scene::Instance().SelectionChanged(GetName(), view);  
+  this->FlagRebuild();
+  Scene::Instance().SelectionChanged(GetName(), view);
   Scene::Instance().RequestRedraw();
 }
 
@@ -786,9 +786,21 @@ void Entity::ColorByElement()
   this->Apply(cop);
 }
 
+void Entity::ColorByElement(const String& selection)
+{
+  ByElementColorOp cop = ByElementColorOp(selection);
+  this->Apply(cop);
+}
+
 void Entity::ColorByChain()
 {
   ByChainColorOp cop = ByChainColorOp();
+  this->Apply(cop);
+}
+
+void Entity::ColorByChain(const String& selection)
+{
+  ByChainColorOp cop = ByChainColorOp(selection);
   this->Apply(cop);
 }
 
@@ -816,6 +828,16 @@ void Entity::ColorBy(const String& prop,
                      mol::Prop::Level level)
 {
   GradientLevelColorOp glop = GradientLevelColorOp("",prop, gradient,minv,maxv,level);
+  this->Apply(glop);
+}
+
+void Entity::ColorBy(const String& prop,
+                     const Gradient& gradient,
+                     float minv,float maxv,
+                     bool clamp)
+{
+  GradientLevelColorOp glop = GradientLevelColorOp("",prop, gradient,minv,maxv,mol::Prop::UNSPECIFIED);
+  glop.SetClamp(clamp);
   this->Apply(glop);
 }
 
@@ -848,6 +870,14 @@ void Entity::ColorBy(const String& prop,
   this->Apply(glop);
 }
 
+void Entity::ColorBy(const String& prop,
+                     const Gradient& gradient,
+                     const String& selection)
+{
+  GradientLevelColorOp glop = GradientLevelColorOp(selection,prop,gradient);
+  this->Apply(glop);
+}
+
 mol::EntityView Entity::GetView() const
 {
   do_update_view();
@@ -861,11 +891,56 @@ void Entity::SetQuery(const mol::Query& q)
   Rebuild();
 }
 
+void Entity::Reset(const mol::EntityHandle& eh)
+{
+  qv_=mol::QueryViewWrapper(qv_.GetQuery(),qv_.GetFlags(),eh);
+  update_view_=true;
+  Rebuild();
+}
+
+void Entity::Reset(const mol::EntityHandle& eh, const mol::Query& q)
+{
+  qv_=mol::QueryViewWrapper(q,qv_.GetFlags(),eh);
+  update_view_=true;
+  Rebuild();
+}
+
+void Entity::Reset(const mol::EntityHandle& eh, const mol::Query& q, mol::QueryFlags f)
+{
+  qv_=mol::QueryViewWrapper(q,f,eh);
+  update_view_=true;
+  Rebuild();
+}
+
+void Entity::Reset(const mol::EntityView& ev)
+{
+  qv_=mol::QueryViewWrapper(ev);
+  update_view_=true;
+  Rebuild();
+}
+
+void Entity::SetQueryView(const mol::QueryViewWrapper& qv)
+{
+  qv_=qv;
+  update_view_=true;
+  Rebuild();
+}
+
+mol::QueryViewWrapper Entity::GetQueryView() const
+{
+  return qv_;
+}
+
+mol::EntityHandle Entity::GetEntity() const
+{
+  return qv_.GetEntity();
+}
+
 void Entity::ColorBy(const String& prop,
                      const Color& c1, const Color& c2,
                      mol::Prop::Level level)
 {
-  std::pair<float,float> minmax = this->GetView().GetMinMax(prop);
+  std::pair<float,float> minmax = this->GetView().GetMinMax(prop, level);
   this->ColorBy(prop,c1,c2,minmax.first, minmax.second,level);
 }
 

@@ -28,11 +28,20 @@ void Mat2_setitem(geom::Mat2& m,const  tuple i,const  Real val) {m(extract<int> 
 
 String mat2_repr(const geom::Mat2& m) {
   std::stringstream ss;
-  
-  ss << "geom.Mat2(" << m(0,0) << ", " << m(0,1) << ", " 
+  ss << "geom.Mat2(" << m(0,0) << ", " << m(0,1) << ", "
      << m(1,0) << ", " << m(1,1) << ")";
   return ss.str();
 }
+
+list mat2_data(const geom::Mat2& m)
+{
+  list nrvo;
+  for(size_t k=0;k<4;++k) {
+    nrvo.append(m.Data()[k]);
+  }
+  return nrvo;
+}
+
 void export_Mat2()
 {
   using namespace geom;
@@ -51,8 +60,11 @@ void export_Mat2()
     .def(self * self)
     .def(self * Vec2())
     .def(self / Real())
+    .def(self == self)
+    .def(self != self)
     .def(self_ns::str(self))
     .def("__getitem__",Mat2_getitem)
     .def("__setitem__",Mat2_setitem)
+    .add_property("data",mat2_data)
   ;
 }

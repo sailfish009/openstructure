@@ -16,7 +16,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
-from _conop import *
+from _ost_conop import *
+
+# The 20 standard amino acids in no particular order
+STANDARD_AMINOACIDS=(
+ 'ALA', 'ARG', 'ASN',
+ 'ASP', 'GLN', 'GLU',
+ 'LYS', 'SER', 'CYS',
+ 'MET', 'TRP', 'TYR',
+ 'THR', 'VAL', 'ILE',
+ 'LEU', 'GLY', 'PRO',
+ 'HIS', 'PHE',
+)
 
 def ConnectAll(ent):
   '''
@@ -53,7 +64,12 @@ def RegisterBuilder(builder, name):
   
 def SetDefaultBuilder(builder_name):
   '''
-  Set the builder with the given name as the default.
+  Set the builder with the given name as the default. You will have to register
+  a builder with :func:`RegisterBuilder` before you will be able to set it as
+  the default.
+
+  :raises: :exc:`RuntimeError` when trying to set a builder as the default that
+    has not been registered yet.
   '''
   conop_inst=Conopology.Instance()
   conop_inst.SetDefaultBuilder(builder_name)

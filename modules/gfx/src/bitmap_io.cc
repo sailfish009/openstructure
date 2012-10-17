@@ -21,14 +21,18 @@
 */
 
 #include <vector>
+#include <sstream>
 #define ZLIB_WINAPI
 #include <png.h>
 
 #include <ost/log.hh>
+#include <ost/message.hh>
 
 #include "bitmap_io.hh"
 
 namespace ost { namespace gfx {
+
+namespace {
 
 void export_png(const String& filename, unsigned int width, unsigned int height, unsigned char* data)
 {
@@ -181,15 +185,38 @@ Bitmap import_png(const String& filename)
   return bm;
 }
 
-void BitmapExport(const String& fname, const String& ext, unsigned int width, unsigned int height,unsigned char* data)
+std::string get_ext(const std::string& fname)
 {
-  if(ext==".png") export_png(fname,width,height,data);
+  int d_index=fname.rfind('.');
+  if (d_index==-1) {
+    return "";
+  }
+  return fname.substr(d_index+1);
 }
 
-Bitmap BitmapImport(const String& fname, const String& ext)
+}
+    
+void ExportBitmap(const String& fname, std::string ext, unsigned int width, unsigned int height,unsigned char* data)
 {
-  if(ext==".png") {
+  if(ext.empty()) ext=get_ext(fname);
+  if(ext=="png") {
+    export_png(fname,width,height,data);
+  } else {
+    std::ostringstream msg;
+    msg << "unsupported bitmap format [" << ext << "]";
+    throw Error(msg.str());
+  }
+}
+
+Bitmap ImportBitmap(const String& fname, std::string ext)
+{
+  if(ext.empty()) ext=get_ext(fname);
+  if(ext=="png") {
     return import_png(fname);
+  } else {
+    std::ostringstream msg;
+    msg << "unsupported bitmap format [" << ext << "]";
+    throw Error(msg.str());
   }
   return Bitmap();
 }

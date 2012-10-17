@@ -30,6 +30,7 @@
 #include "scene.hh"
 #include "vertex_array_helper.hh"
 #include "povray.hh"
+#include "exporter.hh"
 
 #if OST_SHADER_SUPPORT_ENABLED
 #include "shader.hh"
@@ -78,7 +79,7 @@ IndexedVertexArray::IndexedVertexArray()
 {
   initialized_=false;
   Reset(); // replaces ctor initialization list
-  glGenTextures(1,&tex_id_);
+  //glGenTextures(1,&tex_id_);
 }
 
 IndexedVertexArray::~IndexedVertexArray()
@@ -88,7 +89,7 @@ IndexedVertexArray::~IndexedVertexArray()
 IndexedVertexArray::IndexedVertexArray(const IndexedVertexArray& va)
 {
   copy(va);
-  glGenTextures(1,&tex_id_);
+  //glGenTextures(1,&tex_id_);
 }
 
 IndexedVertexArray& IndexedVertexArray::operator=(const IndexedVertexArray& va)
@@ -108,7 +109,7 @@ unsigned int IndexedVertexArray::GetFormat()
 void IndexedVertexArray::Cleanup() 
 {
   if(initialized_) {
-    glDeleteTextures(1,&tex_id_);
+    //glDeleteTextures(1,&tex_id_);
     glDeleteLists(outline_mat_dlist_,1);
 #if OST_SHADER_SUPPORT_ENABLED
     glDeleteBuffers(7,buffer_id_);
@@ -139,7 +140,6 @@ void IndexedVertexArray::SetOutlineMaterial(const Material& m)
 }
 void IndexedVertexArray::SetOutlineExpandFactor(float f) { outline_exp_factor_=f;}
 void IndexedVertexArray::SetOutlineExpandColor(const Color& c) {outline_exp_color_=c;}
-
 
 VertexID IndexedVertexArray::Add(const Vec3& vert, 
                                  const Vec3& norm,
@@ -248,7 +248,7 @@ void IndexedVertexArray::AddIcoSphere(const SpherePrim& prim, unsigned int detai
   }
 }
 
-void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int detail,bool cap)
+void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int detail, bool cap)
 {
   dirty_=true;
   
@@ -266,12 +266,19 @@ void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int deta
   // prepare first vertices to add
   std::vector<Vec3>::const_iterator it=vlist.begin();
   Vec3 v0 = (*it);
-  Vec3 n0 = prim.rotmat * v0; 
-  v0*=prim.radius;
+  bool slant=(prim.radius1!=prim.radius2);
+  // adjust for slant
+  float beta = slant ? atan2(prim.radius1-prim.radius2,prim.length) : 0.0;
+  float cosb = slant ? cos(beta) : 1.0;
+  float sinb = slant ? sin(beta) : 0.0;
+  Vec3 n0 = slant ? prim.rotmat * (cosb*v0+geom::Vec3(0.0,0.0,sinb)) : prim.rotmat*v0;
+
+  v0*=prim.radius1;
+  Vec3 v1 = (*it)*prim.radius2+off;
   VertexID id1 = Add(prim.rotmat * v0 + prim.start, n0, prim.color1);
-  VertexID id2 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color2);
+  VertexID id2 = Add(prim.rotmat * v1 + prim.start, n0, prim.color2);
   VertexID cid1 = cap ? Add(prim.rotmat * v0 + prim.start, cn0, prim.color1) : 0;
-  VertexID cid2 = cap ? Add(prim.rotmat * (v0+off) + prim.start, cn1, prim.color2) : 0;
+  VertexID cid2 = cap ? Add(prim.rotmat * v1 + prim.start, cn1, prim.color2) : 0;
   
   // now for the loop around the circle
   VertexID id3=id1;
@@ -281,15 +288,16 @@ void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int deta
   ++it;
   for(;it!=vlist.end();++it) {
     v0 = (*it);
-    n0 = prim.rotmat * v0; 
-    v0 *= prim.radius;
+    Vec3 n0 = slant ? prim.rotmat * (cosb*v0+geom::Vec3(0.0,0.0,sinb)) : prim.rotmat*v0;
+    v0 *= prim.radius1;
+    Vec3 v1 = (*it)*prim.radius2+off;
     VertexID id5 = Add(prim.rotmat * v0 + prim.start, n0, prim.color1);
-    VertexID id6 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color2);
+    VertexID id6 = Add(prim.rotmat * v1 + prim.start, n0, prim.color2);
     AddTri(id3,id5,id4);
     AddTri(id5,id6,id4);
     if(cap) {
       VertexID cid5 = Add(prim.rotmat * v0 + prim.start, cn0, prim.color1);
-      VertexID cid6 = Add(prim.rotmat * (v0+off) + prim.start, cn1, prim.color2);
+      VertexID cid6 = Add(prim.rotmat * v1 + prim.start, cn1, prim.color2);
       AddTri(cid0,cid5,cid3);
       AddTri(cid7,cid4,cid6);
       cid3=cid5;
@@ -423,6 +431,12 @@ void IndexedVertexArray::RenderGL()
   
   glPushAttrib(GL_ALL_ATTRIB_BITS);
   glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+  
+  if(use_tex_) {
+    glEnable(GL_TEXTURE_2D);
+  } else {
+    glDisable(GL_TEXTURE_2D);
+  }
 
   if(outline_mode_>0) {
     LOG_TRACE("outline rendering");
@@ -479,7 +493,7 @@ void IndexedVertexArray::RenderGL()
     } else {
       glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
     }
-    if(cull_face_) {
+    if(cull_face_ && !solid_) {
       glEnable(GL_CULL_FACE);
     } else { 
       glDisable(GL_CULL_FACE); 
@@ -646,6 +660,14 @@ void IndexedVertexArray::RenderPov(PovState& pov, const std::string& name)
   pov.inc() << "}\n";
 }
 
+void IndexedVertexArray::Export(Exporter* ex) const
+{
+  ex->WriteVertexData(entry_list_[0].v,entry_list_[0].n, entry_list_[0].c, entry_list_[0].t, sizeof(Entry), entry_list_.size());
+  ex->WriteLineData(&line_index_list_[0],line_index_list_.size()/2);
+  ex->WriteTriData(&tri_index_list_[0],tri_index_list_.size()/3);
+  ex->WriteQuadData(&quad_index_list_[0],quad_index_list_.size()/4);
+}
+
 void IndexedVertexArray::Clear()
 {
   dirty_=true;
@@ -676,8 +698,10 @@ void IndexedVertexArray::Reset()
   outline_mat_update_=true;
   outline_exp_factor_=0.1;
   outline_exp_color_=Color(0,0,0);
+  solid_=false;
+  solid_color_=RGB(1,1,1);
   draw_normals_=false;
-  use_tex_=true;
+  use_tex_=false;
 }
 
 void IndexedVertexArray::FlagRefresh()
@@ -1072,6 +1096,8 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   outline_mat_update_=true;
   outline_exp_factor_=va.outline_exp_factor_;
   outline_exp_color_=va.outline_exp_color_;
+  solid_=va.solid_;
+  solid_color_=va.solid_color_;
   draw_normals_=va.draw_normals_;
   use_tex_=va.use_tex_;
 }
@@ -1151,6 +1177,14 @@ bool IndexedVertexArray::prep_buff()
 
 void IndexedVertexArray::draw_ltq(bool use_buff)
 {
+  if(solid_) {
+    glClearStencil(0x0);
+    glClear(GL_STENCIL_BUFFER_BIT);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS,0x0,0x1);
+    glStencilOp(GL_KEEP,GL_INVERT,GL_INVERT);
+  }
+
   if(use_buff && !Scene::Instance().InOffscreenMode()) {
 #if OST_SHADER_SUPPORT_ENABLED
 #if 0
@@ -1207,8 +1241,35 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
       glDrawElements(GL_LINES,line_index_list_.size(),GL_UNSIGNED_INT,&line_index_list_[0]);
     }
   }
+
+  if(solid_) {
+    glStencilFunc(GL_EQUAL,0x1,0x1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    float fov=Scene::Instance().GetFOV()*M_PI/180.0;
+    float znear=Scene::Instance().GetNear();
+    float aspect=Scene::Instance().GetAspect();
+    float rh=2.0*fabs(tan(fov)*znear);
+    float rw=rh*aspect;
+    float rz=-znear-0.1;
+
+    glDisable(GL_LIGHTING);
+  
+    glBegin(GL_TRIANGLE_STRIP);
+    glColor3fv(solid_color_);
+    glNormal3f(0,0,1);
+    glVertex3f(-rw,-rh,rz);
+    glVertex3f(rw,-rh,rz);
+    glVertex3f(-rw,rh,rz);
+    glVertex3f(rw,rh,rz);
+    glEnd();
+    glDisable(GL_STENCIL_TEST);
+    glPopMatrix();
+  }
 }
-    
+
 void IndexedVertexArray::draw_p(bool use_buff)
 {
   if(use_buff && !Scene::Instance().InOffscreenMode()) {
@@ -1231,115 +1292,115 @@ void IndexedVertexArray::draw_p(bool use_buff)
 
 namespace {
 
-struct AALineEntry {
-  float p0[3], p1[3];
-  float edge0[3],edge1[3],edge2[3],edge3[3];
-  float c0[4], c1[4];
-  float z;
-};
+  struct AALineEntry {
+    float p0[3], p1[3];
+    float edge0[3],edge1[3],edge2[3],edge3[3];
+    float c0[4], c1[4];
+    float z;
+  };
 
-typedef std::vector<AALineEntry> AALineList;
+  typedef std::vector<AALineEntry> AALineList;
 
-struct AALineEntryLess
-{
-  bool operator()(const AALineEntry& e1, const AALineEntry& e2)
+  struct AALineEntryLess
   {
-    return e1.z<e2.z;
-  }
-};
-
-/*
-  Adapted after Chan and Durand, "Fast Prefiltered Lines",
-  in GPU Gems 2
-*/
-void render_aalines(AALineList& line_list, float w, float r)
-{
-#if OST_SHADER_SUPPORT_ENABLED
-  static GLuint table_tex_id=0;
-  std::vector<unsigned char> tex_table(32);
-
-  if(table_tex_id==0) {
-    for(int i=0;i<32;++i) {
-      float x=static_cast<float>(i)/31.0;
-      tex_table[31-i]=static_cast<unsigned char>(255.0*exp(-4.0*x*x));
+    bool operator()(const AALineEntry& e1, const AALineEntry& e2)
+    {
+      return e1.z<e2.z;
     }
-    glGenTextures(1,&table_tex_id);
+  };
+
+  /*
+     Adapted after Chan and Durand, "Fast Prefiltered Lines",
+     in GPU Gems 2
+     */
+  void render_aalines(AALineList& line_list, float w, float r)
+  {
+#if OST_SHADER_SUPPORT_ENABLED
+    static GLuint table_tex_id=0;
+    std::vector<unsigned char> tex_table(32);
+
+    if(table_tex_id==0) {
+      for(int i=0;i<32;++i) {
+        float x=static_cast<float>(i)/31.0;
+        tex_table[31-i]=static_cast<unsigned char>(255.0*exp(-4.0*x*x));
+      }
+      glGenTextures(1,&table_tex_id);
+      glBindTexture(GL_TEXTURE_1D,table_tex_id);
+      glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+      glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+      glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexImage1D(GL_TEXTURE_1D,0,GL_LUMINANCE,32,0,GL_LUMINANCE,GL_UNSIGNED_BYTE,&tex_table[0]);
+    }
+    std::sort(line_list.begin(),line_list.end(),AALineEntryLess());
+
+    Shader::Instance().PushProgram();
+    Shader::Instance().Activate("aaline");
+
+    glLineWidth(ceil((2.0f*r+w)*1.5));
+
+    glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_NORMALIZE);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
+    //glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LINE_SMOOTH);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glDepthMask(0);
+    Shader::Instance().UpdateState();
+
+    GLuint cpr = Shader::Instance().GetCurrentProgram();
+    GLint edge0_id = glGetUniformLocation(cpr,"edge0");
+    GLint edge1_id = glGetUniformLocation(cpr,"edge1");
+    GLint edge2_id = glGetUniformLocation(cpr,"edge2");
+    GLint edge3_id = glGetUniformLocation(cpr,"edge3");
+    GLint table_id = glGetUniformLocation(cpr,"table");
+
+    glActiveTexture(GL_TEXTURE0);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D,table_tex_id);
-    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexImage1D(GL_TEXTURE_1D,0,GL_LUMINANCE,32,0,GL_LUMINANCE,GL_UNSIGNED_BYTE,&tex_table[0]);
-  }
-  std::sort(line_list.begin(),line_list.end(),AALineEntryLess());
-  
-  Shader::Instance().PushProgram();
-  Shader::Instance().Activate("aaline");
+    glUniform1i(table_id,0);
 
-  glLineWidth(ceil((2.0f*r+w)*1.5));
+    for(AALineList::iterator it=line_list.begin();
+        it!=line_list.end();++it) {
+      glUniform3fv(edge0_id,1,it->edge0);
+      glUniform3fv(edge1_id,1,it->edge1);
+      glUniform3fv(edge2_id,1,it->edge2);
+      glUniform3fv(edge3_id,1,it->edge3);
+      // glUniform cannot be inside a glBegin / glEnd
+      glBegin(GL_LINES);
+      glColor4fv(it->c0);
+      glVertex3fv(it->p0);
+      glColor4fv(it->c1);
+      glVertex3fv(it->p1); 
+      glEnd();
+    }
 
-  glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
-  glDisable(GL_NORMALIZE);
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_COLOR_MATERIAL);
-  //glDisable(GL_DEPTH_TEST);
-  glDisable(GL_LINE_SMOOTH);
-  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_BLEND);
-  glDepthMask(0);
-  Shader::Instance().UpdateState();
-  
-  GLuint cpr = Shader::Instance().GetCurrentProgram();
-  GLint edge0_id = glGetUniformLocation(cpr,"edge0");
-  GLint edge1_id = glGetUniformLocation(cpr,"edge1");
-  GLint edge2_id = glGetUniformLocation(cpr,"edge2");
-  GLint edge3_id = glGetUniformLocation(cpr,"edge3");
-  GLint table_id = glGetUniformLocation(cpr,"table");
+    glPopAttrib();
 
-  glActiveTexture(GL_TEXTURE0);
-  glDisable(GL_TEXTURE_2D);
-  glEnable(GL_TEXTURE_1D);
-  glBindTexture(GL_TEXTURE_1D,table_tex_id);
-  glUniform1i(table_id,0);
-
-  for(AALineList::iterator it=line_list.begin();
-      it!=line_list.end();++it) {
-    glUniform3fv(edge0_id,1,it->edge0);
-    glUniform3fv(edge1_id,1,it->edge1);
-    glUniform3fv(edge2_id,1,it->edge2);
-    glUniform3fv(edge3_id,1,it->edge3);
-    // glUniform cannot be inside a glBegin / glEnd
-    glBegin(GL_LINES);
-    glColor4fv(it->c0);
-    glVertex3fv(it->p0);
-    glColor4fv(it->c1);
-    glVertex3fv(it->p1); 
-    glEnd();
-  }
-
-  glPopAttrib();
-
-  Shader::Instance().PopProgram();
+    Shader::Instance().PopProgram();
 #endif
+  }
+
+  Vec3 make_aaline_edge(const Vec2& c1, const Vec2& c0, float s)
+  {
+    Vec3 nrvo(c1[1]-c0[1],c0[0]-c1[0],c1[0]*c0[1]-c0[0]*c1[1]);
+    nrvo*=1.0/(s*Length(c1-c0));
+    return nrvo;
+  }
+
 }
 
-Vec3 make_aaline_edge(const Vec2& c1, const Vec2& c0, float s)
-{
-  Vec3 nrvo(c1[1]-c0[1],c0[0]-c1[0],c1[0]*c0[1]-c0[0]*c1[1]);
-  nrvo*=1.0/(s*Length(c1-c0));
-  return nrvo;
-}
-
-}
-    
 void IndexedVertexArray::draw_aalines()
 {
 #if OST_SHADER_SUPPORT_ENABLED
   float w=0.5*line_width_;
   float r=w;
   float hwr = 0.5*w+r;
-  
+
   AALineList line_list;
   for(unsigned int i=0;i<line_index_list_.size();i+=2) {
     Entry& ve0 = entry_list_[line_index_list_[i]];
@@ -1358,26 +1419,26 @@ void IndexedVertexArray::draw_aalines()
     Vec3 e1=make_aaline_edge(c1,c2,r);
     Vec3 e2=make_aaline_edge(c2,c3,r);
     Vec3 e3=make_aaline_edge(c3,c0,r);
-    
+
     // TODO: it should be possible to avoid the unproject and
     // pass the projected coordinates directly to GL, setting
     // modelview and projection to unity; requires handling of
     // the viewport though!
     Vec3 np1=Scene::Instance().UnProject(q0-Vec3(hwr*d),false);
     Vec3 np2=Scene::Instance().UnProject(q1+Vec3(hwr*d),false);
-    
+
     AALineEntry le={{np1[0],np1[1],np1[2]},
-                    {np2[0],np2[1],np2[2]},
-                    {e0[0],e0[1],e0[2]},
-                    {e1[0],e1[1],e1[2]},
-                    {e2[0],e2[1],e2[2]},
-                    {e3[0],e3[1],e3[2]},
-                    {ve0.c[0],ve0.c[1],ve0.c[2],ve0.c[3]},
-                    {ve1.c[0],ve1.c[1],ve1.c[2],ve1.c[3]},
-                    -0.5*(q0[2]+q1[2])};
+      {np2[0],np2[1],np2[2]},
+      {e0[0],e0[1],e0[2]},
+      {e1[0],e1[1],e1[2]},
+      {e2[0],e2[1],e2[2]},
+      {e3[0],e3[1],e3[2]},
+      {ve0.c[0],ve0.c[1],ve0.c[2],ve0.c[3]},
+      {ve1.c[0],ve1.c[1],ve1.c[2],ve1.c[3]},
+      -0.5*(q0[2]+q1[2])};
     line_list.push_back(le);
   }
-  
+
   render_aalines(line_list,w,r);
 #endif
 }
@@ -1403,6 +1464,26 @@ void IndexedVertexArray::draw_line_halo(bool use_buff)
   glPopAttrib();
   glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
   glLineWidth(line_width_);
+}
+
+geom::AlignedCuboid IndexedVertexArray::GetBoundingBox() const
+{
+  if(entry_list_.empty()) {
+    return geom::AlignedCuboid(geom::Vec3(0,0,0),geom::Vec3(0,0,0));
+  } else {
+    geom::Vec3 minc(std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::max());
+    geom::Vec3 maxc(-std::numeric_limits<float>::max(),
+        -std::numeric_limits<float>::max(),
+        -std::numeric_limits<float>::max());
+    for(EntryList::const_iterator it=entry_list_.begin();it!=entry_list_.end();++it) {
+      geom::Vec3 p(it->v[0],it->v[1],it->v[2]);
+      minc=geom::Min(minc,p);
+      maxc=geom::Max(maxc,p);
+    }
+    return geom::AlignedCuboid(minc-1.0,maxc+1.0);
+  }
 }
 
 }} // ns

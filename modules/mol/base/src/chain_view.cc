@@ -18,8 +18,8 @@
 //------------------------------------------------------------------------------
 #include <algorithm>
 #include <limits>
-
 #include <boost/bind.hpp>
+#include <ost/log.hh>
 #include <ost/mol/bond_handle.hh>
 #include <ost/mol/residue_handle.hh>
 #include <ost/mol/chain_view.hh>
@@ -176,7 +176,13 @@ ResidueView ChainView::FindResidue(const ResNum& number) const {
   }
 }
 
-ResidueView ChainView::FindResidue(const ResidueHandle& handle) const {
+ResidueView ChainView::FindResidue(const ResidueHandle& residue) const {
+  LOG_WARNING("ChainView::FindResidue(handle) is deprecated. "
+              "Use ChainView::ViewForHandle instead.");
+  return this->ViewForHandle(residue);
+}
+
+ResidueView ChainView::ViewForHandle(const ResidueHandle& handle) const {
   this->CheckValidity();  
   const ResidueViewList& l=data_->residues;
   ResidueViewList::const_iterator i;
@@ -187,7 +193,7 @@ ResidueView ChainView::FindResidue(const ResidueHandle& handle) const {
 
 bool ChainView::IsResidueIncluded(const ResidueHandle& handle) const {
   this->CheckValidity();  
-  return this->FindResidue(handle).IsValid();
+  return this->ViewForHandle(handle).IsValid();
 }
 
 ResidueView ChainView::AddResidue(const ResidueHandle& residue_handle, 
@@ -195,7 +201,7 @@ ResidueView ChainView::AddResidue(const ResidueHandle& residue_handle,
   this->CheckValidity();                                    
   ResidueView rv;
   if ((flags & ViewAddFlag::CHECK_DUPLICATES) && 
-      (rv=this->FindResidue(residue_handle)))
+      (rv=this->ViewForHandle(residue_handle)))
     return rv;
   rv=ResidueView(*this, residue_handle);
   if (!data_->residues.empty()) {
@@ -213,12 +219,18 @@ ResidueView ChainView::AddResidue(const ResidueHandle& residue_handle,
 }
 
 AtomView ChainView::FindAtom(const AtomHandle& atom) const {
+  LOG_WARNING("ChainView::FindAtom(handle) is deprecated. "
+              "Use ChainView::ViewForHandle instead.");
+  return this->ViewForHandle(atom);
+}
+
+AtomView ChainView::ViewForHandle(const AtomHandle& atom) const {
   ResidueHandle residue=atom.GetResidue();
   if (atom.GetEntity()!=this->GetEntity().GetHandle())
     return AtomView();
 
   ResidueView v=this->FindResidue(residue.GetNumber());
-  return v.IsValid() ? v.FindAtom(atom) : AtomView();
+  return v.IsValid() ? v.ViewForHandle(atom) : AtomView();
 }
 
 AtomView ChainView::AddAtom(const AtomHandle& atom_handle, 
@@ -262,7 +274,7 @@ ResidueView ChainView::AddResidue(const ResidueView& residue_view,
   this->CheckValidity();
   ResidueView rv;
   if ((flags & ViewAddFlag::CHECK_DUPLICATES) && 
-      (rv=this->FindResidue(residue_view.GetHandle()))) {
+      (rv=this->ViewForHandle(residue_view.GetHandle()))) {
     if (!(flags & ViewAddFlag::INCLUDE_ATOMS)) {
       return rv;
     }
@@ -334,14 +346,10 @@ bool ChainView::operator!=(const ChainView& rhs) const
 
 Real ChainView::GetMass() const {
   this->CheckValidity();
-  Real mass = 0;
+  double mass = 0;
   ResidueViewList::const_iterator i;
   for (i=data_->residues.begin(); i!=data_->residues.end(); ++i) {
-    ResidueView r=*i;
-    for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
-         e2=r.GetAtomList().end(); j!=e2; ++j) {
-      mass+=j->GetMass();
-    }
+    mass+=i->GetMass();
   }
   return mass;
 }

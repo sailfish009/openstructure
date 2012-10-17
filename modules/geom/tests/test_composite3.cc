@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
+#include <cmath>
 #include <ost/geom/geom.hh>
 
 #include "helper.hh"
@@ -24,8 +25,10 @@ using namespace geom;
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 
-BOOST_AUTO_TEST_SUITE( geom )
+BOOST_AUTO_TEST_SUITE( geom );
 
 BOOST_AUTO_TEST_CASE(init_composite3)
 {
@@ -148,8 +151,12 @@ BOOST_AUTO_TEST_CASE(func_composite3)
   BOOST_CHECK(Equal(IntersectionPoint(l2,l3), v3));
   
   BOOST_CHECK(!AreIntersecting(l3, l4));
-  
-  BOOST_CHECK_THROW(IntersectionPoint(l3,l4), GeomException);
+  try{
+    BOOST_CHECK_THROW(IntersectionPoint(l3,l4), GeomException);
+  }catch(...)
+  {
+    BOOST_ERROR("Failed to catch GeomException");
+  }
   BOOST_CHECK(Equal(IntersectionPoint(p1,l3), v1));
   BOOST_CHECK(Equal(IntersectionPoint(l3,p1), v1));
   
@@ -193,4 +200,20 @@ BOOST_AUTO_TEST_CASE(func_composite3)
 
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_CASE(rotation3)
+{
+  Vec3 v(1,0,0);
+  Rotation3 r(Vec3(0,1,0), 30.0*M_PI/180.0);
+  Vec3 vrot=r.Apply(v);
+  BOOST_CHECK_CLOSE(Real(cos(30.0*M_PI/180.0)), Real(vrot[0]), Real(1e-5));
+  BOOST_CHECK_SMALL(vrot[1],Real(1e-5));
+  BOOST_CHECK_CLOSE(Real(-sin(30.0*M_PI/180.0)), Real(vrot[2]), Real(1e-5));
+
+  Rotation3 r2(Vec3(0,1,0), 30.0*M_PI/180.0,Vec3(2,0,0));
+  Vec3 vrot2=r2.Apply(v);
+  BOOST_CHECK_CLOSE(Real(2.0)-Real(cos(30.0*M_PI/180.0)), Real(vrot2[0]), Real(1e-5));
+  BOOST_CHECK_SMALL(vrot2[1],Real(1e-5));
+  BOOST_CHECK_CLOSE(Real(sin(30.0*M_PI/180.0)), Real(vrot2[2]), Real(1e-5));
+}
+
+BOOST_AUTO_TEST_SUITE_END();

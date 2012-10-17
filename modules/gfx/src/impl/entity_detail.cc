@@ -39,7 +39,7 @@ struct BlurQuadEntry
 {
   float zdist;
   geom::Vec3 p1,p2,p3,p4;
-  gfx::Color c1,c2,c3,c4;
+  RGBAColor c1,c2,c3,c4;
 };
 
 struct BlurQuadEntryLess
@@ -57,7 +57,7 @@ void DoRenderBlur(BondEntryList& bl, float bf1, float bf2)
 {
   // add blur for this particular orientation!
   // don't use vertex array, but on-the-fly oriented and z-sorted quads
-  mol::Transform tf = Scene::Instance().GetTransform();
+  geom::Transform tf = Scene::Instance().GetTransform();
 
   std::vector<BlurQuadEntry> bql;
   for (BondEntryList::iterator it=bl.begin(); it!=bl.end();++it) {

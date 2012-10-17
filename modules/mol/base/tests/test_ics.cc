@@ -23,6 +23,8 @@
 #include <ost/log.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <ost/message.hh>
 #include <ost/geom/geom.hh>
 
@@ -59,6 +61,37 @@ struct Structure {
   AtomHandle    a5;
 };
 
+struct TorsionStructure {
+  TorsionStructure()
+  {
+    e=CreateEntity();
+    ICSEditor editor=e.EditICS();
+    c=editor.InsertChain("A");
+    r=editor.AppendResidue(c, "TORSTIN");
+    a1=editor.InsertAtom(r, "X1", geom::Vec3( 0.0, -1.0,  0.0));
+    a2=editor.InsertAtom(r, "X2", geom::Vec3( 1.0,  0.0,  0.0));
+    a3=editor.InsertAtom(r, "X3", geom::Vec3( 2.0,  0.0,  0.0));
+    a4=editor.InsertAtom(r, "X4", geom::Vec3( 3.0,  1.0,  0.0));
+    a5=editor.InsertAtom(r, "X5", geom::Vec3( 3.0, -1.0,  0.0));
+    editor.Connect(a1, a2);
+    editor.Connect(a2, a3);
+    editor.Connect(a3, a4);
+    editor.Connect(a3, a5);
+    t1 = editor.AddTorsion("T1", a1, a2, a3, a4);
+    t2 = editor.AddTorsion("T2", a1, a2, a3, a5);
+  }
+  EntityHandle  e;
+  ChainHandle   c;
+  ResidueHandle r;
+  AtomHandle    a1;
+  AtomHandle    a2;
+  AtomHandle    a3;
+  AtomHandle    a4;
+  AtomHandle    a5;
+  TorsionHandle t1;
+  TorsionHandle t2;
+};
+
 const static Real EPSILON=0.000001;
 
 Real angle_xcs(AtomHandle a1, AtomHandle a2, AtomHandle a3) {
@@ -70,8 +103,120 @@ bool test_angle(Real a, Real e) {
   return std::abs(fmod(float(a-e), float(M_PI/2)))<EPSILON;
 }
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
+BOOST_AUTO_TEST_CASE(ics_update_icsbondlength)
+{
+  TorsionStructure s;
+  mol::BondHandle bond = s.a2.FindBondToAtom(s.a3);
+  BOOST_CHECK_CLOSE(bond.GetLength(), Real(1.0), Real(EPSILON));
+}
+
+BOOST_AUTO_TEST_CASE(ics_settorsion_unbuffered)
+{
+  Real eps = 0.0001;
+  TorsionStructure s;
+  ICSEditor e = s.e.EditICS(mol::UNBUFFERED_EDIT);
+  BOOST_CHECK_CLOSE(std::abs(s.t1.GetAngle()), Real(M_PI), Real(eps));
+  BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
+  e.SetTorsionAngle(s.t1,0);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_CLOSE(std::abs(s.t2.GetAngle()), Real(M_PI), Real(eps));
+  e.SetTorsionAngle(s.t2,M_PI/4);
+  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
+  BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(-M_PI+M_PI/4), Real(eps));
+  e.SetTorsionAngle(s.t1,-M_PI/4);
+  BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(-M_PI/4), Real(eps));
+  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(3/4.*M_PI), Real(eps));
+  e.RotateTorsionAngle(s.t1, M_PI/4);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_CLOSE(std::abs(s.t2.GetAngle()), Real(M_PI), Real(eps));
+}
+
+BOOST_AUTO_TEST_CASE(ics_settorsion_buffered)
+{
+  Real eps = 0.0001;
+  TorsionStructure s;
+  ICSEditor e = s.e.EditICS(mol::BUFFERED_EDIT);
+  BOOST_CHECK_CLOSE(std::abs(s.t1.GetAngle()), Real(M_PI), Real(eps));
+  BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
+  e.SetTorsionAngle(s.t1,0);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_CLOSE(std::abs(s.t2.GetAngle()), Real(M_PI), Real(eps));
+  e.SetTorsionAngle(s.t2,M_PI/4);
+  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
+  BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(-M_PI+M_PI/4), Real(eps));
+  e.SetTorsionAngle(s.t1,-M_PI/4);
+  BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(-M_PI/4), Real(eps));
+  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(3/4.*M_PI), Real(eps));
+  e.RotateTorsionAngle(s.t1, M_PI/4);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_CLOSE(std::abs(s.t2.GetAngle()), Real(M_PI), Real(eps));
+}
+
+BOOST_AUTO_TEST_CASE(ics_settorsion_unbuffered_update_others)
+{
+  Real eps = 0.0001;
+  TorsionStructure s;
+  ICSEditor e = s.e.EditICS(mol::UNBUFFERED_EDIT);
+  BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(M_PI), Real(eps));
+  BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
+  e.SetTorsionAngle(s.t1,0,false);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
+  e.SetTorsionAngle(s.t2,M_PI/4,false);
+  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  e.SetTorsionAngle(s.t1,-M_PI/4,false);
+  BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(-M_PI/4), Real(eps));
+  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
+  e.RotateTorsionAngle(s.t1, M_PI/4,false);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
+}
+
+BOOST_AUTO_TEST_CASE(ics_settorsion_buffered_update_others)
+{
+  Real eps = 0.0001;
+  TorsionStructure s;
+  ICSEditor e = s.e.EditICS(mol::BUFFERED_EDIT);
+  BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(M_PI), Real(eps));
+  BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
+  e.SetTorsionAngle(s.t1,0,false);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
+  e.SetTorsionAngle(s.t2,M_PI/4,false);
+  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  e.SetTorsionAngle(s.t1,-M_PI/4,false);
+  BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(-M_PI/4), Real(eps));
+  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
+  e.RotateTorsionAngle(s.t1, M_PI/4,false);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
+}
+
+BOOST_AUTO_TEST_CASE(ics_settorsion_linear_unbuffered)
+{
+  Real eps = 0.0001;
+  TorsionStructure s;
+  ICSEditor e = s.e.EditICS(mol::UNBUFFERED_EDIT);
+  e.SetAngle(s.a2,s.a3,s.a4,M_PI);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
+  e.SetTorsionAngle(s.t1,0);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
+  e.SetTorsionAngle(s.t2,M_PI/4);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
+  e.SetTorsionAngle(s.t1,-M_PI/4);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
+  e.RotateTorsionAngle(s.t1, M_PI/4);
+  BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
+  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
+}
 
 BOOST_AUTO_TEST_CASE(ics_angle_trivia) 
 {
@@ -147,4 +292,4 @@ BOOST_AUTO_TEST_CASE(ics_get_angle)
                       << " found");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

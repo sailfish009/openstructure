@@ -63,6 +63,9 @@ class DLLEXPORT_OST_IO MapIODxHandler: public MapIOHandler
   static bool MatchContent(unsigned char* header);
   static bool MatchType(const ImageFormatBase& type);
   static bool MatchSuffix(const String& locx);
+  static bool ProvidesImport() { return true; }
+  static bool ProvidesExport() { return true; }
+  
   static String GetFormatName() { return String("Dx"); };
   static String GetFormatDescription()  { return String("Format used by the OpenDX software package"); };
 
