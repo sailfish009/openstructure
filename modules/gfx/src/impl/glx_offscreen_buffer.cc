@@ -60,15 +60,43 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
   attrib_list.push_back(f.cbits);
   attrib_list.push_back(GLX_ALPHA_SIZE);
   attrib_list.push_back(f.abits);
+  attrib_list.push_back(GLX_STENCIL_SIZE);
+  attrib_list.push_back(8);
+  attrib_list.push_back(GLX_SAMPLE_BUFFERS);
+  attrib_list.push_back(1);
   attrib_list.push_back(0);
 
   int nelem=0;
   LOG_DEBUG("offscreen buffer: glXChooseFBConfig");
   fbconfig_ =glXChooseFBConfig(dpy_,0,&attrib_list[0],&nelem);
   if(fbconfig_==0 || nelem==0) {
-    LOG_ERROR("error creating offscreen rendering context: glXChooseFBConfig failed");
-    return;
+    LOG_DEBUG("no offscreen rendering context with multisample, trying without");
+    // take out the multisample requirement
+    attrib_list[attrib_list.size()-2]=0;
+    fbconfig_ =glXChooseFBConfig(dpy_,0,&attrib_list[0],&nelem);
+    if(fbconfig_==0 || nelem==0) {
+      LOG_ERROR("error creating offscreen rendering context: glXChooseFBConfig failed");
+      return;
+    }
   }
+#if 0
+  /*
+   let export routine and start offscreen rendering context ask for min/max/next available
+   multisample
+   */
+  for(size_t i=0;i<nelem;++i) {
+    std::cerr << i << " ";
+    int rbits; glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_RED_SIZE, &rbits);
+    int gbits; glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_GREEN_SIZE, &gbits);
+    int bbits; glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_BLUE_SIZE, &bbits);
+    int dbits; glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_DEPTH_SIZE, &dbits);
+    int sbits; glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_STENCIL_SIZE, &sbits);
+    int ms; glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_SAMPLES, &ms);
+    std::cerr << "rgb=" << rbits << "." << gbits << "." << bbits << " d=" << dbits << " s=" << sbits << " ms=" << ms << std::endl;
+  }
+  fb_config_id_=nelem-1;
+#endif
+  fb_config_id_=0;
 
   attrib_list.clear();
   attrib_list.push_back(GLX_PBUFFER_WIDTH);
@@ -78,7 +106,7 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
   attrib_list.push_back(0);
   
   LOG_DEBUG("offscreen buffer: glXCreatePBuffer");
-  pbuffer_ = glXCreatePbuffer(dpy_, fbconfig_[0], &attrib_list[0]);
+  pbuffer_ = glXCreatePbuffer(dpy_, fbconfig_[fb_config_id_], &attrib_list[0]);
   if(!pbuffer_) {
     LOG_ERROR("error creating offscreen rendering context: glXCreatePBuffer failed");
     return;
@@ -86,11 +114,11 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
 
   if(shared) {
     LOG_DEBUG("offscreen buffer: glxCreateNewContext(shared=true)");
-    context_ = glXCreateNewContext(dpy_, fbconfig_[0], GLX_RGBA_TYPE, 
+    context_ = glXCreateNewContext(dpy_, fbconfig_[fb_config_id_], GLX_RGBA_TYPE, 
 				   glXGetCurrentContext(), True);
   } else {
     LOG_DEBUG("offscreen buffer: glxCreateNewContext(shared=false)");
-    context_ = glXCreateNewContext(dpy_, fbconfig_[0], GLX_RGBA_TYPE, 
+    context_ = glXCreateNewContext(dpy_, fbconfig_[fb_config_id_], GLX_RGBA_TYPE, 
 				   NULL, True);
     
   }
@@ -123,14 +151,14 @@ bool OffscreenBuffer::Resize(unsigned int width, unsigned int height)
   attrib_list.push_back(height);
   attrib_list.push_back(0);
   
-  GLXPbuffer new_pbuffer = glXCreatePbuffer(dpy_, fbconfig_[0], &attrib_list[0]);
+  GLXPbuffer new_pbuffer = glXCreatePbuffer(dpy_, fbconfig_[fb_config_id_], &attrib_list[0]);
 
   if(!new_pbuffer) {
     LOG_ERROR("offscreen rendering resize failed to allocate new pbuffer");
     return false;
   }
   
-  GLXContext new_context = glXCreateNewContext(dpy_, fbconfig_[0], GLX_RGBA_TYPE, 
+  GLXContext new_context = glXCreateNewContext(dpy_, fbconfig_[fb_config_id_], GLX_RGBA_TYPE, 
                                                glXGetCurrentContext(), True);
   
   if(!new_context) {
