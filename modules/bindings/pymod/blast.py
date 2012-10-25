@@ -251,7 +251,10 @@ def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
           
   else:
     complexity_opt='-seg'
-    complexity_arg='yes' if filter_low_complexity==True else 'no'
+    if filter_low_complexity==True:
+      complexity_arg='yes'
+    else:
+      complexity_arg='no'
     args=[blast_exe, '-db', database, '-matrix', matrix,
           '-gapopen', str(gap_open), '-gapextend', str(gap_ext), '-outfmt', '5', complexity_opt, complexity_arg ]
 
