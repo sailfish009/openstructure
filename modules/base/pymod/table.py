@@ -1503,7 +1503,10 @@ Statistics for column %(col)s
     ax.set_xticklabels(x_labels, rotation = x_labels_rotation)
       
     if legend:
-      ax.legend(legend_data, cols)   
+      if legend == True:
+        ax.legend(legend_data, cols)   
+      else:
+        ax.legend(legend_data, legend)
       
     if save:
       plt.savefig(save)
