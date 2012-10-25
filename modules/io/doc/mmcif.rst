@@ -873,7 +873,8 @@ of the annotation available.
 
    .. attribute:: first_release
 
-   Index of the revision releasing this entry.
+   Index + 1 of the revision releasing this entry. If the value is 0, was not
+   set, yet.
 
    :type: :class:`int`
 
