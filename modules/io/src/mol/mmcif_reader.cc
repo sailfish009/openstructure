@@ -1316,7 +1316,6 @@ void MMCifReader::ParseDatabasePDBRev(const std::vector<StringRef>& columns)
   StringRef status;
 
   num = this->TryGetInt(columns[indices_[DPI_NUM]], "database_PDB_rev.num");
-  std::cout<<num<<std::endl;
   if (indices_[DPI_DATE] != -1) {
     date = columns[indices_[DPI_DATE]];
   } else {
