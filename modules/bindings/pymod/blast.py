@@ -130,33 +130,41 @@ class BlastError(RuntimeError):
     else:
       return self.brief
 
-def CreateDB(infasta, dbout, mkdb_cmd='makeblastdb'):
+def CreateDB(infasta, dbout, mkdb_cmd=None):
   """
   Create a blast DB from a fasta file
 
   :param infasta: the pdb fasta from which the database will be created
   :type infasta: :class:`string`
 
-  :param dbout: output location for blatDB file
+  :param dbout: output location for blastDB file
   :type infasta: :class:`string`
 
 
   """
-  try:
-    exe=settings.Locate('makeblastdb')
-    args=[exe, '-in', infasta, ' -max_file_sz 10GB -out', dbout,'-dbtype','prot']
-  except:
+  if mkdb_cmd==None:
     try:
-      exe=settings.Locate('formatdb')
-      args=[exe, '-i', infasta, '-v',str(10000),'-n',dbout]
+      exe=settings.Locate('makeblastdb')
+      args=[exe, '-in', infasta, ' -max_file_sz 10GB -out', dbout,'-dbtype','prot']
     except:
-      raise BlastError('could not find makeblastdb/formatdb executable')
+      try:
+        exe=settings.Locate('formatdb')
+        args=[exe, '-i', infasta, '-v',str(10000),'-n',dbout]
+      except:
+        raise RuntimeError('could not find makeblastdb/formatdb executable')
+  else:
+    if os.path.basename(mkdb_cmd)=='makeblastdb':
+      exe=settings.Locate('makeblastdb',explicit_file_name=mkdb_cmd)
+      args=[exe, '-in', infasta, ' -max_file_sz 10GB -out', dbout,'-dbtype','prot']
+    elif os.path.basename(mkdb_cmd)=='formatdb':
+        exe=settings.Locate('formatdb',explicit_filename=mkdb_cmd)
+        args=[exe, '-i', infasta, '-v',str(10000),'-n',dbout]
+    else:
+      raise IOError('mkdb command must either be the path to formatdb or makeblastdb!')
 
   cmd=' '.join(args)
   ost.LogInfo('creating blast DB (%s)' % cmd)
-  stderr=os.system(cmd)
-  print stderr
-  print "finished creating blast DB"
+  os.system(cmd)
 
 def BlastVersion(blast_location=None):
   """
@@ -169,7 +177,7 @@ def BlastVersion(blast_location=None):
     try:
       blast_exe=settings.Locate('blastall', explicit_file_name=blast_location)
     except:
-      raise BlastError('could not find blast executable')
+      raise RuntimeError('could not find blast executable')
 
   if os.path.basename(blast_exe)=='blastall':
     args=[blast_exe]
