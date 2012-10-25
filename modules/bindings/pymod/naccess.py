@@ -205,7 +205,7 @@ def CalculateSurfaceArea(entity,  radius=1.4,
   # parse selection
   
   # setup files for msms
-  (naccess_data_dir, naccess_data_file,naccess_data_base )=_SetupFiles(entity, selection, scratch_dir)
+  (naccess_data_dir, naccess_data_file,naccess_data_base )=_SetupFiles(entity, selection, scratch_dir, max_number_of_atoms)
 
   # set command line
   command="%s %s -p %f " % \
