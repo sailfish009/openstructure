@@ -2,6 +2,10 @@ import unittest
 from ost import *
 from ost import settings
 from ost.bindings import blast
+import re
+import tempfile
+import os
+import shutil
 
 class TestBlastBindings(unittest.TestCase):
   def setUp(self):
@@ -9,8 +13,6 @@ class TestBlastBindings(unittest.TestCase):
                                        'DFSLSVKFGNDVQHFKVLRDGAGKYFLWVVKFNSLNELV'+
                                        'DYHRSTSVSRNQQIFLRDIEQVP')
   def testAllowedMatricesAndPenalties(self):
-    self.assertRaises(blast.BlastError, blast.Blast, self.query, 
-                      'testfiles/seqdb', matrix='BLOSUM45')
     blast.Blast(self.query, 'testfiles/seqdb', matrix='BLOSUM45', 
                 gap_open=13, gap_ext=3)
     blast.Blast(self.query, 'testfiles/seqdb', matrix='BLOSUM80')
@@ -20,12 +22,17 @@ class TestBlastBindings(unittest.TestCase):
     blast.Blast(self.query, 'testfiles/seqdb', matrix='BLOSUM62')
     self.assertRaises(ValueError, blast.Blast, self.query, 'testfiles/seqdb', 
                       matrix='MUAHA')
+    self.assertRaises(RuntimeError, blast.Blast, self.query, 'testfiles/seqdb',
+                      blast_location='/I/do/not/exist')
+
   def testMissingDB(self):
     self.assertRaises(IOError, blast.Blast, self.query, 
                       'testfiles/nonexistentdb')
   
-  def testBlastOutput(self):
+  def testBlastExec(self):
+
     hits=blast.Blast(self.query, 'testfiles/seqdb')
+
     expected_hits=['1griA','1fhsA','3n84E','1mw9X']
     self.assertEqual(len(hits), 4)
 
@@ -41,13 +48,15 @@ class TestBlastBindings(unittest.TestCase):
     self.assertEqual(found, 4)
 
   def testBlastParseOutput(self):
-    raw_out=open('testfiles/raw_blastout.txt','r').readlines()
+
+    raw_out=open('testfiles/raw_blastout.txt','r').read()
+
     parsed_out=blast.ParseBlastOutput(raw_out)
 
     expected_ids=['1griA','1fhsA','3n84E','1mw9X']
     expected_evalues=[4.80893e-59,4.80893e-59,9.06925e-58,2.96523]
     expected_scores=[534,534,523,27]
-    expected_bitscores[210.305,210.305,206.068,15.0086]
+    expected_bitscores=[210.305,210.305,206.068,15.0086]
     expected_seqid=[1.0,1.0,1.0,0.30769]
 
     for i in range(4):
@@ -58,8 +67,32 @@ class TestBlastBindings(unittest.TestCase):
       self.assertAlmostEqual(patch.bit_score,expected_bitscores[i])
       self.assertAlmostEqual(patch.seqid,expected_seqid[i],places=5)
 
+  def testBlastVersion(self):
 
-    
+    self.assertRaises(RuntimeError, blast.Blast, self.query, 'testfiles/seqdb',
+                      blast_location='/I/do/not/exist')
+    version=blast.BlastVersion()
+    self.assertIsInstance(version,str)
+    re_v = re.compile('\d+\.\d+\.\d+')
+    match=False
+    if re_v.match(version):
+      match=True
+    self.assertEqual(match,True)
+
+  def testBuildDatabase(self):
+
+    tmp_dir_name=tempfile.mkdtemp()
+    db_name=os.path.join(tmp_dir_name,'testdb')
+    blast.CreateDB('testfiles/multiple.fasta',db_name)
+    self.assertRaises(IOError,blast.CreateDB, 'testfiles/multiple.fasta',db_name,
+                      mkdb_cmd='I/am/not/a/damn/executable')
+
+    test_seq=seq.CreateSequence('B','ALRLVKDGFAVAIADYNDATATAVAAEINQAGGRAVAIKVDV'+
+                                    'SRRDQVFAAVEQARKALGGFNVIVNNAGIAPSTPIESIT')
+    blastout=blast.Blast(test_seq,db_name)
+    self.assertEqual(len(blastout),28)
+    shutil.rmtree(tmp_dir_name)
+
 if __name__ == "__main__":
   # test if blast package is available on system, otherwise ignore tests
   try:
