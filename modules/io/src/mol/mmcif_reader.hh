@@ -55,6 +55,7 @@ namespace ost { namespace io {
 /// \li struct_conf
 /// \li struct_sheet_range
 /// \li pdbx_database_PDB_obs_spr
+/// \li database_PDB_rev
 class DLLEXPORT_OST_IO MMCifReader : public StarParser  {
 public:
   /// \brief create a MMCifReader
@@ -237,8 +238,8 @@ protected:
   /// proper handling of our sequence classes, these need to be converted to 
   /// one-letter-codes. Ideally, we would use the canonical SEQRES. This is 
   /// not possible, however, since the PDB assigns multiple one letter codes 
-  /// to some of the residues. To be consistent, we have to do the conversion on 
-  /// our own.
+  /// to some of the residues. To be consistent, we have to do the conversion
+  /// on our own.
   String ConvertSEQRES(const String& seqres, conop::CompoundLibPtr compound_lib);
   /// \brief Fetch mmCIF citation_author information
   ///
@@ -286,6 +287,11 @@ protected:
   ///
   /// \param columns data row
   void ParsePdbxStructOperList(const std::vector<StringRef>& columns);
+
+  /// \brief Fetch mmCIF database_PDB_rev information
+  ///
+  /// \param columns data row
+  void ParseDatabasePDBRev(const std::vector<StringRef>& columns);
 
   /// \brief Fetch mmCIF struct information
   ///
@@ -420,24 +426,25 @@ private:
   	SR_DB_ACCESS
 	} StructRefItems;
 	
-	/// \enum items of the struct_ref_seq category
-	typedef enum {
-		SRS_ALIGN_ID,
-		SRS_STRUCT_REF_ID,
-		SRS_PDBX_STRAND_ID,
-		SRS_DB_ALIGN_BEG,
-		SRS_DB_ALIGN_END,
-		SRS_ENT_ALIGN_BEG,
-		SRS_ENT_ALIGN_END
-	} StructRefSeqItems;
-
-	/// \enum items of the struct_ref_seq_dif category
-	typedef enum {
-		SRSD_ALIGN_ID,
-		SRSD_SEQ_RNUM,
-		SRSD_DB_RNUM,
+  /// \enum items of the struct_ref_seq category
+  typedef enum {
+    SRS_ALIGN_ID,
+    SRS_STRUCT_REF_ID,
+    SRS_PDBX_STRAND_ID,
+    SRS_DB_ALIGN_BEG,
+    SRS_DB_ALIGN_END,
+    SRS_ENT_ALIGN_BEG,
+    SRS_ENT_ALIGN_END
+  } StructRefSeqItems;
+  
+  /// \enum items of the struct_ref_seq_dif category
+  typedef enum {
+    SRSD_ALIGN_ID,
+    SRSD_SEQ_RNUM,
+    SRSD_DB_RNUM,
     SRSD_DETAILS
-	} StructRefSeqDifItems;
+  } StructRefSeqDifItems;
+
   /// \enum items of the pdbx_struct_assembly_gen category
   typedef enum {
     ASSEMBLY_ID,                  ///< link to pdbx_struct_assembly.id
@@ -511,6 +518,14 @@ private:
     REPLACE_PDB_ID, ///< OLD PDB ID
   } PdbxDatabasePDBObsSpr;
 
+  /// \enum categories of the database_PDB_rev category
+  typedef enum {
+    DPI_NUM,           ///< unique identifier
+    DPI_DATE,          ///< revision date
+    DPI_DATE_ORIGINAL, ///< date of first sight
+    DPI_STATUS,        ///< status of a revision
+  } DatabasePDBRevItems;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
@@ -530,6 +545,7 @@ private:
     STRUCT_REF,
     STRUCT_REF_SEQ,
     STRUCT_REF_SEQ_DIF,
+    DATABASE_PDB_REV,
     DONT_KNOW
   } MMCifCategory;
 

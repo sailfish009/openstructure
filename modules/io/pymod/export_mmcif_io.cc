@@ -261,6 +261,21 @@ void export_mmcif_io()
                   &MMCifInfoObsolete::SetReplacedPDBID)
   ;
 
+  class_<MMCifInfoRevisions>("MMCifInfoRevisions", init<>())
+    .def("SetDateOriginal", &MMCifInfoRevisions::SetDateOriginal)
+    .def("GetDateOriginal", &MMCifInfoRevisions::GetDateOriginal)
+    .def("AddRevision", &MMCifInfoRevisions::AddRevision)
+    .def("GetSize", &MMCifInfoRevisions::GetSize)
+    .def("GetDate", &MMCifInfoRevisions::GetDate)
+    .def("GetNum", &MMCifInfoRevisions::GetNum)
+    .def("GetStatus", &MMCifInfoRevisions::GetStatus)
+    .def("GetLastDate", &MMCifInfoRevisions::GetLastDate)
+    .def("GetFirstRelease", &MMCifInfoRevisions::GetFirstRelease)
+    .add_property("date_original", &MMCifInfoRevisions::GetDateOriginal,
+                  &MMCifInfoRevisions::SetDateOriginal)
+    .add_property("first_release", &MMCifInfoRevisions::GetFirstRelease)
+  ;
+
   class_<MMCifInfo>("MMCifInfo", init<>())
     .def("AddCitation", &MMCifInfo::AddCitation)
     .def("GetCitations", make_function(&MMCifInfo::GetCitations,
@@ -284,6 +299,9 @@ void export_mmcif_io()
     .def("GetMMCifPDBChainTr", &MMCifInfo::GetMMCifPDBChainTr)
     .def("AddPDBMMCifChainTr", &MMCifInfo::AddPDBMMCifChainTr)
     .def("GetPDBMMCifChainTr", &MMCifInfo::GetPDBMMCifChainTr)
+    .def("SetRevisionsDateOriginal", &MMCifInfo::SetRevisionsDateOriginal)
+    .def("AddRevision", &MMCifInfo::AddRevision)
+    .def("GetRevisions", &MMCifInfo::GetRevisions)
     .add_property("citations", make_function(&MMCifInfo::GetCitations,
                                    return_value_policy<copy_const_reference>()))
     .add_property("biounits", make_function(&MMCifInfo::GetBioUnits,
@@ -299,5 +317,6 @@ void export_mmcif_io()
     			        return_value_policy<copy_const_reference>()))
     .add_property("obsolete", &MMCifInfo::GetObsoleteInfo,
                   &MMCifInfo::SetObsoleteInfo)
+    .add_property("revisions", &MMCifInfo::GetRevisions)
  ;
 }

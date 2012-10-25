@@ -307,31 +307,40 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     this->TryStoreIdx(REPLACE_PDB_ID, "replace_pdb_id", header);
     cat_available = true;
   } else if (header.GetCategory() == "struct_ref") {
-  	category_ = STRUCT_REF;
-  	this->TryStoreIdx(SR_ENTITY_ID, "entity_id", header);
-  	this->TryStoreIdx(SR_ID, "id", header);
-  	this->TryStoreIdx(SR_DB_NAME, "db_name", header);
-  	this->TryStoreIdx(SR_DB_CODE, "db_code", header);
-  	indices_[SR_DB_ACCESS]=header.GetIndex("pdbx_db_accession");
-  	cat_available = true;
-	} else if (header.GetCategory() == "struct_ref_seq") {
-	  category_ = STRUCT_REF_SEQ;	
-  	this->TryStoreIdx(SRS_ALIGN_ID, "align_id", header);
-  	this->TryStoreIdx(SRS_STRUCT_REF_ID, "ref_id", header);
-  	this->TryStoreIdx(SRS_ENT_ALIGN_BEG, "seq_align_beg", header);
-  	this->TryStoreIdx(SRS_ENT_ALIGN_END, "seq_align_end", header);
-  	this->TryStoreIdx(SRS_DB_ALIGN_BEG, "db_align_beg", header);
-  	this->TryStoreIdx(SRS_DB_ALIGN_END, "db_align_end", header);
+    category_ = STRUCT_REF;
+    this->TryStoreIdx(SR_ENTITY_ID, "entity_id", header);
+    this->TryStoreIdx(SR_ID, "id", header);
+    this->TryStoreIdx(SR_DB_NAME, "db_name", header);
+    this->TryStoreIdx(SR_DB_CODE, "db_code", header);
+    indices_[SR_DB_ACCESS]=header.GetIndex("pdbx_db_accession");
+    cat_available = true;
+  } else if (header.GetCategory() == "struct_ref_seq") {
+    category_ = STRUCT_REF_SEQ;	
+    this->TryStoreIdx(SRS_ALIGN_ID, "align_id", header);
+    this->TryStoreIdx(SRS_STRUCT_REF_ID, "ref_id", header);
+    this->TryStoreIdx(SRS_ENT_ALIGN_BEG, "seq_align_beg", header);
+    this->TryStoreIdx(SRS_ENT_ALIGN_END, "seq_align_end", header);
+    this->TryStoreIdx(SRS_DB_ALIGN_BEG, "db_align_beg", header);
+    this->TryStoreIdx(SRS_DB_ALIGN_END, "db_align_end", header);
     indices_[SRS_PDBX_STRAND_ID]=header.GetIndex("pdbx_strand_id");
-	  cat_available = true;
-	} else if (header.GetCategory()=="struct_ref_seq_dif") {
-		category_ = STRUCT_REF_SEQ_DIF;
-  	this->TryStoreIdx(SRSD_ALIGN_ID, "align_id", header);
-  	this->TryStoreIdx(SRSD_SEQ_RNUM, "seq_num", header);
-  	this->TryStoreIdx(SRSD_DB_RNUM, "pdbx_seq_db_seq_num", header);
-  	indices_[SRSD_DETAILS]=header.GetIndex("details");
-  	cat_available = true;
-	}
+    cat_available = true;
+  } else if (header.GetCategory()=="struct_ref_seq_dif") {
+    category_ = STRUCT_REF_SEQ_DIF;
+    this->TryStoreIdx(SRSD_ALIGN_ID, "align_id", header);
+    this->TryStoreIdx(SRSD_SEQ_RNUM, "seq_num", header);
+    this->TryStoreIdx(SRSD_DB_RNUM, "pdbx_seq_db_seq_num", header);
+    indices_[SRSD_DETAILS]=header.GetIndex("details");
+    cat_available = true;
+  } else if (header.GetCategory()=="database_PDB_rev") {
+    category_ = DATABASE_PDB_REV;
+    // mandatory items
+    this->TryStoreIdx(DPI_NUM, "num", header);
+    // optional items
+    indices_[DPI_DATE] = header.GetIndex("date");
+    indices_[DPI_DATE_ORIGINAL] = header.GetIndex("date_original");
+    indices_[DPI_STATUS] = header.GetIndex("status");
+    cat_available = true;
+  }
   category_counts_[category_]++;
   return cat_available;
 }
@@ -598,7 +607,6 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
   // record type
   ah.SetHetAtom(indices_[GROUP_PDB] == -1 ? false :  
                 columns[indices_[GROUP_PDB]][0]=='H');
-
 }
 
 void MMCifReader::ParseEntity(const std::vector<StringRef>& columns)
@@ -1301,6 +1309,30 @@ void MMCifReader::ParsePdbxDatabasePdbObsSpr(const std::vector<StringRef>&
   info_.SetObsoleteInfo(obs_data);
 }
 
+void MMCifReader::ParseDatabasePDBRev(const std::vector<StringRef>& columns)
+{
+  int num;
+  StringRef date;
+  StringRef status;
+
+  num = this->TryGetInt(columns[indices_[DPI_NUM]], "database_PDB_rev.num");
+  std::cout<<num<<std::endl;
+  if (indices_[DPI_DATE] != -1) {
+    date = columns[indices_[DPI_DATE]];
+  } else {
+    date = StringRef("", 0);
+  }
+  if (indices_[DPI_DATE_ORIGINAL] != -1) {
+    info_.SetRevisionsDateOriginal(columns[indices_[DPI_DATE_ORIGINAL]].str());
+  }
+  if (indices_[DPI_STATUS] != -1) {
+    status = columns[indices_[DPI_STATUS]];
+  } else {
+    status = StringRef("", 0);
+  }
+  info_.AddRevision(num, date.str(), status.str());
+}
+
 void MMCifReader::OnDataRow(const StarLoopDesc& header, 
                             const std::vector<StringRef>& columns)
 {
@@ -1362,17 +1394,21 @@ void MMCifReader::OnDataRow(const StarLoopDesc& header,
     this->ParsePdbxDatabasePdbObsSpr(columns);
     break;
   case STRUCT_REF:
-  	LOG_TRACE("processing struct_ref entry");
-  	this->ParseStructRef(columns);
-  	break;
+    LOG_TRACE("processing struct_ref entry");
+    this->ParseStructRef(columns);
+    break;
   case STRUCT_REF_SEQ:
-  	LOG_TRACE("processing struct_ref entry");
-  	this->ParseStructRefSeq(columns);
-  	break;
+    LOG_TRACE("processing struct_ref entry");
+    this->ParseStructRefSeq(columns);
+    break;
   case STRUCT_REF_SEQ_DIF:
-  	LOG_TRACE("processing struct_ref entry");
-  	this->ParseStructRefSeqDif(columns);
-  	break;
+    LOG_TRACE("processing struct_ref entry");
+    this->ParseStructRefSeqDif(columns);
+    break;
+  case DATABASE_PDB_REV:
+    LOG_TRACE("processing database_PDB_rev entry");
+    this->ParseDatabasePDBRev(columns);
+    break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                        "Uncatched category '"+ header.GetCategory() +"' found.",
@@ -1423,7 +1459,6 @@ void MMCifReader::AssignSecStructure(mol::EntityHandle ent)
     chain.AssignSecondaryStructure(extended, start, end);
   }
 }
-
 
 void MMCifReader::ParseStructRef(const std::vector<StringRef>& columns)
 {

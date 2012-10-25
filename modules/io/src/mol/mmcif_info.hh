@@ -545,7 +545,7 @@ private:
 /// 
 class DLLEXPORT_OST_IO MMCifInfoObsolete {
 public:
-  /// \brief Create an object of information baout an obsolete entry.
+  /// \brief Create an object of information about an obsolete entry.
   MMCifInfoObsolete(): date_(""), id_(UNKNOWN), pdb_id_(""),
     replaced_pdb_id_("") {};
 
@@ -619,6 +619,95 @@ private:
   String pdb_id_;          ///< replacing entry
   String replaced_pdb_id_; ///< replaced entry
 };
+
+/// \brief container class for information on file revisions (database_pdb_rev)
+/// 
+class DLLEXPORT_OST_IO MMCifInfoRevisions {
+public:
+  /// \brief Start recording a revision process.
+  MMCifInfoRevisions(): date_original_("?"), first_release_(0) {};
+
+  /// \brief Set date the entry entered PDB.
+  ///
+  /// \param date
+  void SetDateOriginal(String date) { date_original_ = date; }
+
+  /// \brief Get date the entry entered PDB.
+  ///
+  /// \return date
+  String GetDateOriginal() const { return date_original_; }
+
+  /// \brief Add a revision to history
+  ///
+  /// \param num unique identifier
+  /// \param date date of revision
+  /// \param status status of the revision
+  void AddRevision(int num, String date, String status)
+  {
+    if (num_.size() && (num_.back() > num)) {
+      std::stringstream ss;
+      ss << "'num' component of 'database_pdb_rev' category has to increase ";
+      ss << "with every revision, last was ";
+      ss << num_.back();
+      ss << ", trying to add ";
+      ss << num;
+      throw IOException(ss.str());
+      }
+    num_.push_back(num);
+    date_.push_back(date);
+    status_.push_back(status);
+    // set first release date if not already occuoied
+    if (first_release_ == 0) {
+      if (status == "full release") {
+        first_release_ = status_.size();
+      }
+    }
+  }
+
+  /// \brief Get number of revisions stored.
+  ///
+  /// \return number
+  size_t GetSize() const { return num_.size(); }
+
+  /// \brief Get revision date by index in list.
+  ///
+  /// \param i position in list
+  /// \return date
+  String GetDate(size_t i) const { return date_[i]; }
+
+  /// \brief Get revision num by index in list.
+  ///
+  /// \param i position in list
+  /// \return num
+  int GetNum(size_t i) const { return num_[i]; }
+
+  /// \brief Get revision status by index in list.
+  ///
+  /// \param i position in list
+  /// \return status
+  String GetStatus(size_t i) const { return status_[i]; }
+
+  /// \brief Get date of last revision.
+  ///
+  /// \return date
+  String GetLastDate() const { return date_.back(); }
+
+  /// \brief Get the index of the full release revision.
+  ///
+  /// \return index
+  size_t GetFirstRelease() const
+  {
+    return first_release_;
+  }
+
+private:
+  String date_original_;       ///< first time seen in PDB
+  size_t first_release_;          ///< index of full release revision
+  std::vector<int> num_;       ///< sequential id of revision (gets larger)
+  std::vector<String> date_;   ///< date of revision
+  std::vector<String> status_; ///< ststus phrase for this revision
+};
+
 
 class MMCifInfoStructRef;
 class MMCifInfoStructRefSeq;
@@ -861,6 +950,32 @@ public:
   }
   const MMCifInfoStructRefs& GetStructRefs() const { return struct_refs_; }
   void SetStructRefs(const MMCifInfoStructRefs& sr) { struct_refs_=sr; }
+
+  /// \brief Set date_original of revisions.
+  ///
+  /// \param date
+  void SetRevisionsDateOriginal(String date)
+  {
+    revisions_.SetDateOriginal(date);
+  }
+
+  /// \brief Add a revision to history
+  ///
+  /// \param num unique identifier
+  /// \param date date of revision
+  /// \param status status of the revision
+  void AddRevision(int num, String date, String status)
+  {
+    revisions_.AddRevision(num, date, status);
+  }
+
+  /// \brief Get history
+  ///
+  /// \return MMCifInfoRevisions
+  MMCifInfoRevisions GetRevisions() const 
+  {
+    return revisions_;
+  }
 //protected:
 
 private:
@@ -869,6 +984,7 @@ private:
   Real resolution_;
   MMCifInfoStructDetails struct_details_;     ///< mmCIF struct category
   MMCifInfoObsolete obsolete_;                ///< obsolete/ superseded entry
+  MMCifInfoRevisions revisions_;              ///< database_pdb_rev category
   std::vector<MMCifInfoCitation> citations_;  ///< list of citations
   std::vector<MMCifInfoBioUnit>  biounits_;   ///< list of biounits
   std::vector<MMCifInfoTransOpPtr> transops_;
