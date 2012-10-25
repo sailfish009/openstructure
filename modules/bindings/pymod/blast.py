@@ -3,8 +3,9 @@ import subprocess
 from xml.dom import minidom
 from ost import io, seq
 import ost
-import re
-import os
+import os, re, sys
+sys.path.append('PYMODULES')
+
 
 class AlignedPatch:
   """
@@ -28,12 +29,17 @@ class AlignedPatch:
   .. attribute:: evalue
 
     The E-value of the HSP
+
+  .. attribute:: seqid
+
+    The sequence identity of the HSP
   """
-  def __init__(self, aln, bit_score, score, evalue):
+  def __init__(self, aln, bit_score, score, evalue, seqid):
     self.aln=aln
     self.bit_score=bit_score
     self.score=score
     self.evalue=evalue
+    self.seqid=seqid
 
 class BlastHit:
   """
@@ -54,19 +60,66 @@ class BlastHit:
     self.identifier=identifier
     self.aligned_patches=aligned_patches
 
+
+def ParseBlastOutput(string, seqid_thres=0, evalue_thres=float("infinity")):
+  """
+  Parses the blast output and returns a list of BlastHits
+  setting no seqid_thres or evalue_thres, restores default behaviour without filtering
+  """
+  def _GetText(node):
+    rc=''
+    for child in node.childNodes:
+        if child.nodeType==child.TEXT_NODE:
+            rc+=child.data
+    return rc
+
+  def _GetValue(node, tag_name):
+    tag=node.getElementsByTagName(tag_name)
+    assert len(tag)==1
+    return _GetText(tag[0])
+
+  def _GetInt(node, tag_name):
+    return int(_GetValue(node, tag_name))
+
+  def _ParseHsp(query_id, hit_id, hsp, tot_query_len, seqid_thres=0, evalue_thres=float("infinity")):
+    bit_score=float(_GetValue(hsp, 'Hsp_bit-score'))
+    score=float(_GetValue(hsp, 'Hsp_score'))
+    evalue=float(_GetValue(hsp, 'Hsp_evalue'))
+    identity=float(_GetValue(hsp, 'Hsp_identity'))
+    hsp_align_len=float(_GetValue(hsp, 'Hsp_align-len'))
+    seqid=identity/hsp_align_len
+    query_offset=_GetInt(hsp, 'Hsp_query-from')-1
+    hit_offset=_GetInt(hsp, 'Hsp_hit-from')-1
+    query_seq=seq.CreateSequence(str(query_id), str(_GetValue(hsp, 'Hsp_qseq')))
+    query_seq.offset=query_offset
+    hit_seq=seq.CreateSequence(str(hit_id), str(_GetValue(hsp, 'Hsp_hseq')))
+    hit_seq.offset=hit_offset
+    try:
+      if seqid > float(seqid_thres) and evalue < evalue_thres:
+        aln=seq.CreateAlignment(query_seq, hit_seq)
+        return AlignedPatch(aln, bit_score, score, evalue, seqid)
+
+    except Exception, e:
+      print str(e), query_seq, hit_seq
+
+  try:
+    doc=minidom.parseString(string)
+  except Exception, e:
+    ost.LogError('Error while parsing BLAST output: %s' % str(e))
+    return None
+  hits=[]
+  query_id=_GetValue(doc, 'BlastOutput_query-def')
+  tot_query_len=_GetValue(doc, 'BlastOutput_query-len')
+  for hit in doc.getElementsByTagName('Hit'):
+    hit_id=_GetValue(hit, 'Hit_def')
+    hsps=hit.getElementsByTagName('Hsp')
+    aligned_patches=[_ParseHsp(query_id, hit_id, hsp, tot_query_len, seqid_thres, evalue_thres) for hsp in hsps]
+    hits.append(BlastHit(hit_id, aligned_patches))
+  return hits
+
+
+
 class BlastError(RuntimeError):
-  """
-  Raised when something goes wrong during parsing/execution of the blast
-  executable.
-
-  .. attribute:: brief
-
-    Short explanation of the problem
-
-  .. attribute:: details
-
-    If set, explains in more detail what caused the error. Might be empty.
-  """
   def __init__(self, brief, details):
     self.brief=brief
     self.details=details
@@ -77,112 +130,138 @@ class BlastError(RuntimeError):
     else:
       return self.brief
 
-def ParseBlastOutput(string):
+def CreateDB(infasta, dbout, mkdb_cmd='makeblastdb'):
   """
-  Parses the blast output and returns a list of :class:`BlastHit` instances.
+  Create a blast DB from a fasta file
 
-  :raises: :class:`BlastError` if the output could not be parsed.
+  :param infasta: the pdb fasta from which the database will be created
+  :type infasta: :class:`string`
 
-  This functions is only capable of dealing with the BLAST XML output.
+  :param dbout: output location for blatDB file
+  :type infasta: :class:`string`
+
+
   """
-  def _GetText(node):
-    rc=''
-    for child in node.childNodes:
-        if child.nodeType==child.TEXT_NODE:
-            rc+=child.data
-    return rc
-      
-  def _GetValue(node, tag_name):
-    tag=node.getElementsByTagName(tag_name)
-    assert len(tag)==1
-    return _GetText(tag[0])
-    
-  def _GetInt(node, tag_name):
-    return int(_GetValue(node, tag_name))
-
-  def _ParseHsp(query_id, hit_id, hsp):
-    bit_score=float(_GetValue(hsp, 'Hsp_bit-score'))
-    score=float(_GetValue(hsp, 'Hsp_score'))
-    evalue=float(_GetValue(hsp, 'Hsp_evalue'))
-    query_offset=_GetInt(hsp, 'Hsp_query-from')-1
-    hit_offset=_GetInt(hsp, 'Hsp_hit-from')-1
-    query_seq=seq.CreateSequence(str(query_id), str(_GetValue(hsp, 'Hsp_qseq')))
-    query_seq.offset=query_offset
-    hit_seq=seq.CreateSequence(str(hit_id), str(_GetValue(hsp, 'Hsp_hseq')))
-    hit_seq.offset=hit_offset
-    aln=seq.CreateAlignment(query_seq, hit_seq)
-    return AlignedPatch(aln, bit_score, score, evalue)
   try:
-    doc=minidom.parseString(string)
-  except Exception, e:
-    raise BlastError('Error while parsing BLAST output: %s' % str(e), '')
-  hits=[]
-  query_id=_GetValue(doc, 'BlastOutput_query-def')
-  for hit in doc.getElementsByTagName('Hit'):
-    hit_id=_GetValue(hit, 'Hit_def')
-    hsps=hit.getElementsByTagName('Hsp')
-    aligned_patches=[_ParseHsp(query_id, hit_id, hsp) for hsp in hsps]
-    hits.append(BlastHit(hit_id, aligned_patches))
-  return hits
+    exe=settings.Locate('makeblastdb')
+    args=[exe, '-in', infasta, ' -max_file_sz 10GB -out', dbout,'-dbtype','prot']
+  except:
+    try:
+      exe=settings.Locate('formatdb')
+      args=[exe, '-i', infasta, '-v',str(10000),'-n',dbout]
+    except:
+      raise BlastError('could not find makeblastdb/formatdb executable')
+
+  cmd=' '.join(args)
+  ost.LogInfo('creating blast DB (%s)' % cmd)
+  stderr=os.system(cmd)
+  print stderr
+  print "finished creating blast DB"
 
 def BlastVersion(blast_location=None):
   """
   Returns the version of the BLAST executable, e.g. 2.2.24 as a string
   """
-  blastall_exe=settings.Locate('blastall', explicit_file_name=blast_location)
-  blast_pipe=subprocess.Popen(blastall_exe, stdout=subprocess.PIPE,
+
+  try:
+    blast_exe=settings.Locate('blastp',explicit_file_name=blast_location)
+  except:
+    try:
+      blast_exe=settings.Locate('blastall', explicit_file_name=blast_location)
+    except:
+      raise BlastError('could not find blast executable')
+
+  if os.path.basename(blast_exe)=='blastall':
+    args=[blast_exe]
+    pattern=re.compile(r'blastall (\d+\.\d+\.\d+)\s+arguments:\s*')
+
+  else:
+    args=[blast_exe, '-version']
+    pattern=re.compile(r'Package: blast (\d+\.\d+\.\d+),\s+')
+
+  blast_pipe=subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
   lines=blast_pipe.stdout.readlines()
-  pattern=re.compile(r'blastall (\d+\.\d+\.\d+)\s+arguments:\s*')
+
   for line in lines:
     m=pattern.match(line)
     if m:
       return m.group(1)
-  raise IOError("could not determine blast version for '%s'" % blastall_exe)
+  raise IOError("could not determine blast version for '%s'" % blast_exe)
+
+
 
 def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
-         blast_location=None):
+         blast_location=None, outfmt=0, filter_low_complexity=True):
   """
-  Runs a protein vs. protein blast search. The results are returned as a 
+  Runs a protein vs. protein blast search. The results are returned as a
   list of :class:`BlastHit` instances.
-  
+
   :param query: the query sequence
   :type query: :class:`seq.ConstSequenceHandle`
-  
-  :param database: The filename of the sequence database. Make sure that 
-      formatdb has been run on the database and the <database>.pin or
-      <database>.pal file exists.
+
+  :param database: The filename of the sequence database. Make sure that
+      formatdb has been run on the database and the <database>.pin file exists.
   :param matrix: The substitution matrix to be used. Must be one of 'BLOSUM45',
      'BLOSUM62', 'BLOSUM80', 'PAM30', 'PAM70'.
-  :param gap_open: Gap opening penalty. Note that only a subset of gap opening 
-     penalties is supported for each substitutition matrix. Consult the blast 
+  :param gap_open: Gap opening penalty. Note that only a subset of gap opening
+     penalties is supported for each substitutition matrix. Consult the blast
      docs for more information.
-  :param gap_ext: Gap extension penalty. Only a subset of gap extension 
-     penalties are supported for each of the substitution matrices. Consult the 
+  :param gap_ext: Gap extension penalty. Only a subset of gap extension
+     penalties are supported for each of the substitution matrices. Consult the
      blast docs for more information.
-
-  :raises: :class:`~ost.settings.FileNotFound` if the BLAST executable could not 
-           be found
-  :raises: :class:`BlastError` if there was a problem during execution of BLAST.
-  :raises: :class:`ValueError` if the substitution matrix is invalid
-  :raises: :class:`IOError` if the database does not exist
+  :param outfmt: output format, where '0' corresponds to default output (parsed blast output and 1 to raw output)
+  :param filter_low_complexity: Mask off segments of the query sequence that 
+     have low compositional complexity, as determined by the SEG program of 
+     Wootton & Federhen (Computers and Chemistry, 1993)
   """
   subst_mats=('BLOSUM45', 'BLOSUM62', 'BLOSUM80', 'PAM30', 'PAM70',)
   if matrix not in subst_mats:
     raise ValueError('matrix must be one of %s' % ', '.join(subst_mats))
   if not os.path.exists('%s.pin' % database) and not os.path.exists('%s.pal' % database):
     raise IOError("Database %s does not exist" % database)
-  blastall_exe=settings.Locate('blastall', explicit_file_name=blast_location)
-  args=[blastall_exe, '-d', database, '-p', 'blastp', 
-        '-m', '7', '-M', matrix, '-G', str(gap_open), '-E', str(gap_ext)]
+  if blast_location!=None and not os.path.exists(blast_location):
+    ost.LogScript('Could not find %s' %blast_location)
+
+  if blast_location==None:
+    try:
+      blast_exe=settings.Locate('blastp')
+    except:
+      try:
+        blast_exe=settings.Locate('blastall')
+      except:
+        raise BlastError('could not find blast executable')
+  else:
+    blast_exe=settings.Locate(os.path.basename(blast_location),explicit_file_name=blast_location)
+
+  if os.path.basename(blast_exe)=='blastall':
+    args=[blast_exe, '-d', database, '-p', 'blastp',
+          '-m', '7', '-M', matrix, '-G', str(gap_open), '-E', str(gap_ext)]
+    if filter_low_complexity==False:
+      args.append('-F')
+      args.append('F')
+          
+  else:
+    complexity_opt='-seg'
+    complexity_arg='yes' if filter_low_complexity==True else 'no'
+    args=[blast_exe, '-db', database, '-matrix', matrix,
+          '-gapopen', str(gap_open), '-gapextend', str(gap_ext), '-outfmt', '5', complexity_opt, complexity_arg ]
+
   ost.LogInfo('running BLAST (%s)' % ' '.join(args))
-  blast_pipe=subprocess.Popen(args, stderr=subprocess.PIPE, 
+  blast_pipe=subprocess.Popen(args, stderr=subprocess.PIPE,
                               stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-  stdout, stderr=blast_pipe.communicate(io.SequenceToString(query, 'fasta'))
+  if isinstance(query, str):
+    stdout, stderr=blast_pipe.communicate(query)
+  else:
+    stdout, stderr=blast_pipe.communicate(io.SequenceToString(query, 'fasta'))
+
   if len(stderr)>0:
      pattern=re.compile(r'^\[.*\]\s+ERROR:\s+(.*)')
      lines=stderr.split('\n')
      error_message=pattern.match(lines[0])
      if error_message:
        raise BlastError(error_message.group(1), '\n'.join(lines[1:]))
-  return ParseBlastOutput(stdout)
+  if outfmt==0:
+    return ParseBlastOutput(stdout)
+  else:
+    return stdout
