@@ -24,34 +24,51 @@ class TestBlastBindings(unittest.TestCase):
     self.assertRaises(IOError, blast.Blast, self.query, 
                       'testfiles/nonexistentdb')
   
-  def testParseBlastOutput(self):
+  def testBlastOutput(self):
     hits=blast.Blast(self.query, 'testfiles/seqdb')
-    blast_version=blast.BlastVersion()
-    if blast_version=='2.2.16':
-      expected_output=[{'evalue':4.808930E-59,'bitscore':210.305,'score':534}, 
-                       {'evalue':2.366130E-59,'bitscore':210.305,'score':534}, 
-                       {'evalue':5.361450E-58,'bitscore':206.068,'score':523}, 
-                       {'evalue':2.965230E+00,'bitscore':15.0086,'score':27}, 
-                       {'evalue':9.696520E+00,'bitscore':13.4678,'score':23}]
- 
-    else:
-      expected_output=[{'evalue':2.366130E-59,'bitscore':211.460,'score':537}, 
-                       {'evalue':4.808930E-59,'bitscore':210.305,'score':534}, 
-                       {'evalue':5.361450E-58,'bitscore':206.838,'score':525}, 
-                       {'evalue':3.277500E+00,'bitscore':15.0086,'score':27}, 
-                       {'evalue':9.696520E+00,'bitscore':13.4678,'score':23}]
+    expected_hits=['1griA','1fhsA','3n84E','1mw9X']
     self.assertEqual(len(hits), 4)
-    for expected, hit in zip(expected_output, hits):
-      patch=hit.aligned_patches[0]
-      self.assertAlmostEqual(patch.evalue, expected['evalue'])
-      self.assertAlmostEqual(patch.bit_score, expected['bitscore'])
-      self.assertAlmostEqual(patch.score, expected['score'])
+
+    found=0
+    hit_ids=[]
+
+    for h in hits:
+      hit_ids.append(h.identifier)
+
+    for identifier in expected_hits:
+      if identifier in hit_ids:
+        found+=1
+    self.assertEqual(found, 4)
+
+  def testBlastParseOutput(self):
+    raw_out=open('testfiles/raw_blastout.txt','r').readlines()
+    parsed_out=blast.ParseBlastOutput(raw_out)
+
+    expected_ids=['1griA','1fhsA','3n84E','1mw9X']
+    expected_evalues=[4.80893e-59,4.80893e-59,9.06925e-58,2.96523]
+    expected_scores=[534,534,523,27]
+    expected_bitscores[210.305,210.305,206.068,15.0086]
+    expected_seqid=[1.0,1.0,1.0,0.30769]
+
+    for i in range(4):
+      patch=parsed_out[i].aligned_patches[0]
+      self.assertEqual(expected_ids[i],parsed_out[i].identifier)
+      self.assertAlmostEqual(patch.evalue,expected_evalues[i])
+      self.assertAlmostEqual(patch.score,expected_scores[i])
+      self.assertAlmostEqual(patch.bit_score,expected_bitscores[i])
+      self.assertAlmostEqual(patch.seqid,expected_seqid[i],places=5)
+
+
+    
 if __name__ == "__main__":
   # test if blast package is available on system, otherwise ignore tests
   try:
-    blastpath=settings.Locate('blastall')
+    blastpath=settings.Locate('blastp')
   except(settings.FileNotFound):
-    print "Could not find blastall executable: ignoring unit tests"
-    sys.exit(0)
+    try:
+      blastpath=settings.Locate('blastall')
+    except:
+      print "Could not find blast executable: ignoring unit tests"
+      sys.exit(0)
   from ost import testutils
   testutils.RunTests()
