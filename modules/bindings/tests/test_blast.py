@@ -72,7 +72,7 @@ class TestBlastBindings(unittest.TestCase):
     self.assertRaises(RuntimeError, blast.Blast, self.query, 'testfiles/seqdb',
                       blast_location='/I/do/not/exist')
     version=blast.BlastVersion()
-    self.assertIsInstance(version,str)
+    self.assertTrue(isinstance(version,str))
     re_v = re.compile('\d+\.\d+\.\d+')
     match=False
     if re_v.match(version):
@@ -90,7 +90,7 @@ class TestBlastBindings(unittest.TestCase):
     test_seq=seq.CreateSequence('B','ALRLVKDGFAVAIADYNDATATAVAAEINQAGGRAVAIKVDV'+
                                     'SRRDQVFAAVEQARKALGGFNVIVNNAGIAPSTPIESIT')
     blastout=blast.Blast(test_seq,db_name)
-    self.assertEqual(len(blastout),28)
+    self.assertTrue(len(blastout)>10)
     shutil.rmtree(tmp_dir_name)
 
 if __name__ == "__main__":
