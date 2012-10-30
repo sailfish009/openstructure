@@ -5,6 +5,7 @@ from ost import stutil
 import itertools
 import operator
 import cPickle
+import weakref
 from ost import LogError, LogWarning, LogInfo, LogVerbose
 
 def MakeTitle(col_name):
@@ -126,6 +127,45 @@ class TableCol:
   def __div__(self, rhs):
     return BinaryColExpr(operator.div, self, rhs)
 
+class TableRow:
+  """
+  Essentially a named tuple, but allows column names that are not valid 
+  python variable names.
+  """
+  def __init__(self, row_data, tab):
+    self.__dict__['tab'] = weakref.proxy(tab)
+    self.__dict__['row_data'] = row_data
+
+  def __getitem__(self, col_name):
+    if type(col_name)==int:
+      return self.row_data[col_name]
+    return self.row_data[self.tab.GetColIndex(col_name)]
+
+  def __str__(self):
+    s = []
+    for k, v in zip(self.__dict__['tab'].col_names, self.__dict__['row_data']):
+      s.append('%s=%s' % (k, str(v)))
+    return ', '.join(s)
+      
+      
+  def __len__(self):
+    return len(self.row_data)
+
+  def __setitem__(self, col_name, val):
+    if type(col_name)==int:
+      self.row_data[col_name] = val
+    else:
+      self.row_data[self.tab.GetColIndex(col_name)] = val
+
+  def __getattr__(self, col_name):
+    if 'col_names' not in self.tab.__dict__ or col_name not in self.tab.col_names:
+      raise AttributeError(col_name)
+    return self.row_data[self.tab.GetColIndex(col_name)]
+
+  def __setattr__(self, col_name, val):
+    if 'col_names' not in self.tab.__dict__ or col_name not in self.tab.col_names:
+      raise AttributeError(col_name)
+    self.row_data[self.tab.GetColIndex(col_name)] = val
 
 class Table(object):
   """
@@ -1230,7 +1270,7 @@ Statistics for column %(col)s
         if y_range:
           plt.ylim(y_range[0], y_range[1])
         if diag_line:
-          plt.plot(x_range, y_range, '-')
+          plt.plot(x_range, y_range, '-', color='black')
         
         plt.ylabel(nice_y, size='x-large')
       else:
