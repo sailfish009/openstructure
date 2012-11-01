@@ -479,6 +479,8 @@ class DLLEXPORT_OST_GFX Scene {
 
   */
   bool StartOffscreenMode(unsigned int w, unsigned int h, int max_samples);
+  bool StartOffscreenMode(unsigned int w, unsigned int h);
+
   /// \brief stops offline rendering in interactive mode
   void StopOffscreenMode();
 

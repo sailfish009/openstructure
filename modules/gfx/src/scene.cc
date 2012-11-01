@@ -1584,6 +1584,10 @@ uint Scene::GetSelectionMode() const
   return selection_mode_;
 }
 
+bool Scene::StartOffscreenMode(unsigned int width, unsigned int height) {
+  return StartOffscreenMode(width,height,2);
+}
+
 bool Scene::StartOffscreenMode(unsigned int width, unsigned int height, int max_samples)
 {
   LOG_DEBUG("Scene: starting offscreen rendering mode " << width << "x" << height);

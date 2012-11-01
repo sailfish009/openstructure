@@ -329,3 +329,60 @@ def _entity_reset(self,*args,**kwargs):
     self._reset3(eh,qr,qf)
 
 Entity.Reset=_entity_reset
+
+def _scene_export(self,*args,**kwargs):
+  """
+  scene.Export(Exporter)
+  scene.Export("file.png")
+  scene.Export("file.png",(width,height),samples=0,transparency=False)
+  deprecated:
+  scene.Export("file.png",width,height,samples=0,transparency=False)
+  scene.Export("file.png",width,height,transparency) 
+  """
+  scene=Scene()
+  tp=False
+  sa=0
+  if "tp" in kwargs:
+    tp=int(kwargs["tp"])
+  if "transparency" in kwargs:
+    tp=int(kwargs["transparency"])
+  if "samples" in kwargs:
+    sa=int(kwargs["samples"])
+
+  if len(args)==1:
+    if isinstance(args[0],Exporter):
+      scene._export_via_exporter(args[0])
+      return
+    elif type(args[0])==type(""):
+      scene._export_screen(args[0],tp)
+      return
+  elif len(args)==2:
+    if type(args[0]==type("")):
+      # assume second argument is a dimension
+      width=int(args[1][0])
+      height=int(args[1][1])
+      scene._export_buffer(args[0],width,height,sa,tp)
+      return
+  elif len(args)==3:
+    if type(args[0]==type("")):
+      width=int(args[1])
+      height=int(args[2])
+      scene._export_buffer(args[0],width,height,sa,tp)
+      return
+  elif len(args)==4:
+    if type(args[0]==type("")):
+      width=int(args[1])
+      height=int(args[2])
+      tp=int(args[3])
+      scene._export_buffer(args[0],width,height,sa,tp)
+      return
+  # getting here indicates an error
+  raise RuntimeError("""invalid arguments to scene.Export; expected one of
+  Export(gfx.Exporter)
+  Export('file.png')
+  Export('file.png',(width,height),samples=0, transparency=False)
+  Export('file.png',width,height,samples=0, transparency=False) -> deprecated
+  Export('file.png',width,height,transparency) -> deprecated
+  """)
+
+SceneSingleton.Export=_scene_export

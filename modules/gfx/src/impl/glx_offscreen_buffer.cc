@@ -29,6 +29,16 @@
 
 namespace ost { namespace gfx {
 
+namespace {
+  Display* get_dpy() {
+    static Display* dpy=0;
+    if(not dpy) {
+      dpy=XOpenDisplay(getenv("DISPLAY"));
+    }
+    return dpy;
+  }
+}
+
 OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared):
   width_(width), height_(height), valid_(false), active_(false)
 {
@@ -39,7 +49,7 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
   }
 
   LOG_DEBUG("offscreen buffer: XOpenDisplay");
-  dpy_ = XOpenDisplay(getenv("DISPLAY"));
+  dpy_ = get_dpy();
   if(dpy_==NULL) {
     LOG_ERROR("error creating offscreen rendering context: XOpenDisplay failed");
     return;
@@ -84,7 +94,6 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
       search_multisample=false;
     } else {
       LOG_ERROR("error creating offscreen rendering context: glXChooseFBConfig failed");
-      XCloseDisplay(dpy_);
       return;
     }
   }
@@ -129,7 +138,6 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
   if(!pbuffer_) {
     LOG_ERROR("error creating offscreen rendering context: glXCreatePBuffer failed");
     XFree(fbconfig_);
-    XCloseDisplay(dpy_);
     return;
   }
 
@@ -148,7 +156,6 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
     LOG_ERROR("error creating offscreen rendering context: glXCreateNewContext failed");
     glXDestroyPbuffer(dpy_, pbuffer_);
     XFree(fbconfig_);
-    XCloseDisplay(dpy_);
     return;
   }
 
@@ -163,9 +170,7 @@ OffscreenBuffer::~OffscreenBuffer()
     LOG_DEBUG("offscreen buffer: glXDestroyPbuffer()");
     glXDestroyPbuffer(dpy_, pbuffer_);
     LOG_DEBUG("offscreen buffer: XFree(fbconfig_list)");
-    XFree(fbconfig_);
-    LOG_DEBUG("offscreen buffer: XCloseDisplay()");
-    XCloseDisplay(dpy_);
+    //XFree(fbconfig_);
   }
 }
 
