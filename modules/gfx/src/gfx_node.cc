@@ -108,7 +108,9 @@ void GfxNode::Export(Exporter* ex)
   if(!IsVisible()) return;
   ex->NodeStart(GetName(),Exporter::GROUP);
   for(GfxNodeVector::iterator it=node_vector_.begin();it!=node_vector_.end();++it) {
-    (*it)->Export(ex);
+    if((*it)->IsVisible()) {
+      (*it)->Export(ex);
+    }
   }
   ex->NodeEnd(GetName());
 }

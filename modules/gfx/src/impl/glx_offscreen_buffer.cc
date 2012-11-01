@@ -21,6 +21,8 @@
   Author: Ansgar Philippsen
 */
 
+#include <iomanip>
+
 #include <ost/log.hh>
 #include <ost/gfx/offscreen_buffer.hh>
 #include <ost/gfx/scene.hh>
@@ -63,40 +65,57 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
   attrib_list.push_back(GLX_STENCIL_SIZE);
   attrib_list.push_back(8);
   attrib_list.push_back(GLX_SAMPLE_BUFFERS);
-  attrib_list.push_back(1);
+  attrib_list.push_back(f.multisample ? 1 : 0);
   attrib_list.push_back(0);
-
+  bool search_multisample=f.multisample;
   int nelem=0;
   LOG_DEBUG("offscreen buffer: glXChooseFBConfig");
   fbconfig_ =glXChooseFBConfig(dpy_,0,&attrib_list[0],&nelem);
   if(fbconfig_==0 || nelem==0) {
-    LOG_DEBUG("no offscreen rendering context with multisample, trying without");
-    // take out the multisample requirement
-    attrib_list[attrib_list.size()-2]=0;
-    fbconfig_ =glXChooseFBConfig(dpy_,0,&attrib_list[0],&nelem);
-    if(fbconfig_==0 || nelem==0) {
+    if(f.multisample) {
+      LOG_DEBUG("no offscreen rendering context with multisample, trying without");
+      // take out the multisample requirement
+      attrib_list[attrib_list.size()-2]=0;
+      fbconfig_ =glXChooseFBConfig(dpy_,0,&attrib_list[0],&nelem);
+      if(fbconfig_==0 || nelem==0) {
+        LOG_ERROR("error creating offscreen rendering context: glXChooseFBConfig failed");
+        return;
+      }
+      search_multisample=false;
+    } else {
       LOG_ERROR("error creating offscreen rendering context: glXChooseFBConfig failed");
+      XCloseDisplay(dpy_);
       return;
     }
   }
-#if 0
-  /*
-   let export routine and start offscreen rendering context ask for min/max/next available
-   multisample
-   */
-  for(size_t i=0;i<nelem;++i) {
-    std::cerr << i << " ";
+#ifndef NDEBUG
+  LOG_VERBOSE("offscreen buffer: available framebuffer configs");
+  for(int i=0;i<nelem;++i) {
     int rbits; glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_RED_SIZE, &rbits);
     int gbits; glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_GREEN_SIZE, &gbits);
     int bbits; glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_BLUE_SIZE, &bbits);
     int dbits; glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_DEPTH_SIZE, &dbits);
     int sbits; glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_STENCIL_SIZE, &sbits);
     int ms; glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_SAMPLES, &ms);
-    std::cerr << "rgb=" << rbits << "." << gbits << "." << bbits << " d=" << dbits << " s=" << sbits << " ms=" << ms << std::endl;
+    LOG_VERBOSE(" " << std::setw(3) << i << std::setw(0) << ": rgb=" << rbits << "." << gbits << "." << bbits << " d=" << dbits << " s=" << sbits << " ms=" << ms);
   }
-  fb_config_id_=nelem-1;
 #endif
   fb_config_id_=0;
+  if(search_multisample) {
+    int ms;
+    int best_ms;
+    glXGetFBConfigAttrib(dpy_,fbconfig_[0], GLX_SAMPLES, &best_ms);
+    for(int i=1;i<nelem;++i) {
+      glXGetFBConfigAttrib(dpy_,fbconfig_[i], GLX_SAMPLES, &ms);
+      if(ms<=static_cast<int>(f.samples) && ms>best_ms) {
+        fb_config_id_=i;
+        best_ms=ms;
+      }
+    }
+  }
+#ifndef NDEBUG
+  LOG_VERBOSE("offscreen buffer: using buffer # " << fb_config_id_ << " for export");
+#endif
 
   attrib_list.clear();
   attrib_list.push_back(GLX_PBUFFER_WIDTH);
@@ -109,6 +128,8 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
   pbuffer_ = glXCreatePbuffer(dpy_, fbconfig_[fb_config_id_], &attrib_list[0]);
   if(!pbuffer_) {
     LOG_ERROR("error creating offscreen rendering context: glXCreatePBuffer failed");
+    XFree(fbconfig_);
+    XCloseDisplay(dpy_);
     return;
   }
 
@@ -126,6 +147,8 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
   if(!context_) {
     LOG_ERROR("error creating offscreen rendering context: glXCreateNewContext failed");
     glXDestroyPbuffer(dpy_, pbuffer_);
+    XFree(fbconfig_);
+    XCloseDisplay(dpy_);
     return;
   }
 
@@ -139,6 +162,10 @@ OffscreenBuffer::~OffscreenBuffer()
     glXDestroyContext(dpy_, context_);
     LOG_DEBUG("offscreen buffer: glXDestroyPbuffer()");
     glXDestroyPbuffer(dpy_, pbuffer_);
+    LOG_DEBUG("offscreen buffer: XFree(fbconfig_list)");
+    XFree(fbconfig_);
+    LOG_DEBUG("offscreen buffer: XCloseDisplay()");
+    XCloseDisplay(dpy_);
   }
 }
 

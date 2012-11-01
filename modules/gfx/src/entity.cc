@@ -376,8 +376,9 @@ void Entity::CustomRenderPov(PovState& pov)
 
 void Entity::Export(Exporter* ex)
 {
+  if(!IsVisible()) return;
+
   ex->NodeStart(GetName(),Exporter::OBJ);
-  // in the simplest case, just export va
   if(rebuild_ || refresh_) {
     PreRenderGL(true);
   }

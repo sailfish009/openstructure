@@ -1584,11 +1584,18 @@ uint Scene::GetSelectionMode() const
   return selection_mode_;
 }
 
-bool Scene::StartOffscreenMode(unsigned int width, unsigned int height)
+bool Scene::StartOffscreenMode(unsigned int width, unsigned int height, int max_samples)
 {
   LOG_DEBUG("Scene: starting offscreen rendering mode " << width << "x" << height);
   if(main_offscreen_buffer_) return false;
-  main_offscreen_buffer_ = new OffscreenBuffer(width,height,OffscreenBufferFormat(),true);
+  OffscreenBufferFormat obf;
+  if(max_samples>0) {
+    obf.multisample=true;
+    obf.samples=max_samples;
+  } else {
+    obf.multisample=false;
+  }
+  main_offscreen_buffer_ = new OffscreenBuffer(width,height,obf,true);
 
   if(!main_offscreen_buffer_->IsValid()) {
     LOG_ERROR("Scene: error during offscreen buffer creation");
@@ -1643,6 +1650,12 @@ void Scene::StopOffscreenMode()
 void Scene::Export(const String& fname, unsigned int width,
                    unsigned int height, bool transparent)
 {
+  Export(fname,width,height,0,transparent);
+}
+
+void Scene::Export(const String& fname, unsigned int width,
+                   unsigned int height, int max_samples, bool transparent)
+{
   int d_index=fname.rfind('.');
   if (d_index==-1) {
     LOG_ERROR("Scene: no file extension specified");
@@ -1658,7 +1671,14 @@ void Scene::Export(const String& fname, unsigned int width,
 
   // only switch if offscreen mode is not active
   if(of_flag) {
-    if(!StartOffscreenMode(width,height)) {
+    if(max_samples<0) {
+      int msamples=0;
+      if(OST_GL_VERSION_2_0) {
+        glGetIntegerv(GL_SAMPLES, &msamples);
+      }
+      max_samples=msamples;
+    }
+    if(!StartOffscreenMode(width,height, max_samples)) {
       return;
     }
   }

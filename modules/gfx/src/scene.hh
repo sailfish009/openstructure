@@ -294,6 +294,10 @@ class DLLEXPORT_OST_GFX Scene {
   /// dimensions here are ignored
   void Export(const String& fname, unsigned int w,
               unsigned int h, bool transparent=false);
+  /// \brief export into bitmap, using multisample anti-aliasing
+  /// \ref Scene::StartOfffscreenMode(unsigned int, unsigned int, int) for more detail
+  void Export(const String& fname, unsigned int w,
+              unsigned int h, int max_samples, bool transparent=false);
 
   /// \brief export snapshot of current scene
   void Export(const String& fname, bool transparent=false);
@@ -465,9 +469,16 @@ class DLLEXPORT_OST_GFX Scene {
     During batch mode, this is the only way to get meaningful
     functionality with the gfx module
 
-    returns true upon success and false upon failure
+    Returns true upon success and false upon failure
+
+    You can ask for multisampling to be enabled by giving the
+    max_samples a value larger than zero; in this case, the framebuffer
+    with at most this many samplebuffers will be used. The recommended
+    value here is 4; going to 8 or 16 may give you higher export times
+    with usually no marked increase in quality.
+
   */
-  bool StartOffscreenMode(unsigned int w, unsigned int h);
+  bool StartOffscreenMode(unsigned int w, unsigned int h, int max_samples);
   /// \brief stops offline rendering in interactive mode
   void StopOffscreenMode();
 

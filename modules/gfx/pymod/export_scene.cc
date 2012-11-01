@@ -83,13 +83,14 @@ void export_Scene()
   void (Scene::* set_light_prop2)(float,float,float) = &Scene::SetLightProp;
 
   void (Scene::* export1)(const String&, uint, uint, bool) = &Scene::Export;
-  void (Scene::* export2)(const String&, bool) = &Scene::Export;
-  void (Scene::* export3)(Exporter*) const = &Scene::Export;
+  void (Scene::* export2)(const String&, uint, uint, int, bool) = &Scene::Export;
+  void (Scene::* export3)(const String&, bool) = &Scene::Export;
+  void (Scene::* export4)(Exporter*) const = &Scene::Export;
   void (Scene::*remove1)(const GfxNodeP&) = &Scene::Remove;
   void (Scene::*remove2)(const String&) = &Scene::Remove;
   void (Scene::*center_on1)(const String&) = &Scene::CenterOn;
   void (Scene::*center_on2)(const GfxObjP&) = &Scene::CenterOn;
-  
+  bool (Scene::*start_offscreen_mode2)(unsigned int, unsigned int, int) = &Scene::StartOffscreenMode;  
   class_<Viewport>("Viewport", init<>())
     .def_readwrite("x", &Viewport::x)
     .def_readwrite("y", &Viewport::y)
@@ -197,7 +198,8 @@ void export_Scene()
     .def("Apply", apply)
     .def("Export",export1, arg("transparent")=false)
     .def("Export",export2, arg("transparent")=false)
-    .def("Export",export3)
+    .def("Export",export3, arg("transparent")=false)
+    .def("Export",export4)
     .def("ExportPov",&Scene::ExportPov,
          scene_export_pov_overloads())
     .def("PushView",&Scene::PushView)
@@ -227,7 +229,7 @@ void export_Scene()
     .add_property("ao_quality",&Scene::GetAmbientOcclusionQuality,&Scene::SetAmbientOcclusionQuality)
     .add_property("ao_size",&Scene::GetAmbientOcclusionSize,&Scene::SetAmbientOcclusionSize)
     .def("AttachObserver",&Scene::AttachObserver)
-    .def("StartOffscreenMode",&Scene::StartOffscreenMode)
+    .def("StartOffscreenMode",start_offscreen_mode2)
     .def("StopOffscreenMode",&Scene::StopOffscreenMode)
     .def("SetShadingMode",&Scene::SetShadingMode)
     .def("SetBeacon",&Scene::SetBeacon)
