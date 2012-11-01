@@ -67,6 +67,15 @@ bool shift_left(const String& atom_name, bool is_hetatm,
           element=="MG" || element=="LI");
 }
 
+
+bool atom_pos_ok(geom::Vec3 p) {
+  for (int i=0; i<3; ++i) {
+    if (p[i]<=-1000 || p[i] >= 10000) {
+      return false;
+    }
+  }
+  return true;
+}
 void write_atom(std::ostream& ostr, FormattedLine& line, 
                 const mol::AtomHandle& atom, int atomnum, 
                 bool is_pqr, bool charmm_style)
@@ -130,6 +139,9 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
   
   // deal with alternative atom locations
   if (names.empty()) {
+    if (!atom_pos_ok(p)) {
+      throw IOException("Atom position outside of bounds supported by PDB format");
+    }
     line(30, 8)=fmt::LPaddedFloat(p[0],  3);
     line(38, 8)=fmt::LPaddedFloat(p[1],  3);
     line(46, 8)=fmt::LPaddedFloat(p[2],  3);
@@ -158,6 +170,9 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
       p=geom::Vec3(tf*geom::Vec4(atom.GetAltPos(*i)));
       line(30, 50).Clear();
 
+      if (!atom_pos_ok(p)) {
+        throw IOException("Atom position outside of bounds supported by PDB format");
+      }
       if (i->size()>1) {
         throw IOException("Alternative atom indicator '"+atom.GetQualifiedName()+
                           "("+*i+")' too long for PDB output. At most 1 "
