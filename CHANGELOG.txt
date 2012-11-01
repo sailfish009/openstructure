@@ -1,5 +1,10 @@
-Changes in Release 1.2.2
+Changes In Release 1.2.3
+--------------------------------------------------------------------------------
 
+  * PDBWriter: Prevent writing of out-of-bounds atom coordinates.
+
+Changes in Release 1.2.2
+--------------------------------------------------------------------------------
   * Fixed loop indentation in the PDBize function for bio units, leading to
     exponential running time/ memory consumption. This problem only affected a
     fraction of PDB entries.
