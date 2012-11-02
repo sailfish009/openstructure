@@ -208,6 +208,11 @@ void EditorBase::RenumberAllResidues(int start, bool keep_spacing)
   ent_.Impl()->RenumberAllResidues(start, keep_spacing);
 }
 
+void EditorBase::RenumberChain(ChainHandle& chain, int start, bool keep_spacing)
+{
+  chain.Impl()->RenumberAllResidues(start, keep_spacing);
+}
+
 void EditorBase::RenameAtom(AtomHandle atom, const String& new_name)
 {
   CheckHandleValidity(atom);
