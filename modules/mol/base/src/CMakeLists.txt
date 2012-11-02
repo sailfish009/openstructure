@@ -83,6 +83,7 @@ sec_structure.hh
 spatial_organizer.hh
 surface.hh
 surface_builder.hh
+builder.hh
 surface_handle.hh
 surface_prop.hh
 torsion_handle.hh

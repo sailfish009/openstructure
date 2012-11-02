@@ -3,6 +3,7 @@ set(OST_MOL_BASE_UNIT_TESTS
   test_chain.cc
   test_conn.cc
   test_coord_group.cc
+  test_builder.cc
   test_delete.cc
   test_entity.cc
   test_ics.cc
