@@ -31,5 +31,5 @@ void export_StructureAnalysis()
   def("CalculateAverageAgreementWithDensityMap",&CalculateAverageAgreementWithDensityMap,(arg("pos_list"),arg("density_map")));
   def("CalculateAgreementWithDensityMap",&CalculateAgreementWithDensityMap,(arg("pos_list"),arg("density_map")));
 #endif
-  def("WrapEntityInPeriodicCell",&WrapEntityInPeriodicCell,(arg("Entity"),arg("cell_center"),arg("nasis_vec")));
+  def("WrapEntityInPeriodicCell",&WrapEntityInPeriodicCell,(arg("Entity"),arg("cell_center"),arg("basis_vec"),arg("group_res")=true));
 }

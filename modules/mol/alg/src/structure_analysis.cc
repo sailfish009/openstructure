@@ -61,12 +61,21 @@ Real CalculateAverageAgreementWithDensityMap(const geom::Vec3List& vl, img::MapH
 }
 
 #endif
-void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 basis_vec){
+void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 basis_vec, bool group_residues){
   mol::XCSEditor edi=eh.EditXCS(mol::BUFFERED_EDIT);
   geom::Vec3 cm,wrapped_cm,shift;
-  edi=eh.EditXCS();
   ResidueHandleList residues=eh.GetResidueList();
   unsigned int n_residues=eh.GetResidueCount();
+  if (group_residues) {
+    for (unsigned int i=0; i<n_residues; ++i) {
+      ResidueHandle r=residues[i];
+      AtomHandleList atoms=r.GetAtomList();
+      geom::Vec3 ref_pos=atoms[0].GetPos();
+      for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
+        edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),ref_pos,basis_vec));
+      }
+    }
+  }
   for (unsigned int i=0; i<n_residues; ++i) {
     ResidueHandle r=residues[i];
     cm=r.GetCenterOfMass();
