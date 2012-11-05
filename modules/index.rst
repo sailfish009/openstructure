@@ -28,6 +28,7 @@ OpenStructure documentation
   external
   contributing
   table
+  mol/alg/lddt
 
 For Starters
 --------------------------------------------------------------------------------
@@ -98,6 +99,8 @@ Varia
 **Supported File Formats:** :doc:`structure formats<io/structure_formats>` | :doc:`sequence formats <io/sequence_formats>` | :doc:`image formats <io/image_formats>`
 
 **Users** :doc:`Reporting a problem <users>`
+
+**lDDT** :doc:`lDDT command line executable<mol/alg/lddt>`
 
 Extending OpenStructure
 --------------------------------------------------------------------------------
