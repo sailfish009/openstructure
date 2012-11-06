@@ -361,8 +361,10 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
 # arguement is the usual 'self'.
 # documentation for this function was moved to mmcif.rst,
 # MMCifInfoBioUnit.PDBize, since this function is not included in SPHINX.
-def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
+def _PDBize(biounit, asu, seqres=None, min_polymer_size=10,
+            transformation=False):
   def _CopyAtoms(src_res, dst_res, edi, trans=geom.Mat4()):
+    atom_pos_wrong = False
     for atom in src_res.atoms:
       tmp_pos = geom.Vec4(atom.pos)
       new_atom=edi.InsertAtom(dst_res, atom.name, geom.Vec3(trans*tmp_pos), 
@@ -370,6 +372,12 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
                               occupancy=atom.occupancy, 
                               b_factor=atom.b_factor,
                               is_hetatm=atom.is_hetatom)
+      for p in range(0,3):
+        if new_atom.pos[p] <= -1000:
+          atom_pos_wrong = True
+        elif new_atom.pos[p] >= 10000:
+          atom_pos_wrong = True
+    return atom_pos_wrong
 
   chain_names='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'
   # create list of operations
@@ -409,6 +417,7 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
   cur_chain_name = 0
   water_chain = mol.ChainHandle()
   ligand_chain = mol.ChainHandle()
+  a_pos_wrong = False
   for tr in trans_matrices:
     # do a PDBize, add each new entity to the end product
     for chain in assu.chains:
@@ -430,7 +439,9 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
                                   chain.GetStringProp("pdb_auth_chain_name"))
         for res in chain.residues:
           new_res = edi.AppendResidue(new_chain, res.name, res.number)
-          _CopyAtoms(res, new_res, edi, tr)
+          a_b = _CopyAtoms(res, new_res, edi, tr)
+          if not a_pos_wrong:
+            a_pos_wrong = a_b
       elif chain.type == mol.CHAINTYPE_WATER:
         if not water_chain.IsValid():
           # water gets '-' as name
@@ -441,7 +452,9 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
           new_res = edi.AppendResidue(water_chain, res.name)
           new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
           new_res.SetStringProp('description', chain.description)
-          _CopyAtoms(res, new_res, edi, tr)
+          a_b = _CopyAtoms(res, new_res, edi, tr)
+          if not a_pos_wrong:
+            a_pos_wrong = a_b
       else:
         if not ligand_chain.IsValid():
           # all ligands, put in one chain, are named '_'
@@ -463,8 +476,22 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
             new_res.SetStringProp("pdb_auth_chain_name",
                                   chain.GetStringProp("pdb_auth_chain_name"))
           ins_code = chr(ord(ins_code)+1)
-          _CopyAtoms(res, new_res, edi, tr)
+          a_b = _CopyAtoms(res, new_res, edi, tr)
+          if not a_pos_wrong:
+            a_pos_wrong = a_b
+  move_to_origin = None
+  if a_pos_wrong:
+    print "IN"
+    start = pdb_bu.bounds.min
+    move_to_origin = geom.Mat4(1,0,0,(-999 - start[0]),
+                               0,1,0,(-999 - start[1]),
+                               0,0,1,(-999 - start[2]),
+                               0,0,0,1)
+    edi = pdb_bu.EditXCS(mol.UNBUFFERED_EDIT)
+    edi.ApplyTransform(move_to_origin)
   conop.ConnectAll(pdb_bu)
+  if transformation:
+    return pdb_bu, move_to_origin
   return pdb_bu
 
 MMCifInfoBioUnit.PDBize = _PDBize
