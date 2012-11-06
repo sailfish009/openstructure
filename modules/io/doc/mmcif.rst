@@ -541,7 +541,7 @@ of the annotation available.
 
     See :attr:`operations`
 
-.. function:: PDBize(asu, seqres=None, min_polymer_size=10)
+.. function:: PDBize(asu, seqres=None, min_polymer_size=10, transformation=False)
 
     Returns the biological assembly (bio unit) for an entity. The new entity
     created is well suited to be saved as a PDB file. Therefore the function
@@ -556,6 +556,9 @@ of the annotation available.
       - ligands which resemble a polymer but have less than min_polymer_size
         residues are assigned the same numeric residue number. The residues are
         distinguished by insertion code.
+      - sometimes bio units exceed the coordinate system storable in a PDB file.
+        In that case, the box around the entity will be aligned to the lower
+        left corner of the coordinate system.
 
     Since this function is at the moment mainly used to create biounits from
     mmCIF files to be saved as PDBs, the function assumes that the
@@ -573,6 +576,9 @@ of the annotation available.
       get its own chain. Everything below that number will be sorted into the 
       ligand chain.
     :type min_polymer_size: int
+    :param transformation:  If set, return the transformation matrix used to
+      move the bounding box of the bio unit to the lower left corner.
+    :type transformation: :class:`bool`
 
 .. class:: MMCifInfoStructDetails
 
@@ -941,4 +947,4 @@ of the annotation available.
 ..  LocalWords:  biounits biounit uniprot UNP seqs AddMMCifPDBChainTr cif asym
 ..  LocalWords:  auth GetMMCifPDBChainTr AddPDBCMMCifhainTr GetPDBMMCifChainTr
 ..  LocalWords:  GetRevisions AddRevision SetRevisionsDateOriginal GetSize
-..  LocalWords:  GetNum num GetStatus GetLastDate GetFirstRelease
+..  LocalWords:  GetNum num GetStatus GetLastDate GetFirstRelease storable
