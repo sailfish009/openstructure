@@ -481,7 +481,6 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10,
             a_pos_wrong = a_b
   move_to_origin = None
   if a_pos_wrong:
-    print "IN"
     start = pdb_bu.bounds.min
     move_to_origin = geom.Mat4(1,0,0,(-999 - start[0]),
                                0,1,0,(-999 - start[1]),
