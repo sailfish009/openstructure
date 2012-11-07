@@ -748,8 +748,20 @@ void EntityImpl::SetTransform(const geom::Transform& tf)
 
 void EntityImpl::ClearTransform()
 {
-  has_transform_=false;
   SetTransform(geom::Transform());
+  has_transform_=false;
+}
+
+void EntityImpl::FixTransform()
+{
+  if(!has_transform_) return;
+  for(AtomImplMap::iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
+    it->second->OriginalPos()=it->second->TransformedPos();
+  }
+  transform_=geom::Transform();
+  has_transform_=false;
+  this->UpdateTransformedPos();
+  this->MarkOrganizerDirty();
 }
 
 void EntityImpl::AttachObserver(const EntityObserverPtr& o)

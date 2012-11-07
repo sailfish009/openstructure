@@ -205,6 +205,11 @@ void XCSEditor::SetTransform(const geom::Transform& transform)
   this->Update();
 }
 
+void XCSEditor::FixTransform()
+{
+  ent_.Impl()->FixTransform();
+}
+
 void XCSEditor::Update()
 {
   if (GetMode()==UNBUFFERED_EDIT) {

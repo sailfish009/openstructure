@@ -104,6 +104,9 @@ public:
   void SetTransform(const geom::Mat4& transform);
   void SetTransform(const geom::Transform& transform);
 
+  /// \brief set transformed pos to new original pos
+  void FixTransform();
+
   /// \brief immediately update internal coordinate system
   void UpdateICS();  
 
