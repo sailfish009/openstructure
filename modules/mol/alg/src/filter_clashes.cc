@@ -461,6 +461,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
     
     if (remove_bb) {
       LOG_INFO("ACTION: removing whole residue " << res);
+      res.SetBoolProp("stereo_chemical_violation_backbone",true);
       continue;
     }
     if (remove_sc) {
@@ -473,6 +474,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
          filtered.AddAtom(atom);
        }
       }
+      res.SetBoolProp("stereo_chemical_violation_sidechain",true);
       continue;
     }
     filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
@@ -576,6 +578,7 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
     
     if (remove_bb) {
       LOG_VERBOSE("ACTION: removing whole residue " << res);
+      res.SetBoolProp("steric_clash",true);
       continue;
     }
     if (remove_sc) {
@@ -588,6 +591,7 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
          filtered.AddAtom(atom);
        }
       }
+      res.SetBoolProp("steric_clash",true);
       continue;
     }
     filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
