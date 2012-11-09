@@ -55,9 +55,10 @@ EntityHandle load(const String& file, const IOProfile& profile)
       EntityHandle ent=CreateEntity();
       reader.Import(ent);
       conop::Conopology& conop_inst=conop::Conopology::Instance();
+      conop_inst.GetBuilder()->SetBondFeasibilityCheck(profile.bond_feasibility_check);
       conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
       if (ent.GetChainList().size()!=1) {
-        std::cout << "WARNING: File " << file << "has more than one chain" << std::endl; 
+        std::cout << "WARNING: File " << file << " has more than one chain" << std::endl;
       }    
       return ent;
     }
