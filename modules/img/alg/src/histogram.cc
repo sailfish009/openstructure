@@ -58,7 +58,7 @@ template <typename T, class D>
 void HistogramBase::VisitState(const ImageStateImpl<T,D>& isi)
 {
   bins_=Bins(bin_count_,0);
-  for(T* ptr = isi.Data().GetData(); ptr<isi.Data().GetEnd(); ++ptr) {
+  for(const T* ptr = isi.Data().GetData(); ptr<isi.Data().GetEnd(); ++ptr) {
     Real val=Val2Val<T,Real>(*ptr);
     val = std::max(min_,val);
     val=std::min(max_,val);

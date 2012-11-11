@@ -806,7 +806,7 @@ void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
                                           static_cast<Real>(header.y)/static_cast<Real>(header.ny),
                                           static_cast<Real>(header.z)/static_cast<Real>(header.nz)));
     }else{
-      LOG_INFO("Suspicious dell dimensions found. Cannot set sampling.");
+      LOG_INFO("Suspicious cell dimensions found. Cannot set sampling.");
     }
     LOG_INFO("resulting image extent: " << image.GetExtent());
     if(img::image_state::RealSpatialImageState *rs=dynamic_cast<img::image_state::RealSpatialImageState*>(image.ImageStatePtr().get())) {

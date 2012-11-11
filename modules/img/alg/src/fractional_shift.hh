@@ -29,7 +29,7 @@
 
 namespace ost { namespace img { namespace alg {
 
-class DLLEXPORT_IMG_ALG FractionalShift: public ModIPAlgorithm
+class  FractionalShift: public ModIPAlgorithm
 {
 public:
   FractionalShift(Real sx=0.0, Real sy=0.0, Real sz=0.0);

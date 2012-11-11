@@ -74,19 +74,6 @@ public:
   // also takes absolute center, requires logical extent, not physical one!
   ImageStateImpl(const Extent& e, const PixelSampling& s, const Vec3& c);
 
-  /* 
-     special ctor to utilize pre-allocated memory: the data area allocated
-     by ValueHolder will be transfered to this image state
-  */
-  template <typename U>
-  ImageStateImpl(const Extent& e, ValueHolder<U>& d, const PixelSampling& s):
-    domain_(e),
-    data_(domain_.GetExtent().GetSize(),d),
-    sampling_(s)
-  {
-    assert(d.GetPhysicalSize()*sizeof(U)==data_.GetPhysicalSize()*sizeof(T));
-  }
-
   virtual ~ImageStateImpl();
 
   SharedPtrType CloneState(bool cc=true) const;
@@ -94,7 +81,7 @@ public:
   // image state base interface
   virtual ImageStateBasePtr Clone(bool cc=true) const;
   
-  virtual long MemSize() const;
+  virtual size_t MemSize() const;
 
   virtual DataType GetType() const;
 
@@ -181,10 +168,10 @@ public:
   const T& Value(const Index& i) const;
 
   // pass-through to value holder
-  T& Value(unsigned int i);
+  T& Value(size_t i);
 
   // pass-through to value holder
-  const T& Value(unsigned int i) const;
+  const T& Value(size_t i) const;
 
   //! direct access to value holder
   ValueHolder<T>& Data();

@@ -57,7 +57,7 @@ public:
   // provide deep copy
   virtual ImageStateBasePtr Clone(bool cc=true) const = 0;
 
-  virtual long MemSize() const = 0;
+  virtual size_t MemSize() const = 0;
 
   ///////////////////////////////////////
   // abstract virtual methods

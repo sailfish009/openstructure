@@ -117,7 +117,7 @@ ImageStateBasePtr ImageStateImpl<T,D>::Clone(bool cc) const
 
 
 template <typename T, class D>
-long ImageStateImpl<T,D>::MemSize() const 
+size_t ImageStateImpl<T,D>::MemSize() const
 {
   return data_.MemSize();
 }
@@ -125,7 +125,7 @@ long ImageStateImpl<T,D>::MemSize() const
 template <typename T, class D>
 DataType ImageStateImpl<T,D>::GetType() const
 {
-  return Val2Type<T>();
+  return data_.GetDataType();
 }
 
 template <typename T, class D>
@@ -564,15 +564,15 @@ const T& ImageStateImpl<T,D>::Value(const Index& i) const
 }
 
 template <typename T, class D>
-T& ImageStateImpl<T,D>::Value(unsigned int i)
+T& ImageStateImpl<T,D>::Value(size_t i)
 {
-  return data_.Value(i);
+    return data_.GetData()[i];
 }
 
 template <typename T, class D>
-const T& ImageStateImpl<T,D>::Value(unsigned int i) const
+const T& ImageStateImpl<T,D>::Value(size_t i) const
 {
-  return data_.Value(i);
+    return data_.GetData()[i];
 }
 
 template <typename T, class D>
