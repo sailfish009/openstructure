@@ -1,3 +1,4 @@
+import sys
 import unittest
 from ost import *
 from ost import settings

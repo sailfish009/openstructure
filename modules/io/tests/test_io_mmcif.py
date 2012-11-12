@@ -1,4 +1,5 @@
 import unittest
+import ost
 from ost import *
 
 class TestMMCifInfo(unittest.TestCase):

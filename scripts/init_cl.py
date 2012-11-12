@@ -34,6 +34,12 @@ else:
      
 from ost import *
 import ost
+try:
+  from ost import gfx
+  ost.scene = gfx.Scene()
+  ost.scene.Stereo=gfx.Stereo
+except ImportError:
+  pass
 
 ost.SetPrefixPath(os.getenv('DNG_ROOT'))
 def _InitRuleBasedBuilder():

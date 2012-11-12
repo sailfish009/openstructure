@@ -30,6 +30,7 @@ class TestLog(unittest.TestCase):
         self.severity=severity
         ost.PushLogSink(ls)
     ls=CapturingLogSink()
+    ost.PushVerbosityLevel(1)
     ost.PushLogSink(ls)
     ost.LogError('error message')
     self.assertEqual(ls.message, 'error message\n')

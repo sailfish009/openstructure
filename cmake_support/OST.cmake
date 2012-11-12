@@ -423,6 +423,7 @@ macro(script)
     if (NOT _ARG_INPUT)
       message(FATAL_ERROR "script() can only substitute when INPUT is present.")    
     endif()
+
     substitute(IN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${_INPUT}" OUT_FILE ${_ARG_NAME} 
                DICT ${_ARG_SUBSTITUTE})
   endif()
@@ -687,15 +688,21 @@ macro(ost_unittest)
         set_target_properties("${_test_name}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
       endif()
     endif()
+
     foreach(py_test ${PY_TESTS})
       if(WIN32)
-        set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost.bat")
+        set (PY_TESTS_CMD "${PYTHON_BINARY}")
         add_custom_target("${py_test}_run"
                   CALL "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   COMMENT "running checks ${py_test}" VERBATIM)
       else()
-        set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost")
+        set(python_path $ENV{PYTHONPATH})
+        if(python_path)
+          set(python_path "${python_path}:")
+        endif(python_path)
+        set(python_path "${python_path}${LIB_STAGE_PATH}/python${PYTHON_VERSION}/site-packages")
+        set (PY_TESTS_CMD "PYTHONPATH=${python_path}  ${PYTHON_BINARY}")
         add_custom_target("${py_test}_run"
                   sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
