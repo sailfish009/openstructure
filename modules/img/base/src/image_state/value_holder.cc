@@ -62,8 +62,13 @@ size_t calc_volume(const Size& s)
   {
     ++numbits;
   }
+  tmp=sizeof(V);
+  while (tmp >>= 1)
+  {
+    ++numbits;
+  }
   // check if number of pixels (2**(numbits+1)) larger than what size_t can handle
-  if(numbits>=sizeof(size_t)*sizeof(V)*8){
+  if(numbits>=sizeof(size_t)*8){
       throw std::bad_alloc();
   }
   return static_cast<size_t>(s[0])*static_cast<size_t>(s[1])*static_cast<size_t>(s[2]);
