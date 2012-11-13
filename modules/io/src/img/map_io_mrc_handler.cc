@@ -483,7 +483,9 @@ public:
       LOG_DEBUG("CCP4Import: reading little endian data");
       return OST_LITTLE_ENDIAN;
     } else{
-      throw(IOException("CCP4Import: Cray, Convex native and Fijitsu VP formats are not supported."));
+      LOG_VERBOSE("unknown machine stamp (" << (int)float_machst << "), using little endian");
+      return OST_LITTLE_ENDIAN;
+      //throw(IOException("CCP4Import: Cray, Convex native and Fijitsu VP formats are not supported."));
     }
   }
 
@@ -495,7 +497,7 @@ public:
 
     LOG_INFO("ccp4 header:");
     header_base::Print();
-    LOG_INFO(" arms: " << arms);
+    LOG_INFO("arms: " << arms);
   }
 
   int lskflag;
