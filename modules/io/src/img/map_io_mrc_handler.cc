@@ -76,9 +76,11 @@ u v w x . . .     d*c*b*a b c d   3
 #include <ost/img/image_state.hh>
 #include <ost/img/alg/stat.hh>
 #include <ost/img/alg/normalizer_factory.hh>
-#include <ost/io/io_exception.hh>
 #include <ost/img/util.hh>
 #include <ost/img/progress.hh>
+#include <ost/img/alg/fractional_shift.hh>
+#include <ost/img/alg/alg_shift.hh>
+#include <ost/io/io_exception.hh>
 #include <ost/io/img/image_format.hh>
 #include <ost/io/swap_util.hh>
 #include <ost/io/converting_streams.hh>
@@ -987,12 +989,29 @@ void MapIOMrcHandler::Export(const img::MapHandle& sh, std::ostream& loc,const I
   } else {
     assert (formatstruct.GetFormatString()==UndefinedImageFormat::FORMAT_STRING);
   }
+  img::MapHandle sh2=sh;
+  if(geom::Length2(sh.GetAbsoluteOrigin())>0.0) {
+    /*
+      CCP4/MRC format does not allow arbitrary absolute origin to be used, hence
+      this correction routine to re-sample the map appropriately
+    */
+    LOG_VERBOSE("mrc io: applying absolute origin shift correction");
+    geom::Vec3 frac_shift=geom::CompDivide(sh.GetAbsoluteOrigin(),sh.GetSpatialSampling());
+    // apply fractional shift via Fourier space -> will wrap around!
+    sh2=sh.Apply(img::alg::FractionalShift(frac_shift));
+    // force origin to be zero now
+    sh2.SetAbsoluteOrigin(geom::Vec3(0.0,0.0,0.0));
+    // and correct for most of the wrap-around
+    img::Point int_shift(frac_shift);
+    sh2.ApplyIP(img::alg::Shift(-int_shift));
+    sh2.SetSpatialOrigin(int_shift);
+  }
   if (formatmrc.GetSubformat()==MRC_OLD_FORMAT) {
    LOG_DEBUG("mrc io: exporting old style format");
-   detail::export_endianess_switcher<detail::mrc_header>(sh,loc,formatmrc);
+   detail::export_endianess_switcher<detail::mrc_header>(sh2,loc,formatmrc);
   } else {
    LOG_DEBUG("mrc io: exporting new style format");
-   detail::export_endianess_switcher<detail::ccp4_header>(sh,loc,formatmrc);
+   detail::export_endianess_switcher<detail::ccp4_header>(sh2,loc,formatmrc);
   }
 }
 
