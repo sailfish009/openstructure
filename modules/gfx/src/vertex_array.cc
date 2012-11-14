@@ -431,7 +431,9 @@ void IndexedVertexArray::RenderGL()
   
   glPushAttrib(GL_ALL_ATTRIB_BITS);
   glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
-  
+
+  set_clip_offset(clip_offset_);
+
   if(use_tex_) {
     glEnable(GL_TEXTURE_2D);
   } else {
@@ -493,7 +495,7 @@ void IndexedVertexArray::RenderGL()
     } else {
       glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
     }
-    if(cull_face_ && !solid_) {
+    if(cull_face_ && !solid_ && clip_offset_<=0.0) {
       glEnable(GL_CULL_FACE);
     } else { 
       glDisable(GL_CULL_FACE); 
@@ -537,6 +539,7 @@ void IndexedVertexArray::RenderGL()
       glUniform4f(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"color"),
                   outline_exp_color_[0],outline_exp_color_[1],
                   outline_exp_color_[2],opacity_);
+      set_clip_offset(clip_offset_);
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       draw_ltq(use_buff);
 
@@ -700,6 +703,7 @@ void IndexedVertexArray::Reset()
   outline_exp_color_=Color(0,0,0);
   solid_=false;
   solid_color_=RGB(1,1,1);
+  clip_offset_=0.0;
   draw_normals_=false;
   use_tex_=false;
 }
@@ -1098,6 +1102,7 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   outline_exp_color_=va.outline_exp_color_;
   solid_=va.solid_;
   solid_color_=va.solid_color_;
+  clip_offset_=va.clip_offset_;
   draw_normals_=va.draw_normals_;
   use_tex_=va.use_tex_;
 }
@@ -1253,10 +1258,12 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
     float aspect=Scene::Instance().GetAspect();
     float rh=2.0*fabs(tan(fov)*znear);
     float rw=rh*aspect;
-    float rz=-znear-0.1;
+    float rz=-(znear+clip_offset_)-0.05;
 
     glDisable(GL_LIGHTING);
-  
+
+    set_clip_offset(0.0);
+
     glBegin(GL_TRIANGLE_STRIP);
     glColor3fv(solid_color_);
     glNormal3f(0,0,1);
@@ -1265,6 +1272,9 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
     glVertex3f(-rw,rh,rz);
     glVertex3f(rw,rh,rz);
     glEnd();
+
+    set_clip_offset(clip_offset_);
+
     glDisable(GL_STENCIL_TEST);
     glPopMatrix();
   }
@@ -1484,6 +1494,18 @@ geom::AlignedCuboid IndexedVertexArray::GetBoundingBox() const
     }
     return geom::AlignedCuboid(minc-1.0,maxc+1.0);
   }
+}
+
+void IndexedVertexArray::set_clip_offset(float o)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  float n=Scene::Instance().GetNear();
+  float f=Scene::Instance().GetFar();
+  float z=n+o;
+  float t=(f*(-n+o)+n*(n+o))/((f-n)*(n+o));
+  t=(t+1.0)*0.5;
+  glUniform1f(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"clip_offset"),t);
+#endif
 }
 
 }} // ns

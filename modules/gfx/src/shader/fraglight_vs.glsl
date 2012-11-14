@@ -1,3 +1,6 @@
+uniform vec4 clip_plane;
+uniform bool clip_flag;
+
 void main()
 {
   // transformed position
@@ -21,5 +24,8 @@ void main()
 
   gl_FrontColor=gl_Color;
   gl_BackColor=gl_Color;
+  if(clip_flag) {
+    gl_ClipDistance[0] = dot(ec_Pos, clip_plane);
+  }
 }
 

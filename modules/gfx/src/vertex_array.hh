@@ -121,6 +121,8 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   bool GetSolid() const {return solid_;}
   void SetSolidColor(const Color& c) {solid_color_=c;}
   bool GetSolidcolor() const {return solid_color_;}
+  void SetClipOffset(float f) {clip_offset_=f;}
+  float GetClipOffset() const {return clip_offset_;}
 
   // vertex, normal, color and texcoord (T2F_C4F_N3F_V3F)
   VertexID Add(const geom::Vec3& vert, const geom::Vec3& norm, const Color& col, const geom::Vec2& tex=geom::Vec2());
@@ -240,6 +242,7 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   Color outline_exp_color_;
   bool solid_;
   Color solid_color_;
+  float clip_offset_;
   bool draw_normals_;
 
   bool use_tex_;
@@ -253,6 +256,7 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   void draw_p(bool use_buff);
   void draw_aalines();
   void draw_line_halo(bool use_buff);
+  void set_clip_offset(float);
 };
 
 }} // ns

@@ -157,6 +157,9 @@ void export_GfxObj()
     .add_property("opacity",&GfxObjBase::GetOpacity,&GfxObjBase::SetOpacity)
     .add_property("solid",&GfxObjBase::GetSolid,&GfxObjBase::SetSolid)
     .add_property("solid_color",&GfxObjBase::GetSolidColor,&GfxObjBase::SetSolidColor)
+    .add_property("clip",&GfxObjBase::GetClip,&GfxObjBase::SetClip)
+    .add_property("clip_plane",&GfxObjBase::GetClipPlane,&GfxObjBase::SetClipPlane)
+    .add_property("clip_offset",&GfxObjBase::GetClipOffset,&GfxObjBase::SetClipOffset)
     COLOR_BY_DEF()
    ;
 

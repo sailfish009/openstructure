@@ -5,9 +5,13 @@ uniform sampler2D depth_map;
 uniform int depth_mode;
 uniform bool tex_flag;
 uniform sampler2D tex_map;
+uniform float clip_offset;
 
 void main()
 {
+  if(gl_FragCoord.z<clip_offset) {
+    discard;
+  }
   vec4 color = gl_Color;
 
   if(tex_flag) {

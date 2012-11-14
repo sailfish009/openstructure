@@ -93,6 +93,13 @@ public:
   virtual void SetSolidColor(const Color& c);
   virtual Color GetSolidColor() const {return solid_color_;}
   
+  virtual void SetClip(bool f);
+  virtual bool GetClip() const {return clip_flag_;}
+  virtual void SetClipPlane(const geom::Vec4&);
+  virtual geom::Vec4 GetClipPlane() const {return clip_plane_;}
+  virtual void SetClipOffset(float f);
+  virtual float GetClipOffset() const {return clip_offset_;}
+
   virtual void ColorBy(const mol::EntityView& ev, 
                        const String& prop,
                        const Gradient& g, float minv, float maxv);
@@ -249,6 +256,10 @@ public:
 
   bool solid_;
   Color solid_color_;
+
+  bool clip_flag_;
+  geom::Vec4 clip_plane_;
+  float clip_offset_;
 
   boost::ptr_vector<gfx::ColorOp> c_ops_;
 
