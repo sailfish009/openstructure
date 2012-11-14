@@ -282,7 +282,7 @@ public:
 
   /// \brief renumber residues of one chain
   ///
-  /// \param chain
+  /// \param name
   ///           All residues of this chain will be renumbered according to the
   ///           parameters start and keep_spacing
   ///
