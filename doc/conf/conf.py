@@ -13,13 +13,12 @@
 
 import sys, os
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
+site_packs='python%d.%d/site-packages' % sys.version_info[0:2]
 sys.path.append(os.path.join(os.path.abspath('../..'), 
-                             'stage/lib/openstructure'))
+                             'stage/lib', site_packs))
 sys.path.append(os.path.join(os.path.abspath('../..'), 
-                             'stage/lib64/openstructure'))
+                             'stage/lib64', site_packs))
+print site_packs
 import ost
 # -- General configuration -----------------------------------------------------
 

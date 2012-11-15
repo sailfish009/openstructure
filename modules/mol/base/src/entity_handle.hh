@@ -20,7 +20,6 @@
 #define OST_ENTITY_HANDLE_HH
 
 #include <ost/mol/module_config.hh>
-#include <ost/mol/transform.hh>
 
 #include "impl/entity_impl_fw.hh"
 #include "entity_visitor_fw.hh"
@@ -265,12 +264,21 @@ public:
   Real GetAngle(const AtomView& a1, const AtomView& a2,
                 const AtomView& a3) const;
 
-  const geom::Mat4& GetTransformationMatrix() const;
-
-
-  const geom::Mat4& GetInvTransformationMatrix() const;
-
+  /// \brief DEPRECATED
+  geom::Mat4 GetTransformationMatrix() const;
+  /// \brief DEPRECATED
+  geom::Mat4 GetInvTransformationMatrix() const;
+  /// \brief DEPRECATED
   bool IsTransformationIdentity() const;
+
+  /// \brief retrieve transformation of this entity
+  geom::Transform GetTransform() const;
+  /// \brief set transformation that will affect this entity
+  void SetTransform(const geom::Transform& t);
+  /// \brief checks whether a transform has been set
+  bool HasTransform() const;
+  /// \brief remove transform
+  void ClearTransform();
 
   /// \brief get complete list of residues
   /// \sa #ResiduesBegin, #ResiduesEnd

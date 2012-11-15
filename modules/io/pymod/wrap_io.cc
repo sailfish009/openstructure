@@ -66,9 +66,6 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_handle_ov,
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_view_ov,
                                 save_ent_view, 2, 3)
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(save_charmm_trj_ov,
-                                SaveCHARMMTraj, 3, 4)
-
 }
 
 void export_pdb_io();

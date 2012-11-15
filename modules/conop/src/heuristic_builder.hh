@@ -110,6 +110,7 @@ public:
   virtual void FillAtomProps(mol::AtomHandle atom);
 
   const detail::ConnResEntry& DefaultPeptide() const {return default_peptide_;}
+  const detail::ConnResEntry& DefaultNucleotide() const {return default_nucleotide_;}
 protected:
   void ConnectivityFromAtomNames(const mol::ResidueHandle& res,
                                  detail::ConnResEntry& centry,
@@ -117,6 +118,7 @@ protected:
 private:
   detail::ConnResEntryMap emap_;
   detail::ConnResEntry default_peptide_;
+  detail::ConnResEntry default_nucleotide_;
 };
 
 

@@ -200,7 +200,7 @@ class GradientEdit(QtGui.QWidget):
     gradient = gfx.Gradient()
     for s in self.stops:
       c=s.GetColor();
-      gradient.SetColorAt(s.GetRel(), gfx.Color(c.redF(), c.greenF(), c.blueF()));
+      gradient.SetColorAt(s.GetRel(), gfx.RGB(c.redF(), c.greenF(), c.blueF()));
     return gradient;
 
   def GetGradient(self):

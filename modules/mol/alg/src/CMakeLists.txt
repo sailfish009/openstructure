@@ -9,6 +9,7 @@ set(OST_MOL_ALG_HEADERS
   clash_score.hh
   trajectory_analysis.hh
   structure_analysis.hh
+  consistency_checks.hh
 )
 
 set(OST_MOL_ALG_SOURCES
@@ -21,6 +22,7 @@ set(OST_MOL_ALG_SOURCES
   construct_cbeta.cc
   trajectory_analysis.cc
   structure_analysis.cc
+  consistency_checks.cc
 )
 
 set(MOL_ALG_DEPS ost_mol ost_seq)
@@ -48,12 +50,12 @@ module(NAME mol_alg SOURCES ${OST_MOL_ALG_SOURCES}
        DEPENDS_ON ${MOL_ALG_DEPS}
        LINK ${BOOST_PROGRAM_OPTIONS})
 
-copy_if_different("." "${STAGE_DIR}/share/openstructure"
+copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/share/openstructure"
                   "atom_scattering_properties.txt" "ATOM_SCATTERING_PROPS"
                   "ost_mol_alg")
 install(FILES "atom_scattering_properties.txt" DESTINATION "share/openstructure/")
 
-copy_if_different("." "${STAGE_DIR}/share/openstructure"
+copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/share/openstructure"
                   "stereo_chemical_props.txt" "STEREO_CHEMICAL_PROPS"
                   "ost_mol_alg")
 install(FILES "stereo_chemical_props.txt" DESTINATION "share/openstructure/")

@@ -16,15 +16,29 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GUI_MODULE_CONFIG_HH
-#define OST_GUI_MODULE_CONFIG_HH
+/*
+  Author: Valerio Mariani
+*/
 
-#include <ost/base.hh>
+#ifndef OST_BOOST_FILESYSTEM_HELPER_HH
+#define OST_BOOST_FILESYSTEM_HELPER_HH
 
-#if defined(OST_MODULE_OST_GUI)
-#  define DLLEXPORT_OST_GUI DLLEXPORT
+#include <boost/filesystem/path.hpp>
+
+namespace {
+
+inline
+String BFPathToString(const boost::filesystem::path& path)
+{
+#if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
+  return path.string();
 #else
-#  define DLLEXPORT_OST_GUI DLLIMPORT
+  return path.file_string();
 #endif
+}
 
-#endif
+}
+
+
+
+#endif // OST_BOOST_FILESYSTEM_HELPER

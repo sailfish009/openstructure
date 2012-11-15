@@ -38,10 +38,21 @@ namespace ost { namespace conop {
 
 bool CopyResidue(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi)
 {
+  // first let's get our hands on the component library
+  conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
+  conop::RuleBasedBuilderPtr rbb=dyn_cast<conop::RuleBasedBuilder>(builder);
+  conop::CompoundLibPtr comp_lib=rbb->GetCompoundLib(); 
+  return CopyResidue(src_res, dst_res, edi, comp_lib); 
+}
+
+bool CopyResidue(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi, CompoundLibPtr comp_lib)
+{
   bool has_cbeta = false;
   bool ret;
-  if (src_res.GetName()==dst_res.GetName()) {
-    ret = CopyConserved(src_res, dst_res, edi, has_cbeta);
+  char parent_src = (comp_lib->FindCompound(src_res.GetName(),Compound::PDB))->GetOneLetterCode ();  
+  char parent_dst = (comp_lib->FindCompound(dst_res.GetName(),Compound::PDB))->GetOneLetterCode ();  
+  if (parent_src==parent_dst) {
+    ret = CopyConserved(src_res, dst_res, edi, has_cbeta, comp_lib);
   } else {
     ret = CopyNonConserved(src_res, dst_res, edi, has_cbeta);
   }
@@ -53,8 +64,19 @@ bool CopyResidue(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi)
   return ret;
 }
 
+
 bool CopyConserved(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi,
                    bool& has_cbeta)
+{
+  // first let's get our hands on the component library
+  conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
+  conop::RuleBasedBuilderPtr rbb=dyn_cast<conop::RuleBasedBuilder>(builder);
+  conop::CompoundLibPtr comp_lib=rbb->GetCompoundLib(); 
+  return CopyConserved(src_res,dst_res,edi,has_cbeta,comp_lib);
+}
+
+bool CopyConserved(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi,
+                   bool& has_cbeta, CompoundLibPtr comp_lib)
 {
   // check if the residue name of dst and src are the same. In the easy 
   // case, the two residue names match and we just copy over all atoms.
@@ -67,9 +89,10 @@ bool CopyConserved(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi,
   } else if (src_res.GetName()=="MSE") {
     return CopyMSE(src_res, dst_res, edi, has_cbeta);
   } else {
-    return CopyModified(src_res, dst_res, edi, has_cbeta);
+    return CopyModified(src_res, dst_res, edi, has_cbeta, comp_lib);
   }
 }
+
 
 bool CopyIdentical(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi, 
                    bool& has_cbeta)
@@ -117,7 +140,7 @@ bool CopyMSE(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi,
 }
 
 bool CopyModified(ResidueHandle src_res, ResidueHandle dst_res, 
-                  XCSEditor& edi, bool& has_cbeta)
+                  XCSEditor& edi, bool& has_cbeta, CompoundLibPtr comp_lib)
 {
   // FIXME: for now this functions ignores chirality changes of sidechain 
   //        chiral atoms. To detect those changes, we would need to store the 
@@ -128,11 +151,6 @@ bool CopyModified(ResidueHandle src_res, ResidueHandle dst_res,
   // doesn't have. If these two requirements are not met, we fall back to
   // CopyNonConserved.
   
-  // first let's get our hands on the component library
-  conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
-  conop::RuleBasedBuilderPtr rbb=dyn_cast<conop::RuleBasedBuilder>(builder);
-  conop::CompoundLibPtr comp_lib=rbb->GetCompoundLib(); 
-
   CompoundPtr src_compound=comp_lib->FindCompound(src_res.GetName(), 
                                                   Compound::PDB);
   if (!src_compound) {

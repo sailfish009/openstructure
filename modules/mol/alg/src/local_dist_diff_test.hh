@@ -28,7 +28,7 @@ namespace ost { namespace mol { namespace alg {
 /// \brief Contains the infomation needed to uniquely identify an atom in a structure
 ///
 /// Used by the the Local Distance Difference Test classes and functions
-class UniqueAtomIdentifier
+class DLLEXPORT_OST_MOL_ALG UniqueAtomIdentifier
 {
   
 public:
@@ -169,7 +169,7 @@ Real DLLEXPORT_OST_MOL_ALG LDDTHA(EntityView& v, const GlobalRDMap& global_dist_
 /// \brief Creates a list of distances to check during a Local Difference Distance Test
 ///
 /// Requires a reference structure and an inclusion radius (max_dist)
-GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist);
+GlobalRDMap DLLEXPORT_OST_MOL_ALG CreateDistanceList(const EntityView& ref,Real max_dist);
 
 /// \brief Creates a list of distances to check during a Local Difference Distance Test starting from multiple reference structures
 ///
@@ -193,17 +193,17 @@ GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist);
 /// must be passed to the function. These parameters do not influence the output distance list, which always includes all distances
 /// within the provided max_dist (to make it consistent with the single-reference corresponding function). However, the parameters are used when
 /// dealing with the naming convention of residues with ambiguous nomenclature. 
-GlobalRDMap CreateDistanceListFromMultipleReferences(const std::vector<EntityView>& ref_list,std::vector<Real>& cutoff_list, int sequence_separation, Real max_dist);
+GlobalRDMap DLLEXPORT_OST_MOL_ALG CreateDistanceListFromMultipleReferences(const std::vector<EntityView>& ref_list,std::vector<Real>& cutoff_list, int sequence_separation, Real max_dist);
 
 /// \brief Prints all distances in a global distance list to standard output
-void PrintGlobalRDMap(const GlobalRDMap& glob_dist_list);
+void DLLEXPORT_OST_MOL_ALG PrintGlobalRDMap(const GlobalRDMap& glob_dist_list);
 
 /// \brief Prints all distances in a residue distance list to standard output
-void PrintResidueRDMap(const ResidueRDMap& res_dist_list);
+void DLLEXPORT_OST_MOL_ALG PrintResidueRDMap(const ResidueRDMap& res_dist_list);
 
 // required by some helper function. Cannot reuse similar functions in other modules without creating
 // circular dependencies
-bool IsStandardResidue(String rn);
+bool DLLEXPORT_OST_MOL_ALG IsStandardResidue(String rn);
 
 }}}
 

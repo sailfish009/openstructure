@@ -35,6 +35,7 @@ extern void export_Composite3();
 extern void export_Composite2_op();
 extern void export_Composite3_op();
 extern void export_Quat();
+extern void export_Transform();
 
 namespace details {
 #if (defined(OST_STATIC_PROPERTY_WORKAROUND))
@@ -64,6 +65,7 @@ BOOST_PYTHON_MODULE(_ost_geom)
   export_Composite2_op();
   export_Composite3_op();
   export_Quat();
+  export_Transform();
 
 #if (defined(OST_STATIC_PROPERTY_WORKAROUND))
   // workaround for a problem with boost python and python 2.6.3/4

@@ -139,7 +139,13 @@ BOOST_AUTO_TEST_CASE(mmcif_trystoreidx)
 
 BOOST_AUTO_TEST_CASE(mmcif_convert_seqres)
 {
-  SetPrefixPath(getenv("OST_ROOT"));
+  char * ost_root=getenv("OST_ROOT");
+  if(!ost_root){
+    std::cout << "WARNING: skipping SEQRES import unit test. " 
+              << "Rule-based builder is required" << std::endl;
+    return;
+  }
+  SetPrefixPath(ost_root);
   String lib_path=GetSharedDataPath()+"/compounds.chemlib";
   conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);  
   if (!compound_lib) {
@@ -338,7 +344,7 @@ BOOST_AUTO_TEST_CASE(mmcif_unknown_entity_type)
   BOOST_MESSAGE("          unknown type...");
   columns.pop_back();
   columns.push_back(StringRef("foo", 3));
-  BOOST_CHECK_THROW(tmmcif_p.ParseEntity(columns), std::runtime_error);
+  BOOST_CHECK_THROW(tmmcif_p.ParseEntity(columns), Error);
   BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("  done.");
@@ -399,7 +405,13 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
 
 BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
 {
-  SetPrefixPath(getenv("OST_ROOT"));
+  char * ost_root=getenv("OST_ROOT");
+  if(!ost_root){
+    std::cout << "WARNING: skipping SEQRES import unit test. " 
+              << "Rule-based builder is required" << std::endl;
+    return;
+  }
+  SetPrefixPath(ost_root);
   String lib_path=GetSharedDataPath()+"/compounds.chemlib";
   conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);
   if (!compound_lib) {

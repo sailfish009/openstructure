@@ -35,6 +35,7 @@ typedef AtomView (ResidueView::*HandleMethodNonConst)(const AtomHandle&, ViewAdd
 
 StringMethod string_find_atom=&ResidueView::FindAtom;
 HandleMethod handle_find_atom=&ResidueView::FindAtom;
+HandleMethod view_for_ah=&ResidueView::ViewForHandle;
 HandleMethodNonConst add_atom_handle=&ResidueView::AddAtom;
 ViewMethod add_atom_view=&ResidueView::AddAtom;
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_add_atom_overloads,
@@ -67,6 +68,7 @@ void export_ResidueView()
     .def("AddAtom", add_atom_handle, X_add_atom_overloads(args("atom_handle", "flags")))
     .def("AddAtom", add_atom_view, X_add_atom_overloads(args("atom_view", "flags")))
     .def("FindAtom", handle_find_atom, args("atom_handle"))
+    .def("ViewForHandle", view_for_ah, arg("atom_handle"))
     .def("IsAtomIncluded", &ResidueView::IsAtomIncluded, args("atom_handle"))
     .def("GetIndex", &ResidueView::GetIndex)  
     .add_property("index", &ResidueView::GetIndex)

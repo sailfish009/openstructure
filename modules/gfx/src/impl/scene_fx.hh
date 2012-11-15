@@ -53,6 +53,9 @@ public:
   void Preprocess();
   // assumes scene has been drawn in the active framebuffer
   void Postprocess();
+  
+  // returns true if the post-processing will run
+  bool WillPostprocess() const;
 
   void DrawTex(unsigned int w, unsigned int h, GLuint texid);
 
@@ -65,6 +68,7 @@ public:
   float amb_occl_factor;
   uint amb_occl_mode;
   uint amb_occl_quality;
+  float amb_occl_size;
   bool use_beacon;
   Beacon beacon;
 

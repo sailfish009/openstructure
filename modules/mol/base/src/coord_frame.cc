@@ -145,7 +145,7 @@ namespace ost { namespace mol {
     int count_ref=reference_view.GetAtomCount();
     int count_sele=sele_view.GetAtomCount();
     if (count_ref!=count_sele){
-      throw std::runtime_error("atom counts of the two views are not equal");
+      throw Error("atom counts of the two views are not equal");
     }
     std::vector<unsigned long> indices_sele;
     std::vector<geom::Vec3> ref_pos;
@@ -285,10 +285,10 @@ namespace ost { namespace mol {
     dist.reserve(n_atoms-2);
     dist2.reserve(n_atoms-2);
     if (n_atoms!=indices_n.size()||n_atoms!=indices_c.size()||n_atoms!=indices_o.size()){
-      throw std::runtime_error("not same numbers of CA, C, O and N atoms in the selection");
+      throw Error("not same numbers of CA, C, O and N atoms in the selection");
     }
     if (n_atoms<=5){
-      throw std::runtime_error("At least five residues are needed to calulate an alpha helix similarity");
+      throw Error("At least five residues are needed to calulate an alpha helix similarity");
     }
     c=(*this)[indices_c[0]];
     n_next=(*this)[indices_n[1]];
@@ -358,7 +358,7 @@ namespace ost { namespace mol {
     indices_ca.reserve(residues.size());
     //for (ResidueViewList::const_iterator res=residues.begin()+1,
     //     e=residues.end(); res!=e-1; ++res){
-    //  if (!InSequence((*res).GetHandle(),(*(res+1)).GetHandle())) throw std::runtime_error("Residues are not in a continuous sequence");
+    //  if (!InSequence((*res).GetHandle(),(*(res+1)).GetHandle())) throw Error("Residues are not in a continuous sequence");
     //}
     for (ResidueViewList::const_iterator res=residues.begin(),
          e=residues.end(); res!=e; ++res) {
@@ -378,7 +378,7 @@ namespace ost { namespace mol {
     indices_o.reserve(residues.size());
     for (ResidueViewList::const_iterator res=residues.begin()+1,
          e=residues.end(); res!=e-1; ++res){
-      if (!InSequence((*res).GetHandle(),(*(res+1)).GetHandle())) throw std::runtime_error("Residues are not in a continuous sequence");
+      if (!InSequence((*res).GetHandle(),(*(res+1)).GetHandle())) throw Error("Residues are not in a continuous sequence");
     }
     for (ResidueViewList::const_iterator res=residues.begin(),
          e=residues.end(); res!=e; ++res) {

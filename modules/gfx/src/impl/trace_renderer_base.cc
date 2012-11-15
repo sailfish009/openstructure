@@ -63,7 +63,7 @@ inline void apply_color_op(TraceRendererBase* rend, BackboneTrace& trace_subset,
     for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
       NodeEntryList& nl=trace_subset.GetList(node_list);
       for (unsigned int i=0; i<nl.size();++i) {
-        if(view.FindAtom(nl[i].atom)){
+        if(view.ViewForHandle(nl[i].atom)){
           std::pair<bool,Color> clr =get_col.ColorOfAtom(nl[i].atom);
           if(clr.first) {
             set_node_entry_color(nl[i],mask,clr.second);

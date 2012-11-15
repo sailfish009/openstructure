@@ -132,7 +132,16 @@ object log_verbose(tuple args, dict kwargs)
   LOG_VERBOSE(args_to_string(args, kwargs));
   return object();  
 }
-
+object log_debug(tuple args, dict kwargs) 
+{
+  LOG_DEBUG(args_to_string(args, kwargs));
+  return object();  
+}
+object log_trace(tuple args, dict kwargs) 
+{
+  LOG_TRACE(args_to_string(args, kwargs));
+  return object();  
+}
 
 void reset_sinks()
 {
@@ -177,6 +186,8 @@ void export_Logger()
   def("LogInfo", raw_function(log_info, 1));
   def("LogScript", raw_function(log_script, 1));
   def("LogVerbose", raw_function(log_verbose, 1));
+  def("LogDebug", raw_function(log_debug, 1));
+  def("LogTrace", raw_function(log_trace, 1));
   
   // this relatively ugly construct is required to work around a problem with
   // the "ost" command-line interpreter. If we don't remove all the sinks from

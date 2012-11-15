@@ -14,6 +14,7 @@ set(OST_GEOM_PYMOD_SOURCES
   export_composite2_op.cc
   export_composite3_op.cc
   export_quat.cc
+  export_transform.cc
 )
 
 if (NOT ENABLE_STATIC)

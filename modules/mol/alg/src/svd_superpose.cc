@@ -55,7 +55,7 @@ Real CalculateRMSD(const mol::EntityView& ev1,
   int counta=ev1.GetAtomCount();
   int countb=ev2.GetAtomCount();
   if (counta!=countb){
-    throw std::runtime_error("atom counts of the two views are not equal");
+    throw Error("atom counts of the two views are not equal");
   }
   eht=ev1.GetHandle();
   int natoms=ev1.GetAtomCount();
@@ -308,10 +308,10 @@ SuperpositionResult SuperposeAtoms(const mol::AtomViewList& atoms1,
   int counta=static_cast<int>(atoms1.size());
   int countb=static_cast<int>(atoms2.size());
   if (counta!=countb){
-    throw std::runtime_error("atom counts do not match");
+    throw Error("atom counts do not match");
   }
   if ((counta<3)){
-    throw std::runtime_error("at least 3 atoms are required");
+    throw Error("at least 3 atoms are required");
   }
   SuperposerSVD sp(counta, true);
 
@@ -333,10 +333,10 @@ SuperpositionResult SuperposeSVD(const mol::EntityView& ev1,
   int counta=ev1.GetAtomCount();
   int countb=ev2.GetAtomCount();
   if (counta!=countb){
-    throw std::runtime_error("atom counts of the two views are not equal");
+    throw Error("atom counts of the two views are not equal");
   }
   if ((counta<3)){
-    throw std::runtime_error("atom counts of any view must be larger or "
+    throw Error("atom counts of any view must be larger or "
                              "equal 3");
   }
   int nrows=counta;
@@ -358,10 +358,10 @@ SuperpositionResult SuperposeSVD(const std::vector<geom::Vec3>& pl1,
                                  const std::vector<geom::Vec3>& pl2)
 {
   if (pl1.size()!=pl2.size()){
-    throw std::runtime_error("pointlist lengths not equal");
+    throw Error("pointlist lengths not equal");
   }
   if ((pl1.size()<3)){
-    throw std::runtime_error("three or more points required");
+    throw Error("three or more points required");
   }
   SuperposerSVD sp(pl1.size(), true);
   SuperpositionResult res=sp.Run(pl1, pl2);

@@ -87,15 +87,13 @@ Prop::ID DLLEXPORT_OST_MOL PropertyIDFromString(const String& prop);
 Prop DLLEXPORT_OST_MOL PropertyFromString(const String& prop);
 
 
-struct DLLEXPORT PropertyError: public std::exception
+struct DLLEXPORT PropertyError: public ost::Error
 {
   PropertyError(ost::mol::Prop::ID prop):
+    ost::Error("invalid property"),
     prop_(prop)
   {}
   virtual ~PropertyError() throw() {}
-  virtual const char* what() const throw() {
-    return "invalid property";
-  }
   
   ost::mol::Prop::ID Prop() const 
   {

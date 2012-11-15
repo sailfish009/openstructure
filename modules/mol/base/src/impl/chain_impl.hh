@@ -105,7 +105,9 @@ public:
 
   /// \brief append new residue with exactly the same parameters as res, but 
   ///     no atoms and bonds                               
-  ResidueImplPtr AppendResidue(const ResidueImplPtr& res);
+  // force deep to be set explicitely, because it is better than implicit
+  // (and since we are on the impl level interface consistency isn't that critical)
+  ResidueImplPtr AppendResidue(const ResidueImplPtr& res, bool deep);
   
   ResidueImplPtr InsertResidueBefore(int index, const ResNum& n, 
                                      const ResidueKey& k);
@@ -119,6 +121,7 @@ public:
 
   /// \brief  Append residue at end of chain.
   ResidueImplPtr AppendResidue(const ResidueKey& k, const ResNum& n);
+
   
   // next residue, not necessarily in sequence
   ResidueImplPtr GetPrev(const ResidueImplPtr& r) const;
@@ -180,6 +183,8 @@ public:
   ///\brief checks if the residue with that index breaks the in_sequence
   ///       property and updates it accordingly      
   void SetInSequence(int index);
+
+  void UpdateTransformedPos();
 
 private:
   int GetIndexForResNumInSequence(const ResNum& number) const;

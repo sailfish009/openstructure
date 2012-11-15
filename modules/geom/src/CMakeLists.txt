@@ -25,7 +25,7 @@ composite3_op.hh
 aligned_cuboid.hh
 vec_mat_predicates.hh
 quat.hh
-
+transform.hh
 point_cloud.hh
 module_config.hh
 )
@@ -43,6 +43,7 @@ composite3.cc
 composite2_op.cc
 composite3_op.cc
 quat.cc
+transform.cc
 aligned_cuboid.cc
 point_cloud.cc
 )

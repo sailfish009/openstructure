@@ -26,6 +26,10 @@
 #include <ost/gfx/impl/connect_renderer_base.hh>
 #include <ost/gfx/render_options/cpk_render_options.hh>
 
+#if OST_SHADER_SUPPORT_ENABLED
+#include "fast_spheres.hh"
+#endif
+
 namespace ost { namespace gfx { namespace impl {
 
 /// \internal
@@ -45,9 +49,11 @@ public:
 
 private:
   void PrepareRendering(GfxView& view, IndexedVertexArray& va, bool is_sel);
-  void Render3DSprites();
 
   CPKRenderOptionsPtr options_;
+#if OST_SHADER_SUPPORT_ENABLED
+  FastSphereRenderer fsr_,sel_fsr_;
+#endif
 };
 
 }}}

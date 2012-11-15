@@ -57,6 +57,7 @@ VM vm=&EntityView::AddChain;
 HM hm=&EntityView::AddChain;
 
 HandleMethod find_chain_hnd=&EntityView::FindChain;
+HandleMethod view_for_ch=&EntityView::ViewForHandle;
 StringMethod find_chain_str=&EntityView::FindChain;
 QSMethod select_string=&EntityView::Select;
 QueryMethod  select_query=&EntityView::Select;
@@ -94,8 +95,16 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_add_chain_overloads,
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_add_atom_overloads,
                                       EntityView::AddAtom, 1, 2)
 
-AtomView (EntityView::*find_atom_a)(const String&, const ResNum&, const String&) const=&EntityView::FindAtom;
+AtomView (EntityView::*find_atom_a)(const String&, const ResNum&,
+                                    const String&) const=&EntityView::FindAtom;
 AtomView (EntityView::*find_atom_b)(const AtomHandle&) const=&EntityView::FindAtom;
+AtomView (EntityView::*view_for_ah)(const AtomHandle&) const=&EntityView::ViewForHandle;
+
+ResidueView (EntityView::*find_res_a)(const ResidueHandle&) const=&EntityView::FindResidue;
+ResidueView (EntityView::*find_res_b)(const String&,
+                                      const ResNum&) const=&EntityView::FindResidue;
+
+ResidueView (EntityView::*view_for_rh)(const ResidueHandle&) const=&EntityView::ViewForHandle;
 }
 
 
@@ -118,9 +127,15 @@ void export_EntityView()
     .def("ExtendViewToResidues", &EntityView::ExtendViewToResidues)
     .def("ExtendViewToSurrounding", &EntityView::ExtendViewToSurrounding)
     .def("FindChain", find_chain_str)
-    .def("FindResidue", &EntityView::FindResidue)
+    .def("FindChain", find_chain_hnd)
+    .def("ViewForHandle", view_for_rh)
+    .def("ViewForHandle", view_for_ch)
     .def("FindAtom", find_atom_a)
-    .def("FindAtom", find_atom_b)    
+    .def("FindAtom", find_atom_b)
+    .def("FindResidue", find_res_a)
+    .def("FindResidue", find_res_b)
+
+    .def("ViewForHandle", view_for_ah)
     .def("GetAtomCount", &EntityView::GetAtomCount)
     .def("GetGeometricStart", geom_start<EntityView>)
     .def("GetGeometricEnd", geom_end<EntityView>)

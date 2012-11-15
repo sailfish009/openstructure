@@ -332,6 +332,13 @@ void PythonShellWidget::setup_state_machine_()
   single_line->addTransition(clear_all_tr_sl);
   connect(clear_all_tr_sl,SIGNAL(triggered()),this,SLOT(handle_clear_all_()));
 
+  single_line->addTransition(new KeyEventTransition(Qt::Key_Left,
+                                                    DNG_ARROW_MODIFIERS,
+                                                    single_line,
+                                                    true,
+                                                    new EditPositionGuard(this,EditPositionGuard::EQUAL,
+                                                                               EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER)));
+
   //multi line inactive transitions
   multi_line_inactive->addTransition(new KeyEventTransition(Qt::Key_Return,
                                                             Qt::NoModifier,
@@ -514,7 +521,7 @@ void PythonShellWidget::OnExecuteStateEntered()
   QString command=GetCommand();
 
   QString command_trimmed=command.trimmed();
-  if (command_trimmed.size()>0) {
+  if (! command_trimmed.isEmpty()) {
     unsigned int id=PythonInterpreter::Instance().RunCommand(command);
     output_blocks_.insert(id,textCursor().block());
     history_.AppendCommand(command_trimmed,get_block_edit_mode_());
@@ -871,13 +878,14 @@ void PythonShellWidget::insertFromMimeData(const QMimeData * source)
     lines[i]=QString(num_spaces, '\t')+right;
   }
   text=lines.join(QString(1, QChar::LineSeparator));
-  if(lines.size()>0){
+  if(! lines.empty()){
     machine_->setActive(multiline_active_state_);
   }
   QPlainTextEdit::insertFromMimeData(source);
-  if(lines.size()>0){
+  if(! lines.empty()){
     set_block_type_(block_edit_start_,document()->lastBlock(),BLOCKTYPE_BLOCKEDIT);
   }
+  setFocus();
 }
 
 GutterBlockList PythonShellWidget::GetGutterBlocks(const QRect& rect)

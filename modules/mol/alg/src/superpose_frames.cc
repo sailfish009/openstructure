@@ -21,6 +21,7 @@
 #include <Eigen/Array>
 #include <Eigen/SVD>
 #include <Eigen/LU>
+#include <ost/message.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/alg/superpose_frames.hh>
 
@@ -196,7 +197,7 @@ CoordGroupHandle SuperposeFrames(CoordGroupHandle& cg, EntityView& sel,
   //This function superposes the frames of a CoordGroup (cg) with indices between begin and end,
   //using a selection of atoms (sel), onto an EntityView (ref_view).
   if (!ref_view.IsValid()){
-    throw std::runtime_error("Invalid reference view");
+    throw ost::Error("Invalid reference view");
   }
   int real_end=end==-1 ? cg.GetFrameCount() : end;
   CoordFramePtr ref_frame;
@@ -215,7 +216,7 @@ CoordGroupHandle SuperposeFrames(CoordGroupHandle& cg, EntityView& sel,
     }
   }
   if (int(indices.size())!=ref_view.GetAtomCount()){
-    throw std::runtime_error("atom counts of the two views are not equal");
+    throw ost::Error("atom counts of the two views are not equal");
   }
   mol::AtomHandleList alist(cg.GetEntity().GetAtomList());
   std::sort(alist.begin(), alist.end(),less_index);

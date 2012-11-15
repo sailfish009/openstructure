@@ -9,7 +9,7 @@ InMemCoordSource::InMemCoordSource(const AtomHandleList& atoms):
   this->SetMutable(true);
 }
   
-uint InMemCoordSource::GetFrameCount()
+uint InMemCoordSource::GetFrameCount() const
 {
   return frames_.size();
 }

@@ -105,6 +105,12 @@ void ChemdictParser::OnDataItem(const StarDataItem& item)
         std::cout << "unknown pdbx_type '" << type << "' for compound "
                   << compound_->GetID() << std::endl;
       }
+    } else if (item.GetName()==StringRef("name", 4)) {
+      compound_->SetName(item.GetValue().str());
+      if (compound_->GetName()==""){
+        std::cout << "unknown compound name, chemcomp.name field empty for compound: "
+                  << compound_->GetID() << std::endl;
+      }
     } else if (item.GetName()==StringRef("formula", 7)) {
       compound_->SetFormula(item.GetValue().str());
       if (compound_->GetFormula()=="H2 O") {

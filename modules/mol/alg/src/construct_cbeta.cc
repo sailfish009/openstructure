@@ -1,5 +1,6 @@
 #include <cmath>
 
+#include <ost/message.hh>
 #include <ost/mol/mol.hh>
 #include <ost/log.hh>
 #include "construct_cbeta.hh"
@@ -83,7 +84,7 @@ geom::Vec3 CBetaPosition(const ResidueHandle& residue, Real bond_length)
   std::stringstream ss;
   ss << "residue " << residue.GetQualifiedName() 
      << "doesn't have enough backbone atoms to reconstruct CBeta position";
-    throw std::runtime_error(ss.str());
+    throw ost::Error(ss.str());
   }
   return CBetaPosition(n.GetPos(), ca.GetPos(), c.GetPos(), bond_length);
 }

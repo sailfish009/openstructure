@@ -92,7 +92,7 @@ void LineTraceRenderer::PrepareRendering(const BackboneTrace& trace_subset,
         if(nl.size()<1) continue;
         for(unsigned int i=0;i<nl.size();++i) {
           const NodeEntry& entry=nl[i];
-          if(sel_.FindAtom(entry.atom).IsValid()) {
+          if(sel_.ViewForHandle(entry.atom).IsValid()) {
             geom::Vec3 apos = entry.atom.GetPos();
             VertexID p0=va.Add(apos, geom::Vec3(),sel_clr);
             if(i>0) {

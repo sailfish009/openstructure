@@ -85,6 +85,7 @@ set(OST_GUI_PYMOD_MODULES
   init_splash.py
   traj.py
   helpwidget.py
+  table.py
 )
 
 set(OST_GUI_PYMOD_DNG_MODULES
@@ -104,7 +105,7 @@ set(PRESET_FILES
   scene/presets.xml
   scene/loaders.xml
 )
-copy_if_different("./" "${STAGE_DIR}/share/openstructure/scene" 
+copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/share/openstructure/scene" 
                   "${PRESET_FILES}" "IMMUTABLE_FILES" _ost_gui)
 install(FILES ${PRESET_FILES} DESTINATION "share/openstructure/scene")
 
@@ -114,7 +115,7 @@ set(INSPECTOR_ICONS
   scene/icons/render_icon.png
   scene/icons/tool_icon.png
 )
-copy_if_different("./" "${STAGE_DIR}/share/openstructure/scene/icons" 
+copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/share/openstructure/scene/icons" 
                   "${INSPECTOR_ICONS}" "ICONS_FOR_INSPECTOR" _ost_gui)
 install(FILES ${INSPECTOR_ICONS} DESTINATION "share/openstructure/scene/icons")
 

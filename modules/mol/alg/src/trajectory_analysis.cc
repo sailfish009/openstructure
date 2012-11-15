@@ -138,7 +138,7 @@ std::vector<Real> AnalyzeRMSD(const CoordGroupHandle& traj, const EntityView& re
   int count_ref=reference_view.GetAtomCount();
   int count_sele=sele_view.GetAtomCount();
   if (count_ref!=count_sele){
-    throw std::runtime_error("atom counts of the two views are not equal");
+    throw Error("atom counts of the two views are not equal");
   }  
   std::vector<Real> rmsd;
   rmsd.reserve(ceil(traj.GetFrameCount()/float(stride)));
@@ -160,10 +160,10 @@ std::vector<Real>  AnalyzeMinDistance(const CoordGroupHandle& traj, const Entity
   {
   CheckHandleValidity(traj);
   if (view1.GetAtomCount()==0){
-    throw std::runtime_error("first EntityView is empty");
+    throw Error("first EntityView is empty");
   }
   if (view2.GetAtomCount()==0){
-    throw std::runtime_error("second EntityView is empty");
+    throw Error("second EntityView is empty");
   }  
   std::vector<Real> dist;
   dist.reserve(ceil(traj.GetFrameCount()/float(stride)));
@@ -184,10 +184,10 @@ std::vector<Real> AnalyzeMinDistanceBetwCenterOfMassAndView(const CoordGroupHand
   {
   CheckHandleValidity(traj);
   if (view_cm.GetAtomCount()==0){
-    throw std::runtime_error("first EntityView is empty");
+    throw Error("first EntityView is empty");
   }
   if (view_atoms.GetAtomCount()==0){
-    throw std::runtime_error("second EntityView is empty");
+    throw Error("second EntityView is empty");
   } 
   std::vector<Real> dist, masses_cm;
   dist.reserve(ceil(traj.GetFrameCount()/float(stride)));
@@ -211,10 +211,10 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
   {
   CheckHandleValidity(traj);
   if (view_ring1.GetAtomCount()==0){
-    throw std::runtime_error("first EntityView is empty");
+    throw Error("first EntityView is empty");
   }
   if (view_ring2.GetAtomCount()==0){
-    throw std::runtime_error("second EntityView is empty");
+    throw Error("second EntityView is empty");
   } 
   std::vector<Real> dist, masses_ring1,masses_ring2;
   dist.reserve(ceil(traj.GetFrameCount()/float(stride)));
@@ -239,7 +239,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
   {
     CheckHandleValidity(traj);
     if (prot_seg.GetAtomCount()==0){
-      throw std::runtime_error("EntityView is empty");
+      throw Error("EntityView is empty");
     }
     std::vector<unsigned long> indices_ca;
     geom::Line3 axis;
@@ -266,7 +266,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
   {
     CheckHandleValidity(traj);
     if (prot_seg.GetAtomCount()==0){
-      throw std::runtime_error("EntityView is empty");
+      throw Error("EntityView is empty");
     }
     std::vector<unsigned long> indices_ca;
     geom::Line3 axis;
@@ -287,7 +287,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
   {
     CheckHandleValidity(traj);
     if (prot_seg.GetAtomCount()==0){
-      throw std::runtime_error("EntityView is empty");
+      throw Error("EntityView is empty");
     }
     std::vector<unsigned long> indices_ca;
     geom::Plane best_plane;
@@ -308,7 +308,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
   {
     CheckHandleValidity(traj);
     if (prot_seg.GetAtomCount()==0){
-      throw std::runtime_error("EntityView is empty");
+      throw Error("EntityView is empty");
     }
     std::vector<unsigned long> indices_c,indices_o, indices_n, indices_ca;
     std::vector<Real> helicity;
@@ -329,14 +329,14 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
     if (to==-1)to=traj.GetFrameCount();
     unsigned int n_atoms=selection.GetAtomCount();
     if (to<from) {
-      throw std::runtime_error("to smaller than from");
+      throw Error("to smaller than from");
     }
     unsigned int n_frames=ceil((to-from)/stride);
     if (n_atoms==0){
-      throw std::runtime_error("EntityView is empty");
+      throw Error("EntityView is empty");
     }
     if (n_frames<=1) {
-      throw std::runtime_error("number of frames is too small");
+      throw Error("number of frames is too small");
     }
     std::vector<unsigned long> indices;
     std::vector<geom::Vec3> mean_positions;
@@ -368,14 +368,14 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
     if (to==-1)to=traj.GetFrameCount();
     unsigned int n_atoms=selection.GetAtomCount();
     if (to<from) {
-      throw std::runtime_error("to smaller than from");
+      throw Error("to smaller than from");
     }
     unsigned int n_frames=ceil((to-from)/stride);
     if (n_atoms==0){
-      throw std::runtime_error("EntityView is empty");
+      throw Error("EntityView is empty");
     }
     if (n_frames<=1) {
-      throw std::runtime_error("number of frames is too small");
+      throw Error("number of frames is too small");
     }
     Real rmsf=0.0;
     geom::Vec3 v;

@@ -216,7 +216,7 @@ void MessageWidget::ContextMenuRequested(const QPoint& pos) {
 
   QMenu* menu = new QMenu();
   menu->addAction(remove_selected_action);
-  if (menu->actions().size() > 0) {
+  if (! menu->actions().empty()) {
     menu->popup(view_->viewport()->mapToGlobal(pos));
   }
 }

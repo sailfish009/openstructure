@@ -26,10 +26,11 @@ parser.add_option("-v", "--verbosity_level", action="store", type="int", dest="v
 parser.disable_interspersed_args()
 (options, args) = parser.parse_args()
 
+_site_packs='python%d.%d/site-packages' % sys.version_info[0:2]
 if platform.machine()=='x86_64':
-  sys.path.insert(0, os.getenv('DNG_ROOT')+'/lib64/openstructure')
+  sys.path.insert(0, os.path.join(os.getenv('DNG_ROOT'), 'lib64', _site_packs))
 else:
-  sys.path.insert(0,os.getenv('DNG_ROOT')+'/lib/openstructure')
+  sys.path.insert(0,os.path.join(os.getenv('DNG_ROOT'), 'lib', _site_packs))
      
 from ost import *
 import ost
@@ -48,9 +49,7 @@ _InitRuleBasedBuilder()
 import os.path
 HistoryFile=os.path.expanduser('~/.ost_history')
 
-# this is a silly name...
-InGUIMode=False
-# ... lets be more pythonic
+# we are not in GUI mode. 
 gui_mode=False
 
 sys.ps1='ost> '

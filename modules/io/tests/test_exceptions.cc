@@ -16,36 +16,39 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
 /*
-  Authors: Tobias Schmidt
+  Author: Andreas Schenk
  */
- #define BOOST_TEST_DYN_LINK
+
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
-#include <ost/mol/mol.hh>
-#include <ost/mol/transform.hh>
-#include <ost/geom/geom.hh>
+
+#include <ost/io/load_map.hh>
+#include <ost/img/image.hh>
+#include <ost/io/io_exception.hh>
 
 using namespace ost;
-using namespace ost::mol;
+using namespace ost::io;
 
-BOOST_AUTO_TEST_SUITE( mol_base );
 
-BOOST_AUTO_TEST_CASE(test_transform)
+BOOST_AUTO_TEST_SUITE( io );
+
+
+BOOST_AUTO_TEST_CASE(exception) 
 {
-  Transform tf;
-
-  BOOST_CHECK_EQUAL(tf.GetMatrix(), geom::Mat4());
-  BOOST_CHECK_EQUAL(tf.GetRot(), geom::Mat3());
-  BOOST_CHECK_EQUAL(tf.GetTrans(), geom::Vec3());
-  BOOST_CHECK_EQUAL(tf.GetCenter(), geom::Vec3());
-
-  geom::Mat4 mat = geom::Mat4(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16);
-  tf.SetMatrix(mat);
-  BOOST_CHECK_EQUAL(tf.GetMatrix(), mat);
-  BOOST_CHECK_EQUAL(tf.GetRot(), geom::Mat3(1,2,3,5,6,7,9,10,11));
-  BOOST_CHECK_EQUAL(tf.GetCenter(), geom::Vec3(4,8,12));
-  BOOST_CHECK_EQUAL(tf.GetTrans(), geom::Vec3(13,14,15));
+  try {
+      BOOST_CHECK_THROW(ost::img::ImageHandle loadedimage=LoadImage("nonexistent.mrc"),IOException);
+  }catch(...){
+    BOOST_ERROR( "Failed to catch IOException." );
+  }
+  ost::img::ImageHandle ih=ost::img::CreateImage();
+  try {
+      BOOST_CHECK_THROW(SaveImage(ih,"nonexistent.ABC"),IOUnknownFormatException);
+  }catch(...){
+    BOOST_ERROR( "Failed to catch IOUnknownFormatException." );
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END();

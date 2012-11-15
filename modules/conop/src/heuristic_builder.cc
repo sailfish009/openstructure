@@ -187,6 +187,7 @@ HeuristicBuilder::HeuristicBuilder():
       emap_[def_entry.abbrev]=entry;
     }
   }
+  default_nucleotide_=LookupResEntry("G").first;
   LOG_DEBUG("done importing internal tables");
 }
 
@@ -321,12 +322,20 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
       res0_ret.first=builder->DefaultPeptide();
       res0_ret.second=true;
     }
+    if (res0.FindAtom("C3'") && res0.FindAtom("P")) {
+      res0_ret.first=builder->DefaultNucleotide();
+      res0_ret.second=true;
+    }
   }
 
   if(!res1_ret.second) {
     if(res1.FindAtom("N") && res1.FindAtom("CA") && res1.FindAtom("C")) {
       LOG_TRACE("using default peptide for " << res1.GetKey());
       res1_ret.first=builder->DefaultPeptide();
+      res1_ret.second=true;
+    }
+    if (res1.FindAtom("C3'") && res1.FindAtom("P")) {
+      res1_ret.first=builder->DefaultNucleotide();
       res1_ret.second=true;
     }
   }
@@ -348,16 +357,19 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
       if(flag) {
         if (builder->DoesPeptideBondExist(res0_atom, res1_atom)) {
           editor.Connect(res0_atom,res1_atom);
-          res0.SetIsProtein(true);
-          res1.SetIsProtein(true);
+          if (res0_ret.first.GetChemClass().IsPeptideLinking()) {
+            res0.SetIsProtein(true);
+            res1.SetIsProtein(true);
+          }
         }
       } else {
         if (builder->DoesPeptideBondExist(res1_atom, res0_atom)) {
           editor.Connect(res1_atom, res0_atom);
-          res0.SetIsProtein(true);
-          res1.SetIsProtein(true);
+          if (res0_ret.first.GetChemClass().IsPeptideLinking()) {
+            res0.SetIsProtein(true);
+            res1.SetIsProtein(true);
+          }
         }
-
       }
     }
   } else {

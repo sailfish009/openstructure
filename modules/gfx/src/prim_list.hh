@@ -61,10 +61,10 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
   /// \brief create new prim list
   PrimList(const String& name);
 
-  virtual geom::AlignedCuboid GetBoundingBox() const;
+  virtual geom::AlignedCuboid GetBoundingBox(bool use_tf=true) const;
 
   virtual void ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
-                             const mol::Transform& tf) const;
+                             const geom::Transform& tf) const;
   /// \brief get center      
   virtual geom::Vec3 GetCenter() const;
 

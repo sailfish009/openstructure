@@ -62,6 +62,26 @@ build the compound library manually.
   
     Clear the compound cache.
 
+  .. method:: SetChemLibInfo()
+
+     When creating the new library the current date and the Version of OST used
+     are stored into the table chemlib_info.
+
+  .. method:: GetOSTVersionUsed()
+
+     reads out ost_version_used from the table chemlib_info.
+
+     :returns: a version string
+
+     :rtype: :class:`String`
+
+  .. method:: GetCreationDate()
+
+     reads out creation_date from the table chemlib_info.
+
+     :returns: a date string (Py), a Date (C++)
+
+     :rtype: :class:`String` (Py), :class:`Date`
 .. class:: Compound
 
   Holds the description of a chemical compound, such as three-letter-code, and

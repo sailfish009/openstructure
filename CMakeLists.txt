@@ -5,8 +5,8 @@
 cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 project(OpenStructure CXX C)
 set (OST_VERSION_MAJOR 1)
-set (OST_VERSION_MINOR 2)
-set (OST_VERSION_PATCH 4)
+set (OST_VERSION_MINOR 3)
+set (OST_VERSION_PATCH 0)
 set (OST_VERSION_STRING ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR}.${OST_VERSION_PATCH} )
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
 include(OST)
@@ -33,6 +33,8 @@ option(ENABLE_GUI "whether the graphical user interface should be enabled"
        ON)
 option(ENABLE_GFX "whether graphics support should be enabled"
       ON)
+option(USE_MESA "use software rendered Mesa instead of hardware GL"
+      OFF)
 option(ENABLE_IMG "whether the image processing module should be compiled"
        ON)
 option(ENABLE_INFO "whether openstructure should be compiled with support for the info library"
@@ -44,10 +46,10 @@ option(USE_DOUBLE_PRECISION "whether to compile in double precision"
 option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
       OFF)
 option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some boost/boost_python combinations" OFF)
-option(DEPLOYMENT "switch on deployment settings" OFF)
 option(COMPILE_TESTS "whether unit tests should be compiled by default" OFF)
 option(ENABLE_STATIC "whether static libraries should be compiled" OFF)
 option(DEBIAN_STYLE_LIBEXEC "whether 'libexec' should be put under 'lib/openstructure" OFF)
+option(HIDDEN_VISIBILITY "on gcc, use -fvisibility=hidden" OFF)
 
 if (CXX)
   set(CMAKE_CXX_COMPILER ${CXX})
@@ -149,7 +151,7 @@ add_definitions(-DEIGEN2_SUPPORT)
 if (COMPOUND_LIB)
   set(_COMP_LIB "${COMPOUND_LIB}")
   if (NOT IS_ABSOLUTE "${COMPOUND_LIB}")
-    set(COMPOUND_LIB "${CMAKE_CURRENT_SOURCE_DIR}/${COMPOUND_LIB}")
+    set(COMPOUND_LIB "${CMAKE_CURRENT_BINARY_DIR}/${COMPOUND_LIB}")
   endif()
 else()
   set(_COMP_LIB "NONE")
@@ -187,7 +189,13 @@ if (ENABLE_INFO)
 endif()
 
 if (ENABLE_GFX)
-  find_package(OpenGL REQUIRED)
+  if(USE_MESA)
+    find_package(Mesa REQUIRED)
+    set(_USE_MESA ON)
+  else()
+    find_package(OpenGL REQUIRED)
+    set(_USE_MESA OFF)
+  endif()
 endif()
 
 if (ENABLE_IMG OR ENABLE_GFX)
@@ -231,20 +239,30 @@ if (ENABLE_GUI)
 endif()
 
 if (ENABLE_SPNAV)
-  find_package(SpNav REQUIRED)
+  #find_package(SpNav REQUIRED)
+  set(_SPNAV ON)
+else()
+  set(_SPNAV OFF)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
-  set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-strict-aliasing" CACHE STRING "" FORCE)
+  # do not write back into cache, otherwise the compile command line gets expanded
+  # with multiple -fno-strict-aliasing flags, triggering a complete rebuild whenever
+  # cmake is run
+  set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-strict-aliasing")
+  if(HIDDEN_VISIBILITY) 
+    set (CMAKE_CXX_FLAGS "-fvisibility=hidden")
+    set (_HIDDEN_VIS ON)
+  else(HIDDEN_VISIBILITY)
+    set (_HIDDEN_VIS OFF)
+  endif(HIDDEN_VISIBILITY)
 endif()
-
 
 # basic environment
 include_directories(${Boost_INCLUDE_DIRS} 
                     ${FFTW_INCLUDE_PATH} 
                     ${EIGEN2_INCLUDE_DIR}
                     ${TIFF_INCLUDE_DIR}
-                    ${SPNAV_INCLUDE_DIR}
                     ${PNG_INCLUDE_DIR}
                     )
 if(USE_NUMPY)
@@ -272,6 +290,9 @@ endif()
 
 add_subdirectory(modules)
 add_subdirectory(scripts)
+add_subdirectory(tools)
+# deployment has to come last, to ensure that all install commands are run before deployment
+# magic is done
 add_subdirectory(deployment)
 
 set(FILES_TO_BE_REMOVED ${CMAKE_SOURCE_DIR}/stage tests)
@@ -288,14 +309,20 @@ message(STATUS
         "   Info support                    (-DENABLE_INFO) : ${_INFO}\n"
         "   Graphical interface              (-DENABLE_GUI) : ${_UI}\n"
         "   OpenGL support                   (-DENABLE_GFX) : ${_OPENGL}\n"
+        "   OpenGL via Mesa                    (-DUSE_MESA) : ${_USE_MESA}\n"
         "   Image Processing support         (-DENABLE_IMG) : ${_IMG}\n"
         "   Shader support                   (-DUSE_SHADER) : ${_SHADER}\n"
         "   Numpy support                     (-DUSE_NUMPY) : ${_NUMPY}\n"
+        "   SpaceNav Device support        (-DENABLE_SPNAV) : ${_SPNAV}\n"
         "   Optimize                           (-DOPTIMIZE) : ${_OPT}\n"
         "   Profiling support                   (-DPROFILE) : ${_PROFILE}\n"
         "   Double Precision       (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
         "   Compound Lib                   (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
         "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
         "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
-        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}" )
+        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}")
+if (CMAKE_COMPILER_IS_GNUCXX)
+   message(STATUS
+        "   Hidden object visibility  (-DHIDDEN_VISIBILITY) :        ${_HIDDEN_VIS}")
+endif()
 

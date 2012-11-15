@@ -221,16 +221,39 @@ public:
   ChainView FindChain(const String& chain_name) const;
 
   /// \brief Find atom for given residue handle
+  ///
+  /// deprecated. Use ViewForHandle instead
   ResidueView FindResidue(const ResidueHandle& residue) const;
 
-  /// \brief Find view for given atom handle
-  AtomView FindAtom(const AtomHandle& atom) const;
+  ResidueView FindResidue(const String& chain, const ResNum& num) const;
 
+  /// \brief locate residue view for given residue handle
+  ///
+  /// returns an invalid ResidueView if the residue could not be
+  /// located in the structure
+  ResidueView ViewForHandle(const ResidueHandle& residue) const;
+  /// \brief Find view for given atom handle
+  ///
+  /// deprecated. Use ViewForHandle instead
+  AtomView FindAtom(const AtomHandle& atom) const;
+  AtomView ViewForHandle(const AtomHandle& atom) const;
+
+  /// \brief locate atom view for given atom handle
+  ///
+  /// returns an invalid AtomView if the residue could not be
+  /// located in the structure
   AtomView FindAtom(const String& chain_name, const ResNum& num,
                     const String& atom_name) const;
   /// \brief Find chain for given chain handle
-  ChainView FindChain(const ChainHandle& chain) const;
+  ///
+  /// deprecated: Use ViewForHandle instead
 
+  ChainView FindChain(const ChainHandle& chain) const;
+  /// \brief locate chain view for given chain handle
+  ///
+  /// returns an invalid AtomView if the residue could not be
+  /// located in the structure
+  ChainView ViewForHandle(const ChainHandle& chain) const;
   /// \brief  Check whether the view includes the given chain
   /// \return True, if the chain is included in the view, false if not.
   bool IsChainIncluded(const ChainHandle& chain) const;

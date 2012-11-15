@@ -32,7 +32,12 @@
 
 namespace ost { namespace gfx { namespace impl {
 
-CPKRenderer::CPKRenderer(): options_(new CPKRenderOptions()) {
+CPKRenderer::CPKRenderer(): 
+  options_(new CPKRenderOptions())
+#if OST_SHADER_SUPPORT_ENABLED
+  ,fsr_(),sel_fsr_()
+#endif  
+{
   this->SetName("Spheres");
 }
 
@@ -51,25 +56,39 @@ void CPKRenderer::PrepareRendering()
 
 void CPKRenderer::PrepareRendering(GfxView& view, IndexedVertexArray& va, bool is_sel)
 {
-  const Color& sel_clr=this->GetSelectionColor();
+  RGBAColor sel_clr=this->GetSelectionColor();
   float factor=is_sel ? 1.2 : 1.0;
   if(options_!=NULL){
     factor *= options_->GetRadiusMult();
     if(factor>0.0) {
-      va.SetLighting(true);
-      va.SetCullFace(true);
-      va.SetColorMaterial(true);
-      va.SetMode(0x4);
-      
-      // draw all spheres
-      uint det=options_->GetSphereDetail();
-      for(AtomEntryMap::const_iterator it=view.atom_map.begin();it!=view.atom_map.end();++it) {
-        va.AddSphere(SpherePrim(it->second.atom.GetPos(),
-                                it->second.vdwr*factor,
-                                is_sel? sel_clr : it->second.color),
-                     det);
+#if OST_SHADER_SUPPORT_ENABLED
+      if(options_->GetSphereMode()==1 || options_->GetSphereMode()==2) {
+        FastSphereRenderer& fsr = is_sel ? sel_fsr_ : fsr_;
+        fsr.Clear();
+        for(AtomEntryMap::const_iterator it=view.atom_map.begin();it!=view.atom_map.end();++it) {
+          fsr.Add(it->second.atom.GetPos(),
+                  is_sel? sel_clr : it->second.color,
+                  it->second.vdwr*factor);
+        }
+      } else {
+#endif
+        va.SetLighting(true);
+        va.SetCullFace(true);
+        va.SetColorMaterial(true);
+        va.SetMode(0x4);
+        
+        // draw all spheres
+        uint det=options_->GetSphereDetail();
+        for(AtomEntryMap::const_iterator it=view.atom_map.begin();it!=view.atom_map.end();++it) {
+          va.AddSphere(SpherePrim(it->second.atom.GetPos(),
+                                  it->second.vdwr*factor,
+                                  is_sel? sel_clr : it->second.color),
+                       det);
+        }
       }
+#if OST_SHADER_SUPPORT_ENABLED
     }
+#endif
   }
   sel_state_=0;
   state_=0;
@@ -79,13 +98,17 @@ void CPKRenderer::Render(RenderPass pass)
 {
   if(options_!=NULL){
 #if OST_SHADER_SUPPORT_ENABLED
-    if(pass==STANDARD_RENDER_PASS && (options_->GetSphereMode()==1 || options_->GetSphereMode()==2)) {
-      this->Render3DSprites();
+    if(options_->GetSphereMode()==1 || options_->GetSphereMode()==2) {
+      if(pass==STANDARD_RENDER_PASS) {
+        fsr_.RenderGL();
+      } else if(pass==GLOW_RENDER_PASS && this->HasSelection()) {
+        sel_fsr_.RenderGL();
+      }
       return;
     }
 #endif
   }
-  // fall back to parent if above did not fire
+  // fall back to default if above did not fire
   EntityRenderer::Render(pass);
 }
 
@@ -114,81 +137,6 @@ void CPKRenderer::SetOptions(RenderOptionsPtr& render_options){
 
 RenderOptionsPtr CPKRenderer::GetOptions(){
  return options_;
-}
-
-namespace {
-
-void Render3DSpritesInnerLoop(const AtomEntry* ae, const geom::Vec3& cx, 
-                              const geom::Vec3& cy, const geom::Vec3& cz, 
-                              GLdouble* gl_mmat, GLdouble* gl_pmat, GLint* gl_vp,
-                              float rmul)
-{
-  geom::Vec3 pos = ae->atom.GetPos();
-  float rad = rmul*ae->vdwr;
-  GLdouble r1[3],r2[3];
-  gluProject(pos[0],pos[1],pos[2],
-             gl_mmat,gl_pmat,gl_vp,
-             &r1[0],&r1[1],&r1[2]);
-  gluProject(pos[0]-rad*cz[0],pos[1]-rad*cz[1],pos[2]-rad*cz[2],
-             gl_mmat,gl_pmat,gl_vp,
-             &r2[0],&r2[1],&r2[2]);
-  float scale = r1[2]-r2[2];
-  glColor3fv(ae->color);
-  glTexCoord4f(0.0,0.0,-rad,scale);
-  glVertex3v((pos-rad*cx-rad*cy).Data());
-  glTexCoord4f(0.0,1.0,-rad,scale);
-  glVertex3v((pos-rad*cx+rad*cy).Data());
-  glTexCoord4f(1.0,1.0,-rad,scale);
-  glVertex3v((pos+rad*cx+rad*cy).Data());
-  glTexCoord4f(1.0,0.0,-rad,scale);
-  glVertex3v((pos+rad*cx-rad*cy).Data());
-}
-
-}
-
-void CPKRenderer::Render3DSprites()
-{
-#if OST_SHADER_SUPPORT_ENABLED
-  if(options_!=NULL){
-    float rmul= options_->GetRadiusMult();
-    if(rmul==0.0) return;
-
-    geom::Mat3 irot=geom::Transpose(Scene::Instance().GetTransform().GetRot());
-    geom::Vec3 cx=irot*geom::Vec3(1.0,0.0,0.0);
-    geom::Vec3 cy=irot*geom::Vec3(0.0,1.0,0.0);
-    geom::Vec3 cz=irot*geom::Vec3(0.0,0.0,1.0);
-
-    uint write_normals = Shader::Instance().GetCurrentName()=="dumpnorm" ? 1 : 0;
-    uint use_hemimodel = Shader::Instance().GetCurrentName()=="hemilight" ? 1 : 0;
-    Shader::Instance().PushProgram();
-    Shader::Instance().Activate("fast_sphere");
-    Shader::Instance().UpdateState();
-    glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"write_normals"),write_normals);
-    glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"use_hemimodel"),use_hemimodel);
-
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_CULL_FACE);
-
-    GLdouble gl_mmat[16];
-    glGetDoublev(GL_MODELVIEW_MATRIX,gl_mmat);
-    GLdouble gl_pmat[16];
-    glGetDoublev(GL_PROJECTION_MATRIX,gl_pmat);
-    GLint gl_vp[]={0,0,1,1};
-
-    glBegin(GL_QUADS);
-    
-    for(AtomEntryMap::const_iterator it=view_.atom_map.begin();it!=view_.atom_map.end();++it) {
-      Render3DSpritesInnerLoop(&it->second,cx,cy,cz,gl_mmat,gl_pmat,gl_vp,rmul);
-    }
-    glEnd();
-
-    glPopAttrib();
-
-    Shader::Instance().PopProgram();
-    Shader::Instance().UpdateState();
-  }
-#endif
 }
 
 }}}

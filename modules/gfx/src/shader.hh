@@ -40,13 +40,6 @@ public:
   // singleton implementation
   static Shader& Instance();
 
-  static bool Compile(std::string shader_name, std::string shader_code,
-                      GLenum shader_type, GLuint& shader_id);
-
-  static bool Link(const std::vector<GLuint>& code_list, std::string pr_name, GLuint& shader_pr);
-
-  bool Add(const std::string& name, const std::string& vs_code, const std::string& fs_code);
-
   void PreGLInit();
   void Setup();
   void Activate(const String& name);
@@ -61,6 +54,14 @@ public:
   void PopProgram();
 
   void UpdateState();
+
+  void Link(const std::string& pr_name, const std::string& vs_code, const std::string& fs_code);
+
+  static bool Compile(const std::string& shader_name, 
+                      const std::string& shader_code, 
+                      GLenum shader_type, 
+                      GLuint& shader_id);
+
 private:
   Shader();
 
@@ -70,7 +71,6 @@ private:
 
   std::stack<String> program_stack_;
 
-  std::map<String,GLuint> shader_code_map_;
   std::map<String,GLuint> shader_program_map_;
 };
 

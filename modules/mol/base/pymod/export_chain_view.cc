@@ -34,7 +34,8 @@ typedef ResidueView (ChainView::*RnumMethod)(const ResNum&) const;
 typedef ResidueView (ChainView::*HandleMethod)(const ResidueHandle&) const;
 
 RnumMethod rnum_find_residue=&ChainView::FindResidue;
-HandleMethod handle_find_residue=&ChainView::FindResidue;    
+HandleMethod handle_find_residue=&ChainView::FindResidue;
+HandleMethod view_for_rh=&ChainView::ViewForHandle;
 
 typedef ResidueView (ChainView::*HM)(const ResidueHandle&, ViewAddFlags);
 typedef ResidueView (ChainView::*VM)(const ResidueView&, ViewAddFlags);
@@ -48,9 +49,11 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_add_atom_overloads,
                                       ChainView::AddAtom, 1, 2)
                                       
 AtomView (ChainView::*find_atom_a)(const ResNum&, const String&) const=&ChainView::FindAtom;
-AtomView (ChainView::*find_atom_b)(const AtomHandle&) const=&ChainView::FindAtom;                                      
+AtomView (ChainView::*find_atom_b)(const AtomHandle&) const=&ChainView::FindAtom;
+AtomView (ChainView::*view_for_ah)(const AtomHandle&) const=&ChainView::ViewForHandle;
 typedef EntityView (ChainView::*QueryMethod)(const Query&, uint) const;
 typedef EntityView (ChainView::*StringMethod)(const String&, uint) const;  
+
 QueryMethod select_query=&ChainView::Select;
 StringMethod select_string=&ChainView::Select;
 }
@@ -71,8 +74,10 @@ void export_ChainView()
     .def("GetEntity", &ChainView::GetEntity)
     .def("FindResidue",rnum_find_residue, arg("residue_number"))
     .def("FindResidue", handle_find_residue, arg("residue_handle"))
+    .def("ViewForHandle", view_for_rh, arg("residue_handle"))
     .def("FindAtom", find_atom_a)
-    .def("FindAtom", find_atom_b)    
+    .def("FindAtom", find_atom_b)
+    .def("ViewForHandle", view_for_ah)
     .def("AddAtom", &ChainView::AddAtom, 
          X_add_atom_overloads(args("atom_handle", "view_add_flags")))
     .def("AddResidue", hm, 

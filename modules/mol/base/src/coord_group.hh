@@ -28,6 +28,11 @@
 #include "atom_handle.hh"
 #include "coord_source.hh"
 
+namespace geom {
+  // we should really have fw headers...
+  class Transform;
+}
+
 namespace ost { namespace mol {
 
 /// \brief coordinate group, for trajectories and such
@@ -35,6 +40,8 @@ class DLLEXPORT_OST_MOL CoordGroupHandle {
 public:
   /// \brief create empty, invalid handle
   CoordGroupHandle();
+  /// \brief used internally
+  CoordGroupHandle(CoordSourcePtr source);
 
   /// \brief return trajectories entity handle
   EntityHandle GetEntity() const;
@@ -47,6 +54,18 @@ public:
 
   /// \brief number of frames
   uint GetFrameCount() const;
+
+  /// \brief time in ps between frames, default 0.0
+  float GetDelta() const;
+
+  /// \brief set time between each frame in ps
+  void SetDelta(float d);
+
+  /// \brief start time in ps, default 0.0
+  float GetStartTime() const;
+
+  /// \rbrief set start time in ps
+  void SetStartTime(float t);
 
   /// \brief assign positions to the given frame - order and count must match 
   ///      initial atomlist
@@ -91,8 +110,9 @@ public:
   /// \brief return a filtered coord group, containing only the atoms in the 
   ///     view
   CoordGroupHandle Filter(const EntityView& selected,int first=0,int last=-1) const;
-  
-  CoordGroupHandle(CoordSourcePtr source);
+
+  /// \brief apply in-place transform to each coordinate in each frame
+  void ApplyTransform(const geom::Transform& tf);
 
 
 private:

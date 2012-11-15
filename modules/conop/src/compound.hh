@@ -29,7 +29,7 @@
 
 namespace ost { namespace conop {
 
-struct Date {
+struct DLLEXPORT_OST_CONOP Date {
   Date(int y, int m, int d):
     year(y), month(m), day(d)
   { }
@@ -68,7 +68,7 @@ struct Date {
   int day;  
 };
 
-struct AtomSpec {
+struct DLLEXPORT_OST_CONOP AtomSpec {
   AtomSpec()
     : ordinal(0), is_leaving(false) {
   }
@@ -88,7 +88,7 @@ struct AtomSpec {
   }
 };
 
-struct BondSpec {
+struct DLLEXPORT_OST_CONOP BondSpec {
   BondSpec()
     : atom_one(0), atom_two(0), order(1) {
 
@@ -203,9 +203,13 @@ public:
   
   int GetAtomSpecIndex(const String& name) const;
   
-  const String& GetFormula() { return formula_; }
+  const String& GetName() { return name_; }
+  
+  void SetName(const String& name) { name_=name; }
   
   void SetFormula(const String& formula) { formula_=formula; }
+
+  const String& GetFormula() { return formula_; }
   
   const BondSpecList& GetBondSpecs() const {
     return bond_specs_;
@@ -233,6 +237,7 @@ private:
   char                         olc_;
   String                       tlc_;
   String                       formula_;
+  String                       name_;
   AtomSpecList                 atom_specs_;
   BondSpecList                 bond_specs_;
   mol::ChemClass               chem_class_;

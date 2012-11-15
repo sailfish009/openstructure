@@ -26,7 +26,7 @@
 #  if defined(_MSC_VER)
 #    define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t)
 #  else
-#    define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t) extern template TEMPLATE_EXPORT c ost::img::image_state::t;
+#    define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t) extern template c TEMPLATE_EXPORT ost::img::image_state::t;
 #  endif
 #else
 #  define DLLEXPORT_IMG_ALG DLLIMPORT

@@ -23,6 +23,8 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
+#include <ost/base.hh>
+#include <ost/boost_filesystem_helper.hh>
 #include <ost/mol/alg/local_dist_diff_test.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/io/mol/pdb_reader.hh>
@@ -33,6 +35,7 @@
 #include <ost/mol/iterator.hh>
 #include <ost/platform.hh>
 #include <ost/log.hh>
+#include <ost/mol/alg/consistency_checks.hh>
 
 #include <ost/conop/rule_based_builder.hh>
 #include <ost/dyn_cast.hh>
@@ -52,9 +55,10 @@ EntityHandle load(const String& file, const IOProfile& profile)
       EntityHandle ent=CreateEntity();
       reader.Import(ent);
       conop::Conopology& conop_inst=conop::Conopology::Instance();
+      conop_inst.GetBuilder()->SetBondFeasibilityCheck(profile.bond_feasibility_check);
       conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
       if (ent.GetChainList().size()!=1) {
-        std::cout << "WARNING: File " << file << "has more than one chain" << std::endl; 
+        std::cout << "WARNING: File " << file << " has more than one chain" << std::endl;
       }    
       return ent;
     }
@@ -83,6 +87,8 @@ void usage()
   std::cerr << "   -r <value> distance inclusion radius" << std::endl;
   std::cerr << "   -i <value> sequence separation" << std::endl;
   std::cerr << "   -e         print version" << std::endl;
+  std::cerr << "   -x         ignore residue name consistency checks" << std::endl;
+
 }
 
 // computes coverage
@@ -121,12 +127,14 @@ int main (int argc, char **argv)
   // parses options
   String sel;
   bool structural_checks=false;
+  bool consistency_checks=true;
   po::options_description desc("Options");
   desc.add_options()
     ("calpha,c", "consider only calpha atoms")
     ("sel,s", po::value<String>(&sel)->default_value(""), "selection performed on reference structure")
     ("tolerant,t", "fault tolerant mode")
     ("structural-checks,f", "perform stereo-chemical and clash checks")
+    ("ignore-consistency-checks,x", "ignore residue name consistency checks")
     ("version,e", "version")
     ("parameter-file,p", po::value<String>(), "stereo-chemical parameter file")
     ("verbosity,v", po::value<int>(), "verbosity level")
@@ -166,6 +174,9 @@ int main (int argc, char **argv)
   }
   if (vm.count("structural-checks")) {
     structural_checks=true;
+  }
+  if (vm.count("ignore-consistency-checks")) {
+    consistency_checks=false;
   }
   if (vm.count("tolerant")) {
     profile.fault_tolerant=true;
@@ -213,6 +224,8 @@ int main (int argc, char **argv)
   cutoffs.push_back(1.0);
   cutoffs.push_back(2.0);
   cutoffs.push_back(4.0);
+
+  std::vector<EntityView> ref_list;  
     
   // loads the reference file and creates the list of distances to check in lddt    
   // if the reference file is a comma-separated list of files, switches to multi-
@@ -228,10 +241,10 @@ int main (int argc, char **argv)
     if (!ref) {
       exit(-1);
     }  
+    ref_list.push_back(ref.CreateFullView());
     glob_dist_list = CreateDistanceList(ref.CreateFullView(),radius);  
   } else {
     std::cout << "Multi-reference mode: On" << std::endl;  
-    std::vector<EntityView> ref_list;  
     for (std::vector<StringRef>::const_iterator ref_file_split_sr_it = ref_file_split_sr.begin();
          ref_file_split_sr_it != ref_file_split_sr.end();++ref_file_split_sr_it) {
       String ref_filename = ref_file_split_sr_it->str();  
@@ -239,7 +252,7 @@ int main (int argc, char **argv)
       if (!ref) {
         exit(-1);
       }
-      if (ref_list.size()>0) {
+      if (! ref_list.empty()) {
         if (ref_list[0].GetChainList()[0].GetName()!=ref.GetChainList()[0].GetName()) {
           std::cout << "ERROR: First chains in the reference structures have different names" << std::endl;
           exit(-1);  
@@ -282,12 +295,22 @@ int main (int argc, char **argv)
     }
     EntityView v=model.CreateFullView();
 
+    for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
+         ref_list_it != ref_list.end(); ++ref_list_it) {
+      bool cons_check = ResidueNamesMatch(v,*ref_list_it);
+      if (cons_check==false) {
+        if (consistency_checks==true) {
+          LOG_ERROR("Residue names in model: " << files[i] << " are inconsistent with one or more references");
+          exit(-1);            
+        } else {
+          LOG_WARNING("Residue names in model: " << files[i] << " are inconsistent with one or more references");
+        }   
+      } 
+    }
+
     boost::filesystem::path pathstring(files[i]);
-    #if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
-    String filestring=pathstring.string();
-    #else
-    String filestring=pathstring.file_string();
-    #endif      
+
+    String filestring=BFPathToString(pathstring);
     std::cout << "File: " << files[i] << std::endl; 
     std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
     std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;

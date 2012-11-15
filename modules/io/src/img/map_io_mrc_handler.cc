@@ -585,13 +585,13 @@ void real_filler(img::image_state::RealSpatialImageState& isi,
   img::Progress::Instance().Register(&this_dummy,header.ns*header.nr,100);
   for(int is=0;is<header.ns;++is) {
     pnt[maps]=header.nsstart+is;
+    std::vector<B> buffer(header.nr*header.nc);
+    f.read(&buffer[0],header.nr*header.nc);
     for(int ir=0;ir<header.nr;++ir) {
       pnt[mapr]=header.nrstart+ir;
       for(int ic=0;ic<header.nc;++ic) {
         pnt[mapc]=header.ncstart+ic;
-        B tmp;
-        f >> tmp;
-        isi.Value(pnt) = static_cast<Real>(tmp);
+        isi.Value(pnt) = img::Val2Val<B,Real>(buffer[header.nc*ir+ic]);
       }
       img::Progress::Instance().AdvanceProgress(&this_dummy);
     }
@@ -698,7 +698,6 @@ void real_dumper(BinaryOStream<CONVERSIONTYPE>& f, header_base& header, const Co
   img::Point pnt;
   char this_dummy; //create dummy variable to give to Progress as this
   Progress::Instance().Register(&this_dummy,header.ns*header.nr,100);
-  Point start=image.GetExtent().GetStart();
   for(int ss=0;ss<header.ns;++ss) {
     pnt[maps]=header.nsstart+ss;
     for(int sr=0;sr<header.nr;++sr) {

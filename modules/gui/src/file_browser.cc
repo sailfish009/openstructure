@@ -267,7 +267,7 @@ void FileBrowser::ShowContextMenu(const QPoint& pos){
     }
     menu->addAction(system_open_action);
   }
-  if(menu->actions().size()>0){
+  if(! menu->actions().empty()){
     menu->exec(QCursor::pos());
   }
 }

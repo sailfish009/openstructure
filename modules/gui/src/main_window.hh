@@ -46,7 +46,7 @@ public:
   MainWindow(QWidget* parent=0, Qt::WindowFlags flags=0);
 
   //! add a custom docking widget
-  void AddDockWidget(QWidget* w, const QString& name, bool show=true, int area=0);
+  void AddDockWidget(QWidget* w, const QString& name, bool show=true, int area=2);
   //! remove a previously added custom docking widget
   void RemoveDockWidget(QWidget* w);
 

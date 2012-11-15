@@ -18,17 +18,12 @@
 //------------------------------------------------------------------------------
 
 #include <ost/config.hh>
-#if(OST_INFO_ENABLED)
-#include <ost/info/info.hh>
-#include <ost/info/geom_info_conversion.hh>
-#endif
+
 #include "transform.hh"
+#include "vecmat3_op.hh"
+#include "vecmat4_op.hh"
 
-namespace ost { 
-
-using namespace geom;
-
-namespace mol {
+namespace geom {
 
 Transform::Transform():
   rot_(Mat3(1,0,0, 0,1,0, 0,0,1)),
@@ -40,21 +35,18 @@ Transform::Transform():
   update_tm();
 }
     
-Mat4 Transform::GetMatrix() const
-{
-  return tm_;
-}
-
 void Transform::SetMatrix(const Mat4& m)
 {
   tm_=m;
   ttm_ = Transpose(tm_);
+  try {
+    itm_ = Invert(tm_);
+  } catch (GeomException& e) {
+    std::cerr << "caught GeomException in Transform::SetMatrix: " << e.what() << std::endl;
+    std::cerr << m << std::endl;
+    itm_=geom::Mat4();
+  }
   update_components();
-}
-
-Mat4 Transform::GetTransposedMatrix() const
-{
-  return ttm_;
 }
 
 void Transform::SetTrans(const Vec3& t) 
@@ -131,7 +123,7 @@ void Transform::ApplyZAxisRotation(float delta)
 
 void Transform::ApplyAxisRotation(float delta, const Vec3& axis)
 {
-  rot_=rot_*AxisRotation(rot_*axis, delta*P_180);
+  rot_=rot_*AxisRotation(axis, delta*P_180);
   update_tm();
 }
 
@@ -165,6 +157,42 @@ Vec4 Transform::Apply(const Vec4& v) const
   return nrvo;
 }
 
+Vec3 Transform::ApplyInverse(const Vec3& v) const
+{
+  Vec3 nrvo(itm_*Vec4(v));
+  return nrvo;
+}
+
+Vec4 Transform::ApplyInverse(const Vec4& v) const
+{
+  Vec4 nrvo=itm_*v;
+  return nrvo;
+}
+
+geom::AlignedCuboid Transform::Apply(const geom::AlignedCuboid& c) const
+{
+  geom::Vec3 cmin=c.GetMin();
+  geom::Vec3 cmax=c.GetMax();
+  Vec3 t1 = Apply(Vec3(cmin[0],cmin[1],cmin[2]));
+  Vec3 t2 = Apply(Vec3(cmin[0],cmax[1],cmin[2]));
+  Vec3 t3 = Apply(Vec3(cmax[0],cmax[1],cmin[2]));
+  Vec3 t4 = Apply(Vec3(cmax[0],cmin[1],cmin[2]));
+  Vec3 t5 = Apply(Vec3(cmin[0],cmin[1],cmax[2]));
+  Vec3 t6 = Apply(Vec3(cmin[0],cmax[1],cmax[2]));
+  Vec3 t7 = Apply(Vec3(cmax[0],cmax[1],cmax[2]));
+  Vec3 t8 = Apply(Vec3(cmax[0],cmin[1],cmax[2]));
+  geom::Vec3 minc = Min(t1,Min(t2,Min(t3,Min(t4,Min(t5,Min(t6,Min(t7,t8)))))));
+  geom::Vec3 maxc = Max(t1,Max(t2,Max(t3,Max(t4,Max(t5,Max(t6,Max(t7,t8)))))));
+  return geom::AlignedCuboid(minc,maxc);
+}
+
+Transform Transform::Apply(const Transform& tf) const
+{
+  Transform nrvo(*this);
+  nrvo.SetMatrix(tf.GetMatrix()*nrvo.GetMatrix());
+  return nrvo;
+}
+
 /*
   The order of the transformations given herein is conceptually
   "backward" as they are applied to a vertex, because the left-right
@@ -186,56 +214,31 @@ void Transform::update_tm()
 {
   tm_ =
     Mat4(1.0,0.0,0.0,trans_[0],
-               0.0,1.0,0.0,trans_[1],
-               0.0,0.0,1.0,trans_[2],
-               0.0,0.0,0.0,1.0) *
+         0.0,1.0,0.0,trans_[1],
+         0.0,0.0,1.0,trans_[2],
+         0.0,0.0,0.0,1.0) *
     Mat4(rot_) *
     Mat4(1.0,0.0,0.0,-cen_[0],
-               0.0,1.0,0.0,-cen_[1],
-               0.0,0.0,1.0,-cen_[2],
-               0.0,0.0,0.0,1.0);
+         0.0,1.0,0.0,-cen_[1],
+         0.0,0.0,1.0,-cen_[2],
+         0.0,0.0,0.0,1.0);
   ttm_ = Transpose(tm_);
+  // TODO: calculate from rot, cen and trans
+  try {
+    itm_ = Invert(tm_);
+  } catch (GeomException& e) {
+    std::cerr << "caught GeomException in Transform::update_tm: " << e.what() << std::endl;
+    itm_=geom::Mat4();
+  }
 }
 
 void Transform::update_components()
 {
+  // there is no way to extract the centering component
+  // so we just get a rotation and translation
   rot_ = tm_.ExtractRotation();
-  cen_ = tm_.ExtractTranslation();
-  trans_[0] = tm_(3,0);
-  trans_[1] = tm_(3,1);
-  trans_[2] = tm_(3,2);
+  trans_ = tm_.ExtractTranslation();
+  cen_ = Vec3(0,0,0);
 }
 
-#if(OST_INFO_ENABLED)
-Transform TransformFromInfo(const info::InfoGroup& group)
-{
-  if (!group.HasItem("center")) {
-    throw info::InfoError("Error while loading transform from info: "
-                          "Group does not contain a center element");
-  }
-  if (!group.HasGroup("rotation")) {
-    throw info::InfoError("Error while loading transform from info: "
-                          "Group does not contain a rotation element");
-  }
-  if (!group.HasItem("translation")) {
-    throw info::InfoError("Error while loading transform from info: "
-                          "Group does not contain a translation element");
-  } 
-  Transform tf;
-  tf.SetCenter(group.GetItem("center").AsVector());
-  tf.SetTrans(group.GetItem("translation").AsVector());
-  tf.SetRot(info::Mat3FromInfo(group.GetGroup("rotation")));
-  return tf;
-}
-
-void TransformToInfo(const Transform& transform, info::InfoGroup& group)
-{
-  Transform tf;
-  group.CreateItem("center", transform.GetCenter());
-  group.CreateItem("translation", transform.GetTrans());
-  info::InfoGroup rot=group.CreateGroup("rotation");
-  info::Mat3ToInfo(transform.GetRot(), rot);
-}
-#endif
-
-}} // ns
+} // ns

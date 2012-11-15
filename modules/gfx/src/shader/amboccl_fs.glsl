@@ -2,6 +2,7 @@ uniform sampler2D depth_map;
 uniform sampler2D norm_map;
 uniform sampler1D kernel;
 uniform float step;
+uniform float size;
 uniform vec2 i_vp;
 uniform vec4 abcd;
 uniform int mode;
@@ -66,7 +67,7 @@ void main()
   float i;
   float sum=0.0;
   for(i=0.0;i<1.0;i+=step) {
-    vec2 nn=texture1D(kernel,i).xy*40.0-20.0;
+    vec2 nn=(texture1D(kernel,i).xy-0.5)*size;
     sum+=ao(nn,depth_p,norm_p,t_pos_p);
   }
   sum*=step;

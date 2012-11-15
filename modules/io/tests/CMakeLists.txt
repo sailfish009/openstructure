@@ -15,6 +15,7 @@ set(OST_IO_UNIT_TESTS
 )
 if (ENABLE_IMG)
   list(APPEND OST_IO_UNIT_TESTS test_io_img.cc)
+  list(APPEND OST_IO_UNIT_TESTS test_exceptions.cc)
 endif()
 ost_unittest(MODULE io
              SOURCES "${OST_IO_UNIT_TESTS}"

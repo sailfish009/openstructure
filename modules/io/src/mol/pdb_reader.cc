@@ -42,23 +42,23 @@ using boost::format;
 
 namespace {
 
-bool IEquals(const StringRef& a, const StringRef& b)
-{
-  if (a.size()!=b.size()) {
-    return false;
-  }
-  for (size_t i=0; i<a.size(); ++i) {
-    if (toupper(a[i])!=b[i]) {
+  bool IEquals(const StringRef& a, const StringRef& b)
+  {
+    if (a.size()!=b.size()) {
       return false;
     }
+    for (size_t i=0; i<a.size(); ++i) {
+      if (toupper(a[i])!=b[i]) {
+        return false;
+      }
+    }
+    return true;
   }
-  return true;
-}
 
-mol::ResNum to_res_num(int num, char ins_code)
-{
-  return mol::ResNum(num, ins_code==' ' ? '\0' : ins_code);
-}
+  mol::ResNum to_res_num(int num, char ins_code)
+  {
+    return mol::ResNum(num, ins_code==' ' ? '\0' : ins_code);
+  }
 
 }
 
@@ -493,7 +493,7 @@ void PDBReader::AssignMolIds(mol::EntityHandle ent) {
       }
     }
   }
-  if (compnds_.size()>0){
+  if (! compnds_.empty()){
     mol::ChainHandleList ch_list=ent.GetChainList();
     for (mol::ChainHandleList::const_iterator chain=ch_list.begin();
          chain!=ch_list.end(); ++chain) {
@@ -597,7 +597,7 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
     }
   } else {
     chain_name=String(1, line[21]);    
-    if (restrict_chains_.size()>0 &&
+    if (! restrict_chains_.empty() &&
       restrict_chains_.find(chain_name)==String::npos) {
       return false;
     }    
@@ -776,8 +776,25 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       curr_residue_=curr_chain_.FindResidue(res_num);
     }
     if (!curr_residue_.IsValid()) {
-      LOG_DEBUG("new residue " << res_name << " " << res_num);
-      curr_residue_=editor.AppendResidue(curr_chain_, res_name.str(), res_num);
+      if(curr_chain_.GetResidueCount()>0 && profile_.join_spread_atom_records) {
+        int loc=curr_chain_.GetResidueCount()-1;
+        for(;loc>=0;--loc) {
+          if(curr_chain_.GetResidueByIndex(loc).GetNumber()<res_num) break;
+        }
+        if(loc<0) {
+          curr_residue_=editor.InsertResidueBefore(curr_chain_,0,res_num,res_name.str());
+        } else {
+          curr_residue_=editor.InsertResidueAfter(curr_chain_,loc,res_num,res_name.str());
+        }
+        if(!curr_residue_) {
+          // this should not happen...
+          curr_residue_=editor.AppendResidue(curr_chain_, res_name.str(), res_num);
+        }
+        LOG_DEBUG("inserted new residue " << res_name << " " << res_num << " after " << loc);
+      } else {
+        curr_residue_=editor.AppendResidue(curr_chain_, res_name.str(), res_num);
+        LOG_DEBUG("appended new residue " << res_name << " " << res_num);
+      }
       warned_name_mismatch_=false;
       ++residue_count_; 
     }

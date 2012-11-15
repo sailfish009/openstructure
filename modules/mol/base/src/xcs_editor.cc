@@ -74,14 +74,11 @@ void XCSEditor::SetAtomTransformedPos(const AtomHandle& atom,
                                       const geom::Vec3& position)
 {
   CheckHandleValidity(atom);
+  impl::EntityImplPtr eip=ent_.Impl();
   atom.Impl()->TransformedPos()=position;
-  if(ent_.Impl()->IsTransfIdentity()) {
-    atom.Impl()->OriginalPos()=position;
-  } else {
-    atom.Impl()->OriginalPos() = geom::Vec3(ent_.Impl()->GetInvTransfMatrix()*geom::Vec4(position));
-  }
-  ent_.Impl()->MarkICSDirty();
-  ent_.Impl()->MarkOrganizerDirty();
+  atom.Impl()->OriginalPos() = eip->HasTransform() ? eip->GetTransform().ApplyInverse(position) : position;
+  eip->MarkICSDirty();
+  eip->MarkOrganizerDirty();
   this->Update();
 }
 
@@ -89,17 +86,14 @@ namespace {
   template<typename T>
   void set_transformed_pos(impl::EntityImpl* ent, const AtomHandleList& alist, T *positions)
   {
-    bool has_tf=ent->IsTransfIdentity();
+    bool has_tf=ent->HasTransform();
     for(AtomHandleList::const_iterator ait=alist.begin();ait!=alist.end();++ait) {
       if(ait->IsValid()) {
-        ait->Impl()->TransformedPos()[0]=static_cast<Real>(positions[0]);
-        ait->Impl()->TransformedPos()[1]=static_cast<Real>(positions[1]);
-        ait->Impl()->TransformedPos()[2]=static_cast<Real>(positions[2]);
-        if(has_tf) {
-          ait->Impl()->OriginalPos()=ait->Impl()->TransformedPos();
-        } else {
-          ait->Impl()->OriginalPos() = geom::Vec3(ent->GetInvTransfMatrix()*geom::Vec4(ait->Impl()->TransformedPos()));
-        }
+        geom::Vec3& tpos=ait->Impl()->TransformedPos();
+        tpos[0]=static_cast<Real>(positions[0]);
+        tpos[1]=static_cast<Real>(positions[1]);
+        tpos[2]=static_cast<Real>(positions[2]);
+        ait->Impl()->OriginalPos()=has_tf ? ent->GetTransform().ApplyInverse(tpos) : tpos;
       }
       positions+=3;
     }
@@ -124,14 +118,11 @@ void XCSEditor::SetAtomOriginalPos(const AtomHandle& atom,
                                    const geom::Vec3& position)
 {
   CheckHandleValidity(atom);
+  impl::EntityImplPtr eip=ent_.Impl();
   atom.Impl()->OriginalPos()=position;
-  if(ent_.Impl()->IsTransfIdentity()) {
-    atom.Impl()->TransformedPos()=position;
-  } else {
-    atom.Impl()->TransformedPos() = geom::Vec3(ent_.Impl()->GetTransfMatrix()*geom::Vec4(position));
-  }
-  ent_.Impl()->MarkICSDirty();
-  ent_.Impl()->MarkOrganizerDirty();
+  atom.Impl()->TransformedPos() = eip->HasTransform() ? eip->GetTransform().Apply(position) : position;
+  eip->MarkICSDirty();
+  eip->MarkOrganizerDirty();
   this->Update();
 }
 
@@ -139,17 +130,14 @@ namespace {
   template<typename T>
   void set_original_pos(impl::EntityImpl* ent, const AtomHandleList& alist, T *positions)
   {
-    bool has_tf=ent->IsTransfIdentity();
+    bool has_tf=ent->HasTransform();
     for(AtomHandleList::const_iterator ait=alist.begin();ait!=alist.end();++ait) {
       if(ait->IsValid()) {
-        ait->Impl()->OriginalPos()[0]=static_cast<Real>(positions[0]);
-        ait->Impl()->OriginalPos()[1]=static_cast<Real>(positions[1]);
-        ait->Impl()->OriginalPos()[2]=static_cast<Real>(positions[2]);
-        if(has_tf) {
-          ait->Impl()->TransformedPos()=ait->Impl()->OriginalPos();
-        } else {
-          ait->Impl()->TransformedPos() = geom::Vec3(ent->GetTransfMatrix()*geom::Vec4(ait->Impl()->OriginalPos()));
-        }
+        geom::Vec3& opos=ait->Impl()->OriginalPos();
+        opos[0]=static_cast<Real>(positions[0]);
+        opos[1]=static_cast<Real>(positions[1]);
+        opos[2]=static_cast<Real>(positions[2]);
+        ait->Impl()->TransformedPos()= has_tf ? ent->GetTransform().Apply(opos) : opos;
       }
       positions+=3;
     }
@@ -187,6 +175,13 @@ void XCSEditor::SetAtomPos(const AtomHandleList& alist, double *positions)
 
 void XCSEditor::ApplyTransform(const geom::Mat4& transform)
 {
+  geom::Transform tf;
+  tf.SetMatrix(transform);
+  this->ApplyTransform(tf);
+}
+
+void XCSEditor::ApplyTransform(const geom::Transform& transform)
+{
   ent_.Impl()->ApplyTransform(transform);
   ent_.Impl()->UpdateTransformedPos();
   ent_.Impl()->MarkICSDirty();
@@ -194,8 +189,14 @@ void XCSEditor::ApplyTransform(const geom::Mat4& transform)
   this->Update();
 }
 
-
 void XCSEditor::SetTransform(const geom::Mat4& transform)
+{
+  geom::Transform tf;
+  tf.SetMatrix(transform);
+  this->SetTransform(tf);
+}
+
+void XCSEditor::SetTransform(const geom::Transform& transform)
 {
   ent_.Impl()->SetTransform(transform);
   ent_.Impl()->UpdateTransformedPos();
@@ -203,7 +204,6 @@ void XCSEditor::SetTransform(const geom::Mat4& transform)
   ent_.Impl()->MarkOrganizerDirty();
   this->Update();
 }
-
 
 void XCSEditor::Update()
 {

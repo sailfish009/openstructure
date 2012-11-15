@@ -16,22 +16,49 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef GEOM_EXCEPTION_HH
-#define GEOM_EXCEPTION_HH
+#ifndef OST_GFX_MESA_OFFSCREEN_BUFFER_HH
+#define OST_GFX_MESA_OFFSCREEN_BUFFER_HH
 
-#include <string>
-#include <ost/message.hh>
-#include "module_config.hh"
+#include <stack>
+#include <ost/gfx/glext_include.hh>
+#include <GL/glx.h>
 
-namespace geom {
+namespace ost { namespace gfx {
 
-class DLLEXPORT_OST_GEOM GeomException: public Error
+/*
+  mesa implementation for offscreen buffers
+
+  Author: Ansgar Philippsen
+*/
+
+class OffscreenBuffer
 {
 public:
-  GeomException(const String& m):
-    Error(m) {}
-  
+  OffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared=true);
+  ~OffscreenBuffer();
+
+  bool Resize(unsigned int w, unsigned int h);
+
+  bool MakeActive();
+
+  bool IsActive() {return active_;}
+
+  bool IsValid() {return valid_;}
+
+private:
+  int width_;
+  int height_;
+  bool valid_;
+  bool active_;
+
+  Display* dpy_;
+  XVisualInfo* visinfo_;
+  Pixmap pm_;
+  GLXPixmap glxpm_;
+  GLXContext context_;
+  GLXFBConfig* fbconfig_;
 };
 
-}
+}} // ns
 
+#endif

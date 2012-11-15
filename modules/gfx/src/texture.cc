@@ -1,4 +1,5 @@
 #include "texture.hh"
+#include "bitmap_io.hh"
 
 namespace ost { namespace gfx {
 
@@ -7,12 +8,12 @@ namespace ost { namespace gfx {
     d_()
   {
     if(!bm.data) return;
-    d_=boost::shared_array<Color>(new Color[w_*h_]);
+    d_=boost::shared_array<float>(new float[4*w_*h_]);
     static float f=1.0/255.0;
     for(GLint v=0;v<h_;++v) {
       for(GLint u=0;u<w_;++u) {
         int p=v*w_+u;
-        Color& c = d_[p];
+        float* c = &d_[p*4];
         if(bm.channels==1) {
           c[0]=f*static_cast<float>(bm.data[p]);
           c[1]=c[0];

@@ -96,6 +96,7 @@ SequenceViewer::SequenceViewer(bool stand_alone, bool observe_scene,
   layout->setSpacing(0);
   this->setLayout(layout);
 
+  toolbar_ = new QToolBar(this);
   this->InitActions();
 
 
@@ -120,7 +121,6 @@ SequenceViewer::SequenceViewer(bool stand_alone, bool observe_scene,
 
 void SequenceViewer::InitMenuBar()
 {
-  toolbar_ = new QToolBar(this);
   toolbar_->setToolButtonStyle(Qt::ToolButtonIconOnly);
   toolbar_->setIconSize(QSize(16,16));
   toolbar_->addActions(action_list_);
@@ -132,7 +132,8 @@ void SequenceViewer::InitSearchBar()
   seq_search_bar_ = new SeqSearchBar(this);
   seq_search_bar_->hide();
   layout()->addWidget(seq_search_bar_);
-  connect(seq_search_bar_, SIGNAL(Changed(const QString&, bool, const QString&)), this, SLOT(OnSearchBarUpdate(const QString&, bool, const QString&)));
+  connect(seq_search_bar_, SIGNAL(Changed(const QString&, bool, const QString&)), 
+         this, SLOT(OnSearchBarUpdate(const QString&, bool, const QString&)));
 }
 
 void SequenceViewer::InitView()
@@ -164,7 +165,7 @@ void SequenceViewer::InitActions()
   icon_path.cd("gui");
   icon_path.cd("icons");
 
-  QAction* find_action = new QAction(this);
+  QAction* find_action = new QAction(toolbar_);
   find_action->setText("Find Dialog");
   find_action->setShortcut(QKeySequence(tr("Ctrl+F")));
   find_action->setCheckable(true);
@@ -173,8 +174,8 @@ void SequenceViewer::InitActions()
   action_list_.append(find_action);
   connect(find_action, SIGNAL(triggered(bool)), this, SLOT(FindInSequence()));
 
-  display_mode_actions_ = new QActionGroup(this);
-  QAction* menu_action = new QAction(this);
+  display_mode_actions_ = new QActionGroup(toolbar_);
+  QAction* menu_action = new QAction(toolbar_);
   menu_action->setText("Menubar");
   menu_action->setShortcut(QKeySequence(tr("Ctrl+M")));
   menu_action->setToolTip("Display Options (Ctrl+M)");
@@ -314,7 +315,7 @@ void SequenceViewer::CopyEvent(QKeyEvent* event)
 {
   QItemSelectionModel* model = seq_table_view_->selectionModel();
   const QModelIndexList& list = model->selectedIndexes();
-  if(list.size()>0){
+  if(! list.empty()){
     QString clipboard_string;
     QSet<int> rows;
     int min_col=model_->columnCount();
@@ -387,7 +388,7 @@ void SequenceViewer::SelectList(const QModelIndexList& list)
       rows_visited.insert(row);
     }
   }
-  if (list.size() > 0) {
+  if (! list.empty()) {
     int last_row = 0;
     int last_col = 0;
     QModelIndex topleft_idx;

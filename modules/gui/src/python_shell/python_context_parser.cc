@@ -92,7 +92,7 @@ void PythonContextParser::Parse(PythonContext*& parent_context)
         Parse(current_context);
         if (tokenizer_.CurrentToken().GetType() != PythonToken::END)
           current_context->AddToken(tokenizer_.CurrentToken());   
-        else if (current_context->GetSubContexts().size() > 0) {
+        else if (! current_context->GetSubContexts().empty()) {
           Range last_sub = current_context->GetSubContexts().back()->GetRange();
           Range curr_range(current_context->GetRange().location,
                            last_sub.End()-current_context->GetRange().location);

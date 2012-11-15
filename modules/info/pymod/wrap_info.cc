@@ -314,4 +314,8 @@ BOOST_PYTHON_MODULE(_ost_info)
 
   class_<VerboseInfoVisitor, bases<InfoVisitor> >("VerboseInfoVisitor",init<>())
   ;
+
+  def("TransformToInfo", &TransformToInfo);
+  def("TransformFromInfo", &TransformFromInfo);
+
 }

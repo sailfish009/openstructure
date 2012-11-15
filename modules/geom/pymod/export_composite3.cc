@@ -33,6 +33,7 @@ void export_Composite3()
     .def("GetDirection",&Line3::GetDirection)
     .add_property("origin", &Line3::GetOrigin)
     .add_property("direction", &Line3::GetDirection)
+    .def(self_ns::str(self))
   ;
 
 { // scope
@@ -169,6 +170,7 @@ scope PlaneScope =
          return_value_policy<copy_const_reference>()))
     .add_property("center", &AlignedCuboid::GetCenter)
     .add_property("size", &AlignedCuboid::GetSize)
+    .def(self_ns::str(self))
   ;
 }
 

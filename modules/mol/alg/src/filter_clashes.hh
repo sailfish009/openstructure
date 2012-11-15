@@ -25,7 +25,7 @@
 namespace ost { namespace mol { namespace alg {
 
 /// \brief List of reference atom-atom distances to detect clashes between non-bonded atoms 
-class ClashingDistances
+class DLLEXPORT_OST_MOL_ALG ClashingDistances
 {
 
 public:
@@ -61,7 +61,7 @@ private:
 /// \brief List of stereo chemical parameters (Bonds and angles)
 ///
 /// For each item (bond or angle in a specific residue), stores the mean and standard deviation 
-class StereoChemicalParams
+class DLLEXPORT_OST_MOL_ALG StereoChemicalParams
 {
 
 public:

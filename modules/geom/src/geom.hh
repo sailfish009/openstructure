@@ -29,5 +29,6 @@
 #include "composite_op.hh"
 #include "quat.hh"
 #include "aligned_cuboid.hh"
+#include "transform.hh"
 
 #endif

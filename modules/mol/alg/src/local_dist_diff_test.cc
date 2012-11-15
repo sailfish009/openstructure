@@ -390,6 +390,9 @@ bool IsStandardResidue(String rn)
 GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist)
 {
  GlobalRDMap dist_list; 
+ if (!ref.GetChainCount()) {
+   return dist_list;
+ }
  ResidueViewList ref_residues=ref.GetChainList()[0].GetResidueList(); 
  for (ResidueViewList::iterator i=ref_residues.begin(), e=ref_residues.end(); i!=e; ++i) {
    if (IsStandardResidue(i->GetName())) {

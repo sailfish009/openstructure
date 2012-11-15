@@ -26,7 +26,7 @@ namespace ost { namespace mol {
   
 /// \brief Error to indicate that two atoms that are supposed to be connected
 ///        are not.
-class DLLEXPORT_OST_MOL NotConnectedError : public Error {
+class DLLEXPORT NotConnectedError : public Error {
 public:
   NotConnectedError(AtomHandle one, AtomHandle two);
   virtual ~NotConnectedError() throw() {}

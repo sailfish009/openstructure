@@ -30,7 +30,22 @@ using namespace ost;
 
 BOOST_AUTO_TEST_SUITE( base );
 
-BOOST_AUTO_TEST_CASE( test_string_ref)
+
+BOOST_AUTO_TEST_CASE(test_whitespace_split)
+{
+  std::string s=" 1 2  \r\n 3  4\t5 "; 
+  StringRef sr(s.c_str(), s.size());
+  std::vector<StringRef> srl=sr.split();
+  BOOST_CHECK_EQUAL(srl.size(), static_cast<size_t>(5));
+  BOOST_CHECK_EQUAL(srl[0], StringRef("1", 1));
+  BOOST_CHECK_EQUAL(srl[1], StringRef("2", 1));
+  BOOST_CHECK_EQUAL(srl[2], StringRef("3", 1));
+  BOOST_CHECK_EQUAL(srl[3], StringRef("4", 1));
+  BOOST_CHECK_EQUAL(srl[4], StringRef("5", 1));
+}
+
+
+BOOST_AUTO_TEST_CASE(test_string_ref)
 {
   StringRef sr("12345", 5);
   BOOST_CHECK_EQUAL(sr.length(), size_t(5));

@@ -11,6 +11,7 @@ set(GEOM_UNITTESTS
   test_vec2.cc
   test_vec3.cc
   test_vec4.cc
+  test_transform.cc
   tests.cc
   test_geom.py
 )

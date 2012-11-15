@@ -54,7 +54,7 @@ public:
   MapIso(const String& name, const img::MapHandle& mh,float level, uint a=0);
 
   /// returns bounding box of iso-contour object, not overall map
-  virtual geom::AlignedCuboid GetBoundingBox() const;
+  virtual geom::AlignedCuboid GetBoundingBox(bool use_global=false) const;
 
   /// returns center of iso-contour object, not overall map
   virtual geom::Vec3 GetCenter() const;

@@ -168,7 +168,7 @@ QMap<int, QList<int> > SequenceViewObject::GetIndexesForView(const mol::EntityVi
           // for each residue in the selection deduce index in sequence
           for (mol::ResidueViewList::const_iterator j=src_chain.GetResidueList().begin(),
              e2=src_chain.GetResidueList().end(); j!=e2; ++j) {
-            mol::ResidueView dst_res=dst_chain.FindResidue(j->GetHandle());
+            mol::ResidueView dst_res=dst_chain.ViewForHandle(j->GetHandle());
             assert(dst_res.IsValid());
             int p=dst_res.GetIndex()+1;
             assert(p>=0 && p<=seq.GetLength());

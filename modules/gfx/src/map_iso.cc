@@ -86,20 +86,20 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   SetMatDiff(Color(1,1,1));
   SetMatSpec(Color(0.1,0.1,0.1));
   SetMatShin(32);
-  mol::Transform tf=this->GetTF();
+  geom::Transform tf=this->GetTF();
   tf.SetCenter(this->GetCenter());
   tf.SetTrans(this->GetCenter());  
   this->SetTF(tf);
   Rebuild();
 }
 
-geom::AlignedCuboid MapIso::GetBoundingBox() const
+geom::AlignedCuboid MapIso::GetBoundingBox(bool use_tf) const
 {
   if(recalc_bb_) {
     bb_=va_.GetBoundingBox();
     recalc_bb_=false;
   }
-  return bb_;
+  return use_tf ? transform_.Apply(bb_) : bb_;
 }
 
 geom::Vec3 MapIso::GetCenter() const

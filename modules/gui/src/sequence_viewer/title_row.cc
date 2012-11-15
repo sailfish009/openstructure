@@ -41,29 +41,30 @@ QVariant TitleRow::GetData(int column, int role) const
   if(column<0){
     return QVariant();
   }
-  else if(role==Qt::DisplayRole && column%10==9){
-    return QVariant(QString::number(column+1));
-  }
-  else if(role==Qt::DisplayRole && column%10==0){
-      return QVariant(QString::number(column));
-  }
-  else if (role==Qt::FontRole){
-    if(column < 999){
-      return QVariant(font_);
-    }
-    else{
+  switch (role) {
+    case Qt::DisplayRole:
+      if (column % 10 == 9) { 
+        return QVariant(QString::number(column+1));
+      }
+      if (column % 10 == 0) {
+        return QVariant(QString::number(column));
+      }
+      return QVariant();
+    case Qt::FontRole:
+      if(column < 999){
+        return QVariant(font_);
+      }
       return QVariant(small_font_);
-    }
-  }
-  else if (role==Qt::TextAlignmentRole){
-    return QVariant(Qt::AlignHCenter|Qt::AlignBottom);
-  }
-  else if (role==Qt::SizeHintRole){
+    case Qt::TextAlignmentRole:
+      return QVariant(Qt::AlignHCenter|Qt::AlignBottom);
+    case Qt::SizeHintRole: {
       QSize size = this->GetCellSize();
       size.setHeight(10);
       return QVariant(size);
+    }
+    default:
+      return BaseRow::GetData(column, role);
   }
-  return BaseRow::GetData(column, role);
 }
 
 Qt::ItemFlags TitleRow::Flags(int column) const
@@ -79,7 +80,8 @@ void TitleRow::DoubleClicked(int column)
  if(this->parent()){
    if(SequenceModel* model = qobject_cast<SequenceModel*>(this->parent()->parent())){
      int rows = model->rowCount()-1;
-     QItemSelection add = QItemSelection(model->index(1,column),model->index(rows,column));
+     QItemSelection add = QItemSelection(model->index(1,column),
+                                         model->index(rows,column));
      model->SelectionChanged(add,QItemSelection());
    }
  }

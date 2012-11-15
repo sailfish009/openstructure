@@ -100,9 +100,18 @@ PyObject* get_pos1(EntityHandle& entity)
   return get_pos2(entity,true);
 }
 
-
-
 #endif
+
+geom::Mat4 depr_get_transformation_matrix(const EntityHandle& eh)
+{
+  return eh.GetTransformationMatrix();
+}
+
+bool depr_is_transformation_identity(const EntityHandle& eh)
+{
+  return eh.IsTransformationIdentity();
+}
+
 } // ns
 
 void export_Entity()
@@ -181,17 +190,17 @@ void export_Entity()
     .add_property("bonds", &EntityHandle::GetBondList)
     .def("GetBounds", &EntityHandle::GetBounds)
     .add_property("bounds", &EntityHandle::GetBounds)
-    .def("GetTransformationMatrix", &EntityHandle::GetTransformationMatrix,
-         return_value_policy<copy_const_reference>())
-    .add_property("transform", 
-                   make_function(&EntityHandle::GetTransformationMatrix, 
-                                 return_value_policy<copy_const_reference>()))    
-
+    .def("GetTransformationMatrix", depr_get_transformation_matrix)
+    .def("IsTransformationIdentity",depr_is_transformation_identity)
+    .def("GetTransform",&EntityHandle::GetTransform)
+    .def("SetTransform",&EntityHandle::SetTransform)
+    .add_property("transform",&EntityHandle::GetTransform,&EntityHandle::SetTransform)
+    .def("HasTransform",&EntityHandle::HasTransform)
+    .def("ClearTransform",&EntityHandle::ClearTransform)
     .def("EditXCS", &EntityHandle::EditXCS, arg("mode")=UNBUFFERED_EDIT)
     .def("EditICS", &EntityHandle::EditICS, arg("mode")=UNBUFFERED_EDIT)
     .def("RequestXCSEditor", &depr_request_xcs_editor, arg("mode")=UNBUFFERED_EDIT)
     .def("RequestICSEditor", &depr_request_ics_editor, arg("mode")=UNBUFFERED_EDIT)  
-    .def("IsTransformationIdentity",&EntityHandle::IsTransformationIdentity)
     .def(self==self)
     .def(self!=self)
 #if OST_NUMPY_SUPPORT_ENABLED

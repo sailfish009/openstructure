@@ -30,7 +30,7 @@
 #include <boost/shared_array.hpp>
 
 #include <ost/gfx/module_config.hh>
-#include <ost/mol/transform.hh>
+#include <ost/geom/transform.hh>
 #include <ost/mol/atom_handle.hh>
 
 #include "gl_include.hh"
@@ -43,6 +43,8 @@
 #include "gfx_prim.hh"
 #include "povray_fw.hh"
 #include "exporter_fw.hh"
+#include "gradient.hh"
+#include "bitmap_io.hh"
 
 namespace ost { namespace gfx {
 
@@ -84,7 +86,7 @@ class DLLEXPORT_OST_GFX Scene {
   // refactoring of the scene it into a management
   // and a view part
   struct SceneViewStackEntry {
-    mol::Transform transform;
+    geom::Transform transform;
     float fov;
     float znear,zfar;
   };
@@ -137,10 +139,17 @@ class DLLEXPORT_OST_GFX Scene {
   void SetAmbientOcclusionQuality(uint q);
   /// experimental feature
   uint GetAmbientOcclusionQuality() const;
+  /// experimental feature
+  void SetAmbientOcclusionSize(float f);
+  /// experimental feature
+  float GetAmbientOcclusionSize() const;
   
   /// \brief select shading mode
   /// one of fallback, basic, default, hf, toon1, toon2
   void SetShadingMode(const std::string& smode);
+
+  geom::Mat4 GetProjection() const {return pmat_;}
+  geom::Mat4 GetInvertedProjection() const {return ipmat_;}
 
   /// \name clipping planes, fog and field-of-view
   //@{
@@ -165,6 +174,8 @@ class DLLEXPORT_OST_GFX Scene {
   // \brief get the field of view
   float GetFOV() const;
 
+  float GetAspect() const {return aspect_ratio_;}
+
   /// \brief offset between near clipping plane and start of fog
   void SetFogNearOffset(float o);
 
@@ -180,20 +191,48 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief convenciene function to set fog near and far offset
   void SetFogOffsets(float no, float fo);
   
-  /// \brief adjust near and far clipping plane to fit visible objects
-  // TODO: use mode aka fast, precise, max
-  void Autoslab(bool fast=false, bool redraw=true);
+  /// DEPRECATED, use Autoslab() and SetAutoslabMode(int)
+  void Autoslab(bool fast);
 
-  /// \brief adjust clipping planes to fix maximal extent of all objects
-  ///        even under rotation
-  // TODO: merge with Autoslab
+  /// DEPRECATED, use Autoslab() and SetAutoslabMode(int)
+  void Autoslab(bool fast, bool);
+
+  /// DEPRECATED, use SetAutoslabMode(2)
   void AutoslabMax();
 
-  /// \brief turn on automatic auto-slabbing (using the fast bounding box alg)
-  // TODO: more sophisticated mode, aka fast, precise, max
+  /*!
+    \brief adjust near and far clipping plane to fit visible objects
+
+    Use autoslab mode to calculate near and far clipping places; this
+    does not need to be called explicitely if AutoAutoslab is active.
+    Uses the mode set by \ref SetAutoslabMode
+  */
+  void Autoslab();
+
+  /*!
+    \brief set autoslab mode
+
+    0: fast (default), using only the bounding box
+    1: precise, using each graphical element (not implemented)
+    2: max, using maximal extent upon rotation
+  */
+  void SetAutoslabMode(int mode) {
+    autoslab_mode_=std::min(2,std::max(0,mode));
+  }
+
+  /// \brief return current autoslab mode
+  int GetAutoslabMode() const {
+    return autoslab_mode_;
+  }
+
+  /*!
+    \brief turn automatic autoslab'bing on or off for each scene update
+
+    the current autoslab mode is honored \ref SetAutoslabMode(int)
+  */
   void AutoAutoslab(bool f);
   
-  /// \brief get current state of automatic auto-slabbing
+  /// \brief get current state of automatic autoslab'bing
   bool GetAutoAutoslab() const { return auto_autoslab_; }
 
   //@}
@@ -298,6 +337,12 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief set background color
   void SetBackground(const Color& c);
 
+  /// \brief set background gradient
+  void SetBackground(const Gradient& g);
+
+  /// \brief set background image
+  void SetBackground(const Bitmap& bm);
+
   /// \brief get background color
   Color GetBackground() const;
 
@@ -319,14 +364,22 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief calculate unprojected point out of the scene
   geom::Vec3 UnProject(const geom::Vec3& v, bool ignore_vp=false) const;
 
-  /// \brief return bounding box of scene under given transform
-  geom::AlignedCuboid GetBoundingBox(const mol::Transform& tf) const;
+  /// \brief return bounding box of scene
+  /*!
+    the sole boolean parameter determines whether or not the scene 
+    transformation is applied to calculate the bounding box. Since in
+    most cases it should be used, the default value is true.
+  */
+  geom::AlignedCuboid GetBoundingBox(bool use_tf=true) const;
+
+  /// \brief return bounding box of with a given transform
+  geom::AlignedCuboid GetBoundingBox(const geom::Transform& tf) const;
 
   /// \brief get full underlying transformation
-  mol::Transform GetTransform() const;
+  geom::Transform GetTransform() const;
 
   /// \brief set transform
-  void SetTransform(const mol::Transform& t);
+  void SetTransform(const geom::Transform& t);
 
   /// \brief returns a compact, internal representation of the scene orientation
   geom::Mat4 GetRTC() const;
@@ -442,6 +495,11 @@ class DLLEXPORT_OST_GFX Scene {
   /// experimental feature
   void SetBeaconOff();
 
+  void SetExportAspect(float a);
+  float GetExportAspect() const {return export_aspect_;}
+  void SetShowExportAspect(bool f);
+  bool GetShowExportAspect() const {return show_export_aspect_;}
+
 protected:
   friend class GfxObj; 
   friend class GfxNode;
@@ -454,6 +512,7 @@ protected:
   void NodeTransformed(const GfxObjP& object);
   void NodeAdded(const GfxNodeP& node);
   void RenderModeChanged(const String& name);
+
 
 private:  
 
@@ -470,7 +529,7 @@ private:
   mutable GfxNodeP     root_node_; // mutable is slightly hackish
   SceneObserverList    observers_;
 
-  mol::Transform transform_; // overall modelview transformation
+  geom::Transform transform_; // overall modelview transformation
 
   bool gl_init_;
 
@@ -478,6 +537,7 @@ private:
   float znear_,zfar_; // near and far clipping plane
   float fnear_,ffar_; // fog near and far offsets
 
+  geom::Mat4 pmat_,ipmat_; // projection and inverted projection matrix
   unsigned int vp_width_,vp_height_; // viewport
 
   SceneViewStack scene_view_stack_;
@@ -496,8 +556,9 @@ private:
   bool fix_cor_flag_;
   bool fog_flag_;
   Color fog_color_;
-  bool auto_autoslab_;
-  bool do_autoslab_,do_autoslab_fast_;
+  bool auto_autoslab_; // run autoslab on each scene update
+  bool do_autoslab_;   // run autoslab on next scene update
+  int autoslab_mode_;  // 0: fast, 1:precise, 2: max
 
   bool offscreen_flag_; // a simple indicator whether in offscreen mode or not
   OffscreenBuffer* main_offscreen_buffer_; // not null if a main offscreen buffer is present
@@ -523,6 +584,14 @@ private:
   Real stereo_iod_,stereo_distance_;
   unsigned int scene_left_tex_;
   unsigned int scene_right_tex_;
+  unsigned int bg_mode_;
+  bool update_bg_;
+  Gradient bg_grad_;
+  Bitmap bg_bm_;
+  unsigned int bg_tex_;
+  
+  float export_aspect_; 
+  bool show_export_aspect_;
 
   void set_near(float n);
   void set_far(float f);
@@ -531,10 +600,12 @@ private:
   void prep_glyphs();
   void prep_blur();
   void stereo_projection(int view);
+  void render_bg();
+  void render_export_aspect();
   void render_scene();
   void render_glow();
   void render_stereo();
-
+  void set_bg();
   void do_autoslab();
 
   bool IsNameAvailable(const String& name) const;

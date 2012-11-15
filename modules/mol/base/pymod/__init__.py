@@ -21,6 +21,17 @@ import ost.geom as _geom
 from ost.mol import alg
 
 
+def Transform(tf=None):
+  from ost import LogWarning
+  if Transform.mol_transform_warning_flag:
+    LogWarning("mol.Transform is deprecated, please use geom.Transform instead")
+    Transform.mol_transform_warning_flag=False
+  if tf:
+    return _geom.Transform(tf)
+  else:
+    return _geom.Transform()
+Transform.mol_transform_warning_flag=True
+
 def MergeCoordGroups(*coord_groups):
   """
   Merge several separate coord groups into one. The coord groups must have the 

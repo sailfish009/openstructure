@@ -58,7 +58,7 @@ public:
       Vec3 d=is.GetSampling().GetPixelSampling();
       Real F=calcF(Point(it),d);
       Real value = (F <= limit_ ? 1.0 : 0.0);
-      is.Value(it)*=value;
+      is.Value(it)*=Val2Val<Real,T>(value);
     }
   }
 
@@ -91,7 +91,7 @@ public:
       Vec3 d=is.GetSampling().GetPixelSampling();
       Real F=calcF(Point(it),d);
       Real value= (F >= limit_ ? 1.0 : 0.0);
-      is.Value(it)*=value;
+      is.Value(it)*=Val2Val<Real,T>(value);
     }
   }
 
@@ -123,7 +123,7 @@ public:
       Vec3 d=is.GetSampling().GetPixelSampling();
       Real F=calcF(Point(it),d);
       Real value=exp(-F*F/(2.0*limit_*limit_));
-      is.Value(it)*=value;
+      is.Value(it)*=Val2Val<Real,T>(value);
     }
   }
 
@@ -155,7 +155,7 @@ public:
       Vec3 d=is.GetSampling().GetPixelSampling();
       Real F=calcF(Point(it),d);
       Real value=1.0-exp(-F*F/(2.0*limit_*limit_));
-      is.Value(it)*=value;
+      is.Value(it)*=Val2Val<Real,T>(value);
     }
   }
 
@@ -195,7 +195,7 @@ public:
         Real F=calcF(Point(it),d);
         Real teff=t_*t_/l2*F*(t_>=0?1.0:-1.0);
         Real value=1.0/(1.0+exp((F-limit_)/(teff)));
-        is.Value(it)*=value;
+        is.Value(it)*=Val2Val<Real,T>(value);
       }
     }
   }
@@ -235,7 +235,7 @@ public:
       Vec3 d=is.GetSampling().GetPixelSampling();
       Real F=calcF(Point(it),d);
       Real value=(1.0/(sqrt(1+pow(F/rad,Real(2.0)*order))));
-      is.Value(it)*=value;
+      is.Value(it)*=Val2Val<Real,T>(value);
     }
   }
 

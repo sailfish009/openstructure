@@ -118,6 +118,7 @@ public:
   AtomView FindAtom(const String& atom_name) const;
 
   /// \brief Find residue by residue handle
+  AtomView ViewForHandle(const AtomHandle& handle) const;
   AtomView FindAtom(const AtomHandle& handle) const;
 
   /// \brief Check whether the view includes the the given atom.

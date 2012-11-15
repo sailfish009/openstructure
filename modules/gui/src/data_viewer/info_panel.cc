@@ -64,9 +64,9 @@ InfoPanel::InfoPanel(QWidget* parent):
   QFont fnt=font();
   fnt.setPointSize(font().pointSize()-1);
   setFont(fnt);
-  int maxw = QFontMetrics(fnt).width("(9999,9999,1) to (9999,9999,1)");
-  setMaximumWidth(maxw);
-  setMinimumWidth(maxw);
+  //int maxw = QFontMetrics(fnt).width("(9999,9999,1) to (9999,9999,1)");
+  //setMaximumWidth(maxw);
+  //setMinimumWidth(maxw);
 
   QFont fnt2(fnt);
   fnt2.setWeight(QFont::Bold);

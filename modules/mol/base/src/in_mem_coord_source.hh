@@ -38,7 +38,7 @@ class DLLEXPORT_OST_MOL InMemCoordSource : public CoordSource {
 public:
   InMemCoordSource(const AtomHandleList& atoms);
   
-  virtual uint GetFrameCount();
+  virtual uint GetFrameCount() const;
   
   virtual CoordFramePtr GetFrame(uint frame_id) const;
   

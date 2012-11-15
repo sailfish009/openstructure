@@ -8,6 +8,7 @@ string_ref.cc
 platform.cc
 message.cc
 test_utils/compare_files.cc
+boost_filesystem_helper.cc
 )
 
 set(OST_BASE_HEADERS
@@ -30,6 +31,7 @@ string_ref.hh
 pod_vector.hh
 fixed_string.hh
 tri_matrix.hh
+boost_filesystem_helper.hh
 )
 
 set(OST_EXPORT_HELPERS

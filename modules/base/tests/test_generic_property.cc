@@ -55,8 +55,8 @@ BOOST_AUTO_TEST_CASE( test_generic_property )
 
   EntityView ev = eh.CreateFullView();
   ChainView chv = ev.FindChain("A");
-  ResidueView resv = ev.FindResidue(res);
-  AtomView atomv = ev.FindAtom(atom);
+  ResidueView resv = ev.ViewForHandle(res);
+  AtomView atomv = ev.ViewForHandle(atom);
 
   BOOST_CHECK(ev.GetStringProp("a")=="123");
   BOOST_CHECK(chv.GetFloatProp("b")==1.5);

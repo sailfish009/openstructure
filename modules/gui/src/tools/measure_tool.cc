@@ -205,7 +205,7 @@ Measurement::Measurement(mol::AtomHandleList ahl, gfx::Color col, Real line_widt
       name_=ahl_[0].GetQualifiedName()+" - "+ahl_[1].GetQualifiedName()+" - "
              +ahl_[2].GetQualifiedName();
       measurement_=57.2958*geom::Angle(ahl_[0].GetPos()-ahl_[1].GetPos(),
-                                       ahl_[1].GetPos()-ahl_[2].GetPos());
+                                       ahl_[2].GetPos()-ahl_[1].GetPos());
       valid_=true;
       break;
     }

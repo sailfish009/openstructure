@@ -59,7 +59,11 @@ public:
 */
 
 #if defined(__linux__)
+#if OST_MESA_SUPPORT_ENABLED
+#include "impl/mesa_offscreen_buffer.hh"
+#else
 #include "impl/glx_offscreen_buffer.hh"
+#endif
 #elif defined(__APPLE__)
 #include "impl/cgl_offscreen_buffer.hh"
 #elif defined(_MSC_VER)

@@ -85,6 +85,7 @@ public:
     mol::AtomHandle ca = res.GetCentralAtom();
     if (ca) {
       float rad=1.0;
+      // TODO: move this property to the rendering state
       if(ca.HasProp("trace_rad")) {
         rad=ca.GetFloatProp("trace_rad");
       }
@@ -253,7 +254,7 @@ BackboneTrace BackboneTrace::CreateSubset(const mol::EntityView& subview)
     NodeEntryList new_nlist;
     const NodeEntryList& nlist=*nitnit;
     for(NodeEntryList::const_iterator nit=nlist.begin();nit!=nlist.end();++nit) {
-      if(subview.FindAtom(nit->atom).IsValid()) {
+      if(subview.ViewForHandle(nit->atom).IsValid()) {
         if(!new_nlist.empty()) {
           if(!in_sequence(new_nlist.back().atom.GetResidue(),nit->atom.GetResidue(),seq_hack_)) {
             if(new_nlist.size()>1) {

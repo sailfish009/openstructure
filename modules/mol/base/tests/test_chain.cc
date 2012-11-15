@@ -87,16 +87,38 @@ BOOST_AUTO_TEST_CASE(test_comparison)
   BOOST_CHECK(cc==ch1);
 }
 
-
 BOOST_AUTO_TEST_CASE(throw_invalid_chain_handle)
 {
   EntityHandle ent=CreateEntity();
-  ChainHandle chain=ent.FindChain("A");
-  BOOST_CHECK_THROW(CheckHandleValidity(chain), InvalidHandle);
+  ChainHandle ch=ent.FindChain("A");
+  BOOST_CHECK_THROW(CheckHandleValidity(ch), InvalidHandle);
   XCSEditor edi=ent.EditXCS();
   edi.InsertChain("A");
-  chain=ent.FindChain("A");
-  BOOST_CHECK_NO_THROW(CheckHandleValidity(chain));
+  ch=ent.FindChain("A");
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(ch));
+
+
+  EntityHandle eh1 = CreateEntity();
+  XCSEditor e1=eh1.EditXCS();
+  ChainHandle chain = e1.InsertChain("C");
+  ResidueHandle res1 = e1.AppendResidue(chain, "FOO", ResNum(13));
+  AtomHandle atom1 = e1.InsertAtom(res1, "X1",geom::Vec3());
+  AtomHandle atom2 = e1.InsertAtom(res1, "X2",geom::Vec3());
+  ResidueHandle res2 = e1.AppendResidue(chain, "FOO", ResNum(42));
+  e1.InsertAtom(res2, "X1",geom::Vec3());
+  e1.InsertAtom(res2, "X2",geom::Vec3());
+
+  EntityHandle eh2=CreateEntity();
+  XCSEditor e2=eh2.EditXCS();
+  ChainHandle inserted_chain1 = e2.InsertChain("Q",chain);
+  res1.SetIntProp("amazing",42);
+  ResidueHandle inserted_residue1 = e2.AppendResidue(inserted_chain1,res1);
+  BOOST_CHECK(inserted_residue1!=res1);
+  BOOST_CHECK(eh2.GetResidueCount()==1);
+  BOOST_CHECK(eh2.GetAtomCount()==0);
+  BOOST_CHECK(inserted_residue1.HasProp("amazing"));
+  ResidueHandle inserted_residue2 = e2.AppendResidue(inserted_chain1,res2,true);
+  BOOST_CHECK(eh2.GetAtomCount()==2);
 }
 
 BOOST_AUTO_TEST_CASE(throw_invalid_chain_view)
@@ -301,7 +323,7 @@ BOOST_AUTO_TEST_CASE(chain_type)
                CHAINTYPE_POLY_DN_RN);
    BOOST_CHECK(ChainTypeFromString("other") == CHAINTYPE_UNKNOWN);
    BOOST_CHECK_THROW(ChainTypeFromString("supposed to fail"),
-                     std::runtime_error);
+                     Error);
 
    // chain type -> string
    BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY) == "polymer");
@@ -322,7 +344,7 @@ BOOST_AUTO_TEST_CASE(chain_type)
                "polydeoxyribonucleotide/polyribonucleotide hybrid");
    BOOST_CHECK(StringFromChainType(CHAINTYPE_UNKNOWN) == "other");
    BOOST_CHECK_THROW(StringFromChainType(CHAINTYPE_N_CHAINTYPES),
-                     std::runtime_error);
+                     Error);
 }
 
 BOOST_AUTO_TEST_CASE(chain_description)

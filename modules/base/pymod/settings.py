@@ -1,6 +1,18 @@
 import os, platform
 import __main__
  
+def GetPlatform():
+  """
+  Returns platform.system(). If the system call is interrupted, it is repeated.
+  This function is a workaround for the buggy system call handling in Python.
+  """
+  system=None
+  while not system:
+    try:
+      system=platform.system()
+    except IOError:
+      pass
+  return system
 
 def GetValue(val_key,val_default=None,prefix='OST'):
   """
@@ -89,7 +101,7 @@ def Locate(file_name, explicit_file_name=None, search_paths=[],
 
   if search_system_paths:
     paths=os.getenv('PATH')
-    if platform.system() == "Windows":
+    if GetPlatform() == "Windows":
       searched+=paths.split(';')
     else:
       searched+=paths.split(':')

@@ -245,7 +245,8 @@ private:
   bool fast_high_mag_;
 
   bool antialiasing_;
-  
+  Point drag_start_;
+
   void move(int dx, int dy);
   void slab(int dz);
   void zoom(int d);

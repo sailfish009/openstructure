@@ -1,4 +1,5 @@
 //------------------------------------------------------------------------------
+//
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
 // Copyright (C) 2008-2011 by the OpenStructure authors
@@ -207,7 +208,7 @@ ChainView EntityView::AddChain(const ChainHandle& chain_handle,
   this->CheckValidity();
   ChainView cv;
   if (flags & ViewAddFlag::CHECK_DUPLICATES &&
-      (cv=this->FindChain(chain_handle)))
+      (cv=this->ViewForHandle(chain_handle)))
     return cv;
   cv=ChainView(*this, chain_handle);
   data_->chains.push_back(cv);
@@ -256,14 +257,14 @@ ChainView EntityView::FindChain(const String& chain_name) const{
 }
 
 
-ResidueView EntityView::FindResidue(const ResidueHandle& residue) const {
+ResidueView EntityView::ViewForHandle(const ResidueHandle& residue) const {
   ChainHandle chain=residue.GetChain();
-  ChainView v=this->FindChain(chain);
-  return v.IsValid() ? v.FindResidue(residue) : ResidueView();
+  ChainView v=this->ViewForHandle(chain);
+  return v.IsValid() ? v.ViewForHandle(residue) : ResidueView();
 }
 
 
-AtomView EntityView::FindAtom(const AtomHandle& atom) const 
+AtomView EntityView::ViewForHandle(const AtomHandle& atom) const
 {
   this->CheckValidity();
   return data_->ViewForHandle(atom);
@@ -409,7 +410,7 @@ EntityView EntityView::Select(const Query& query, QueryFlags flags) const
   return view;
 }
 
-ChainView EntityView::FindChain(const ChainHandle& chain) const {
+ChainView EntityView::ViewForHandle(const ChainHandle& chain) const {
   this->CheckValidity();
   ChainViewList::const_iterator i;
   i=std::find_if(data_->chains.begin(), data_->chains.end(),
@@ -421,7 +422,7 @@ ChainView EntityView::FindChain(const ChainHandle& chain) const {
 bool EntityView::IsChainIncluded(const ChainHandle& chain) const 
 {
   this->CheckValidity();
-  return this->FindChain(chain).IsValid();
+  return this->ViewForHandle(chain).IsValid();
 }
 
 
@@ -584,7 +585,7 @@ ChainView EntityView::AddChain(const ChainView& chain_view,
   this->CheckValidity();
   ChainView cv;
   if (flags & ViewAddFlag::CHECK_DUPLICATES &&
-     (cv=this->FindChain(chain_view.GetHandle()))) {
+     (cv=this->ViewForHandle(chain_view.GetHandle()))) {
     if (!(flags & ViewAddFlag::INCLUDE_RESIDUES)) {
       return cv;
     }
@@ -627,7 +628,7 @@ AtomViewList EntityView::FindWithin(const geom::Vec3& center, Real radius) const
   AtomHandleList ahl=this->GetHandle().FindWithin(center, radius);
   AtomViewList avl;
   for (AtomHandleList::iterator i=ahl.begin(), e=ahl.end(); i!=e; ++i) {
-    if (AtomView v=this->FindAtom(*i)) {
+    if (AtomView v=this->ViewForHandle(*i)) {
       avl.push_back(v);
     }
   }
@@ -721,7 +722,7 @@ AtomView EntityView::AddXAtom(const AtomHandle& ah, ViewAddFlags flags)
 }
 AtomView EntityView::FindXAtom(const AtomHandle& ah)
 {
-  return this->FindAtom(ah);
+  return this->ViewForHandle(ah);
 }
 #endif
 
@@ -737,6 +738,18 @@ AtomView EntityView::FindAtom(const String& chain_name,
   }
   return AtomView();
 }
+
+ResidueView EntityView::FindResidue(const String& chain,
+                                    const ResNum& num) const
+{
+  this->CheckValidity();
+  ChainView ch=this->FindChain(chain);
+  if (ch.IsValid()) {
+    return ch.FindResidue(num);
+ }
+  return ResidueView();
+}
+
 geom::AlignedCuboid EntityView::GetBounds() const
 {
   this->CheckValidity();
@@ -876,6 +889,27 @@ String EntityView::Dump() const
   std::stringstream stream;
   EntityViewDumper dumper(stream, *this);
   return stream.str();
+}
+
+ChainView EntityView::FindChain(const ChainHandle& chain) const
+{
+  LOG_WARNING("EntityView::FindChain is deprecated. "
+              "Use EntityView::ViewForHandle instead");
+  return this->ViewForHandle(chain);
+}
+
+ResidueView EntityView::FindResidue(const ResidueHandle& residue) const
+{
+  LOG_WARNING("EntityView::FindResidue is deprecated. "
+              "Use EntityView::ViewForHandle instead");
+  return this->ViewForHandle(residue);
+}
+
+AtomView EntityView::FindAtom(const AtomHandle& atom) const
+{
+  LOG_WARNING("EntityView::FindAtom(handle) is deprecated. "
+              "Use EntityView::ViewForHandle instead");
+  return this->ViewForHandle(atom);
 }
 
 }} // ns

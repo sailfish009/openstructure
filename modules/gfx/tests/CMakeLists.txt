@@ -1,6 +1,7 @@
 set(OST_GFX_UNIT_TESTS
   tests.cc
   test_gfx_node.cc
+  test_color.cc
   test_gfx.py
 )
 if (ENABLE_IMG)

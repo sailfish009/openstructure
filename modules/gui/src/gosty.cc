@@ -108,13 +108,20 @@ String get_ost_root()
 
 void setup_python_search_path(const String& root, PythonInterpreter& pi)
 {
+  std::stringstream site_pkgs;
+  site_pkgs << "python" << PY_MAJOR_VERSION << "." << PY_MINOR_VERSION;
 #ifdef _MSC_VER
-  pi.AppendModulePath(QString::fromStdString(root+"\\lib\\openstructure"));
+  pi.AppendModulePath(QString::fromStdString(root+"\\lib\\"+site_pkgs.str()
+                                             +"\\site-packages"));
 #else  
 #  if (defined(__ppc64__) || defined(__x86_64__)) && !defined(__APPLE__)
-  pi.AppendModulePath(QString::fromStdString(root+"/lib64/openstructure"));
+  pi.AppendModulePath(QString::fromStdString(root+"/lib64/"+
+                                             site_pkgs.str()+
+                                             "/site-packages"));
 #  else
-  pi.AppendModulePath(QString::fromStdString(root+"/lib/openstructure"));
+  pi.AppendModulePath(QString::fromStdString(root+"/lib/"+
+                                             site_pkgs.str()+
+                                             "/site-packages"));
 #  endif
 #endif
   pi.AppendModulePath(".");  
@@ -193,6 +200,23 @@ void prepare_scripts(int argc, char** argv, PythonInterpreter& py)
   py.RunScript(argv[1]);
 }
 
+class MyApplication : public QApplication
+{
+public:
+    MyApplication(int argc, char** argv) : QApplication(argc, argv) {}
+    virtual ~MyApplication() {}
+    virtual bool notify(QObject *rec, QEvent *ev)
+    {
+      try {
+        return QApplication::notify(rec, ev);
+      } catch( std::runtime_error& e) {
+        std::cerr << "runtime_error in Qt main loop: " << e.what() << std::endl;
+        exit(0);
+      }
+      return false;
+    }
+};
+
 
 }
 
@@ -201,7 +225,7 @@ int main(int argc, char** argv)
 {
   int dummy_argc=1;
   
-  QApplication app(dummy_argc,argv);
+  MyApplication app(dummy_argc,argv);
   QCoreApplication::setOrganizationName("OpenStructure");
   QCoreApplication::setOrganizationDomain("openstructure.org");
   QCoreApplication::setApplicationName(QString(argv[2]));
