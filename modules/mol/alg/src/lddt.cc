@@ -398,7 +398,14 @@ int main (int argc, char **argv)
               << " checked, over " << cutoffs.size() << " thresholds)" << std::endl;
 
     // prints the residue-by-residue statistics  
-    std::cout << "Local LDDT Score:" << std::endl;
+    if (structural_checks) {
+      std::cout << "Local LDDT Scores:" << std::endl;
+      std::cout << "(A 'Yes' in the 'Quality Problems' column stands for problems" << std::endl;
+      std::cout << "in the side-chain of a residue, while a 'Yes+' for problems" << std::endl;
+      std::cout << "in the backbone)" << std::endl;
+    } else {
+      std::cout << "Local LDDT Scores:" << std::endl;
+    }
     if (structural_checks) {
       std::cout << "Chain\tResName\tResNum\tAsses.\tQ.Prob.\tScore\t(Conserved/Total, over " << cutoffs.size() << " thresholds)" << std::endl;
     } else {
