@@ -396,12 +396,17 @@ mol::AtomHandle Entity::PickAtom(const geom::Line3& line, Real line_width)
 {
   mol::AtomHandle picked_atom;
   if (!this->IsVisible())
-    return picked_atom;  
+    return picked_atom;
+  geom::Mat4 it=GetTF().GetInvertedMatrix();
+  geom::Vec3 l1=geom::Vec3(it*geom::Vec4(line.At(0.0)));
+  geom::Vec3 l2=geom::Vec3(it*geom::Vec4(line.At(1.0)));
+  geom::Line3 tf_line(l1,l2);
+
   for (RendererMap::iterator i=renderer_.begin(), 
        e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* r=i->second;
     if (r->HasDataToRender() && r->IsEnabled()) {
-      r->PickAtom(line, line_width, picked_atom);      
+      r->PickAtom(tf_line, line_width, picked_atom);      
     }
   }
   return picked_atom;

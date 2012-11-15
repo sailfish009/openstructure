@@ -544,6 +544,11 @@ void GfxObj::OnInput(const InputEvent& e)
       trans+=geom::Vec3(0.0, -fy*e.GetDelta(), 0.0)*rot;
     }
     transform_.SetTrans(trans);
+  } else if (e.GetCommand()==INPUT_COMMAND_TRANSZ) {
+    float currz=transform_.GetTrans()[2];
+    float delta=currz*pow(1.01f,-e.GetDelta())-currz;
+    transform_.ApplyZAxisTranslation(delta);
+    transformed=true;
   }
   if (transformed) {
     GfxObjP obj=dyn_cast<GfxObj>(this->shared_from_this());
