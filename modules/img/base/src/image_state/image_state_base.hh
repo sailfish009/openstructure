@@ -30,6 +30,8 @@
 #include "image_state_base_fw.hh"
 
 #include <ost/base.hh>
+#include <ost/img/module_config.hh>
+#include <ost/img/data.hh>
 
 #include "image_state_visitor_fw.hh"
 #include "type_fw.hh"
