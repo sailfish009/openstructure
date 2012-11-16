@@ -253,14 +253,6 @@ void export_ImageHandle()
     .def(Real() * self)
     .def(self /= Real())
     .def(self / Real())
-    .def(self += other<Function>())
-    .def(self + other<Function>())
-    .def(self -= other<Function>())
-    .def(self - other<Function>())
-    .def(self *= other<Function>())
-    .def(self * other<Function>())
-    .def(self /= other<Function>())
-    .def(self / other<Function>())
     ;
 
   def("CreateImage",c0);
@@ -325,10 +317,6 @@ void export_ConstImageHandle()
     .def(self * Complex())
     .def(Complex() * self)
     .def(self / Complex())
-    .def(self + other<Function>())
-    .def(self - other<Function>())
-    .def(self * other<Function>())
-    .def(self / other<Function>())
      ;
 
   implicitly_convertible<ImageHandle,ConstImageHandle>();

@@ -2,7 +2,6 @@ set(OST_IMG_PYMOD_SOURCES
 export_data.cc
 export_data_algorithm.cc
 export_extent.cc
-export_function.cc
 export_image_handle.cc
 export_peak.cc
 export_phase.cc

@@ -173,10 +173,6 @@ template <typename T, class D>
     peak_collector.ClearPeakList();
   }
 
-  void HighestPeakSearch3DBase::VisitFunction(const Function& f)
-  {
-    throw Error("VisitFunction not implemented");
-  }
 
 } // ns
 

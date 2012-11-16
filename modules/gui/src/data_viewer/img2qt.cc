@@ -70,15 +70,6 @@ public:
 
   }
 
-  void VisitFunction(const Function& f)
-  {
-    for(int y=0;y<img_->size().height();++y) {
-      for(int x=0;x<img_->size().width();++x) {
-        int cv=clamp(static_cast<int>(norm_->Convert(f.GetReal(Point(x,y)+off_))),0,255);
-        img_->setPixel(x,y,qRgb(cv,cv,cv));
-      }
-    }
-  }
 
   static String GetAlgorithmName() {return "Conv0";}
 

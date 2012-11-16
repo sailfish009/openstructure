@@ -208,11 +208,6 @@ public:
   ImageStateBase& operator*=(const ImageStateBase& b);
   ImageStateBase& operator/=(const ImageStateBase& b);
 
-  virtual void operator+=(const Function& b) = 0;
-  virtual void operator-=(const Function& b) = 0;
-  virtual void operator*=(const Function& b) = 0;
-  virtual void operator/=(const Function& b) = 0;
-
 protected:
   ImageStateBase() {}
   ImageStateBase(const ImageStateBase& s) {}

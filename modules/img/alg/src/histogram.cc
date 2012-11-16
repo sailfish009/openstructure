@@ -66,18 +66,6 @@ void HistogramBase::VisitState(const ImageStateImpl<T,D>& isi)
     bins_[bin]++;
   }
 }
-void HistogramBase::VisitFunction(const Function& fnc)
-{
-  bins_=Bins(bin_count_,0);
-  for(ExtentIterator it(fnc.GetExtent());!it.AtEnd(); ++it) {
-    Real val=fnc.GetReal(it);
-    val = std::max(min_,val);
-    val=std::min(max_,val);
-    int bin = int(floor((val-min_)*cfac_));
-    bins_[bin]++;
-  }
-}
-
 
 }
 

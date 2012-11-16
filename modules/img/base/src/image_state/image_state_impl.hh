@@ -211,11 +211,6 @@ public:
   virtual ImageStateBase& operator/=(Real v);
   virtual ImageStateBase& operator/=(const Complex& v);
 
-  virtual void operator+=(const Function& b);
-  virtual void operator-=(const Function& b);
-  virtual void operator*=(const Function& b);
-  virtual void operator/=(const Function& b);
-
 protected:
   // helper methods for operators above
   template <typename U> void add_scalar(const U& v);

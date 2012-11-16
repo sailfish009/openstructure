@@ -66,28 +66,6 @@ void StatMinMaxBase::VisitState(const ImageStateImpl<T,D>& isi)
   maxpos_=maxindex.second+isi.GetExtent().GetStart();  
 }
 
-void StatMinMaxBase::VisitFunction(const Function& fnc)
-{
-  ValIndex minindex(std::numeric_limits<Real>::max(),Point(0,0,0));
-  ValIndex maxindex(-std::numeric_limits<Real>::max(),Point(0,0,0));
-  Real n = (Real)(fnc.GetSize().GetVol());
-
-  if(n==0.0)  return;
-
-  min_ = std::numeric_limits<Real>::max();
-  max_ = -std::numeric_limits<Real>::max();
-
-  for(ExtentIterator it(fnc.GetExtent());!it.AtEnd(); ++it) {
-    Real val=fnc.GetReal(it);
-    ValIndex vi(val,it);
-    minindex=std::min<ValIndex>(vi,minindex);
-    maxindex=std::max<ValIndex>(vi,maxindex);
-  }
-  min_=minindex.first;
-  max_=maxindex.first;
-  minpos_=minindex.second;
-  maxpos_=maxindex.second;  
-}
 
 std::ostream& operator<<(std::ostream& o, const StatMinMax& s)
 {

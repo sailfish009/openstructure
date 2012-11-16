@@ -45,18 +45,6 @@ void PasteFnc::VisitState(const image_state::ImageStateImpl<V,D>& isi)
   f_paste_ip(target_.ImageStatePtr().get(),&isi);
 }
 
-void PasteFnc::VisitFunction(const Function& f)
-{
-  if(target_.GetType()==REAL) {
-    for(ExtentIterator it(f.GetExtent());!it.AtEnd();++it) {
-      target_.SetReal(it,f.GetReal(it));
-    }
-  } else {
-    for(ExtentIterator it(f.GetExtent());!it.AtEnd();++it) {
-      target_.SetComplex(it,f.GetComplex(it));
-    }
-  }
-}
 
 }
 

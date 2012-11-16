@@ -305,7 +305,6 @@ public:
 
   }
 
-  void VisitFunction(const Function& f) {}
 
   static String GetAlgorithmName() {return "RasterImageFiller";}
 

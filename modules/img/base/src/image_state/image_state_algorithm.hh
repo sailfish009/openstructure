@@ -226,16 +226,13 @@ namespace ost { namespace img { namespace image_state {
     FNC(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,pa,pb), BASE (FNC::GetAlgorithmName()) {}
 
 
-//! non-modifying image state visitor plus data algorithm
+//! non-modifying image state visitor plus non-mod algorithm
 /*!
   This convenience hybrid class combines the functionality of
   the NonModAlgorithm and the ImageStateNonModVisitor by implementing
-  both interfaces. The template is expected to be a class with two
-  methods, a VisitState() method as for 
-  img::image_state::ImageStateNonModVisitor, and in addition a 
-  Visit(const Function&) method for the implementation of the
-  img::NonModAlgorithm interface and a static GetAlgorithmName() for
-  the initialization of the img::NonModAlgorithm ctor
+  both interfaces. The template parameter is expected to be a class
+  offering VisitState (see img::image_state::ImageStateNonModVisitor ),
+  plus a static GetAlgorithmName() method:
 
   \code
 
@@ -243,8 +240,6 @@ namespace ost { namespace img { namespace image_state {
   public:
     template<typename T, class D>
     void VisitState(const img::image_state::ImageStateImpl<T,D>& isi);
-
-    void VisitFunction(const Funcion& f);
 
     static String GetAlgorithmName();
   };
@@ -274,9 +269,6 @@ public:
   // const algorithm interface
   virtual void Visit(const ConstImageHandle& h) {
     h.StateApply(*this);
-  }
-  virtual void Visit(const Function& f) {
-    this->VisitFunction(f);
   }
   
 private:

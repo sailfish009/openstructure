@@ -8,8 +8,6 @@ data_algorithm.cc
 data_observer.cc
 extent.cc
 extent_iterator.cc
-function_base.cc
-function_impl.cc
 image_factory.cc
 image_handle.cc
 image_impl.cc
@@ -45,10 +43,6 @@ debug.hh
 dllexport.hh
 extent.hh
 extent_iterator.hh
-function.hh
-function_base.hh
-function_fw.hh
-function_impl.hh
 image.hh
 image_factory.hh
 image_fw.hh
@@ -61,7 +55,6 @@ mask_visitor.hh
 normalizer_fw.hh
 normalizer_impl.hh
 null_data.hh
-null_function.hh
 observable.hh
 paste_impl.hh
 peak.hh

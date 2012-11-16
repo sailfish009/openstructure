@@ -28,7 +28,6 @@
 #define IMG_DATA_ALG_H
 
 #include <ost/img/module_config.hh>
-#include "function_fw.hh"
 #include "image_fw.hh"
 
 /*
@@ -69,8 +68,6 @@ class DLLEXPORT_OST_IMG_BASE NonModAlgorithm: public AlgorithmBase
 public:
   //! visitor implementation for images
   virtual void Visit(const ConstImageHandle& i) = 0;
-  //! visitor implementation for real functions
-  virtual void Visit(const Function& f) = 0;
 
 protected:
   //! ctor, must be initialized with name

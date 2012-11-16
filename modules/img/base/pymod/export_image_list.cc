@@ -86,10 +86,6 @@ void export_ImageList()
     .def(self -= Real())
     .def(self *= Real())
     .def(self /= Real())
-    .def(self += other<Function>())
-    .def(self -= other<Function>())
-    .def(self *= other<Function>())
-    .def(self /= other<Function>())
     ;
 }
 

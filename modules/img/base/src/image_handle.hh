@@ -38,7 +38,6 @@
 #include "data.hh"
 #include "observable.hh"
 #include "data_observer.hh"
-#include "function.hh"
 #include "extent_iterator.hh"
 
 #include "image_state/image_state_visitor_fw.hh"
@@ -463,11 +462,6 @@ public:
   ImageHandle& operator*=(const ConstImageHandle& h);
   ImageHandle& operator/=(const ConstImageHandle& h);
 
-  ImageHandle& operator+=(const Function& h);
-  ImageHandle& operator-=(const Function& h);
-  ImageHandle& operator*=(const Function& h);
-  ImageHandle& operator/=(const Function& h);
-
   //@}
 
   /*! @name low-level access
@@ -736,14 +730,6 @@ DLLEXPORT_OST_IMG_BASE ImageHandle operator-(const ConstImageHandle& h1, const C
 DLLEXPORT_OST_IMG_BASE ImageHandle operator*(const ConstImageHandle& h1, const ConstImageHandle& h2);
 DLLEXPORT_OST_IMG_BASE ImageHandle operator/(const ConstImageHandle& h1, const ConstImageHandle& h2);
 
-DLLEXPORT_OST_IMG_BASE ImageHandle operator+(const ConstImageHandle& h1, const Function& h2);
-DLLEXPORT_OST_IMG_BASE ImageHandle operator-(const ConstImageHandle& h1, const Function& h2);
-DLLEXPORT_OST_IMG_BASE ImageHandle operator*(const ConstImageHandle& h1, const Function& h2);
-DLLEXPORT_OST_IMG_BASE ImageHandle operator/(const ConstImageHandle& h1, const Function& h2);
-
-DLLEXPORT_OST_IMG_BASE ImageHandle operator+(const Function& h1, const ConstImageHandle& h2);
-DLLEXPORT_OST_IMG_BASE ImageHandle operator-(const Function& h1, const ConstImageHandle& h2);
-DLLEXPORT_OST_IMG_BASE ImageHandle operator*(const Function& h1, const ConstImageHandle& h2);
 
 }} // namespace img
 

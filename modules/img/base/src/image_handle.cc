@@ -572,47 +572,6 @@ ImageHandle& ImageHandle::operator/=(const ConstImageHandle& h)
   return *this;
 }
 
-ImageHandle& ImageHandle::operator+=(const Function& h)
-{
-  try {
-    ImageStatePtr()->operator+=(h);
-  } catch(InvalidExtentException&) {
-    // ignore
-  }
-  return *this;
-}
-
-ImageHandle& ImageHandle::operator-=(const Function& h)
-{
-  try {
-    ImageStatePtr()->operator-=(h);
-  } catch(InvalidExtentException&) {
-    // ignore
-  }
-  return *this;
-}
-
-ImageHandle& ImageHandle::operator*=(const Function& h)
-{
-  try {
-    ImageStatePtr()->operator*=(h);
-  } catch(InvalidExtentException&) {
-    // ignore
-  }
-  return *this;
-}
-
-ImageHandle& ImageHandle::operator/=(const Function& h)
-{
-  try {
-    ImageStatePtr()->operator/=(h);
-  } catch(InvalidExtentException&) {
-    // ignore
-  }
-  return *this;
-}
-
-
 void ImageHandle::Reciproce()
 {
   throw Error("Reciproce not implemented");
@@ -989,53 +948,6 @@ ImageHandle operator/(const ConstImageHandle& h1, const ConstImageHandle& h2)
   return nh;
 }
 
-ImageHandle operator+(const ConstImageHandle& h1, const Function& h2)
-{
-  ImageHandle nh=h1.Copy();
-  nh+=h2;
-  return nh;
-}
 
-ImageHandle operator-(const ConstImageHandle& h1, const Function& h2)
-{
-  ImageHandle nh=h1.Copy();
-  nh-=h2;
-  return nh;
-}
-
-ImageHandle operator*(const ConstImageHandle& h1, const Function& h2)
-{
-  ImageHandle nh=h1.Copy();
-  nh*=h2;
-  return nh;
-}
-
-ImageHandle operator/(const ConstImageHandle& h1, const Function& h2)
-{
-  ImageHandle nh=h1.Copy();
-  nh/=h2;
-  return nh;
-}
-
-ImageHandle operator+(const Function& h1, const ConstImageHandle& h2)
-{
-  ImageHandle nh=h2.Copy();
-  nh+=h1;
-  return nh;
-}
-
-ImageHandle operator-(const Function& h1, const ConstImageHandle& h2)
-{
-  ImageHandle nh=h2.Copy();
-  nh+=h1;
-  return nh;
-}
-
-ImageHandle operator*(const Function& h1, const ConstImageHandle& h2)
-{
-  ImageHandle nh=h2.Copy();
-  nh*=h1;
-  return nh;
-}
 
 }} // namespace

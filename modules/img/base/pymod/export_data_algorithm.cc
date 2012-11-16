@@ -43,11 +43,6 @@ public:
   virtual void VisitImage(const ConstImageHandle&) {
     throw(Error("NonModAlgorithm Base: VisitImage not overridden"));
   }
-
-  virtual void Visit(const Function& f) {VisitFunction(f);}
-  virtual void VisitFunction(const Function&) {
-    throw(Error("NonModAlgorithm Base: VisitFunction not overridden"));
-  }
 };
 
 class WrapPyNonModAlgorithm: public PyNonModAlgorithm {
@@ -58,9 +53,6 @@ public:
 
   virtual void VisitImage(const ConstImageHandle& ih) {
     call_method<void>(self_, "VisitImage", ih); 
-  }
-  virtual void VisitFunction(const Function& f) {
-    call_method<void>(self_, "VisitFunction", f); 
   }
 
 private:

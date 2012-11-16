@@ -39,7 +39,6 @@ using namespace boost::python;
 void export_Data();
 void export_DataAlgorithm();
 void export_Extent();
-void export_Function();
 void export_ImageHandle();
 void export_ImageList();
 void export_ConstImageHandle();
@@ -60,7 +59,6 @@ BOOST_PYTHON_MODULE(_ost_img)
   export_Data();
   export_DataAlgorithm();
   export_Extent();
-  export_Function();
   export_ImageHandle();
   export_ImageList();
   export_ConstImageHandle();
