@@ -28,7 +28,6 @@ using namespace boost::python;
 #include <ost/message.hh>
 #include <ost/img/algorithm.hh>
 #include <ost/img/image.hh>
-#include <ost/img/function.hh>
 #include "wrap_extent_iterator.hh"
 
 using namespace ost::img;

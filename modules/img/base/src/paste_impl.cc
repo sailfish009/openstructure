@@ -25,7 +25,6 @@
 #include "paste_impl.hh"
 
 #include "image_state/binop.hh"
-#include "function.hh"
 #include "image.hh"
 
 namespace ost { namespace img { namespace detail {
