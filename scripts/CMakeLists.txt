@@ -31,11 +31,11 @@ if (NOT ENABLE_STATIC)
   endif()
 
   set(INIT_SCRIPTS 
-    init_cl.py
+    ost_startup.py
   )
-  set(SPD "${LIB_DIR}/python${PYTHON_VERSION}/site-packages")
+  set(SPD "${LIB_DIR}/python${PYTHON_VERSION}/site-packages/ost")
   if (ENABLE_GUI)
-    list(APPEND INIT_SCRIPTS init.py)
+    list(APPEND INIT_SCRIPTS dng_startup.py)
   endif()
   copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/${SPD}" 
                   "${INIT_SCRIPTS}" "python init scripts" ost_scripts)
