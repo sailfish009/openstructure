@@ -1677,9 +1677,11 @@ void Scene::Export(const String& fname, unsigned int width,
   if(of_flag) {
     if(max_samples<0) {
       int msamples=0;
+#if OST_SHADER_SUPPORT_ENABLED
       if(OST_GL_VERSION_2_0) {
         glGetIntegerv(GL_SAMPLES, &msamples);
       }
+#endif
       max_samples=msamples;
     }
     if(!StartOffscreenMode(width,height, max_samples)) {
