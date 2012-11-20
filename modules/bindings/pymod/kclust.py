@@ -11,6 +11,11 @@ HHblits: lighting-fast iterative protein sequence searching by
 HMM-HMM alignment
 Nature Methods 9, 173-175 (2012)
 
+source code can be downloaded from:
+
+ftp://toolkit.genzentrum.lmu.de/pub/
+
+
 """
 
 class cluster:
