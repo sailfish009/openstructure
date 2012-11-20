@@ -99,7 +99,7 @@ def _RunkClust(tmp_dir_name, clustering_thresh, create_alignments):
   executable=settings.Locate('kClust') 
 
   cmd=[]
-  cmd.append('kClust')
+  cmd.append(executable)
   cmd.append('-i')
   cmd.append(os.path.join(tmp_dir_name,'fastadb.fasta'))
   cmd.append('-d')
@@ -108,8 +108,8 @@ def _RunkClust(tmp_dir_name, clustering_thresh, create_alignments):
   cmd.append(str(bitscore))
 
   cmd=' '.join(cmd)
-  ps=subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-  ps.stdout.readlines()
+  ps=subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  stdout, stderr = ps.communicate()
 
   result=_ParseOutput(tmp_dir_name)
 
