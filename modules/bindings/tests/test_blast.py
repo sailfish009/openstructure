@@ -97,12 +97,9 @@ class TestBlastBindings(unittest.TestCase):
 if __name__ == "__main__":
   # test if blast package is available on system, otherwise ignore tests
   try:
-    blastpath=settings.Locate('blastp')
+    blastpath=settings.Locate(('blastp','blastall'))
   except(settings.FileNotFound):
-    try:
-      blastpath=settings.Locate('blastall')
-    except:
-      print "Could not find blast executable: ignoring unit tests"
-      sys.exit(0)
+    print "Could not find blast executable: ignoring unit tests"
+    sys.exit(0)
   from ost import testutils
   testutils.RunTests()
