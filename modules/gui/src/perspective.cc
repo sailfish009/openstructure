@@ -61,7 +61,9 @@ Perspective::Perspective(QMainWindow* parent):
   quick_access_bar_(new QWidget),
   verbosity_slider_(new QSlider(Qt::Horizontal,quick_access_bar_))
 {
+#if !defined(__APPLE__)
   parent->setMenuBar(menu_bar_);
+#endif
 
   QVBoxLayout* l=new QVBoxLayout(central_);
   l->setMargin(0);
