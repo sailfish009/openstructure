@@ -293,7 +293,7 @@ public:
   /// \param keep_spacing
   ///           If set to false, residues will continously be renumbered ongoing from start.
   ///           Otherwise the spacings between the residues are kept.
-  void RenumberChain(const String& name, int start, bool keep_spacing);
+  void RenumberChain(const ChainHandle& chain, int start, bool keep_spacing);
     
   /// \brief Get edit mode of editor
   EditMode GetMode() const {return mode_;}

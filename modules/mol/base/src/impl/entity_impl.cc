@@ -1202,16 +1202,4 @@ void EntityImpl::RenumberAllResidues(int start, bool keep_spacing)
 
 }
 
-void EntityImpl::RenumberChain(const String& name, int start, bool keep_spacing)
-{
-  ChainImplPtr ch=this->FindChain(name);
-
-  if(!ch) {
-    throw Error("Could not find chain with name "+name);
-  }
-
-  ch->RenumberAllResidues(start, keep_spacing);
-
-}
-
 }}} // ns

@@ -251,8 +251,6 @@ public:
 
   void RenumberAllResidues(int start, bool keep_spacing);
 
-  void RenumberChain(const String& name, int start, bool keep_spacing);
-
 private:
   void DoCopy(EntityImplPtr dest);
   
