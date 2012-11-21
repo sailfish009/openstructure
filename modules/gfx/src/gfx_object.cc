@@ -166,7 +166,7 @@ void GfxObj::RenderGL(RenderPass pass)
     */
   
     if(clip_flag_) {
-#if OST_SHADER_SUPPORT_ENABLED
+#if OST_SHADER_SUPPORT_ENABLED && GL_VERSION_3_0
       glEnable(GL_CLIP_DISTANCE0);
       GLuint cp = Shader::Instance().GetCurrentProgram();
       if(cp>0) {
@@ -214,7 +214,7 @@ void GfxObj::RenderGL(RenderPass pass)
     }
 
     if(clip_flag_) {
-#if OST_SHADER_SUPPORT_ENABLED
+#if OST_SHADER_SUPPORT_ENABLED && GL_VERSION_3_0
       glDisable(GL_CLIP_DISTANCE0);
 #endif
     }
