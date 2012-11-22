@@ -25,10 +25,14 @@
 *     2010/08/02: A new RMSD matrix was used and obsolete statement removed.
 *     2011/01/03: The length of pdb file names were extended to 500.
 *     2011/01/30: An open source license is attached to the program.
+*     2012/05/07: Improved RMSD calculation subroutine which speeds up 
+*                 TM-score program by 30%.
+*     2012/06/05: Added option '-l L' which calculates TM-score (and maxsub
+*                 and GDT scores) normalized by a specific length 'L'.
 *************************************************************************
       
       program TMscore
-      PARAMETER(nmax=3000)
+      PARAMETER(nmax=5000)
       
       common/stru/xt(nmax),yt(nmax),zt(nmax),xb(nmax),yb(nmax),zb(nmax)
       common/nres/nresA(nmax),nresB(nmax),nseqA,nseqB
@@ -76,15 +80,19 @@ ccc
          write(*,*)'(For detail: Zhang & Skolnick,  Proteins, 2004',
      &        ' 57:702-10)'
          write(*,*)
-         write(*,*)'1. Run TM-score to compare ''model'' and ''native',
-     &        ':'
+         write(*,*)'1. Run TM-score to compare ''model'' and ',
+     &        '''native'':'
          write(*,*)'   >TMscore model native'
          write(*,*)
-         write(*,*)'2. Run TM-score with an assigned d0, e.g. 5',
-     &        ' Angstroms:'
+         write(*,*)'2. TM-score normalized with an assigned scale d0',
+     &        ' e.g. 5 A:'
          write(*,*)'   >TMscore model native -d 5'
          write(*,*)
-         write(*,*)'3. Run TM-score with superposition output, e.g. ',
+         write(*,*)'3. TM-score normalized by a specific length, ',
+     &        'e.g. 120 AA:'
+         write(*,*)'   >TMscore model native -l 120'
+         write(*,*)
+         write(*,*)'4. TM-score with superposition output, e.g. ',
      &        '''TM.sup'':'
          write(*,*)'   >TMscore model native -o TM.sup'
          write(*,*)'   To view the superimposed structures by rasmol:'
@@ -96,6 +104,7 @@ ccc
 ******* options ----------->
       m_out=-1
       m_fix=-1
+      m_len=-1
       narg=iargc()
       i=0
       j=0
@@ -111,6 +120,11 @@ ccc
          i=i+1
          call getarg(i,fnam)
          read(fnam,*)d0_fix
+      elseif(fnam.eq.'-l')then
+         m_len=1
+         i=i+1
+         call getarg(i,fnam)
+         read(fnam,*)l0_fix
       else
          j=j+1
          pdb(j)=fnam
@@ -207,6 +221,9 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       else
          d0=0.5
       endif
+      if(m_len.eq.1)then
+         d0=1.24*(l0_fix-15)**(1.0/3.0)-1.8
+      endif
       if(d0.lt.0.5)d0=0.5
       if(m_fix.eq.1)d0=d0_fix
 ***   d0_search ----->
@@ -262,10 +279,12 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
               k_ali(ka)=k
               LL=LL+1
            enddo
-           call u3b(w,r_1,r_2,LL,1,rms,u,t,ier) !u rotate r_1 to r_2
            if(i_init.eq.1)then  !global superposition
+              call u3b(w,r_1,r_2,LL,2,rms,u,t,ier) !0:rmsd; 1:u,t; 2:rmsd,u,t
               armsd=dsqrt(rms/LL)
               rmsd_ali=armsd
+           else
+              call u3b(w,r_1,r_2,LL,1,rms,u,t,ier) !u rotate r_1 to r_2
            endif
            do j=1,nseqA
               xt(j)=t(1)+u(1,1)*xa(j)+u(1,2)*ya(j)+u(1,3)*za(j)
@@ -340,7 +359,12 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  302       continue
  300    continue                !for shift
  333  continue                  !for initial length, L_ali/M
-
+      
+      ratio=1
+      if(m_len.gt.0)then
+         ratio=float(nseqB)/float(l0_fix)
+      endif
+      
 ******************************************************************
 *     Output
 ******************************************************************
@@ -367,7 +391,14 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       write(*,*)
       write(*,501)pdb(1),nseqA
  501  format('Structure1: ',A10,'  Length= ',I4)
-      write(*,502)pdb(2),nseqB
+      if(m_len.eq.1)then
+         write(*,411)pdb(2),nseqB
+         write(*,412)l0_fix
+      else
+         write(*,502)pdb(2),nseqB
+      endif
+ 411  format('Structure2: ',A10,'  Length= ',I4)
+ 412  format('TM-score is notmalized by ',I4)
  502  format('Structure2: ',A10,'  Length= ',I4,
      &     ' (by which all scores are normalized)')
       write(*,503)n_ali
@@ -375,20 +406,25 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       write(*,513)rmsd_ali
  513  format('RMSD of  the common residues= ',F8.3)
       write(*,*)
-      write(*,504)score_max,d0,score10_max
- 504  format('TM-score    = ',f6.4,'  (d0=',f5.2,',',' TM10= ',f6.4,')')
-      write(*,505)score_maxsub_max
+      if(m_len.eq.1)then
+         score_max=score_max*float(nseqB)/float(l0_fix)
+      endif
+      write(*,504)score_max,d0
+ 504  format('TM-score    = ',f6.4,'  (d0=',f5.2,')')
+      write(*,505)score_maxsub_max*ratio
  505  format('MaxSub-score= ',f6.4,'  (d0= 3.50)')
       score_GDT=(n_GDT1_max+n_GDT2_max+n_GDT4_max+n_GDT8_max)
      &     /float(4*nseqB)
-      write(*,506)score_GDT,n_GDT1_max/float(nseqB),n_GDT2_max
-     &     /float(nseqB),n_GDT4_max/float(nseqB),n_GDT8_max/float(nseqB)
+      write(*,506)score_GDT*ratio,n_GDT1_max/float(nseqB)*ratio,
+     &     n_GDT2_max/float(nseqB)*ratio,n_GDT4_max/float(nseqB)*ratio,
+     &     n_GDT8_max/float(nseqB)*ratio
  506  format('GDT-TS-score= ',f6.4,' %(d<1)=',f6.4,' %(d<2)=',f6.4,
      $     ' %(d<4)=',f6.4,' %(d<8)=',f6.4)
       score_GDT_HA=(n_GDT05_max+n_GDT1_max+n_GDT2_max+n_GDT4_max)
      &     /float(4*nseqB)
-      write(*,507)score_GDT_HA,n_GDT05_max/float(nseqB),n_GDT1_max
-     &     /float(nseqB),n_GDT2_max/float(nseqB),n_GDT4_max/float(nseqB)
+      write(*,507)score_GDT_HA*ratio,n_GDT05_max/float(nseqB)*ratio,
+     &     n_GDT1_max/float(nseqB)*ratio,n_GDT2_max/float(nseqB)*ratio,
+     &     n_GDT4_max/float(nseqB)*ratio
  507  format('GDT-HA-score= ',f6.4,' %(d<0.5)=',f6.4,' %(d<1)=',f6.4,
      $     ' %(d<2)=',f6.4,' %(d<4)=',f6.4)
       write(*,*)
@@ -576,7 +612,7 @@ c     1, collect those residues with dis<d;
 c     2, calculate score_GDT, score_maxsub, score_TM
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       subroutine score_fun
-      PARAMETER(nmax=3000)
+      PARAMETER(nmax=5000)
 
       common/stru/xt(nmax),yt(nmax),zt(nmax),xb(nmax),yb(nmax),zb(nmax)
       common/nres/nresA(nmax),nresB(nmax),nseqA,nseqB
@@ -646,13 +682,14 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       end
 
 cccccccccccccccc Calculate sum of (r_d-r_m)^2 cccccccccccccccccccccccccc
-c  w    - w(m) is weight for atom pair  c m           (given)
-c  x    - x(i,m) are coordinates of atom c m in set x       (given)
-c  y    - y(i,m) are coordinates of atom c m in set y       (given)
-c  n    - n is number of atom pairs                         (given)
-c  mode  - 0:calculate rms only                             (given)
-c          1:calculate rms,u,t                              (takes longer)
-c  rms   - sum of w*(ux+t-y)**2 over all atom pairs         (result)
+c  w    - w(m) is weight for atom pair  c m                    (given)
+c  x    - x(i,m) are coordinates of atom c m in set x          (given)
+c  y    - y(i,m) are coordinates of atom c m in set y          (given)
+c  n    - n is number of atom pairs                            (given)
+c  mode  - 0:calculate rms     only                            (given,short)
+c          1:calculate     u,t only                            (given,medium)
+c          2:calculate rms,u,t                                 (given,longer)
+c  rms   - sum of w*(ux+t-y)**2 over all atom pairs            (result)
 c  u    - u(i,j) is   rotation  matrix for best superposition  (result)
 c  t    - t(i)   is translation vector for best superposition  (result)
 c  ier  - 0: a unique optimal superposition has been determined(result)
@@ -673,6 +710,9 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       double precision a(3,3), b(3,3), e(3), rr(6), ss(6)
       double precision e0, d, spur, det, cof, h, g
       double precision cth, sth, sqrth, p, sigma
+      double precision c1x, c1y, c1z, c2x, c2y, c2z
+      double precision s1x, s1y, s1z, s2x, s2y, s2z
+      double precision sxx, sxy, sxz, syx, syy, syz, szx, szy, szz
       
       double precision sqrt3, tol, zero
       
@@ -682,9 +722,24 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       data ip / 1, 2, 4, 2, 3, 5, 4, 5, 6 /
       data ip2312 / 2, 3, 1, 2 /
       
-      wc = zero
+      wc  = zero
       rms = zero
-      e0 = zero
+      e0  = zero
+      s1x = zero
+      s1y = zero
+      s1z = zero
+      s2x = zero
+      s2y = zero
+      s2z = zero
+      sxx = zero
+      sxy = zero
+      sxz = zero
+      syx = zero
+      syy = zero
+      syz = zero
+      szx = zero 
+      szy = zero
+      szz = zero
       
       do i=1, 3
          xc(i) = zero
@@ -704,29 +759,61 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       ier = -1
       if( n .lt. 1 ) return
       ier = -2
-      do m=1, n
-         if( w(m) .lt. 0.0 ) return
-         wc = wc + w(m)
-         do i=1, 3
-            xc(i) = xc(i) + w(m)*x(i,m)
-            yc(i) = yc(i) + w(m)*y(i,m)
-         end do
-      end do
-      if( wc .le. zero ) return
-      do i=1, 3
-         xc(i) = xc(i) / wc
-         yc(i) = yc(i) / wc
-      end do
       
       do m=1, n
-         do i=1, 3
-            e0=e0+w(m)*((x(i,m)-xc(i))**2+(y(i,m)-yc(i))**2)
-            d = w(m) * ( y(i,m) - yc(i) )
-            do j=1, 3
-               r(i,j) = r(i,j) + d*( x(j,m) - xc(j) )
-            end do
-         end do
+         c1x=x(1, m)
+         c1y=x(2, m)
+         c1z=x(3, m)
+         
+         c2x=y(1, m)
+         c2y=y(2, m)
+         c2z=y(3, m)
+         
+         s1x = s1x + c1x
+         s1y = s1y + c1y;
+         s1z = s1z + c1z;
+         
+         s2x = s2x + c2x;
+         s2y = s2y + c2y;
+         s2z = s2z + c2z;
+         
+         sxx = sxx + c1x*c2x; 
+         sxy = sxy + c1x*c2y; 
+         sxz = sxz + c1x*c2z; 
+         
+         syx = syx + c1y*c2x; 
+         syy = syy + c1y*c2y; 
+         syz = syz + c1y*c2z;
+         
+         szx = szx + c1z*c2x; 
+         szy = szy + c1z*c2y; 
+         szz = szz + c1z*c2z;
       end do
+      
+      xc(1) = s1x/n;
+      xc(2) = s1y/n; 	
+      xc(3) = s1z/n;
+      
+      yc(1) = s2x/n;
+      yc(2) = s2y/n; 	
+      yc(3) = s2z/n;
+      if(mode.eq.2.or.mode.eq.0) then ! need rmsd                     		
+         do m=1, n		
+            do i=1, 3
+               e0 = e0+ (x(i, m)-xc(i))**2 + (y(i, m)-yc(i))**2			
+            end do				
+         end do
+      endif
+      
+      r(1, 1) = sxx-s1x*s2x/n;
+      r(2, 1) = sxy-s1x*s2y/n;
+      r(3, 1) = sxz-s1x*s2z/n;
+      r(1, 2) = syx-s1y*s2x/n;
+      r(2, 2) = syy-s1y*s2y/n;
+      r(3, 2) = syz-s1y*s2z/n;
+      r(1, 3) = szx-s1z*s2x/n;
+      r(2, 3) = szy-s1z*s2y/n;
+      r(3, 3) = szz-s1z*s2z/n;
       
       det = r(1,1) * ( (r(2,2)*r(3,3)) - (r(2,3)*r(3,2)) )
      &     - r(1,2) * ( (r(2,1)*r(3,3)) - (r(2,3)*r(3,1)) )
@@ -770,7 +857,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       e(1) = (spur + cth) + cth
       e(2) = (spur - cth) + sth
       e(3) = (spur - cth) - sth
-	
+      
       if( mode .eq. 0 ) then
          goto 50
       end if
@@ -913,8 +1000,12 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       end if
       d = (d + e(2)) + e(1)
       
-      rms = (e0 - d) - d
-      if( rms .lt. 0.0 ) rms = 0.0
+      if(mode .eq. 2.or.mode.eq.0) then ! need rmsd                     		
+         rms = (e0 - d) - d
+         if( rms .lt. 0.0 ) rms = 0.0
+      endif
       
       return
       end
+      
+
