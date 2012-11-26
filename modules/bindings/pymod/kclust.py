@@ -38,7 +38,6 @@ class cluster:
 
   def __init__(self, sequences, representative_id):
 
-
     self.sequences=sequences
     self.representative_id=representative_id
     self.alignment=None
