@@ -14,8 +14,6 @@ Nature Methods 9, 173-175 (2012)
 source code can be downloaded from:
 
 ftp://toolkit.genzentrum.lmu.de/pub/
-
-
 """
 
 class cluster:
