@@ -54,7 +54,7 @@ typedef enum {
 class DLLEXPORT_OST_CONOP Builder {
 public:
   
-  Builder(): dialect_(PDB_DIALECT), strict_(false), bond_feasibility_check_(true) { }
+  Builder(): dialect_(PDB_DIALECT), strict_(false), bond_feasibility_check_(false) { }
   virtual ~Builder();
   
   ///  \brief add any missing atoms to the residue based on its key,

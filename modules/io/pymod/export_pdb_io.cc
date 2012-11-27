@@ -43,7 +43,7 @@ void export_pdb_io()
                                                           arg("join_spread_atom_records")=false,
                                                           arg("no_hetatms")=false,
                                                           arg("calpha_only")=false,
-						          arg("bond_feasibility_check")=true)))
+						          arg("bond_feasibility_check")=false)))
     .def_readwrite("dialect", &IOProfile::dialect)
     .def_readwrite("fault_tolerant", &IOProfile::fault_tolerant)
     .def_readwrite("quack_mode", &IOProfile::quack_mode)

@@ -33,7 +33,7 @@ public:
   { }
   IOProfile(): dialect("PDB"), strict_hydrogens(true), quack_mode(false),
     fault_tolerant(false), join_spread_atom_records(false), no_hetatms(false),
-    calpha_only(false), bond_feasibility_check(true)
+    calpha_only(false), bond_feasibility_check(false)
   { }
   virtual ~IOProfile() { }
 

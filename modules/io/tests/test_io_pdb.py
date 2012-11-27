@@ -17,13 +17,13 @@ class TestPDB(unittest.TestCase):
 
   def test_compnd_parser(self):
     profiles=io.IOProfiles()
-    profiles['NO_FEAS_CHECK']=io.IOProfile(bond_feasibility_check=False)
+    profiles['FEAS_CHECK']=io.IOProfile(bond_feasibility_check=True)
         
-    e=io.LoadPDB('testfiles/pdb/simple_defective.pdb', restrict_chains="A",profile='NO_FEAS_CHECK')
+    e=io.LoadPDB('testfiles/pdb/simple_defective.pdb', restrict_chains="A",profile='FEAS_CHECK')
     
     res=e.FindResidue('A',3)
         
-    self.assertTrue(mol.BondExists(res.FindAtom("CA"),res.FindAtom("CB")))
+    self.assertFalse(mol.BondExists(res.FindAtom("CA"),res.FindAtom("CB")))
     
 if __name__== '__main__':
   from ost import testutils
