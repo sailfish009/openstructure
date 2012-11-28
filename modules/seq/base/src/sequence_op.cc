@@ -41,7 +41,9 @@ SequenceHandle SequenceFromChain(const String& name,
        e=residues.end(); i!=e; ++i) {
     sequence+=(*i).GetOneLetterCode();
   }
-  return CreateSequence(name, sequence);
+  SequenceHandle s = CreateSequence(name, sequence);
+  s.AttachView(chain.Select(""));
+  return s;
 }
 
 
@@ -54,7 +56,9 @@ SequenceHandle SequenceFromChain(const String& name,
        e=chain.GetResidueList().end(); i!=e; ++i) {
     sequence+=(*i).GetOneLetterCode();
   }
-  return CreateSequence(name, sequence);
+  SequenceHandle s = CreateSequence(name, sequence);
+  s.AttachView(chain.Select(""));
+  return s;
 } 
  
 }}
