@@ -40,6 +40,9 @@ public:
   /// \brief Recovers a reference distance and a tolerance threshold (respectively) from the list
   std::pair<Real,Real> GetClashingDistance(const String& ele1,const String& ele2) const;
 
+  /// \brief Recovers a reference distance already adjusted by the tolerance threshold from the list
+  Real GetAdjustedClashingDistance(const String& ele1,const String& ele2) const;
+
   /// \brief Recovers the longest distance in the list, corrected by tolerance
   Real GetMaxAdjustedDistance() const;
 

@@ -6,11 +6,11 @@ import ost.mol.alg.structure_analysis
 import ost.mol.alg.helix_kinks
 
 # Fills a list of reference clashing distances from a file (requires a path to the file)
-def FillClashingDistancesFromFile(filename,default_clashing_distance,default_tolerance):
+def FillClashingDistancesFromFile(filename):
   fh=open(filename,'r')
   lines=fh.readlines()
   fh.close()
-  return FillClashingDistances(lines,default_clashing_distance,default_tolerance)
+  return FillClashingDistances(lines)
 
 # Fills a list of bond stereo-chemical statistics from a file (requires a path to the file)
 def FillBondStereoChemicalParamsFromFile(filename):
