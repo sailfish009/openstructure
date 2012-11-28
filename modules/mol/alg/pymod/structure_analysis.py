@@ -129,3 +129,33 @@ def CalculateHelixAxis(sele1):
   f=GetFrameFromEntity(eh)
   return f.FitCylinder(sele1)
 
+
+def CalculateDistanceDifferenceMatrix(sele1,sele2):
+  """
+  This function calculates the pairwise distance differences between two EntityViews.
+  The two EntityViews should have the same number of atoms
+  It returns an NxN DistanceDifferenceMatrix M (where N is the number of atoms in sele1)
+  where M[i,j]=(sele2.atoms[i].pos-sele2.atoms[j].pos)-(sele1.atoms[i].pos-sele1.atoms[j].pos)
+  """
+  try:import numpy as npy
+  except ImportError:
+    LogError("Function needs numpy, but I could not import it.")
+    raise
+  if not sele1.IsValid() and sele2.IsValid():
+    print 'invalid view'
+    return
+  if not sele1.GetAtomCount()==sele2.GetAtomCount():
+    print 'The two views must have the same number of atoms'
+    return
+  n_atoms=sele1.GetAtomCount()
+  M=npy.zeros([n_atoms,n_atoms])
+  for i,a1 in enumerate(sele1.atoms):
+    for j,a2 in enumerate(sele2.atoms):
+      if i>=j:continue
+      d1=geom.Distance(a1.pos,a2.pos)
+      d2=geom.Distance(sele2.atoms[i].pos,sele2.atoms[j].pos)
+      M[i,j]=d2-d1
+      M[j,i]=d2-d1
+  return M
+
+
