@@ -98,6 +98,15 @@ inline void DLLEXPORT StoreStrAsAln(String& aln_str1, String& aln_str2,
   AlignmentHandle aln=CreateAlignment();
   aln.AddSequence(CreateSequence(s1.GetName(), aln_str1));
   aln.AddSequence(CreateSequence(s2.GetName(), aln_str2));  
+
+  if (s1.GetAttachedView()) {
+    aln.AttachView(0, s1.GetAttachedView());
+  }
+
+  if (s2.GetAttachedView()) {
+    aln.AttachView(1, s2.GetAttachedView());
+  }
+
   aln.SetSequenceOffset(0, i);
   aln.SetSequenceOffset(1, j);
   alignments.push_back(aln);
