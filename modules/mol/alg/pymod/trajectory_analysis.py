@@ -196,4 +196,20 @@ def DistRMSDFromTraj(t,sele,ref_sele,radius=7.0,average=False,seq_sep=4,first=0,
     LogError("Function needs numpy, but I could not import it.")
     raise
     
+def AverageDistanceMatrixFromTraj(t,sele,first=0,last=-1):
+  try:
+    import numpy as npy
+  except ImportError:
+    LogError("Function needs numpy, but I could not import it.")
+    raise
+  n_atoms=sele.GetAtomCount()
+  M=npy.zeros([n_atoms,n_atoms])
+  for i,a1 in enumerate(sele.atoms):
+    for j,a2 in enumerate(sele.atoms):
+      d=ost.mol.alg.AnalyzeDistanceBetwAtoms(t,a1.GetHandle(),a2.GetHandle())[first:last]
+      M[i,j]=npy.mean(d)
+      M[j,i]=npy.mean(d)
+  return M
+
+
     
