@@ -108,6 +108,12 @@ std::pair<Real,Real> ClashingDistances::GetClashingDistance(const String& ele1,c
   return find_ci->second;
 }
 
+Real ClashingDistances::GetAdjustedClashingDistance(const String& ele1,const String& ele2) const
+{
+  std::pair <Real,Real> clash_dist = GetClashingDistance(ele1,ele2);
+  return clash_dist.first-clash_dist.second;
+}
+
 void ClashingDistances::PrintAllDistances() const
 {
    for (std::map <String,std::pair<float,float> >::const_iterator index = min_distance_.begin();index != min_distance_.end();++index) {
