@@ -33,9 +33,10 @@ namespace ost { namespace mol {
 using namespace impl;
 
 struct LazilyBoundRef {
+  LazilyBoundRef(): points(5.0) { }
   LazilyBoundRef& operator=(const LazilyBoundRef& rhs);
-  //EntityView for now, will be generalized to a point cloud later on.
-  EntityView  view;
+  // Stores the points in the lazily bound reference for efficient within calculation.
+  SpatialOrganizer<bool> points;
 };
   
 struct LazilyBoundData {
@@ -67,17 +68,8 @@ bool QueryState::do_within(const geom::Vec3& pos, const WithinParam& p,
       return geom::Dot(d, d) > p.GetRadiusSquare();
   } else {
     const LazilyBoundRef& r=this->GetBoundObject(p.GetRef());
-    for (AtomViewIter i=r.view.AtomsBegin(), e=r.view.AtomsEnd(); i!=e; ++i) {
-      geom::Vec3 d=pos-(*i).GetPos();
-      if (op==COP_LE) {
-        if (geom::Dot(d, d) <= p.GetRadiusSquare()) {
-          return true;
-        }
-      } else if (geom::Dot(d, d) < p.GetRadiusSquare()) {
-        return false;
-      }
-    }
-    return op!=COP_LE;
+    bool has_within = r.points.HasWithin(pos, sqrt(p.GetRadiusSquare()));
+    return op==COP_LE ? has_within : !has_within;
   }
 }
 
@@ -113,14 +105,16 @@ QueryState::QueryState(const QueryImpl& query, const EntityHandle& ref)
     r_.reset(new LazilyBoundData);
     r_->refs.resize(query.bracketed_expr_.size());
     for (size_t i=0;i<query.bracketed_expr_.size(); ++i) {
-      r_->refs[i].view=ref.Select(Query(query.bracketed_expr_[i]));
+      EntityView view=ref.Select(Query(query.bracketed_expr_[i]));
+      for (AtomViewIter j=view.AtomsBegin(), e=view.AtomsEnd(); j!=e; ++j) {
+        r_->refs[i].points.Add(true, (*j).GetPos());
+      }
     }    
   }
-
 }
 
 LazilyBoundRef& LazilyBoundRef::operator=(const LazilyBoundRef& rhs) {
-  view=rhs.view;
+  points=rhs.points;
   return *this;
 }
 
@@ -131,8 +125,11 @@ QueryState::QueryState(const QueryImpl& query, const EntityView& ref)
     r_.reset(new LazilyBoundData);
     r_->refs.resize(query.bracketed_expr_.size());
     for (size_t i=0;i<query.bracketed_expr_.size(); ++i) {
-      r_->refs[i].view=ref.Select(Query(query.bracketed_expr_[i]));
-    }    
+      EntityView view=ref.Select(Query(query.bracketed_expr_[i]));
+      for (AtomViewIter j=view.AtomsBegin(), e=view.AtomsEnd(); j!=e; ++j) {
+        r_->refs[i].points.Add(true, (*j).GetPos());
+      }
+    }
   }
 }
 
