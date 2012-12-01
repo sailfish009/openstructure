@@ -815,7 +815,7 @@ void Scene::RenderGL()
 
   prep_blur();
 
-  if(stereo_mode_==1 || stereo_mode_==2) {
+  if(stereo_mode_==1 || stereo_mode_==2 || stereo_mode_==3) {
     render_stereo();
   } else {
     render_scene();
@@ -1488,6 +1488,8 @@ void Scene::SetStereoMode(unsigned int m)
     }
   } else if(m==2) {
     stereo_mode_=2;
+  } else if(m==3) {
+    stereo_mode_=3;
   } else {
     stereo_mode_=0;
   }
@@ -2380,71 +2382,94 @@ void Scene::render_stereo()
   glPushMatrix();
   glLoadIdentity();
 
-  if(stereo_mode_==2) {
-    // draw interlaced lines in stencil buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLineWidth(1.0);
-    glEnable(GL_STENCIL_TEST);
-    glStencilMask(0x1);
-    glClearStencil(0x0);
-    glClear(GL_STENCIL_BUFFER_BIT);
-    glStencilFunc(GL_ALWAYS,0x1,0x1);
-    glStencilOp(GL_REPLACE,GL_REPLACE,GL_REPLACE);
-    glBegin(GL_LINES);
-    glColor3f(1.0,1.0,1.0);
-    for(unsigned int i=0;i<vp_height_;i+=2) {
-      glVertex2i(0,i);
-      glVertex2i(vp_width_-1,i);
-    } 
+  if(stereo_mode_==3) {
+#if OST_SHADER_SUPPORT_ENABLED
+    // anaglyph shader
+    Shader::Instance().PushProgram();
+    Shader::Instance().Activate("anaglyph");
+    GLuint cpr=Shader::Instance().GetCurrentProgram();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
+    glUniform1i(glGetUniformLocation(cpr,"left_scene"),0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_left_tex_ : scene_right_tex_);
+    glUniform1i(glGetUniformLocation(cpr,"right_scene"),1);
+    glActiveTexture(GL_TEXTURE0);
+    // draw screen quad
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+    glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+    glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+    glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
     glEnd();
-    
-    glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
-  }
-
-  // right eye
-  if(stereo_mode_==1) {
-    glDrawBuffer(GL_BACK_RIGHT);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  } else if(stereo_mode_==2) {
-    glStencilFunc(GL_EQUAL,0x0,0x1);
-  }
-#if OST_SHADER_SUPPORT_ENABLED
-  if(OST_GL_VERSION_2_0) {
-    glActiveTexture(GL_TEXTURE0);
-  }
+    Shader::Instance().PopProgram();
 #endif
-  glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_left_tex_ : scene_right_tex_);
-  // draw
-  glColor3f(1.0,0.0,1.0);
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.0,0.0); glVertex2i(0,0);
-  glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
-  glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
-  glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
-  glEnd();
+  } else {
+    if(stereo_mode_==2) {
+      // draw interlaced lines in stencil buffer
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glLineWidth(1.0);
+      glEnable(GL_STENCIL_TEST);
+      glStencilMask(0x1);
+      glClearStencil(0x0);
+      glClear(GL_STENCIL_BUFFER_BIT);
+      glStencilFunc(GL_ALWAYS,0x1,0x1);
+      glStencilOp(GL_REPLACE,GL_REPLACE,GL_REPLACE);
+      glBegin(GL_LINES);
+      glColor3f(1.0,1.0,1.0);
+      for(unsigned int i=0;i<vp_height_;i+=2) {
+        glVertex2i(0,i);
+        glVertex2i(vp_width_-1,i);
+      } 
+      glEnd();
+      glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
+    }
 
-  // left eye
-  if(stereo_mode_==1) {
-    glDrawBuffer(GL_BACK_LEFT);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  } else if(stereo_mode_==2) {
-    glStencilFunc(GL_EQUAL,0x1,0x1);
-  }
+    // right eye
+    if(stereo_mode_==1) {
+      glDrawBuffer(GL_BACK_RIGHT);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    } else if(stereo_mode_==2) {
+      glStencilFunc(GL_EQUAL,0x0,0x1);
+    } 
 #if OST_SHADER_SUPPORT_ENABLED
-  if(OST_GL_VERSION_2_0) {
-    glActiveTexture(GL_TEXTURE0);
-  }
+    if(OST_GL_VERSION_2_0) {
+      glActiveTexture(GL_TEXTURE0);
+    }
 #endif
-  glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
-  // draw
-  glColor3f(1.0,0.0,1.0);
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.0,0.0); glVertex2i(0,0);
-  glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
-  glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
-  glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
-  glEnd();
-  
+    glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_left_tex_ : scene_right_tex_);
+    // draw
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+    glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+    glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+    glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
+    glEnd();
+
+    // left eye
+    if(stereo_mode_==1) {
+      glDrawBuffer(GL_BACK_LEFT);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    } else if(stereo_mode_==2) {
+      glStencilFunc(GL_EQUAL,0x1,0x1);
+    }
+#if OST_SHADER_SUPPORT_ENABLED
+    if(OST_GL_VERSION_2_0) {
+      glActiveTexture(GL_TEXTURE0);
+    }
+#endif
+    glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
+    // draw
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+    glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+    glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+    glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
+    glEnd();
+  }
   // restore settings
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 0, 0, 0);
   glBindTexture(GL_TEXTURE_2D, 0);
