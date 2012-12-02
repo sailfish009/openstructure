@@ -67,6 +67,105 @@ def GuessColumnType(iterator):
   # return the last element available
   return possibilities.pop()
 
+class QueryNode:
+
+  def __init__(self,par):
+    self.operator=None
+    self.operand=None
+    self.children=list()
+    self.parent=par
+
+  def AddChild(self):
+    if len(self.children)>=2:
+      raise RuntimeError('Cannot add more than two children')
+    self.children.append(QueryNode(self))
+    return self.children[-1]
+
+  def SetOperator(self,op):
+    if self.operand!=None:
+      raise RuntimeError('Cannot add an operator to a node, that is already marked as leave by an operand!')
+    self.operator=op
+
+  def SetOperand(self,op):
+    if self.operator!=None:
+      raise RuntimeError('Setting an operand marks a node as leave, but there is already an operator set!')
+    self.operand=op
+
+  def GetParent(self):
+    return self.parent
+
+  def SetParent(self, par):
+    par.children.append(self)
+    self.parent=par
+    return self.parent
+  
+  def EvaluateAnd(self,lhs,rhs):
+    return lhs and rhs
+
+  def EvaluateOr(self,lhs,rhs):
+    return lhs or rhs
+
+  def EvaluateEqual(self,lhs,rhs):
+    return lhs==rhs
+
+  def EvaluateNonEqual(self,lhs,rhs):
+    return lhs!=rhs
+
+  def EvaluateLower(self,lhs,rhs):
+    return lhs<rhs
+
+  def EvaluateGreater(self,lhs,rhs):
+    return lhs>rhs
+
+  def EvaluateLowerEqual(self,lhs,rhs):
+    return lhs<=rhs
+
+  def EvaluateGreaterEqual(self,lhs,rhs):
+    return lhs>=rhs
+
+  def EvaluateOperator(self,op,lhs,rhs):
+    if op=='and':
+      return self.EvaluateAnd(lhs,rhs)
+    elif op=='or':
+      return self.EvaluateOr(lhs,rhs)
+    elif op=='=':
+      return self.EvaluateEqual(lhs,rhs)
+    elif op=='!=':
+      return self.EvaluateNonEqual(lhs,rhs)
+    elif op=='<':
+      return self.EvaluateLower(lhs,rhs)
+    elif op=='>':
+      return self.EvaluateGreater(lhs,rhs)
+    elif op=='<=':
+      return self.EvaluateLowerEqual(lhs,rhs)
+    elif op=='>=':
+      return self.EvaluateGreaterEqual(lhs,rhs)
+    else:
+      raise RuntimeError('Unknown operator: '+op)
+
+  def EvaluateNode(self):
+
+    #handle the case where node is a leave
+    if self.operand:
+      return self.operand
+
+    #if there is a single logical expression, there is a root node with no
+    #operator... We have to evaluate its child
+    if len(self.children)==1:
+      return self.children[0].EvaluateNode()
+
+    #something must have failed in building up the tree!
+    if self.operator==None:
+      raise RuntimeError('no operator set!') 
+    if len(self.children)!=2:
+      raise RuntimeError('Node must have two children!')
+    
+    #recursively traverse binary tree
+    return self.EvaluateOperator(self.operator,self.children[0].EvaluateNode(),self.children[1].EvaluateNode())
+
+
+
+
 class BinaryColExpr:
   def __init__(self, op, lhs, rhs):
     self.op=op
@@ -818,6 +917,124 @@ Statistics for column %(col)s
       if matches:
         filt_tab.AddRow(row)
     return filt_tab
+
+  def Select(self, query):
+
+    valid_operators=['and','or','=','!=','<','>','<=','>=']
+
+    def ParseOperand(operand,row_num):
+      if operand=='true':
+        return True
+      if operand=='false':
+        return False
+      if operand in self.col_names:
+        col_index=self.GetColIndex(operand)
+        return self.rows[row_num][col_index]
+      try:
+        return float(operand)
+      except:
+        raise RuntimeError('Could not parse operand '+operand)
+
+    def ParseExpression(expression):
+
+      split_expression=list()
+      split_types=list()
+      actual_position=0
+      eaten_stuff=''
+
+      while True:
+
+        if actual_position>=len(expression):
+          if len(eaten_stuff.strip())>0:
+            split_expression.append(eaten_stuff.strip())
+            split_types.append('operand')
+          return split_expression,split_types
+
+        token=expression[actual_position]
+
+        if token=='(' or token=='[' or token=='{':
+          if len(eaten_stuff.strip())>0:
+            split_expression.append(eaten_stuff.strip())
+            split_types.append('operand')
+          split_expression.append('(')
+          split_types.append('opening_bracket')
+          actual_position+=1
+          eaten_stuff=''
+          continue
+
+        if token==')' or token==']' or token=='}':
+          if len(eaten_stuff.strip())>0:
+            split_expression.append(eaten_stuff.strip())
+            split_types.append('operand')
+          split_expression.append(')')
+          split_types.append('closing_bracket')
+          actual_position+=1
+          eaten_stuff=''
+          continue
+
+        found_operator=False
+
+        for op in valid_operators:
+          if actual_position+len(op)>len(expression):
+            continue
+          if expression[actual_position:actual_position+len(op)]==op:
+            if len(eaten_stuff.strip())>0:
+              split_expression.append(eaten_stuff.strip())
+              split_types.append('operand')
+            split_expression.append(op)
+            split_types.append('operator')
+            actual_position+=len(op)
+            eaten_stuff=''
+            found_operator=True
+
+        if found_operator:
+          continue
+
+        eaten_stuff+=token
+        actual_position+=1
+
+    selected_tab=Table(list(self.col_names), list(self.col_types))
+
+    split_expression, type_expression=ParseExpression(query)
+
+    root=QueryNode(None)
+    actual_node=root
+
+    leaves=list()
+    leave_operands=list()
+
+    #build binary tree with operators as nodes and operands as leaves
+    for exp, typ in zip(split_expression,type_expression):
+
+      if typ=='opening_bracket':
+        #add child and move down
+        actual_node=actual_node.AddChild()
+      elif typ=='operator':
+        #set operator, add child and move down 
+        actual_node.SetOperator(exp)
+        actual_node=actual_node.AddChild()
+      elif typ=='operand':
+        #reached leave, go up again
+        leaves.append(actual_node)
+        leave_operands.append(exp)
+        actual_node=actual_node.GetParent()
+      elif typ=='closing_bracket':
+        if actual_node.GetParent()==None:
+          #move up with creating a new root
+          actual_node=actual_node.SetParent(QueryNode(None))
+          root=actual_node
+        else:
+          #move up
+          actual_node=actual_node.GetParent()
+    
+    #evaluate tree for every row  
+    for i, r in enumerate(self.rows):
+      for leave, operand in zip(leaves, leave_operands):
+        leave.SetOperand(ParseOperand(operand,i))
+      if root.EvaluateNode():
+        selected_tab.AddRow(r)
+
+    return selected_tab
 
   @staticmethod
   def _LoadOST(stream_or_filename):
