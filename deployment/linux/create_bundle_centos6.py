@@ -12,7 +12,7 @@ import PyQt4
 qt4_plugins_location='/usr/lib/qt4/plugins'
 qt4_qmake_location='/usr/lib/qt4/bin/qmake'
 ssl_crypto_location='/usr/lib/'
-chemlib_dictionary_location='/home/bundler/ost/ChemLib/1.2.2/compounds.chemlib'
+chemlib_dictionary_location='/home/bundler/compounds.chemlib'
 list_of_excluded_libraries=[
 'ld-linux',
 'libexpat',
