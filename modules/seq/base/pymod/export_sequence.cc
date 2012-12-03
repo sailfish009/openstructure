@@ -80,6 +80,9 @@ ConstSequenceList do_slice_a(ConstSequenceList& t, slice sl)
 {
   return do_slice<ConstSequenceList>(t, sl);
 }
+String aln_to_str(const AlignmentHandle& aln) {
+  return aln.ToString();
+}
 
 SequenceList do_slice_b(SequenceList& t, slice sl)
 {
@@ -334,9 +337,6 @@ void export_sequence()
   class_<SeqListIter>("SeqListIter", no_init)
     .def("next", &SeqListIter::next)
   ;
-  to_python_converter<std::pair<mol::EntityView, mol::EntityView>, 
-                      PairToTupleConverter<mol::EntityView, mol::EntityView> >();
-  
   class_<AlignmentHandle>("AlignmentHandle", init<>())
     .def("GetCount", &AlignmentHandle::GetCount)
     .add_property("sequence_count", &AlignmentHandle::GetCount)
@@ -345,10 +345,13 @@ void export_sequence()
     .def("GetResidueIndex", &AlignmentHandle::GetResidueIndex)
     .def("GetResidue", &AlignmentHandle::GetResidue)
     .def("AddSequence", &AlignmentHandle::AddSequence)
+    .def("GetMatchingBackboneViews", &AlignmentHandle::GetMatchingBackboneViews,
+         (arg("idx_a")=0, arg("idx_b")=1))
     .def("FindSequence", &AlignmentHandle::FindSequence)
     .def("FindSequenceIndex", &AlignmentHandle::FindSequenceIndex)
     .def("Copy", &AlignmentHandle::Copy)
-    .def("ToString", &AlignmentHandle::ToString)
+    .def("ToString", &AlignmentHandle::ToString, (arg("width")=80))
+    .def("__str__", aln_to_str)
     .def("GetLength", &AlignmentHandle::GetLength)
     .def("__len__", &AlignmentHandle::GetLength)
     .def("GetSequences", &AlignmentHandle::GetSequences)

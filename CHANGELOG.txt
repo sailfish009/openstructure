@@ -26,6 +26,9 @@ Changes In Release 1.3.0
   * Update directory layout of OST to be more conformant with the site-package
     system of Python: Instead of storing the modules in lib{64}/ost/ost, they
     are now in lib{64}/python{{VERSION}}/site-packages/ost
+  * Added molck, the molecular checker. A small command-line tool to clean PDB 
+    files, e.g. remove atoms with zero occupancy, "virtual atoms", hydrogens 
+    etc.
 
 Changes In Release 1.2.3
 --------------------------------------------------------------------------------
