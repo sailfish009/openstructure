@@ -345,7 +345,7 @@ void export_sequence()
     .def("GetResidueIndex", &AlignmentHandle::GetResidueIndex)
     .def("GetResidue", &AlignmentHandle::GetResidue)
     .def("AddSequence", &AlignmentHandle::AddSequence)
-    .def("GetMatchingBackboneViews", &AlignmentHandle::GetMatchingBackboneViews, 
+    .def("GetMatchingBackboneViews", &AlignmentHandle::GetMatchingBackboneViews,
          (arg("idx_a")=0, arg("idx_b")=1))
     .def("FindSequence", &AlignmentHandle::FindSequence)
     .def("FindSequenceIndex", &AlignmentHandle::FindSequenceIndex)

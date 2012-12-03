@@ -37,6 +37,16 @@ String BFPathToString(const boost::filesystem::path& path)
 #endif
 }
 
+inline String BFPathStem(const boost::filesystem::path& path) {
+#if BOOST_FILESYSTEM_VERSION<103400
+  String name = BFPathToString(path);
+  size_t n = name.rfind('.');
+  return name.substr(0, n);
+#else
+  return path.stem();
+#endif
+}
+
 }
 
 

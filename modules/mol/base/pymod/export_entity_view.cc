@@ -215,6 +215,6 @@ void export_EntityView()
   class_<EntityViewList>("EntityViewList", init<>())
     .def(vector_indexing_suite<EntityViewList>())
   ;
-  to_python_converter<std::pair<EntityView, EntityView>, 
+  to_python_converter<std::pair<EntityView, EntityView>,
                       PairToTupleConverter<EntityView, EntityView> >();
 }
