@@ -1,7 +1,8 @@
 Changes in Release 1.4
 --------------------------------------------------------------------------------
 
-  * Feasibility check set to off by default
+  * Feasibility check set to off by default, atoms in compounds are now connected
+    by the Builder irrespective of the distance between them
   * Speed improvement for bracketed within selections up to a factor of 20
 
 Changes In Release 1.3.1
