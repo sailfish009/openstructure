@@ -47,9 +47,11 @@ if not profiles:
   profiles['STRICT']=IOProfile(dialect='PDB', fault_tolerant=False,
                                strict_hydrogens=False, quack_mode=False)
   profiles['SLOPPY']=IOProfile(dialect='PDB', fault_tolerant=True,
-                               strict_hydrogens=False, quack_mode=True)
+                               strict_hydrogens=False, quack_mode=True,
+                               bond_feasibility_check=True)
   profiles['CHARMM']=IOProfile(dialect='CHARMM', fault_tolerant=True,
-                               strict_hydrogens=False, quack_mode=False)
+                               strict_hydrogens=False, quack_mode=False,
+                               bond_feasibility_check=True)
   profiles['DEFAULT']='STRICT'
 
 def _override(val1, val2):

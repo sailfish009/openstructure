@@ -55,7 +55,7 @@ SLOPPY:
 
     IOProfile(dialect='PDB', strict_hydrogens=False, quack_mode=True,
               fault_tolerant=True, join_spread_atom_records=False,
-              no_hetatms=False, bond_feasibility_check=False)
+              no_hetatms=False, bond_feasibility_check=True)
 
 CHARMM:
 
@@ -66,7 +66,7 @@ CHARMM:
 
     IOProfile(dialect='CHARMM', strict_hydrogens=False, quack_mode=True,
               fault_tolerant=True, join_spread_atom_records=True,
-              no_hetatms=False, bond_feasibility_check=False)
+              no_hetatms=False, bond_feasibility_check=True)
 
 
 The IOProfile Class
