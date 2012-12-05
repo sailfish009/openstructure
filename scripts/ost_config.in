@@ -50,6 +50,18 @@ if [ -n "$DNG_ATTACH_VALGRIND" ]; then
   pyexec="`which valgrind`#--leak-check=full#$pyexec"
 fi
 
+if [ -n "$DNG_PROFILE" ]; then
+  if [[ "$DNG_PROFILE" == "yep" ]]; then
+    echo "Profiling activated using yep"
+    pyexec="$pyexec#-m#yep#-v#--"
+  elif [[ "$DNG_PROFILE" == "cProfile" ]]; then
+    echo "Profiling activated using cProfile"
+    pyexec="$pyexec#-m#cProfile#-s#cumulative#--"
+  else 
+    echo "Profiling deactivated due to unkown profiler"
+  fi
+fi
+
 
 set -o noglob
 
