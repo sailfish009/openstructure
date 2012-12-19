@@ -67,105 +67,6 @@ def GuessColumnType(iterator):
   # return the last element available
   return possibilities.pop()
 
-class QueryNode:
-
-  def __init__(self,par):
-    self.operator=None
-    self.operand=None
-    self.children=list()
-    self.parent=par
-
-  def AddChild(self):
-    if len(self.children)>=2:
-      raise RuntimeError('Cannot add more than two children')
-    self.children.append(QueryNode(self))
-    return self.children[-1]
-
-  def SetOperator(self,op):
-    if self.operand!=None:
-      raise RuntimeError('Cannot add an operator to a node, that is already marked as leave by an operand!')
-    self.operator=op
-
-  def SetOperand(self,op):
-    if self.operator!=None:
-      raise RuntimeError('Setting an operand marks a node as leave, but there is already an operator set!')
-    self.operand=op
-
-  def GetParent(self):
-    return self.parent
-
-  def SetParent(self, par):
-    par.children.append(self)
-    self.parent=par
-    return self.parent
-  
-  def EvaluateAnd(self,lhs,rhs):
-    return lhs and rhs
-
-  def EvaluateOr(self,lhs,rhs):
-    return lhs or rhs
-
-  def EvaluateEqual(self,lhs,rhs):
-    return lhs==rhs
-
-  def EvaluateNonEqual(self,lhs,rhs):
-    return lhs!=rhs
-
-  def EvaluateLower(self,lhs,rhs):
-    return lhs<rhs
-
-  def EvaluateGreater(self,lhs,rhs):
-    return lhs>rhs
-
-  def EvaluateLowerEqual(self,lhs,rhs):
-    return lhs<=rhs
-
-  def EvaluateGreaterEqual(self,lhs,rhs):
-    return lhs>=rhs
-
-  def EvaluateOperator(self,op,lhs,rhs):
-    if op=='and':
-      return self.EvaluateAnd(lhs,rhs)
-    elif op=='or':
-      return self.EvaluateOr(lhs,rhs)
-    elif op=='=':
-      return self.EvaluateEqual(lhs,rhs)
-    elif op=='!=':
-      return self.EvaluateNonEqual(lhs,rhs)
-    elif op=='<':
-      return self.EvaluateLower(lhs,rhs)
-    elif op=='>':
-      return self.EvaluateGreater(lhs,rhs)
-    elif op=='<=':
-      return self.EvaluateLowerEqual(lhs,rhs)
-    elif op=='>=':
-      return self.EvaluateGreaterEqual(lhs,rhs)
-    else:
-      raise RuntimeError('Unknown operator: '+op)
-
-  def EvaluateNode(self):
-
-    #handle the case where node is a leave
-    if self.operand:
-      return self.operand
-
-    #if there is a single logical expression, there is a root node with no
-    #operator... We have to evaluate its child
-    if len(self.children)==1:
-      return self.children[0].EvaluateNode()
-
-    #something must have failed in building up the tree!
-    if self.operator==None:
-      raise RuntimeError('no operator set!') 
-    if len(self.children)!=2:
-      raise RuntimeError('Node must have two children!')
-    
-    #recursively traverse binary tree
-    return self.EvaluateOperator(self.operator,self.children[0].EvaluateNode(),self.children[1].EvaluateNode())
-
-
-
-
 class BinaryColExpr:
   def __init__(self, op, lhs, rhs):
     self.op=op
@@ -918,123 +819,404 @@ Statistics for column %(col)s
         filt_tab.AddRow(row)
     return filt_tab
 
+  def _EvaluateAnd(self, lhs, rhs):
+    return lhs and rhs
+
+  def _EvaluateOr(self, lhs, rhs):
+    return lhs or rhs
+
+  def _EvaluateEqual(self, lhs, rhs):
+    return lhs==rhs
+
+  def _EvaluateNonEqual(self, lhs, rhs):
+    return lhs!=rhs
+
+  def _EvaluateLower(self, lhs, rhs):
+    return lhs<rhs
+
+  def _EvaluateGreater(self, lhs, rhs):
+    return lhs>rhs
+
+  def _EvaluateLowerEqual(self, lhs, rhs):
+    return lhs<=rhs
+
+  def _EvaluateGreaterEqual(self, lhs, rhs):
+    return lhs>=rhs
+
+  def _EvaluateAdd(self, lhs, rhs):
+    return lhs+rhs
+
+  def _EvaluateSubtract(self, lhs, rhs):
+    return lhs-rhs
+
+  def _EvaluateMultiply(self, lhs, rhs):
+    return lhs*rhs
+
+  def _EvaluateDivide(self, lhs, rhs):
+    return lhs/rhs
+
+
+  def _EvaluateOperator(self, op, lhs, rhs):
+    if op=='and':
+      return self._EvaluateAnd(lhs, rhs)
+    elif op=='or':
+      return self._EvaluateOr(lhs, rhs)
+    elif op=='=':
+      return self._EvaluateEqual(lhs, rhs)
+    elif op=='!=':
+      return self._EvaluateNonEqual(lhs, rhs)
+    elif op=='<':
+      return self._EvaluateLower(lhs, rhs)
+    elif op=='>':
+      return self._EvaluateGreater(lhs, rhs)
+    elif op=='<=':
+      return self._EvaluateLowerEqual(lhs, rhs)
+    elif op=='>=':
+      return self._EvaluateGreaterEqual(lhs, rhs)
+    elif op=='+':
+      return self._EvaluateAdd(lhs, rhs)
+    elif op=='-':
+      return self._EvaluateSubtract(lhs, rhs)
+    elif op=='/':
+      return self._EvaluateDivide(lhs, rhs)
+    elif op=='*':
+      return self._EvaluateMultiply(lhs, rhs)
+    else:
+      raise RuntimeError('Unknown operator: '+op)
+
+  def _EvaluateRPN(self, RPNExp, RPNTypes):
+    #Evaluates the reverse polish notation
+    stack=list()
+    while True:
+      if len(RPNExp)==0:
+        break
+      exp=RPNExp.pop(0)
+      typ=RPNTypes.pop(0)
+      if typ=='operand' or typ=='tab_value':
+        stack.append(exp)
+      elif typ=='operator':
+        if len(stack)<2:
+          raise RuntimeError('Cannot evaluate operator on less than two operands!')
+        rhs=stack.pop()
+        lhs=stack.pop()
+        stack.append(self._EvaluateOperator(exp, lhs, rhs))
+    if len(stack)>1:
+      raise RuntimeError('Too many operands for given operators!')
+    return stack.pop()
+
+  def _ShuntingYard(self, split_expression, split_types, precedence):
+    #Creates the so called reverse polish notation out of the expression parser output.
+    #note, that there won't be parenthesis anymore and potential parenthesis
+    #mismatches get recognized.
+    #The so called shunting yard algorithm from dijkstra gets used.
+
+    output_stack_exp=list()
+    output_stack_types=list()
+    operator_stack=list()
+
+    while True:
+      if len(split_expression)==0:
+        while True:
+          if len(operator_stack)==0:
+            break
+          if operator_stack[-1] in ['(',')']:
+            raise ValueError('Parenthesis mismatch!')
+          output_stack_exp.append(operator_stack.pop())
+          output_stack_types.append('operator')
+        break
+
+      typ=split_types.pop(0)
+      exp=split_expression.pop(0)
+
+      if typ in ['operand','tab_value']:
+        output_stack_exp.append(exp)
+        output_stack_types.append(typ)
+        continue
+
+      if typ == 'opening_bracket':
+        operator_stack.append('(')
+        continue
+
+      if typ == 'operator':
+        prec=precedence[exp]
+        while len(operator_stack)>0:
+          if operator_stack[-1]=='(':
+            break
+          elif prec>=precedence[operator_stack[-1]]:
+            output_stack_exp.append(operator_stack.pop())
+            output_stack_types.append('operator')
+          else:
+            break
+        operator_stack.append(exp)
+        
+      if typ == 'closing_bracket':
+        while True:
+          if len(operator_stack)==0:
+            raise ValueError('Parenthesis mismatch!')
+          if operator_stack[-1]=='(':
+            operator_stack.pop()
+            break
+          output_stack_exp.append(operator_stack.pop())
+          output_stack_types.append('operator')
+
+    return output_stack_exp, output_stack_types
+
+  def _EvaluateOperand(self, operand):
+
+    import re
+
+    float_expression=re.compile('[-+]?[0-9]*\.[0-9]+(?:[eE][-+]?[0-9]+)?$')
+    int_expression=re.compile('[-+]?[0-9]+(?:[eE][-+]?[0-9]+)?$')
+    bool_expression=re.compile('true$|True$|false$|False$')
+
+    if re.match(float_expression,operand):
+      return float(operand)
+    elif re.match(int_expression, operand):
+      return int(operand)
+    elif re.match(bool_expression,operand):
+      return bool(operand)
+    return operand
+
+    #If nothing above matches, operand must be a string, full string
+    #gets returned.
+
+
+
+  def _ExpressionParser(self, expression, valid_operators, precedence):
+
+    #Reads token after token and searches for brackets and valid_operators
+    #everything, that doesn't match the above is assumed to be an operand
+    #and is cast into the most likely type based on regular expression
+    #Note, that there is no check, wether the operands can be processed by
+    #their corresponding operators (with respect to types)!
+
+    split_expression=list()
+    split_types=list()
+    actual_position=0
+    eaten_stuff=''
+
+    while True:
+
+      if actual_position>=len(expression):
+        if len(eaten_stuff.strip())>0:
+          op=eaten_stuff.strip()
+          if ' ' in op:
+            raise ValueError('cannot evaluate %s'%(op))
+          split_expression.append(op)
+          split_types.append('operand')
+
+        #check for problematic cases like 'a<=b<=c'. We don't know which operator to evaluate first.
+        temp=['operator','operand','operator']
+
+        for i in range(len(split_expression)-3):
+          if split_types[i:i+3]==temp:
+            if precedence[split_expression[i]]==precedence[split_expression[i+2]]:
+              raise RuntimeError('Cannot Evaluate '+' '.join(split_expression[i:i+3])+' since both operators have same precedence!')
+
+        #handle ':' operator
+        #replaces an expression like 'col_a=x:y' with '(col_a>=x and col_a<=y)'
+        
+        temp_split_expression=list()
+        temp_split_types=list()
+        skips=0
+
+        for i in range(len(split_expression)):
+          if skips>0:
+            skips-=1
+            continue
+          if split_types[i]=='operand':
+            if ':' in split_expression[i]:
+              if split_expression[max(0,i-1)] != '=' and split_expression[min(i+1,len(split_expression)-1)] != '=':
+                raise RuntimeError('Can evaluate \':\' sign only in combination with \'=\'')
+              if len(split_expression[i].split(':')) != 2:
+                raise RuntimeError('Can operate \':\' operator only on 2 operands')
+
+              lhs=self._EvaluateOperand(split_expression[i].split(':')[0])
+              rhs=self._EvaluateOperand(split_expression[i].split(':')[1])
+
+              template_expression=['(','','<=','','and','','<=','',')']
+              template_types=['opening_bracket','operand','operator','operand','operator','operand','operator','operand','closing_bracket']
+
+              if split_expression[max(0,i-1)] == '=':
+                if i-2<0:
+                  raise RuntimeError('Does it really make sense to start with an \'=\'?')
+
+                temp_split_expression.pop()
+                temp_split_expression.pop()
+                temp_split_types.pop()
+                temp_split_types.pop()
+                template_expression[3]=split_expression[i-2]
+                template_expression[5]=split_expression[i-2]
+                skips=0
+
+              else:
+                if i+2>len(split_expression)-1:
+                  raise RuntimeError('Does it really make sense to end with an \'=\'?')
+
+                template_expression[2]=split_expression[i+2]
+                template_expression[4]=split_expression[i+2]
+                skips=2 
+
+              template_expression[1]=str(min(lhs,rhs))
+              template_expression[7]=str(max(lhs,rhs))
+              temp_split_expression+=template_expression
+              temp_split_types+=template_types
+
+              continue
+
+          temp_split_expression.append(split_expression[i])
+          temp_split_types.append(split_types[i])  
+
+        split_expression=temp_split_expression
+        split_types=temp_split_types 
+
+        #handle , operator
+        #replaces an expression like 'rnum=1,2,3' with '(rnum=1 or rnum=2 or rnum=3)'
+
+        temp_split_expression=list()
+        temp_split_types=list()
+
+        for i in range(len(split_expression)):
+          if skips>0:
+            skips-=1
+            continue
+          if ',' in split_expression[i]:
+
+            if split_expression[max(0,i-1)] != '=' and split_expression[min(i+1,len(split_expression)-1)] != '=':
+              raise RuntimeError('Can evaluate \',\' sign only in combination with \'=\'')
+
+            single_operands=split_expression[i].split(',')
+
+            if split_expression[max(0,i-1)]=='=':
+              if i-2<0:
+                raise RuntimeError('Does it really make sense to start with an \'=\'')
+              main_operand=split_expression[i-2]
+              temp_split_expression.pop()
+              temp_split_types.pop()
+              temp_split_expression.pop()
+              temp_split_types.pop()
+              skips=0
+
+            else:
+              if i+2>len(split_expression)-1:
+                raise RuntimeError('Does it really make sense to end with an \'=\'')
+              main_operand=split_expression[i+2]
+              skips=2
+
+            temp_expression=list(['('])
+            temp_expression+=' or '.join(['%s = %s'% (a,b) for (a,b) in zip(len(single_operands)*[main_operand],single_operands)]).split()
+            temp_expression.append(')')
+
+            temp_types=list()
+            temp_types+=' '.join(['%s %s'% (a,b) for (a,b) in zip(len(single_operands)*['operand'],len(single_operands)*['operator'])]).split()
+            temp_types+=temp_types
+            temp_types=['opening_bracket']+temp_types
+            temp_types[-1]='closing_bracket'
+
+            temp_split_expression+=temp_expression
+            temp_split_types+=temp_types
+
+
+            continue
+
+          temp_split_expression.append(split_expression[i])
+          temp_split_types.append(split_types[i])
+
+        split_expression=temp_split_expression
+        split_types=temp_split_types
+
+        for i in range(len(split_expression)):
+          if split_types[i]=='operand':
+            if split_expression[i] in self.GetColNames():
+              split_types[i]='tab_value'
+            else:
+              split_expression[i]=self._EvaluateOperand(split_expression[i])
+
+        return split_expression, split_types
+
+      token=expression[actual_position]
+
+      if token=='(' or token=='[' or token=='{':
+        if len(eaten_stuff.strip())>0:
+          op=eaten_stuff.strip()
+          if ' ' in op:
+            raise ValueError('cannot evaluate %s'%(op))
+          split_expression.append(op)
+          split_types.append('operand')
+          eaten_stuff=''
+        split_expression.append('(')
+        split_types.append('opening_bracket')
+        actual_position+=1
+        continue
+
+      if token==')' or token==']' or token=='}':
+        if len(eaten_stuff.strip())>0:
+          op=eaten_stuff.strip()
+          if ' ' in op:
+            raise ValueError('cannot evaluate %s'%(op))
+          split_expression.append(op)
+          split_types.append('operand')
+          eaten_stuff=''
+        split_expression.append(')')
+        split_types.append('closing_bracket')
+        actual_position+=1
+        continue
+
+      found_operator=False
+
+      for operator in valid_operators:
+        if actual_position+len(operator)>len(expression):
+          continue
+        if expression[actual_position:actual_position+len(operator)]==operator:
+          if len(eaten_stuff.strip())>0:
+            op=eaten_stuff.strip()
+            if ' ' in op:
+              raise ValueError('cannot evaluate %s'%(op))
+            split_expression.append(op)
+            split_types.append('operand')
+            eaten_stuff=''
+          split_expression.append(operator)
+          split_types.append('operator')
+          actual_position+=len(operator)
+          found_operator=True
+
+      if found_operator:
+        continue
+
+      eaten_stuff+=token
+      actual_position+=1
+
   def Select(self, query):
 
-    valid_operators=['and','or','=','!=','<','>','<=','>=']
 
-    def ParseOperand(operand,row_num):
-      if operand=='true':
-        return True
-      if operand=='false':
-        return False
-      if operand in self.col_names:
-        col_index=self.GetColIndex(operand)
-        return self.rows[row_num][col_index]
-      try:
-        return float(operand)
-      except:
-        raise RuntimeError('Could not parse operand '+operand)
+    valid_operators=['and','or','!=','<=','>=','=','<','>','+','-','*','/']
 
-    def ParseExpression(expression):
+    #http://en.wikipedia.org/wiki/Order_of_operations
 
-      split_expression=list()
-      split_types=list()
-      actual_position=0
-      eaten_stuff=''
+    precedence={'or':6 , 'and':5 , '!=':4 , '=':4 , '<=':3 , 
+                '>=':3 , '<':3 , '>':3 , '+':2 , '-':2 , '*':1 , '/':1}
 
-      while True:
+    split_expression, split_types=self._ExpressionParser(query, valid_operators, precedence)
+    rpn_expressions, rpn_types=self._ShuntingYard(list(split_expression), list(split_types), precedence)
 
-        if actual_position>=len(expression):
-          if len(eaten_stuff.strip())>0:
-            split_expression.append(eaten_stuff.strip())
-            split_types.append('operand')
-          return split_expression,split_types
+    tab_indices=list()
+    exp_indices=list()
 
-        token=expression[actual_position]
-
-        if token=='(' or token=='[' or token=='{':
-          if len(eaten_stuff.strip())>0:
-            split_expression.append(eaten_stuff.strip())
-            split_types.append('operand')
-          split_expression.append('(')
-          split_types.append('opening_bracket')
-          actual_position+=1
-          eaten_stuff=''
-          continue
-
-        if token==')' or token==']' or token=='}':
-          if len(eaten_stuff.strip())>0:
-            split_expression.append(eaten_stuff.strip())
-            split_types.append('operand')
-          split_expression.append(')')
-          split_types.append('closing_bracket')
-          actual_position+=1
-          eaten_stuff=''
-          continue
-
-        found_operator=False
-
-        for op in valid_operators:
-          if actual_position+len(op)>len(expression):
-            continue
-          if expression[actual_position:actual_position+len(op)]==op:
-            if len(eaten_stuff.strip())>0:
-              split_expression.append(eaten_stuff.strip())
-              split_types.append('operand')
-            split_expression.append(op)
-            split_types.append('operator')
-            actual_position+=len(op)
-            eaten_stuff=''
-            found_operator=True
-
-        if found_operator:
-          continue
-
-        eaten_stuff+=token
-        actual_position+=1
+    for i, (typ, exp) in enumerate(zip(rpn_types, rpn_expressions)):
+      if typ == 'tab_value':
+        tab_indices.append(self.GetColIndex(exp))
+        exp_indices.append(i)
 
     selected_tab=Table(list(self.col_names), list(self.col_types))
 
-    split_expression, type_expression=ParseExpression(query)
-
-    root=QueryNode(None)
-    actual_node=root
-
-    leaves=list()
-    leave_operands=list()
-
-    #build binary tree with operators as nodes and operands as leaves
-    for exp, typ in zip(split_expression,type_expression):
-
-      if typ=='opening_bracket':
-        #add child and move down
-        actual_node=actual_node.AddChild()
-      elif typ=='operator':
-        #set operator, add child and move down 
-        actual_node.SetOperator(exp)
-        actual_node=actual_node.AddChild()
-      elif typ=='operand':
-        #reached leave, go up again
-        leaves.append(actual_node)
-        leave_operands.append(exp)
-        actual_node=actual_node.GetParent()
-      elif typ=='closing_bracket':
-        if actual_node.GetParent()==None:
-          #move up with creating a new root
-          actual_node=actual_node.SetParent(QueryNode(None))
-          root=actual_node
-        else:
-          #move up
-          actual_node=actual_node.GetParent()
-    
-    #evaluate tree for every row  
-    for i, r in enumerate(self.rows):
-      for leave, operand in zip(leaves, leave_operands):
-        leave.SetOperand(ParseOperand(operand,i))
-      if root.EvaluateNode():
-        selected_tab.AddRow(r)
+    for row in self.rows:
+      for ti, ei in zip(tab_indices, exp_indices):
+        rpn_expressions[ei] = row[ti]
+      if self._EvaluateRPN(list(rpn_expressions), list(rpn_types)):
+        selected_tab.AddRow(row)
 
     return selected_tab
+
 
   @staticmethod
   def _LoadOST(stream_or_filename):
