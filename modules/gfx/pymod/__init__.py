@@ -386,3 +386,11 @@ def _scene_export(self,*args,**kwargs):
   """)
 
 SceneSingleton.Export=_scene_export
+
+import __main__ as main_mod
+main_mod.scene=Scene()
+main_mod.scene.Stereo=Stereo
+
+import ost as ost_mod
+ost_mod.scene=Scene()
+ost_mod.scene.Stereo=Stereo

@@ -35,15 +35,6 @@ else:
      
 from ost import *
 import ost
-try:
-  from ost import gfx
-  ost.scene = gfx.Scene()
-  scene=gfx.Scene()
-  ost.scene.Stereo=gfx.Stereo
-  scene.Stereo=gfx.Stereo
-except ImportError:
-  print "ost build without gfx"
-  pass
 
 ost.SetPrefixPath(_base_dir)
 def _InitRuleBasedBuilder():

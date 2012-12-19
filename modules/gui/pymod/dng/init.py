@@ -12,8 +12,6 @@ try:
 except ImportError:
   _img_present=False
   pass
-ost.scene = gfx.Scene()
-ost.scene.Stereo=gfx.Stereo
 
 import httplib
 
