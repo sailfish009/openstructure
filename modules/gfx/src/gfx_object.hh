@@ -218,6 +218,9 @@ public:
 
   void Debug(unsigned int flags);
 
+  IndexedVertexArray& GetVA() {return va_;}
+  const IndexedVertexArray& GetVA() const {return va_;}
+
  protected:
   
   void PreRenderGL(bool flag);
