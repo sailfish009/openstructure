@@ -819,6 +819,7 @@ Statistics for column %(col)s
         filt_tab.AddRow(row)
     return filt_tab
 
+
   def _EvaluateAnd(self, lhs, rhs):
     return lhs and rhs
 
@@ -882,36 +883,34 @@ Statistics for column %(col)s
     elif op=='*':
       return self._EvaluateMultiply(lhs, rhs)
     else:
-      raise RuntimeError('Unknown operator: '+op)
+      raise ValueError('Unknown operator: '+op)
 
-  def _EvaluateRPN(self, RPNExp, RPNTypes):
+  def _EvaluateRPN(self, RPNExp, valid_operators):
     #Evaluates the reverse polish notation
     stack=list()
     while True:
       if len(RPNExp)==0:
         break
       exp=RPNExp.pop(0)
-      typ=RPNTypes.pop(0)
-      if typ=='operand' or typ=='tab_value':
-        stack.append(exp)
-      elif typ=='operator':
+      if exp in valid_operators:
         if len(stack)<2:
-          raise RuntimeError('Cannot evaluate operator on less than two operands!')
+          raise ValueError('Cannot evaluate operator on less than two operands!')
         rhs=stack.pop()
         lhs=stack.pop()
         stack.append(self._EvaluateOperator(exp, lhs, rhs))
+      else:
+        stack.append(exp)
     if len(stack)>1:
-      raise RuntimeError('Too many operands for given operators!')
+      raise ValueError('Too many operands for given operators!')
     return stack.pop()
 
-  def _ShuntingYard(self, split_expression, split_types, precedence):
+  def _ShuntingYard(self, split_expression, valid_operators, precedence):
     #Creates the so called reverse polish notation out of the expression parser output.
     #note, that there won't be parenthesis anymore and potential parenthesis
     #mismatches get recognized.
-    #The so called shunting yard algorithm from dijkstra gets used.
+    #The shunting yard algorithm from dijkstra gets used.
 
-    output_stack_exp=list()
-    output_stack_types=list()
+    output_stack=list()
     operator_stack=list()
 
     while True:
@@ -921,45 +920,40 @@ Statistics for column %(col)s
             break
           if operator_stack[-1] in ['(',')']:
             raise ValueError('Parenthesis mismatch!')
-          output_stack_exp.append(operator_stack.pop())
-          output_stack_types.append('operator')
+          output_stack.append(operator_stack.pop())
         break
 
-      typ=split_types.pop(0)
       exp=split_expression.pop(0)
 
-      if typ in ['operand','tab_value']:
-        output_stack_exp.append(exp)
-        output_stack_types.append(typ)
-        continue
-
-      if typ == 'opening_bracket':
+      if exp == '(':
         operator_stack.append('(')
         continue
 
-      if typ == 'operator':
+      if exp in valid_operators:
         prec=precedence[exp]
         while len(operator_stack)>0:
           if operator_stack[-1]=='(':
             break
           elif prec>=precedence[operator_stack[-1]]:
-            output_stack_exp.append(operator_stack.pop())
-            output_stack_types.append('operator')
+            output_stack.append(operator_stack.pop())
           else:
             break
         operator_stack.append(exp)
+        continue
         
-      if typ == 'closing_bracket':
+      if exp == ')':
         while True:
           if len(operator_stack)==0:
             raise ValueError('Parenthesis mismatch!')
           if operator_stack[-1]=='(':
             operator_stack.pop()
             break
-          output_stack_exp.append(operator_stack.pop())
-          output_stack_types.append('operator')
+          output_stack.append(operator_stack.pop())
+        continue
 
-    return output_stack_exp, output_stack_types
+      output_stack.append(exp)
+
+    return output_stack
 
   def _EvaluateOperand(self, operand):
 
@@ -974,7 +968,9 @@ Statistics for column %(col)s
     elif re.match(int_expression, operand):
       return int(operand)
     elif re.match(bool_expression,operand):
-      return bool(operand)
+      if operand == 'false' or operand == 'False':
+        return False
+      return True
     return operand
 
     #If nothing above matches, operand must be a string, full string
@@ -982,7 +978,7 @@ Statistics for column %(col)s
 
 
 
-  def _ExpressionParser(self, expression, valid_operators, precedence):
+  def _ExpressionLexer(self, expression, valid_operators, precedence):
 
     #Reads token after token and searches for brackets and valid_operators
     #everything, that doesn't match the above is assumed to be an operand
@@ -991,7 +987,6 @@ Statistics for column %(col)s
     #their corresponding operators (with respect to types)!
 
     split_expression=list()
-    split_types=list()
     actual_position=0
     eaten_stuff=''
 
@@ -1003,78 +998,65 @@ Statistics for column %(col)s
           if ' ' in op:
             raise ValueError('cannot evaluate %s'%(op))
           split_expression.append(op)
-          split_types.append('operand')
 
-        #check for problematic cases like 'a<=b<=c'. We don't know which operator to evaluate first.
-        temp=['operator','operand','operator']
-
+        #check for problematic cases like 'a<=b<=c'. We don't know which operator to evaluate first
         for i in range(len(split_expression)-3):
-          if split_types[i:i+3]==temp:
+          if (split_expression[i] in valid_operators) and (split_expression[i+2] in valid_operators):
             if precedence[split_expression[i]]==precedence[split_expression[i+2]]:
-              raise RuntimeError('Cannot Evaluate '+' '.join(split_expression[i:i+3])+' since both operators have same precedence!')
+              raise ValueError('Cannot Evaluate '+' '.join(split_expression[i:i+3])+' since both operators have same precedence!')
 
         #handle ':' operator
         #replaces an expression like 'col_a=x:y' with '(col_a>=x and col_a<=y)'
         
         temp_split_expression=list()
-        temp_split_types=list()
         skips=0
 
         for i in range(len(split_expression)):
           if skips>0:
             skips-=1
             continue
-          if split_types[i]=='operand':
-            if ':' in split_expression[i]:
-              if split_expression[max(0,i-1)] != '=' and split_expression[min(i+1,len(split_expression)-1)] != '=':
-                raise RuntimeError('Can evaluate \':\' sign only in combination with \'=\'')
-              if len(split_expression[i].split(':')) != 2:
-                raise RuntimeError('Can operate \':\' operator only on 2 operands')
+          if ':' in split_expression[i]:
+            if split_expression[max(0,i-1)] != '=' and split_expression[min(i+1,len(split_expression)-1)] != '=':
+              raise ValueError('Can evaluate \':\' sign only in combination with \'=\'')
+            if len(split_expression[i].split(':')) != 2:
+              raise ValueError('Can operate \':\' operator only on 2 operands')
+            
+            #even though we are still in the lexer, its necessary to evaluate the next
+            #expressions... They will be written back into the splitexpression as string again
+            lhs=self._EvaluateOperand(split_expression[i].split(':')[0])
+            rhs=self._EvaluateOperand(split_expression[i].split(':')[1])
 
-              lhs=self._EvaluateOperand(split_expression[i].split(':')[0])
-              rhs=self._EvaluateOperand(split_expression[i].split(':')[1])
+            template_expression=['(','','<=','','and','','<=','',')']
 
-              template_expression=['(','','<=','','and','','<=','',')']
-              template_types=['opening_bracket','operand','operator','operand','operator','operand','operator','operand','closing_bracket']
+            if split_expression[max(0,i-1)] == '=':
+              if i-2<0:
+                raise ValueError('Does it really make sense to start with an \'=\'?')
+              temp_split_expression.pop()
+              temp_split_expression.pop()
+              template_expression[3]=split_expression[i-2]
+              template_expression[5]=split_expression[i-2]
+              skips=0
 
-              if split_expression[max(0,i-1)] == '=':
-                if i-2<0:
-                  raise RuntimeError('Does it really make sense to start with an \'=\'?')
+            else:
+              if i+2>len(split_expression)-1:
+                raise ValueError('Does it really make sense to end with an \'=\'?')
+              template_expression[3]=split_expression[i+2]
+              template_expression[5]=split_expression[i+2]
+              skips=2 
 
-                temp_split_expression.pop()
-                temp_split_expression.pop()
-                temp_split_types.pop()
-                temp_split_types.pop()
-                template_expression[3]=split_expression[i-2]
-                template_expression[5]=split_expression[i-2]
-                skips=0
-
-              else:
-                if i+2>len(split_expression)-1:
-                  raise RuntimeError('Does it really make sense to end with an \'=\'?')
-
-                template_expression[2]=split_expression[i+2]
-                template_expression[4]=split_expression[i+2]
-                skips=2 
-
-              template_expression[1]=str(min(lhs,rhs))
-              template_expression[7]=str(max(lhs,rhs))
-              temp_split_expression+=template_expression
-              temp_split_types+=template_types
-
-              continue
+            template_expression[1]=str(min(lhs,rhs))
+            template_expression[7]=str(max(lhs,rhs))
+            temp_split_expression+=template_expression
+            continue
 
           temp_split_expression.append(split_expression[i])
-          temp_split_types.append(split_types[i])  
-
+  
         split_expression=temp_split_expression
-        split_types=temp_split_types 
 
         #handle , operator
         #replaces an expression like 'rnum=1,2,3' with '(rnum=1 or rnum=2 or rnum=3)'
 
         temp_split_expression=list()
-        temp_split_types=list()
 
         for i in range(len(split_expression)):
           if skips>0:
@@ -1083,56 +1065,35 @@ Statistics for column %(col)s
           if ',' in split_expression[i]:
 
             if split_expression[max(0,i-1)] != '=' and split_expression[min(i+1,len(split_expression)-1)] != '=':
-              raise RuntimeError('Can evaluate \',\' sign only in combination with \'=\'')
+              raise ValueError('Can evaluate \',\' sign only in combination with \'=\'')
 
             single_operands=split_expression[i].split(',')
 
             if split_expression[max(0,i-1)]=='=':
               if i-2<0:
-                raise RuntimeError('Does it really make sense to start with an \'=\'')
+                raise ValueError('Does it really make sense to start with an \'=\'')
               main_operand=split_expression[i-2]
               temp_split_expression.pop()
-              temp_split_types.pop()
               temp_split_expression.pop()
-              temp_split_types.pop()
               skips=0
 
             else:
               if i+2>len(split_expression)-1:
-                raise RuntimeError('Does it really make sense to end with an \'=\'')
+                raise ValueError('Does it really make sense to end with an \'=\'')
               main_operand=split_expression[i+2]
               skips=2
 
             temp_expression=list(['('])
             temp_expression+=' or '.join(['%s = %s'% (a,b) for (a,b) in zip(len(single_operands)*[main_operand],single_operands)]).split()
             temp_expression.append(')')
-
-            temp_types=list()
-            temp_types+=' '.join(['%s %s'% (a,b) for (a,b) in zip(len(single_operands)*['operand'],len(single_operands)*['operator'])]).split()
-            temp_types+=temp_types
-            temp_types=['opening_bracket']+temp_types
-            temp_types[-1]='closing_bracket'
-
             temp_split_expression+=temp_expression
-            temp_split_types+=temp_types
-
-
             continue
 
           temp_split_expression.append(split_expression[i])
-          temp_split_types.append(split_types[i])
 
         split_expression=temp_split_expression
-        split_types=temp_split_types
 
-        for i in range(len(split_expression)):
-          if split_types[i]=='operand':
-            if split_expression[i] in self.GetColNames():
-              split_types[i]='tab_value'
-            else:
-              split_expression[i]=self._EvaluateOperand(split_expression[i])
-
-        return split_expression, split_types
+        return split_expression
 
       token=expression[actual_position]
 
@@ -1142,10 +1103,8 @@ Statistics for column %(col)s
           if ' ' in op:
             raise ValueError('cannot evaluate %s'%(op))
           split_expression.append(op)
-          split_types.append('operand')
           eaten_stuff=''
         split_expression.append('(')
-        split_types.append('opening_bracket')
         actual_position+=1
         continue
 
@@ -1155,17 +1114,15 @@ Statistics for column %(col)s
           if ' ' in op:
             raise ValueError('cannot evaluate %s'%(op))
           split_expression.append(op)
-          split_types.append('operand')
           eaten_stuff=''
         split_expression.append(')')
-        split_types.append('closing_bracket')
         actual_position+=1
         continue
 
       found_operator=False
 
       for operator in valid_operators:
-        if actual_position+len(operator)>len(expression):
+        if actual_position+len(operator)>=len(expression):
           continue
         if expression[actual_position:actual_position+len(operator)]==operator:
           if len(eaten_stuff.strip())>0:
@@ -1173,12 +1130,11 @@ Statistics for column %(col)s
             if ' ' in op:
               raise ValueError('cannot evaluate %s'%(op))
             split_expression.append(op)
-            split_types.append('operand')
             eaten_stuff=''
           split_expression.append(operator)
-          split_types.append('operator')
           actual_position+=len(operator)
           found_operator=True
+          break
 
       if found_operator:
         continue
@@ -1188,6 +1144,38 @@ Statistics for column %(col)s
 
   def Select(self, query):
 
+    """
+    Returns a new table object containing all rows matching a logical query expression.
+    
+    *query* is a string containing the logical expression, that will be evaluated
+    for every row. 
+
+    Operands have to be the name of a column or an expression that can be parsed to 
+    float, int, bool or string.
+    Valid operators are: and, or, !=, <=, >=, =, <, >, +, -, *, / 
+    
+    .. code-block:: python
+    
+      subtab=tab.Select('col_a>0.5 and (col_b=5 or col_c=5)')
+
+    The selection query should be self explaining. Allowed parenthesis are: (), [], {}, 
+    whereas parenthesis mismatches get recognized. If there is a row containing 'None'
+    in a query relevant column, it will be neglected.
+
+    There are two special expressions:
+
+    .. code-block:: python
+
+      #selects rows, where 1.0<=col_a<=1.5
+      subtab=tab.Select('col_a=1.0:1.5')
+
+      #selects rows, where col_a=1 or col_a=2 or col_a=3
+      subtab=tab.Select('col_a=1,2,3')
+
+    Be aware, that there is no typechecking! Non consistent combinations of types
+    can lead to weird behaviour!
+
+    """
 
     valid_operators=['and','or','!=','<=','>=','=','<','>','+','-','*','/']
 
@@ -1196,23 +1184,31 @@ Statistics for column %(col)s
     precedence={'or':6 , 'and':5 , '!=':4 , '=':4 , '<=':3 , 
                 '>=':3 , '<':3 , '>':3 , '+':2 , '-':2 , '*':1 , '/':1}
 
-    split_expression, split_types=self._ExpressionParser(query, valid_operators, precedence)
-    rpn_expressions, rpn_types=self._ShuntingYard(list(split_expression), list(split_types), precedence)
+    split_expression=self._ExpressionLexer(query, valid_operators, precedence)
+    rpn_expression=self._ShuntingYard(list(split_expression), valid_operators, precedence)
 
     tab_indices=list()
     exp_indices=list()
 
-    for i, (typ, exp) in enumerate(zip(rpn_types, rpn_expressions)):
-      if typ == 'tab_value':
+    #extract indices for tab values and cast other operands in their most likely type based on
+    #regular expressions
+    for i, exp in enumerate(rpn_expression):
+      if exp in self.col_names:
         tab_indices.append(self.GetColIndex(exp))
         exp_indices.append(i)
+        continue
+      elif exp in valid_operators or exp in ['(',')']:
+        continue
+      rpn_expression[i] = self._EvaluateOperand(exp)
 
     selected_tab=Table(list(self.col_names), list(self.col_types))
 
     for row in self.rows:
       for ti, ei in zip(tab_indices, exp_indices):
-        rpn_expressions[ei] = row[ti]
-      if self._EvaluateRPN(list(rpn_expressions), list(rpn_types)):
+        rpn_expression[ei] = row[ti]
+      if None in rpn_expression:
+        continue
+      if self._EvaluateRPN(list(rpn_expression), valid_operators):
         selected_tab.AddRow(row)
 
     return selected_tab
