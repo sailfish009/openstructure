@@ -720,6 +720,7 @@ void GfxObj::Debug(unsigned int flags)
 void GfxObj::render_depth_only()
 {
   glPushAttrib(GL_ALL_ATTRIB_BITS);
+  glPushClientAttrib(GL_ALL_ATTRIB_BITS);
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
@@ -735,6 +736,7 @@ void GfxObj::render_depth_only()
   CustomRenderGL(STANDARD_RENDER_PASS);
   CustomRenderGL(TRANSPARENT_RENDER_PASS);
   glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);      
+  glPopClientAttrib();
   glPopAttrib();
 }
 

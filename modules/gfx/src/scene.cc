@@ -438,7 +438,8 @@ void Scene::InitGL(bool full)
   glClearDepth(1.0);
 
   // background
-  glClearColor(background_.Red(),background_.Green(),background_.Blue(),background_.Alpha());
+  //glClearColor(background_.Red(),background_.Green(),background_.Blue(),background_.Alpha());
+  glClearColor(background_.Red(),background_.Green(),background_.Blue(),0.0);
   fog_color_=background_;
 
   // polygon orientation setting
@@ -582,7 +583,8 @@ void Scene::SetBackground(const Color& c)
   background_=c;
   bg_mode_=0;
   if(gl_init_) {
-    glClearColor(c.Red(),c.Green(),c.Blue(),c.Alpha());
+    //glClearColor(c.Red(),c.Green(),c.Blue(),c.Alpha());
+    glClearColor(c.Red(),c.Green(),c.Blue(),0.0);
     SetFogColor(c);
     RequestRedraw();
   }
