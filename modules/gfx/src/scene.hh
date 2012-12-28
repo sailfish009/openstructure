@@ -513,6 +513,7 @@ class DLLEXPORT_OST_GFX Scene {
   void SetShowExportAspect(bool f);
   bool GetShowExportAspect() const {return show_export_aspect_;}
 
+  bool HasMultisample() const {return ms_flag_;}
 protected:
   friend class GfxObj; 
   friend class GfxNode;
@@ -603,6 +604,8 @@ private:
   Bitmap bg_bm_;
   unsigned int bg_tex_;
   
+  bool ms_flag_; // multisample flag
+
   float export_aspect_; 
   bool show_export_aspect_;
 

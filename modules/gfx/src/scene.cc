@@ -141,6 +141,7 @@ Scene::Scene():
   bg_grad_(),
   bg_bm_(),
   bg_tex_(),
+  ms_flag_(false),
   export_aspect_(1.0),
   show_export_aspect_(false)
 {
@@ -477,7 +478,9 @@ void Scene::InitGL(bool full)
     glDisable(GL_POINT_SMOOTH);
     glDisable(GL_POLYGON_SMOOTH);
     glEnable(GL_MULTISAMPLE);
+    ms_flag_=true;
   } else {
+    ms_flag_=false;
     glEnable(GL_LINE_SMOOTH);
     glDisable(GL_POINT_SMOOTH);
     glDisable(GL_POLYGON_SMOOTH);
@@ -2067,21 +2070,26 @@ namespace {
         glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
         glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
         glEnd();
-     }
+      }
 
-     ~ViewportRenderer() {
-       glBindTexture(GL_TEXTURE_2D, 0);
-       glDisable(GL_TEXTURE_2D);
-       glMatrixMode(GL_PROJECTION);
-       glPopMatrix();
-       glMatrixMode(GL_MODELVIEW);
-       glPopMatrix();
-       glPopClientAttrib();
-       glPopAttrib();
-#if OST_SHADER_SUPPORT_ENABLED
-       Shader::Instance().PopProgram();
+      ~ViewportRenderer() {
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_TEXTURE_2D);
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+        glPopMatrix();
+        glPopClientAttrib();
+        glPopAttrib();
+#if defined(OST_GL_VERSION_2_0)
+        if(Scene::Instance().HasMultisample()) {
+          glEnable(GL_MULTISAMPLE);
+        }
 #endif
-     }
+#if OST_SHADER_SUPPORT_ENABLED
+        Shader::Instance().PopProgram();
+#endif
+      }
   };
 }
 
@@ -2480,6 +2488,11 @@ void Scene::render_stereo()
   glPopMatrix();
   glPopClientAttrib();
   glPopAttrib();
+#if defined(OST_GL_VERSION_2_0)
+  if(HasMultisample()) {
+    glEnable(GL_MULTISAMPLE);
+  }
+#endif
 #if OST_SHADER_SUPPORT_ENABLED
   Shader::Instance().PopProgram();
 #endif
