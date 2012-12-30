@@ -148,6 +148,7 @@ VertexID IndexedVertexArray::Add(const Vec3& vert,
 {
   dirty_=true;
   entry_list_.push_back(Entry(vert,norm,col,texc));
+  entry_list_.back().c[3] = opacity_;
   return entry_list_.size()-1;
 }
 
@@ -364,7 +365,7 @@ void IndexedVertexArray::SetColor(VertexID id, const Color& c)
   entry_list_[id].c[0]=c[0];
   entry_list_[id].c[1]=c[1];
   entry_list_[id].c[2]=c[2];
-  entry_list_[id].c[3]=c[3];
+  entry_list_[id].c[3]=opacity_;
 }
 
 Vec2 IndexedVertexArray::GetTexCoord(VertexID id) const
@@ -385,12 +386,17 @@ void IndexedVertexArray::SetTexCoord(VertexID id, const Vec2& t)
 void IndexedVertexArray::SetOpacity(float o)
 {
   o=std::max(0.0f,std::min(1.0f,o));
+  if (std::abs(opacity_-o)<1e-6) {
+    opacity_=o;
+    return;
+  }
   // this should really just set a value in the shader... 
   // but we need to support the fixed function pipeline as well
   for(EntryList::iterator it=entry_list_.begin();it!=entry_list_.end();++it) {
     it->c[3]=o;
   }
   opacity_=o;
+  LOG_ERROR("new opacity (slow)" << opacity_);
   FlagRefresh();
 }
 
