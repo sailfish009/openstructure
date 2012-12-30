@@ -151,9 +151,8 @@ boost::logic::tribool QueryState::EvalChain(const ChainImplPtr& c) {
     float float_value;
     switch (ss.sel_id) {
       case Prop::CNAME:
-        value = c->GetName();
-        s_[*i] = cmp_string(ss.comp_op,
-                            value,boost::get<StringOrRegexParam>(ss.param));
+        s_[*i] = cmp_string(ss.comp_op, c->GetName(),
+                            boost::get<StringOrRegexParam>(ss.param));
         continue;
       default:
         if (ss.sel_id>=Prop::CUSTOM) {
@@ -187,8 +186,7 @@ boost::logic::tribool QueryState::EvalResidue(const ResidueImplPtr& r) {
     Real float_value;
     switch (ss.sel_id) {
       case Prop::RNAME:
-        str_value = r->GetKey();
-        s_[*i] = cmp_string(ss.comp_op,str_value,
+        s_[*i] = cmp_string(ss.comp_op,r->GetName(),
                             boost::get<StringOrRegexParam>(ss.param));
         continue;
       case Prop::RNUM:
@@ -234,7 +232,7 @@ boost::logic::tribool QueryState::EvalResidue(const ResidueImplPtr& r) {
           }
           s_[*i]=ss.comp_op==COP_EQ ? b : !b;          
         } else {
-          str_value= String(1, (char)r->GetSecStructure());
+          str_value = String(1, (char)r->GetSecStructure());
           s_[*i]=cmp_string(ss.comp_op,str_value,
                             boost::get<StringOrRegexParam>(ss.param));          
         }
@@ -265,19 +263,18 @@ boost::logic::tribool QueryState::EvalResidue(const ResidueImplPtr& r) {
 boost::logic::tribool QueryState::EvalStack(Prop::Level level) {
   const SelStack& stack = q_.sel_stacks_[(int)level];
   SelStack::const_reverse_iterator i = stack.rbegin();
-  std::vector<boost::logic::tribool> value_stack;
-
+  value_stack_.clear();
   while (i!=stack.rend()) {
     const SelItem& si = *i;
     if (si.type==VALUE) {
-      value_stack.push_back(s_[si.value]);
+      value_stack_.push_back(s_[si.value]);
       ++i;
       continue;
     } else {
-      boost::logic::tribool lhs = value_stack.back();
-      value_stack.pop_back();
-      boost::logic::tribool rhs = value_stack.back();
-      value_stack.pop_back();      
+      boost::logic::tribool lhs = value_stack_.back();
+      value_stack_.pop_back();
+      boost::logic::tribool rhs = value_stack_.back();
+      value_stack_.pop_back();      
       LogicOP lop = (LogicOP)si.value;
       boost::logic::tribool result;
       switch(lop) {
@@ -288,12 +285,12 @@ boost::logic::tribool QueryState::EvalStack(Prop::Level level) {
           result = lhs || rhs;
           break;              
       }      
-      value_stack.push_back(result);
+      value_stack_.push_back(result);
       ++i;
     }
   }
-  assert(value_stack.size()==1);
-  return value_stack.back();
+  assert(value_stack_.size()==1);
+  return value_stack_.back();
 }
 
 namespace {
@@ -302,6 +299,7 @@ QueryImpl dummy_query_impl;
 }
 QueryState::QueryState()
   : s_(), q_(dummy_query_impl) {
+ value_stack_.reserve(20);
 }
 
 boost::logic::tribool QueryState::EvalAtom(const AtomImplPtr& a) {
@@ -316,8 +314,7 @@ boost::logic::tribool QueryState::EvalAtom(const AtomImplPtr& a) {
     int int_value;
     switch (ss.sel_id) {
       case Prop::ANAME:
-        str_value = a->Name();
-        s_[*i] = cmp_string(ss.comp_op,str_value,
+        s_[*i] = cmp_string(ss.comp_op,a->GetName(),
                             boost::get<StringOrRegexParam>(ss.param));
         break;
       case Prop::AINDEX:
@@ -345,8 +342,7 @@ boost::logic::tribool QueryState::EvalAtom(const AtomImplPtr& a) {
                              boost::get<float>(ss.param));
         break;                        
       case Prop::ELE:
-        str_value = a->GetElement();
-        s_[*i] = cmp_string(ss.comp_op,str_value,
+        s_[*i] = cmp_string(ss.comp_op,a->GetElement(),
                             boost::get<StringOrRegexParam>(ss.param));                          
         break;
       case Prop::ABFAC:
