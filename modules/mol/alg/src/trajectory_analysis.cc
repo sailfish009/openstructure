@@ -159,10 +159,10 @@ std::vector<Real>  AnalyzeMinDistance(const CoordGroupHandle& traj, const Entity
 // each frame in a trajectory and returns it as a vector.
   {
   CheckHandleValidity(traj);
-  if (view1.GetAtomCount()==0){
+  if (!view1.HasAtoms()){
     throw Error("first EntityView is empty");
   }
-  if (view2.GetAtomCount()==0){
+  if (!view2.HasAtoms()){
     throw Error("second EntityView is empty");
   }  
   std::vector<Real> dist;
@@ -183,10 +183,10 @@ std::vector<Real> AnalyzeMinDistanceBetwCenterOfMassAndView(const CoordGroupHand
   // of a second set of atoms (view_cm) for each frame in a trajectory and returns it as a vector.
   {
   CheckHandleValidity(traj);
-  if (view_cm.GetAtomCount()==0){
+  if (!view_cm.HasAtoms()){
     throw Error("first EntityView is empty");
   }
-  if (view_atoms.GetAtomCount()==0){
+  if (!view_atoms.HasAtoms()){
     throw Error("second EntityView is empty");
   } 
   std::vector<Real> dist, masses_cm;
@@ -210,10 +210,10 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
   // center of mass - heavy atom distance betweent he two rings
   {
   CheckHandleValidity(traj);
-  if (view_ring1.GetAtomCount()==0){
+  if (!view_ring1.HasAtoms()){
     throw Error("first EntityView is empty");
   }
-  if (view_ring2.GetAtomCount()==0){
+  if (!view_ring2.HasAtoms()){
     throw Error("second EntityView is empty");
   } 
   std::vector<Real> dist, masses_ring1,masses_ring2;
@@ -238,7 +238,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
   //the last residue of the selection, usually the direction of the alpha-helix
   {
     CheckHandleValidity(traj);
-    if (prot_seg.GetAtomCount()==0){
+    if (!prot_seg.HasAtoms()){
       throw Error("EntityView is empty");
     }
     std::vector<unsigned long> indices_ca;
@@ -265,7 +265,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
                           geom::Vec3List& centers, unsigned int stride)
   {
     CheckHandleValidity(traj);
-    if (prot_seg.GetAtomCount()==0){
+    if (!prot_seg.HasAtoms()){
       throw Error("EntityView is empty");
     }
     std::vector<unsigned long> indices_ca;
@@ -286,7 +286,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
                           geom::Vec3List& origins, unsigned int stride)
   {
     CheckHandleValidity(traj);
-    if (prot_seg.GetAtomCount()==0){
+    if (!prot_seg.HasAtoms()){
       throw Error("EntityView is empty");
     }
     std::vector<unsigned long> indices_ca;
@@ -307,7 +307,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
                                     unsigned int stride)
   {
     CheckHandleValidity(traj);
-    if (prot_seg.GetAtomCount()==0){
+    if (!prot_seg.HasAtoms()){
       throw Error("EntityView is empty");
     }
     std::vector<unsigned long> indices_c,indices_o, indices_n, indices_ca;

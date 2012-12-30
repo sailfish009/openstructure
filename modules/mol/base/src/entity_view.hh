@@ -341,6 +341,9 @@ public:
   EntityView CreateFullView() const;
   /// \brief create empty view
   EntityView CreateEmptyView() const;
+  
+  /// \brief true if view contains at least one atom
+  bool HasAtoms() const;
 #ifdef _MSC_VER
   // alternative routines for msvc
   AtomView AddXAtom(const AtomHandle& ah, ViewAddFlags flags=0);

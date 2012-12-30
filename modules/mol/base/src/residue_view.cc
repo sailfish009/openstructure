@@ -281,4 +281,9 @@ AtomView ResidueView::FindAtom(const AtomHandle& handle) const
   return this->ViewForHandle(handle);
 }
 
+bool ResidueView::HasAtoms() const {
+  this->CheckValidity();
+  return data_->atoms.size()>0;
+}
+
 }} //ns

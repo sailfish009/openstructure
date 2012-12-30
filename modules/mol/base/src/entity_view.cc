@@ -161,7 +161,7 @@ int EntityView::GetResidueCount() const
 geom::Vec3 EntityView::GetCenterOfAtoms() const 
 {
   geom::Vec3 center;
-  if (this->GetAtomCount()>0) {
+  if (this->HasAtoms()) {
     unsigned int counter=0;
     AtomViewIter it=this->AtomsBegin();
     for(; it!=this->AtomsEnd(); ++it, ++counter) {
@@ -176,7 +176,7 @@ geom::Vec3 EntityView::GetCenterOfMass() const
 {
   geom::Vec3 center;
   Real mass = this->GetMass();
-  if (this->GetAtomCount()>0 && mass>0) {
+  if (this->HasAtoms() && mass>0) {
     AtomViewIter it=this->AtomsBegin();
     for(; it!=this->AtomsEnd(); ++it) {
       center+=(*it).GetPos()*(*it).GetMass();
@@ -755,7 +755,7 @@ geom::AlignedCuboid EntityView::GetBounds() const
   this->CheckValidity();
   geom::Vec3 mmin( std::numeric_limits<Real>::max());
   geom::Vec3 mmax(-std::numeric_limits<Real>::max());
-  if (this->GetAtomCount()) {
+  if (this->HasAtoms()) {
     for(AtomViewIter it=AtomsBegin(); it!=this->AtomsEnd(); ++it) {
       mmax=geom::Max(mmax, (*it).GetPos());
       mmin=geom::Min(mmin, (*it).GetPos());
@@ -910,6 +910,19 @@ AtomView EntityView::FindAtom(const AtomHandle& atom) const
   LOG_WARNING("EntityView::FindAtom(handle) is deprecated. "
               "Use EntityView::ViewForHandle instead");
   return this->ViewForHandle(atom);
+}
+
+bool EntityView::HasAtoms() const 
+{
+  this->CheckValidity();
+  for (ChainViewList::const_iterator it=data_->chains.begin(), 
+       e=data_->chains.end();
+       it!=e; ++it) {
+    if ((*it).HasAtoms()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 }} // ns
