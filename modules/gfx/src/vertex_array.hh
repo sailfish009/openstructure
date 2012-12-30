@@ -150,18 +150,6 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
 
   void AddCylinder(const CylinderPrim& prim, unsigned int detail,bool cap=false);
 
-  geom::Vec3 GetVert(VertexID id) const;
-  void SetVert(VertexID id, const geom::Vec3& vert);
-
-  geom::Vec3 GetNormal(VertexID id) const;
-  void SetNormal(VertexID id, const geom::Vec3& norm);
-
-  Color GetColor(VertexID id) const;
-  void SetColor(VertexID id, const Color& col);
-
-  geom::Vec2 GetTexCoord(VertexID id) const;
-  void SetTexCoord(VertexID id, const geom::Vec2& tex);
-
   void SetOpacity(float o);
 
   // OpenGL rendering call
@@ -210,6 +198,72 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   /// return min/max of vertex entries - this call is not cached!
   geom::AlignedCuboid GetBoundingBox() const;
 
+  geom::Vec3 GetVert(VertexID id) const
+  {
+    geom::Vec3 nrvo;
+    if(id>=entry_list_.size()) return nrvo;
+    nrvo = geom::Vec3(entry_list_[id].v);
+    return nrvo;
+  } 
+
+  void SetVert(VertexID id, const geom::Vec3& v) 
+  {
+    if(id>=entry_list_.size()) return;
+    entry_list_[id].v[0]=v[0];
+    entry_list_[id].v[1]=v[1];
+    entry_list_[id].v[2]=v[2];
+  }
+
+  geom::Vec3 GetNormal(VertexID id) const
+  {
+    geom::Vec3 nrvo;
+    if(id>=entry_list_.size()) return nrvo;
+    nrvo = geom::Vec3(entry_list_[id].n);
+    return nrvo;
+  } 
+
+  void SetNormal(VertexID id, const geom::Vec3& n) 
+  {
+    if(id>=entry_list_.size()) return;
+    entry_list_[id].n[0]=n[0];
+    entry_list_[id].n[1]=n[1];
+    entry_list_[id].n[2]=n[2];
+  }
+
+  Color GetColor(VertexID id) const
+  {
+    Color nrvo;
+    if(id>=entry_list_.size()) return nrvo;
+    nrvo = Color(entry_list_[id].c[0],
+                entry_list_[id].c[1],
+                entry_list_[id].c[2],
+                entry_list_[id].c[3]);
+    return nrvo;
+  } 
+
+  void SetColor(VertexID id, const Color& c) 
+  {
+    if(id>=entry_list_.size()) return;
+    entry_list_[id].c[0]=c[0];
+    entry_list_[id].c[1]=c[1];
+    entry_list_[id].c[2]=c[2];
+    entry_list_[id].c[3]=opacity_;
+  }
+
+  geom::Vec2 GetTexCoord(VertexID id) const
+  {
+    geom::Vec2 nrvo;
+    if(id>=entry_list_.size()) return nrvo;
+    nrvo = geom::Vec2(entry_list_[id].t);
+    return nrvo;
+  } 
+
+  void SetTexCoord(VertexID id, const geom::Vec2& t) 
+  {
+    if(id>=entry_list_.size()) return;
+    entry_list_[id].t[0]=t[0];
+    entry_list_[id].t[1]=t[1];
+  }
  private:
   bool initialized_;
   
