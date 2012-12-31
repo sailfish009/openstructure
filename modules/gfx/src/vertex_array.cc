@@ -58,21 +58,6 @@ static const int VA_AMBIENT_BUFFER=4;
 static const int VA_NORMAL_BUFFER=5;
 static const int VA_COLOR_BUFFER=6;
 
-IndexedVertexArray::Entry::Entry()
-{
-  v[0]=0.0; v[1]=0.0; v[2]=0.0;
-  n[0]=0.0; n[1]=0.0; n[2]=1.0;
-  c[0]=0.0; c[1]=0.0; c[2]=0.0; c[3]=0.0;
-  t[0]=0.0; t[1]=0.0;
-}
-
-  IndexedVertexArray::Entry::Entry(const Vec3& vv, const Vec3& nn, const Color& cc, const geom::Vec2& tt)
-{
-  v[0]=vv[0]; v[1]=vv[1]; v[2]=vv[2];
-  n[0]=nn[0]; n[1]=nn[1]; n[2]=nn[2];
-  c[0]=cc[0]; c[1]=cc[1]; c[2]=cc[2]; c[3]=cc[3];
-  t[0]=tt[0]; t[1]=tt[1];
-}
 
 
 IndexedVertexArray::IndexedVertexArray()
@@ -141,16 +126,6 @@ void IndexedVertexArray::SetOutlineMaterial(const Material& m)
 void IndexedVertexArray::SetOutlineExpandFactor(float f) { outline_exp_factor_=f;}
 void IndexedVertexArray::SetOutlineExpandColor(const Color& c) {outline_exp_color_=c;}
 
-VertexID IndexedVertexArray::Add(const Vec3& vert, 
-                                 const Vec3& norm,
-                                 const Color& col,
-                                 const Vec2& texc) 
-{
-  dirty_=true;
-  entry_list_.push_back(Entry(vert,norm,col,texc));
-  entry_list_.back().c[3] = opacity_;
-  return entry_list_.size()-1;
-}
 
 unsigned int IndexedVertexArray::GetVertexCount() const
 {
@@ -223,6 +198,7 @@ void IndexedVertexArray::AddSphere(const SpherePrim& prim, unsigned int detail)
 
   // use prebuild list of vertices which define given unit sphere
   std::vector<VertexID> vid_table;
+  vid_table.reserve(se.vlist.size());
   for(std::vector<Vec3>::const_iterator it=se.vlist.begin();it!=se.vlist.end();++it) {
     VertexID id = Add(prim.radius*(*it)+prim.position,(*it),prim.color);
     vid_table.push_back(id);
@@ -1351,6 +1327,7 @@ void IndexedVertexArray::draw_aalines()
   float hwr = 0.5*w+r;
 
   AALineList line_list;
+  line_list.reserve(line_index_list_.size() >> 1);
   for(unsigned int i=0;i<line_index_list_.size();i+=2) {
     Entry& ve0 = entry_list_[line_index_list_[i]];
     Entry& ve1 = entry_list_[line_index_list_[i+1]];

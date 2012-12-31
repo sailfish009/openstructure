@@ -49,9 +49,23 @@ typedef unsigned int TriID;
 typedef unsigned int QuadID;
 class DLLEXPORT_OST_GFX IndexedVertexArray {
  public:
-  struct Entry {
-    Entry();
-    Entry(const geom::Vec3& vv, const geom::Vec3& nn, const Color& cc, const geom::Vec2& tt);
+  struct DLLEXPORT Entry {
+    Entry()
+    {
+      v[0]=0.0; v[1]=0.0; v[2]=0.0;
+      n[0]=0.0; n[1]=0.0; n[2]=1.0;
+      c[0]=0.0; c[1]=0.0; c[2]=0.0; c[3]=0.0;
+      t[0]=0.0; t[1]=0.0;
+    }
+
+    Entry(const geom::Vec3& vv, const geom::Vec3& nn, const Color& cc, 
+          const geom::Vec2& tt)
+    {
+      v[0]=vv[0]; v[1]=vv[1]; v[2]=vv[2];
+      n[0]=nn[0]; n[1]=nn[1]; n[2]=nn[2];
+      c[0]=cc[0]; c[1]=cc[1]; c[2]=cc[2]; c[3]=cc[3];
+      t[0]=tt[0]; t[1]=tt[1];
+    }
     float t[2];
     float c[4];
     float n[3];
@@ -125,7 +139,13 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   float GetClipOffset() const {return clip_offset_;}
 
   // vertex, normal, color and texcoord (T2F_C4F_N3F_V3F)
-  VertexID Add(const geom::Vec3& vert, const geom::Vec3& norm, const Color& col, const geom::Vec2& tex=geom::Vec2());
+  VertexID Add(const geom::Vec3& vert, const geom::Vec3& norm, 
+               const Color& col, const geom::Vec2& texc=geom::Vec2()) {
+    dirty_=true;
+    entry_list_.push_back(Entry(vert,norm,col,texc));
+    entry_list_.back().c[3] = opacity_;
+    return entry_list_.size()-1;
+  }
 
   unsigned int GetVertexCount() const;
   void DumpVertices() const;
