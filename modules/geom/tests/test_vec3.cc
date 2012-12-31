@@ -62,23 +62,6 @@ BOOST_AUTO_TEST_CASE(init_vec3)
   BOOST_CHECK(match(Vec3(Vec4(2.0,1.0,3.0,0.0)),2.0,1.0,3.0));
 }
 
-BOOST_AUTO_TEST_CASE(access_vec3)
-{
-  Vec3 v;
-  v[0]=1.1;
-  v[1]=2.3;
-  v[2]=5.6;
-  BOOST_CHECK(match(v,1.1,2.3,5.6));
-
-  BOOST_CHECK_NO_THROW(v[0]=1);
-  BOOST_CHECK_NO_THROW(v[1]=1);
-  BOOST_CHECK_NO_THROW(v[2]=1);
-  BOOST_CHECK_NO_THROW(v[0]);
-  BOOST_CHECK_NO_THROW(v[1]);
-  BOOST_CHECK_NO_THROW(v[2]);
-  BOOST_CHECK_THROW( v[3]=1.0, std::out_of_range);
-  BOOST_CHECK_THROW( v[3], std::out_of_range);
-}
 
 BOOST_AUTO_TEST_CASE(operators_vec3) 
 {

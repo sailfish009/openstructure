@@ -91,15 +91,4 @@ BOOST_AUTO_TEST_CASE(init_mat4)
         
 }
 
-BOOST_AUTO_TEST_CASE(access_mat4)
-{
-  Mat4 m;
-  BOOST_CHECK_THROW( m(4,4)=1.0, std::out_of_range);
-  BOOST_CHECK_THROW( m(4,0)=1.0, std::out_of_range);
-  BOOST_CHECK_THROW( m(0,4)=1.0, std::out_of_range);
-  BOOST_CHECK_THROW( m(4,4), std::out_of_range);
-  BOOST_CHECK_THROW( m(4,0), std::out_of_range);
-  BOOST_CHECK_THROW( m(0,4), std::out_of_range);
-}
-
 BOOST_AUTO_TEST_SUITE_END();

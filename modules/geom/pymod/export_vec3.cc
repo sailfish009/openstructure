@@ -24,8 +24,12 @@
 
 using namespace boost::python;
 
-const Real Vec3_getitem(const geom::Vec3& v, int i) {return v[i];}
-void Vec3_setitem(geom::Vec3& v,const  int i,const  Real val) {v[i]=val;}
+const Real Vec3_getitem(const geom::Vec3& v, int i) {
+  return v.At(i);
+}
+void Vec3_setitem(geom::Vec3& v,const  int i,const  Real val) {
+  v.At(i)=val;
+}
 
 geom::Vec3 NormalizeV3(const geom::Vec3& v) {
   return geom::Normalize(v);

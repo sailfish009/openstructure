@@ -61,18 +61,6 @@ BOOST_AUTO_TEST_CASE(init_vec4)
 }
 
 
-BOOST_AUTO_TEST_CASE(access_vec4)
-{
-  Vec4 v;
-  v[0]=1.1;
-  v[1]=2.3;
-  v[2]=5.6;
-  v[3]=2.0;
-  BOOST_CHECK(match(v,1.1,2.3,5.6,2.0));
-
-  BOOST_CHECK_THROW( v[4]=1.0, std::out_of_range);
-}
-
 BOOST_AUTO_TEST_CASE(operators_vec4)
 {
   Vec4 v1(0.8,1.2,2.3,3.4);

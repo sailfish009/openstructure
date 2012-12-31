@@ -61,16 +61,6 @@ BOOST_AUTO_TEST_CASE(init_vec2)
   BOOST_CHECK_THROW( Vec2(Vec4(1.0,1.0,1.0,0.0)), DivideByZeroException);
 }
 
-BOOST_AUTO_TEST_CASE(access_vec2)
-{
-  Vec2 v;
-  v[0]=1.1;
-  v[1]=2.3;
-  BOOST_CHECK(match(v,1.1,2.3));
-  BOOST_CHECK_NO_THROW( v[0]=1.0);
-  BOOST_CHECK_THROW( v[2]=1.0, std::out_of_range);
-}
-
 BOOST_AUTO_TEST_CASE(operators_vec2)
 {
   Vec2 v1(1.2,2.3);

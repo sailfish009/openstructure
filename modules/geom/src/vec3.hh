@@ -20,6 +20,7 @@
 #define GEOM_VEC3_H
 
 #include <stdexcept>
+#include <cassert>
 #include <cstddef> // for size_t
 #include <ostream>
 #include <vector>
@@ -90,17 +91,27 @@ public:
   //! element access
   Real& operator[](std::size_t indx)
   {
-    if (indx>2) {
-      throw std::out_of_range("Index must be in the range [0-2]");
-    }
+    assert(indx<3);
     return (&x)[indx];
   }
   
   //! const element access
   const Real& operator[](std::size_t indx) const
   {
+    assert(indx<3);
+    return (&x)[indx];
+  }
+
+  Real& At(size_t indx) {
     if (indx>2) {
-      throw std::out_of_range("Index must be in the range [0-2]");
+      throw std::out_of_range("index must be smaller than 3");
+    }
+    return (&x)[indx];
+  }
+
+  const Real& At(size_t indx) const {
+    if (indx>2) {
+      throw std::out_of_range("index must be smaller than 3");
     }
     return (&x)[indx];
   }
