@@ -1005,6 +1005,48 @@ Statistics for column %(col)s
             if precedence[split_expression[i]]==precedence[split_expression[i+2]]:
               raise ValueError('Cannot Evaluate '+' '.join(split_expression[i:i+3])+' since both operators have same precedence!')
 
+
+        #handle , operator
+        #replaces an expression like 'rnum=1,2,3' with '(rnum=1 or rnum=2 or rnum=3)'
+
+        temp_split_expression=list()
+        skips=0
+
+        for i in range(len(split_expression)):
+          if skips>0:
+            skips-=1
+            continue
+          if ',' in split_expression[i]:
+
+            if split_expression[max(0,i-1)] != '=' and split_expression[min(i+1,len(split_expression)-1)] != '=':
+              raise ValueError('Can evaluate \',\' sign only in combination with \'=\'')
+
+            single_operands=split_expression[i].split(',')
+
+            if split_expression[max(0,i-1)]=='=':
+              if i-2<0:
+                raise ValueError('Does it really make sense to start with an \'=\'')
+              main_operand=split_expression[i-2]
+              temp_split_expression.pop()
+              temp_split_expression.pop()
+              skips=0
+
+            else:
+              if i+2>len(split_expression)-1:
+                raise ValueError('Does it really make sense to end with an \'=\'')
+              main_operand=split_expression[i+2]
+              skips=2
+
+            temp_expression=list(['('])
+            temp_expression+=' or '.join(['%s = %s'% (a,b) for (a,b) in zip(len(single_operands)*[main_operand],single_operands)]).split()
+            temp_expression.append(')')
+            temp_split_expression+=temp_expression
+            continue
+
+          temp_split_expression.append(split_expression[i])
+
+        split_expression=temp_split_expression
+
         #handle ':' operator
         #replaces an expression like 'col_a=x:y' with '(col_a>=x and col_a<=y)'
         
@@ -1051,46 +1093,6 @@ Statistics for column %(col)s
 
           temp_split_expression.append(split_expression[i])
   
-        split_expression=temp_split_expression
-
-        #handle , operator
-        #replaces an expression like 'rnum=1,2,3' with '(rnum=1 or rnum=2 or rnum=3)'
-
-        temp_split_expression=list()
-
-        for i in range(len(split_expression)):
-          if skips>0:
-            skips-=1
-            continue
-          if ',' in split_expression[i]:
-
-            if split_expression[max(0,i-1)] != '=' and split_expression[min(i+1,len(split_expression)-1)] != '=':
-              raise ValueError('Can evaluate \',\' sign only in combination with \'=\'')
-
-            single_operands=split_expression[i].split(',')
-
-            if split_expression[max(0,i-1)]=='=':
-              if i-2<0:
-                raise ValueError('Does it really make sense to start with an \'=\'')
-              main_operand=split_expression[i-2]
-              temp_split_expression.pop()
-              temp_split_expression.pop()
-              skips=0
-
-            else:
-              if i+2>len(split_expression)-1:
-                raise ValueError('Does it really make sense to end with an \'=\'')
-              main_operand=split_expression[i+2]
-              skips=2
-
-            temp_expression=list(['('])
-            temp_expression+=' or '.join(['%s = %s'% (a,b) for (a,b) in zip(len(single_operands)*[main_operand],single_operands)]).split()
-            temp_expression.append(')')
-            temp_split_expression+=temp_expression
-            continue
-
-          temp_split_expression.append(split_expression[i])
-
         split_expression=temp_split_expression
 
         return split_expression

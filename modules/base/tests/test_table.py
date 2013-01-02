@@ -1765,11 +1765,13 @@ class TestTable(unittest.TestCase):
     query_two='a=2:9 and c'
     query_three='d=e,f,j and a!=4'
     query_four='(b=2.0:3.0 and c=False) or (b<1.0 and c)'
+    query_five='b=0.0:1.2,2.5:8.0'
 
     self.assertEqual([0,1,2,3], list(r[0] for r in tab.Select(query_one).rows))
     self.assertEqual([2,3], list(r[0] for r in tab.Select(query_two).rows))
     self.assertEqual([5,9], list(r[0] for r in tab.Select(query_three).rows))
     self.assertEqual([0,7], list(r[0] for r in tab.Select(query_four).rows))
+    self.assertEqual([0,1,2,3,8,9], list(r[0] for r in tab.Select(query_five).rows))
 
     
 if __name__ == "__main__":
