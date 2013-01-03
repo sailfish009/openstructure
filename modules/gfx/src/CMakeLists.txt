@@ -94,6 +94,7 @@ endif()
 
 set(OST_GFX_SOURCES
 bitmap_io.cc
+exporter.cc
 collada_exporter.cc
 color.cc
 primitives.cc

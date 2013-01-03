@@ -1784,6 +1784,7 @@ void Scene::ExportPov(const std::string& fname, const std::string& wdir)
 
 void Scene::Export(Exporter* ex) const
 {
+  ex->SetupTransform(this);
   ex->SceneStart(this);
   root_node_->Export(ex);
   ex->SceneEnd(this);

@@ -394,3 +394,16 @@ main_mod.scene.Stereo=Stereo
 import ost as ost_mod
 ost_mod.scene=Scene()
 ost_mod.scene.Stereo=Stereo
+
+def GostExporter(file,scale=1.0,to_origin=True):
+  e=GostExporter_(file)
+  e.scale=scale
+  e.to_origin=to_origin
+  return e
+
+def ColladaExporter(file,scale=1.0,to_origin=True):
+  e=ColladaExporter_(file)
+  e.scale=scale
+  e.to_origin=to_origin
+  return e
+

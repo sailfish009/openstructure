@@ -57,6 +57,7 @@ namespace ost { namespace gfx {
   }
 
 GostExporter::GostExporter(const std::string& fname):
+  Exporter(),
   file_(0)
 {
   file_=fopen(fname.c_str(),"w");
