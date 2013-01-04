@@ -266,7 +266,9 @@ void export_Editors()
     .def("SetTransform", set_transform1)
     .def("SetTransform", set_transform2)
     .def("UpdateICS", &XCSEditor::UpdateICS)
-    .def("__exit__", &XCSEditor::UpdateICS)    
+    .def("ForceUpdate", &XCSEditor::ForceUpdate)
+    .def("__exit__", &XCSEditor::ForceUpdate)    
+    .def("__del__", &XCSEditor::ForceUpdate)    
   ;
   
   class_<ICSEditor, bases<EditorBase> >("ICSEditor", no_init)

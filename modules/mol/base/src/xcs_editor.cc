@@ -218,6 +218,12 @@ void XCSEditor::Update()
   }
 }
 
+void XCSEditor::ForceUpdate()
+{
+  ent_.Impl()->UpdateICSIfNeeded();
+  ent_.Impl()->UpdateOrganizerIfNeeded();
+}
+
 void XCSEditor::UpdateICS()
 {
   ent_.Impl()->UpdateICSIfNeeded();
