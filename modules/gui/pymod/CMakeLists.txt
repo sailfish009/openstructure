@@ -65,6 +65,7 @@ query_editor.py
 )
 if (ENABLE_IMG)
   list(APPEND OST_GUI_PYMOD_SOURCES
+  data_viewer_proxy.cc
   export_data_viewer.cc
   export_overlay.cc
   export_overlay_manager.cc
