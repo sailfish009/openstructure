@@ -71,8 +71,6 @@ public:
   virtual void mouseMoveEvent(QMouseEvent* event);
   virtual void keyPressEvent(QKeyEvent * event);
 
-  //void OnMenu(wxCommandEvent& e);
-  //void OnUpdateMenu(wxUpdateUIEvent& e);
 
   //////////////////////
   // observer interface
@@ -160,10 +158,10 @@ public:
   RasterImage::Mode GetColorMode(){return cmode_;};
 
   //! set/get fast drawing modes for low and high magnification
-  void SetFastLowMagnificationDrawing(bool flag){fast_low_mag_=flag;UpdateView();}  
-  bool GetFastLowMagnificationDrawing(){return fast_low_mag_;}
-  void SetFastHighMagnificationDrawing(bool flag){fast_high_mag_=flag;UpdateView();}  
-  bool GetFastHighMagnificationDrawing(){return fast_high_mag_;}
+  void SetFastLowMagnificationDrawing(bool flag);
+  bool GetFastLowMagnificationDrawing();
+  void SetFastHighMagnificationDrawing(bool flag);
+  bool GetFastHighMagnificationDrawing();
 
   geom::Vec2 GetMousePosition(){return mouseposition_;};
   void MoveTo(const geom::Vec2& p);
@@ -206,6 +204,27 @@ signals:
 protected:
   QMenu* popupmenu_;
 
+protected slots:
+  // slots for popup menu
+  void toggle_phase_color();
+  void normalize();
+  void center();
+  void toggle_invert();
+  void toggle_display_pixels();
+  void toggle_show_click_pos();
+  void zoom_plus();
+  void zoom_minus();
+  void zoom_reset();
+  void slab_plus();
+  void slab_minus();
+  void slab_start();
+  void slab_end();
+  void slab_center();
+  void toggle_fast_low_mag();
+  void toggle_fast_high_mag();
+  void toggle_antialiasing();
+
+
 private:
   Real data_min_;
   Real data_max_;
@@ -246,6 +265,14 @@ private:
 
   bool antialiasing_;
   Point drag_start_;
+  QAction* phase_toggle_action_;
+  QAction* invert_toggle_action_;
+  QAction* show_click_pos_toggle_action_;
+  QAction* fast_low_mag_toggle_action_;
+  QAction* fast_high_mag_toggle_action_;
+  QAction* display_pixel_toggle_action_;
+  QAction* antialiasing_toggle_action_;
+
 
   void move(int dx, int dy);
   void slab(int dz);
