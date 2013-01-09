@@ -69,6 +69,9 @@ public:
   //! set new image or function to display
   void SetData(const Data& data);
 
+  //! get the current displayed image
+  const Data& GetData() const;
+
   //! retrieve used normalizer
   NormalizerPtr GetNormalizer() const;
 

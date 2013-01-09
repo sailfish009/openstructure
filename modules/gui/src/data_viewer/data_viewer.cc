@@ -87,6 +87,10 @@ void DataViewer::SetData(const Data& d)
   info_->SetImageInfo(d);
 }
 
+const Data& DataViewer::GetData() const{
+  return panel_->GetObservedData();
+}
+
 NormalizerPtr DataViewer::GetNormalizer() const 
 {
   assert(panel_);

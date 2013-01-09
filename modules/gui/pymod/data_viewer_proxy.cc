@@ -30,8 +30,10 @@
 namespace ost { namespace img { namespace gui {
 
 DataViewerProxy::DataViewerProxy(DataViewer* v):
-  ost::gui::SipHandler<ost::img::gui::DataViewer>(v)
-{}
+  ost::gui::SipHandler<ost::img::gui::DataViewer>(v),
+  DataObserver(v->GetData())
+{
+}
 
 
 NormalizerPtr DataViewerProxy::GetNormalizer() const
@@ -58,6 +60,81 @@ Extent DataViewerProxy::GetSelection() const
 {
   return Me()->GetSelection();
 }
+void DataViewerProxy::SetSelection(const Extent& selection)
+{
+  Me()->SetSelection(selection);
+}
+
+void DataViewerProxy::SetSlab(int slab)
+{
+  Me()->SetSlab(slab);
+}
+
+int DataViewerProxy::GetSlab() const
+{
+  return Me()->GetSlab();
+}
+
+void DataViewerProxy::SetZoomScale(Real zoomscale)
+{
+  Me()->SetZoomScale(zoomscale);
+}
+
+Real DataViewerProxy::GetZoomScale() const
+{
+  return Me()->GetZoomScale();
+}
+
+void DataViewerProxy::SetViewerMin(Real min)
+{
+  Me()->SetViewerMin(min);
+}
+
+Real DataViewerProxy::GetViewerMin() const
+{
+  return Me()->GetViewerMin();
+}
+
+void DataViewerProxy::SetViewerMax(Real max)
+{
+  Me()->SetViewerMax(max);
+}
+
+Real DataViewerProxy::GetViewerMax() const
+{
+  return Me()->GetViewerMax();
+}
+
+void DataViewerProxy::SetGamma(Real gamma)
+{
+  Me()->SetGamma(gamma);
+}
+
+Real DataViewerProxy::GetGamma() const
+{
+  return Me()->GetGamma();
+}
+
+void DataViewerProxy::SetInvert(bool invert)
+{
+  Me()->SetInvert(invert);
+}
+
+bool DataViewerProxy::GetInvert() const
+{
+  return Me()->GetInvert();
+}
+
+void DataViewerProxy::SetOffset(const geom::Vec2& offset)
+{
+  Me()->SetOffset(offset);
+}
+
+geom::Vec2 DataViewerProxy::GetOffset() const
+{
+  return Me()->GetOffset();
+}
+
 
 void DataViewerProxy::SetData(const Data& d)
 {
@@ -85,9 +162,9 @@ OverlayManagerPtr DataViewerProxy::GetOverlayManager() const
 }
 
 
-void DataViewerProxy::AddDockWidget(QWidget* w, const QString& name, bool shown)
+void DataViewerProxy::AddDockWidget(QWidget* w, const QString& name, bool shown, int area)
 {
-  Me()->AddDockWidget(w,name, shown);
+  Me()->AddDockWidget(w,name, shown,area);
 }
 
 void DataViewerProxy::RemoveDockWidget(QWidget* w)
@@ -110,6 +187,22 @@ void DataViewerProxy::Hide()
   Me()->hide();
 }
 
+void DataViewerProxy::ObserverUpdate()
+{
+}
+void DataViewerProxy::ObserverUpdate(const Extent& e)
+{
+}
+void DataViewerProxy::ObserverUpdate(const Point& p)
+{
+}
+void DataViewerProxy::ObserverRelease()
+{
+  Release(Me());
+}
 
+object DataViewerProxy::GetQObject(){
+  return ost::gui::get_py_qobject<DataViewer>(Me());
+}
 
 }}}  //ns

@@ -48,7 +48,7 @@ namespace ost { namespace img { namespace gui {
 // fw decl
 class DataViewer;
 
-class TEMPLATE_EXPORT DataViewerProxy : public ost::gui::SipHandler<DataViewer>{
+class TEMPLATE_EXPORT DataViewerProxy : public ost::gui::SipHandler<DataViewer>, public DataObserver {
 public:
   DataViewerProxy(DataViewer* v);
 
@@ -63,11 +63,27 @@ public:
   void UpdateView();
 
   Extent GetSelection() const;
+  void SetSelection(const Extent& selection);
+  void SetSlab(int slab);
+  int GetSlab() const;
+  void SetZoomScale(Real zoomscale);
+  Real GetZoomScale() const;
+  void SetViewerMin(Real min);
+  Real GetViewerMin() const;
+  void SetViewerMax(Real max);
+  Real GetViewerMax() const;
+  void SetGamma(Real gamma);
+  Real GetGamma() const;
+  void SetInvert(bool invert);
+  bool GetInvert() const;
+  void SetOffset(const geom::Vec2& offset);
+  geom::Vec2 GetOffset() const;
+
   int AddOverlay(const OverlayPtr& ov, bool make_active=true);
   OverlayManagerPtr GetOverlayManager() const;
   void ClearOverlays();
 
-  void AddDockWidget(QWidget* w, const QString& name, bool shown=true);
+  void AddDockWidget(QWidget* w, const QString& name, bool shown=true, int area=2);
   void RemoveDockWidget(QWidget* w);
 
   void SetAntialiasing(bool f);
@@ -80,6 +96,14 @@ public:
 
   void Hide();  
 
+  //////////////////////
+  // observer interface
+  virtual void ObserverUpdate();
+  virtual void ObserverUpdate(const Extent& e);
+  virtual void ObserverUpdate(const Point& p);
+  virtual void ObserverRelease();
+
+  object GetQObject();
 };
 
 typedef boost::shared_ptr<DataViewerProxy> DataViewerProxyPtr;

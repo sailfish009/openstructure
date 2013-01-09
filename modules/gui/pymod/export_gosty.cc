@@ -36,9 +36,7 @@ using namespace boost::python;
 #include "sip_handler.hh"
 
 #if OST_IMG_ENABLED
-  #include <ost/gui/data_viewer/data_viewer.hh>
-#include <ost/img/data.hh>
-#include <ost/gui/data_viewer/data_viewer.hh>
+#include "data_viewer_proxy.hh"
 using namespace ost::img::gui;
 #endif
 
@@ -48,15 +46,13 @@ using namespace ost::gui;
 namespace {
 
 #if OST_IMG_ENABLED
-DataViewer* app_create_data_viewer1(GostyApp* app, 
-                                    const ost::img::Data& d, 
-                                    const QString& name)
+DataViewerProxyPtr app_create_data_viewer1(GostyApp* app, const ost::img::Data& d, const QString& name)
 {
-  return app->CreateDataViewer(d,name);
+  return DataViewerProxyPtr(new DataViewerProxy(app->CreateDataViewer(d,name)));
 }
-DataViewer* app_create_data_viewer2(GostyApp* app, const ost::img::Data& d)
+DataViewerProxyPtr app_create_data_viewer2(GostyApp* app, const ost::img::Data& d)
 {
-  return app->CreateDataViewer(d);
+  return DataViewerProxyPtr(new DataViewerProxy(app->CreateDataViewer(d)));
 }
 #endif
 
@@ -117,8 +113,8 @@ void export_Gosty()
     .add_property("message_widget", make_function(&GostyApp::GetMessageWidget,
         return_value_policy<reference_existing_object>()))
      #if OST_IMG_ENABLED
-    .def("CreateDataViewer", &app_create_data_viewer1,return_value_policy<reference_existing_object>())
-    .def("CreateDataViewer", &app_create_data_viewer2,return_value_policy<reference_existing_object>())
+    .def("CreateDataViewer", &app_create_data_viewer1)
+    .def("CreateDataViewer", &app_create_data_viewer2)
     #endif
     .def("ProcessEvents", &GostyApp::ProcessEvents)           
     .add_property("perspective", 
