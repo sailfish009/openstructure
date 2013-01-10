@@ -46,11 +46,11 @@ using namespace ost::gui;
 namespace {
 
 #if OST_IMG_ENABLED
-DataViewerProxyPtr app_create_data_viewer1(GostyApp* app, const ost::img::Data& d, const QString& name)
+DataViewerProxyPtr app_create_data_viewer1(GostyApp* app, const ost::img::ImageHandle& d, const QString& name)
 {
   return DataViewerProxyPtr(new DataViewerProxy(app->CreateDataViewer(d,name)));
 }
-DataViewerProxyPtr app_create_data_viewer2(GostyApp* app, const ost::img::Data& d)
+DataViewerProxyPtr app_create_data_viewer2(GostyApp* app, const ost::img::ImageHandle& d)
 {
   return DataViewerProxyPtr(new DataViewerProxy(app->CreateDataViewer(d)));
 }

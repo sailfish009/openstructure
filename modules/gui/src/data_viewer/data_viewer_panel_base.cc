@@ -43,7 +43,7 @@
 namespace ost { namespace img { namespace gui {
 
 
-DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
+DataViewerPanelBase::DataViewerPanelBase(const ImageHandle& data,QWidget* parent):
   QWidget(parent),
   DataObserver(data),
   popupmenu_(new QMenu(this)),
@@ -171,7 +171,7 @@ DataViewerPanelBase::~DataViewerPanelBase()
   delete pixmap_;
 }
 
-void DataViewerPanelBase::SetData(const Data& d)
+void DataViewerPanelBase::SetData(const ImageHandle& d)
 {
   SetObservedData(d);
   update_min_max();

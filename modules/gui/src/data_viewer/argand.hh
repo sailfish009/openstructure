@@ -41,7 +41,7 @@ class DLLEXPORT_OST_GUI Argand: public QWidget, public DataObserver
 {
   Q_OBJECT;
 public:
-  Argand(const Data& data, QWidget* p);
+  Argand(const ImageHandle& data, QWidget* p);
   ~Argand();
 
   // QWidget interface

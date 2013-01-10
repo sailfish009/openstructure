@@ -21,7 +21,7 @@
 
 namespace ost { namespace img { namespace gui {
 
-DataViewerPanel::DataViewerPanel(const Data& d, QWidget* p):
+DataViewerPanel::DataViewerPanel(const ImageHandle& d, QWidget* p):
   DataViewerPanelBase(d,p)
 {}
 

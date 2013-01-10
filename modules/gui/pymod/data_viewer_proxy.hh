@@ -28,6 +28,7 @@
 #define IMG_GUI_DATA_VIEWER_PROXY_H
 
 #include <boost/shared_ptr.hpp>
+#include <QPointer>
 
 #include <ost/img/point.hh>
 #include <ost/img/extent.hh>
@@ -48,13 +49,13 @@ namespace ost { namespace img { namespace gui {
 // fw decl
 class DataViewer;
 
-class TEMPLATE_EXPORT DataViewerProxy : public ost::gui::SipHandler<DataViewer>, public DataObserver {
+class TEMPLATE_EXPORT DataViewerProxy  {
 public:
   DataViewerProxy(DataViewer* v);
 
   // data viewer interface
 
-  void SetData(const Data& data);
+  void SetData(const ImageHandle& data);
   void SetName(const String& name);
 
   NormalizerPtr GetNormalizer() const;
@@ -96,14 +97,10 @@ public:
 
   void Hide();  
 
-  //////////////////////
-  // observer interface
-  virtual void ObserverUpdate();
-  virtual void ObserverUpdate(const Extent& e);
-  virtual void ObserverUpdate(const Point& p);
-  virtual void ObserverRelease();
-
   object GetQObject();
+protected:
+  QPointer<DataViewer> viewer_ptr_;
+  DataViewer* viewer() const;
 };
 
 typedef boost::shared_ptr<DataViewerProxy> DataViewerProxyPtr;

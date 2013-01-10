@@ -58,7 +58,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(o_AddDockWidget, AddDockWidget, 2, 4)
 
 void export_data_viewer()
 {
-  class_<DataViewerProxy, DataViewerProxyPtr, bases<ost::gui::SipHandlerBase> >("DataViewer",no_init)
+  class_<DataViewerProxy, DataViewerProxyPtr >("DataViewer",no_init)
     .def("SetData",&DataViewerProxy::SetData)
     .def("SetName",&DataViewerProxy::SetName)
     .def("GetOverlayManager",&DataViewerProxy::GetOverlayManager)

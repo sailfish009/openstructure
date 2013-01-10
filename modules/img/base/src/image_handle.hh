@@ -23,7 +23,7 @@
 
   offers the Image interface
 
-  Author: Ansgar Philippsen
+  Author: Ansgar Philippsen, Andreas Schenk
 */
 
 #ifndef IMG_IMAGE_HANDLE_H
@@ -37,7 +37,6 @@
 
 #include "data.hh"
 #include "observable.hh"
-#include "data_observer.hh"
 #include "extent_iterator.hh"
 
 #include "image_state/image_state_visitor_fw.hh"
@@ -69,6 +68,7 @@ class ModIPAlgorithm;
 class ConstModIPAlgorithm;
 class ModOPAlgorithm;
 class ConstModOPAlgorithm;
+class DataObserver;
 
 //! Exception thrown upon invalid image handle usage
 class DLLEXPORT InvalidImageHandle: public Error {

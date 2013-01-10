@@ -25,6 +25,7 @@
 */
 
 #include <ost/gui/module_config.hh>
+#include <ost/img/data_observer.hh>
 #include "data_viewer_panel_base.hh"
 
 namespace ost { namespace img { namespace gui {
@@ -32,7 +33,7 @@ namespace ost { namespace img { namespace gui {
 class ParentDataObserver: public DataObserver
 {
 public:
-  ParentDataObserver(const Data& d):DataObserver(d){}
+  ParentDataObserver(const ImageHandle& d):DataObserver(d){}
   virtual void ObserverRelease()
   {
    // Noop as parent takes care of this.
@@ -44,12 +45,12 @@ class DLLEXPORT_OST_GUI FFTPanel: public DataViewerPanelBase
 Q_OBJECT
 
 public:
-  FFTPanel(const Data& parent_data, QWidget* parent);
+  FFTPanel(const ImageHandle& parent_data, QWidget* parent);
   virtual ~FFTPanel();
   void SetFFTSize(unsigned int size);
   unsigned int GetFFTSize();
   virtual void ObserverUpdate();
-  virtual void SetData(const Data& parent_data);
+  virtual void SetData(const ImageHandle& parent_data);
 
 public slots:
   void SetPosition(const Point& p);

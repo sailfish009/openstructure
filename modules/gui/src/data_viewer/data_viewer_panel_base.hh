@@ -32,6 +32,7 @@
 
 #include <ost/base.hh>
 #include <ost/img/extent.hh>
+#include <ost/img/data_observer.hh>
 #include <ost/img/normalizer_impl.hh>
 #include <ost/img/raster_image/raster_image.hh>
 
@@ -56,10 +57,10 @@ class DLLEXPORT_OST_GUI DataViewerPanelBase: public QWidget,
   Q_OBJECT;
 
 public:
-  DataViewerPanelBase(const Data& data,QWidget* parent);
+  DataViewerPanelBase(const ImageHandle& data,QWidget* parent);
   virtual ~DataViewerPanelBase();
 
-  virtual void SetData(const Data& d);
+  virtual void SetData(const ImageHandle& d);
 
   //////////////////
   // event handling

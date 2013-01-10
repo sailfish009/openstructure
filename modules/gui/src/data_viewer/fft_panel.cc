@@ -32,7 +32,7 @@
 
 namespace ost { namespace img { namespace gui {
     
-FFTPanel::FFTPanel(const Data& parent_data, QWidget* parent):
+FFTPanel::FFTPanel(const ImageHandle& parent_data, QWidget* parent):
   DataViewerPanelBase(parent_data,parent),
   size_(std::min<int>(256,std::min<int>(parent_data.GetSize()[0],parent_data.GetSize()[1]))),
   parent_position_(parent_data.GetExtent().GetCenter()),
@@ -95,7 +95,7 @@ unsigned int FFTPanel::GetFFTSize()
   return size_;
 }
 
-void FFTPanel::SetData(const Data& parent_data)
+void FFTPanel::SetData(const ImageHandle& parent_data)
 {
   parent_observer_=ParentDataObserver(parent_data);
 }

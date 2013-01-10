@@ -109,12 +109,14 @@ SequenceViewer* GostyApp::GetSequenceViewer()
 }
 
 #if OST_IMG_ENABLED
-ost::img::gui::DataViewer* GostyApp::CreateDataViewer(const ost::img::Data& d, const QString& name)
+ost::img::gui::DataViewer* GostyApp::CreateDataViewer(const ost::img::ImageHandle& d, const QString& name)
 {
   ost::img::gui::DataViewer* viewer=new ost::img::gui::DataViewer(main_,d,name);
   QMdiSubWindow* mdi=new QMdiSubWindow(this->GetPerspective()->GetMainArea());
   mdi->setWindowTitle(name);
   mdi->setWidget(viewer);
+  viewer->setAttribute(Qt::WA_DeleteOnClose);
+  mdi->setAttribute(Qt::WA_DeleteOnClose);
   viewer->setParent(mdi);
   this->GetPerspective()->GetMainArea()->addSubWindow(mdi);
   mdi->showMaximized();

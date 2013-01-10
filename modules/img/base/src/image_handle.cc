@@ -21,7 +21,7 @@
 /*
   image handle and const handle
 
-  Author: Ansgar Philippsen
+  Author: Ansgar Philippsen, Andreas Schenk
 */
 
 #include <ost/message.hh>
@@ -37,6 +37,7 @@
 #include "image_impl.hh"
 #include "observable.hh"
 #include "paste_impl.hh"
+#include "data_observer.hh"
 
 #include "image_state/image_state_factory.hh"
 #include "image_state/image_state_base.hh"

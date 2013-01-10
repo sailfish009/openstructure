@@ -23,186 +23,178 @@
 */
 
 #include <ost/message.hh>
-//#include <ost/gui/snapshot.hh>
 
 #include "data_viewer_proxy.hh"
 
 namespace ost { namespace img { namespace gui {
 
 DataViewerProxy::DataViewerProxy(DataViewer* v):
-  ost::gui::SipHandler<ost::img::gui::DataViewer>(v),
-  DataObserver(v->GetData())
+  viewer_ptr_(v)
 {
 }
 
 
 NormalizerPtr DataViewerProxy::GetNormalizer() const
 {
-  return Me()->GetNormalizer();
+  return viewer()->GetNormalizer();
 }
 
 void DataViewerProxy::Renormalize()
 {
-  Me()->Renormalize();
+  viewer()->Renormalize();
 }
 
 void DataViewerProxy::UpdateView()
 {
-  Me()->UpdateView();
+  viewer()->UpdateView();
 }
 
 void DataViewerProxy::Recenter()
 {
-  Me()->Recenter();
+  viewer()->Recenter();
 }
 
 Extent DataViewerProxy::GetSelection() const
 {
-  return Me()->GetSelection();
+  return viewer()->GetSelection();
 }
 void DataViewerProxy::SetSelection(const Extent& selection)
 {
-  Me()->SetSelection(selection);
+  viewer()->SetSelection(selection);
 }
 
 void DataViewerProxy::SetSlab(int slab)
 {
-  Me()->SetSlab(slab);
+  viewer()->SetSlab(slab);
 }
 
 int DataViewerProxy::GetSlab() const
 {
-  return Me()->GetSlab();
+  return viewer()->GetSlab();
 }
 
 void DataViewerProxy::SetZoomScale(Real zoomscale)
 {
-  Me()->SetZoomScale(zoomscale);
+  viewer()->SetZoomScale(zoomscale);
 }
 
 Real DataViewerProxy::GetZoomScale() const
 {
-  return Me()->GetZoomScale();
+  return viewer()->GetZoomScale();
 }
 
 void DataViewerProxy::SetViewerMin(Real min)
 {
-  Me()->SetViewerMin(min);
+  viewer()->SetViewerMin(min);
 }
 
 Real DataViewerProxy::GetViewerMin() const
 {
-  return Me()->GetViewerMin();
+  return viewer()->GetViewerMin();
 }
 
 void DataViewerProxy::SetViewerMax(Real max)
 {
-  Me()->SetViewerMax(max);
+  viewer()->SetViewerMax(max);
 }
 
 Real DataViewerProxy::GetViewerMax() const
 {
-  return Me()->GetViewerMax();
+  return viewer()->GetViewerMax();
 }
 
 void DataViewerProxy::SetGamma(Real gamma)
 {
-  Me()->SetGamma(gamma);
+  viewer()->SetGamma(gamma);
 }
 
 Real DataViewerProxy::GetGamma() const
 {
-  return Me()->GetGamma();
+  return viewer()->GetGamma();
 }
 
 void DataViewerProxy::SetInvert(bool invert)
 {
-  Me()->SetInvert(invert);
+  viewer()->SetInvert(invert);
 }
 
 bool DataViewerProxy::GetInvert() const
 {
-  return Me()->GetInvert();
+  return viewer()->GetInvert();
 }
 
 void DataViewerProxy::SetOffset(const geom::Vec2& offset)
 {
-  Me()->SetOffset(offset);
+  viewer()->SetOffset(offset);
 }
 
 geom::Vec2 DataViewerProxy::GetOffset() const
 {
-  return Me()->GetOffset();
+  return viewer()->GetOffset();
 }
 
 
-void DataViewerProxy::SetData(const Data& d)
+void DataViewerProxy::SetData(const ImageHandle& d)
 {
-  Me()->SetData(d);
+  viewer()->SetData(d);
 }
 
 void DataViewerProxy::SetName(const String& name)
 {
-  Me()->SetName(name);
+  viewer()->SetName(name);
 }
 
 int DataViewerProxy::AddOverlay(const OverlayPtr& ov, bool make_active)
 {
-  return Me()->AddOverlay(ov,make_active);
+  return viewer()->AddOverlay(ov,make_active);
 }
 
 void DataViewerProxy::ClearOverlays()
 {
-  Me()->ClearOverlays();
+  viewer()->ClearOverlays();
 }
 
 OverlayManagerPtr DataViewerProxy::GetOverlayManager() const
 {
-  return Me()->GetOverlayManager();
+  return viewer()->GetOverlayManager();
 }
 
 
 void DataViewerProxy::AddDockWidget(QWidget* w, const QString& name, bool shown, int area)
 {
-  Me()->AddDockWidget(w,name, shown,area);
+  viewer()->AddDockWidget(w,name, shown,area);
 }
 
 void DataViewerProxy::RemoveDockWidget(QWidget* w)
 {
-  Me()->RemoveDockWidget(w);
+  viewer()->RemoveDockWidget(w);
 }
 
 void DataViewerProxy::SetAntialiasing(bool f)
 {
-  Me()->SetAntialiasing(f);
+  viewer()->SetAntialiasing(f);
 }
 
 void DataViewerProxy::Show()
 {
-  Me()->show();
+  viewer()->show();
 }
 
 void DataViewerProxy::Hide() 
 {
-  Me()->hide();
+  viewer()->hide();
 }
 
-void DataViewerProxy::ObserverUpdate()
-{
-}
-void DataViewerProxy::ObserverUpdate(const Extent& e)
-{
-}
-void DataViewerProxy::ObserverUpdate(const Point& p)
-{
-}
-void DataViewerProxy::ObserverRelease()
-{
-  Release(Me());
-}
 
 object DataViewerProxy::GetQObject(){
-  return ost::gui::get_py_qobject<DataViewer>(Me());
+  return ost::gui::get_py_qobject<DataViewer>(viewer());
 }
 
+DataViewer* DataViewerProxy::viewer() const
+{
+  if(!viewer_ptr_){
+     throw Error("DataViewer no longer exists");
+  }
+  return viewer_ptr_;
+}
 }}}  //ns
