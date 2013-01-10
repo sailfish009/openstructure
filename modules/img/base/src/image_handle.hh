@@ -117,7 +117,7 @@ class DLLEXPORT_OST_IMG_BASE ImageHandle: public Data {
   // for access to Sampling
   friend class ConstImageHandle;
 
-  typedef Observable<DataObserver> DataObservable;
+  typedef Observable DataObservable;
   typedef boost::shared_ptr<DataObservable> ObsPtr;
 
   typedef boost::shared_ptr<ImageStateBasePtr> StatePtrPtr;
