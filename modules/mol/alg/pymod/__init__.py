@@ -33,7 +33,7 @@ def DefaultClashingDistances():
   fh=open(filename,'r')
   lines=fh.readlines()
   fh.close()
-  return FillClashingDistances(lines,1.5,0.0)
+  return FillClashingDistances(lines)
 
 # Returns the default list of bond stereo-chemical statistics (from the default OpenStructure parameter file)
 def DefaultBondStereoChemicalParams():
