@@ -513,6 +513,7 @@ void DataViewerPanelBase::mousePressEvent(QMouseEvent* event)
   if(!IsDataValid()) return;
   if(event->button() == Qt::LeftButton && event->modifiers()==Qt::NoModifier) {
     selection_=Extent();
+    update(rubberband_->geometry());
     rubberband_->setGeometry(QRect(event->pos(),QSize(0,0)));
     rubberband_->hide();
     last_x_=event->x();
@@ -1095,7 +1096,9 @@ void DataViewerPanelBase::draw_pixel_values(QPainter& painter)
 
 void DataViewerPanelBase::update_rubberband_from_selection_()
 {
+  QRect old_geometry=rubberband_->geometry();
   rubberband_->setGeometry(QRect(PointToWin(selection_.GetStart()),PointToWin(selection_.GetEnd()+Point(1,1))));
+  update(old_geometry);
 }
 
 }}}  //ns
