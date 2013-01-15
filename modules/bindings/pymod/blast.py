@@ -138,7 +138,7 @@ def CreateDB(infasta, dbout, mkdb_cmd=None):
   :type infasta: :class:`string`
 
   :param dbout: output location for blastDB file
-  :type infasta: :class:`string`
+  :type dbout: :class:`string`
 
 
   """
