@@ -50,7 +50,7 @@ Mat2 Invert(const Mat2& m)
 
 Real Angle(const Vec2& v1, const Vec2& v2)
 {
-  return std::acos(Dot(v1,v2)/Length(v1)/Length(v2));
+  return std::acos(std::max(static_cast<Real>(-1.0),std::min(static_cast<Real>(1.0),Dot(v1,v2)/Length(v1)/Length(v2))));
 }
 
 Real SignedAngle(const Vec2& v1, const Vec2& v2)
@@ -63,7 +63,7 @@ Real SignedAngle(const Vec2& v1, const Vec2& v2)
   if(vc.z!=0.0){
     sign=vc.z/std::fabs(vc.z);
   }
-  return acos(Dot(v1,v2)/Length(v1)/Length(v2))*sign;
+  return acos(std::max(static_cast<Real>(-1.0),std::min(static_cast<Real>(1.0),Dot(v1,v2)/Length(v1)/Length(v2))))*sign;
 }
 
 Vec2 Rotate(const Vec2& v,Real ang)
