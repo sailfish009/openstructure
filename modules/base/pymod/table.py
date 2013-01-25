@@ -820,6 +820,12 @@ Statistics for column %(col)s
     return filt_tab
 
 
+  def _EvaluateEqualNone(self, lhs, rhs):
+    return (lhs==None or lhs==float('NaN')) == (rhs==None or rhs==float('NaN'))
+ 
+  def _EvaluateNonEqualNone(self, lhs, rhs):
+    return (lhs==None or lhs==float('NaN')) != (rhs==None or rhs==float('NaN'))
+ 
   def _EvaluateAnd(self, lhs, rhs):
     return lhs and rhs
 
@@ -845,20 +851,43 @@ Statistics for column %(col)s
     return lhs>=rhs
 
   def _EvaluateAdd(self, lhs, rhs):
+    if lhs==None or lhs==float('NaN') or rhs==None or rhs==float('NaN'):
+      return None
     return lhs+rhs
 
   def _EvaluateSubtract(self, lhs, rhs):
+    if lhs==None or lhs==float('NaN') or rhs==None or rhs==float('NaN'):
+      return None
     return lhs-rhs
 
   def _EvaluateMultiply(self, lhs, rhs):
+    if lhs==None or lhs==float('NaN') or rhs==None or rhs==float('NaN'):
+      return None
     return lhs*rhs
 
   def _EvaluateDivide(self, lhs, rhs):
+    if lhs==None or lhs==float('NaN') or rhs==None or rhs==float('NaN'):
+      return None
     return lhs/rhs
 
 
   def _EvaluateOperator(self, op, lhs, rhs):
-    if op=='and':
+
+    if op=='+':
+      return self._EvaluateAdd(lhs, rhs)
+    elif op=='-':
+      return self._EvaluateSubtract(lhs, rhs)
+    elif op=='/':
+      return self._EvaluateDivide(lhs, rhs)
+    elif op=='*':
+      return self._EvaluateMultiply(lhs, rhs)
+    elif lhs==None or lhs==float('NaN') or rhs==None or rhs==float('NaN'):
+      if op=='=':
+        return self._EvaluateEqualNone(lhs,rhs)
+      elif op=='!=':
+        return self._EvaluateNonEqualNone(lhs,rhs)
+      return None
+    elif op=='and':
       return self._EvaluateAnd(lhs, rhs)
     elif op=='or':
       return self._EvaluateOr(lhs, rhs)
@@ -874,14 +903,7 @@ Statistics for column %(col)s
       return self._EvaluateLowerEqual(lhs, rhs)
     elif op=='>=':
       return self._EvaluateGreaterEqual(lhs, rhs)
-    elif op=='+':
-      return self._EvaluateAdd(lhs, rhs)
-    elif op=='-':
-      return self._EvaluateSubtract(lhs, rhs)
-    elif op=='/':
-      return self._EvaluateDivide(lhs, rhs)
-    elif op=='*':
-      return self._EvaluateMultiply(lhs, rhs)
+
     else:
       raise ValueError('Unknown operator: '+op)
 
@@ -897,7 +919,10 @@ Statistics for column %(col)s
           raise ValueError('Cannot evaluate operator on less than two operands!')
         rhs=stack.pop()
         lhs=stack.pop()
-        stack.append(self._EvaluateOperator(exp, lhs, rhs))
+        result=self._EvaluateOperator(exp, lhs, rhs)
+        if result==None:
+          return False
+        stack.append(result)
       else:
         stack.append(exp)
     if len(stack)>1:
@@ -962,6 +987,7 @@ Statistics for column %(col)s
     float_expression=re.compile('[-+]?[0-9]*\.[0-9]+(?:[eE][-+]?[0-9]+)?$')
     int_expression=re.compile('[-+]?[0-9]+(?:[eE][-+]?[0-9]+)?$')
     bool_expression=re.compile('true$|True$|false$|False$')
+    none_expression=re.compile('None$|none$|nan$|NAN$|NaN$')
 
     if re.match(float_expression,operand):
       return float(operand)
@@ -971,6 +997,8 @@ Statistics for column %(col)s
       if operand == 'false' or operand == 'False':
         return False
       return True
+    elif re.match(none_expression,operand):
+      return None
     return operand
 
     #If nothing above matches, operand must be a string, full string
@@ -1208,8 +1236,6 @@ Statistics for column %(col)s
     for row in self.rows:
       for ti, ei in zip(tab_indices, exp_indices):
         rpn_expression[ei] = row[ti]
-      if None in rpn_expression:
-        continue
       if self._EvaluateRPN(list(rpn_expression), valid_operators):
         selected_tab.AddRow(row)
 
