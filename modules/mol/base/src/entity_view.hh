@@ -30,7 +30,6 @@
 #include <ost/mol/entity_visitor_fw.hh>
 #include <ost/mol/handle_type_fw.hh>
 #include <ost/mol/query.hh>
-#include <ost/mol/iterator_fw.hh>
 #include <ost/mol/property_id.hh>
 #include <ost/geom/geom.hh>
 
@@ -280,20 +279,6 @@ public:
   int GetBondCount() const;
 
   const ChainViewList& GetChainList() const;
-
-  /// \brief Get iterator pointing to the beginning of atoms
-  AtomViewIter AtomsBegin() const;
-
-  /// \brief Get iterator pointing to the end of atoms
-  AtomViewIter AtomsEnd() const;
-
-  /// \brief Get iterator pointing to the beginnin of residues
-  /// \sa ResiduesEnd
-  ResidueViewIter ResiduesBegin() const;
-
-  /// \brief get iterator pointing to the end of residues
-  /// \sa ResiduesBegin
-  ResidueViewIter ResiduesEnd() const;
 
   /// \brief Get list of all residues included in the view
   ResidueViewList GetResidueList() const;

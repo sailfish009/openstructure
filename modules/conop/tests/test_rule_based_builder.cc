@@ -394,11 +394,13 @@ BOOST_AUTO_TEST_CASE(nucleotide_based_connect)
   ResidueHandle du2=make_defective_uracil2(dc);
 
 
-  for (AtomHandleIter i=e.AtomsBegin(),x=e.AtomsEnd(); i!=x; ++i) {
+  AtomHandleList atoms = e.GetAtomList();
+  for (AtomHandleList::const_iterator i = atoms.begin(), e = atoms.end(); i!=e; ++i ){
     rb_builder.FillAtomProps(*i);
   }
 
-  for (AtomHandleIter i=de.AtomsBegin(),x=de.AtomsEnd(); i!=x; ++i) {
+  atoms = de.GetAtomList();
+  for (AtomHandleList::const_iterator i = atoms.begin(), e = atoms.end(); i!=e; ++i ){
     drb_builder.FillAtomProps(*i);
   }
   

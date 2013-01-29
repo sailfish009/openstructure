@@ -166,7 +166,8 @@ BOOST_AUTO_TEST_CASE(name_based_connect)
   ResidueHandle ile=make_leu(c);
   ResidueHandle arg=make_arg(c);
   HeuristicBuilder heuristic_builder;  
-  for (AtomHandleIter i=e.AtomsBegin(),x=e.AtomsEnd(); i!=x; ++i) {
+  AtomHandleList atoms =e .GetAtomList();
+  for (AtomHandleList::const_iterator i = atoms.begin(), e = atoms.end(); i!=e; ++i ){
     heuristic_builder.FillAtomProps(*i);
   }
 
@@ -175,7 +176,8 @@ BOOST_AUTO_TEST_CASE(name_based_connect)
   ResidueHandle dile=make_defective_leu(dc);
   HeuristicBuilder dheuristic_builder;
   dheuristic_builder.SetBondFeasibilityCheck(false);
-  for (AtomHandleIter i=de.AtomsBegin(),x=de.AtomsEnd(); i!=x; ++i) {
+  atoms = de.GetAtomList();
+  for (AtomHandleList::const_iterator i = atoms.begin(), e = atoms.end(); i!=e; ++i ){
     dheuristic_builder.FillAtomProps(*i);
   }
    
@@ -201,7 +203,8 @@ BOOST_AUTO_TEST_CASE(test_assign_torsions){
   a2.SetChemClass(ChemClass(ChemClass::L_PEPTIDE_LINKING));  
   l3.SetChemClass(ChemClass(ChemClass::L_PEPTIDE_LINKING));
   HeuristicBuilder heuristic_builder;
-  for (AtomHandleIter i=e.AtomsBegin(),x=e.AtomsEnd(); i!=x; ++i) {
+  AtomHandleList atoms = e.GetAtomList();
+  for (AtomHandleList::const_iterator i = atoms.begin(), e = atoms.end(); i!=e; ++i ){
     heuristic_builder.FillAtomProps(*i);
   }
   heuristic_builder.ConnectAtomsOfResidue(l1);

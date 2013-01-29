@@ -44,6 +44,18 @@ struct LazilyBoundData {
 };
 
 
+void add_points_to_organizer(SpatialOrganizer<bool>& org, const EntityView& view) {
+  for (ChainViewList::const_iterator ci = view.GetChainList().begin(),
+       ce = view.GetChainList().end(); ci != ce; ++ci) {
+    for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
+         re = ci->GetResidueList().end(); ri != re; ++ri) {
+      for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
+           ae = ri->GetAtomList().end(); ai != ae; ++ai) {
+        org.Add(true, ai->GetPos());
+      }
+    }
+  }
+}
     
 bool cmp_string(CompOP op,const String& lhs, const StringOrRegexParam& rhs) {
   switch (op) {
@@ -106,9 +118,7 @@ QueryState::QueryState(const QueryImpl& query, const EntityHandle& ref)
     r_->refs.resize(query.bracketed_expr_.size());
     for (size_t i=0;i<query.bracketed_expr_.size(); ++i) {
       EntityView view=ref.Select(Query(query.bracketed_expr_[i]));
-      for (AtomViewIter j=view.AtomsBegin(), e=view.AtomsEnd(); j!=e; ++j) {
-        r_->refs[i].points.Add(true, (*j).GetPos());
-      }
+      add_points_to_organizer(r_->refs[i].points, view);
     }    
   }
 }
@@ -126,9 +136,7 @@ QueryState::QueryState(const QueryImpl& query, const EntityView& ref)
     r_->refs.resize(query.bracketed_expr_.size());
     for (size_t i=0;i<query.bracketed_expr_.size(); ++i) {
       EntityView view=ref.Select(Query(query.bracketed_expr_[i]));
-      for (AtomViewIter j=view.AtomsBegin(), e=view.AtomsEnd(); j!=e; ++j) {
-        r_->refs[i].points.Add(true, (*j).GetPos());
-      }
+      add_points_to_organizer(r_->refs[i].points, view);
     }
   }
 }

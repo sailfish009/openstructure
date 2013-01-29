@@ -1,4 +1,3 @@
-#include <ost/mol/iterator.hh>
 #include "model_check.hh"
 #include "amino_acids.hh"
 
@@ -8,8 +7,8 @@ namespace ost { namespace conop {
 
 void Checker::CheckForCompleteness(bool require_hydrogens)
 {
-  for (ResidueHandleIter i=ent_.ResiduesBegin(), e=ent_.ResiduesEnd();
-    i!=e; ++i) {
+  for (ResidueHandleList::const_iterator i=residues_.begin(), 
+       e = residues_.end(); i!=e; ++i) {
     ResidueHandle res=*i;
     String anames="";
     CompoundPtr compound=lib_->FindCompound(res.GetName(),Compound::PDB);
@@ -52,8 +51,8 @@ void Checker::CheckForCompleteness(bool require_hydrogens)
 mol::AtomHandleList Checker::GetHydrogens()
 {
   AtomHandleList hydlist;
-  for (ResidueHandleIter i=ent_.ResiduesBegin(), e=ent_.ResiduesEnd();
-       i!=e; ++i) {
+  for (ResidueHandleList::const_iterator i=residues_.begin(), 
+       e = residues_.end(); i!=e; ++i) {
     ResidueHandle res=*i;
     CompoundPtr compound=lib_->FindCompound(res.GetName(),Compound::PDB);
     if (!compound) {
@@ -76,8 +75,8 @@ mol::AtomHandleList Checker::GetHydrogens()
 mol::AtomHandleList Checker::GetZeroOccupancy()
 {
   AtomHandleList zerolist;
-  for (ResidueHandleIter i=ent_.ResiduesBegin(), e=ent_.ResiduesEnd();
-       i!=e; ++i) {
+  for (ResidueHandleList::const_iterator i=residues_.begin(), 
+       e = residues_.end(); i!=e; ++i) {
     ResidueHandle res=*i;
     AtomHandleList atoms=res.GetAtomList();
     for (AtomHandleList::const_iterator j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
@@ -91,8 +90,8 @@ mol::AtomHandleList Checker::GetZeroOccupancy()
 
 void Checker::CheckForNonStandard()
 {
-  for (ResidueHandleIter i=ent_.ResiduesBegin(), e=ent_.ResiduesEnd();
-       i!=e; ++i) {
+  for (ResidueHandleList::const_iterator i=residues_.begin(), 
+       e = residues_.end(); i!=e; ++i) {
     ResidueHandle res=*i;
     CompoundPtr compound=lib_->FindCompound(res.GetName(),Compound::PDB);
     if (!compound) {
@@ -113,8 +112,8 @@ void Checker::CheckForNonStandard()
 
 void Checker::CheckForUnknownAtoms()
 {
-  for (ResidueHandleIter i=ent_.ResiduesBegin(), e=ent_.ResiduesEnd();
-       i!=e; ++i) {
+  for (ResidueHandleList::const_iterator i=residues_.begin(), 
+       e = residues_.end(); i!=e; ++i) {
     ResidueHandle res=*i;
     String anames="";
     CompoundPtr compound=lib_->FindCompound(res.GetName(),Compound::PDB);

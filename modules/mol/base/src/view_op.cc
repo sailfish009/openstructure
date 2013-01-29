@@ -180,32 +180,37 @@ mol::EntityView Intersection(const mol::EntityView& ev1,
   BondMap bm;
   BondHandleList bl;
   BondHandleList bonds_to_add;
-  for (AtomViewIter a=ev1.AtomsBegin(),e=ev1.AtomsEnd(); a!=e; ++a) {
-    AtomView av=*a;
-    AtomView av2=ev2.ViewForHandle(av.GetHandle());
-    if (av2.IsValid()) {
-      intersection.AddAtom(av.GetHandle());
-      bl=av.GetBondList();
-      for (BondHandleList::iterator i=bl.begin(), e2=bl.end(); i!=e2; ++i) {
-        BondMap::iterator x=bm.find(*i);
-        if (x==bm.end()) {
-          bm.insert(std::make_pair(*i, true));
-        }
-      }  
-      bl=av2.GetBondList();
-      for (BondHandleList::iterator i=bl.begin(), e2=bl.end(); i!=e2; ++i) {
-        BondMap::iterator x=bm.find(*i);
-        if (x!=bm.end()) {
-          if (x->second) {
-            bonds_to_add.push_back(*i);
-            x->second=false;
+  for (ChainViewList::const_iterator ci = ev1.GetChainList().begin(),
+       ce = ev1.GetChainList().end(); ci != ce; ++ci) {
+    for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
+         re = ci->GetResidueList().end(); ri != re; ++ri) {
+      for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
+           ae = ri->GetAtomList().end(); ai != ae; ++ai) {
+        AtomView av=*ai;
+        AtomView av2=ev2.ViewForHandle(av.GetHandle());
+        if (av2.IsValid()) {
+          intersection.AddAtom(av.GetHandle());
+          bl=av.GetBondList();
+          for (BondHandleList::iterator i=bl.begin(), e2=bl.end(); i!=e2; ++i) {
+            BondMap::iterator x=bm.find(*i);
+            if (x==bm.end()) {
+              bm.insert(std::make_pair(*i, true));
+            }
+          }  
+          bl=av2.GetBondList();
+          for (BondHandleList::iterator i=bl.begin(), e2=bl.end(); i!=e2; ++i) {
+            BondMap::iterator x=bm.find(*i);
+            if (x!=bm.end()) {
+              if (x->second) {
+                bonds_to_add.push_back(*i);
+                x->second=false;
+              }
+            } else {
+              bm.insert(std::make_pair(*i, true));
+            }
           }
-        } else {
-          bm.insert(std::make_pair(*i, true));
         }
-      }
-    }
-  }
+  }}}
   for (BondHandleList::iterator i=bonds_to_add.begin(), 
        e=bonds_to_add.end(); i!=e; ++i) {
     intersection.AddBond(*i);

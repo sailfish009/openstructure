@@ -25,7 +25,6 @@
 #include <ost/geom/mat4.hh>
 #include <ost/mol/alg/svd_superpose.hh>
 #include <ost/mol/entity_handle.hh>
-#include <ost/mol/iterator.hh>
 
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
@@ -51,8 +50,5 @@ void export_svdSuperPose()
   def("SuperposeSVD", sup1, (arg("apply_transform")=true));
   def("SuperposeSVD", sup2, (arg("apply_transform")=true));
   def("CalculateRMSD", &CalculateRMSD, (arg("transformation")=geom::Mat4()));
-  def("IterativeSuperposition", &IterativeSuperposition, (arg("ncycles")=200,
-                                                          arg("dist_thres")=4.0,
-                                                          arg("apply_transform")=true));
 }
 

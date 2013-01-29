@@ -32,7 +32,6 @@
 #include <ost/conop/conop.hh>
 #include <ost/string_ref.hh>
 #include <ost/conop/amino_acids.hh>
-#include <ost/mol/iterator.hh>
 #include <ost/platform.hh>
 #include <ost/log.hh>
 #include <ost/mol/alg/consistency_checks.hh>
@@ -417,54 +416,61 @@ int main (int argc, char **argv)
     } else {
       std::cout << "Chain\tResName\tResNum\tAsses.\tScore\t(Conserved/Total, over " << cutoffs.size() << " thresholds)" << std::endl;
     }
-    for (ResidueViewIter rit=outv.ResiduesBegin();rit!=outv.ResiduesEnd();++rit){
-      ResidueView ritv=*rit;
-      ResNum rnum = ritv.GetNumber();
-      bool assessed = false;
-      String assessed_string="No";
-      bool quality_problems = false;
-      String quality_problems_string="No";
-      Real lddt_local = -1;
-      String lddt_local_string="-";
-      int conserved_dist = -1;
-      int total_dist = -1;
-      String dist_string = "-";
-      if (is_resnum_in_globalrdmap(rnum,glob_dist_list)) {
-        assessed = true;
-        assessed_string="Yes";
-      }
-      if (ritv.HasProp("stereo_chemical_violation_sidechain") || ritv.HasProp("steric_clash_sidechain")) {
-        quality_problems = true;
-        quality_problems_string="Yes";
-      }
-      if (ritv.HasProp("stereo_chemical_violation_backbone") || ritv.HasProp("steric_clash_backbone")) {
-        quality_problems = true;
-        quality_problems_string="Yes+";
-      }
-
-      if (assessed==true) {
-        if (ritv.HasProp(label)) {
-          lddt_local=ritv.GetFloatProp(label);
-          std::stringstream stkeylddt;
-          stkeylddt <<  std::fixed << std::setprecision(4) << lddt_local;
-          lddt_local_string=stkeylddt.str();
-          conserved_dist=ritv.GetIntProp(label+"_conserved");
-          total_dist=ritv.GetIntProp(label+"_total");
-          std::stringstream stkeydist;
-          stkeydist << "("<< conserved_dist << "/" << total_dist << ")";
-          dist_string=stkeydist.str();
-        } else {
-          lddt_local = 0;
-          lddt_local_string="0.0000";
-          conserved_dist = 0;
-          total_dist = 0;
-          dist_string="(0/0)";
+    for (ChainViewList::const_iterator ci = outv.GetChainList().begin(),
+         ce = outv.GetChainList().end(); ci != ce; ++ci) {
+      for (ResidueViewList::const_iterator rit = ci->GetResidueList().begin(),
+           re = ci->GetResidueList().end(); rit != re; ++rit) {
+     
+        ResidueView ritv=*rit;
+        ResNum rnum = ritv.GetNumber();
+        bool assessed = false;
+        String assessed_string="No";
+        bool quality_problems = false;
+        String quality_problems_string="No";
+        Real lddt_local = -1;
+        String lddt_local_string="-";
+        int conserved_dist = -1;
+        int total_dist = -1;
+        String dist_string = "-";
+        if (is_resnum_in_globalrdmap(rnum,glob_dist_list)) {
+          assessed = true;
+          assessed_string="Yes";
         }
-      }
-      if (structural_checks) {
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << quality_problems_string << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
-      } else {
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
+        if (ritv.HasProp("stereo_chemical_violation_sidechain") || 
+            ritv.HasProp("steric_clash_sidechain")) {
+          quality_problems = true;
+          quality_problems_string="Yes";
+        }
+        if (ritv.HasProp("stereo_chemical_violation_backbone") || 
+            ritv.HasProp("steric_clash_backbone")) {
+          quality_problems = true;
+          quality_problems_string="Yes+";
+        }
+
+        if (assessed==true) {
+          if (ritv.HasProp(label)) {
+            lddt_local=ritv.GetFloatProp(label);
+            std::stringstream stkeylddt;
+            stkeylddt <<  std::fixed << std::setprecision(4) << lddt_local;
+            lddt_local_string=stkeylddt.str();
+            conserved_dist=ritv.GetIntProp(label+"_conserved");
+            total_dist=ritv.GetIntProp(label+"_total");
+            std::stringstream stkeydist;
+            stkeydist << "("<< conserved_dist << "/" << total_dist << ")";
+            dist_string=stkeydist.str();
+          } else {
+            lddt_local = 0;
+            lddt_local_string="0.0000";
+            conserved_dist = 0;
+            total_dist = 0;
+            dist_string="(0/0)";
+          }
+        }
+        if (structural_checks) {
+          std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << quality_problems_string << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
+        } else {
+          std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
+        }
       }
     }
     std::cout << std::endl;

@@ -18,7 +18,8 @@
 //------------------------------------------------------------------------------
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/atom_view.hh>
-#include <ost/mol/iterator.hh>
+#include <ost/mol/residue_view.hh>
+#include <ost/mol/chain_view.hh>
 #include "clash_score.hh"
 
 namespace ost { namespace mol { namespace alg {
@@ -64,19 +65,55 @@ Real StericEnergy(const geom::Vec3& pos1, Real r1,
 
 Real ClashScore(const EntityView& ent_a, const EntityView& ent_b)
 {
-  return do_clash_score<EntityView, AtomViewIter>(ent_a, ent_b);
+  Real energy=0.0;
+  for (ChainViewList::const_iterator ci = ent_a.GetChainList().begin(),
+       ce = ent_a.GetChainList().end(); ci != ce; ++ci) {
+    for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
+         re = ci->GetResidueList().end(); ri != re; ++re) {
+      for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
+           ae = ri->GetAtomList().end(); ai!= ae; ++ai) {
+        AtomViewList clashees=ent_b.FindWithin(ai->GetPos(), 
+                                               ai->GetRadius()+1.7);
+
+        for (AtomViewList::iterator j=clashees.begin(), 
+            e2=clashees.end(); j!=e2; ++j) {
+            energy+=StericEnergy((*j).GetPos(), (*j).GetRadius()-0.25,
+                                  ai->GetPos(), ai->GetRadius()-0.25);           
+        }
+      }
+    }
+  }
+  return energy;  
 }
 
 Real ClashScore(const EntityHandle& ent_a, const EntityView& ent_b)
 {
-  return do_clash_score<EntityHandle, AtomHandleIter>(ent_a, ent_b);  
+  Real energy=0.0;
+  for (ChainViewList::const_iterator ci = ent_b.GetChainList().begin(),
+       ce = ent_b.GetChainList().end(); ci != ce; ++ci) {
+    for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
+         re = ci->GetResidueList().end(); ri != re; ++re) {
+      for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
+           ae = ri->GetAtomList().end(); ai!= ae; ++ai) {
+        AtomHandleList clashees=ent_a.FindWithin(ai->GetPos(), 
+                                                 ai->GetRadius()+1.7);
+
+        for (AtomHandleList::iterator j=clashees.begin(), 
+            e2=clashees.end(); j!=e2; ++j) {
+            energy+=StericEnergy((*j).GetPos(), (*j).GetRadius()-0.25,
+                                  ai->GetPos(), ai->GetRadius()-0.25);           
+        }
+      }
+    }
+  }
+  return energy;  
 }
 
 Real ClashScore(const AtomHandle& atom, const EntityView& ent_b)
 {
   Real energy=0.0;
   AtomViewList clashees=ent_b.FindWithin(atom.GetPos(), 
-                                              atom.GetRadius()+2.0);
+                                         atom.GetRadius()+2.0);
   for (AtomViewList::iterator j=clashees.begin(), 
        e2=clashees.end(); j!=e2; ++j) {
        energy+=StericEnergy((*j).GetPos(), (*j).GetRadius(),
