@@ -821,10 +821,10 @@ Statistics for column %(col)s
 
 
   def _EvaluateEqualNone(self, lhs, rhs):
-    return (lhs==None or lhs==float('NaN')) == (rhs==None or rhs==float('NaN'))
+    return (lhs==None or lhs!=lhs) == (rhs==None or rhs!=rhs)
  
   def _EvaluateNonEqualNone(self, lhs, rhs):
-    return (lhs==None or lhs==float('NaN')) != (rhs==None or rhs==float('NaN'))
+    return (lhs==None or lhs!=lhs) != (rhs==None or rhs!=rhs)
  
   def _EvaluateAnd(self, lhs, rhs):
     return lhs and rhs
@@ -851,22 +851,22 @@ Statistics for column %(col)s
     return lhs>=rhs
 
   def _EvaluateAdd(self, lhs, rhs):
-    if lhs==None or lhs==float('NaN') or rhs==None or rhs==float('NaN'):
+    if lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
       return None
     return lhs+rhs
 
   def _EvaluateSubtract(self, lhs, rhs):
-    if lhs==None or lhs==float('NaN') or rhs==None or rhs==float('NaN'):
+    if lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
       return None
     return lhs-rhs
 
   def _EvaluateMultiply(self, lhs, rhs):
-    if lhs==None or lhs==float('NaN') or rhs==None or rhs==float('NaN'):
+    if lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
       return None
     return lhs*rhs
 
   def _EvaluateDivide(self, lhs, rhs):
-    if lhs==None or lhs==float('NaN') or rhs==None or rhs==float('NaN'):
+    if lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
       return None
     return lhs/rhs
 
@@ -881,7 +881,7 @@ Statistics for column %(col)s
       return self._EvaluateDivide(lhs, rhs)
     elif op=='*':
       return self._EvaluateMultiply(lhs, rhs)
-    elif lhs==None or lhs==float('NaN') or rhs==None or rhs==float('NaN'):
+    elif lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
       if op=='=':
         return self._EvaluateEqualNone(lhs,rhs)
       elif op=='!=':
