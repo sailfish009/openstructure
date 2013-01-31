@@ -1005,6 +1005,14 @@ Statistics for column %(col)s
     #gets returned.
 
 
+  def _LexerHelper(self, operand):
+    if len(operand.strip())>0:
+      if ' ' in operand.strip():
+        raise ValueError('Cannot Evaluate %s'%(operand))
+      return [operand.strip()]
+    return []
+
+
 
   def _ExpressionLexer(self, expression, valid_operators, precedence):
 
@@ -1127,50 +1135,62 @@ Statistics for column %(col)s
 
       token=expression[actual_position]
 
-      if token=='(' or token=='[' or token=='{':
-        if len(eaten_stuff.strip())>0:
-          op=eaten_stuff.strip()
-          if ' ' in op:
-            raise ValueError('cannot evaluate %s'%(op))
-          split_expression.append(op)
-          eaten_stuff=''
+      if token.isspace():
+        split_expression+=self._LexerHelper(eaten_stuff)
+        actual_position+=1
+        eaten_stuff=''
+        continue
+
+      if token in ['(','[','{']:
+        split_expression+=self._LexerHelper(eaten_stuff)
         split_expression.append('(')
         actual_position+=1
+        eaten_stuff=''
         continue
 
-      if token==')' or token==']' or token=='}':
-        if len(eaten_stuff.strip())>0:
-          op=eaten_stuff.strip()
-          if ' ' in op:
-            raise ValueError('cannot evaluate %s'%(op))
-          split_expression.append(op)
-          eaten_stuff=''
+      if token in [')',']','}']:
+        split_expression+=self._LexerHelper(eaten_stuff)
         split_expression.append(')')
         actual_position+=1
+        eaten_stuff=''
         continue
 
-      found_operator=False
+      if token in ['+','-','*','/','=']:
+        split_expression+=self._LexerHelper(eaten_stuff)
+        split_expression.append(token)
+        actual_position+=1
+        eaten_stuff=''
+        continue
 
-      for operator in valid_operators:
-        if actual_position+len(operator)>=len(expression):
+      if token == '!':
+        if actual_position+1==len(expression):
+          raise ValueError('Cannot evaluate \'!\'')
+        if expression[actual_position+1]== '=':
+          split_expression+=self._LexerHelper(eaten_stuff)
+          split_expression.append('!=')
+          actual_position+=2
+          eaten_stuff=''
           continue
-        if expression[actual_position:actual_position+len(operator)]==operator:
-          if len(eaten_stuff.strip())>0:
-            op=eaten_stuff.strip()
-            if ' ' in op:
-              raise ValueError('cannot evaluate %s'%(op))
-            split_expression.append(op)
-            eaten_stuff=''
-          split_expression.append(operator)
-          actual_position+=len(operator)
-          found_operator=True
-          break
+        else:
+          raise ValueError('Cannot evaluate single \'!\'')
 
-      if found_operator:
+      if token in ['<','>']:
+        if actual_position+1<len(expression):
+          if expression[actual_position+1]=='=':
+            split_expression+=self._LexerHelper(eaten_stuff)
+            split_expression.append(token+'=')
+            actual_position+=2
+            eaten_stuff=''
+            continue
+        split_expression+=self._LexerHelper(eaten_stuff)
+        split_expression.append(token)
+        actual_position+=1
+        eaten_stuff=''
         continue
 
       eaten_stuff+=token
       actual_position+=1
+
 
   def Select(self, query):
 
