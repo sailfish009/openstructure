@@ -617,6 +617,7 @@ void IndexedVertexArray::Reset()
   outline_exp_factor_=0.1;
   outline_exp_color_=Color(0,0,0);
   solid_=false;
+  #undef RGB
   solid_color_=RGB(1,1,1);
   clip_offset_=0.0;
   draw_normals_=false;

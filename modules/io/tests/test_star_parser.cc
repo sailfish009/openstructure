@@ -19,16 +19,17 @@
 /*
   Author: Marco Biasini
  */
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+
 #include <fstream>
 #include <math.h>
 #include <ost/mol/mol.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/io/mol/star_parser.hh>
 
-#define BOOST_AUTO_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
 
 
 using namespace ost;

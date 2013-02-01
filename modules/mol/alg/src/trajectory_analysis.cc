@@ -331,7 +331,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
     if (to<from) {
       throw Error("to smaller than from");
     }
-    unsigned int n_frames=ceil((to-from)/stride);
+    unsigned int n_frames=ceil((to-from)/static_cast<Real>(stride));
     if (n_atoms==0){
       throw Error("EntityView is empty");
     }
@@ -370,7 +370,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
     if (to<from) {
       throw Error("to smaller than from");
     }
-    unsigned int n_frames=ceil((to-from)/stride);
+    unsigned int n_frames=ceil((to-from)/static_cast<Real>(stride));
     if (n_atoms==0){
       throw Error("EntityView is empty");
     }

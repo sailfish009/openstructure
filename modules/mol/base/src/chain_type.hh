@@ -19,6 +19,7 @@
 #ifndef OST_CHAIN_TYPE_HH
 #define OST_CHAIN_TYPE_HH
 
+#include <ost/mol/module_config.hh>
 #include <ost/base.hh>
 #include <ost/string_ref.hh>
 

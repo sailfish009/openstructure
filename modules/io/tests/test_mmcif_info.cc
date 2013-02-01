@@ -17,13 +17,13 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <ost/io/io_exception.hh>
-#include <ost/io/mol/mmcif_info.hh>
-
-#define BOOST_AUTO_TEST_DYN_LINK
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+
+#include <ost/io/io_exception.hh>
+#include <ost/io/mol/mmcif_info.hh>
 
 using namespace ost;
 using namespace ost::io;

@@ -16,6 +16,12 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+using boost::unit_test_framework::test_suite;
+
 #include <ost/test_utils/compare_files.hh>
 #include <ost/geom/vec_mat_predicates.hh>
 
@@ -31,11 +37,6 @@
 #include <ost/log.hh>
 
 #include <ost/io/io_exception.hh>
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
-using boost::unit_test_framework::test_suite;
 
 using namespace ost;
 using namespace ost::io;

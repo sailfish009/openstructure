@@ -18,7 +18,6 @@ if (NOT ENABLE_STATIC)
            TARGET ost_scripts)
     script(NAME ost.bat INPUT ost.bat.in SUBSTITUTE ${SUBST_DICT}
            TARGET ost_scripts)
-    script(NAME gipltng.bat INPUT gipltng.bat.in SUBSTITUTE ${SUBST_DICT})
   else()
     script(NAME ost_config INPUT ost_config.in SUBSTITUTE ${SUBST_DICT}
            TARGET ost_scripts OUTPUT_DIR ${LIBEXEC_PATH})

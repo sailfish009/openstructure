@@ -47,7 +47,7 @@ macro(_find_python PYTHON_ROOT VERSION)
     find_library(PYTHON_LIBRARIES
       NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}"
       HINTS "${PYTHON_ROOT}"
-      PATH_SUFFIXES lib
+      PATH_SUFFIXES lib libs
       NO_SYSTEM_ENVIRONMENT_PATH NO_DEFAULT_PATH
     )
     find_path(PYTHON_INCLUDE_PATH
@@ -72,7 +72,7 @@ macro(_find_python_bin PYTHON_ROOT VERSION)
   string(REPLACE "." "" _VERSION_NO_DOTS "${VERSION}")
   if(PYTHON_ROOT)
     find_program(PYTHON_BINARY
-      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}"
+      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}" python.exe
       HINTS "${PYTHON_ROOT}"
       PATH_SUFFIXES bin
       NO_SYSTEM_ENVIRONMENT_PATH NO_DEFAULT_PATH

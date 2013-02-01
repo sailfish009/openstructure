@@ -159,7 +159,7 @@ private:
   mutable bool hsv_dirty_;
 };
 
-
+#undef RGB
 /// \brief RGB color spec from floats (0.0-1.0)
 Color DLLEXPORT_OST_GFX RGB(float r, float g, float b);
 

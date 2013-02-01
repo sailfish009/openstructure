@@ -95,7 +95,7 @@ public:
 
   static DataType GetDataType();
 
-  size_t  MemSize() const;
+  std::size_t  MemSize() const;
 
 
 
@@ -124,11 +124,11 @@ public:
 
 private:
 #ifdef USE_ROW_ORDER
-  size_t depth_;
-  size_t height_depth_;
+  std::size_t depth_;
+  std::size_t height_depth_;
 #else
-  size_t height_;
-  size_t width_height_;
+  std::size_t height_;
+  std::size_t width_height_;
 #endif
 
   // actual data storage

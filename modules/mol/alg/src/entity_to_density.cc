@@ -123,7 +123,7 @@ public:
     uint y_limit = ceil(falloff_end_frequency_ / frequency_sampling[1]);
     uint z_limit = ceil(falloff_end_frequency_ / frequency_sampling[2]);
      img::Extent reduced_extent = img::Extent
-             (img::Point(-x_limit,-y_limit,0),
+             (img::Point(-static_cast<int>(x_limit),-static_cast<int>(y_limit),0),
               img::Point(x_limit,y_limit,z_limit));
 
     mol::AtomViewIter iterator_end = entity_view_.AtomsEnd();
