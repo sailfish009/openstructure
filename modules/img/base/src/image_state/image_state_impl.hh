@@ -81,7 +81,7 @@ public:
   // image state base interface
   virtual ImageStateBasePtr Clone(bool cc=true) const;
   
-  virtual size_t MemSize() const;
+  virtual std::size_t MemSize() const;
 
   virtual DataType GetType() const;
 
@@ -168,10 +168,10 @@ public:
   const T& Value(const Index& i) const;
 
   // pass-through to value holder
-  T& Value(size_t i);
+  T& Value(std::size_t i);
 
   // pass-through to value holder
-  const T& Value(size_t i) const;
+  const T& Value(std::size_t i) const;
 
   //! direct access to value holder
   ValueHolder<T>& Data();

@@ -42,7 +42,7 @@ namespace ost { namespace img { namespace image_state {
 namespace {
 
 template <typename V>
-size_t calc_volume(const Size& s)
+std::size_t calc_volume(const Size& s)
 {
   unsigned int tmp;
   unsigned int numbits = 0;
@@ -67,11 +67,11 @@ size_t calc_volume(const Size& s)
   {
     ++numbits;
   }
-  // check if number of pixels (2**(numbits+1)) larger than what size_t can handle
-  if(numbits>=sizeof(size_t)*8){
+  // check if number of pixels (2**(numbits+1)) larger than what std::size_t can handle
+  if(numbits>=sizeof(std::size_t)*8){
       throw std::bad_alloc();
   }
-  return static_cast<size_t>(s[0])*static_cast<size_t>(s[1])*static_cast<size_t>(s[2]);
+  return static_cast<std::size_t>(s[0])*static_cast<std::size_t>(s[1])*static_cast<std::size_t>(s[2]);
 }
 
 } //ns
@@ -183,7 +183,7 @@ DataType ValueHolder<V>::GetDataType()
 }
 
 template <typename V>
-size_t ValueHolder<V>::MemSize() const
+std::size_t ValueHolder<V>::MemSize() const
 {
   return sizeof(V)*data_.size();
 }
