@@ -201,16 +201,11 @@ macro(module)
                                    COMMAND ${CMAKE_COMMAND} -E make_directory ${LIBEXEC_STAGE_PATH}
                                    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/tests")
   endif()
-  if (WIN32)
-    set(_ABS_FILE_PATTERN "^[A-Z]:/")
-  else()
-    set(_ABS_FILE_PATTERN "^/")
-  endif()
   if (_ARG_SOURCES)
     # when there is at least one source file, we build a library
     set(_ABS_SOURCE_NAMES)
     foreach(_SOURCE ${_ARG_SOURCES})
-      if (_SOURCE MATCHES ${_ABS_FILE_PATTERN})
+      if (IS_ABSOLUTE ${_SOURCE})
         list(APPEND _ABS_SOURCE_NAMES "${_SOURCE}")
       else()
         list(APPEND _ABS_SOURCE_NAMES "${CMAKE_CURRENT_SOURCE_DIR}/${_SOURCE}")
@@ -292,7 +287,9 @@ macro(stage_and_install_headers HEADERLIST HEADER_OUTPUT_DIR TARGET)
     set(_HDR_STAGE_DIR "${HEADER_OUTPUT_DIR}/${_DIR}")
     set(_FULL_HEADER_DIR "${HEADER_STAGE_PATH}/${_HDR_STAGE_DIR}")
     copy_if_different("" "${_FULL_HEADER_DIR}" "${_ABS_HEADER_NAMES}" "" "${TARGET}_headers")
-    install(FILES ${_ABS_HEADER_NAMES} DESTINATION "include/${_HDR_STAGE_DIR}")
+    if(NOT WIN32)
+      install(FILES ${_ABS_HEADER_NAMES} DESTINATION "include/${_HDR_STAGE_DIR}")
+    endif(NOT WIN32)
   endforeach()
 endmacro()
 
@@ -355,6 +352,12 @@ macro(executable_libexec)
   add_executable(${_ARG_NAME} ${_ARG_SOURCES})
   set_target_properties(${_ARG_NAME}
                         PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                       "${LIBEXEC_STAGE_PATH}")  
+  set_target_properties(${_ARG_NAME}
+                        PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE
+                       "${LIBEXEC_STAGE_PATH}")  
+  set_target_properties(${_ARG_NAME}
+                        PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG
                        "${LIBEXEC_STAGE_PATH}")  
   if (NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
     if (APPLE)
@@ -464,23 +467,26 @@ macro(ui_to_python LIBNAME PYMODDIR STAGEDIR)
                        )
     list(APPEND out_files ${_abs_out_file})
   endforeach()
-  compile_py_files(_${LIBNAME} ${STAGEDIR} ${out_files})
+  compile_py_files(_${LIBNAME} ${STAGEDIR} compiled_files ${out_files})
   install(FILES ${out_files} DESTINATION "${LIB_DIR}/${PYMODDIR}")
+  install(FILES ${compiled_files} DESTINATION "${LIB_DIR}/${PYMODDIR}")
 endmacro()
 
 #-------------------------------------------------------------------------------
 # Synopsis:
-#   compile_py_files(module out_files [input_file1 ...])
+#   compile_py_files(module out_dir compiled_files [input_file1 ...])
 # Description:
 #   Calls pyuic on every input file. The resulting python files are stored in
-#   the variable with name out_files.
+#   the variable with name compiled_files.
 #-------------------------------------------------------------------------------
-macro(compile_py_files module out_dir)
+macro(compile_py_files module out_dir compiled_files_name)
   set(_input_files ${ARGN})
+  set(${compiled_files_name})
   foreach(input_file ${_input_files})
     get_filename_component(_out_file ${input_file} NAME_WE)
     get_filename_component(_in_file ${input_file} ABSOLUTE)
     set(_out_file ${out_dir}/${_out_file}.pyc)
+    list(APPEND ${compiled_files_name} ${_out_file})
     get_filename_component(_in_name ${input_file} NAME)
     file(MAKE_DIRECTORY  ${out_dir})
     add_custom_command(TARGET ${module}
@@ -604,7 +610,8 @@ macro(pymod)
       copy_if_different("./" "${PYMOD_STAGE_DIR}/${_DIR}"
                         "${_ABS_PY_FILES}" "TARGETS"
                         "${_PYMOD_TARGET}")
-      compile_py_files(_${_LIB_NAME} ${PYMOD_STAGE_DIR}/${_DIR} ${_ABS_PY_FILES})
+      compile_py_files(_${_LIB_NAME} ${PYMOD_STAGE_DIR}/${_DIR} compiled_files ${_ABS_PY_FILES})
+      install(FILES ${compiled_files} DESTINATION "${LIB_DIR}/${PYMOD_DIR}/${_DIR}")
     endforeach()
   endif()  
   get_target_property(_MOD_DEPS "${_PARENT_NAME}" MODULE_DEPS)
