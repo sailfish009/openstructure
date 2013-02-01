@@ -709,6 +709,15 @@ function(get_dependencies_for_item  item list_var)
   set(ENV{VS_UNICODE_OUTPUT} "") # Block extra output from inside VS IDE.
   execute_process( COMMAND ${dumpbin_cmd}  /dependents ${item} OUTPUT_VARIABLE dumpbin_cmd_ov  ERROR_VARIABLE dumpbin_cmd_ev RESULT_VARIABLE retcode)
   if(retcode)
+    if(${item} MATCHES "System32")
+      # 32 bit cmake might run within WOW64, which automatically mangles the path to System32
+      # dumpbin, which is x86_64 in this case will run with the unmangled path and therefore has to look for
+      # the 32 bit libraries in SysWOW64 instead of System32
+      string(REPLACE "System32" "SysWOW64" item ${item})
+      execute_process( COMMAND ${dumpbin_cmd}  /dependents ${item} OUTPUT_VARIABLE dumpbin_cmd_ov  ERROR_VARIABLE dumpbin_cmd_ev RESULT_VARIABLE retcode)
+    endif(${item} MATCHES "System32")
+  endif(retcode)
+  if(retcode)
     MESSAGE( "dumpbin output: '${dumpbin_cmd_ov}'")
     MESSAGE( "dumpbin error output: '${dumpbin_cmd_ev}'")
     MESSAGE(FATAL_ERROR "dumpbin stopped with return code: '${retcode}'")
@@ -747,7 +756,7 @@ function(is_system_lib item system_var)
   string(REGEX REPLACE "\\\\" "/" sysroot "${sysroot}")
   string(TOLOWER "$ENV{windir}" windir)
   string(REGEX REPLACE "\\\\" "/" windir "${windir}")
-  if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)")
+  if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)" AND NOT lower MATCHES "python.*dll")
     set(${system_var}  1 PARENT_SCOPE)
   else()
     set(${system_var}  0 PARENT_SCOPE)
@@ -779,10 +788,30 @@ function(copy_python include_path version new_binary_path)
   get_filename_component(python_root_dir ${real_python_include_path}/.. REALPATH) 
   file(GLOB  lib_files "${python_root_dir}/Lib/*")
   file(COPY ${lib_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version})
+  file(GLOB  dll_files "${python_root_dir}/DLLs/*")
+  file(COPY ${dll_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version})
   file(GLOB  py_config_files "${include_path}/pyconfig*.h")
   file(COPY ${py_config_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/python${version})
   file(COPY ${python_root_dir}/python.exe DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
   set(${new_binary_path} "${CMAKE_INSTALL_PREFIX}/bin/python.exe" PARENT_SCOPE)
+  
+  # copy msvc90 CRT for python
+  get_filename_component(msvc90_dir "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0;InstallDir]" ABSOLUTE)
+  get_filename_component(msvc90_express_dir "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\9.0;InstallDir]" ABSOLUTE)
+  find_path(msvc_redist_dir NAMES x86/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest
+            PATHS
+            "${msvc90_dir}/../../VC/redist"
+            "${msvc90_express_dir}/../../VC/redist"
+            "C:/Program Files/Microsoft Visual Studio 9.0/VC/redist"
+            "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist"
+    )
+  set(msvc90_crt_dir "${msvc_redist_dir}/x86/Microsoft.VC90.CRT")
+  file(COPY "${msvc90_crt_dir}/Microsoft.VC90.CRT.manifest"
+            "${msvc90_crt_dir}/msvcm90.dll"
+            "${msvc90_crt_dir}/msvcp90.dll"
+            "${msvc90_crt_dir}/msvcr90.dll"
+       DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+
 endfunction(copy_python)
 
 #=============================================================================
