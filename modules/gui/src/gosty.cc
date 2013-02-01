@@ -225,6 +225,9 @@ public:
 
 }
 
+#ifdef _MSC_VER
+  #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+#endif
 // initialise gosty - the graphical open structure interpreter
 int main(int argc, char** argv)
 {
