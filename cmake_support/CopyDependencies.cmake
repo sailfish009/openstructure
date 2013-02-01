@@ -992,14 +992,6 @@ function(copy_python include_path version new_binary_path)
 endfunction(copy_python)
 
 
-
-else(APPLE)
-  MESSAGE("Unknown platform, deployment will not work.")
-endif(APPLE)
-
-
-
-
 #=============================================================================
 # function remove_rpath (Linux)
 #=============================================================================
