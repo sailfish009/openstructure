@@ -20,7 +20,7 @@
 /*
  * Author Valerio Mariani
  */
-#define BOOST_TEST_MODULE ost_mol_alg
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
 
