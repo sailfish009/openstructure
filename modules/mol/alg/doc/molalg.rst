@@ -276,7 +276,7 @@ The following function detects steric clashes in atomic structures. Two atoms ar
     :param clash_distance: minimum clashing distance (in Angstroms)
     :param tolerance: tolerance threshold (in Angstroms)
 
-  .. method GetClashingDistance()
+  .. method:: GetClashingDistance()
 
      Recovers a reference distance and a tolerance threshold from the list
 
@@ -284,6 +284,15 @@ The following function detects steric clashes in atomic structures. Two atoms ar
     :param ele2: string containing the second element's name 
 
     :returns: a tuple containing the minimum clashing distance and the tolerance threshold
+
+  .. method:: GetAdjustedClashingDistance()
+
+     Recovers a reference distance from the list, already adjusted by the tolerance threshold
+
+    :param ele1: string containing the first element's name
+    :param ele2: string containing the second element's name
+
+    :returns: the adjusted minimum clashing distance
 
   .. method::  GetMaxAdjustedDistance()
  

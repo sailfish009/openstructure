@@ -19,12 +19,12 @@
 
 #include <ost/geom/geom.hh>
 
-#include "helper.hh"
-using namespace geom;
-
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
+
+#include "helper.hh"
+using namespace geom;
 
 BOOST_AUTO_TEST_SUITE( geom );
 
@@ -51,15 +51,6 @@ BOOST_AUTO_TEST_CASE(init_mat2)
   // assignement op
   m1=m4;
   BOOST_CHECK(match(m1,m4(0,0),m4(0,1),m4(1,0),m4(1,1)));
-}
-
-
-
-BOOST_AUTO_TEST_CASE(access_mat2)
-{
-  Mat2 m;
-  BOOST_CHECK_THROW( m(2,2)=1.0, std::out_of_range);
-  BOOST_CHECK_THROW( m(2,2), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

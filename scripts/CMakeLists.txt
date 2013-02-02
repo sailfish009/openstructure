@@ -18,7 +18,6 @@ if (NOT ENABLE_STATIC)
            TARGET ost_scripts)
     script(NAME ost.bat INPUT ost.bat.in SUBSTITUTE ${SUBST_DICT}
            TARGET ost_scripts)
-    script(NAME gipltng.bat INPUT gipltng.bat.in SUBSTITUTE ${SUBST_DICT})
   else()
     script(NAME ost_config INPUT ost_config.in SUBSTITUTE ${SUBST_DICT}
            TARGET ost_scripts OUTPUT_DIR ${LIBEXEC_PATH})
@@ -31,11 +30,11 @@ if (NOT ENABLE_STATIC)
   endif()
 
   set(INIT_SCRIPTS 
-    init_cl.py
+    ost_startup.py
   )
-  set(SPD "${LIB_DIR}/python${PYTHON_VERSION}/site-packages")
+  set(SPD "${LIB_DIR}/python${PYTHON_VERSION}/site-packages/ost")
   if (ENABLE_GUI)
-    list(APPEND INIT_SCRIPTS init.py)
+    list(APPEND INIT_SCRIPTS dng_startup.py)
   endif()
   copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/${SPD}" 
                   "${INIT_SCRIPTS}" "python init scripts" ost_scripts)

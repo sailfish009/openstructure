@@ -383,16 +383,18 @@ geom::Vec3 ChainView::GetCenterOfAtoms() const
 {
   this->CheckValidity();
   geom::Vec3 center;
-  if(this->GetAtomCount() > 0) {
+  if(this->HasAtoms()) {
+    int atom_count = 0;
     ResidueViewList::const_iterator i;
     for (i=data_->residues.begin(); i!=data_->residues.end(); ++i) {
       ResidueView r=*i;
       for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
            e2=r.GetAtomList().end(); j!=e2; ++j) {
         center+=j->GetPos();
+        atom_count+=1;
       }
     }
-    center/=this->GetAtomCount();
+    center/=atom_count;
   }
   return center;
 }
@@ -402,7 +404,7 @@ geom::Vec3 ChainView::GetCenterOfMass() const
   this->CheckValidity();
   geom::Vec3 center;
   Real mass = this->GetMass();
-  if(this->GetAtomCount() > 0 && mass > 0) {
+  if(this->HasAtoms() && mass > 0) {
     ResidueViewList::const_iterator i;
     for (i=data_->residues.begin(); i!=data_->residues.end(); ++i) {
       ResidueView r=*i;
@@ -451,5 +453,18 @@ EntityView ChainView::Select(const String& q, QueryFlags flags) const {
   }
   else return this->GetEntity().Select(Query("cname='"+Impl()->GetName()+"'"), flags);
 }
+
+
+bool ChainView::HasAtoms() const {
+  this->CheckValidity();  
+  for (ResidueViewList::const_iterator it=data_->residues.begin(), 
+       e=data_->residues.end(); it!=e; ++it) {
+    if ((*it).HasAtoms()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 }} // ns
 

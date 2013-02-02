@@ -29,12 +29,12 @@
 namespace ost { namespace img { namespace alg {
 
 FractionalShift::FractionalShift(Real sx, Real sy, Real sz):
-  ModIPAlgorithm("FractionalShift"),
+  ConstModIPAlgorithm("FractionalShift"),
   shift_(sx,sy,sz)
 {
 }
 FractionalShift::FractionalShift(const Vec3& v):
-  ModIPAlgorithm("FractionalShift"),
+  ConstModIPAlgorithm("FractionalShift"),
   shift_(v)
 {
 }
@@ -54,7 +54,7 @@ Vec3 FractionalShift::GetShift() const
   return shift_;
 }
 
-void FractionalShift::Visit(ImageHandle& ih)
+void FractionalShift::Visit(ImageHandle& ih) const
 {  
   Vec3 ao=ih.GetAbsoluteOrigin();
 

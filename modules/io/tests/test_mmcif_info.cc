@@ -17,13 +17,13 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <ost/io/io_exception.hh>
-#include <ost/io/mol/mmcif_info.hh>
-
-#define BOOST_AUTO_TEST_DYN_LINK
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+
+#include <ost/io/io_exception.hh>
+#include <ost/io/mol/mmcif_info.hh>
 
 using namespace ost;
 using namespace ost::io;
@@ -187,6 +187,31 @@ BOOST_AUTO_TEST_CASE(mmcif_info_structdetails)
   BOOST_MESSAGE("  done.");
 }
 
+BOOST_AUTO_TEST_CASE(mmcif_info_revisions)
+{
+  BOOST_MESSAGE("  Running mmcif_info_revisions tests...");
+
+  MMCifInfoRevisions rev = MMCifInfoRevisions();
+
+  BOOST_CHECK(rev.GetDateOriginal() == "?");
+
+  rev.SetDateOriginal("2012-05-04");
+  rev.AddRevision(1, "2012-05-04", "in preparation");
+  rev.AddRevision(2, "2012-05-05", "full release");
+
+  BOOST_CHECK(rev.GetSize() == 2);
+  BOOST_CHECK(rev.GetDateOriginal() == "2012-05-04");
+  BOOST_CHECK(rev.GetDate(0) == "2012-05-04");
+  BOOST_CHECK(rev.GetNum(0) == 1);
+  BOOST_CHECK(rev.GetStatus(0) == "in preparation");
+  BOOST_CHECK(rev.GetDate(1) == rev.GetLastDate());
+  BOOST_CHECK(rev.GetFirstRelease() == 2);
+  BOOST_CHECK(rev.GetNum(1) == 2);
+  BOOST_CHECK(rev.GetStatus(1) == "full release");  
+
+  BOOST_MESSAGE("  done.");
+}
+
 BOOST_AUTO_TEST_CASE(mmcif_info)
 {
   BOOST_MESSAGE("  Running mmcif_info tests...");
@@ -212,6 +237,8 @@ BOOST_AUTO_TEST_CASE(mmcif_info)
   BOOST_CHECK_THROW(info.AddPDBMMCifChainTr("A", "B"), IOException);
   BOOST_CHECK("B" == info.GetPDBMMCifChainTr("A"));
   BOOST_CHECK("" == info.GetPDBMMCifChainTr("C"));
+
+  BOOST_CHECK(info.GetRevisions().GetSize() == 0);
 
   BOOST_MESSAGE("  done.");
 }

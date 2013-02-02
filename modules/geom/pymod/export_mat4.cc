@@ -26,8 +26,17 @@ using namespace geom;
 
 
 
-const Real Mat4_getitem(const geom::Mat4& m, tuple i) {return m(extract<int> (i[0]),extract<int> (i[1]));}
-void Mat4_setitem(geom::Mat4& m,const  tuple i,const  Real val) {m(extract<int> (i[0]),extract<int> (i[1]))=val;}
+const Real Mat4_getitem(const geom::Mat4& m, tuple i) {
+  int a = extract<int> (i[0]);
+  int b = extract<int> (i[1]);
+  return m.At(a, b);
+}
+
+void Mat4_setitem(geom::Mat4& m,const  tuple i,const  Real val) {
+  int a = extract<int> (i[0]);
+  int b = extract<int> (i[1]);
+  m.At(a, b) = val;
+}
 
 Mat3 Mat4_getslice(const geom::Mat4& m, slice s) {
   tuple start=extract<tuple> (s.start());
@@ -38,7 +47,9 @@ Mat3 Mat4_getslice(const geom::Mat4& m, slice s) {
   int end1=extract<int> (end[1]);
   if(end0-start0==1 && end1-start1==1) throw GeomException("Invalid slice: Only Mat3 slices allowed");
   if(end0-start0!=2 || end1-start1!=2) throw GeomException("Invalid slice");
-  return Mat3(m(start0,start1),m(start0,start1+1),m(start0,start1+2),m(start0+1,start1),m(start0+1,start1+1),m(start0+1,start1+2),m(start0+2,start1),m(start0+2,start1+1),m(start0+2,start1+2));
+  return Mat3(m.At(start0+0,start1), m.At(start0+0,start1+1), m.At(start0+0,start1+2),
+              m.At(start0+1,start1), m.At(start0+1,start1+1), m.At(start0+1,start1+2),
+              m.At(start0+2,start1), m.At(start0+2,start1+1), m.At(start0+2,start1+2));
 }
 void Mat4_setslice2(geom::Mat4& m,const  slice s,const  Mat2& m2)
 {
@@ -49,10 +60,10 @@ void Mat4_setslice2(geom::Mat4& m,const  slice s,const  Mat2& m2)
   int end0=extract<int> (end[0]);
   int end1=extract<int> (end[1]);
   if(end0-start0!=1 || end1-start1!=1) throw GeomException("Invalid slice");
-  m(start0,start1)=m2(0,0);
-  m(start0,start1+1)=m2(0,1);
-  m(start0+1,start1)=m2(1,0);
-  m(start0+1,start1+1)=m2(1,1);
+  m.At(start0,start1)=m2(0,0);
+  m.At(start0,start1+1)=m2(0,1);
+  m.At(start0+1,start1)=m2(1,0);
+  m.At(start0+1,start1+1)=m2(1,1);
 }
 void Mat4_setslice3(geom::Mat4& m,const  slice s,const  Mat3& m2)
 {
@@ -63,15 +74,15 @@ void Mat4_setslice3(geom::Mat4& m,const  slice s,const  Mat3& m2)
   int end0=extract<int> (end[0]);
   int end1=extract<int> (end[1]);
   if(end0-start0!=2 || end1-start1!=2) throw GeomException("Invalid slice");
-  m(start0,start1)=m2(0,0);
-  m(start0,start1+1)=m2(0,1);
-  m(start0,start1+2)=m2(0,2);
-  m(start0+1,start1)=m2(1,0);
-  m(start0+1,start1+1)=m2(1,1);
-  m(start0+1,start1+2)=m2(1,2);
-  m(start0+2,start1)=m2(2,0);
-  m(start0+2,start1+1)=m2(2,1);
-  m(start0+2,start1+2)=m2(2,2);
+  m.At(start0,start1)=m2(0,0);
+  m.At(start0,start1+1)=m2(0,1);
+  m.At(start0,start1+2)=m2(0,2);
+  m.At(start0+1,start1)=m2(1,0);
+  m.At(start0+1,start1+1)=m2(1,1);
+  m.At(start0+1,start1+2)=m2(1,2);
+  m.At(start0+2,start1)=m2(2,0);
+  m.At(start0+2,start1+1)=m2(2,1);
+  m.At(start0+2,start1+2)=m2(2,2);
 }
 
 String mat4_repr(const geom::Mat4& m) {

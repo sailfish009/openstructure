@@ -151,6 +151,7 @@ public:
   const geom::Transform& GetTransform() const {return transform_;}
   bool HasTransform() const {return has_transform_;}
   void ClearTransform();
+  void FixTransform();
 
   void AttachObserver(const EntityObserverPtr& o);
   void DetachObserver(const EntityObserverPtr& o);
@@ -250,6 +251,8 @@ public:
   void ReorderAllResidues();
 
   void RenumberAllResidues(int start, bool keep_spacing);
+
+  void RenumberChain(const String& name, int start, bool keep_spacing);
 
 private:
   void DoCopy(EntityImplPtr dest);

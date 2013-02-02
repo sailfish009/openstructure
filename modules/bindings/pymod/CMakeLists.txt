@@ -10,5 +10,6 @@ utils.py
 naccess.py
 blast.py
 cadscore.py
+kclust.py
 )
 pymod(NAME bindings PY ${OST_BINDINGS})

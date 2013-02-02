@@ -28,11 +28,16 @@ using namespace ost::gfx;
 
 void export_Exporter()
 {
-  class_<Exporter, boost::noncopyable>("Exporter", no_init);
+  class_<Exporter, boost::noncopyable>("Exporter", no_init)
+    .add_property("scale",&Exporter::GetScale,&Exporter::SetScale)
+    .add_property("to_origin",&Exporter::GetToOrigin,&Exporter::SetToOrigin)
+  ;
 
-  class_<GostExporter, bases<Exporter>, boost::noncopyable>("GostExporter", init<const std::string&>())
+  // internal class, factory function in __init__.py
+  class_<GostExporter, bases<Exporter>, boost::noncopyable>("GostExporter_", init<const std::string&>())
     ;
 
-  class_<ColladaExporter, bases<Exporter>, boost::noncopyable>("ColladaExporter", init<const std::string&, optional<float> >())
+  // internal class, factory function in __init__.py
+  class_<ColladaExporter, bases<Exporter>, boost::noncopyable>("ColladaExporter_", init<const std::string&>())
     ;
 }

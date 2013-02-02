@@ -329,32 +329,4 @@ ImageList& ImageList::operator/=(const ConstImageHandle& h)
     }
     return *this;
 }
-ImageList& ImageList::operator+=(const Function& h)
-{
-    for(iterator it=begin();it!=end();++it){
-        (*it)+=h;    
-    }
-    return *this;
-}
-ImageList& ImageList::operator-=(const Function& h)
-{
-    for(iterator it=begin();it!=end();++it){
-        (*it)-=h;    
-    }
-    return *this;
-}
-ImageList& ImageList::operator*=(const Function& h)
-{
-    for(iterator it=begin();it!=end();++it){
-        (*it)*=h;    
-    }
-    return *this;
-}
-ImageList& ImageList::operator/=(const Function& h)
-{
-    for(iterator it=begin();it!=end();++it){
-        (*it)/=h;    
-    }
-    return *this;
-}
 }}//ns

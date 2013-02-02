@@ -68,8 +68,6 @@ class DLLEXPORT_IMG_ALG StatBase
   template <typename T, class D>
   void VisitState(const ImageStateImpl<T,D>& isi);
 
-  void VisitFunction(const Function& f);
-
   static String GetAlgorithmName() {return "Stat";}
 
   // other interface

@@ -1,4 +1,5 @@
 import unittest
+import ost
 from ost import *
 
 class TestMMCifInfo(unittest.TestCase):
@@ -164,6 +165,21 @@ class TestMMCifInfo(unittest.TestCase):
                       415)
     self.assertEquals(len(pdb_seqres_ent.GetChainList()[9].GetResidueList()),
                       414)
+
+  def test_mmcifinfo_biounit_pdbize_transformation(self):
+    ent, seqres, info = io.LoadMMCIF("testfiles/mmcif/3hqv.cif.gz",
+                                     seqres=True,
+                                     info=True)
+    pdb_ent, t = info.GetBioUnits()[0].PDBize(ent, transformation=True)
+    self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[0], -915.759, 2)
+    self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[1], -952.345, 2)
+    self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[2], 3221.75, 2)
+    self.assertEquals(geom.Equal(t,
+                                 geom.Mat4(1,0,0,-920.462,
+                                           0,1,0,-966.654,
+                                           0,0,1,1703,
+                                           0,0,0,1),
+                                 epsilon=0.01), True)
 
   def test_mmcifinfo_structdetails(self):
     d = io.MMCifInfoStructDetails()

@@ -36,15 +36,15 @@ void (PDBWriter::*write_b)(const mol::EntityView&)=&PDBWriter::Write;
 void export_pdb_io()
 {
   class_<IOProfile>("IOProfile",
-         init<String,bool,bool,bool,bool,bool,bool,
+         init<String,bool,bool,bool,bool,bool,
               conop::ProcessorPtr>((arg("dialect")="PDB",
                                     arg("quack_mode")=false,
                                     arg("fault_tolerant")=false,
                                     arg("join_spread_atom_records")=false,
                                     arg("no_hetatms")=false,
                                     arg("calpha_only")=false,
-                                    arg("bond_feasibility_check")=true,
                                     arg("processor")=conop::ProcessorPtr())))
+    .def(init<const IOProfile&>())
     .def_readwrite("dialect", &IOProfile::dialect)
     .def_readwrite("fault_tolerant", &IOProfile::fault_tolerant)
     .def_readwrite("quack_mode", &IOProfile::quack_mode)

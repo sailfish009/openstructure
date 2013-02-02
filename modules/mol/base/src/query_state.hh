@@ -82,6 +82,7 @@ private:
   bool do_within(const geom::Vec3& pos, const impl::WithinParam& p, 
                  impl::CompOP op);
   std::vector<boost::logic::tribool>   s_;
+  std::vector<boost::logic::tribool>   value_stack_;
   boost::shared_ptr<LazilyBoundData>   r_;
   const impl::QueryImpl&               q_;
 };

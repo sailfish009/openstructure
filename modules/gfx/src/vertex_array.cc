@@ -58,21 +58,6 @@ static const int VA_AMBIENT_BUFFER=4;
 static const int VA_NORMAL_BUFFER=5;
 static const int VA_COLOR_BUFFER=6;
 
-IndexedVertexArray::Entry::Entry()
-{
-  v[0]=0.0; v[1]=0.0; v[2]=0.0;
-  n[0]=0.0; n[1]=0.0; n[2]=1.0;
-  c[0]=0.0; c[1]=0.0; c[2]=0.0; c[3]=0.0;
-  t[0]=0.0; t[1]=0.0;
-}
-
-  IndexedVertexArray::Entry::Entry(const Vec3& vv, const Vec3& nn, const Color& cc, const geom::Vec2& tt)
-{
-  v[0]=vv[0]; v[1]=vv[1]; v[2]=vv[2];
-  n[0]=nn[0]; n[1]=nn[1]; n[2]=nn[2];
-  c[0]=cc[0]; c[1]=cc[1]; c[2]=cc[2]; c[3]=cc[3];
-  t[0]=tt[0]; t[1]=tt[1];
-}
 
 
 IndexedVertexArray::IndexedVertexArray()
@@ -141,15 +126,6 @@ void IndexedVertexArray::SetOutlineMaterial(const Material& m)
 void IndexedVertexArray::SetOutlineExpandFactor(float f) { outline_exp_factor_=f;}
 void IndexedVertexArray::SetOutlineExpandColor(const Color& c) {outline_exp_color_=c;}
 
-VertexID IndexedVertexArray::Add(const Vec3& vert, 
-                                 const Vec3& norm,
-                                 const Color& col,
-                                 const Vec2& texc) 
-{
-  dirty_=true;
-  entry_list_.push_back(Entry(vert,norm,col,texc));
-  return entry_list_.size()-1;
-}
 
 unsigned int IndexedVertexArray::GetVertexCount() const
 {
@@ -222,6 +198,7 @@ void IndexedVertexArray::AddSphere(const SpherePrim& prim, unsigned int detail)
 
   // use prebuild list of vertices which define given unit sphere
   std::vector<VertexID> vid_table;
+  vid_table.reserve(se.vlist.size());
   for(std::vector<Vec3>::const_iterator it=se.vlist.begin();it!=se.vlist.end();++it) {
     VertexID id = Add(prim.radius*(*it)+prim.position,(*it),prim.color);
     vid_table.push_back(id);
@@ -315,82 +292,20 @@ void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int deta
   }
 }
 
-Vec3 IndexedVertexArray::GetVert(VertexID id) const
-{
-  Vec3 nrvo;
-  if(id>=entry_list_.size()) return nrvo;
-  nrvo = Vec3(entry_list_[id].v);
-  return nrvo;
-} 
-
-void IndexedVertexArray::SetVert(VertexID id, const Vec3& v) 
-{
-  if(id>=entry_list_.size()) return;
-  entry_list_[id].v[0]=v[0];
-  entry_list_[id].v[1]=v[1];
-  entry_list_[id].v[2]=v[2];
-}
-
-Vec3 IndexedVertexArray::GetNormal(VertexID id) const
-{
-  Vec3 nrvo;
-  if(id>=entry_list_.size()) return nrvo;
-  nrvo = Vec3(entry_list_[id].n);
-  return nrvo;
-} 
-
-void IndexedVertexArray::SetNormal(VertexID id, const Vec3& n) 
-{
-  if(id>=entry_list_.size()) return;
-  entry_list_[id].n[0]=n[0];
-  entry_list_[id].n[1]=n[1];
-  entry_list_[id].n[2]=n[2];
-}
-
-Color IndexedVertexArray::GetColor(VertexID id) const
-{
-  Color nrvo;
-  if(id>=entry_list_.size()) return nrvo;
-  nrvo = Color(entry_list_[id].c[0],
-               entry_list_[id].c[1],
-               entry_list_[id].c[2],
-               entry_list_[id].c[3]);
-  return nrvo;
-} 
-
-void IndexedVertexArray::SetColor(VertexID id, const Color& c) 
-{
-  if(id>=entry_list_.size()) return;
-  entry_list_[id].c[0]=c[0];
-  entry_list_[id].c[1]=c[1];
-  entry_list_[id].c[2]=c[2];
-  entry_list_[id].c[3]=c[3];
-}
-
-Vec2 IndexedVertexArray::GetTexCoord(VertexID id) const
-{
-  Vec2 nrvo;
-  if(id>=entry_list_.size()) return nrvo;
-  nrvo = Vec2(entry_list_[id].t);
-  return nrvo;
-} 
-
-void IndexedVertexArray::SetTexCoord(VertexID id, const Vec2& t) 
-{
-  if(id>=entry_list_.size()) return;
-  entry_list_[id].t[0]=t[0];
-  entry_list_[id].t[1]=t[1];
-}
-
 void IndexedVertexArray::SetOpacity(float o)
 {
   o=std::max(0.0f,std::min(1.0f,o));
+  if (std::abs(opacity_-o)<1e-6) {
+    opacity_=o;
+    return;
+  }
   // this should really just set a value in the shader... 
   // but we need to support the fixed function pipeline as well
   for(EntryList::iterator it=entry_list_.begin();it!=entry_list_.end();++it) {
     it->c[3]=o;
   }
   opacity_=o;
+  LOG_ERROR("new opacity (slow)" << opacity_);
   FlagRefresh();
 }
 
@@ -431,7 +346,9 @@ void IndexedVertexArray::RenderGL()
   
   glPushAttrib(GL_ALL_ATTRIB_BITS);
   glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
-  
+
+  set_clip_offset(clip_offset_);
+
   if(use_tex_) {
     glEnable(GL_TEXTURE_2D);
   } else {
@@ -493,7 +410,7 @@ void IndexedVertexArray::RenderGL()
     } else {
       glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
     }
-    if(cull_face_ && !solid_) {
+    if(cull_face_ && !solid_ && clip_offset_<=0.0) {
       glEnable(GL_CULL_FACE);
     } else { 
       glDisable(GL_CULL_FACE); 
@@ -537,6 +454,7 @@ void IndexedVertexArray::RenderGL()
       glUniform4f(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"color"),
                   outline_exp_color_[0],outline_exp_color_[1],
                   outline_exp_color_[2],opacity_);
+      set_clip_offset(clip_offset_);
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       draw_ltq(use_buff);
 
@@ -699,7 +617,9 @@ void IndexedVertexArray::Reset()
   outline_exp_factor_=0.1;
   outline_exp_color_=Color(0,0,0);
   solid_=false;
+  #undef RGB
   solid_color_=RGB(1,1,1);
+  clip_offset_=0.0;
   draw_normals_=false;
   use_tex_=false;
 }
@@ -1098,6 +1018,7 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   outline_exp_color_=va.outline_exp_color_;
   solid_=va.solid_;
   solid_color_=va.solid_color_;
+  clip_offset_=va.clip_offset_;
   draw_normals_=va.draw_normals_;
   use_tex_=va.use_tex_;
 }
@@ -1253,10 +1174,12 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
     float aspect=Scene::Instance().GetAspect();
     float rh=2.0*fabs(tan(fov)*znear);
     float rw=rh*aspect;
-    float rz=-znear-0.1;
+    float rz=-(znear+clip_offset_)-0.05;
 
     glDisable(GL_LIGHTING);
-  
+
+    set_clip_offset(0.0);
+
     glBegin(GL_TRIANGLE_STRIP);
     glColor3fv(solid_color_);
     glNormal3f(0,0,1);
@@ -1265,6 +1188,9 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
     glVertex3f(-rw,rh,rz);
     glVertex3f(rw,rh,rz);
     glEnd();
+
+    set_clip_offset(clip_offset_);
+
     glDisable(GL_STENCIL_TEST);
     glPopMatrix();
   }
@@ -1402,6 +1328,7 @@ void IndexedVertexArray::draw_aalines()
   float hwr = 0.5*w+r;
 
   AALineList line_list;
+  line_list.reserve(line_index_list_.size() >> 1);
   for(unsigned int i=0;i<line_index_list_.size();i+=2) {
     Entry& ve0 = entry_list_[line_index_list_[i]];
     Entry& ve1 = entry_list_[line_index_list_[i+1]];
@@ -1484,6 +1411,18 @@ geom::AlignedCuboid IndexedVertexArray::GetBoundingBox() const
     }
     return geom::AlignedCuboid(minc-1.0,maxc+1.0);
   }
+}
+
+void IndexedVertexArray::set_clip_offset(float o)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  float n=Scene::Instance().GetNear();
+  float f=Scene::Instance().GetFar();
+  float z=n+o;
+  float t=(f*(-n+o)+n*(n+o))/((f-n)*(n+o));
+  t=(t+1.0)*0.5;
+  glUniform1f(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"clip_offset"),t);
+#endif
 }
 
 }} // ns

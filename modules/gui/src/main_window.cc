@@ -39,11 +39,28 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags):
 
 void MainWindow::AddDockWidget(QWidget* w, const QString& name, bool shown, int area)
 {
+  Qt::DockWidgetArea dock_area;
+  switch(area){
+    case 1:
+      dock_area=Qt::LeftDockWidgetArea;
+      break;
+    case 2:
+      dock_area=Qt::RightDockWidgetArea;
+      break;
+    case 4:
+      dock_area=Qt::TopDockWidgetArea;
+      break;
+    case 8:
+      dock_area=Qt::BottomDockWidgetArea;
+      break;
+    default:
+      dock_area=Qt::RightDockWidgetArea;
+      break;
+  }
   DockWidget* dock = new DockWidget(name, this);
   dock->adjustSize();
-  dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
   dock->setWidget(w);
-  addDockWidget(area==0 ? Qt::RightDockWidgetArea : Qt::LeftDockWidgetArea, dock);
+  addDockWidget(dock_area, dock);
   dock_widget_map_[w]=dock;
   connect(dock,SIGNAL(OnClose(QDockWidget*)),this,SLOT(OnDockClose(QDockWidget*)));
   if(!shown) dock->hide();

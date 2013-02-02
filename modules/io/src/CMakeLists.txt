@@ -22,7 +22,9 @@ io_manager.cc
 convert.cc
 io_utils.cc
 )
-
+if (WIN32)
+ set(OST_IO_SOURCES ${OST_IO_SOURCES} zlib.cpp gzip.cpp)
+endif(WIN32)
 
 foreach(fname ${OST_IO_MOL_SOURCES})
   set(OST_IO_SOURCES ${OST_IO_SOURCES} mol/${fname})
@@ -61,10 +63,7 @@ module(NAME io SOURCES "${OST_IO_SOURCES}"
                ${OST_IO_SEQ_HEADERS} IN_DIR seq            
                ${OST_IO_HEADERS} 
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
-if (NOT WIN32)
-  # see note in modules/gui/src/CMakeLists.txt
-  target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})
-endif()
+target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})
 if (ENABLE_IMG)
   target_link_libraries(ost_io ${TIFF_LIBRARIES} ${PNG_LIBRARIES})
 endif()

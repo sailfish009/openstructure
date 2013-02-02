@@ -39,6 +39,10 @@
 #  include <ost/img/alg/stat.hh>
 #endif // OST_IMG_ENABLED
 
+#if OST_SHADER_SUPPORT_ENABLED
+#include "shader.hh"
+#endif
+
 namespace ost { namespace gfx {
 
 GfxObj::GfxObj(const String& name):
@@ -66,6 +70,9 @@ GfxObj::GfxObj(const String& name):
 #endif
   solid_(false),
   solid_color_(RGB(0.7,0.7,0.7)),
+  clip_flag_(false),
+  clip_plane_(),
+  clip_offset_(0.0),
   c_ops_(),
   labels_(),
   use_occlusion_(false)
@@ -102,6 +109,11 @@ void GfxObj::DeepSwap(GfxObj& go)
   std::swap(smoothf_,go.smoothf_);
   std::swap(outline_flag_,go.outline_flag_);
   std::swap(outline_mode_,go.outline_mode_);
+  std::swap(solid_,go.solid_);
+  std::swap(solid_color_,go.solid_color_);
+  std::swap(clip_flag_,go.clip_flag_);
+  std::swap(clip_plane_,go.clip_plane_);
+  std::swap(clip_offset_,go.clip_offset_);
   std::swap(c_ops_,go.c_ops_);
   std::swap(labels_,go.labels_);
   std::swap(use_occlusion_,go.use_occlusion_);
@@ -152,7 +164,27 @@ void GfxObj::RenderGL(RenderPass pass)
       only STANDARD_RENDER_PASS and GLOW_RENDER_PASS are
       passed down to the custom rendering routines
     */
-   
+  
+    if(clip_flag_) {
+#if OST_SHADER_SUPPORT_ENABLED && GL_VERSION_3_0
+      glEnable(GL_CLIP_DISTANCE0);
+      GLuint cp = Shader::Instance().GetCurrentProgram();
+      if(cp>0) {
+        glUniform1i(glGetUniformLocation(cp,"clip_flag"),1);
+        glUniform4f(glGetUniformLocation(cp,"clip_plane"),
+                   clip_plane_[0],clip_plane_[1],clip_plane_[2],clip_plane_[3]);
+      } else {
+        GLdouble eq[4];
+        for(size_t i=0;i<4;++i) eq[i]=clip_plane_[i];
+        glClipPlane(GL_CLIP_PLANE0,eq);
+      }
+#else
+      GLdouble eq[4];
+      for(size_t i=0;i<4;++i) eq[i]=clip_plane_[i];
+      glClipPlane(GL_CLIP_PLANE0,eq);
+#endif
+    }
+
     if(pass==DEPTH_RENDER_PASS) {
       render_depth_only();
     } else if(pass==TRANSPARENT_RENDER_PASS) {
@@ -179,6 +211,12 @@ void GfxObj::RenderGL(RenderPass pass)
     } else if(pass==OVERLAY_RENDER_PASS) {
       LOG_TRACE("drawing labels");
       render_labels();
+    }
+
+    if(clip_flag_) {
+#if OST_SHADER_SUPPORT_ENABLED && GL_VERSION_3_0
+      glDisable(GL_CLIP_DISTANCE0);
+#endif
     }
 
     glPopMatrix();    
@@ -393,6 +431,27 @@ void GfxObj::SetSolidColor(const Color& c)
   Scene::Instance().RequestRedraw();
 }
 
+void GfxObj::SetClip(bool f)
+{
+  clip_flag_=f;
+  // va_.SetClip(clip_flag_);
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetClipPlane(const geom::Vec4& p)
+{
+  clip_plane_=p;
+  // va_.SetSolidColor(solid_color_);
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetClipOffset(float f)
+{
+  clip_offset_=f;
+  va_.SetClipOffset(clip_offset_);
+  Scene::Instance().RequestRedraw();
+}
+
 void GfxObj::ColorBy(const mol::EntityView& ev, 
                       const String& prop,
                       const Gradient& g, float minv, float maxv)
@@ -487,6 +546,11 @@ void GfxObj::OnInput(const InputEvent& e)
       trans+=geom::Vec3(0.0, -fy*e.GetDelta(), 0.0)*rot;
     }
     transform_.SetTrans(trans);
+  } else if (e.GetCommand()==INPUT_COMMAND_TRANSZ) {
+    float currz=transform_.GetTrans()[2];
+    float delta=currz*pow(1.01f,-e.GetDelta())-currz;
+    transform_.ApplyZAxisTranslation(delta);
+    transformed=true;
   }
   if (transformed) {
     GfxObjP obj=dyn_cast<GfxObj>(this->shared_from_this());
@@ -630,7 +694,7 @@ void GfxObj::render_labels() const
 }
 
 void GfxObj::ReapplyColorOps(){
-  if(c_ops_.size()>0){
+  if(! c_ops_.empty()){
     GfxObjP o=dyn_cast<GfxObj>(shared_from_this());
     for(boost::ptr_vector<gfx::ColorOp>::iterator it=c_ops_.begin();
       it!=c_ops_.end();++it) {
@@ -656,6 +720,7 @@ void GfxObj::Debug(unsigned int flags)
 void GfxObj::render_depth_only()
 {
   glPushAttrib(GL_ALL_ATTRIB_BITS);
+  glPushClientAttrib(GL_ALL_ATTRIB_BITS);
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
@@ -671,6 +736,7 @@ void GfxObj::render_depth_only()
   CustomRenderGL(STANDARD_RENDER_PASS);
   CustomRenderGL(TRANSPARENT_RENDER_PASS);
   glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);      
+  glPopClientAttrib();
   glPopAttrib();
 }
 

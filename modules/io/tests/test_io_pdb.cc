@@ -16,6 +16,12 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+using boost::unit_test_framework::test_suite;
+
 #include <ost/test_utils/compare_files.hh>
 #include <ost/geom/vec_mat_predicates.hh>
 
@@ -31,11 +37,6 @@
 #include <ost/log.hh>
 
 #include <ost/io/io_exception.hh>
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
-using boost::unit_test_framework::test_suite;
 
 using namespace ost;
 using namespace ost::io;
@@ -924,8 +925,7 @@ BOOST_AUTO_TEST_CASE(charmm_rname)
 {
   {
     PDBWriter writer(String("testfiles/pdb/charmm_rname-out.pdb"),
-                     IOProfile("CHARMM", false, false,
-                               false, false, false, true));
+                     IOProfile("CHARMM", false, false, false, false, false));
 
     mol::EntityHandle ent=mol::CreateEntity();
     mol::XCSEditor edi=ent.EditXCS();
@@ -944,8 +944,7 @@ BOOST_AUTO_TEST_CASE(charmm_longcname)
 {
   {
     PDBWriter writer(String("testfiles/pdb/charmm_longcname-out.pdb"),
-                     IOProfile("CHARMM", false, false,
-                               false, false, false, true));
+                     IOProfile("CHARMM", false, false, false, false, false));
 
     mol::EntityHandle ent=mol::CreateEntity();
     mol::XCSEditor edi=ent.EditXCS();
@@ -964,8 +963,7 @@ BOOST_AUTO_TEST_CASE(write_charmm_ter)
 {
   {
     PDBWriter writer(String("testfiles/pdb/charmm_ter-out.pdb"),
-                     IOProfile("CHARMM", false, false,
-                               false, false, false, true));
+                     IOProfile("CHARMM", false, false, false, false, false));
 
     mol::EntityHandle ent=mol::CreateEntity();
     mol::XCSEditor edi=ent.EditXCS();
@@ -1031,6 +1029,24 @@ BOOST_AUTO_TEST_CASE(test_pqr_read_atom)
   BOOST_CHECK_EQUAL(a2.IsHetAtom(), false);
   BOOST_CHECK_CLOSE(a2.GetCharge(), Real(0.2507), Real(1e-4));
   BOOST_CHECK_CLOSE(a2.GetRadius(), Real(1.7503), Real(1e-4));
+}
+
+BOOST_AUTO_TEST_CASE(checks_for_atom_pos_overflow)
+{
+  std::stringstream out;
+  PDBWriter writer(out, IOProfile());
+  writer.SetIsPQR(true);
+
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor edi=ent.EditXCS();
+  mol::ChainHandle ch=edi.InsertChain("A");
+  mol::ResidueHandle r=edi.AppendResidue(ch, "GLY");
+
+  mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(0, -1000,0), "C");
+  
+  BOOST_CHECK_THROW(writer.Write(ent), IOException);
+  edi.SetAtomPos(a, geom::Vec3(10000,0,0));
+  BOOST_CHECK_THROW(writer.Write(ent), IOException);
 }
 
 BOOST_AUTO_TEST_CASE(test_pqr_write_atom)

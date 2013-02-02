@@ -24,7 +24,7 @@ if(${PROJECT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
   elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     include(linux/CMakeLists.txt) 
   elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    include(windows/CMakeLists.txt) 
+    include(win/CMakeLists.txt) 
   endif()
 
   INCLUDE(CPack) 

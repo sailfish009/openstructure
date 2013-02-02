@@ -279,6 +279,8 @@ public:
   bool HasTransform() const;
   /// \brief remove transform
   void ClearTransform();
+  /// \brief write transformed pos to orig, and the clear tf
+  void FixTransform();
 
   /// \brief get complete list of residues
   /// \sa #ResiduesBegin, #ResiduesEnd

@@ -295,6 +295,12 @@ void EntityHandle::ClearTransform()
   Impl()->ClearTransform();  
 }
 
+void EntityHandle::FixTransform()
+{
+  this->CheckValidity();
+  Impl()->FixTransform();  
+}
+
 ResidueHandle EntityHandle::FindResidue(const String& chain_name,
                                         const ResNum& residue) const {
   this->CheckValidity();

@@ -19,6 +19,7 @@
 #include <ost/log.hh>
 #include <ost/mol/mol.hh>
 #include <sstream>
+#include <iomanip>
 #include <math.h>
 #include "filter_clashes.hh"
 #include <ost/units.hh>
@@ -105,6 +106,12 @@ std::pair<Real,Real> ClashingDistances::GetClashingDistance(const String& ele1,c
       throw Error(serr.str());
   }    
   return find_ci->second;
+}
+
+Real ClashingDistances::GetAdjustedClashingDistance(const String& ele1,const String& ele2) const
+{
+  std::pair <Real,Real> clash_dist = GetClashingDistance(ele1,ele2);
+  return clash_dist.first-clash_dist.second;
 }
 
 void ClashingDistances::PrintAllDistances() const
@@ -460,6 +467,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
     
     if (remove_bb) {
       LOG_INFO("ACTION: removing whole residue " << res);
+      res.SetBoolProp("stereo_chemical_violation_backbone",true);
       continue;
     }
     if (remove_sc) {
@@ -472,13 +480,14 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
          filtered.AddAtom(atom);
        }
       }
+      res.SetBoolProp("stereo_chemical_violation_sidechain",true);
       continue;
     }
     filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
   }
   Real avg_zscore_bonds = running_sum_zscore_bonds/static_cast<float>(bond_count);
   Real avg_zscore_angles = running_sum_zscore_angles/static_cast<float>(angle_count);
-  LOG_SCRIPT("Average Z-Score for bond lengths: " << avg_zscore_bonds);
+  LOG_SCRIPT("Average Z-Score for bond lengths: " << std::fixed << std::setprecision(5) << avg_zscore_bonds);
   LOG_SCRIPT("Bonds outside of tolerance range: " << bad_bond_count << " out of " << bond_count);
   LOG_SCRIPT("Bond\tAvg Length\tAvg zscore\tNum Bonds")
 
@@ -489,9 +498,9 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
     Real sum_bond_zscore=bond_zscore_sum[key];
     Real avg_length=sum_bond_length/static_cast<Real>(counter);
     Real avg_zscore=sum_bond_zscore/static_cast<Real>(counter);
-    LOG_SCRIPT(key << "\t" << avg_length << "\t" << avg_zscore << "\t" << counter);
+    LOG_SCRIPT(key << "\t" << std::fixed << std::setprecision(5) << std::left << std::setw(10) << avg_length << "\t" << std::left << std::setw(10) << avg_zscore << "\t" << counter);
   }
-  LOG_SCRIPT("Average Z-Score angle widths: " << avg_zscore_angles);
+  LOG_SCRIPT("Average Z-Score angle widths: " << std::fixed << std::setprecision(5) << avg_zscore_angles);
   LOG_SCRIPT("Angles outside of tolerance range: " << bad_angle_count << " out of " << angle_count);
   return filtered;
 }
@@ -575,6 +584,7 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
     
     if (remove_bb) {
       LOG_VERBOSE("ACTION: removing whole residue " << res);
+      res.SetBoolProp("steric_clash",true);
       continue;
     }
     if (remove_sc) {
@@ -587,6 +597,7 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
          filtered.AddAtom(atom);
        }
       }
+      res.SetBoolProp("steric_clash",true);
       continue;
     }
     filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
@@ -596,7 +607,7 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
     average_offset = average_offset_sum / static_cast<Real>(bad_distance_count);
   }
   LOG_SCRIPT(bad_distance_count << " non-bonded short-range distances shorter than tolerance distance");
-  LOG_SCRIPT("Distances shorter than tolerance are on average shorter by: " << average_offset);
+  LOG_SCRIPT("Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << average_offset);
   return filtered;
 }
 

@@ -38,7 +38,7 @@ void SeqSecStrPainter::Paint(QPainter* painter, const QStyleOptionViewItem& opti
   painter->setPen(QPen(Qt::lightGray));
   const QVarLengthArray<mol::SecStructure>& sec_str = index.data(Qt::UserRole).value<QVarLengthArray<mol::SecStructure> >();
   int column = index.column()-1;
-  if(sec_str.size()>0 && column < sec_str.size()){
+  if(! sec_str.isEmpty() && column < sec_str.size()){
     QSize size = index.data(Qt::UserRole+1).toSize();
     mol::SecStructure sec_element = sec_str[column];
 

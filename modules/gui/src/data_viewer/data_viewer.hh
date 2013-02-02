@@ -67,7 +67,10 @@ public:
   virtual ~DataViewer();
 
   //! set new image or function to display
-  void SetData(const Data& data);
+  void SetData(const ImageHandle& data);
+
+  //! get the current displayed image
+  const ImageHandle& GetData() const;
 
   //! retrieve used normalizer
   NormalizerPtr GetNormalizer() const;
@@ -151,7 +154,7 @@ public slots:
 
  protected:
   //! initialize with data to view, plus a name
-  DataViewer(QWidget* p, const Data& data, const QString& name="");
+  DataViewer(QWidget* p, const ImageHandle& data, const QString& name="");
 
  private:
   // inhibit coping and assignement
@@ -173,7 +176,7 @@ public slots:
   QLabel* slablabel_;
   QPoint lastmouse_;
 
-  void build(const Data& data);
+  void build(const ImageHandle& data);
 
   void build_menu();
 };

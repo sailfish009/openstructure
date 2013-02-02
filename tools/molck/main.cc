@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
     }
     if (write_to_file) {
       fs::path input_file_path(files[i]);
-      fs::path input_filename = input_file_path.stem();
+      fs::path input_filename = BFPathStem(input_file_path);
       String input_filename_string=BFPathToString(input_filename);
       size_t replstart =output_blueprint_string.find('%');	
       String output_blueprint_string_copy = output_blueprint_string;

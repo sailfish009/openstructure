@@ -66,6 +66,9 @@ protected:
   void DistanceBasedConnect(mol::AtomHandle atom) const;
   mol::AtomHandle LocateAtom(const mol::AtomHandleList&, int ordinal) const;
 public:
+  Processor(bool bf, bool at, bool cn, bool aa, ConopAction zo): check_bond_feasibility_(bf),
+    assign_torsions_(at), connect_(cn), connect_aa_(aa),
+    zero_occ_treatment_(zo) {}
   Processor(): check_bond_feasibility_(false),
     assign_torsions_(false), connect_(true), connect_aa_(true),
     zero_occ_treatment_(CONOP_SILENT) {}

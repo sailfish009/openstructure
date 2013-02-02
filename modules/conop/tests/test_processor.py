@@ -1,5 +1,5 @@
 import unittest
-from ost import conop
+from ost import conop, mol
 
 
 class TestProcessor(unittest.TestCase):
@@ -14,6 +14,7 @@ class TestProcessor(unittest.TestCase):
     ent = mol.CreateEntity()
     p.Process(ent)
     self.assertEqual(p.count, 1)
+
 if __name__ == "__main__":
   from ost import testutils
   testutils.RunTests()

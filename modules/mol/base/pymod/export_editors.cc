@@ -80,6 +80,8 @@ void (ICSEditor::*rotate_torsion_b)(const AtomHandle&, const AtomHandle&,
                                     const AtomHandle&, const AtomHandle&,
                                     Real, bool)=&ICSEditor::RotateTorsionAngle;
 
+void (EditorBase::*renumber_chain_a)(ChainHandle,const ResNumList&)=&EditorBase::RenumberChain;
+void (EditorBase::*renumber_chain_b)(const ChainHandle&,int, bool)=&EditorBase::RenumberChain;
 #if OST_NUMPY_SUPPORT_ENABLED
 template<typename T, bool O>
 void set_pos2_nc_t(XCSEditor& e, const AtomHandleList& alist, PyArrayObject* na)
@@ -248,7 +250,9 @@ void export_Editors()
     .def("AddTorsion", &EditorBase::AddTorsion)
     .def("ReorderResidues",&EditorBase::ReorderResidues)
     .def("ReorderAllResidues",&EditorBase::ReorderAllResidues)
-    .def("RenumberChain",&EditorBase::RenumberChain)
+    .def("RenumberAllResidues",&EditorBase::RenumberAllResidues)
+    .def("RenumberChain",renumber_chain_a)
+    .def("RenumberChain",renumber_chain_b)
   ;
   
   void (XCSEditor::*apply_transform1)(const geom::Mat4&) = &XCSEditor::ApplyTransform;
@@ -265,7 +269,9 @@ void export_Editors()
     .def("SetTransform", set_transform1)
     .def("SetTransform", set_transform2)
     .def("UpdateICS", &XCSEditor::UpdateICS)
-    .def("__exit__", &XCSEditor::UpdateICS)    
+    .def("ForceUpdate", &XCSEditor::ForceUpdate)
+    .def("__exit__", &XCSEditor::ForceUpdate)    
+    .def("__del__", &XCSEditor::ForceUpdate)    
   ;
   
   class_<ICSEditor, bases<EditorBase> >("ICSEditor", no_init)

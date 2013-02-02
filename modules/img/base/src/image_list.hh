@@ -135,10 +135,6 @@ public:
   ImageList& operator-=(const ConstImageHandle& h);
   ImageList& operator*=(const ConstImageHandle& h);
   ImageList& operator/=(const ConstImageHandle& h);
-  ImageList& operator+=(const Function& h);
-  ImageList& operator-=(const Function& h);
-  ImageList& operator*=(const Function& h);
-  ImageList& operator/=(const Function& h);
 private:
   Size get_max_size_();
   DataType get_data_type_();

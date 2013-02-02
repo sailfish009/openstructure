@@ -152,7 +152,7 @@ geom::AlignedCuboid Surface::GetBoundingBox(bool use_tf) const
                     -std::numeric_limits<float>::max());
     
     std::vector<mol::SurfaceVertexID> svid_list = sh_.GetVertexIDList();
-    if(svid_list.size()>0) {
+    if(! svid_list.empty()) {
       for(std::vector<mol::SurfaceVertexID>::const_iterator it=svid_list.begin();
           it!=svid_list.end();++it) {
         geom::Vec3 pos = sh_.GetVertex(*it).position;

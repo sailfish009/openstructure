@@ -147,7 +147,7 @@ void test_Reset()
 
 class MyObserver: public DataObserver {
 public:
-  MyObserver(const Data& d):
+  MyObserver(const ImageHandle& d):
     DataObserver(d),
     update_count(0),
     release_count(0)

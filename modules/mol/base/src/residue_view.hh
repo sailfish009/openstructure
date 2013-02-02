@@ -183,6 +183,7 @@ public:
   
   bool operator!=(const ResidueView& rhs) const;
 
+  bool HasAtoms() const;
 protected:
   /// \brief set the index of residiue view in chain
   /// should be called from chainview whenever indexes change

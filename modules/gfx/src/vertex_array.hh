@@ -49,9 +49,23 @@ typedef unsigned int TriID;
 typedef unsigned int QuadID;
 class DLLEXPORT_OST_GFX IndexedVertexArray {
  public:
-  struct Entry {
-    Entry();
-    Entry(const geom::Vec3& vv, const geom::Vec3& nn, const Color& cc, const geom::Vec2& tt);
+  struct DLLEXPORT Entry {
+    Entry()
+    {
+      v[0]=0.0; v[1]=0.0; v[2]=0.0;
+      n[0]=0.0; n[1]=0.0; n[2]=1.0;
+      c[0]=0.0; c[1]=0.0; c[2]=0.0; c[3]=0.0;
+      t[0]=0.0; t[1]=0.0;
+    }
+
+    Entry(const geom::Vec3& vv, const geom::Vec3& nn, const Color& cc, 
+          const geom::Vec2& tt)
+    {
+      v[0]=vv[0]; v[1]=vv[1]; v[2]=vv[2];
+      n[0]=nn[0]; n[1]=nn[1]; n[2]=nn[2];
+      c[0]=cc[0]; c[1]=cc[1]; c[2]=cc[2]; c[3]=cc[3];
+      t[0]=tt[0]; t[1]=tt[1];
+    }
     float t[2];
     float c[4];
     float n[3];
@@ -120,10 +134,18 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   void SetSolid(bool f) {solid_=f;}
   bool GetSolid() const {return solid_;}
   void SetSolidColor(const Color& c) {solid_color_=c;}
-  bool GetSolidcolor() const {return solid_color_;}
+  Color GetSolidcolor() const {return solid_color_;}
+  void SetClipOffset(float f) {clip_offset_=f;}
+  float GetClipOffset() const {return clip_offset_;}
 
   // vertex, normal, color and texcoord (T2F_C4F_N3F_V3F)
-  VertexID Add(const geom::Vec3& vert, const geom::Vec3& norm, const Color& col, const geom::Vec2& tex=geom::Vec2());
+  VertexID Add(const geom::Vec3& vert, const geom::Vec3& norm, 
+               const Color& col, const geom::Vec2& texc=geom::Vec2()) {
+    dirty_=true;
+    entry_list_.push_back(Entry(vert,norm,col,texc));
+    entry_list_.back().c[3] = opacity_;
+    return entry_list_.size()-1;
+  }
 
   unsigned int GetVertexCount() const;
   void DumpVertices() const;
@@ -147,18 +169,6 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   void AddIcoSphere(const SpherePrim& prim, unsigned int detail);
 
   void AddCylinder(const CylinderPrim& prim, unsigned int detail,bool cap=false);
-
-  geom::Vec3 GetVert(VertexID id) const;
-  void SetVert(VertexID id, const geom::Vec3& vert);
-
-  geom::Vec3 GetNormal(VertexID id) const;
-  void SetNormal(VertexID id, const geom::Vec3& norm);
-
-  Color GetColor(VertexID id) const;
-  void SetColor(VertexID id, const Color& col);
-
-  geom::Vec2 GetTexCoord(VertexID id) const;
-  void SetTexCoord(VertexID id, const geom::Vec2& tex);
 
   void SetOpacity(float o);
 
@@ -208,6 +218,72 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   /// return min/max of vertex entries - this call is not cached!
   geom::AlignedCuboid GetBoundingBox() const;
 
+  geom::Vec3 GetVert(VertexID id) const
+  {
+    geom::Vec3 nrvo;
+    if(id>=entry_list_.size()) return nrvo;
+    nrvo = geom::Vec3(entry_list_[id].v);
+    return nrvo;
+  } 
+
+  void SetVert(VertexID id, const geom::Vec3& v) 
+  {
+    if(id>=entry_list_.size()) return;
+    entry_list_[id].v[0]=v[0];
+    entry_list_[id].v[1]=v[1];
+    entry_list_[id].v[2]=v[2];
+  }
+
+  geom::Vec3 GetNormal(VertexID id) const
+  {
+    geom::Vec3 nrvo;
+    if(id>=entry_list_.size()) return nrvo;
+    nrvo = geom::Vec3(entry_list_[id].n);
+    return nrvo;
+  } 
+
+  void SetNormal(VertexID id, const geom::Vec3& n) 
+  {
+    if(id>=entry_list_.size()) return;
+    entry_list_[id].n[0]=n[0];
+    entry_list_[id].n[1]=n[1];
+    entry_list_[id].n[2]=n[2];
+  }
+
+  Color GetColor(VertexID id) const
+  {
+    Color nrvo;
+    if(id>=entry_list_.size()) return nrvo;
+    nrvo = Color(entry_list_[id].c[0],
+                entry_list_[id].c[1],
+                entry_list_[id].c[2],
+                entry_list_[id].c[3]);
+    return nrvo;
+  } 
+
+  void SetColor(VertexID id, const Color& c) 
+  {
+    if(id>=entry_list_.size()) return;
+    entry_list_[id].c[0]=c[0];
+    entry_list_[id].c[1]=c[1];
+    entry_list_[id].c[2]=c[2];
+    entry_list_[id].c[3]=opacity_;
+  }
+
+  geom::Vec2 GetTexCoord(VertexID id) const
+  {
+    geom::Vec2 nrvo;
+    if(id>=entry_list_.size()) return nrvo;
+    nrvo = geom::Vec2(entry_list_[id].t);
+    return nrvo;
+  } 
+
+  void SetTexCoord(VertexID id, const geom::Vec2& t) 
+  {
+    if(id>=entry_list_.size()) return;
+    entry_list_[id].t[0]=t[0];
+    entry_list_[id].t[1]=t[1];
+  }
  private:
   bool initialized_;
   
@@ -240,6 +316,7 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   Color outline_exp_color_;
   bool solid_;
   Color solid_color_;
+  float clip_offset_;
   bool draw_normals_;
 
   bool use_tex_;
@@ -253,6 +330,7 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   void draw_p(bool use_buff);
   void draw_aalines();
   void draw_line_halo(bool use_buff);
+  void set_clip_offset(float);
 };
 
 }} // ns

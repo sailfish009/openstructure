@@ -159,7 +159,6 @@ Date CompoundLib::GetCreationDate(void){
     }
     assert(SQLITE_DONE==sqlite3_step(stmt));
   } else {
-    LOG_ERROR("ERROR: " << sqlite3_errmsg(conn_));
     sqlite3_finalize(stmt);      
     return Date();
   }
@@ -168,7 +167,7 @@ Date CompoundLib::GetCreationDate(void){
 }
 
 
-String CompoundLib::GetOSTVersionUsed(){
+String CompoundLib::GetOSTVersionUsed() {
   String query="SELECT ost_version_used FROM chemlib_info";
   sqlite3_stmt* stmt;
   String version;
@@ -189,7 +188,7 @@ String CompoundLib::GetOSTVersionUsed(){
     }
     assert(SQLITE_DONE==sqlite3_step(stmt));
   } else {
-    LOG_ERROR("ERROR: " << sqlite3_errmsg(conn_) << " - your compound library might be outdated!");
+    LOG_WARNING("your compound library might be outdated.");
     sqlite3_finalize(stmt);      
     return String();
   }

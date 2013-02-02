@@ -82,14 +82,15 @@ void export_Scene()
   void (Scene::* set_light_prop1)(const Color&,const Color&,const Color&) = &Scene::SetLightProp;
   void (Scene::* set_light_prop2)(float,float,float) = &Scene::SetLightProp;
 
-  void (Scene::* export1)(const String&, uint, uint, bool) = &Scene::Export;
-  void (Scene::* export2)(const String&, bool) = &Scene::Export;
-  void (Scene::* export3)(Exporter*) const = &Scene::Export;
+  void (Scene::* export_buffer)(const String&, uint, uint, int, bool) = &Scene::Export;
+  void (Scene::* export_screen)(const String&, bool) = &Scene::Export;
+  void (Scene::* export_via_exporter)(Exporter*) const = &Scene::Export;
   void (Scene::*remove1)(const GfxNodeP&) = &Scene::Remove;
   void (Scene::*remove2)(const String&) = &Scene::Remove;
   void (Scene::*center_on1)(const String&) = &Scene::CenterOn;
   void (Scene::*center_on2)(const GfxObjP&) = &Scene::CenterOn;
-  
+  bool (Scene::*start_offscreen_mode1)(unsigned int, unsigned int) = &Scene::StartOffscreenMode;  
+  bool (Scene::*start_offscreen_mode2)(unsigned int, unsigned int, int) = &Scene::StartOffscreenMode;  
   class_<Viewport>("Viewport", init<>())
     .def_readwrite("x", &Viewport::x)
     .def_readwrite("y", &Viewport::y)
@@ -195,9 +196,9 @@ void export_Scene()
     .def("SetLightProp",set_light_prop1)
     .def("SetLightProp",set_light_prop2)
     .def("Apply", apply)
-    .def("Export",export1, arg("transparent")=false)
-    .def("Export",export2, arg("transparent")=false)
-    .def("Export",export3)
+    .def("_export_screen",export_screen)
+    .def("_export_buffer",export_buffer)
+    .def("_export_via_exporter",export_via_exporter)
     .def("ExportPov",&Scene::ExportPov,
          scene_export_pov_overloads())
     .def("PushView",&Scene::PushView)
@@ -227,7 +228,8 @@ void export_Scene()
     .add_property("ao_quality",&Scene::GetAmbientOcclusionQuality,&Scene::SetAmbientOcclusionQuality)
     .add_property("ao_size",&Scene::GetAmbientOcclusionSize,&Scene::SetAmbientOcclusionSize)
     .def("AttachObserver",&Scene::AttachObserver)
-    .def("StartOffscreenMode",&Scene::StartOffscreenMode)
+    .def("StartOffscreenMode",start_offscreen_mode1)
+    .def("StartOffscreenMode",start_offscreen_mode2)
     .def("StopOffscreenMode",&Scene::StopOffscreenMode)
     .def("SetShadingMode",&Scene::SetShadingMode)
     .def("SetBeacon",&Scene::SetBeacon)

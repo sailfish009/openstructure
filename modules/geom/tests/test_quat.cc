@@ -19,13 +19,14 @@
 
 #include <ost/geom/geom.hh>
 
-#include "helper.hh"
-using namespace geom;
-
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+
+#include "helper.hh"
+using namespace geom;
+
 
 BOOST_AUTO_TEST_SUITE( geom );
 

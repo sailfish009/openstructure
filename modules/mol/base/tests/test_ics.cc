@@ -19,12 +19,12 @@
 /*
  *  Authors: Marco Biasini, Juergen Haas
  */
-#include <ost/mol/mol.hh>
-#include <ost/log.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/auto_unit_test.hpp>
+#include <ost/mol/mol.hh>
+#include <ost/log.hh>
 #include <ost/message.hh>
 #include <ost/geom/geom.hh>
 

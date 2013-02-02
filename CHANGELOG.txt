@@ -1,5 +1,43 @@
-Changes in Release 1.2.2
+Changes in Release 1.4
+--------------------------------------------------------------------------------
 
+  * Feasibility check set to off by default, atoms in compounds are now connected
+    by the Builder irrespective of the distance between them
+  * Speed improvement for bracketed within selections up to a factor of 20
+
+Changes In Release 1.3.1
+--------------------------------------------------------------------------------
+
+  * Export missing default argument for AligmentHandle.ToString
+  * Automatically attach entity view in SequenceFromChain
+  * Export GetMatchingBackboneViews to Python
+  * Fix compilation with boost 1.33.1
+  * Allow renumbering of single chain
+
+Changes In Release 1.3.0
+--------------------------------------------------------------------------------
+
+  * Scene background can now be set to a gradient or an image
+  * Better Handling of HSV colors
+  * Table: direct access to columns tab['x'] is also available as tab.x
+  * Table: Export to ConTeXt and HTML tables
+  * Table: Barplot interface
+  * The BLAST binding supports newer versions of BLAST
+  * Bindings for CAD score
+  * Update directory layout of OST to be more conformant with the site-package
+    system of Python: Instead of storing the modules in lib{64}/ost/ost, they
+    are now in lib{64}/python{{VERSION}}/site-packages/ost
+  * Added molck, the molecular checker. A small command-line tool to clean PDB 
+    files, e.g. remove atoms with zero occupancy, "virtual atoms", hydrogens 
+    etc.
+
+Changes In Release 1.2.3
+--------------------------------------------------------------------------------
+
+  * PDBWriter: Prevent writing of out-of-bounds atom coordinates.
+
+Changes in Release 1.2.2
+--------------------------------------------------------------------------------
   * Fixed loop indentation in the PDBize function for bio units, leading to
     exponential running time/ memory consumption. This problem only affected a
     fraction of PDB entries.

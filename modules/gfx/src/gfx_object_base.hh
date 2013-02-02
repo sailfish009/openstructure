@@ -121,6 +121,13 @@ class DLLEXPORT_OST_GFX GfxObjBase: public GfxNode
   virtual bool GetSolid() const = 0;
   virtual void SetSolidColor(const Color& c) = 0;
   virtual Color GetSolidColor() const = 0;
+
+  virtual void SetClip(bool f) = 0;
+  virtual bool GetClip() const = 0;
+  virtual void SetClipPlane(const geom::Vec4&) = 0;
+  virtual geom::Vec4 GetClipPlane() const = 0;
+  virtual void SetClipOffset(float f) = 0;
+  virtual float GetClipOffset() const = 0;
   
   /// \brief color each component based on the gradient-mapped property of 
   ///    the given entity

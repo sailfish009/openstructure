@@ -376,8 +376,9 @@ void Entity::CustomRenderPov(PovState& pov)
 
 void Entity::Export(Exporter* ex)
 {
+  if(!IsVisible()) return;
+
   ex->NodeStart(GetName(),Exporter::OBJ);
-  // in the simplest case, just export va
   if(rebuild_ || refresh_) {
     PreRenderGL(true);
   }
@@ -395,12 +396,17 @@ mol::AtomHandle Entity::PickAtom(const geom::Line3& line, Real line_width)
 {
   mol::AtomHandle picked_atom;
   if (!this->IsVisible())
-    return picked_atom;  
+    return picked_atom;
+  geom::Mat4 it=GetTF().GetInvertedMatrix();
+  geom::Vec3 l1=geom::Vec3(it*geom::Vec4(line.At(0.0)));
+  geom::Vec3 l2=geom::Vec3(it*geom::Vec4(line.At(1.0)));
+  geom::Line3 tf_line(l1,l2);
+
   for (RendererMap::iterator i=renderer_.begin(), 
        e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* r=i->second;
     if (r->HasDataToRender() && r->IsEnabled()) {
-      r->PickAtom(line, line_width, picked_atom);      
+      r->PickAtom(tf_line, line_width, picked_atom);      
     }
   }
   return picked_atom;
@@ -447,7 +453,7 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
         if(av.IsValid()) {
           LOG_DEBUG("de-selected atom: " << sel);
           sel_.RemoveAtom(av);
-          if(av.GetResidue().GetAtomCount()==0){
+          if(!av.GetResidue().HasAtoms()){
             av.GetResidue().GetChain().RemoveResidue(av.GetResidue());
           }
         } else {
@@ -608,7 +614,7 @@ void Entity::OnRenderModeChange()
   for (RendererMap::iterator i=renderer_.begin(), 
 	 e=renderer_.end(); i!=e; ++i) {
     mol::EntityView rv=i->second->GetFullView();
-    if (rv.IsValid() && rv.GetAtomCount()>0) {
+    if (rv.IsValid() && rv.HasAtoms()) {
       i->second->SetSelection(mol::Intersection(sel_, rv));
     }         
     i->second->UpdateViews();
@@ -998,7 +1004,7 @@ void Entity::set_static_max_rad()
 
 bool Entity::HasSelection() const
 {
-  return (sel_.IsValid() && sel_.GetAtomCount()>0);
+  return (sel_.IsValid() && sel_.HasAtoms());
 }
 
 namespace {

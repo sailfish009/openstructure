@@ -25,91 +25,87 @@
 #include <boost/python.hpp>
 #include <ost/base.hh>
 #include <ost/gui/data_viewer/data_viewer.hh>
+#include "data_viewer_proxy.hh"
 #include <ost/gui/data_viewer/overlay_manager.hh>
-
-#include "sip_handler.hh"
 
 using namespace boost::python;
 using namespace ost::img;
 using namespace ost;
-using namespace ost::img::gui;
 using namespace ost::gui;
+using namespace ost::img::gui;
 
 namespace {
 
-void add_dock1(DataViewer* p, QWidget* w, const String& name)
+void add_dock1(DataViewerProxy* p, QWidget* w, const String& name) 
 {
   p->AddDockWidget(w,QString::fromStdString(name));
 }
 
-void add_dock2(DataViewer* p, QWidget* w, const QString& name)
-{
-  p->AddDockWidget(w,name);
-}
-
-void add_dock3(DataViewer* p, QWidget* w, const String& name, bool s)
+void add_dock2(DataViewerProxy* p, QWidget* w, const String& name, bool s)
 {
   p->AddDockWidget(w,QString::fromStdString(name),s);
 }
 
-void add_dock4(DataViewer* p, QWidget* w, const QString& name, bool s)
+void add_dock3(DataViewerProxy* p, QWidget* w, const String& name, bool s, int area)
 {
-  p->AddDockWidget(w,name,s);
+  p->AddDockWidget(w,QString::fromStdString(name),s,area);
 }
 
 } // anon ns
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(o_AddOverlay, AddOverlay, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(o_AddDockWidget, AddDockWidget, 2, 4)
 
 void export_data_viewer()
 {
-  class_<DataViewer, boost::noncopyable >("DataViewer",no_init)
-    .def("SetData",&DataViewer::SetData)
-    .def("SetName",&DataViewer::SetName)
-    .def("GetOverlayManager",&DataViewer::GetOverlayManager)
-    .def("GetNormalizer",&DataViewer::GetNormalizer,return_value_policy<return_by_value>())
-    .def("Renormalize",&DataViewer::Renormalize)
-    .def("AddOverlay",&DataViewer::AddOverlay,o_AddOverlay())
-    .def("ClearOverlays",&DataViewer::ClearOverlays)
-    .def("GetSelection",&DataViewer::GetSelection)
-    .def("SetSelection",&DataViewer::SetSelection)
-    .def("UpdateView",&DataViewer::UpdateView)
-    .def("Recenter",&DataViewer::Recenter)
+  class_<DataViewerProxy, DataViewerProxyPtr >("DataViewer",no_init)
+    .def("SetData",&DataViewerProxy::SetData)
+    .def("SetName",&DataViewerProxy::SetName)
+    .def("GetOverlayManager",&DataViewerProxy::GetOverlayManager)
+    .def("GetNormalizer",&DataViewerProxy::GetNormalizer,return_value_policy<return_by_value>())
+    .def("Renormalize",&DataViewerProxy::Renormalize)
+    .def("AddOverlay",&DataViewerProxy::AddOverlay,o_AddOverlay())
+    .def("ClearOverlays",&DataViewerProxy::ClearOverlays)
+    .def("GetSelection",&DataViewerProxy::GetSelection)
+    .def("SetSelection",&DataViewerProxy::SetSelection)
+    .def("UpdateView",&DataViewerProxy::UpdateView)
+    .def("Recenter",&DataViewerProxy::Recenter)
+    .def("AddDockWidget",&DataViewerProxy::AddDockWidget,o_AddDockWidget())
     .def("AddDockWidget",add_dock1)
     .def("AddDockWidget",add_dock2)
-    .def("SetSlab", &DataViewer::SetSlab)
-    .def("GetSlab", &DataViewer::GetSlab)
-    .add_property("slab", &DataViewer::GetSlab, &DataViewer::SetSlab)
-    .def("SetZoomScale", &DataViewer::SetZoomScale)
-    .def("GetZoomScale", &DataViewer::GetZoomScale)
-    .add_property("zoomscale", &DataViewer::GetZoomScale, &DataViewer::SetZoomScale)
-    .def("SetViewerMin", &DataViewer::SetViewerMin)
-    .def("GetViewerMin", &DataViewer::GetViewerMin)
-    .add_property("viewer_min", &DataViewer::GetViewerMin, &DataViewer::SetViewerMin)
-    .def("SetViewerMax", &DataViewer::SetViewerMax)
-    .def("GetViewerMax", &DataViewer::GetViewerMax)
-    .add_property("viewer_max", &DataViewer::GetViewerMax, &DataViewer::SetViewerMax)
-    .def("SetGamma", &DataViewer::SetGamma)
-    .def("GetGamma", &DataViewer::GetGamma)
-    .add_property("gamma", &DataViewer::GetGamma, &DataViewer::SetGamma)
-    .def("SetInvert", &DataViewer::SetInvert)
-    .def("GetInvert", &DataViewer::GetInvert)
-    .add_property("invert", &DataViewer::GetInvert, &DataViewer::SetInvert)
-    .def("SetOffset", &DataViewer::SetOffset)
-    .def("GetOffset", &DataViewer::GetOffset)
-    .add_property("offset", &DataViewer::GetOffset, &DataViewer::SetOffset)
     .def("AddDockWidget",add_dock3)
-    .def("AddDockWidget",add_dock4)
-    .def("RemoveDockWidget",&DataViewer::RemoveDockWidget)
-    .def("SetAntialiasing",&DataViewer::SetAntialiasing)
-    .def("Show",&DataViewer::show)
-    .def("Hide", &DataViewer::hide)
-    .def("GetQObject",&get_py_qobject<DataViewer>)
-    .add_property("qobject", &get_py_qobject<DataViewer>)
-    /*
-    .def("SetAutoNormalize",&DataViewer::SetAutoNormalize)
-    .def("ShowClickedPosition",&DataViewer::ShowClickedPosition,o_ShowClickedPosition())
-    .def("GetClickedPosition",&DataViewer::GetClickedPosition)
-    */
+    .def("RemoveDockWidget",&DataViewerProxy::RemoveDockWidget)
+    .def("SetAntialiasing",&DataViewerProxy::SetAntialiasing)
+    .def("Show",&DataViewerProxy::Show)
+    .def("Hide", &DataViewerProxy::Hide)
+    .def("SetSlab", &DataViewerProxy::SetSlab)
+    .def("GetSlab", &DataViewerProxy::GetSlab)
+    .add_property("slab", &DataViewerProxy::GetSlab, &DataViewerProxy::SetSlab)
+    .def("SetZoomScale", &DataViewerProxy::SetZoomScale)
+    .def("GetZoomScale", &DataViewerProxy::GetZoomScale)
+    .add_property("zoomscale", &DataViewerProxy::GetZoomScale, &DataViewerProxy::SetZoomScale)
+    .def("SetViewerMin", &DataViewerProxy::SetViewerMin)
+    .def("GetViewerMin", &DataViewerProxy::GetViewerMin)
+    .add_property("viewer_min", &DataViewerProxy::GetViewerMin, &DataViewerProxy::SetViewerMin)
+    .def("SetViewerMax", &DataViewerProxy::SetViewerMax)
+    .def("GetViewerMax", &DataViewerProxy::GetViewerMax)
+    .add_property("viewer_max", &DataViewerProxy::GetViewerMax, &DataViewerProxy::SetViewerMax)
+    .def("SetGamma", &DataViewerProxy::SetGamma)
+    .def("GetGamma", &DataViewerProxy::GetGamma)
+    .add_property("gamma", &DataViewerProxy::GetGamma, &DataViewerProxy::SetGamma)
+    .def("SetInvert", &DataViewerProxy::SetInvert)
+    .def("GetInvert", &DataViewerProxy::GetInvert)
+    .add_property("invert", &DataViewerProxy::GetInvert, &DataViewerProxy::SetInvert)
+    .def("SetOffset", &DataViewerProxy::SetOffset)
+    .def("GetOffset", &DataViewerProxy::GetOffset)
+    .add_property("offset", &DataViewerProxy::GetOffset, &DataViewerProxy::SetOffset)
+    .def("GetQObject",&DataViewerProxy::GetQObject)
+    .add_property("qobject",&DataViewerProxy::GetQObject)
+
+      /*
+    .def("SetAutoNormalize",&DataViewerProxy::SetAutoNormalize)
+    .def("ShowClickedPosition",&DataViewerProxy::ShowClickedPosition,o_ShowClickedPosition())
+    .def("GetClickedPosition",&DataViewerProxy::GetClickedPosition)
+    */    
     ;
 }

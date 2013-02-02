@@ -284,6 +284,21 @@ public:
 
 
   void RenumberChain(ChainHandle chain, const ResNumList& new_numbers);
+
+  /// \brief renumber residues of one chain
+  ///
+  /// \param name
+  ///           All residues of this chain will be renumbered according to the
+  ///           parameters start and keep_spacing
+  ///
+  /// \param start
+  ///           Residues of given chain will be renumbered, whereas the first
+  ///           residue gets the residue number start.
+  ///
+  /// \param keep_spacing
+  ///           If set to false, residues will continously be renumbered ongoing from start.
+  ///           Otherwise the spacings between the residues are kept.
+  void RenumberChain(const ChainHandle& chain, int start, bool keep_spacing);
     
   /// \brief Get edit mode of editor
   EditMode GetMode() const {return mode_;}

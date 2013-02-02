@@ -43,7 +43,7 @@
 namespace ost { namespace img { namespace gui {
 
 
-DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
+DataViewerPanelBase::DataViewerPanelBase(const ImageHandle& data,QWidget* parent):
   QWidget(parent),
   DataObserver(data),
   popupmenu_(new QMenu(this)),
@@ -78,7 +78,14 @@ DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
   fast_low_mag_(true),
   fast_high_mag_(true),
   antialiasing_(true),
-  drag_start_()
+  drag_start_(),
+  phase_toggle_action_(),
+  invert_toggle_action_(),
+  show_click_pos_toggle_action_(),
+  fast_low_mag_toggle_action_(),
+  fast_high_mag_toggle_action_(),
+  display_pixel_toggle_action_(),
+  antialiasing_toggle_action_()
 {
   update_min_max();
   UpdateNormalizer(data_min_,data_max_,1.0,false);
@@ -92,32 +99,68 @@ DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
   setFocusPolicy(Qt::WheelFocus);
   //TODO cursors
   setCursor(cursor_);
-  /*
-  QMenu* m_zoom = new QMenu();
-  m_zoom->Append(ID_ZOOM_PLUS,QT("Zoom In"));
-  m_zoom->Append(ID_ZOOM_MINUS,QT("Zoom Out"));
-  m_zoom->AppendSeparator();
-  m_zoom->Append(ID_ZOOM_1,QT("Original Size"));
 
-  QMenu* m_slab = new QMenu();
-  m_slab->Append(ID_SLAB_PLUS,QT("Next Slab"));
-  m_slab->Append(ID_SLAB_MINUS,QT("Previous Slab"));
-  m_slab->AppendSeparator();
-  m_slab->Append(ID_SLAB_CENTER,QT("Center Slab"));
-  m_slab->Append(ID_SLAB_START,QT("First Slab"));
-  m_slab->Append(ID_SLAB_END,QT("Last Slab"));
-  
-  popupmenu_->Append(ID_NORMALIZE,QT("Normalize"));
-  popupmenu_->Append(ID_CENTER,QT("Center image"));
-  popupmenu_->AppendSeparator();
-  popupmenu_->Append(ID_ZOOM,QT("Zoom"),m_zoom);
-  popupmenu_->Append(ID_SLAB,QT("Slab"),m_slab);
-  popupmenu_->AppendSeparator();
-  popupmenu_->AppendCheckItem(ID_PHASECOLOR,QT("Phase Color Display"));
-  popupmenu_->AppendCheckItem(ID_INVERT,QT("Invert"));
-  popupmenu_->AppendCheckItem(ID_DISP_PIXEL_VAL,QT("Display pixel values"));
-  popupmenu_->AppendCheckItem(ID_SHOW_CLICK_POS,QT("Show last clicked point"));
-  */
+  QMenu* m_zoom = new QMenu("Zoom");
+  QAction* action=m_zoom->addAction("Zoom In");
+  connect(action, SIGNAL(triggered()), this, SLOT(zoom_plus()));
+  action=m_zoom->addAction("Zoom Out");
+  connect(action, SIGNAL(triggered()), this, SLOT(zoom_minus()));
+  m_zoom->addSeparator();
+  action=m_zoom->addAction("Original Size");
+  connect(action, SIGNAL(triggered()), this, SLOT(zoom_reset()));
+
+  QMenu* m_slab = new QMenu("Slab");
+  action=m_slab->addAction("Next Slab");
+  connect(action, SIGNAL(triggered()), this, SLOT(slab_plus()));
+  action=m_slab->addAction("Previous Slab");
+  connect(action, SIGNAL(triggered()), this, SLOT(slab_minus()));
+  m_slab->addSeparator();
+  action=m_slab->addAction("Center Slab");
+  connect(action, SIGNAL(triggered()), this, SLOT(slab_center()));
+  action=m_slab->addAction("First Slab");
+  connect(action, SIGNAL(triggered()), this, SLOT(slab_start()));
+  action=m_slab->addAction("Last Slab");
+  connect(action, SIGNAL(triggered()), this, SLOT(slab_end()));
+
+  action=popupmenu_->addAction("Normalize");
+  connect(action, SIGNAL(triggered()), this, SLOT(normalize()));
+  action=popupmenu_->addAction("Center image");
+  connect(action, SIGNAL(triggered()), this, SLOT(center()));
+  popupmenu_->addSeparator();
+  popupmenu_->addMenu(m_zoom);
+  popupmenu_->addMenu(m_slab);
+  popupmenu_->addSeparator();
+
+  phase_toggle_action_=popupmenu_->addAction("Phase Color Display");
+  phase_toggle_action_->setCheckable(true);
+  phase_toggle_action_->setChecked(false);
+  connect(phase_toggle_action_, SIGNAL(triggered()), this, SLOT(toggle_phase_color()));
+  invert_toggle_action_=popupmenu_->addAction("Invert");
+  invert_toggle_action_->setCheckable(true);
+  invert_toggle_action_->setChecked(false);
+  connect(invert_toggle_action_, SIGNAL(triggered()), this, SLOT(toggle_invert()));
+  display_pixel_toggle_action_=popupmenu_->addAction("Display pixel values");
+  display_pixel_toggle_action_->setCheckable(true);
+  display_pixel_toggle_action_->setChecked(true);
+  connect(display_pixel_toggle_action_, SIGNAL(triggered()), this, SLOT(toggle_display_pixels()));
+  show_click_pos_toggle_action_=popupmenu_->addAction("Show last clicked point");
+  show_click_pos_toggle_action_->setCheckable(true);
+  show_click_pos_toggle_action_->setChecked(false);
+  connect(show_click_pos_toggle_action_, SIGNAL(triggered()), this, SLOT(toggle_show_click_pos()));
+  popupmenu_->addSeparator();
+  fast_low_mag_toggle_action_=popupmenu_->addAction("Fast low magnification drawing");
+  fast_low_mag_toggle_action_->setCheckable(true);
+  fast_low_mag_toggle_action_->setChecked(true);
+  connect(fast_low_mag_toggle_action_, SIGNAL(triggered()), this, SLOT(toggle_fast_low_mag()));
+  fast_high_mag_toggle_action_=popupmenu_->addAction("Fast high magnification drawing");
+  fast_high_mag_toggle_action_->setCheckable(true);
+  fast_high_mag_toggle_action_->setChecked(true);
+  connect(fast_high_mag_toggle_action_, SIGNAL(triggered()), this, SLOT(toggle_fast_high_mag()));
+  antialiasing_toggle_action_=popupmenu_->addAction("Antialiasing");
+  antialiasing_toggle_action_->setCheckable(true);
+  antialiasing_toggle_action_->setChecked(false);
+  connect(antialiasing_toggle_action_, SIGNAL(triggered()), this, SLOT(toggle_antialiasing()));
+
   QPixmapCache::setCacheLimit(51200);
 
 }
@@ -128,7 +171,7 @@ DataViewerPanelBase::~DataViewerPanelBase()
   delete pixmap_;
 }
 
-void DataViewerPanelBase::SetData(const Data& d)
+void DataViewerPanelBase::SetData(const ImageHandle& d)
 {
   SetObservedData(d);
   update_min_max();
@@ -150,83 +193,83 @@ ViewerNormalizerPtr DataViewerPanelBase::GetNormalizer() const
   return normalizer_;
 }
 
-#if 0
-void DataViewerPanelBase::OnMenu(QCommandEvent& e)
-{
-  switch(e.GetId()){
-  case ID_PHASECOLOR:
-    if(e.IsChecked()){
-      SetColorMode(RasterImage::PHASECOLOR);
-    }else{
-      SetColorMode(RasterImage::GREY);
-    }
-    break;
-  case ID_NORMALIZE:
-    Renormalize();
-    break;
-  case ID_CENTER:
-    Recenter();
-    break;
-  case ID_INVERT:
-    SetInvert(!GetInvert());
-    break;
-  case ID_DISP_PIXEL_VAL:
-    SetDisplayPixelValues(!display_pixel_values_);
-    break;
-  case ID_SHOW_CLICK_POS:
-    ShowClickedPosition(!show_clicked_position_);
-    break;
-  case ID_ZOOM_PLUS:
-    SetZoomScale(2.0*GetZoomScale());
-    break;
-  case ID_ZOOM_MINUS:
-    SetZoomScale(0.5*GetZoomScale());
-    break;
-  case ID_ZOOM_1:
-    SetZoomScale(1.0);
-    break;
-  case ID_SLAB_PLUS:
-    SetSlab(GetSlab()+1);
-    break;
-  case ID_SLAB_MINUS:
-    SetSlab(GetSlab()-1);
-    break;
-  case ID_SLAB_START:
-    SetSlab(GetObservedData().GetExtent().GetStart()[2]);
-    break;
-  case ID_SLAB_END:
-    SetSlab(GetObservedData().GetExtent().GetEnd()[2]);
-    break;
-  case ID_SLAB_CENTER:
-    SetSlab(static_cast<int>((GetObservedData().GetExtent().GetEnd()[2]
-                             -GetObservedData().GetExtent().GetStart()[2])/2.0));
-    break;
-  default:
-    e.Skip();
-    break;
+void DataViewerPanelBase::toggle_phase_color(){
+  if(GetColorMode()!=RasterImage::PHASECOLOR){
+    SetColorMode(RasterImage::PHASECOLOR);
+  }else{
+    SetColorMode(RasterImage::GREY);
   }
 }
-void DataViewerPanelBase::OnUpdateMenu(QUpdateUIEvent& e)
-{
-  switch(e.GetId()){
-  case ID_PHASECOLOR:
-    e.Check(GetColorMode()==RasterImage::PHASECOLOR);
-    break;
-  case ID_INVERT:
-    e.Check(GetInvert());
-    break;
-  case ID_DISP_PIXEL_VAL:
-    e.Check(display_pixel_values_);
-    break;
-  case ID_SHOW_CLICK_POS:
-    e.Check(show_clicked_position_);
-    break;
-  default:
-    e.Skip();
-    break;
-  }
+void DataViewerPanelBase::normalize(){
+  Renormalize();
 }
-#endif
+void DataViewerPanelBase::center(){
+  Recenter();
+}
+void DataViewerPanelBase::toggle_invert(){
+  SetInvert(!GetInvert());
+}
+void DataViewerPanelBase::toggle_display_pixels(){
+  SetDisplayPixelValues(!display_pixel_values_);
+}
+void DataViewerPanelBase::toggle_show_click_pos(){
+  ShowClickedPosition(!show_clicked_position_);
+}
+void DataViewerPanelBase::zoom_plus(){
+  SetZoomScale(2.0*GetZoomScale());
+}
+void DataViewerPanelBase::zoom_minus(){
+  SetZoomScale(0.5*GetZoomScale());
+}
+void DataViewerPanelBase::zoom_reset(){
+  SetZoomScale(1.0);
+}
+void DataViewerPanelBase::slab_plus(){
+  SetSlab(GetSlab()+1);
+}
+void DataViewerPanelBase::slab_minus(){
+  SetSlab(GetSlab()-1);
+}
+void DataViewerPanelBase::slab_start(){
+  SetSlab(GetObservedData().GetExtent().GetStart()[2]);
+}
+void DataViewerPanelBase::slab_end(){
+  SetSlab(GetObservedData().GetExtent().GetEnd()[2]);
+}
+void DataViewerPanelBase::slab_center(){
+  SetSlab(static_cast<int>((GetObservedData().GetExtent().GetEnd()[2]
+                           -GetObservedData().GetExtent().GetStart()[2])/2.0));
+}
+void DataViewerPanelBase::toggle_fast_low_mag(){
+  SetFastLowMagnificationDrawing(!GetFastLowMagnificationDrawing());
+}
+void DataViewerPanelBase::toggle_fast_high_mag(){
+  SetFastHighMagnificationDrawing(!GetFastHighMagnificationDrawing());
+}
+void DataViewerPanelBase::toggle_antialiasing(){
+  SetAntialiasing(!GetAntialiasing());
+}
+
+void DataViewerPanelBase::SetFastLowMagnificationDrawing(bool flag)
+{
+  fast_low_mag_=flag;
+  fast_low_mag_toggle_action_->setChecked(flag);
+  UpdateView();
+}
+bool DataViewerPanelBase::GetFastLowMagnificationDrawing()
+{
+  return fast_low_mag_;
+}
+void DataViewerPanelBase::SetFastHighMagnificationDrawing(bool flag)
+{
+  fast_high_mag_=flag;
+  fast_high_mag_toggle_action_->setChecked(flag);
+  UpdateView();
+}
+bool DataViewerPanelBase::GetFastHighMagnificationDrawing()
+{
+  return fast_high_mag_;
+}
 
 void DataViewerPanelBase::Renormalize() 
 {
@@ -252,12 +295,6 @@ void DataViewerPanelBase::ObserverUpdate()
   update_min_max();
   UpdateNormalizer(data_min_,data_max_,normalizer_->GetGamma(),normalizer_->GetInvert());
   UpdateView(true);
-
-  /*
-  QCommandEvent ev=QCommandEvent(QEVT_VIEWER_DATA_CHANGE,GetId());
-  ev.SetEventObject(this);
-  AddPendingEvent(ev);
-  */
 }
 
 void DataViewerPanelBase::ObserverUpdate(const Extent& e)
@@ -347,11 +384,6 @@ void DataViewerPanelBase::ObserverUpdate(const Point& p)
 void DataViewerPanelBase::ObserverRelease()
 {
   emit released();
-  /*
-  QCommandEvent ev=QCommandEvent(QEVT_VIEWER_RELEASE,GetId());
-  ev.SetEventObject(this);
-  AddPendingEvent(ev);
-  */
 }
 
 void DataViewerPanelBase::resizeEvent(QResizeEvent* event)
@@ -433,6 +465,12 @@ void DataViewerPanelBase::paintEvent(QPaintEvent* event)
   if(zoom_level_<7) {
     draw_extent(painter);
   }
+  if(show_clicked_position_){
+    painter.setPen(QPen(QColor(0,255,0),1));
+    painter.setBrush(QBrush(Qt::NoBrush));
+    painter.drawLine(FracPointToWin(geom::Vec2(clicked_position_))-QPoint(4,0),FracPointToWin(geom::Vec2(clicked_position_))+QPoint(4,0));
+    painter.drawLine(FracPointToWin(geom::Vec2(clicked_position_))-QPoint(0,4),FracPointToWin(geom::Vec2(clicked_position_))+QPoint(0,4));
+  }
 }
 
 void DataViewerPanelBase::keyPressEvent(QKeyEvent * event)
@@ -475,11 +513,17 @@ void DataViewerPanelBase::mousePressEvent(QMouseEvent* event)
   if(!IsDataValid()) return;
   if(event->button() == Qt::LeftButton && event->modifiers()==Qt::NoModifier) {
     selection_=Extent();
+    update(rubberband_->geometry());
     rubberband_->setGeometry(QRect(event->pos(),QSize(0,0)));
     rubberband_->hide();
     last_x_=event->x();
     last_y_=event->y();
+    geom::Vec3 old_position=clicked_position_;
     clicked_position_ = geom::Vec3(WinToFracPoint(QPoint(event->x(),event->y())));
+    if(show_clicked_position_){
+      update(QRect(FracPointToWin(geom::Vec2(old_position))-QPoint(4,4),FracPointToWin(geom::Vec2(old_position))+QPoint(4,4)));
+      update(QRect(FracPointToWin(geom::Vec2(clicked_position_))-QPoint(4,4),FracPointToWin(geom::Vec2(clicked_position_))+QPoint(4,4)));
+    }
     clicked_position_[2]=slab_;
     emit clicked(clicked_position_);
 
@@ -696,6 +740,7 @@ void DataViewerPanelBase::SetCursor(const QCursor& cursor)
 void DataViewerPanelBase::SetDisplayPixelValues(bool show)
 {
   display_pixel_values_ = show;
+  display_pixel_toggle_action_->setChecked(show);
   UpdateView(false);
 }
 
@@ -855,6 +900,7 @@ void DataViewerPanelBase::slab(int dz)
 void DataViewerPanelBase::SetColorMode(RasterImage::Mode m) 
 {
   cmode_=m;
+  phase_toggle_action_->setChecked(m==RasterImage::PHASECOLOR);
   UpdateView(true);
 }
 
@@ -872,7 +918,8 @@ ImageHandle DataViewerPanelBase::Extract(const Extent& e)
 void DataViewerPanelBase::ShowClickedPosition(bool show = true)
 {
   show_clicked_position_ = show;
-  UpdateView(false);
+  show_click_pos_toggle_action_->setChecked(show);
+  update(QRect(FracPointToWin(geom::Vec2(clicked_position_))-QPoint(4,4),FracPointToWin(geom::Vec2(clicked_position_))+QPoint(4,4)));
 }
 
 void DataViewerPanelBase::HideClickedPosition()
@@ -935,6 +982,7 @@ void DataViewerPanelBase::SetInvert(bool invert)
   UpdateNormalizer(normalizer_->GetMinimum(),
                    normalizer_->GetMaximum(),
                    normalizer_->GetGamma(),invert);
+  invert_toggle_action_->setChecked(invert);
   UpdateView(true);
 }
 
@@ -988,6 +1036,7 @@ void DataViewerPanelBase::SetOffset(const geom::Vec2& offset)
 void DataViewerPanelBase::SetAntialiasing(bool f)
 {
   antialiasing_=f;
+  antialiasing_toggle_action_->setChecked(f);
   update();
 }
 
@@ -1014,8 +1063,7 @@ void DataViewerPanelBase::draw_pixel_values(QPainter& painter)
   if(GetObservedData().GetType()==REAL){
     for(int i = 0; i <= (b[0] - a[0]); ++i) {
       for(int j = 0; j <= (b[1] - a[1]); ++j) {
-        Real pixel_value = GetObservedData().GetReal(Point(a[0]+i,
-                                                                 a[1]+j,slab_));
+        Real pixel_value = GetObservedData().GetReal(Point(a[0]+i,a[1]+j,slab_));
         QString value_string = QString("%1").arg(pixel_value,0,'g',5);
         Real rv = GetNormalizer()->Convert(pixel_value);
         QPoint p = FracPointToWinCenter(geom::Vec2(static_cast<Real>(a[0]+i),
@@ -1048,7 +1096,9 @@ void DataViewerPanelBase::draw_pixel_values(QPainter& painter)
 
 void DataViewerPanelBase::update_rubberband_from_selection_()
 {
+  QRect old_geometry=rubberband_->geometry();
   rubberband_->setGeometry(QRect(PointToWin(selection_.GetStart()),PointToWin(selection_.GetEnd()+Point(1,1))));
+  update(old_geometry);
 }
 
 }}}  //ns

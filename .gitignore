@@ -58,6 +58,7 @@ Debug
 /deployment/win/create_archive.bat
 /install_manifest.txt
 /modules/gui/src/module_config.hh
+/modules/base/pymod/__init__.py
 /modules/gui/src/dngr.qrc.depends
 *_out.csv
 *_out.tab

@@ -141,6 +141,7 @@ Scene::Scene():
   bg_grad_(),
   bg_bm_(),
   bg_tex_(),
+  ms_flag_(false),
   export_aspect_(1.0),
   show_export_aspect_(false)
 {
@@ -437,7 +438,8 @@ void Scene::InitGL(bool full)
   glClearDepth(1.0);
 
   // background
-  glClearColor(background_.Red(),background_.Green(),background_.Blue(),background_.Alpha());
+  //glClearColor(background_.Red(),background_.Green(),background_.Blue(),background_.Alpha());
+  glClearColor(background_.Red(),background_.Green(),background_.Blue(),0.0);
   fog_color_=background_;
 
   // polygon orientation setting
@@ -477,7 +479,9 @@ void Scene::InitGL(bool full)
     glDisable(GL_POINT_SMOOTH);
     glDisable(GL_POLYGON_SMOOTH);
     glEnable(GL_MULTISAMPLE);
+    ms_flag_=true;
   } else {
+    ms_flag_=false;
     glEnable(GL_LINE_SMOOTH);
     glDisable(GL_POINT_SMOOTH);
     glDisable(GL_POLYGON_SMOOTH);
@@ -579,7 +583,8 @@ void Scene::SetBackground(const Color& c)
   background_=c;
   bg_mode_=0;
   if(gl_init_) {
-    glClearColor(c.Red(),c.Green(),c.Blue(),c.Alpha());
+    //glClearColor(c.Red(),c.Green(),c.Blue(),c.Alpha());
+    glClearColor(c.Red(),c.Green(),c.Blue(),0.0);
     SetFogColor(c);
     RequestRedraw();
   }
@@ -815,7 +820,7 @@ void Scene::RenderGL()
 
   prep_blur();
 
-  if(stereo_mode_==1 || stereo_mode_==2) {
+  if(stereo_mode_==1 || stereo_mode_==2 || stereo_mode_==3) {
     render_stereo();
   } else {
     render_scene();
@@ -1488,6 +1493,8 @@ void Scene::SetStereoMode(unsigned int m)
     }
   } else if(m==2) {
     stereo_mode_=2;
+  } else if(m==3) {
+    stereo_mode_=3;
   } else {
     stereo_mode_=0;
   }
@@ -1584,11 +1591,22 @@ uint Scene::GetSelectionMode() const
   return selection_mode_;
 }
 
-bool Scene::StartOffscreenMode(unsigned int width, unsigned int height)
+bool Scene::StartOffscreenMode(unsigned int width, unsigned int height) {
+  return StartOffscreenMode(width,height,2);
+}
+
+bool Scene::StartOffscreenMode(unsigned int width, unsigned int height, int max_samples)
 {
   LOG_DEBUG("Scene: starting offscreen rendering mode " << width << "x" << height);
   if(main_offscreen_buffer_) return false;
-  main_offscreen_buffer_ = new OffscreenBuffer(width,height,OffscreenBufferFormat(),true);
+  OffscreenBufferFormat obf;
+  if(max_samples>0) {
+    obf.multisample=true;
+    obf.samples=max_samples;
+  } else {
+    obf.multisample=false;
+  }
+  main_offscreen_buffer_ = new OffscreenBuffer(width,height,obf,true);
 
   if(!main_offscreen_buffer_->IsValid()) {
     LOG_ERROR("Scene: error during offscreen buffer creation");
@@ -1643,6 +1661,12 @@ void Scene::StopOffscreenMode()
 void Scene::Export(const String& fname, unsigned int width,
                    unsigned int height, bool transparent)
 {
+  Export(fname,width,height,0,transparent);
+}
+
+void Scene::Export(const String& fname, unsigned int width,
+                   unsigned int height, int max_samples, bool transparent)
+{
   int d_index=fname.rfind('.');
   if (d_index==-1) {
     LOG_ERROR("Scene: no file extension specified");
@@ -1658,7 +1682,16 @@ void Scene::Export(const String& fname, unsigned int width,
 
   // only switch if offscreen mode is not active
   if(of_flag) {
-    if(!StartOffscreenMode(width,height)) {
+    if(max_samples<0) {
+      int msamples=0;
+#if OST_SHADER_SUPPORT_ENABLED
+      if(OST_GL_VERSION_2_0) {
+        glGetIntegerv(GL_SAMPLES, &msamples);
+      }
+#endif
+      max_samples=msamples;
+    }
+    if(!StartOffscreenMode(width,height, max_samples)) {
       return;
     }
   }
@@ -1751,6 +1784,7 @@ void Scene::ExportPov(const std::string& fname, const std::string& wdir)
 
 void Scene::Export(Exporter* ex) const
 {
+  ex->SetupTransform(this);
   ex->SceneStart(this);
   root_node_->Export(ex);
   ex->SceneEnd(this);
@@ -2039,21 +2073,26 @@ namespace {
         glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
         glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
         glEnd();
-     }
+      }
 
-     ~ViewportRenderer() {
-       glBindTexture(GL_TEXTURE_2D, 0);
-       glDisable(GL_TEXTURE_2D);
-       glMatrixMode(GL_PROJECTION);
-       glPopMatrix();
-       glMatrixMode(GL_MODELVIEW);
-       glPopMatrix();
-       glPopClientAttrib();
-       glPopAttrib();
-#if OST_SHADER_SUPPORT_ENABLED
-       Shader::Instance().PopProgram();
+      ~ViewportRenderer() {
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_TEXTURE_2D);
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+        glPopMatrix();
+        glPopClientAttrib();
+        glPopAttrib();
+#if defined(OST_GL_VERSION_2_0)
+        if(Scene::Instance().HasMultisample()) {
+          glEnable(GL_MULTISAMPLE);
+        }
 #endif
-     }
+#if OST_SHADER_SUPPORT_ENABLED
+        Shader::Instance().PopProgram();
+#endif
+      }
   };
 }
 
@@ -2205,6 +2244,8 @@ void Scene::render_glow()
 #endif  
 }
 
+#undef far
+#undef near
 namespace {
   geom::Mat4 frustum(float left, float right, float bot, float top, float near, float far) {
     float rl=1.0/(right-left);
@@ -2354,71 +2395,94 @@ void Scene::render_stereo()
   glPushMatrix();
   glLoadIdentity();
 
-  if(stereo_mode_==2) {
-    // draw interlaced lines in stencil buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLineWidth(1.0);
-    glEnable(GL_STENCIL_TEST);
-    glStencilMask(0x1);
-    glClearStencil(0x0);
-    glClear(GL_STENCIL_BUFFER_BIT);
-    glStencilFunc(GL_ALWAYS,0x1,0x1);
-    glStencilOp(GL_REPLACE,GL_REPLACE,GL_REPLACE);
-    glBegin(GL_LINES);
-    glColor3f(1.0,1.0,1.0);
-    for(unsigned int i=0;i<vp_height_;i+=2) {
-      glVertex2i(0,i);
-      glVertex2i(vp_width_-1,i);
-    } 
+  if(stereo_mode_==3) {
+#if OST_SHADER_SUPPORT_ENABLED
+    // anaglyph shader
+    Shader::Instance().PushProgram();
+    Shader::Instance().Activate("anaglyph");
+    GLuint cpr=Shader::Instance().GetCurrentProgram();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
+    glUniform1i(glGetUniformLocation(cpr,"left_scene"),0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_left_tex_ : scene_right_tex_);
+    glUniform1i(glGetUniformLocation(cpr,"right_scene"),1);
+    glActiveTexture(GL_TEXTURE0);
+    // draw screen quad
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+    glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+    glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+    glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
     glEnd();
-    
-    glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
-  }
-
-  // right eye
-  if(stereo_mode_==1) {
-    glDrawBuffer(GL_BACK_RIGHT);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  } else if(stereo_mode_==2) {
-    glStencilFunc(GL_EQUAL,0x0,0x1);
-  }
-#if OST_SHADER_SUPPORT_ENABLED
-  if(OST_GL_VERSION_2_0) {
-    glActiveTexture(GL_TEXTURE0);
-  }
+    Shader::Instance().PopProgram();
 #endif
-  glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_left_tex_ : scene_right_tex_);
-  // draw
-  glColor3f(1.0,0.0,1.0);
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.0,0.0); glVertex2i(0,0);
-  glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
-  glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
-  glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
-  glEnd();
+  } else {
+    if(stereo_mode_==2) {
+      // draw interlaced lines in stencil buffer
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glLineWidth(1.0);
+      glEnable(GL_STENCIL_TEST);
+      glStencilMask(0x1);
+      glClearStencil(0x0);
+      glClear(GL_STENCIL_BUFFER_BIT);
+      glStencilFunc(GL_ALWAYS,0x1,0x1);
+      glStencilOp(GL_REPLACE,GL_REPLACE,GL_REPLACE);
+      glBegin(GL_LINES);
+      glColor3f(1.0,1.0,1.0);
+      for(unsigned int i=0;i<vp_height_;i+=2) {
+        glVertex2i(0,i);
+        glVertex2i(vp_width_-1,i);
+      } 
+      glEnd();
+      glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
+    }
 
-  // left eye
-  if(stereo_mode_==1) {
-    glDrawBuffer(GL_BACK_LEFT);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  } else if(stereo_mode_==2) {
-    glStencilFunc(GL_EQUAL,0x1,0x1);
-  }
+    // right eye
+    if(stereo_mode_==1) {
+      glDrawBuffer(GL_BACK_RIGHT);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    } else if(stereo_mode_==2) {
+      glStencilFunc(GL_EQUAL,0x0,0x1);
+    } 
 #if OST_SHADER_SUPPORT_ENABLED
-  if(OST_GL_VERSION_2_0) {
-    glActiveTexture(GL_TEXTURE0);
-  }
+    if(OST_GL_VERSION_2_0) {
+      glActiveTexture(GL_TEXTURE0);
+    }
 #endif
-  glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
-  // draw
-  glColor3f(1.0,0.0,1.0);
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.0,0.0); glVertex2i(0,0);
-  glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
-  glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
-  glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
-  glEnd();
-  
+    glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_left_tex_ : scene_right_tex_);
+    // draw
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+    glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+    glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+    glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
+    glEnd();
+
+    // left eye
+    if(stereo_mode_==1) {
+      glDrawBuffer(GL_BACK_LEFT);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    } else if(stereo_mode_==2) {
+      glStencilFunc(GL_EQUAL,0x1,0x1);
+    }
+#if OST_SHADER_SUPPORT_ENABLED
+    if(OST_GL_VERSION_2_0) {
+      glActiveTexture(GL_TEXTURE0);
+    }
+#endif
+    glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
+    // draw
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+    glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+    glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+    glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
+    glEnd();
+  }
   // restore settings
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 0, 0, 0);
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -2429,6 +2493,11 @@ void Scene::render_stereo()
   glPopMatrix();
   glPopClientAttrib();
   glPopAttrib();
+#if defined(OST_GL_VERSION_2_0)
+  if(HasMultisample()) {
+    glEnable(GL_MULTISAMPLE);
+  }
+#endif
 #if OST_SHADER_SUPPORT_ENABLED
   Shader::Instance().PopProgram();
 #endif

@@ -176,7 +176,8 @@ void Shader::Setup()
     {"material_phong.glsl", GL_FRAGMENT_SHADER},
     {"material_hemi.glsl", GL_FRAGMENT_SHADER},
     {"material_toon1.glsl", GL_FRAGMENT_SHADER},
-    {"material_toon2.glsl", GL_FRAGMENT_SHADER}
+    {"material_toon2.glsl", GL_FRAGMENT_SHADER},
+    {"anaglyph_fs.glsl", GL_FRAGMENT_SHADER}
     //////////////////////////////////////////////////////////////////
   };
 
@@ -287,6 +288,9 @@ void Shader::Setup()
   Link("test_tex",
        shader_code_map["fraglight_vs.glsl"],
        shader_code_map["test_tex_fs.glsl"]);
+  Link("anaglyph",
+       shader_code_map["quadpp_vs.glsl"],
+       shader_code_map["anaglyph_fs.glsl"]);
 
   valid_=true;
 }

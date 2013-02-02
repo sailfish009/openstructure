@@ -199,6 +199,7 @@ public:
     
   bool operator==(const ChainView& rhs) const;
   bool operator!=(const ChainView& rhs) const;
+  bool HasAtoms() const;
   //@}
 private:
   ChainViewDataPtr  data_;

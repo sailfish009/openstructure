@@ -60,7 +60,7 @@ int ipow(int base, unsigned int exponent){
 }
 }
 
-DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
+DataViewer::DataViewer(QWidget* p, const ImageHandle& data, const QString& name):
   ost::gui::MainWindow(p,0),
   name_(name),
   panel_(new DataViewerPanel(data,this)),
@@ -80,11 +80,15 @@ DataViewer::~DataViewer()
 {
 }
 
-void DataViewer::SetData(const Data& d)
+void DataViewer::SetData(const ImageHandle& d)
 {
   panel_->SetData(d);
   fft_->SetData(d);
   info_->SetImageInfo(d);
+}
+
+const ImageHandle& DataViewer::GetData() const{
+  return panel_->GetObservedData();
 }
 
 NormalizerPtr DataViewer::GetNormalizer() const 
@@ -263,7 +267,7 @@ void DataViewer::SetAntialiasing(bool f)
 //////////////////////////
 // private methods
 
-void DataViewer::build(const Data& data) 
+void DataViewer::build(const ImageHandle& data)
 {
   build_menu();
 
@@ -278,9 +282,9 @@ void DataViewer::build(const Data& data)
   statusBar()->addWidget(zoomlabel_);
   statusBar()->addWidget(slablabel_);
 
-  AddDockWidget(ov_manager_gui_,"Overlays",true,0);
+  AddDockWidget(ov_manager_gui_,"Overlays",true,2);
   info_->SetImageInfo(data);
-  AddDockWidget(info_,"Info",true,0);
+  AddDockWidget(info_,"Info",true,2);
   AddDockWidget(argand_,"Argand",false,1);
   AddDockWidget(fft_,"FFT",false,1);
 

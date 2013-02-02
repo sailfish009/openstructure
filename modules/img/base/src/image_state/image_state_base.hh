@@ -30,7 +30,8 @@
 #include "image_state_base_fw.hh"
 
 #include <ost/base.hh>
-#include <ost/img/function.hh>
+#include <ost/img/module_config.hh>
+#include <ost/img/data.hh>
 
 #include "image_state_visitor_fw.hh"
 #include "type_fw.hh"
@@ -57,7 +58,7 @@ public:
   // provide deep copy
   virtual ImageStateBasePtr Clone(bool cc=true) const = 0;
 
-  virtual long MemSize() const = 0;
+  virtual size_t MemSize() const = 0;
 
   ///////////////////////////////////////
   // abstract virtual methods
@@ -207,11 +208,6 @@ public:
   ImageStateBase& operator-=(const ImageStateBase& b);
   ImageStateBase& operator*=(const ImageStateBase& b);
   ImageStateBase& operator/=(const ImageStateBase& b);
-
-  virtual void operator+=(const Function& b) = 0;
-  virtual void operator-=(const Function& b) = 0;
-  virtual void operator*=(const Function& b) = 0;
-  virtual void operator/=(const Function& b) = 0;
 
 protected:
   ImageStateBase() {}

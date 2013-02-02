@@ -42,8 +42,8 @@ class HSCWidget(RenderModeWidget):
     max_arc_detail = 20
     
     min_width = 0.1
-    max_width = 2.5
-    max_tube_width= 2.0
+    max_width = 5.0
+    max_tube_width= 5.0
 
     min_tube_ratio = 0.2
     max_tube_ratio = 4

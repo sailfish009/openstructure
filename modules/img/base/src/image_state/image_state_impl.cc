@@ -117,7 +117,7 @@ ImageStateBasePtr ImageStateImpl<T,D>::Clone(bool cc) const
 
 
 template <typename T, class D>
-long ImageStateImpl<T,D>::MemSize() const 
+size_t ImageStateImpl<T,D>::MemSize() const
 {
   return data_.MemSize();
 }
@@ -125,7 +125,7 @@ long ImageStateImpl<T,D>::MemSize() const
 template <typename T, class D>
 DataType ImageStateImpl<T,D>::GetType() const
 {
-  return Val2Type<T>();
+  return data_.GetDataType();
 }
 
 template <typename T, class D>
@@ -564,15 +564,15 @@ const T& ImageStateImpl<T,D>::Value(const Index& i) const
 }
 
 template <typename T, class D>
-T& ImageStateImpl<T,D>::Value(unsigned int i)
+T& ImageStateImpl<T,D>::Value(size_t i)
 {
-  return data_.Value(i);
+    return data_.GetData()[i];
 }
 
 template <typename T, class D>
-const T& ImageStateImpl<T,D>::Value(unsigned int i) const
+const T& ImageStateImpl<T,D>::Value(size_t i) const
 {
-  return data_.Value(i);
+    return data_.GetData()[i];
 }
 
 template <typename T, class D>
@@ -702,130 +702,6 @@ ImageStateBase& ImageStateImpl<T,D>::operator/=(const Complex& v)
   return *this;
 }
 
-// add function
-
-template<typename T>
-void add_func_value(T& v, const Function& f, const Point& p);
-
-template<>
-void add_func_value(Real& v, const Function& f, const Point& p)
-{
-  v+=f.GetReal(p);
-}
-
-template<>
-void add_func_value(Complex& v, const Function& f, const Point& p)
-{
-  v+=f.GetComplex(p);
-}
-
-template<typename T>
-void add_func_value(T& v, const Function& f, const Point& p)
-{
-  v+=static_cast<T>(f.GetReal(p));
-}
-
-template <typename T, class D>
-void ImageStateImpl<T,D>::operator+=(const Function& f)
-{
-  for(ExtentIterator it(this->GetExtent());!it.AtEnd();++it) {
-    add_func_value(this->Value(it),f,it);
-  }
-}
-
-// sub function
-
-template<typename T>
-void sub_func_value(T& v, const Function& f, const Point& p);
-
-template<>
-void sub_func_value(Real& v, const Function& f, const Point& p)
-{
-  v-=f.GetReal(p);
-}
-
-template<>
-void sub_func_value(Complex& v, const Function& f, const Point& p)
-{
-  v-=f.GetComplex(p);
-}
-
-template<typename T>
-void sub_func_value(T& v, const Function& f, const Point& p)
-{
-  v-=static_cast<T>(f.GetReal(p));
-}
-
-template <typename T, class D>
-void ImageStateImpl<T,D>::operator-=(const Function& f)
-{
-  for(ExtentIterator it(this->GetExtent());!it.AtEnd();++it) {
-    sub_func_value(this->Value(it),f,it);
-  }
-}
-
-// mul function
-
-template<typename T>
-void mul_func_value(T& v, const Function& f, const Point& p);
-
-template<>
-void mul_func_value(Real& v, const Function& f, const Point& p)
-{
-  v*=f.GetReal(p);
-}
-
-template<>
-void mul_func_value(Complex& v, const Function& f, const Point& p)
-{
-  v*=f.GetComplex(p);
-}
-
-template<typename T>
-void mul_func_value(T& v, const Function& f, const Point& p)
-{
-  v*=static_cast<T>(f.GetReal(p));
-}
-
-template <typename T, class D>
-void ImageStateImpl<T,D>::operator*=(const Function& f)
-{
-  for(ExtentIterator it(this->GetExtent());!it.AtEnd();++it) {
-    mul_func_value(this->Value(it),f,it);
-  }
-}
-
-// div function
-
-template<typename T>
-void div_func_value(T& v, const Function& f, const Point& p);
-
-template<>
-void div_func_value(Real& v, const Function& f, const Point& p)
-{
-  v/=f.GetReal(p);
-}
-
-template<>
-void div_func_value(Complex& v, const Function& f, const Point& p)
-{
-  v/=f.GetComplex(p);
-}
-
-template<typename T>
-void div_func_value(T& v, const Function& f, const Point& p)
-{
-  v/=static_cast<T>(f.GetReal(p));
-}
-
-
-template <typename T, class D>
-void ImageStateImpl<T,D>::operator/=(const Function& f)
-{
-  for(ExtentIterator it(this->GetExtent());!it.AtEnd();++it) {
-    div_func_value(this->Value(it),f,it);
-  }
-}
 
 template <typename T, class D>
 template <typename U>

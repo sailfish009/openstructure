@@ -113,7 +113,7 @@ void EntityRenderer::SubstractView(const mol::EntityView& view)
 
 void EntityRenderer::ClearViews()
 {
-  if (full_view_.IsValid() && full_view_.GetAtomCount()>0) {
+  if (full_view_.IsValid() && full_view_.HasAtoms()) {
     full_view_=full_view_.CreateEmptyView();
     if(effective_view_.IsValid()){
       effective_view_=effective_view_.CreateEmptyView();
@@ -127,7 +127,7 @@ void EntityRenderer::ClearViews()
 
 bool EntityRenderer::HasDataToRender() const
 {
-  return effective_view_ && effective_view_.GetAtomCount()>0;
+  return effective_view_ && effective_view_.HasAtoms();
 }
 
 mol::EntityView EntityRenderer::GetFullView()
@@ -163,7 +163,7 @@ void EntityRenderer::Export(Exporter* ex)
 
 bool EntityRenderer::HasSelection() const
 {
-  return (sel_.IsValid() && sel_.GetAtomCount()>0);
+  return (sel_.IsValid() && sel_.HasAtoms());
 }
 
 void EntityRenderer::SetSelection(const mol::EntityView& sel)

@@ -96,8 +96,6 @@ String get_ost_root()
 #else
   #ifdef _MSC_VER
     dir.cdUp();
-    dir.cdUp();
-    dir.cdUp();
   #else
     dir.cdUp();
     dir.cdUp();
@@ -106,25 +104,23 @@ String get_ost_root()
   return dir.path().toStdString();
 }
 
-void setup_python_search_path(const String& root, PythonInterpreter& pi)
+String setup_python_search_path(const String& root, PythonInterpreter& pi)
 {
   std::stringstream site_pkgs;
   site_pkgs << "python" << PY_MAJOR_VERSION << "." << PY_MINOR_VERSION;
 #ifdef _MSC_VER
-  pi.AppendModulePath(QString::fromStdString(root+"\\lib\\"+site_pkgs.str()
-                                             +"\\site-packages"));
+  String loc=root+"\\lib\\"+site_pkgs.str()+"\\site-packages";
 #else  
-#  if (defined(__ppc64__) || defined(__x86_64__)) && !defined(__APPLE__)
-  pi.AppendModulePath(QString::fromStdString(root+"/lib64/"+
-                                             site_pkgs.str()+
-                                             "/site-packages"));
-#  else
-  pi.AppendModulePath(QString::fromStdString(root+"/lib/"+
-                                             site_pkgs.str()+
-                                             "/site-packages"));
-#  endif
+# if (defined(__ppc64__) || defined(__x86_64__)) && !defined(__APPLE__)
+  String loc=root+"/lib64/"+site_pkgs.str()+"/site-packages";
+# else
+  String loc=root+"/lib/"+site_pkgs.str()+"/site-packages";
+# endif
 #endif
+  pi.AppendModulePath(QString::fromStdString(loc));
+  // dng is an interactive python session, so add '.' to search path
   pi.AppendModulePath(".");  
+  return loc;
 }
   
 int setup_resources(QApplication& app) 
@@ -186,9 +182,18 @@ int init_python_interpreter()
                      console_logger,
                      SLOT(AppendOutput(unsigned int, const QString &)));
   }  
-  setup_python_search_path(root, py);
-  py.RunCommand("from ost import *");
-  py.RunCommand("gui_mode=True");
+  String python_loc=setup_python_search_path(root, py);
+  //py.RunCommand("from ost import *");
+  //py.RunCommand("gui_mode=True");
+  std::stringstream cmd;
+  cmd << "execfile('" << python_loc;
+#ifdef _MSC_VER
+  cmd << "\\ost\\gui\\";
+#else  
+  cmd << "/ost/gui/";
+#endif
+  cmd << "gosty_startup.py')";
+  py.RunCommand(QString::fromStdString(cmd.str()));
   return 0;
 }
 
@@ -220,6 +225,9 @@ public:
 
 }
 
+#ifdef _MSC_VER
+  #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+#endif
 // initialise gosty - the graphical open structure interpreter
 int main(int argc, char** argv)
 {

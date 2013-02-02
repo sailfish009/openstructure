@@ -27,17 +27,19 @@ parser.disable_interspersed_args()
 (options, args) = parser.parse_args()
 
 _site_packs='python%d.%d/site-packages' % sys.version_info[0:2]
+_base_dir=os.getenv('DNG_ROOT')
 if platform.machine()=='x86_64':
-  sys.path.insert(0, os.path.join(os.getenv('DNG_ROOT'), 'lib64', _site_packs))
+  sys.path.insert(0, os.path.join(_base_dir, 'lib64', _site_packs))
 else:
-  sys.path.insert(0,os.path.join(os.getenv('DNG_ROOT'), 'lib', _site_packs))
+  sys.path.insert(0,os.path.join(_base_dir, 'lib', _site_packs))
      
 from ost import *
 import ost
 
-ost.SetPrefixPath(os.getenv('DNG_ROOT'))
+ost.SetPrefixPath(_base_dir)
 
 def _InitRuleBasedProcessor():
+def _InitRuleBasedBuilder():
   compound_lib_path=os.path.join(ost.GetSharedDataPath(), 'compounds.chemlib')
   if os.path.exists(compound_lib_path):
     compound_lib=conop.CompoundLib.Load(compound_lib_path)
@@ -49,9 +51,7 @@ _InitRuleBasedProcessor()
 import os.path
 HistoryFile=os.path.expanduser('~/.ost_history')
 
-# this is a silly name...
-InGUIMode=False
-# ... lets be more pythonic
+# we are not in GUI mode. 
 gui_mode=False
 
 sys.ps1='ost> '
@@ -75,6 +75,7 @@ else:
 
 PushVerbosityLevel(options.vlevel)
 
+# this should probably only be added when running an interactive shell
 sys.path.append(".")
 
 if len(parser.rargs)>0 :

@@ -5,6 +5,7 @@ from ost import stutil
 import itertools
 import operator
 import cPickle
+import weakref
 from ost import LogError, LogWarning, LogInfo, LogVerbose
 
 def MakeTitle(col_name):
@@ -126,6 +127,45 @@ class TableCol:
   def __div__(self, rhs):
     return BinaryColExpr(operator.div, self, rhs)
 
+class TableRow:
+  """
+  Essentially a named tuple, but allows column names that are not valid 
+  python variable names.
+  """
+  def __init__(self, row_data, tab):
+    self.__dict__['tab'] = weakref.proxy(tab)
+    self.__dict__['row_data'] = row_data
+
+  def __getitem__(self, col_name):
+    if type(col_name)==int:
+      return self.row_data[col_name]
+    return self.row_data[self.tab.GetColIndex(col_name)]
+
+  def __str__(self):
+    s = []
+    for k, v in zip(self.__dict__['tab'].col_names, self.__dict__['row_data']):
+      s.append('%s=%s' % (k, str(v)))
+    return ', '.join(s)
+      
+      
+  def __len__(self):
+    return len(self.row_data)
+
+  def __setitem__(self, col_name, val):
+    if type(col_name)==int:
+      self.row_data[col_name] = val
+    else:
+      self.row_data[self.tab.GetColIndex(col_name)] = val
+
+  def __getattr__(self, col_name):
+    if 'col_names' not in self.tab.__dict__ or col_name not in self.tab.col_names:
+      raise AttributeError(col_name)
+    return self.row_data[self.tab.GetColIndex(col_name)]
+
+  def __setattr__(self, col_name, val):
+    if 'col_names' not in self.tab.__dict__ or col_name not in self.tab.col_names:
+      raise AttributeError(col_name)
+    self.row_data[self.tab.GetColIndex(col_name)] = val
 
 class Table(object):
   """
@@ -192,6 +232,15 @@ class Table(object):
         self.col_types=['string' for u in range(len(self.col_names))]
       if len(kwargs)>0:
         self._AddRowsFromDict(kwargs)
+
+  def __getattr__(self, col_name):
+    # pickling doesn't call the standard __init__ defined above and thus
+    # col_names might not be defined. This leads to infinite recursions.
+    # Protect against it by checking that col_names is contained in 
+    # __dict__
+    if 'col_names' not in self.__dict__ or col_name not in self.col_names:
+      raise AttributeError(col_name)
+    return TableCol(self, col_name)
 
   @staticmethod
   def _ParseColTypes(types, exp_num=None):
@@ -614,7 +663,6 @@ Statistics for column %(col)s
       self._AddRowsFromDict(data, overwrite)
     else:
       if len(data)!=len(self.col_names):
-        print data, self.col_names
         msg='data array must have %d elements, not %d'
         raise ValueError(msg % (len(self.col_names), len(data)))
       new_row = [self._Coerce(v, t) for v, t in zip(data, self.col_types)]
@@ -770,6 +818,449 @@ Statistics for column %(col)s
       if matches:
         filt_tab.AddRow(row)
     return filt_tab
+
+
+  def _EvaluateEqualNone(self, lhs, rhs):
+    return (lhs==None or lhs!=lhs) == (rhs==None or rhs!=rhs)
+ 
+  def _EvaluateNonEqualNone(self, lhs, rhs):
+    return (lhs==None or lhs!=lhs) != (rhs==None or rhs!=rhs)
+ 
+  def _EvaluateAnd(self, lhs, rhs):
+    return lhs and rhs
+
+  def _EvaluateOr(self, lhs, rhs):
+    return lhs or rhs
+
+  def _EvaluateEqual(self, lhs, rhs):
+    return lhs==rhs
+
+  def _EvaluateNonEqual(self, lhs, rhs):
+    return lhs!=rhs
+
+  def _EvaluateLower(self, lhs, rhs):
+    return lhs<rhs
+
+  def _EvaluateGreater(self, lhs, rhs):
+    return lhs>rhs
+
+  def _EvaluateLowerEqual(self, lhs, rhs):
+    return lhs<=rhs
+
+  def _EvaluateGreaterEqual(self, lhs, rhs):
+    return lhs>=rhs
+
+  def _EvaluateAdd(self, lhs, rhs):
+    if lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
+      return None
+    return lhs+rhs
+
+  def _EvaluateSubtract(self, lhs, rhs):
+    if lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
+      return None
+    return lhs-rhs
+
+  def _EvaluateMultiply(self, lhs, rhs):
+    if lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
+      return None
+    return lhs*rhs
+
+  def _EvaluateDivide(self, lhs, rhs):
+    if lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
+      return None
+    return lhs/rhs
+
+
+  def _EvaluateOperator(self, op, lhs, rhs):
+
+    if op=='+':
+      return self._EvaluateAdd(lhs, rhs)
+    elif op=='-':
+      return self._EvaluateSubtract(lhs, rhs)
+    elif op=='/':
+      return self._EvaluateDivide(lhs, rhs)
+    elif op=='*':
+      return self._EvaluateMultiply(lhs, rhs)
+    elif lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
+      if op=='=':
+        return self._EvaluateEqualNone(lhs,rhs)
+      elif op=='!=':
+        return self._EvaluateNonEqualNone(lhs,rhs)
+      return None
+    elif op=='and':
+      return self._EvaluateAnd(lhs, rhs)
+    elif op=='or':
+      return self._EvaluateOr(lhs, rhs)
+    elif op=='=':
+      return self._EvaluateEqual(lhs, rhs)
+    elif op=='!=':
+      return self._EvaluateNonEqual(lhs, rhs)
+    elif op=='<':
+      return self._EvaluateLower(lhs, rhs)
+    elif op=='>':
+      return self._EvaluateGreater(lhs, rhs)
+    elif op=='<=':
+      return self._EvaluateLowerEqual(lhs, rhs)
+    elif op=='>=':
+      return self._EvaluateGreaterEqual(lhs, rhs)
+
+    else:
+      raise ValueError('Unknown operator: '+op)
+
+  def _EvaluateRPN(self, RPNExp, valid_operators):
+    #Evaluates the reverse polish notation
+    stack=list()
+    while True:
+      if len(RPNExp)==0:
+        break
+      exp=RPNExp.pop(0)
+      if exp in valid_operators:
+        if len(stack)<2:
+          raise ValueError('Cannot evaluate operator on less than two operands!')
+        rhs=stack.pop()
+        lhs=stack.pop()
+        result=self._EvaluateOperator(exp, lhs, rhs)
+        if result==None:
+          return False
+        stack.append(result)
+      else:
+        stack.append(exp)
+    if len(stack)>1:
+      raise ValueError('Too many operands for given operators!')
+    return stack.pop()
+
+  def _ShuntingYard(self, split_expression, valid_operators, precedence):
+    #Creates the so called reverse polish notation out of the expression parser output.
+    #note, that there won't be parenthesis anymore and potential parenthesis
+    #mismatches get recognized.
+    #The shunting yard algorithm from dijkstra gets used.
+
+    output_stack=list()
+    operator_stack=list()
+
+    while True:
+      if len(split_expression)==0:
+        while True:
+          if len(operator_stack)==0:
+            break
+          if operator_stack[-1] in ['(',')']:
+            raise ValueError('Parenthesis mismatch!')
+          output_stack.append(operator_stack.pop())
+        break
+
+      exp=split_expression.pop(0)
+
+      if exp == '(':
+        operator_stack.append('(')
+        continue
+
+      if exp in valid_operators:
+        prec=precedence[exp]
+        while len(operator_stack)>0:
+          if operator_stack[-1]=='(':
+            break
+          elif prec>=precedence[operator_stack[-1]]:
+            output_stack.append(operator_stack.pop())
+          else:
+            break
+        operator_stack.append(exp)
+        continue
+        
+      if exp == ')':
+        while True:
+          if len(operator_stack)==0:
+            raise ValueError('Parenthesis mismatch!')
+          if operator_stack[-1]=='(':
+            operator_stack.pop()
+            break
+          output_stack.append(operator_stack.pop())
+        continue
+
+      output_stack.append(exp)
+
+    return output_stack
+
+  def _EvaluateOperand(self, operand):
+
+    import re
+
+    float_expression=re.compile('[-+]?[0-9]*\.[0-9]+(?:[eE][-+]?[0-9]+)?$')
+    int_expression=re.compile('[-+]?[0-9]+(?:[eE][-+]?[0-9]+)?$')
+    bool_expression=re.compile('true$|True$|false$|False$')
+    none_expression=re.compile('None$|none$|nan$|NAN$|NaN$')
+
+    if re.match(float_expression,operand):
+      return float(operand)
+    elif re.match(int_expression, operand):
+      return int(operand)
+    elif re.match(bool_expression,operand):
+      if operand == 'false' or operand == 'False':
+        return False
+      return True
+    elif re.match(none_expression,operand):
+      return None
+    return operand
+
+    #If nothing above matches, operand must be a string, full string
+    #gets returned.
+
+
+  def _LexerHelper(self, operand):
+    if len(operand.strip())>0:
+      if ' ' in operand.strip():
+        raise ValueError('Cannot Evaluate %s'%(operand))
+      return [operand.strip()]
+    return []
+
+
+
+  def _ExpressionLexer(self, expression, valid_operators, precedence):
+
+    #Reads token after token and searches for brackets and valid_operators
+    #everything, that doesn't match the above is assumed to be an operand
+    #and is cast into the most likely type based on regular expression
+    #Note, that there is no check, wether the operands can be processed by
+    #their corresponding operators (with respect to types)!
+
+    split_expression=list()
+    actual_position=0
+    eaten_stuff=''
+
+    while True:
+
+      if actual_position>=len(expression):
+        if len(eaten_stuff.strip())>0:
+          op=eaten_stuff.strip()
+          if ' ' in op:
+            raise ValueError('cannot evaluate %s'%(op))
+          split_expression.append(op)
+
+        #check for problematic cases like 'a<=b<=c'. We don't know which operator to evaluate first
+        for i in range(len(split_expression)-3):
+          if (split_expression[i] in valid_operators) and (split_expression[i+2] in valid_operators):
+            if precedence[split_expression[i]]==precedence[split_expression[i+2]]:
+              raise ValueError('Cannot Evaluate '+' '.join(split_expression[i:i+3])+' since both operators have same precedence!')
+
+
+        #handle , operator
+        #replaces an expression like 'rnum=1,2,3' with '(rnum=1 or rnum=2 or rnum=3)'
+
+        temp_split_expression=list()
+        skips=0
+
+        for i in range(len(split_expression)):
+          if skips>0:
+            skips-=1
+            continue
+          if ',' in split_expression[i]:
+
+            if split_expression[max(0,i-1)] != '=' and split_expression[min(i+1,len(split_expression)-1)] != '=':
+              raise ValueError('Can evaluate \',\' sign only in combination with \'=\'')
+
+            single_operands=split_expression[i].split(',')
+
+            if split_expression[max(0,i-1)]=='=':
+              if i-2<0:
+                raise ValueError('Does it really make sense to start with an \'=\'')
+              main_operand=split_expression[i-2]
+              temp_split_expression.pop()
+              temp_split_expression.pop()
+              skips=0
+
+            else:
+              if i+2>len(split_expression)-1:
+                raise ValueError('Does it really make sense to end with an \'=\'')
+              main_operand=split_expression[i+2]
+              skips=2
+
+            temp_expression=list(['('])
+            temp_expression+=' or '.join(['%s = %s'% (a,b) for (a,b) in zip(len(single_operands)*[main_operand],single_operands)]).split()
+            temp_expression.append(')')
+            temp_split_expression+=temp_expression
+            continue
+
+          temp_split_expression.append(split_expression[i])
+
+        split_expression=temp_split_expression
+
+        #handle ':' operator
+        #replaces an expression like 'col_a=x:y' with '(col_a>=x and col_a<=y)'
+        
+        temp_split_expression=list()
+        skips=0
+
+        for i in range(len(split_expression)):
+          if skips>0:
+            skips-=1
+            continue
+          if ':' in split_expression[i]:
+            if split_expression[max(0,i-1)] != '=' and split_expression[min(i+1,len(split_expression)-1)] != '=':
+              raise ValueError('Can evaluate \':\' sign only in combination with \'=\'')
+            if len(split_expression[i].split(':')) != 2:
+              raise ValueError('Can operate \':\' operator only on 2 operands')
+            
+            #even though we are still in the lexer, its necessary to evaluate the next
+            #expressions... They will be written back into the splitexpression as string again
+            lhs=self._EvaluateOperand(split_expression[i].split(':')[0])
+            rhs=self._EvaluateOperand(split_expression[i].split(':')[1])
+
+            template_expression=['(','','<=','','and','','<=','',')']
+
+            if split_expression[max(0,i-1)] == '=':
+              if i-2<0:
+                raise ValueError('Does it really make sense to start with an \'=\'?')
+              temp_split_expression.pop()
+              temp_split_expression.pop()
+              template_expression[3]=split_expression[i-2]
+              template_expression[5]=split_expression[i-2]
+              skips=0
+
+            else:
+              if i+2>len(split_expression)-1:
+                raise ValueError('Does it really make sense to end with an \'=\'?')
+              template_expression[3]=split_expression[i+2]
+              template_expression[5]=split_expression[i+2]
+              skips=2 
+
+            template_expression[1]=str(min(lhs,rhs))
+            template_expression[7]=str(max(lhs,rhs))
+            temp_split_expression+=template_expression
+            continue
+
+          temp_split_expression.append(split_expression[i])
+  
+        split_expression=temp_split_expression
+
+        return split_expression
+
+      token=expression[actual_position]
+
+      if token.isspace():
+        split_expression+=self._LexerHelper(eaten_stuff)
+        actual_position+=1
+        eaten_stuff=''
+        continue
+
+      if token in ['(','[','{']:
+        split_expression+=self._LexerHelper(eaten_stuff)
+        split_expression.append('(')
+        actual_position+=1
+        eaten_stuff=''
+        continue
+
+      if token in [')',']','}']:
+        split_expression+=self._LexerHelper(eaten_stuff)
+        split_expression.append(')')
+        actual_position+=1
+        eaten_stuff=''
+        continue
+
+      if token in ['+','-','*','/','=']:
+        split_expression+=self._LexerHelper(eaten_stuff)
+        split_expression.append(token)
+        actual_position+=1
+        eaten_stuff=''
+        continue
+
+      if token == '!':
+        if actual_position+1==len(expression):
+          raise ValueError('Cannot evaluate \'!\'')
+        if expression[actual_position+1]== '=':
+          split_expression+=self._LexerHelper(eaten_stuff)
+          split_expression.append('!=')
+          actual_position+=2
+          eaten_stuff=''
+          continue
+        else:
+          raise ValueError('Cannot evaluate single \'!\'')
+
+      if token in ['<','>']:
+        if actual_position+1<len(expression):
+          if expression[actual_position+1]=='=':
+            split_expression+=self._LexerHelper(eaten_stuff)
+            split_expression.append(token+'=')
+            actual_position+=2
+            eaten_stuff=''
+            continue
+        split_expression+=self._LexerHelper(eaten_stuff)
+        split_expression.append(token)
+        actual_position+=1
+        eaten_stuff=''
+        continue
+
+      eaten_stuff+=token
+      actual_position+=1
+
+
+  def Select(self, query):
+
+    """
+    Returns a new table object containing all rows matching a logical query expression.
+    
+    *query* is a string containing the logical expression, that will be evaluated
+    for every row. 
+
+    Operands have to be the name of a column or an expression that can be parsed to 
+    float, int, bool or string.
+    Valid operators are: and, or, !=, <=, >=, =, <, >, +, -, *, / 
+    
+    .. code-block:: python
+    
+      subtab=tab.Select('col_a>0.5 and (col_b=5 or col_c=5)')
+
+    The selection query should be self explaining. Allowed parenthesis are: (), [], {}, 
+    whereas parenthesis mismatches get recognized. If there is a row containing 'None'
+    in a query relevant column, it will be neglected.
+
+    There are two special expressions:
+
+    .. code-block:: python
+
+      #selects rows, where 1.0<=col_a<=1.5
+      subtab=tab.Select('col_a=1.0:1.5')
+
+      #selects rows, where col_a=1 or col_a=2 or col_a=3
+      subtab=tab.Select('col_a=1,2,3')
+
+    Be aware, that there is no typechecking! Non consistent combinations of types
+    can lead to weird behaviour!
+
+    """
+
+    valid_operators=['and','or','!=','<=','>=','=','<','>','+','-','*','/']
+
+    #http://en.wikipedia.org/wiki/Order_of_operations
+
+    precedence={'or':6 , 'and':5 , '!=':4 , '=':4 , '<=':3 , 
+                '>=':3 , '<':3 , '>':3 , '+':2 , '-':2 , '*':1 , '/':1}
+
+    split_expression=self._ExpressionLexer(query, valid_operators, precedence)
+    rpn_expression=self._ShuntingYard(list(split_expression), valid_operators, precedence)
+
+    tab_indices=list()
+    exp_indices=list()
+
+    #extract indices for tab values and cast other operands in their most likely type based on
+    #regular expressions
+    for i, exp in enumerate(rpn_expression):
+      if exp in self.col_names:
+        tab_indices.append(self.GetColIndex(exp))
+        exp_indices.append(i)
+        continue
+      elif exp in valid_operators or exp in ['(',')']:
+        continue
+      rpn_expression[i] = self._EvaluateOperand(exp)
+
+    selected_tab=Table(list(self.col_names), list(self.col_types))
+
+    for row in self.rows:
+      for ti, ei in zip(tab_indices, exp_indices):
+        rpn_expression[ei] = row[ti]
+      if self._EvaluateRPN(list(rpn_expression), valid_operators):
+        selected_tab.AddRow(row)
+
+    return selected_tab
+
 
   @staticmethod
   def _LoadOST(stream_or_filename):
@@ -1222,7 +1713,7 @@ Statistics for column %(col)s
         if y_range:
           plt.ylim(y_range[0], y_range[1])
         if diag_line:
-          plt.plot(x_range, y_range, '-')
+          plt.plot(x_range, y_range, '-', color='black')
         
         plt.ylabel(nice_y, size='x-large')
       else:
@@ -1468,7 +1959,6 @@ Statistics for column %(col)s
     fig=plt.figure()
     ax=fig.add_subplot(111)
     legend_data=[]
-
     for i in range(len(data)):
       legend_data.append(ax.bar(ind+i*single_bar_width,data[i],single_bar_width,bottom=bottom,color=colors[i],yerr=yerr_data[i], ecolor='black')[0])
       
@@ -1496,7 +1986,10 @@ Statistics for column %(col)s
     ax.set_xticklabels(x_labels, rotation = x_labels_rotation)
       
     if legend:
-      ax.legend(legend_data, cols)   
+      if legend == True:
+        ax.legend(legend_data, cols)   
+      else:
+        ax.legend(legend_data, legend)
       
     if save:
       plt.savefig(save)
@@ -1599,14 +2092,20 @@ Statistics for column %(col)s
       raise ValueError('parameter x_range must contain exactly two elements')
     if y_range and (IsScalar(y_range) or len(y_range)!=2):
       raise ValueError('parameter y_range must contain exactly two elements')
+
+    ext = [min(xdata),max(xdata),min(ydata),max(ydata)]
+
     if x_range:
       plt.xlim((x_range[0], x_range[1]))
+      ext[0]=x_range[0]
+      ext[1]=x_range[1]
     if y_range:
       plt.ylim(y_range[0], y_range[1])
-    extent = None
-    if x_range and y_range:
-      extent = [x_range[0], x_range[1], y_range[0], y_range[1]]
-    plt.hexbin(xdata, ydata, bins=binning, cmap=colormap, extent=extent)
+      ext[2]=y_range[0]
+      ext[3]=y_range[1]
+
+
+    plt.hexbin(xdata, ydata, bins=binning, cmap=colormap, extent=ext)
 
     plt.title(title, size='x-large', fontweight='bold',
               verticalalignment='bottom')
@@ -2750,6 +3249,7 @@ Statistics for column %(col)s
             return False
     return True
     
+
   def Extend(self, tab, overwrite=None):
     """
     Append each row of *tab* to the current table. The data is appended based

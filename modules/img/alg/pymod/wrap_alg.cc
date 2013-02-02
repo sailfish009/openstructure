@@ -236,7 +236,7 @@ BOOST_PYTHON_MODULE(_ost_img_alg)
     .def("GetBlocksize",&alg::DiscreteShrink::GetBlocksize)
     ;
 
-  class_<alg::FractionalShift, bases<ModIPAlgorithm> >("FractionalShift", init<optional <Real,Real,Real> >() )
+  class_<alg::FractionalShift, bases<ConstModIPAlgorithm> >("FractionalShift", init<optional <Real,Real,Real> >() )
     .def(init<const Vec3&>())
     .def("SetShift",frac_shift0)
     .def("SetShift",frac_shift1)

@@ -36,22 +36,22 @@
 #include <ost/img/alg/module_config.hh>
 
 
-#define IMG_ALG_TRANSCENDENTALS_BLOCK(FF,NN,SS)                               \
-struct FF {					                                                           \
+#define IMG_ALG_TRANSCENDENTALS_BLOCK(FF,NN,SS)                                \
+struct FF {					                                                   \
   FF() {}                                                                      \
   ~FF() {}                                                                     \
   template <typename T, class D>                                               \
   void VisitState(ImageStateImpl<T,D>& isi) const {	                           \
-    T* end = isi.Data().GetEnd();                                              \
+    const T* end = isi.Data().GetEnd();                                        \
     for(T* it = isi.Data().GetData(); it!=end; ++it) {                         \
       (*it) = SS (*it);                                                        \
     }                                                                          \
   }                                                                            \
   template <class D>                                                           \
   void VisitState(ImageStateImpl<Word,D>& isi) const {                         \
-    Word* end = isi.Data().GetEnd();                                           \
+    const Word* end = isi.Data().GetEnd();                                     \
     for(Word* it = isi.Data().GetData(); it!=end; ++it) {                      \
-      (*it) = static_cast<Word>(SS(static_cast<Real>(*it)));                 \
+      (*it) = static_cast<Word>(SS(static_cast<Real>(*it)));                   \
     }                                                                          \
   }                                                                            \
   static String GetAlgorithmName() {return "";}                                \
@@ -75,7 +75,7 @@ struct PowFnc {
 
   template <typename T, class D>
   void VisitState(ImageStateImpl<T,D>& isi) const {
-    T* end = isi.Data().GetEnd();
+    const T* end = isi.Data().GetEnd();
     for(T* it = isi.Data().GetData(); it!=end; ++it) {
       (*it) = std::pow(*it,exp_);
     }

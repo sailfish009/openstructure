@@ -41,6 +41,7 @@ The following categories of a mmCIF file are considered by the reader:
 * ``struct_ref`` stored in :class:`MMCifInfoStructRef`
 * ``struct_ref_seq`` stored in :class:`MMCifInfoStructRefSeq`
 * ``struct_ref_seq_dif`` stored in :class:`MMCifInfoStructRefDif`
+* ``database_pdb_rev`` stored in :class:`MMCifInfoRevisions`
 
 Info Classes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -99,6 +100,14 @@ of the annotation available.
   .. attribute:: struct_refs
 
     Lists all links to external databases in the mmCIF file.
+
+  .. attribute:: revisions
+
+    Stores a simple history of a PDB entry.
+
+    Also available as :meth:`GetRevisions`. May be extended by
+    :meth:`AddRevision`.
+
   .. method:: AddCitation(citation)
 
     Add a citation to the citation list of an info object.
@@ -195,6 +204,28 @@ of the annotation available.
     :param pdb_chain_id: atom_site.auth_asym_id
     :type pdb_chain_id: :class:`str`
     :returns: atom_site.label_asym_id as :class:`str`
+
+  .. method:: AddRevision(num, date, status)
+
+    Add a new iteration to the history.
+
+    :param num: database_pdb_rev.num
+    :type num: :class:`int`
+    :param date: database_pdb_rev.date
+    :type date: :class:`str`
+    :param status: database_pdb_rev.status
+    :type status: :class:`str`
+
+  .. method:: GetRevisions()
+
+    See :attr:`revisions`
+
+  .. method:: SetRevisionsDateOriginal(date)
+
+    Set the date, when this entry first entered the PDB.
+
+    :param date: database_pdb_rev.date_original
+    :type date: :class:`str`
 
 .. class:: MMCifInfoCitation
 
@@ -510,7 +541,7 @@ of the annotation available.
 
     See :attr:`operations`
 
-.. function:: PDBize(asu, seqres=None, min_polymer_size=10)
+.. function:: PDBize(asu, seqres=None, min_polymer_size=10, transformation=False)
 
     Returns the biological assembly (bio unit) for an entity. The new entity
     created is well suited to be saved as a PDB file. Therefore the function
@@ -525,6 +556,9 @@ of the annotation available.
       - ligands which resemble a polymer but have less than min_polymer_size
         residues are assigned the same numeric residue number. The residues are
         distinguished by insertion code.
+      - sometimes bio units exceed the coordinate system storable in a PDB file.
+        In that case, the box around the entity will be aligned to the lower
+        left corner of the coordinate system.
 
     Since this function is at the moment mainly used to create biounits from
     mmCIF files to be saved as PDBs, the function assumes that the
@@ -541,6 +575,9 @@ of the annotation available.
       get its own chain. Everything below that number will be sorted into the 
       ligand chain.
     :type min_polymer_size: int
+    :param transformation:  If set, return the transformation matrix used to
+      move the bounding box of the bio unit to the lower left corner.
+    :type transformation: :class:`bool`
 
 .. class:: MMCifInfoStructDetails
 
@@ -827,7 +864,88 @@ of the annotation available.
 
     :type: :class:`str`
 
-..  LocalWords:  cas isbn pubmed asu seqres conop casp COMPND OBSLTE
+.. class:: MMCifInfoRevisions
+
+  Revision history of a PDB entry. If you find a '?' somewhere, this means
+  'not set'.
+
+   .. attribute:: date_original
+
+   The date when this entry was seen in PDB for the very first time. This is
+   not necessarily the release date.
+
+   :type: :class:`str`
+
+   .. attribute:: first_release
+
+   Index + 1 of the revision releasing this entry. If the value is 0, was not
+   set, yet.
+
+   :type: :class:`int`
+
+   .. method:: SetDateOriginal(date)
+
+   Set the date, when this entry first entered the PDB.
+
+   :param date: database_pdb_rev.date_original
+   :type date: :class:`str`
+
+   .. method:: GetDateOriginal()
+
+   Retrieve  database_pdb_rev.date_original.
+
+   :returns: database_pdb_rev.date_original as :class:`str` in format
+   'yyyy-mm-dd'
+
+   .. method:: AddRevision(int num, String date, String status)
+
+   Add a new iteration to the history.
+
+   :param num: database_pdb_rev.num
+   :type num: :class:`int`
+   :param date: database_pdb_rev.date
+   :type date: :class:`str`
+   :param status: database_pdb_rev.status
+   :type status: :class:`str`
+
+   .. method:: GetSize()
+
+   :returns: Number of revisions as :class:`int`
+
+   .. method:: GetDate(i)
+
+   :param i: Index of revision
+   :type i: :class:`int`
+   :returns: database_pdb_rev.date as :class:`str`
+
+   .. method:: GetNum(i)
+
+   :param i: Index of revision
+   :type i: :class:`int`
+   :returns: database_pdb_rev.num as :class:`int`
+
+   .. method:: GetStatus(i)
+
+   :param i: Index of revision
+   :type i: :class:`int`
+   :returns: database_pdb_rev.status as :class:`str`
+
+   .. method:: GetLastDate()
+
+   The date of the latest revision.
+
+   :returns: date as :class:`str`
+
+   .. method:: GetFirstRelease()
+
+   Points to the revision releasing the entry.
+
+   :returns: Index as :class:`int`
+
+..  LocalWords:  cas isbn pubmed asu seqres conop ConnectAll casp COMPND OBSLTE
 ..  LocalWords:  SPRSDE pdb func autofunction exptl attr pdbx oper conf spr dif
 ..  LocalWords:  biounits biounit uniprot UNP seqs AddMMCifPDBChainTr cif asym
 ..  LocalWords:  auth GetMMCifPDBChainTr AddPDBCMMCifhainTr GetPDBMMCifChainTr
+..  LocalWords:  GetRevisions AddRevision SetRevisionsDateOriginal GetSize
+..  LocalWords:  GetNum num GetStatus GetLastDate GetFirstRelease storable
+..  LocalWords:  cas isbn pubmed asu seqres conop casp COMPND OBSLTE

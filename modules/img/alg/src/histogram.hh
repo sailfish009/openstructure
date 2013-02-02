@@ -55,8 +55,6 @@ public:
   template <typename T, class D>
   void VisitState(const ImageStateImpl<T,D>& isi);
 
-  void VisitFunction(const Function& f);
-
   const Bins& GetBins() const;
 
   static String GetAlgorithmName() {return "Histogram";}

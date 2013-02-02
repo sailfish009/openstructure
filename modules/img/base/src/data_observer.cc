@@ -30,54 +30,54 @@
 
 namespace ost { namespace img {
 
-DataObserver::DataObserver(const Data& d):
-  data_(boost::cref(d)) 
+DataObserver::DataObserver(const ImageHandle& d):
+  data_(d)
 {
-  data_.get().Attach(this);
+  data_.Attach(this);
 }
 
 DataObserver::DataObserver(const DataObserver& o):
   data_(o.data_) 
 {
-  data_.get().Attach(this);
+  data_.Attach(this);
 }
 
 DataObserver& DataObserver::operator=(const DataObserver& o)
 {
   if(this!=&o) {
-    data_.get().Detach(this);
+    data_.Detach(this);
     data_=o.data_;
-    data_.get().Attach(this);
+    data_.Attach(this);
   }
   return *this;
 }
 
 DataObserver::~DataObserver() 
 {
-  data_.get().Detach(this);
+  data_.Detach(this);
 }
 
 void DataObserver::ObserverInvalidate()
 {
-  data_=boost::cref(NullData::Instance());
+  data_=ImageHandle();
 }
 
-const Data& DataObserver::GetObservedData() const 
+const ImageHandle& DataObserver::GetObservedData() const
 {
   if(!is_valid()) {
     std::cerr << "invalid observed data access" << std::endl;
     throw InvalidObserver("GetData called for invalidated observer");
   }
-  return data_.get();
+  return data_;
 }
 
-void DataObserver::SetObservedData(const Data& d) 
+void DataObserver::SetObservedData(const ImageHandle& d)
 {
   if(is_valid()) {
-    data_.get().Detach(this);
+    data_.Detach(this);
   }
-  data_ = boost::cref(d);
-  data_.get().Attach(this);
+  data_ = d;
+  data_.Attach(this);
 }
 
 void DataObserver::ObserverUpdate()
@@ -97,7 +97,7 @@ void DataObserver::ObserverUpdate(const Point&)
 
 bool DataObserver::is_valid() const 
 {
-  return data_.get_pointer() != &NullData::Instance();
+  return data_.IsValid();
 }
 
 }} // namespace

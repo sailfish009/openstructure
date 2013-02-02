@@ -114,7 +114,7 @@ AtomView ResidueView::FindAtom(const String& atom_name) const {
   this->CheckValidity();
   const AtomViewList& l=data_->atoms;
   AtomViewList::const_iterator i;
-  i=std::find_if(l.begin(), l.end(), bind(&AtomView::GetName, _1)==atom_name);
+  i=std::find_if(l.begin(), l.end(), boost::bind(&AtomView::GetName, _1)==atom_name);
   return i==data_->atoms.end() ? AtomView() : *i;
 }
 
@@ -279,6 +279,11 @@ AtomView ResidueView::FindAtom(const AtomHandle& handle) const
   LOG_WARNING("ResidueView::FindAtom(handle) is deprecated. "
               "Use ResidueView::ViewForHandle instead.");
   return this->ViewForHandle(handle);
+}
+
+bool ResidueView::HasAtoms() const {
+  this->CheckValidity();
+  return data_->atoms.size()>0;
 }
 
 }} //ns

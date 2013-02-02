@@ -34,7 +34,12 @@ ring_finder.cc
 module(NAME conop SOURCES ${OST_CONOP_SOURCES}
        HEADERS ${OST_CONOP_HEADERS} DEPENDS_ON ost_mol ost_mol_alg ost_geom ost_db)
 
-executable(NAME chemdict_tool SOURCES chemdict_tool.cc DEPENDS_ON ost_io STATIC)
+
+if (WIN32)
+  executable(NAME chemdict_tool SOURCES chemdict_tool.cc ../../io/src/zlib.cpp ../../io/src/gzip.cpp DEPENDS_ON ost_io STATIC)
+else(WIN32)
+  executable(NAME chemdict_tool SOURCES chemdict_tool.cc DEPENDS_ON ost_io STATIC)
+endif(WIN32)
 
 if (COMPOUND_LIB)
   if (EXISTS "${COMPOUND_LIB}")

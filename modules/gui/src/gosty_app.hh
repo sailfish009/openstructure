@@ -46,7 +46,7 @@ namespace ost {
 
 namespace img { 
 
-class Data;
+class ImageHandle;
 
 namespace gui { 
 class DataViewer; 
@@ -124,7 +124,7 @@ public:
 #if OST_IMG_ENABLED
   /// \brief create new DataViewer
   /// 
-  ost::img::gui::DataViewer* CreateDataViewer(const ost::img::Data& d, const QString& name="");
+  ost::img::gui::DataViewer* CreateDataViewer(const ost::img::ImageHandle& d, const QString& name="");
 #endif
 
   /// \brief give the application time to run the mainloop and process events

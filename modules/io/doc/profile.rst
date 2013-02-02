@@ -45,7 +45,7 @@ STRICT
 
     IOProfile(dialect='PDB', strict_hydrogens=False, quack_mode=False,
               fault_tolerant=False, join_spread_atom_records=False,
-              no_hetatms=False, bond_feasibility_check=True)
+              no_hetatms=False, bond_feasibility_check=False)
 
 SLOPPY:
 

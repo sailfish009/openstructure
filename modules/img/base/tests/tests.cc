@@ -29,9 +29,7 @@
 
 #include "test_data.hh"
 #include "test_extent.hh"
-#include "test_function.hh"
 #include "test_image.hh"
-#include "test_image_factory.hh"
 #include "test_image_state.hh"
 #include "test_image_state_visitor.hh"
 #include "test_index.hh"
@@ -60,9 +58,7 @@ bool init_ost_img_base_unit_tests() {
   try {
     framework::master_test_suite().add(CreateDataTest());
     framework::master_test_suite().add(CreateExtentTest());
-    framework::master_test_suite().add(CreateFunctionTest());
     framework::master_test_suite().add(CreateImageTest());
-    framework::master_test_suite().add(CreateImageFactoryTest());
     framework::master_test_suite().add(CreateImageStateTest());
     framework::master_test_suite().add(CreateImageStateVisitorTest());
     framework::master_test_suite().add(CreateIndexTest());

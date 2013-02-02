@@ -20,14 +20,14 @@
  *  Authors: Marco Biasini, Juergen Haas
  */
  
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <ost/geom/vec_mat_predicates.hh>
 #include <ost/mol/chem_class.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/property_id.hh>
 #include <cmath>
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-#include <boost/test/auto_unit_test.hpp>
 
 #define CHECK_TRANSFORMED_ATOM_POSITION(ATOM,TARGET) \
    BOOST_CHECK(vec3_is_close(ATOM.GetPos(), TARGET,Real(0.1)))

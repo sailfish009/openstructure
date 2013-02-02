@@ -12,6 +12,7 @@ try:
 except ImportError:
   _img_present=False
   pass
+
 import httplib
 
 from PyQt4 import QtGui, QtCore

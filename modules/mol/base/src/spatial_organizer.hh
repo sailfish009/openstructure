@@ -89,54 +89,35 @@ public:
     }
   }
 
-  ITEM FindClosest(const VEC& pos) {
-
-    // find closest index with non-empty itemlist
-    Real best_dist2=std::numeric_limits<Real>::max();
-    Index i0;
-    bool found_i0=false;
-    for(typename ItemMap::const_iterator map_it = map_.begin();
-        map_it!=map_.end();++map_it) {
-      Real dist2=geom::Length2(pos-gen_middle(map_it->first));
-      if(dist2<best_dist2 && !map_it->second.empty()) {
-        best_dist2=dist2;
-        i0 = map_it->first;
-        found_i0=true;
+  bool HasWithin(const VEC& pos, Real dist) const {
+    Real dist2=dist*dist;
+    Index imin = gen_index(pos-VEC(dist,dist,dist));
+    Index imax = gen_index(pos+VEC(dist,dist,dist));
+    for(int wc=imin.w;wc<=imax.w;++wc) {
+      for(int vc=imin.v;vc<=imax.v;++vc) {
+        for(int uc=imin.u;uc<=imax.u;++uc) {
+          typename ItemMap::const_iterator map_it = map_.find(Index(uc,vc,wc));
+          if(map_it!=map_.end()) {
+            for(typename EntryList::const_iterator entry_it = map_it->second.begin();
+                entry_it != map_it->second.end(); ++entry_it) {
+                    /*
+                      speed tests indicate that pre-calculating dx2 or dy2
+                      and pre-checking them with an additional if gives little
+                      speed improvement for very specific circumstances only,
+                      but most of the time the performance is worse.
+                    */
+                Real delta_x = entry_it->pos[0]-pos[0];
+                Real delta_y = entry_it->pos[1]-pos[1];
+                Real delta_z = entry_it->pos[2]-pos[2];
+                if(delta_x*delta_x+delta_y*delta_y+delta_z*delta_z<=dist2) {
+                  return true;
+              }
+            }
+          }
+        }
       }
     }
-
-    if(!found_i0) return ITEM();
-
-    // now find the closest item in the 3x3x3 items centered on i0
-    best_dist2=std::numeric_limits<Real>::max();
-    ITEM* best_item=NULL;
-
-    for(int wc=i0.w-1;wc<=i0.w+1;++wc) {
-      for(int vc=i0.v-1;wc<=i0.v+1;++vc) {
-        for(int uc=i0.u-1;wc<=i0.u+1;++uc) {
-	  typename ItemMap::const_iterator map_it = map_.find(Index(uc,vc,wc));
-
-	  if(map_it!=map_.end()) {
-	    for(typename EntryList::iterator entry_it = map_it->second.begin();
-		entry_it != map_it->second.end(); ++entry_it) {
-	      Real delta_x = entry_it->pos[0]-pos[0];
-              Real delta_y = entry_it->pos[1]-pos[1];
-              Real delta_z = entry_it->pos[2]-pos[2];
-              Real dist2=delta_x*delta_x+delta_y*delta_y+delta_z*delta_z;
-              if(dist2<best_dist2) {
-                best_dist2=dist2;
-                best_item=entry_it;
-	      }
-	    }
-	  }
-	}
-      }
-    }
-    if(best_item) {
-      return &best_item;
-    } else {
-      return ITEM();
-    }
+    return false;
   }
 
   ItemList FindWithin(const VEC& pos, Real dist) const {
@@ -148,27 +129,27 @@ public:
 
     for(int wc=imin.w;wc<=imax.w;++wc) {
       for(int vc=imin.v;vc<=imax.v;++vc) {
-	for(int uc=imin.u;uc<=imax.u;++uc) {
-	  typename ItemMap::const_iterator map_it = map_.find(Index(uc,vc,wc));
+        for(int uc=imin.u;uc<=imax.u;++uc) {
+          typename ItemMap::const_iterator map_it = map_.find(Index(uc,vc,wc));
 
-	  if(map_it!=map_.end()) {
-	    for(typename EntryList::const_iterator entry_it = map_it->second.begin();
-		entry_it != map_it->second.end(); ++entry_it) {
-              /*
-                speed tests indicate that pre-calculating dx2 or dy2
-                and pre-checking them with an additional if gives little
-                speed improvement for very specific circumstances only,
-                but most of the time the performance is worse. 
-              */
-	      Real delta_x = entry_it->pos[0]-pos[0];
-              Real delta_y = entry_it->pos[1]-pos[1];
-              Real delta_z = entry_it->pos[2]-pos[2];
-              if(delta_x*delta_x+delta_y*delta_y+delta_z*delta_z<=dist2) {
-                item_list.push_back(entry_it->item);
-	      }
-	    }
-	  }
-	}
+          if(map_it!=map_.end()) {
+            for(typename EntryList::const_iterator entry_it = map_it->second.begin();
+          entry_it != map_it->second.end(); ++entry_it) {
+                    /*
+                      speed tests indicate that pre-calculating dx2 or dy2
+                      and pre-checking them with an additional if gives little
+                      speed improvement for very specific circumstances only,
+                      but most of the time the performance is worse.
+                    */
+              Real delta_x = entry_it->pos[0]-pos[0];
+                    Real delta_y = entry_it->pos[1]-pos[1];
+                    Real delta_z = entry_it->pos[2]-pos[2];
+                    if(delta_x*delta_x+delta_y*delta_y+delta_z*delta_z<=dist2) {
+                      item_list.push_back(entry_it->item);
+              }
+            }
+          }
+        }
       }
     }
     return item_list;

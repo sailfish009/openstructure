@@ -23,7 +23,7 @@
 
   offers the Image interface
 
-  Author: Ansgar Philippsen
+  Author: Ansgar Philippsen, Andreas Schenk
 */
 
 #ifndef IMG_IMAGE_HANDLE_H
@@ -37,8 +37,6 @@
 
 #include "data.hh"
 #include "observable.hh"
-#include "data_observer.hh"
-#include "function.hh"
 #include "extent_iterator.hh"
 
 #include "image_state/image_state_visitor_fw.hh"
@@ -70,6 +68,7 @@ class ModIPAlgorithm;
 class ConstModIPAlgorithm;
 class ModOPAlgorithm;
 class ConstModOPAlgorithm;
+class DataObserver;
 
 //! Exception thrown upon invalid image handle usage
 class DLLEXPORT InvalidImageHandle: public Error {
@@ -118,7 +117,7 @@ class DLLEXPORT_OST_IMG_BASE ImageHandle: public Data {
   // for access to Sampling
   friend class ConstImageHandle;
 
-  typedef Observable<DataObserver> DataObservable;
+  typedef Observable DataObservable;
   typedef boost::shared_ptr<DataObservable> ObsPtr;
 
   typedef boost::shared_ptr<ImageStateBasePtr> StatePtrPtr;
@@ -463,11 +462,6 @@ public:
   ImageHandle& operator*=(const ConstImageHandle& h);
   ImageHandle& operator/=(const ConstImageHandle& h);
 
-  ImageHandle& operator+=(const Function& h);
-  ImageHandle& operator-=(const Function& h);
-  ImageHandle& operator*=(const Function& h);
-  ImageHandle& operator/=(const Function& h);
-
   //@}
 
   /*! @name low-level access
@@ -736,14 +730,6 @@ DLLEXPORT_OST_IMG_BASE ImageHandle operator-(const ConstImageHandle& h1, const C
 DLLEXPORT_OST_IMG_BASE ImageHandle operator*(const ConstImageHandle& h1, const ConstImageHandle& h2);
 DLLEXPORT_OST_IMG_BASE ImageHandle operator/(const ConstImageHandle& h1, const ConstImageHandle& h2);
 
-DLLEXPORT_OST_IMG_BASE ImageHandle operator+(const ConstImageHandle& h1, const Function& h2);
-DLLEXPORT_OST_IMG_BASE ImageHandle operator-(const ConstImageHandle& h1, const Function& h2);
-DLLEXPORT_OST_IMG_BASE ImageHandle operator*(const ConstImageHandle& h1, const Function& h2);
-DLLEXPORT_OST_IMG_BASE ImageHandle operator/(const ConstImageHandle& h1, const Function& h2);
-
-DLLEXPORT_OST_IMG_BASE ImageHandle operator+(const Function& h1, const ConstImageHandle& h2);
-DLLEXPORT_OST_IMG_BASE ImageHandle operator-(const Function& h1, const ConstImageHandle& h2);
-DLLEXPORT_OST_IMG_BASE ImageHandle operator*(const Function& h1, const ConstImageHandle& h2);
 
 }} // namespace img
 

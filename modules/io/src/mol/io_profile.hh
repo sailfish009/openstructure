@@ -31,12 +31,10 @@ namespace ost { namespace io {
 struct DLLEXPORT IOProfile {
 public:
   IOProfile(String d, bool qm, bool ft, bool js, bool nh, 
-            bool co, bool bf, conop::ProcessorPtr proc=conop::ProcessorPtr()):
+            bool co, conop::ProcessorPtr proc=conop::ProcessorPtr()):
     dialect(d), quack_mode(qm), fault_tolerant(ft), join_spread_atom_records(js), 
     no_hetatms(nh), calpha_only(co), processor(proc)
   {
-    if (!processor) return;
-    processor->SetCheckBondFeasibility(bf);
   }
 
   IOProfile(): dialect("PDB"), quack_mode(false), fault_tolerant(false), 
@@ -56,7 +54,6 @@ public:
   {
     return IOProfile(dialect, quack_mode, fault_tolerant, join_spread_atom_records, 
                      no_hetatms, calpha_only,  
-                     processor ? processor->GetCheckBondFeasibility() : false,
                      processor ? processor->Copy() : conop::ProcessorPtr());
   }
 };

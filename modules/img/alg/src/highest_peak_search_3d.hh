@@ -35,8 +35,6 @@ class DLLEXPORT_IMG_ALG HighestPeakSearch3DBase
     template <typename T, class D>
     void VisitState(const ImageStateImpl<T,D>& isi);
     
-    void VisitFunction(const Function& f);
-
     static String GetAlgorithmName() {return "HighestPeakSearch3D";}
   
     //! Main "return" function returns a list of Peaks

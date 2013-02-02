@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 
 /*
-  abstract observable concept
+  observable concept
 
   Author: Ansgar Philippsen
 */
@@ -32,72 +32,43 @@
 
 namespace ost { namespace img {
 
+// fw decl
+class DataObserver;
+
 //! templated observable class
 /*
   manages a list of observers, which must
   offer the methods ObserverRelease, ObserverInvalidate
   and ObserverUpdate
 */
-template <class T>
 class DLLEXPORT Observable {
-  typedef std::list<T *> ObserverList;
-  typedef typename ObserverList::iterator ObserverIter;
-  typedef typename ObserverList::const_iterator ObserverConstIter;
+  typedef std::list<DataObserver *> ObserverList;
+  typedef  ObserverList::iterator ObserverIter;
+  typedef  ObserverList::const_iterator ObserverConstIter;
 public:
-  Observable() {
-    list_.clear();
-  }
-
+  Observable() ;
   /*
     copy logic: the observers are not copied
   */
-  Observable(const Observable& o) {
-    list_.clear();
-  }
+  Observable(const Observable& o) ;
 
-  ~Observable() {
-    for(ObserverIter it=list_.begin();it!=list_.end();++it) {
-      (*it)->ObserverInvalidate();
-      (*it)->ObserverRelease();
-    }
-  }
+  ~Observable() ;
 
   /*
     assignement logic: the observers are not copied
   */
-  Observable& operator=(const Observable& o) {
-    list_.clear();
-    return *this;
-  }
+  Observable& operator=(const Observable& o) ;
 
-  void Attach(T* d) {
-    list_.push_back(d);
-  }
+  void Attach(DataObserver* d) ;
 
-  void Detach(T* o) {
-    list_.remove(o);
-  }
+  void Detach(DataObserver* o) ;
 
-  void Notify() const {
-    for(ObserverConstIter it=list_.begin();it!=list_.end();++it)
-      (*it)->ObserverUpdate();
-  }
-  void Notify(const Extent& e) const {
-    for(ObserverConstIter it=list_.begin();it!=list_.end();++it)
-      (*it)->ObserverUpdate(e);
-  }
-  void Notify(const Point& p) const {
-    for(ObserverConstIter it=list_.begin();it!=list_.end();++it)
-      (*it)->ObserverUpdate(p);
-  }
+  void Notify() const ;
+  void Notify(const Extent& e) const ;
+  void Notify(const Point& p) const ;
+  int GetListSize() const ;
 
-  int GetListSize() const {
-    return list_.size();
-  }
-
-  long MemSize() const {
-    return sizeof(list_) + list_.size()*sizeof(T*);
-  }
+  long MemSize() const ;
 
   private:
     ObserverList list_;

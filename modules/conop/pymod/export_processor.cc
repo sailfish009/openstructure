@@ -52,6 +52,15 @@ void export_processor() {
     .value("CHARMM_DIALECT", CHARMM_DIALECT)
     .export_values()
   ;
+  enum_<ConopAction>("ConopAction")
+    .value("CONOP_WARN", CONOP_WARN)
+    .value("CONOP_SILENT", CONOP_SILENT)
+    .value("CONOP_REMOVE", CONOP_REMOVE)
+    .value("CONOP_REMOVE_ATOM", CONOP_REMOVE_ATOM)
+    .value("CONOP_REMOVE_RESIDUE", CONOP_REMOVE_RESIDUE)
+    .value("CONOP_FATAL", CONOP_FATAL)
+    .export_values()
+  ;
   class_<Processor, ProcessorPtr, boost::noncopyable>("_Processor", no_init)
     .def("Copy", &Processor::Copy)
     .add_property("check_bond_feasibility", 

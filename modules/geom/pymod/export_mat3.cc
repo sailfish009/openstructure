@@ -25,8 +25,16 @@ using namespace geom;
 
 
 
-const Real Mat3_getitem(const geom::Mat3& m, tuple i) {return m(extract<int> (i[0]),extract<int> (i[1]));}
-void Mat3_setitem(geom::Mat3& m,const  tuple i,const  Real val) {m(extract<int> (i[0]),extract<int> (i[1]))=val;}
+const Real Mat3_getitem(const geom::Mat3& m, tuple i) {
+  int a = extract<int> (i[0]);
+  int b = extract<int> (i[1]);
+  return m.At(a, b);
+}
+void Mat3_setitem(geom::Mat3& m,const  tuple i,const  Real val) { 
+  int a = extract<int> (i[0]);
+  int b = extract<int> (i[1]);
+  m.At(a, b) = val;
+}
 
 Mat2 Mat3_getslice(const geom::Mat3& m, slice s) {
   tuple start=extract<tuple> (s.start());

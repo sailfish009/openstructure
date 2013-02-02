@@ -58,7 +58,7 @@ gl_canvas_(NULL)
   
   if(try_stereo) {
     LOG_VERBOSE("GLCanvas: trying stereo visuals first");
-    for(int format_id=3;format_id>=0;--format_id) {
+    for(int format_id=4;format_id>=0;--format_id) {
       QGLFormat format=GLWin::CreateFormat(format_id);
       if (try_stereo) {
         format.setStereo(true);
@@ -76,7 +76,7 @@ gl_canvas_(NULL)
     if(try_stereo) {
       LOG_VERBOSE("GLCanvas: no stereo visual found, trying normal ones");
     }
-    for(int format_id=3;format_id>=0;--format_id) {
+    for(int format_id=4;format_id>=0;--format_id) {
       QGLFormat format=GLWin::CreateFormat(format_id);
       gl_canvas_=new GLCanvas(this, main, format);
       if(gl_canvas_->isValid()) {
@@ -97,16 +97,23 @@ gl_canvas_(NULL)
   gfx::Scene::Instance().AttachObserver(this);
   QGLFormat format = gl_canvas_->format();
 
-  LOG_DEBUG("GLCanvas: rbits=" << format.redBufferSize() 
-               << " gbits=" << format.greenBufferSize() 
-               << " bbits=" << format.blueBufferSize() 
-               << " abits=" << format.alphaBufferSize() 
-               << " dbits=" << format.depthBufferSize()
-               << " accumbits=" << format.accumBufferSize()
-               << " multisample=" << format.sampleBuffers()
-               << " with samples=" << format.samples());
+
+  LOG_VERBOSE("GLCanvas: using " << format.redBufferSize() << "." 
+                              << format.greenBufferSize() << "."
+                              << format.blueBufferSize() << "."
+                              << format.alphaBufferSize() << " RGBA bits, " 
+                              << format.depthBufferSize() << " depth bits, "
+                              << format.accumBufferSize() << " accum bits, and "
+                              << format.stencilBufferSize() << " stencil bits")
   if(gl_canvas_->format().stereo()) {
     LOG_VERBOSE("GLCanvas: using stereo visual");
+  } else {
+    LOG_VERBOSE("GLCanvas: no stereo visual found");
+  }
+  if(format.sampleBuffers()) {
+    LOG_VERBOSE("GLCanvas: using multisampling with " << format.samples() << " samples per pixel");
+  } else {
+    LOG_VERBOSE("GLCanvas: no multisampling");
   }
   main->setCentralWidget(gl_canvas_);
   connect(gl_canvas_, SIGNAL(ReleaseFocus()), this, SIGNAL(ReleaseFocus()));
@@ -129,7 +136,17 @@ void GLWin::ActiveToolChanged(Tool* t)
 QGLFormat GLWin::CreateFormat(int fid)
 {
   QGLFormat format = QGLFormat::defaultFormat();
-  if(fid==3) {
+  if(fid==4) {
+    format.setDepthBufferSize(24);
+    format.setRedBufferSize(8);
+    format.setGreenBufferSize(8);
+    format.setBlueBufferSize(8);
+    format.setAlpha(true);
+    format.setAlphaBufferSize(8);
+    format.setAccum(true);
+    format.setStencil(true);
+    format.setSampleBuffers(true);
+  } else if(fid==3) {
     format.setDepthBufferSize(24);
     format.setRedBufferSize(8);
     format.setGreenBufferSize(8);

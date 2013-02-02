@@ -94,6 +94,7 @@ endif()
 
 set(OST_GFX_SOURCES
 bitmap_io.cc
+exporter.cc
 collada_exporter.cc
 color.cc
 primitives.cc
@@ -268,6 +269,7 @@ if (USE_SHADER)
     shader/material_hemi.glsl
     shader/material_toon1.glsl
     shader/material_toon2.glsl
+    shader/anaglyph_fs.glsl
   )
   copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
                     "SHADER_TARGETS" ost_gfx)  

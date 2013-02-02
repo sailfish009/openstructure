@@ -99,59 +99,6 @@ void StatBase::VisitState(const ImageStateImpl<T,D>& isi)
   }
 }
 
-void StatBase::VisitFunction(const Function& fnc)
-{
-  sum_=0.0;
-  mean_=0.0;
-
-  Real n = (Real)(fnc.GetSize().GetVol());
-  if(n==0.0){
-    var_=0.0;
-    std_dev_=0.0;
-    min_=0.0;
-    max_=0.0;
-    maxpos_=Point(0,0,0),
-    minpos_=Point(0,0,0),
-    rms_=0.0;
-    skewness_=0.0;
-    kurtosis_=0.0;
-    center_of_mass_=Vec3(0.0,0.0,0.0);
-    return;
-  }
-
-  Vec3 sumcenter(0.0,0.0,0.0);
-  ValIndex minindex(std::numeric_limits<Real>::max(),Point(0,0,0));
-  ValIndex maxindex(-std::numeric_limits<Real>::max(),Point(0,0,0));
-  min_ = std::numeric_limits<Real>::max();
-  max_ = -std::numeric_limits<Real>::max();
-  StatAccumulator<> acc;
-
-  for(ExtentIterator it(fnc.GetExtent());!it.AtEnd(); ++it) {
-    Real val=fnc.GetReal(it);
-    ValIndex vi(val,it);
-    minindex=std::min<ValIndex>(vi,minindex);
-    maxindex=std::max<ValIndex>(vi,maxindex);
-    sumcenter+=Point(it).ToVec3()*val;
-    acc(val);
-  }
-  min_=minindex.first;
-  max_=maxindex.first;
-  minpos_=minindex.second;
-  maxpos_=maxindex.second;
-  var_=acc.GetVariance();
-  std_dev_=acc.GetStandardDeviation();
-  rms_=acc.GetRootMeanSquare();
-  skewness_=acc.GetSkewness();
-  kurtosis_= acc.GetKurtosis();
-  sum_=acc.GetSum();
-  mean_=acc.GetMean();
-  if(sum_!=0.0){
-    center_of_mass_=sumcenter/sum_;
-  }else{
-    center_of_mass_=Vec3(0.0,0.0,0.0);
-  }
-}
-
 std::ostream& operator<<(std::ostream& o, const Stat& s)
 {
   o << "mean=" << s.GetMean() << " ";

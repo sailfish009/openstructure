@@ -1,3 +1,4 @@
+import sys
 import unittest
 from ost import geom, conop
 from ost.conop import cleanup
