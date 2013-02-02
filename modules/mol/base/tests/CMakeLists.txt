@@ -12,6 +12,7 @@ set(OST_MOL_BASE_UNIT_TESTS
   test_surface.cc
   test_residue.cc
   test_view.cc
+  test_transfer_connectivity.cc
   test_view_op.cc
   tests.cc
 )

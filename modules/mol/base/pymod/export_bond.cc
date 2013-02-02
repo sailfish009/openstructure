@@ -21,7 +21,6 @@
 
 using namespace boost::python;
 
-
 #include <ost/mol/mol.hh>
 
 using namespace ost;
@@ -61,4 +60,5 @@ void export_Bond()
     .def(vector_indexing_suite<BondHandleList>())
     .def(geom::VectorAdditions<BondHandleList>());  
   def("BondExists", &BondExists);
+
 }

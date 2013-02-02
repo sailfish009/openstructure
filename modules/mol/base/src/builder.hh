@@ -26,6 +26,7 @@
 #include "residue_handle.hh"
 #include "chain_handle.hh"
 #include "entity_handle.hh"
+#include "bond_handle.hh"
 #include "xcs_editor.hh"
 
 
@@ -60,6 +61,27 @@ public:
 
    Builder& Atom(const String& name, const geom::Vec3& pos=geom::Vec3()) {
      edi_.InsertAtom(res_, name, pos);
+     return *this;
+   }
+   Builder& Gly(bool connect=true) {
+     this->Residue("GLY");
+     this->Atom("N");
+     this->Atom("CA");
+     this->Atom("C");
+     this->Atom("O");
+     if (connect) {
+       edi_.Connect(res_.FindAtom("N"), res_.FindAtom("CA"));
+       edi_.Connect(res_.FindAtom("CA"), res_.FindAtom("C"));
+       edi_.Connect(res_.FindAtom("C"), res_.FindAtom("O"));
+     }
+     return *this;
+   }
+   Builder& ConnectToPrev() {
+     AtomHandle ah = res_.FindAtom("N");
+     AtomHandle pa = res_.GetPrev().FindAtom("C");
+     if (pa) {
+       edi_.Connect(pa, ah);
+     }
      return *this;
    }
 private:
