@@ -10,6 +10,7 @@ set(OST_MOL_ALG_HEADERS
   trajectory_analysis.hh
   structure_analysis.hh
   consistency_checks.hh
+  pdbize.hh
 )
 
 set(OST_MOL_ALG_SOURCES
@@ -23,6 +24,7 @@ set(OST_MOL_ALG_SOURCES
   trajectory_analysis.cc
   structure_analysis.cc
   consistency_checks.cc
+  pdbize.cc
 )
 
 set(MOL_ALG_DEPS ost_mol ost_seq)

@@ -18,10 +18,12 @@
 //------------------------------------------------------------------------------
 #define BOOST_PYTHON_MAX_ARITY 20
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/slice.hpp>
 using namespace boost::python;
 
 #include <ost/geom/geom.hh>
+#include <ost/geom/export_helper/vector.hh>
 using namespace geom;
 
 
@@ -137,5 +139,10 @@ void export_Mat4()
     .def("ExtractTranslation",&Mat4::ExtractTranslation)
     .def("PasteTranslation",&Mat4::PasteTranslation)
     .add_property("data",mat4_data)
+  ;
+
+  class_<Mat4List>("Mat4List", init<>())
+    .def(vector_indexing_suite<Mat4List>())
+    .def(geom::VectorAdditions<Mat4List>())
   ;
 }
