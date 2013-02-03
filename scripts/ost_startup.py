@@ -39,7 +39,6 @@ import ost
 ost.SetPrefixPath(_base_dir)
 
 def _InitRuleBasedProcessor():
-def _InitRuleBasedBuilder():
   compound_lib_path=os.path.join(ost.GetSharedDataPath(), 'compounds.chemlib')
   if os.path.exists(compound_lib_path):
     compound_lib=conop.CompoundLib.Load(compound_lib_path)
