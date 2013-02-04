@@ -83,7 +83,6 @@ void usage()
   std::cerr << "   -v <level> verbosity level (0=results only,1=problems reported, 2=full report)" << std::endl;
   std::cerr << "   -b <value> tolerance in stddevs for bonds" << std::endl;
   std::cerr << "   -a <value> tolerance in stddevs for angles" << std::endl;
-  std::cerr << "   -m <value> clashing distance for unknwon atom types" << std::endl;
   std::cerr << "   -r <value> distance inclusion radius" << std::endl;
   std::cerr << "   -i <value> sequence separation" << std::endl;
   std::cerr << "   -e         print version" << std::endl;
