@@ -19,6 +19,7 @@
 #include <ost/log.hh>
 #include <ost/mol/mol.hh>
 #include <sstream>
+#include <iomanip>
 #include <math.h>
 #include "filter_clashes.hh"
 #include <ost/units.hh>
