@@ -478,9 +478,9 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
   }
   Real avg_zscore_bonds = running_sum_zscore_bonds/static_cast<float>(bond_count);
   Real avg_zscore_angles = running_sum_zscore_angles/static_cast<float>(angle_count);
-  LOG_SCRIPT("Average Z-Score for bond lengths: " << avg_zscore_bonds);
-  LOG_SCRIPT("Bonds outside of tolerance range: " << bad_bond_count << " out of " << bond_count);
-  LOG_SCRIPT("Bond\tAvg Length\tAvg zscore\tNum Bonds")
+  std::cout << "Average Z-Score for bond lengths: " << std::fixed << std::setprecision(5) << avg_zscore_bonds << std::endl;
+  std::cout << "Bonds outside of tolerance range: " << bad_bond_count << " out of " << bond_count << std::endl;
+  std::cout << "Bond\tAvg Length\tAvg zscore\tNum Bonds" << std::endl;
 
   for (std::map<String,Real>::const_iterator bls_it=bond_length_sum.begin();bls_it!=bond_length_sum.end();++bls_it) {
     String key = (*bls_it).first;
@@ -489,10 +489,10 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
     Real sum_bond_zscore=bond_zscore_sum[key];
     Real avg_length=sum_bond_length/static_cast<Real>(counter);
     Real avg_zscore=sum_bond_zscore/static_cast<Real>(counter);
-    LOG_SCRIPT(key << "\t" << avg_length << "\t" << avg_zscore << "\t" << counter);
+    std::cout << key << "\t" << std::fixed << std::setprecision(5) << std::left << std::setw(10) << avg_length << "\t" << std::left << std::setw(10) << avg_zscore << "\t" << counter  << std::endl;
   }
-  LOG_SCRIPT("Average Z-Score angle widths: " << avg_zscore_angles);
-  LOG_SCRIPT("Angles outside of tolerance range: " << bad_angle_count << " out of " << angle_count);
+  std::cout << "Average Z-Score angle widths: " << std::fixed << std::setprecision(5) << avg_zscore_angles << std::endl;
+  std::cout << "Angles outside of tolerance range: " << bad_angle_count << " out of " << angle_count << std::endl;
   return filtered;
 }
 
@@ -595,8 +595,8 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
   if (bad_distance_count!=0) {
     average_offset = average_offset_sum / static_cast<Real>(bad_distance_count);
   }
-  LOG_SCRIPT(bad_distance_count << " non-bonded short-range distances shorter than tolerance distance");
-  LOG_SCRIPT("Distances shorter than tolerance are on average shorter by: " << average_offset);
+  std::cout << bad_distance_count << " non-bonded short-range distances shorter than tolerance distance" << std::endl;
+  std::cout << "Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << average_offset << std::endl;
   return filtered;
 }
 
