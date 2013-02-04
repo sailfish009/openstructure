@@ -96,7 +96,11 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
   int second=0;
   int first=0;
   if (v.GetResidueList().size()==0) {
-    return std::make_pair<int,int>(0,1);
+    if (glob_dist_list.size()==0) {
+      return std::make_pair<int,int>(0,-1);
+    } else {    
+      return std::make_pair<int,int>(0,glob_dist_list.size());
+    }  
   }
   ChainView vchain=v.GetChainList()[0];
   for (GlobalRDMap::const_iterator i=glob_dist_list.begin();i!=glob_dist_list.end();++i)
@@ -284,6 +288,7 @@ int main (int argc, char **argv)
     std::cout << "Stereo-chemical and steric clash checks: Off " << std::endl;
   }
   std::cout << "Inclusion Radius: " << radius << std::endl;
+
   std::cout << "Sequence separation: " << sequence_separation << std::endl;
   if (structural_checks) {
     std::cout << "Parameter filename: " << parameter_filename << std::endl;
@@ -325,7 +330,11 @@ int main (int argc, char **argv)
     String filestring=BFPathToString(pathstring);
     std::cout << "File: " << files[i] << std::endl; 
     std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
-    std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
+    if (cov.second == -1) {
+      std::cout << "Coverage: 0 (0 out of 0 residues)" << std::endl;
+    } else {
+      std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
+    }
 
     if (structural_checks) {
       // reads in parameter files   
