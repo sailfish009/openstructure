@@ -4,8 +4,6 @@ from xml.dom import minidom
 from ost import io, seq
 import ost
 import os, re, sys
-sys.path.append('PYMODULES')
-
 
 class AlignedPatch:
   """
