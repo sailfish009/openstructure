@@ -662,15 +662,15 @@ macro(ost_unittest)
       set_target_properties(${_test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/tests"  )
 
       if (WIN32)
-        target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "${_ARG_PREFIX}_${_ARG_MODULE}")  
-        #add_custom_target("${_test_name}_run":
-        #                COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe || echo
-        #                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/..
-        #                COMMENT "running checks for module ${_ARG_MODULE}"
-        #                DEPENDS ${_test_name})
-        #add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe)
-        #set_target_properties("${_test_name}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
-        #add_dependencies(check "${_test_name}_run")
+        target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "${_ARG_PREFIX}_${_ARG_MODULE}")
+        add_custom_target("${_test_name}_run":
+                        COMMAND set PATH=${STAGE_DIR}/bin\;%PATH% & ${CMAKE_CURRENT_BINARY_DIR}/${_test_name}.exe || echo
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        COMMENT "running checks for module ${_ARG_MODULE}"
+                        DEPENDS ${_test_name})
+        add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${_test_name}.exe)
+        set_target_properties("${_test_name}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
+        add_dependencies(check "${_test_name}_run")
       else()
         target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES}
                             "${_ARG_PREFIX}_${_ARG_MODULE}")
