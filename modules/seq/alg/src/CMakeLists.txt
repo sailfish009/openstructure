@@ -4,6 +4,7 @@ module_config.hh
 ins_del.hh
 subst_weight_matrix.hh
 alignment_opts.hh
+entropy.hh
 merge_pairwise_alignments.hh
 conservation.hh
 local_align.hh
@@ -14,6 +15,7 @@ set(OST_SEQ_ALG_SOURCES
 merge_pairwise_alignments.cc
 local_align.cc
 global_align.cc
+entropy.cc
 sequence_identity.cc
 ins_del.cc
 conservation.cc

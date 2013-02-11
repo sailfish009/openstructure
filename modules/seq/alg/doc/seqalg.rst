@@ -118,3 +118,18 @@
   :param gap_open: The gap opening penalty. Must be a negative number
   :param gap_ext: The gap extension penalty. Must be a negative number
   :returns: best-scoring alignment of *seq1* and *seq2*.
+
+.. function:: ShannonEntropy(aln, ignore_gaps=True)
+
+  Returns the per-column Shannon entropies of the alignment. The entropy
+  describes how conserved a certain column in the alignment is . The higher
+  the entropy is, the less conserved the column. For column with no amino 
+  aids, the entropy value is set to NAN
+
+  :param aln: multiple sequence alignment
+  :type aln: :class:`~ost.seq.AlignmentHandle`
+  :param ignore_gaps: whether to ignore gaps in the column.
+  :type ignore_gaps: bool
+
+  :returns: list of column entropies
+
