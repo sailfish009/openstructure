@@ -109,6 +109,9 @@ public:
   void SetZeroOccTreatment(ConopAction action) {
     zero_occ_treatment_ = action;
   }
+  virtual String ToString() const = 0;
+protected:
+  String OptionsToString() const; 
 private:
   bool check_bond_feasibility_;
   bool assign_torsions_;
@@ -118,6 +121,8 @@ private:
 };
 
 ConopAction DLLEXPORT_OST_CONOP ConopActionFromString(const String& name);
+
+String DLLEXPORT_OST_CONOP StringFromConopAction(ConopAction action);
 
 
 /// \brief guess element of atom based on name and hetatm flag

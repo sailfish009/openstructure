@@ -89,4 +89,10 @@ void HeuristicProcessor::DoProcess(DiagnosticsPtr diags,
   }
 }
 
+String HeuristicProcessor::ToString() const {
+  std::stringstream ss;
+  ss << "HeuristicProcessor(" << this->OptionsToString() << ")";
+  return ss.str();
+}
+
 }}

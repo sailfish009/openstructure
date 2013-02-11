@@ -77,6 +77,8 @@ public:
   virtual ProcessorPtr Copy() const {
     return ProcessorPtr(new RuleBasedProcessor(*this));
   }
+
+  virtual String ToString() const;
 protected:
   void ProcessUnkResidue(DiagnosticsPtr diags,
                          mol::ResidueHandle res, 

@@ -61,17 +61,13 @@ public:
 
 inline  std::ostream& operator<<(std::ostream& stream, const IOProfile& p)
 {
-#if 0
-  stream << "IOProfile(dialect='" << p.dialect << "', strict_hydrogens="
-         << (p.strict_hydrogens ? "True" : "False") << ", quack_mode="
-         << (p.quack_mode ? "True" : "False") << ", join_spread_atom_records="
-         << (p.join_spread_atom_records ? "True" : "False") << ", no_hetatms="
-         << (p.no_hetatms ? "True" : "False") << ", calpha_only="
-         << (p.calpha_only ? "True" : "False") << ", fault_tolerant="
-         << (p.fault_tolerant ? "True" : "False") << ", bond_feasibility_check="
-	 << (p.bond_feasibility_check ? "True" : "False") << ")";
-#endif
-#warning implement me
+  stream << "IOProfile(dialect='" << p.dialect
+         << "', quack_mode=" << (p.quack_mode ? "True" : "False") << ", "
+         << "join_spread_atom_records=" << (p.join_spread_atom_records ? "True" : "False") << ", "
+         << "calpha_only=" << (p.calpha_only ? "True" : "False") << ", "
+         << "fault_tolerant=" << (p.fault_tolerant ? "True" : "False") << ", "
+         << "no_hetatms=" << (p.no_hetatms ? "True" : "False") << ", "
+         << "processor=" << (p.processor ? p.processor->ToString() : "None") << ")";
   return stream;
 }
 

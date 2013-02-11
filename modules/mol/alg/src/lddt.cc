@@ -186,9 +186,6 @@ int main (int argc, char **argv)
 
   // creates the required loading profile
   IOProfile profile;
-#warning implement me
-  //profile.bond_feasibility_check=false;
-
   // parses options
   String sel;
   String custom_path;
@@ -229,6 +226,7 @@ int main (int argc, char **argv)
     exit(0);
   }
   profile.processor = conop::RuleBasedProcessorPtr(new conop::RuleBasedProcessor(lib));
+  profile.processor->SetCheckBondFeasibility(false);
   po::notify(vm);
   if (vm.count("version")) {
     std::cout << "Version: " << version << std::endl;

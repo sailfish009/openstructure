@@ -177,6 +177,16 @@ void RuleBasedProcessor::ProcessUnkAtoms(DiagnosticsPtr diags,
   }
 }
 
+String RuleBasedProcessor::ToString() const {
+  std::stringstream ss;
+  ss << "RuleBasedProcesor(" << this->OptionsToString() 
+     << ", fix_element=" << (fix_element_ ? "True" : "False")
+     << ", strict_hydrogens=" << (strict_hydrogens_ ? "True" : "False")
+     << ", unk_res_treatment='" << StringFromConopAction(unk_res_treatment_)
+     << ", unk_atom_treatment'=" << StringFromConopAction(unk_atom_treatment_)
+     << "')";
+  return ss.str();
+}
 
 
 

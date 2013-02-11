@@ -39,6 +39,10 @@ struct WrappedProcessor : public PyProcessor, public wrapper<WrappedProcessor> {
   ProcessorPtr Copy() const { 
     return call_method<ProcessorPtr>(self_, "Copy"); 
   }
+  virtual String ToString() const {
+    return call_method<String>(self_, "ToString");
+  }
+  String ToStringDefault() const { return ""; }
   ProcessorPtr CopyDefault() const { return ProcessorPtr(); }
   
   PyObject* self_;
@@ -78,6 +82,7 @@ void export_processor() {
          bases<Processor> >("Processor")
     .def("Copy", &WrappedProcessor::CopyDefault)
     .def("DoProcess", &WrappedProcessor::DoProcessDefault)
+    .def("ToString", &WrappedProcessor::ToStringDefault)
   ;
   def("IsBondFeasible", &IsBondFeasible);
 }

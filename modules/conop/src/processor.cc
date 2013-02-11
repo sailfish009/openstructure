@@ -412,6 +412,23 @@ void Processor::DistanceBasedConnect(mol::AtomHandle atom) const
   }
 }
 
+String StringFromConopAction(ConopAction action) {
+  switch (action) {
+    case CONOP_FATAL:
+      return "fatal";
+    case CONOP_SILENT:
+      return "silent";
+    case CONOP_REMOVE:
+      return "rm";
+    case CONOP_REMOVE_RESIDUE:
+      return "rm_residue";
+    case CONOP_REMOVE_ATOM:
+      return "rm_atom";
+    case CONOP_WARN:
+      return "warn";
+  }
+}
+
 bool Processor::AreResiduesConsecutive(mol::ResidueHandle r1, 
                                        mol::ResidueHandle r2)
 {
@@ -419,6 +436,17 @@ bool Processor::AreResiduesConsecutive(mol::ResidueHandle r1,
   if(r1.GetChain() != r2.GetChain()) return false;
   return r2.GetNumber().GetNum()==r1.GetNumber().GetNum()+1 ||
          r2.GetNumber().GetInsCode()==r1.GetNumber().NextInsertionCode().GetInsCode();
+}
+
+
+String Processor::OptionsToString() const {
+  std::stringstream ss;
+  ss << "check_bond_feasibility=" << (check_bond_feasibility_ ? "True" : "False") << ", "
+     << "assign_torsions=" << (assign_torsions_ ? "True" : "False") << ", "
+     << "connect=" << (connect_ ? "True" : "False") << ", "
+     << "connect_peptides=" << (connect_aa_ ? "True" : "False")  << ", "
+     << "zero_occ_treatment='" << StringFromConopAction(zero_occ_treatment_) << "'";
+  return ss.str();
 }
 
 

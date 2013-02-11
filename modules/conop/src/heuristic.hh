@@ -40,6 +40,8 @@ public:
   }
   HeuristicProcessor(bool bf, bool at, bool cn, bool aa, ConopAction zo): 
     Processor(bf, at, cn, aa, zo) {}
+
+  virtual String ToString() const;
 protected:
   void ProcessUnkResidue(DiagnosticsPtr diags, mol::ResidueHandle res) const;
   virtual void DoProcess(DiagnosticsPtr diags, 
