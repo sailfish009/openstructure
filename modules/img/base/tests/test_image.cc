@@ -209,9 +209,10 @@ void test_Observer()
   }
   // ih and ih2 go out-of-scope
 
-  BOOST_CHECK(to1->release_count==1);
+  // observer retains internal reference, therefore no call to release should happen
+  BOOST_CHECK(to1->release_count==0);
 
-  BOOST_CHECK_THROW(to1->CheckData(), InvalidObserver);
+  BOOST_CHECK_NO_THROW(to1->CheckData());
 
   delete to1;
 }
