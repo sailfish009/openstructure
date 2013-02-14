@@ -314,13 +314,13 @@ int main (int argc, char **argv)
     EntityView outv=model.GetChainList()[0].Select("peptide=true");
     for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
          ref_list_it != ref_list.end(); ++ref_list_it) {
-      bool cons_check = ResidueNamesMatch(v,*ref_list_it);
+      bool cons_check = ResidueNamesMatch(v,*ref_list_it,consistency_checks);
       if (cons_check==false) {
         if (consistency_checks==true) {
-          LOG_ERROR("Residue names in model: " << files[i] << " are inconsistent with one or more references");
+          LOG_ERROR("Residue names in model: " << files[i] << " and in reference structure(s) are inconsistent.");
           exit(-1);            
         } else {
-          LOG_WARNING("Residue names in model: " << files[i] << " are inconsistent with one or more references");
+          LOG_WARNING("Residue names in model: " << files[i] << " and in reference structure(s) are inconsistent.");
         }   
       } 
     }

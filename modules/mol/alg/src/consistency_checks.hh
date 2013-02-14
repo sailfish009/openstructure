@@ -32,7 +32,7 @@ namespace ost { namespace mol { namespace alg {
 /// (i.e.: the first chain of the reference will be compared with the first chain of the probe 
 /// structure, etc.)
 
-bool DLLEXPORT_OST_MOL_ALG ResidueNamesMatch (const mol::EntityView& probe, const mol::EntityView& reference);
+bool DLLEXPORT_OST_MOL_ALG ResidueNamesMatch (const mol::EntityView& probe, const mol::EntityView& reference, bool consistency_checks);
   
 }}}
 
