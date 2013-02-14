@@ -36,7 +36,7 @@ namespace ost { namespace mol { namespace alg {
 
 
 
-bool ResidueNamesMatch (const mol::EntityView& probe, const mol::EntityView& reference)
+bool ResidueNamesMatch (const mol::EntityView& probe, const mol::EntityView& reference, bool consistency_checks)
 {
   bool return_value = true;
   ChainViewList ref_chains = reference.GetChainList();
@@ -51,8 +51,12 @@ bool ResidueNamesMatch (const mol::EntityView& probe, const mol::EntityView& ref
         if (probe_residue.IsValid()) {
           if (probe_residue.GetName()!=rri->GetName()) {
             return_value = false;
-            LOG_VERBOSE("Name mismatch for residue " << probe_residue.GetNumber() << " in chain " << rci);
-            LOG_VERBOSE("In reference: " << rri->GetName() << ", in compared structure: " << probe_residue.GetName());
+            if (consistency_checks==true) {
+              LOG_ERROR("Name mismatch for residue " << probe_residue.GetNumber() << ": in the reference structure(s) is " << rri->GetName() << ", in the model " << probe_residue.GetName());
+            } else {
+              LOG_WARNING("Name mismatch for residue " << probe_residue.GetNumber() << ": in the reference structure(s) is " << rri->GetName() << ", in the model " << probe_residue.GetName());
+            }
+
           } 
         }            
       }
