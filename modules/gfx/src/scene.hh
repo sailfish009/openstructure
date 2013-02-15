@@ -350,6 +350,15 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief get background color
   Color GetBackground() const;
 
+  /// \brief use bg bitmap for stereo mode
+  /// this tiles the background bitmap at the far plane
+  void SetBackgroundStereoMode(bool);
+  bool GetBackgroundStereoMode() const {return bg_stereo_mode_;}
+
+  /// background tile left/right offset
+  void SetBackgroundStereoOffset(float);
+  float GetBackgroundStereoOffset() const {return bg_stereo_offset_;}
+
   /// \brief center rotation on the given point
   void SetCenter(const geom::Vec3& cen);
   
@@ -594,12 +603,14 @@ private:
   unsigned int stereo_mode_;
   unsigned int stereo_alg_;
   bool stereo_inverted_;
-  unsigned int stereo_eye_;
+  int stereo_eye_;
   Real stereo_iod_,stereo_distance_;
   unsigned int scene_left_tex_;
   unsigned int scene_right_tex_;
   unsigned int bg_mode_;
   bool update_bg_;
+  bool bg_stereo_mode_;
+  float bg_stereo_offset_;
   Gradient bg_grad_;
   Bitmap bg_bm_;
   unsigned int bg_tex_;

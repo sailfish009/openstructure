@@ -135,6 +135,8 @@ void export_Scene()
     .add_property("bg",
                   &Scene::GetBackground, 
                   scene_set_bg1)
+    .add_property("bg_stereo_mode",&Scene::GetBackgroundStereoMode,&Scene::SetBackgroundStereoMode)
+    .add_property("bg_stereo_offset",&Scene::GetBackgroundStereoOffset,&Scene::SetBackgroundStereoOffset)
     .def("GetProjection",&Scene::GetProjection)
     .add_property("projection",&Scene::GetProjection)
     .def("GetInvertedProjection",&Scene::GetInvertedProjection)
