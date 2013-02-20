@@ -240,5 +240,12 @@ unsigned long AtomBase::GetIndex() const
   return Impl()->GetIndex();
 }
 
+void AtomBase::SetIndex(const unsigned long index) 
+{
+  this->CheckValidity();
+  return impl_->SetIndex(index);
+}
+
+  
 }} // ns
 
