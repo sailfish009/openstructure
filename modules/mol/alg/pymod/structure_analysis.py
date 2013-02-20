@@ -13,7 +13,7 @@ def GetFrameFromEntity(eh):
   Input:
     eh : EntityHandle
   """
-  return ost.mol.CreateCoordFrame(eh.GetAtomPosList())
+  return ost.mol.CreateCoordFrame(eh.GetAtomPosList(ordered_by_index=True))
   
 def GetDistanceBetwCenterOfMass(sele1,sele2):
   """

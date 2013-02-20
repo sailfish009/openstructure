@@ -402,16 +402,23 @@ AtomHandleList EntityHandle::GetAtomList() const
   return atoms;
 }
 
-geom::Vec3List EntityHandle::GetAtomPosList() const {
+bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
+{
+  return a1.GetIndex()<a2.GetIndex();
+}
+
+geom::Vec3List EntityHandle::GetAtomPosList(bool ordered_by_index) const {
   this->CheckValidity();
   geom::Vec3List atom_pos_list;
   atom_pos_list.reserve(this->GetAtomCount());
   AtomHandleList atom_list=this->GetAtomList();
+  if (ordered_by_index){
+    std::sort(atom_list.begin(),atom_list.end(),less_index);
+  }
   for (AtomHandleList::const_iterator a=atom_list.begin(), e=atom_list.end(); a!=e; ++a) {
     atom_pos_list.push_back(a->GetPos());
   }
   return atom_pos_list;
-  //return Impl()->GetAtomPosList();
 }
   
 EntityHandle EntityHandle::GetHandle() const
