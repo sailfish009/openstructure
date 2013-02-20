@@ -239,8 +239,12 @@ CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected, int first,
       indices.push_back(i->GetIndex());
     }
     new_ent=CreateEntityFromView(selected, false);
+    //we have to correct the atom indices in the new entity
+    AtomHandleList new_atoms=new_ent.GetAtomList();
+    for (int i=0,e=atoms.size();i!=e;++i){
+      new_atoms[i].SetIndex(i);
+    }
   }
-
   CoordGroupHandle filtered_cg=CreateCoordGroup(new_ent.GetAtomList());
   std::vector<geom::Vec3> vecs(indices.size());
   if (last==-1) last=this->GetFrameCount();
