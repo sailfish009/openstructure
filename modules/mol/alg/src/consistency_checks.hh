@@ -31,8 +31,9 @@ namespace ost { namespace mol { namespace alg {
 /// same ResNum) are of the same residue type. Chains are comapred by order, not by chain name 
 /// (i.e.: the first chain of the reference will be compared with the first chain of the probe 
 /// structure, etc.)
-
-bool DLLEXPORT_OST_MOL_ALG ResidueNamesMatch (const mol::EntityView& probe, const mol::EntityView& reference, bool consistency_checks);
+bool DLLEXPORT_OST_MOL_ALG ResidueNamesMatch(const EntityView& probe, 
+                                             const EntityView& reference, 
+                                             bool log_as_error=false);
   
 }}}
 

@@ -24,19 +24,8 @@
 
 namespace ost { namespace mol { namespace alg {
   
-/// \brief Checks that residue types with the same ResNum in the two structures match
-///
-/// Requires a reference structure and a probe structure. The function checks that all the 
-/// residues in the reference structure that appear in the probe structure (i.e., that have the 
-/// same ResNum) are of the same residue type. Chains are paired by index, not by chain name
-/// (i.e., the first chain of the reference will be compared with the first chain of the probe,
-/// the second with the second, etc.)
-
-
-
-
-
-bool ResidueNamesMatch (const mol::EntityView& probe, const mol::EntityView& reference, bool consistency_checks)
+bool ResidueNamesMatch(const EntityView& probe, const EntityView& reference, 
+                       bool log_as_error)
 {
   bool return_value = true;
   ChainViewList ref_chains = reference.GetChainList();
@@ -51,7 +40,7 @@ bool ResidueNamesMatch (const mol::EntityView& probe, const mol::EntityView& ref
         if (probe_residue.IsValid()) {
           if (probe_residue.GetName()!=rri->GetName()) {
             return_value = false;
-            if (consistency_checks==true) {
+            if (log_as_error) {
               LOG_ERROR("Name mismatch for residue " << probe_residue.GetNumber() << ": in the reference structure(s) is " << rri->GetName() << ", in the model " << probe_residue.GetName());
             } else {
               LOG_WARNING("Name mismatch for residue " << probe_residue.GetNumber() << ": in the reference structure(s) is " << rri->GetName() << ", in the model " << probe_residue.GetName());
