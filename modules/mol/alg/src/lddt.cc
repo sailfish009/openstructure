@@ -301,6 +301,12 @@ int main (int argc, char **argv)
   }
   LOG_INFO("LDDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
 
+  // error if the reference structure is empty
+  if (glob_dist_list.size()==0) {
+    std::cout << "ERROR: No valid distance to check in the reference structure(s). Please check that the first chain of the reference structure(s) contains a peptide." << std::endl;
+    exit(-1);
+  }
+
   // cycles through the models to evaluate 
   for (size_t i=0; i<files.size(); ++i) {
     EntityHandle model=load(files[i], profile);
