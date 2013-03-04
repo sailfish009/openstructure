@@ -263,6 +263,12 @@ public:
   ///
   /// \param chain chain name
   void AddChain(String chain) { chains_.push_back(chain); }
+
+  /// \brief  Set a vector of chain names
+  ///
+  /// \param chain chain name
+  void SetChainList(std::vector<String> chains) { chains_ = chains; }
+
   /// \brief Get vector of chain names
   ///
   /// \return chains

@@ -559,9 +559,11 @@ private:
 
   /// \struct assembly information
   typedef struct {
-    MMCifInfoBioUnit biounit;
+    String biounit_id;                              ///< identifier for the bu
+    std::vector<String> chains;                     ///< chains affected by
+                                                    /// this operations
     std::vector<std::vector<String> > operations;   ///< list of links to
-                                                     /// MMCifBioUOperation
+                                                    /// MMCifBioUOperation
   } MMCifBioUAssembly;
   typedef std::vector<MMCifBioUAssembly> MMCifBioUAssemblyVector;
 

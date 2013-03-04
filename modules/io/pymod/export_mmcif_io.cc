@@ -176,6 +176,7 @@ void export_mmcif_io()
     .def("SetDetails", &MMCifInfoBioUnit::SetDetails)
     .def("GetDetails", &MMCifInfoBioUnit::GetDetails)
     .def("AddChain", &MMCifInfoBioUnit::AddChain)
+    .def("SetChainList", &MMCifInfoBioUnit::SetChainList)
     .def("GetChainList", make_function(&MMCifInfoBioUnit::GetChainList,
                                    return_value_policy<copy_const_reference>()))
     .def("AddOperations", &MMCifInfoBioUnit::AddOperations)
