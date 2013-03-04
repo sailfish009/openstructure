@@ -114,6 +114,11 @@ BOOST_AUTO_TEST_CASE(mmcif_info_biounit)
   BOOST_CHECK(bu.GetDetails() == "author_defined_assembly");
   BOOST_CHECK(bu.GetChainList().back() == "A");
 
+  std::vector<String> chains;
+  chains.push_back("B");
+  bu.SetChainList(chains);
+  BOOST_CHECK(bu.GetChainList().back() == "B");
+
   MMCifInfo info = MMCifInfo();
   info.AddBioUnit(bu);
   std::vector<MMCifInfoBioUnit> biounits = info.GetBioUnits();

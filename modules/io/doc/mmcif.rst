@@ -499,7 +499,7 @@ of the annotation available.
     Chains involved in this bio unit. If not provided, resembles an empty list.
 
     Also available as :meth:`GetChainList`. May also be modified by
-    :meth:`AddChain`.
+    :meth:`AddChain` or :meth:`SetChainList`.
 
   .. attribute:: operations
 
@@ -526,6 +526,13 @@ of the annotation available.
     See :attr:`details`
 
   .. method:: GetChainList()
+
+    See :attr:`chains`
+
+  .. method:: SetChainList(chains)
+
+    :param chains: List of chain names.
+    :type chains: :class:`~ost.StringList`
 
     See :attr:`chains`
 
@@ -567,7 +574,7 @@ of the annotation available.
 
     :param asu:  Asymmetric unit to work on. Should be created from a mmCIF
                  file.
-    :type asu: :class:`~ost.mol.EntityHandle>`
+    :type asu: :class:`~ost.mol.EntityHandle`
     :param seqres: If set to a valid sequence list, the length of the seqres 
       records will be used to determine if a certain chain has the minimally 
       required length.
@@ -949,3 +956,6 @@ of the annotation available.
 ..  LocalWords:  auth GetMMCifPDBChainTr AddPDBCMMCifhainTr GetPDBMMCifChainTr
 ..  LocalWords:  GetRevisions AddRevision SetRevisionsDateOriginal GetSize
 ..  LocalWords:  GetNum num GetStatus GetLastDate GetFirstRelease storable
+..  LocalWords:  SetChainList MMCifInfoTransOp ChainTypes MMCifInfoStructRef
+..  LocalWords:  MMCifInfoRevisions bool difs MMCifInfoStructRefSeqDif rnum
+..  LocalWords:  SetDateOriginal GetDateOriginal yyyy
