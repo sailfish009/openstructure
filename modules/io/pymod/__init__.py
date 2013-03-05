@@ -60,30 +60,6 @@ def _override(val1, val2):
   else:
     return val1
 
-def __GetModelFromPDB(model_id, output_dir, file_pattern='pdb%s.ent.gz'):
-  file_name = file_pattern % model_id
-  file_path = os.path.join(output_dir,file_name)
-  try:
-    server="ftp.wwpdb.org"
-    ftp=ftplib.FTP(server,"anonymous","user@")
-    ftp.cwd("pub/pdb/data/structures/all/pdb")
-    ftp_retrfile=open(file_path,"wb")
-    ftp.retrbinary("RETR "+file_name,ftp_retrfile.write)
-    ftp_retrfile.close()
-  except:
-    conn=httplib.HTTPConnection('www.pdb.org')
-    conn.request('GET', '/pdb/files/%s.pdb.gz' % model_id )
-    response=conn.getresponse()
-    if response.status==200:
-      data=response.read()
-      f=open(os.path.join(output_dir, file_pattern % model_id), 'w+')
-      f.write(data)
-      f.close()
-    else:
-      conn.close()
-      return False
-  return os.path.getsize(file_path) > 0
-
 def LoadPDB(filename, restrict_chains="", no_hetatms=None,
             fault_tolerant=None, load_multi=False, quack_mode=None,
             join_spread_atom_records=None, calpha_only=None,
@@ -156,12 +132,11 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
   prof.join_spread_atom_records=_override(prof.join_spread_atom_records,
                                           join_spread_atom_records)
 
+  tmp_file = None # avoid getting out of scope
   if remote:
-    output_dir = tempfile.gettempdir()
-    if __GetModelFromPDB(filename, output_dir):
-      filename = os.path.join(output_dir, 'pdb%s.ent.gz' % filename)
-    else:
-      raise IOError('Can not load PDB %s from www.pdb.org'%filename) 
+    from ost.io.remote import RemoteGet
+    tmp_file =RemoteGet(filename)
+    filename = tmp_file.name
   
   conop_inst=conop.Conopology.Instance()
   builder=conop_inst.GetBuilder("DEFAULT")

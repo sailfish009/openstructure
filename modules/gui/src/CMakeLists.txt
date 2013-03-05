@@ -166,7 +166,6 @@ set(OST_GUI_HEADERS
 file_browser.hh
 file_type_dialog.hh
 file_viewer.hh
-remote_loader.hh
 gl_canvas.hh
 gl_win.hh
 scene_menu.hh
@@ -176,7 +175,6 @@ module_config.hh
 main.hh
 main_area.hh
 perspective.hh
-remote_site_loader.hh
 scene_selection.hh
 main_window.hh
 dock_widget.hh
@@ -188,7 +186,6 @@ widget_pool.hh
 widget_registry.hh
 widget_state_saver.hh
 file_loader.hh
-loader_manager.hh
 )
 
 set(OST_GUI_SOURCES
@@ -198,7 +195,6 @@ widget_registry.cc
 file_browser.cc
 file_type_dialog.cc
 file_viewer.cc
-remote_loader.cc
 main.cc
 gl_canvas.cc
 dock_widget.cc
@@ -208,7 +204,6 @@ scene_menu.cc
 widget.cc
 admin.cc
 widget_pool.cc
-remote_site_loader.cc
 messages/message_widget.cc
 messages/message_box_widget.cc
 messages/log_reader.cc
@@ -237,7 +232,6 @@ widget_state_saver.cc
 scene_selection.cc
 widget_geom_handler.cc
 file_loader.cc
-loader_manager.cc
 panels/button_bar.cc
 panels/drop_box.cc
 panels/panel_bar.cc
@@ -305,7 +299,6 @@ set(HEADERS_TO_BE_MOCCED
 file_browser.hh
 file_type_dialog.hh
 file_viewer.hh
-remote_loader.hh
 gl_canvas.hh
 gl_win.hh
 scene_menu.hh

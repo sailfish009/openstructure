@@ -23,6 +23,8 @@ from ost.gui.init_context_menu import _InitContextMenu
 from ost.gui.init_splash import _InitSplash
 from ost.gui.dng import termuse
 from ost.gui.dng import superpositiondialog
+from ost.gui.scene.remote import RemoteLoader
+
 import ost.gui.dng.menu
 from PyQt4.QtGui import *
 def _my_exit(code):
@@ -56,7 +58,6 @@ def _InitPanels(app):
   panels = app.perspective.panels
   panels.AddWidgetToPool('ost.gui.FileBrowser', -1)
   panels.AddWidgetToPool('ost.gui.PythonShell', 1)
-  panels.AddWidgetToPool('ost.gui.RemoteLoader', -1)
   panels.AddWidgetToPool('ost.gui.SceneWin', 1)
   panels.AddWidgetToPool('ost.gui.SequenceViewer', 1)
   panels.AddWidgetToPool('ost.gui.MessageWidget', 1)
@@ -64,8 +65,6 @@ def _InitPanels(app):
     panels.AddWidget(gui.PanelPosition.LEFT_PANEL, app.scene_win)
     panels.AddWidgetByName(gui.PanelPosition.LEFT_PANEL, 
                            'ost.gui.FileBrowser', False)    
-    panels.AddWidgetByName(gui.PanelPosition.LEFT_PANEL, 
-                           'ost.gui.RemoteLoader', False)
     panels.AddWidget(gui.PanelPosition.BOTTOM_PANEL, app.seq_viewer)
     panels.AddWidget(gui.PanelPosition.BOTTOM_PANEL, app.py_shell)
     panels.AddWidget(gui.PanelPosition.RIGHT_PANEL, app.message_widget)
