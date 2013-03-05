@@ -24,7 +24,6 @@ using namespace boost::python;
 #include <QString>
 
 #include <ost/gui/file_loader.hh>
-#include <ost/gui/loader_manager.hh>
 
 using namespace ost;
 using namespace ost::gui;
@@ -41,48 +40,13 @@ void load_object_b(const QString& file_name, const QString& selection)
   FileLoader::LoadObject(file_name, selection);
 }
 
-void load_from_site_a(const QString& id)
-{
-  FileLoader::LoadFrom(id);
-}
-
-void load_from_site_b(const QString& id, const QString& site)
-{
-  FileLoader::LoadFrom(id,site);
-}
-
-void load_from_site_c(const QString& id, const QString& site, const QString& selection)
-{
-  FileLoader::LoadFrom(id,site,selection);
-}
-
-void add_remote_site_loader(LoaderManager* loader_manager, const QString& site, RemoteSiteLoader* site_loader){
-  loader_manager->AddRemoteSiteLoader(site,site_loader);
-}
-
 }
 
 void export_FileLoader()
 {
-  class_<LoaderManager, LoaderManagerPtr, boost::noncopyable>("LoaderManager", no_init)
-    .def("GetSiteLoaderIdents", &LoaderManager::GetSiteLoaderIdents)
-    .def("AddRemoteSiteLoader", &add_remote_site_loader)
-    .def("RemoveRemoteSiteLoader", &LoaderManager::RemoveRemoteSiteLoader)
-    .def("SetDefaultRemoteSiteIdent", &LoaderManager::SetDefaultRemoteSiteIdent)
-    .def("GetDefaultRemoteSiteIdent", &LoaderManager::GetDefaultRemoteSiteIdent)
-  ;
-
   class_<FileLoader, boost::noncopyable>("FileLoader", no_init)
     .def("LoadObject", &load_object_a)
     .def("LoadObject", &load_object_b)
     .staticmethod("LoadObject")
-    .def("LoadFrom", &load_from_site_a)
-    .def("LoadFrom", &load_from_site_b)
-    .def("LoadFrom", &load_from_site_c)
-    .staticmethod("LoadFrom")
-    .def("GetSiteLoaderIdents", &FileLoader::GetSiteLoaderIdents)
-    .staticmethod("GetSiteLoaderIdents")
-    .def("GetLoaderManager", &FileLoader::GetLoaderManager)
-    .staticmethod("GetLoaderManager")
   ;
 }

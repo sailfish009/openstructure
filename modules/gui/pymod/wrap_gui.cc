@@ -38,7 +38,6 @@ void export_SipHandler();
 void export_SceneSelection();
 void export_MainArea();
 void export_MenuBar();
-void export_RemoteSiteLoader();
 void export_FileLoader();
 void export_FileViewer();
 void export_Widget();
@@ -118,7 +117,6 @@ BOOST_PYTHON_MODULE(_ost_gui)
   export_SceneWin();
   export_SceneSelection();
   export_SequenceViewer();
-  export_RemoteSiteLoader();
   export_FileLoader();
   export_FileViewer();
   export_Widget();

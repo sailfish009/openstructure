@@ -2,7 +2,6 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from ost import *
 from ost import gui
-from ost.gui.scene.loader_manager_widget import LoaderManagerWidget
 from ost.gui.init_splash import _InitSplash
 from ost.gui.dng import termuse
 from ost.gui.dng import superpositiondialog
@@ -204,7 +203,6 @@ class WindowMenu(QMenu):
   def __init__(self, parent=None):
     QMenu.__init__(self, parent)
     self.setTitle('Window')
-    self.loader_manager=LoaderManagerWidget()
     gosty=gui.GostyApp.Instance()
     QObject.connect(self, SIGNAL('aboutToShow()'), self._AboutToShow)
     inspector_visible=gosty.GetWidget('InspectorDialog').isVisible()
