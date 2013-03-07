@@ -241,6 +241,11 @@ public:
   /// \brief Create a biounit.
   MMCifInfoBioUnit(): id_(""), details_("") {};
 
+  /// \brief Merge chains & operations, set intervals
+  ///
+  /// \param from biounit to read data from
+  void Merge(MMCifInfoBioUnit& from);
+
   /// \brief Set id
   ///
   /// \param id id
@@ -262,25 +267,39 @@ public:
   /// \brief Add a chain name
   ///
   /// \param chain chain name
-  void AddChain(String chain) { chains_.push_back(chain); }
+  void AddChain(String chain);
 
   /// \brief  Set a vector of chain names
   ///
-  /// \param chain chain name
-  void SetChainList(std::vector<String> chains) { chains_ = chains; }
+  /// \param chains chain name
+  void SetChainList(std::vector<String> chains);
 
   /// \brief Get vector of chain names
   ///
   /// \return chains
   const std::vector<String>& GetChainList() const { return chains_; }
 
+  /// \brief Get the list of intervals of chains
+  ///
+  /// \return pair-intervals
+  const std::vector<std::pair<int, int> >& GetChainIntervalList()
+  {
+    return tr_chains_;
+  }
+
   /// \brief Add a set of operations
   ///
   /// \param operations vector of operations to be added
-  void AddOperations(std::vector<MMCifInfoTransOpPtr> operations)
+  void AddOperations(std::vector<MMCifInfoTransOpPtr> operations);
+
+  /// \brief Get the list of intervals of operations
+  ///
+  /// \return pair-intervals
+  const std::vector<std::pair<int, int> >& GetOperationsIntervalList()
   {
-    operations_.push_back(operations);
+    return tr_operations_;
   }
+
   /// \brief Get the list of operations
   ///
   /// \return vector of vectors of iterators.
@@ -297,6 +316,12 @@ public:
       return false;
     }
     if (this->chains_ != bu.chains_) {
+      return false;
+    }
+    if (this->tr_chains_ != bu.tr_chains_) {
+      return false;
+    }
+    if (this->tr_operations_ != bu.tr_operations_) {
       return false;
     }
     if (this->operations_.size() == bu.operations_.size()) {
@@ -335,8 +360,10 @@ public:
 private:
   String id_;                  ///< pdbx_struct_assembly.id
   String details_;             ///< pdbx_struct_assembly.details
-  std::vector<String> chains_; ///< chains involved in this assembly
+  std::vector<String> chains_; ///< all chains of this this assembly
+  std::vector<std::pair<int, int> > tr_chains_; //< chains of a transformation
   std::vector<std::vector<MMCifInfoTransOpPtr> > operations_;
+  std::vector<std::pair<int, int> > tr_operations_; //< ops. of a transformation
 };
 
 class DLLEXPORT_OST_IO MMCifInfoCitation {
@@ -894,10 +921,7 @@ public:
   /// \brief Add a biounit
   ///
   /// \param bu biounit to be added
-  void AddBioUnit(MMCifInfoBioUnit bu) // unit test
-  {
-    biounits_.push_back(bu);
-  }
+  void AddBioUnit(MMCifInfoBioUnit bu);
 
   /// \brief Get the list of biounits stored in an info object.
   ///
