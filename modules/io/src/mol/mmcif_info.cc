@@ -72,7 +72,75 @@ void MMCifInfo::AddAuthorsToCitation(StringRef id, std::vector<String> list)
   throw IOException("No citation for identifier '" + id.str() + "' found.");
 }
 
+void MMCifInfo::AddBioUnit(MMCifInfoBioUnit bu)
+{
+  std::vector<MMCifInfoBioUnit>::iterator bu_it;
+  for (bu_it = biounits_.begin(); bu_it != biounits_.end(); ++bu_it) {
+    if (bu_it->GetID() == bu.GetID()) {
+      break;
+    }
+  }
+  if (bu_it != biounits_.end()) {
+    bu_it->Merge(bu);
+    return;
+  }
+  biounits_.push_back(bu);
+}
 
+void MMCifInfoBioUnit::AddChain(String chain)
+{
+  chains_.push_back(chain);
+
+  if (tr_chains_.size()) {
+    tr_chains_.back().second = chains_.size();
+  }
+  else {
+    std::pair<int, int> tr_interval = std::pair<int, int>(0, 1);
+    tr_chains_.push_back(tr_interval);
+  }
+}
+
+void MMCifInfoBioUnit::SetChainList(std::vector<String> chains)
+{
+  chains_ = chains;
+
+  if (tr_chains_.size()) {
+    tr_chains_.clear();
+  }
+  std::pair<int, int> tr_interval = std::pair<int, int>(0, chains_.size());
+  tr_chains_.push_back(tr_interval);
+}
+
+void MMCifInfoBioUnit::AddOperations(std::vector<MMCifInfoTransOpPtr> operations)
+{
+  operations_.push_back(operations);
+
+  if (tr_operations_.size()) {
+    tr_operations_.back().second = operations_.size();
+  }
+  else {
+    std::pair<int, int> tr_interval = std::pair<int, int>(0, 1);
+    tr_operations_.push_back(tr_interval);
+  }
+}
+
+void MMCifInfoBioUnit::Merge(MMCifInfoBioUnit& from)
+{
+  // merge chains
+  int old_size = chains_.size();
+  chains_.insert(chains_.end(), from.chains_.begin(), from.chains_.end());
+  std::pair<int, int> tr_interval = std::pair<int, int>(old_size,
+                                                        chains_.size());
+  tr_chains_.push_back(tr_interval);
+  // merge operations
+  old_size = operations_.size();
+  operations_.insert(operations_.end(),
+                     from.operations_.begin(),
+                     from.operations_.end());
+  tr_interval.first = old_size;
+  tr_interval.second = operations_.size();
+  tr_operations_.push_back(tr_interval);
+}
 
 MMCifInfoStructRefSeqPtr 
 MMCifInfoStructRef::AddAlignedSeq(const String& aid, const String& chain_name, 
@@ -107,6 +175,5 @@ MMCifInfoStructRefSeq::AddDif(int seq_rnum, int db_rnum, const String& details)
 	difs_.push_back(d);
 	return d;
 }
-
 
 }} //ns
