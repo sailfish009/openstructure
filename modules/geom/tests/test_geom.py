@@ -26,6 +26,14 @@ if __name__== '__main__':
 import ost
 import ost.geom as geom
 
+# this terrible hack is required for older version of Python/Boost
+# which do not convert std::out_of_range to IndexError correctly.
+try:
+  geom.Vec2()[3]
+except Exception, e:
+  pass
+  IndexError = type(e)
+
 class TestGeom(unittest.TestCase):
   def runTest(self):
     self.test_repr()
