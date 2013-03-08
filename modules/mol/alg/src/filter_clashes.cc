@@ -502,6 +502,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
   }
   std::cout << "Average Z-Score angle widths: " << std::fixed << std::setprecision(5) << avg_zscore_angles << std::endl;
   std::cout << "Angles outside of tolerance range: " << bad_angle_count << " out of " << angle_count << std::endl;
+  filtered.AddAllInclusiveBonds();
   return filtered;
 }
 
@@ -608,6 +609,7 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
   }
   std::cout << bad_distance_count << " non-bonded short-range distances shorter than tolerance distance" << std::endl;
   std::cout << "Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << average_offset << std::endl;
+  filtered.AddAllInclusiveBonds();
   return filtered;
 }
 
