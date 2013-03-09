@@ -24,28 +24,6 @@
 
 namespace ost { namespace mol { namespace alg {
 
-namespace {
-  
-template <typename T, typename I>
-Real do_clash_score(const T& ent_a, const EntityView& ent_b)
-{
-  Real energy=0.0;
-  for (I i=ent_a.AtomsBegin(), e=ent_a.AtomsEnd(); i!=e; ++i) {
-    
-    AtomViewList clashees=ent_b.FindWithin((*i).GetPos(), 
-                                                (*i).GetRadius()+1.7);
-
-    for (AtomViewList::iterator j=clashees.begin(), 
-         e2=clashees.end(); j!=e2; ++j) {
-         energy+=StericEnergy((*j).GetPos(), (*j).GetRadius()-0.25,
-                              (*i).GetPos(), (*i).GetRadius()-0.25);           
-    }
-  }
-  return energy;  
-}
-
-}
-
 Real StericEnergy(const geom::Vec3& pos1, Real r1,
                   const geom::Vec3& pos2, Real r2)
 {
