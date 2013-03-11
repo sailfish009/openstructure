@@ -201,7 +201,7 @@ class TestMMCifInfo(unittest.TestCase):
     pdb_ent, t = info.GetBioUnits()[0].PDBize(ent, transformation=True)
     self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[0], -915.8, 1)
     self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[1], -952.345, 2)
-    self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[2], 3221.74, 2)
+    self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[2], 3221.75, 2)
     self.assertEquals(geom.Equal(t,
                                  geom.Mat4(1,0,0,-920.462,
                                            0,1,0,-966.654,
