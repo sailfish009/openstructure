@@ -380,105 +380,110 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10,
     return atom_pos_wrong
 
   chain_names='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'
+  cur_chain_name = 0
+  water_chain = mol.ChainHandle()
+  ligand_chain = mol.ChainHandle()
+  a_pos_wrong = False
+  pdb_bu = mol.CreateEntity()
+  edi = pdb_bu.EditXCS(mol.BUFFERED_EDIT)
+  chains = biounit.GetChainList()
+  c_intvls = biounit.GetChainIntervalList()
+  o_intvls = biounit.GetOperationsIntervalList()
   # create list of operations
   # for cartesian products, operations are stored in a list, multiplied with
   # the next list of operations and re-stored... until all lists of operations
   # are multiplied in an all-against-all manner.
   operations = biounit.GetOperations()
-  trans_matrices = list()
-  if len(operations) > 0:
-    for op in operations[0]:
-      rot = geom.Mat4()
-      rot.PasteRotation(op.rotation)
-      trans = geom.Mat4()
-      trans.PasteTranslation(op.translation)
-      tr = geom.Mat4()
-      tr = trans * rot
-      trans_matrices.append(tr)
-    for op_n in range(1, len(operations)):
-      tmp_ops = list()
-      for o in operations[op_n]:
+  for i in range(0,len(c_intvls)):
+    trans_matrices = list()
+    l_operations = operations[o_intvls[i][0]:o_intvls[i][1]]
+    if len(l_operations) > 0:
+      for op in l_operations[0]:
         rot = geom.Mat4()
-        rot.PasteRotation(o.rotation)
+        rot.PasteRotation(op.rotation)
         trans = geom.Mat4()
-        trans.PasteTranslation(o.translation)
+        trans.PasteTranslation(op.translation)
         tr = geom.Mat4()
         tr = trans * rot
-        for t_o in trans_matrices:
-          tp = t_o * tr
-          tmp_ops.append(tp)
-      trans_matrices = tmp_ops
-  # select chains into a view as basis for each transformation
-  assu = asu.Select('cname=' + ','.join(biounit.GetChainList()))
-  # use each transformation on the view, store as entity and transform, PDBize
-  # the result while adding everything to one large entity
-  pdb_bu = mol.CreateEntity()
-  edi = pdb_bu.EditXCS(mol.BUFFERED_EDIT)
-  cur_chain_name = 0
-  water_chain = mol.ChainHandle()
-  ligand_chain = mol.ChainHandle()
-  a_pos_wrong = False
-  for tr in trans_matrices:
-    # do a PDBize, add each new entity to the end product
-    for chain in assu.chains:
-      residue_count = len(chain.residues)
-      if seqres:
-        seqres_chain = seqres.FindSequence(chain.name)
-        if seqres_chain.IsValid():
-          residue_count = len(seqres_chain)
-      if chain.is_polymer and residue_count >= min_polymer_size:
-        if len(chain_names) == cur_chain_name:
-          raise RuntimeError('Running out of chain names')
-        new_chain = edi.InsertChain(chain_names[cur_chain_name])
-        cur_chain_name += 1
-        edi.SetChainDescription(new_chain, chain.description)
-        edi.SetChainType(new_chain, chain.type)
-        new_chain.SetStringProp('original_name', chain.name)
-        if chain.HasProp("pdb_auth_chain_name"):
-          new_chain.SetStringProp("pdb_auth_chain_name", 
-                                  chain.GetStringProp("pdb_auth_chain_name"))
-        for res in chain.residues:
-          new_res = edi.AppendResidue(new_chain, res.name, res.number)
-          a_b = _CopyAtoms(res, new_res, edi, tr)
-          if not a_pos_wrong:
-            a_pos_wrong = a_b
-      elif chain.type == mol.CHAINTYPE_WATER:
-        if not water_chain.IsValid():
-          # water gets '-' as name
-          water_chain = edi.InsertChain('-')
-          edi.SetChainDescription(water_chain, chain.description)
-          edi.SetChainType(water_chain, chain.type)
-        for res in chain.residues:
-          new_res = edi.AppendResidue(water_chain, res.name)
-          new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
-          new_res.SetStringProp('description', chain.description)
-          a_b = _CopyAtoms(res, new_res, edi, tr)
-          if not a_pos_wrong:
-            a_pos_wrong = a_b
-      else:
-        if not ligand_chain.IsValid():
-          # all ligands, put in one chain, are named '_'
-          ligand_chain = edi.InsertChain('_')
-          last_rnum = 0
-        else:
-          last_rnum = ligand_chain.residues[-1].number.num
-        residues=chain.residues
-        ins_code='\0'
-        if len(residues)>1:
-          ins_code='A'
-        for res in chain.residues:
-          new_res = edi.AppendResidue(ligand_chain, res.name, 
-                                      mol.ResNum(last_rnum+1, ins_code))
-          new_res.SetStringProp('description', chain.description)
-          new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
-          new_res.SetStringProp("original_name", chain.name)
+        trans_matrices.append(tr)
+      for op_n in range(1, len(l_operations)):
+        tmp_ops = list()
+        for o in l_operations[op_n]:
+          rot = geom.Mat4()
+          rot.PasteRotation(o.rotation)
+          trans = geom.Mat4()
+          trans.PasteTranslation(o.translation)
+          tr = geom.Mat4()
+          tr = trans * rot
+          for t_o in trans_matrices:
+            tp = t_o * tr
+            tmp_ops.append(tp)
+        trans_matrices = tmp_ops
+    # select chains into a view as basis for each transformation
+    assu = asu.Select('cname='+','.join(chains[c_intvls[i][0]:c_intvls[i][1]]))
+    # use each transformation on the view, store as entity and transform, PDBize
+    # the result while adding everything to one large entity
+    for tr in trans_matrices:
+      # do a PDBize, add each new entity to the end product
+      for chain in assu.chains:
+        residue_count = len(chain.residues)
+        if seqres:
+          seqres_chain = seqres.FindSequence(chain.name)
+          if seqres_chain.IsValid():
+            residue_count = len(seqres_chain)
+        if chain.is_polymer and residue_count >= min_polymer_size:
+          if len(chain_names) == cur_chain_name:
+            raise RuntimeError('Running out of chain names')
+          new_chain = edi.InsertChain(chain_names[cur_chain_name])
+          cur_chain_name += 1
+          edi.SetChainDescription(new_chain, chain.description)
+          edi.SetChainType(new_chain, chain.type)
+          new_chain.SetStringProp('original_name', chain.name)
           if chain.HasProp("pdb_auth_chain_name"):
-            new_res.SetStringProp("pdb_auth_chain_name",
-                                  chain.GetStringProp("pdb_auth_chain_name"))
-          ins_code = chr(ord(ins_code)+1)
-          a_b = _CopyAtoms(res, new_res, edi, tr)
-          if not a_pos_wrong:
-            a_pos_wrong = a_b
+            new_chain.SetStringProp("pdb_auth_chain_name", 
+                                    chain.GetStringProp("pdb_auth_chain_name"))
+          for res in chain.residues:
+            new_res = edi.AppendResidue(new_chain, res.name, res.number)
+            a_b = _CopyAtoms(res, new_res, edi, tr)
+            if not a_pos_wrong:
+              a_pos_wrong = a_b
+        elif chain.type == mol.CHAINTYPE_WATER:
+          if not water_chain.IsValid():
+            # water gets '-' as name
+            water_chain = edi.InsertChain('-')
+            edi.SetChainDescription(water_chain, chain.description)
+            edi.SetChainType(water_chain, chain.type)
+          for res in chain.residues:
+            new_res = edi.AppendResidue(water_chain, res.name)
+            new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
+            new_res.SetStringProp('description', chain.description)
+            a_b = _CopyAtoms(res, new_res, edi, tr)
+            if not a_pos_wrong:
+              a_pos_wrong = a_b
+        else:
+          if not ligand_chain.IsValid():
+            # all ligands, put in one chain, are named '_'
+            ligand_chain = edi.InsertChain('_')
+            last_rnum = 0
+          else:
+            last_rnum = ligand_chain.residues[-1].number.num
+          residues=chain.residues
+          ins_code='\0'
+          if len(residues)>1:
+            ins_code='A'
+          for res in chain.residues:
+            new_res = edi.AppendResidue(ligand_chain, res.name, 
+                                        mol.ResNum(last_rnum+1, ins_code))
+            new_res.SetStringProp('description', chain.description)
+            new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
+            new_res.SetStringProp("original_name", chain.name)
+            if chain.HasProp("pdb_auth_chain_name"):
+              new_res.SetStringProp("pdb_auth_chain_name",
+                                    chain.GetStringProp("pdb_auth_chain_name"))
+            ins_code = chr(ord(ins_code)+1)
+            a_b = _CopyAtoms(res, new_res, edi, tr)
+            if not a_pos_wrong:
+              a_pos_wrong = a_b
   move_to_origin = None
   if a_pos_wrong:
     start = pdb_bu.bounds.min
