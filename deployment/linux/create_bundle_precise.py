@@ -11,7 +11,7 @@ import PyQt4
 # parameters that can be modified
 qt4_plugins_location='/usr/lib/i386-linux-gnu/qt4/plugins'
 ssl_crypto_location='/lib/i386-linux-gnu/'
-chemlib_dictionary_location='/data/Work/Software/compounds.chemlib'
+chemlib_dictionary_location='/home/bundler/compounds.chemlib'
 list_of_excluded_libraries=[
 'ld-linux',
 'libexpat',
