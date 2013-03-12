@@ -36,8 +36,9 @@ export LD_LIBRARY_PATH="$DNG_LIBDIR:${LD_LIBRARY_PATH}"
 #unset PYTHONPATH
 
 
+
 # retrieve absolute path to python executable
-pyexec="$DNG_ROOT/bin/python"
+pyexec="@PYTHON_BINARY@"
 
 if [ ! -x "$pyexec" ]; then 
   echo "Error: Python executable '$pyexec' not found!"
