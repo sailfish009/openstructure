@@ -31,13 +31,13 @@ export DYLD_FRAMEWORK_PATH="$DNG_LIBDIR:${DYLD_FRAMEWORK_PATH}"
 export DYLD_LIBRARY_PATH="$DNG_LIBDIR:${DYLD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH="$DNG_LIBDIR:${LD_LIBRARY_PATH}"
 # set QT_PLUGIN_PATH for bundle (commented except in linux bundles)
- export QT_PLUGIN_PATH="$BIN_DIR/plugins"
+# export QT_PLUGIN_PATH="$BIN_DIR/plugins"
 # unset PYTHONPATH for bundle (commented except in linux bundles)
- unset PYTHONPATH
+# unset PYTHONPATH
 
 
 # retrieve absolute path to python executable
-pyexec="$DNG_ROOT/bin/python"
+pyexec="@PYTHON_BINARY@"
 
 if [ ! -x "$pyexec" ]; then 
   echo "Error: Python executable '$pyexec' not found!"
