@@ -91,7 +91,7 @@ subprocess.call('mkdir '+directory_name+'/bin',shell=True,cwd='../../')
 print 'Copy python executable into stage for dependency detection'
 subprocess.call('cp '+system_python_bin+ ' stage/bin/python',shell=True,cwd='../../')
 print 'Copy python libraries into the stage for dependency detection'
-subprocess.call('cp -pRL '+system_python_libs+'/* stage/'+libdir+'/',shell=True,cwd='../../')
+subprocess.call('cp -pRL '+system_python_libs+' stage/'+libdir+'/',shell=True,cwd='../../')
 subprocess.call('rm -fr stage/'+libdir+'/'+system_python_executable+'/dist-packages',shell=True,cwd='../../')
 subprocess.call('cp -pRL '+sip_module_location+'/sip* stage/'+libdir+'/'+system_python_executable+'/',shell=True,cwd='../../')
 subprocess.call('cp -pRL '+qt4_module_location+' stage/'+libdir+'/'+system_python_executable+'/',shell=True,cwd='../../')
@@ -129,7 +129,7 @@ for entry in filtered_dep_list:
 print 'Copy python executable into package directory structure'
 subprocess.call('cp '+system_python_bin+ ' '+directory_name+'/bin/python',shell=True,cwd='../../')
 print 'Copy python libraries into package directory structure'
-subprocess.call('cp -pRL '+system_python_libs+' '+directory_name+'/'+libdir+'/'+system_python_executable+'/',shell=True,cwd='../../')
+subprocess.call('cp -pRL '+system_python_libs+'/* '+directory_name+'/'+libdir+'/'+system_python_executable+'/',shell=True,cwd='../../')
 subprocess.call('rm -fr '+directory_name+'/'+libdir+'/'+system_python_executable+'/dist-packages',shell=True,cwd='../../')
 subprocess.call('cp -pRL '+sip_module_location+'/sip* '+directory_name+'/'+libdir+'/'+system_python_executable+'/',shell=True,cwd='../../')
 subprocess.call('cp -pRL '+qt4_module_location+' '+directory_name+'/'+libdir+'/'+system_python_executable+'/',shell=True,cwd='../../')
