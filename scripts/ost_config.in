@@ -36,7 +36,6 @@ export LD_LIBRARY_PATH="$DNG_LIBDIR:${LD_LIBRARY_PATH}"
 #unset PYTHONPATH
 
 
-
 # retrieve absolute path to python executable
 pyexec="@PYTHON_BINARY@"
 

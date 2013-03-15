@@ -67,6 +67,7 @@ else:
 directory_name='openstructure-linux-'+archstring+'-'+additional_label
 print 'Hardcoding package python binary path in openstructure executables'
 subprocess.call('rm -f scripts/ost_config.in.pre* scripts/ost_config.in.backup',shell=True,cwd='../../')
+subprocess.call('mv scripts/ost_config.in scripts/ost_config.in.backup',shell=True,cwd='../../')
 subprocess.call('sed "s/@PYTHON_BINARY@/\$DNG_ROOT\/bin\/python/g" scripts/ost_config.in.backup > scripts/ost_config.in.prepreprepre',shell=True,cwd='../../')
 subprocess.call('sed "s/\#export PYTHONHOME/ export PYTHONHOME/g" scripts/ost_config.in.prepreprepre > scripts/ost_config.in.preprepre',shell=True,cwd='../../')
 subprocess.call('sed "s/\#export PYTHONPATH/ export PYTHONPATH/g" scripts/ost_config.in.preprepre > scripts/ost_config.in.prepre',shell=True,cwd='../../')
