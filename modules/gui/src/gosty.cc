@@ -208,7 +208,7 @@ void prepare_scripts(int argc, char** argv, PythonInterpreter& py)
 class MyApplication : public QApplication
 {
 public:
-    MyApplication(int argc, char** argv) : QApplication(argc, argv) {}
+    MyApplication(int& argc, char** argv) : QApplication(argc, argv) {}
     virtual ~MyApplication() {}
     virtual bool notify(QObject *rec, QEvent *ev)
     {
@@ -232,11 +232,13 @@ public:
 int main(int argc, char** argv)
 {
   int dummy_argc=1;
-  
-  MyApplication app(dummy_argc,argv);
+  char *dummy_argv[]= {argv[0], NULL };
+  std::cout << dummy_argv[0] << std::endl;
+  MyApplication app(dummy_argc, dummy_argv);
   QCoreApplication::setOrganizationName("OpenStructure");
   QCoreApplication::setOrganizationDomain("openstructure.org");
   QCoreApplication::setApplicationName(QString(argv[2]));
+
   if (int rv=setup_resources(app)<0) {
     return rv;
   }
