@@ -6,7 +6,6 @@ set(OST_GUI_PYMOD_SOURCES
   export_tool.cc
   export_py_shell.cc
   export_gosty.cc
-  export_remote_site_loader.cc
   export_scene_win.cc
   export_sequence_viewer.cc
   export_perspective.cc
@@ -37,6 +36,7 @@ init_inspector.py
 inspector_widget.py
 map_level_widget.py
 preset.py
+remote.py
 preset_editor_list_model.py
 preset_editor_widget.py
 preset_info_handler.py
@@ -54,11 +54,6 @@ trace_widget.py
 tube_widget.py
 uniform_color_widget.py
 visibility_op.py
-file_loader.py
-loader_info_handler.py
-loader_list_model.py
-loader_manager_widget.py
-immutable_loader_info_handler.py
 line_trace_widget.py
 wireframe_widget.py
 query_editor.py

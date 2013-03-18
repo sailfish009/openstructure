@@ -289,7 +289,7 @@ public:
   AtomHandleList GetAtomList() const;
   
   /// \brief get complete list of atom positions
-  geom::Vec3List GetAtomPosList() const;
+  geom::Vec3List GetAtomPosList(bool ordered_by_index = false) const;
   
   /// \brief Get editor for external coordinate system to manipulate atom 
   ///     positions

@@ -24,6 +24,7 @@
 #include <ost/mol/alg/superpose_frames.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/mol/alg/consistency_checks.hh>
+#include <ost/export_helper/pair_to_tuple_conv.hh>
 
 using namespace boost::python;
 using namespace ost;
@@ -60,7 +61,7 @@ ost::mol::alg::StereoChemicalParams fill_stereochemical_params_wrapper (const St
   return ost::mol::alg::FillStereoChemicalParams(header,stereo_chemical_props_file_vector);
 }
 
-ost::mol::alg::ClashingDistances fill_clashing_distances_wrapper (const list& stereo_chemical_props_file, Real min_default_distance, Real min_distance_tolerance)  
+ost::mol::alg::ClashingDistances fill_clashing_distances_wrapper (const list& stereo_chemical_props_file)
 {
   int stereo_chemical_props_file_length = boost::python::extract<int>(stereo_chemical_props_file.attr("__len__")());
   std::vector<String> stereo_chemical_props_file_vector(stereo_chemical_props_file_length);
@@ -103,6 +104,9 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   export_entity_to_density();
   #endif
   
+  to_python_converter<std::pair<Real,Real>,
+                      PairToTupleConverter<Real, Real> >();
+
   def("LocalDistDiffTest", lddt_a, (arg("sequence_separation")=0,arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_c, (arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_b, (arg("ref_index")=0, arg("mdl_index")=1));
@@ -124,6 +128,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   class_<mol::alg::ClashingDistances> ("ClashingDistances",init<>())
     .def("SetClashingDistance",&mol::alg::ClashingDistances::SetClashingDistance)
     .def("GetClashingDistance",&mol::alg::ClashingDistances::GetClashingDistance)
+    .def("GetAdjustedClashingDistance",&mol::alg::ClashingDistances::GetAdjustedClashingDistance)
     .def("GetMaxAdjustedDistance",&mol::alg::ClashingDistances::GetMaxAdjustedDistance)    
     .def("IsEmpty",&mol::alg::ClashingDistances::IsEmpty)  
     
@@ -162,7 +167,8 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("PrintGlobalRDMap",&mol::alg::PrintGlobalRDMap);
   def("PrintResidueRDMap",&mol::alg::PrintResidueRDMap);
  
-  def("ResidueNamesMatch",&mol::alg::ResidueNamesMatch);
+  def("ResidueNamesMatch",&mol::alg::ResidueNamesMatch,
+      (arg("probe"), arg("reference"), arg("log_as_error")=false));
 
  
 }

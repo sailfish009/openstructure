@@ -49,6 +49,7 @@ void do_shrink(const ImageStateImpl<T,D>& isi, T& dest, const Extent& inner_ext)
   T sum(0);
   Real count=0.0;
   for(ExtentIterator bit(inner_ext);!bit.AtEnd();++bit) {
+    LOG_VERBOSE("inner extent point:" << Point(bit)<<","<<isi.GetExtent().Contains(Point(bit)));
     sum+=isi.Value(bit);
     count+=1.0;
   }
@@ -61,18 +62,27 @@ void do_shrink(const ImageStateImpl<T,D>& isi, T& dest, const Extent& inner_ext)
 template <typename T, class D>
 ImageStateBasePtr DiscreteShrinkFnc::VisitState(const ImageStateImpl<T,D>& isi) const
 {
-  Size size(isi.GetExtent().GetSize());
-  Point start(isi.GetExtent().GetStart());
+  Size size(isi.GetLogicalExtent().GetSize());
+  Point start(isi.GetLogicalExtent().GetStart());
   Size newsize;
 
   div_t dt;
-  dt = div(static_cast<int>(size[0]),bs_[0]);  newsize[0] = dt.quot + ((dt.rem>0) ? 1 : 0);
-  dt = div(static_cast<int>(size[1]),bs_[1]);  newsize[1] = dt.quot + ((dt.rem>0) ? 1 : 0);
-  dt = div(static_cast<int>(size[2]),bs_[2]);  newsize[2] = dt.quot + ((dt.rem>0) ? 1 : 0);
-
+  dt = div(static_cast<int>(size[0]),bs_[0]); 
+  newsize[0] = dt.quot + ((dt.rem>0) ? 1 : 0);
+  dt = div(static_cast<int>(size[1]),bs_[1]);
+  newsize[1] = dt.quot + ((dt.rem>0) ? 1 : 0);
+  dt = div(static_cast<int>(size[2]),bs_[2]);
+  newsize[2] = dt.quot + ((dt.rem>0) ? 1 : 0);
   Extent new_ext(newsize);
+  Point newstart;
 
-  LOG_DEBUG("extent of shrunken image" << isi.GetExtent() << " " << new_ext);
+  dt = div(start[0],bs_[0]);  newstart[0] = dt.quot;
+  dt = div(start[1],bs_[1]);  newstart[1] = dt.quot;
+  dt = div(start[2],bs_[2]);  newstart[2] = dt.quot;
+  
+  new_ext.Shift(newstart);
+
+  LOG_DEBUG("extent of shrunken image" << isi.GetExtent() << " " << new_ext<< new_ext.GetEnd());
 
 
   geom::Vec3 ao = isi.GetAbsoluteOrigin();
@@ -80,26 +90,18 @@ ImageStateBasePtr DiscreteShrinkFnc::VisitState(const ImageStateImpl<T,D>& isi) 
   new_ps.SetExtent(new_ext);
 
   typename ImageStateImpl<T,D>::SharedPtrType ni(new ImageStateImpl<T,D>(new_ext,new_ps));
+  ni->SetAbsoluteOrigin(ao);
+  ni->GetSampling().SetPixelSampling(CompMultiply(ni->GetSampling().GetPixelSampling(),Vec3(bs_[0],bs_[1],bs_[2])));
 
-  for(ExtentIterator it(new_ext); !it.AtEnd(); ++it) {
+  for(ExtentIterator it(ni->GetExtent(),ni->GetDomain()); !it.AtEnd(); ++it) {
     Point t(it[0]*bs_[0],
 	    it[1]*bs_[1],
 	    it[2]*bs_[2]);
-
-    Extent inner_ext = Overlap(Extent(t+start,bs_),isi.GetExtent());
-
+    Extent inner_ext = Overlap(Extent(t,bs_),isi.GetExtent());
     do_shrink(isi,ni->Value(it),inner_ext);
   }
 
-  Point newstart;
 
-  dt = div(start[0],bs_[0]);  newstart[0] = dt.quot;
-  dt = div(start[1],bs_[1]);  newstart[1] = dt.quot;
-  dt = div(start[2],bs_[2]);  newstart[2] = dt.quot;
-
-  ni->SetAbsoluteOrigin(ao);
-  ni->SetSpatialOrigin(newstart);
-  ni->GetSampling().SetPixelSampling(CompMultiply(ni->GetSampling().GetPixelSampling(),Vec3(bs_[0],bs_[1],bs_[2])));
 
   return ni;
 }

@@ -130,7 +130,14 @@ of the annotation available.
 
   .. method:: AddBioUnit(biounit)
 
-    Add a bio unit to the bio unit list of an info object.
+    Add a bio unit to the bio unit list of an info object. If the
+    :attr:`id <MMCifInfoBioUnit.id>` of ``biounit`` already exists in the set
+    of assemblies, both will be merged. This means that
+    :attr:`chain <MMCifInfoBioUnit.chains>` and
+    :attr:`operations <MMCifInfoBioUnit.operations>` lists will be concatenated
+    and the interval lists
+    (:attr:`operationsintervalls <MMCifInfoBioUnit.operationsintervalls>`,
+    :attr:`chainintervalls <MMCifInfoBioUnit.chainintervalls>`) will be updated.
 
     :param biounit: Bio unit to be added.
     :type biounit: :class:`MMCifInfoBioUnit`
@@ -499,7 +506,17 @@ of the annotation available.
     Chains involved in this bio unit. If not provided, resembles an empty list.
 
     Also available as :meth:`GetChainList`. May also be modified by
-    :meth:`AddChain`.
+    :meth:`AddChain` or :meth:`SetChainList`.
+
+  .. attribute:: chainintervalls
+
+    List of intervals on the chain list. Needed if there a several sets of
+    chains and transformations to create the bio unit. Comes as a list of
+    tuples. First component is the start, second is the right border of the
+    interval.
+
+    Also available as :meth:`GetChainIntervalList`. Is automatically modified by
+    :meth:`AddChain`, :meth:`SetChainList` and :meth:`MMCifInfo.AddBioUnit`.
 
   .. attribute:: operations
 
@@ -508,6 +525,16 @@ of the annotation available.
 
     Also available as :meth:`GetOperations`. May be modified by
     :meth:`AddOperations`
+
+  .. attribute:: operationsintervalls
+
+    List of intervals on the operations list. Needed if there a several sets of
+    chains and transformations to create the bio unit. Comes as a list of
+    tuples. First component is the start, second is the right border of the
+    interval.
+
+    Also available as :meth:`GetOperationsIntervalList`. Is automatically
+    modified by :meth:`AddOperations` and :meth:`MMCifInfo.AddBioUnit`.
 
   .. method:: GetID()
 
@@ -529,9 +556,22 @@ of the annotation available.
 
     See :attr:`chains`
 
+  .. method:: SetChainList(chains)
+
+    See :attr:`chains`, also resets :attr:`chainintervalls` to contain only one
+    interval enclosing the whole chain list.
+
+    :param chains: List of chain names.
+    :type chains: :class:`~ost.StringList`
+
   .. method:: AddChain(chain name)
 
-    See :attr:`chains`
+    See :attr:`chains`, also extends the right border of the last entry in
+    :attr:`chainintervalls`.
+
+  .. method:: GetChainIntervalList()
+
+    See :attr:`chainintervalls`
 
   .. method:: GetOperations()
 
@@ -539,7 +579,12 @@ of the annotation available.
 
   .. method:: AddOperations(list of operations)
 
-    See :attr:`operations`
+    See :attr:`operations`, also extends the right border of the last entry in
+    :attr:`operationsintervalls`.
+
+  .. method:: GetOperationsIntervalList()
+
+    See :attr:`operationsintervalls`
 
 .. function:: PDBize(asu, seqres=None, min_polymer_size=10, transformation=False)
 
@@ -567,7 +612,7 @@ of the annotation available.
 
     :param asu:  Asymmetric unit to work on. Should be created from a mmCIF
                  file.
-    :type asu: :class:`~ost.mol.EntityHandle>`
+    :type asu: :class:`~ost.mol.EntityHandle`
     :param seqres: If set to a valid sequence list, the length of the seqres 
       records will be used to determine if a certain chain has the minimally 
       required length.
@@ -948,3 +993,8 @@ of the annotation available.
 ..  LocalWords:  auth GetMMCifPDBChainTr AddPDBCMMCifhainTr GetPDBMMCifChainTr
 ..  LocalWords:  GetRevisions AddRevision SetRevisionsDateOriginal GetSize
 ..  LocalWords:  GetNum num GetStatus GetLastDate GetFirstRelease storable
+..  LocalWords:  SetChainList MMCifInfoTransOp ChainTypes MMCifInfoStructRef
+..  LocalWords:  MMCifInfoRevisions bool difs MMCifInfoStructRefSeqDif rnum
+..  LocalWords:  SetDateOriginal GetDateOriginal yyyy operationsintervalls
+..  LocalWords:  chainintervalls GetChainIntervalList
+..  LocalWords:  GetOperationsIntervalList

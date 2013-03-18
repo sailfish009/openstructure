@@ -83,7 +83,6 @@ void usage()
   std::cerr << "   -v <level> verbosity level (0=results only,1=problems reported, 2=full report)" << std::endl;
   std::cerr << "   -b <value> tolerance in stddevs for bonds" << std::endl;
   std::cerr << "   -a <value> tolerance in stddevs for angles" << std::endl;
-  std::cerr << "   -m <value> clashing distance for unknwon atom types" << std::endl;
   std::cerr << "   -r <value> distance inclusion radius" << std::endl;
   std::cerr << "   -i <value> sequence separation" << std::endl;
   std::cerr << "   -e         print version" << std::endl;
@@ -97,7 +96,11 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
   int second=0;
   int first=0;
   if (v.GetResidueList().size()==0) {
-    return std::make_pair<int,int>(0,1);
+    if (glob_dist_list.size()==0) {
+      return std::make_pair<int,int>(0,-1);
+    } else {    
+      return std::make_pair<int,int>(0,glob_dist_list.size());
+    }  
   }
   ChainView vchain=v.GetChainList()[0];
   for (GlobalRDMap::const_iterator i=glob_dist_list.begin();i!=glob_dist_list.end();++i)
@@ -109,6 +112,17 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
     }
   }
   return std::make_pair<int,int>(first,second);
+}
+
+bool is_resnum_in_globalrdmap(const ResNum& resnum, const GlobalRDMap& glob_dist_list)
+{
+  for (GlobalRDMap::const_iterator i=glob_dist_list.begin(), e=glob_dist_list.end(); i!=e; ++i) {
+    ResNum rn = i->first;
+    if (rn==resnum) {
+      return true;
+    }
+  }
+  return false;
 }
 
 int main (int argc, char **argv)
@@ -241,8 +255,9 @@ int main (int argc, char **argv)
     if (!ref) {
       exit(-1);
     }  
-    ref_list.push_back(ref.CreateFullView());
-    glob_dist_list = CreateDistanceList(ref.CreateFullView(),radius);  
+    EntityView refview=ref.GetChainList()[0].Select("peptide=true");
+    ref_list.push_back(refview);
+    glob_dist_list = CreateDistanceList(refview,radius);
   } else {
     std::cout << "Multi-reference mode: On" << std::endl;  
     for (std::vector<StringRef>::const_iterator ref_file_split_sr_it = ref_file_split_sr.begin();
@@ -258,6 +273,7 @@ int main (int argc, char **argv)
           exit(-1);  
         }    
       }
+      EntityView refview=ref.GetChainList()[0].Select("peptide=true");
       ref_list.push_back(ref.CreateFullView());
     } 
     glob_dist_list = CreateDistanceListFromMultipleReferences (ref_list,cutoffs,sequence_separation,radius);  
@@ -272,6 +288,7 @@ int main (int argc, char **argv)
     std::cout << "Stereo-chemical and steric clash checks: Off " << std::endl;
   }
   std::cout << "Inclusion Radius: " << radius << std::endl;
+
   std::cout << "Sequence separation: " << sequence_separation << std::endl;
   if (structural_checks) {
     std::cout << "Parameter filename: " << parameter_filename << std::endl;
@@ -284,6 +301,12 @@ int main (int argc, char **argv)
   }
   LOG_INFO("LDDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
 
+  // error if the reference structure is empty
+  if (glob_dist_list.size()==0) {
+    std::cout << "ERROR: No valid distance to check in the reference structure(s). Please check that the first chain of the reference structure(s) contains a peptide." << std::endl;
+    exit(-1);
+  }
+
   // cycles through the models to evaluate 
   for (size_t i=0; i<files.size(); ++i) {
     EntityHandle model=load(files[i], profile);
@@ -293,17 +316,17 @@ int main (int argc, char **argv)
       }
       continue;
     }
-    EntityView v=model.CreateFullView();
-
+    EntityView v=model.GetChainList()[0].Select("peptide=true");
+    EntityView outv=model.GetChainList()[0].Select("peptide=true");
     for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
          ref_list_it != ref_list.end(); ++ref_list_it) {
-      bool cons_check = ResidueNamesMatch(v,*ref_list_it);
+      bool cons_check = ResidueNamesMatch(v,*ref_list_it,consistency_checks);
       if (cons_check==false) {
         if (consistency_checks==true) {
-          LOG_ERROR("Residue names in model: " << files[i] << " are inconsistent with one or more references");
+          LOG_ERROR("Residue names in model: " << files[i] << " and in reference structure(s) are inconsistent.");
           exit(-1);            
         } else {
-          LOG_WARNING("Residue names in model: " << files[i] << " are inconsistent with one or more references");
+          LOG_WARNING("Residue names in model: " << files[i] << " and in reference structure(s) are inconsistent.");
         }   
       } 
     }
@@ -313,7 +336,11 @@ int main (int argc, char **argv)
     String filestring=BFPathToString(pathstring);
     std::cout << "File: " << files[i] << std::endl; 
     std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
-    std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
+    if (cov.second == -1) {
+      std::cout << "Coverage: 0 (0 out of 0 residues)" << std::endl;
+    } else {
+      std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
+    }
 
     if (structural_checks) {
       // reads in parameter files   
@@ -355,8 +382,6 @@ int main (int argc, char **argv)
         std::cout << e.what() << std::endl;
         exit(-1);
       }
-      cov = compute_coverage(v,glob_dist_list);
-      std::cout << "Coverage after stereo-chemical checks: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
       try {
         v=alg::FilterClashes(v,nonbonded_table);
       } catch (std::exception& e) {       
@@ -364,8 +389,6 @@ int main (int argc, char **argv)
         std::cout << e.what() << std::endl;
         exit(-1);
       }
-      cov = compute_coverage(v,glob_dist_list);
-      std::cout << "Coverage after clashing checks: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
     }
     if (cov.first==0) {
       std::cout << "Global LDDT score: 0.0" << std::endl;
@@ -381,20 +404,67 @@ int main (int argc, char **argv)
               << " checked, over " << cutoffs.size() << " thresholds)" << std::endl;
 
     // prints the residue-by-residue statistics  
-    std::cout << "Local LDDT Score:" << std::endl;
-    std::cout << "Chain\tResName\tResNum\tScore\t(Conserved/Total, over " << cutoffs.size() << " thresholds)" << std::endl;
-    for (ResidueViewIter rit=v.ResiduesBegin();rit!=v.ResiduesEnd();++rit){
-      ResidueView ritv = *rit;
-      Real lddt_local = 0;
-      int conserved_dist = 0;
-      int total_dist = 0;      
-      if (ritv.HasProp(label)) {
-          lddt_local=ritv.GetFloatProp(label);
-          conserved_dist=ritv.GetIntProp(label+"_conserved");
-      total_dist=ritv.GetIntProp(label+"_total");
+    if (structural_checks) {
+      std::cout << "Local LDDT Scores:" << std::endl;
+      std::cout << "(A 'Yes' in the 'Quality Problems' column stands for problems" << std::endl;
+      std::cout << "in the side-chain of a residue, while a 'Yes+' for problems" << std::endl;
+      std::cout << "in the backbone)" << std::endl;
+    } else {
+      std::cout << "Local LDDT Scores:" << std::endl;
+    }
+    if (structural_checks) {
+      std::cout << "Chain\tResName\tResNum\tAsses.\tQ.Prob.\tScore\t(Conserved/Total, over " << cutoffs.size() << " thresholds)" << std::endl;
+    } else {
+      std::cout << "Chain\tResName\tResNum\tAsses.\tScore\t(Conserved/Total, over " << cutoffs.size() << " thresholds)" << std::endl;
+    }
+    for (ResidueViewIter rit=outv.ResiduesBegin();rit!=outv.ResiduesEnd();++rit){
+      ResidueView ritv=*rit;
+      ResNum rnum = ritv.GetNumber();
+      bool assessed = false;
+      String assessed_string="No";
+      bool quality_problems = false;
+      String quality_problems_string="No";
+      Real lddt_local = -1;
+      String lddt_local_string="-";
+      int conserved_dist = -1;
+      int total_dist = -1;
+      String dist_string = "-";
+      if (is_resnum_in_globalrdmap(rnum,glob_dist_list)) {
+        assessed = true;
+        assessed_string="Yes";
       }
-      if (lddt_local!=0) {
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << std::setprecision(4) << lddt_local << "\t" << "("<< conserved_dist << "/" << total_dist << ")" <<std::endl;
+      if (ritv.HasProp("stereo_chemical_violation_sidechain") || ritv.HasProp("steric_clash_sidechain")) {
+        quality_problems = true;
+        quality_problems_string="Yes";
+      }
+      if (ritv.HasProp("stereo_chemical_violation_backbone") || ritv.HasProp("steric_clash_backbone")) {
+        quality_problems = true;
+        quality_problems_string="Yes+";
+      }
+
+      if (assessed==true) {
+        if (ritv.HasProp(label)) {
+          lddt_local=ritv.GetFloatProp(label);
+          std::stringstream stkeylddt;
+          stkeylddt <<  std::fixed << std::setprecision(4) << lddt_local;
+          lddt_local_string=stkeylddt.str();
+          conserved_dist=ritv.GetIntProp(label+"_conserved");
+          total_dist=ritv.GetIntProp(label+"_total");
+          std::stringstream stkeydist;
+          stkeydist << "("<< conserved_dist << "/" << total_dist << ")";
+          dist_string=stkeydist.str();
+        } else {
+          lddt_local = 0;
+          lddt_local_string="0.0000";
+          conserved_dist = 0;
+          total_dist = 0;
+          dist_string="(0/0)";
+        }
+      }
+      if (structural_checks) {
+        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << quality_problems_string << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
+      } else {
+        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
       }
     }
     std::cout << std::endl;

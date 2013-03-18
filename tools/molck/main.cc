@@ -289,20 +289,8 @@ int main(int argc, char *argv[])
       }
       std::cerr << " --> removed " << hremoved << " hydrogen atoms" << std::endl;
     }
+    
     if (rm_oxt_atoms) {
-      std::cerr << "removing OXT atoms" << std::endl;
-      int oremoved=0;
-      AtomHandleList atoms=ent.GetAtomList();
-      for (AtomHandleList::const_iterator i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
-         if (i->GetName()=="OXT") {
-           edi.DeleteAtom(*i);
-           oremoved++;   
-         }
-      }
-      std::cerr << " --> removed " << oremoved << " OXT atoms" << std::endl;
-    }
-
-    if (rm_non_std) {
       std::cerr << "removing OXT atoms" << std::endl;
       int oremoved=0;
       AtomHandleList atoms=ent.GetAtomList();
@@ -339,6 +327,7 @@ int main(int argc, char *argv[])
       }
       std::cerr << std::endl;
     }
+    
     if (assign_elem)  {
       ChainHandleList chains=ent.GetChainList();
       for (ChainHandleList::const_iterator c=chains.begin();c!=chains.end();++c) {

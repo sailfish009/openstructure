@@ -12,7 +12,7 @@ import PyQt4
 qt4_plugins_location='/usr/lib/qt47/plugins'
 qt4_qmake_location='/usr/lib/qt47/bin/qmake'
 ssl_crypto_location='/lib/'
-chemlib_dictionary_location='/home/bundler/ost/ChemLib/1.2.2/compounds.chemlib'
+chemlib_dictionary_location='/home/bundler/compounds.chemlib'
 list_of_excluded_libraries=[
 'ld-linux',
 'libexpat',
@@ -75,9 +75,10 @@ directory_name='openstructure-linux-'+archstring+'-'+additional_label
 print 'Hardcoding package python binary path in openstructure executables'
 subprocess.call('rm -f scripts/ost_config.in.pre* scripts/ost_config.in.backup',shell=True,cwd='../../')
 subprocess.call('mv scripts/ost_config.in scripts/ost_config.in.backup',shell=True,cwd='../../')
-subprocess.call('sed "s/@PYTHON_BINARY@/\$DNG_ROOT\/bin\/python/g" scripts/ost_config.in.backup > scripts/ost_config.in.preprepre',shell=True,cwd='../../')
-subprocess.call('sed "s/\#export PYTHONHOME/ export PYTHONHOME/g" scripts/ost_config.in.preprepre > scripts/ost_config.in.prepre',shell=True,cwd='../../')
-subprocess.call('sed "s/\#export PYTHONPATH/ export PYTHONPATH/g" scripts/ost_config.in.prepre > scripts/ost_config.in.pre',shell=True,cwd='../../')
+subprocess.call('sed "s/@PYTHON_BINARY@/\$DNG_ROOT\/bin\/python/g" scripts/ost_config.in.backup > scripts/ost_config.in.prepreprepre',shell=True,cwd='../../')
+subprocess.call('sed "s/\#export PYTHONHOME/ export PYTHONHOME/g" scripts/ost_config.in.prepreprepre > scripts/ost_config.in.preprepre',shell=True,cwd='../../')
+subprocess.call('sed "s/\#export PYTHONPATH/ export PYTHONPATH/g" scripts/ost_config.in.preprepre > scripts/ost_config.in.prepre',shell=True,cwd='../../')
+subprocess.call('sed "s/\#unset PYTHONPATH/ unset PYTHONPATH/g" scripts/ost_config.in.prepre > scripts/ost_config.in.pre',shell=True,cwd='../../')
 subprocess.call('sed "s/\#export QT_PLUGIN_PATH/ export QT_PLUGIN_PATH/g" scripts/ost_config.in.pre > scripts/ost_config.in',shell=True,cwd='../../')
 print 'Compiling Openstructure'
 subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DQT_QMAKE_EXECUTABLE='+qt4_qmake_location+' -DPREFIX='+directory_name+' -DCOMPOUND_LIB='+chemlib_dictionary_location+' -DENABLE_IMG=ON -DUSE_RPATH=ON -DENABLE_GUI=ON -DENABLE_GFX=ON -DOPTIMIZE=ON',shell=True,cwd='../../')
@@ -128,7 +129,7 @@ for entry in filtered_dep_list:
 print 'Copy python executable into package directory structure'
 subprocess.call('cp '+system_python_bin+ ' '+directory_name+'/bin/python',shell=True,cwd='../../')
 print 'Copy python libraries into package directory structure'
-subprocess.call('cp -pRL '+system_python_libs+' '+directory_name+'/'+libdir+'/'+system_python_executable+'/',shell=True,cwd='../../')
+subprocess.call('cp -pRL '+system_python_libs+'/* '+directory_name+'/'+libdir+'/'+system_python_executable+'/',shell=True,cwd='../../')
 subprocess.call('rm -fr '+directory_name+'/'+libdir+'/'+system_python_executable+'/dist-packages',shell=True,cwd='../../')
 subprocess.call('cp -pRL '+sip_module_location+'/sip* '+directory_name+'/'+libdir+'/'+system_python_executable+'/',shell=True,cwd='../../')
 subprocess.call('cp -pRL '+qt4_module_location+' '+directory_name+'/'+libdir+'/'+system_python_executable+'/',shell=True,cwd='../../')
