@@ -28,7 +28,7 @@ parser.disable_interspersed_args()
 
 _site_packs='python%d.%d/site-packages' % sys.version_info[0:2]
 _base_dir=os.getenv('DNG_ROOT')
-if platform.machine()=='x86_64':
+if platform.machine()=='x86_64' and platform.system()!='Darwin' :
   sys.path.insert(0, os.path.join(_base_dir, 'lib64', _site_packs))
 else:
   sys.path.insert(0,os.path.join(_base_dir, 'lib', _site_packs))
