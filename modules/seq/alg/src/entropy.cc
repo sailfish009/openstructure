@@ -17,7 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <limits> 
-
+#include <cstring>
 #include "entropy.hh"
 
 #include <ost/seq/aligned_column.hh>
