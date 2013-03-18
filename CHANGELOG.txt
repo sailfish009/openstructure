@@ -15,6 +15,8 @@ Changes In Release 1.3.2
   * small tweaks to molck
   * Repaired bio unit parsing from mmCIF file/ PDBizing bio units, before
     chains with different transformations were ignored
+  * use new remote loader written in Python to work around crash on Mountain 
+    Lion
 
 Changes In Release 1.3.1
 --------------------------------------------------------------------------------
