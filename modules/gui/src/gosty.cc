@@ -233,7 +233,6 @@ int main(int argc, char** argv)
 {
   int dummy_argc=1;
   char *dummy_argv[]= {argv[0], NULL };
-  std::cout << dummy_argv[0] << std::endl;
   MyApplication app(dummy_argc, dummy_argv);
   QCoreApplication::setOrganizationName("OpenStructure");
   QCoreApplication::setOrganizationDomain("openstructure.org");
