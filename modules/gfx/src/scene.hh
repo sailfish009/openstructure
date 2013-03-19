@@ -143,7 +143,10 @@ class DLLEXPORT_OST_GFX Scene {
   void SetAmbientOcclusionSize(float f);
   /// experimental feature
   float GetAmbientOcclusionSize() const;
-  
+ 
+  void SetHemiParams(const geom::Vec4&);
+  geom::Vec4 GetHemiParams() const {return hemi_param_;}
+
   /// \brief select shading mode
   /// one of fallback, basic, default, hf, toon1, toon2
   void SetShadingMode(const std::string& smode);
@@ -574,6 +577,7 @@ private:
   Color light_amb_;
   Color light_diff_;
   Color light_spec_;
+  geom::Vec4 hemi_param_;
 
   bool cor_flag_;
   bool fix_cor_flag_;

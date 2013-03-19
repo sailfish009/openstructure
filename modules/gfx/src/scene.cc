@@ -109,6 +109,7 @@ Scene::Scene():
   light_amb_(0.1,0.1,0.1),
   light_diff_(0.9,0.9,0.9),
   light_spec_(0.5,0.5,0.5),
+  hemi_param_(0.4,1.0,0.0,1.0),
   cor_flag_(false),
   fix_cor_flag_(true),
   fog_flag_(true),
@@ -339,6 +340,12 @@ float Scene::GetAmbientOcclusionSize() const
 #else
   return 1.0;
 #endif
+}
+
+void Scene::SetHemiParams(const geom::Vec4& p)
+{
+  hemi_param_=p;
+  RequestRedraw();
 }
 
 void Scene::SetShadingMode(const std::string& smode)
@@ -835,6 +842,17 @@ void Scene::RenderGL()
   }
 
   prep_blur();
+
+#if OST_SHADER_SUPPORT_ENABLED
+  {
+    GLuint cpr=Shader::Instance().GetCurrentProgram();
+    GLuint loc=glGetUniformLocation(cpr,"hemi_param");
+    if(loc>0) {
+      glUniform4f(loc,hemi_param_[0],hemi_param_[1],hemi_param_[2],hemi_param_[3]);
+    }
+  }
+#endif
+
 
   if(stereo_mode_==1 || stereo_mode_==2 || stereo_mode_==3) {
     render_stereo();

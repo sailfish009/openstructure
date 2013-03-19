@@ -77,6 +77,12 @@ namespace ost { namespace gfx { namespace impl {
     if(Shader::Instance().GetCurrentName()=="hemilight" ||
        Shader::Instance().GetCurrentName()=="hf") {
       Shader::Instance().Activate("fast_sphere_hf");
+      GLuint cpr=Shader::Instance().GetCurrentProgram();
+      GLuint loc=glGetUniformLocation(cpr,"hemi_param");
+      if(loc>0) {
+        geom::Vec4 hp=Scene::Instance().GetHemiParams();
+        glUniform4f(loc,hp[0],hp[1],hp[2],hp[3]);
+      }
     } else if(Shader::Instance().GetCurrentName()=="toon1") {
       Shader::Instance().Activate("fast_sphere_toon1");
     } else if(Shader::Instance().GetCurrentName()=="toon2") {
