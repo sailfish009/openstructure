@@ -601,9 +601,19 @@ void Entity::SetOutlineExpandColor(const Color& c)
   Scene::Instance().RequestRedraw();
 }
 
+void Entity::SetClipOffset(float f)
+{
+  GfxObj::SetClipOffset(f);
+  for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
+    it->second->VA().SetClipOffset(f);
+  }
+  Scene::Instance().RequestRedraw();
+
+}
+
 void Entity::OnRenderModeChange()
 {
-  for (RendererMap::iterator i=renderer_.begin(), 
+  for (RendererMap::iterator i=renderer_.begin(),
        e=renderer_.end(); i!=e; ++i) {
     i->second->ClearViews();
   }

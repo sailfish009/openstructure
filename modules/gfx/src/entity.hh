@@ -148,6 +148,7 @@ public:
   virtual void SetOutlineWidth(float f);
   virtual void SetOutlineExpandFactor(float f);
   virtual void SetOutlineExpandColor(const Color& c);
+  virtual void SetClipOffset(float f);
 
   /// \brief resets used entity handle
   /// replaces underlying entity, keeps query and flags intact
