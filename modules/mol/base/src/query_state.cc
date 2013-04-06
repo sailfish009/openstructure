@@ -78,11 +78,10 @@ bool QueryState::do_within(const geom::Vec3& pos, const WithinParam& p,
       return geom::Dot(d, d) <= p.GetRadiusSquare();
     else
       return geom::Dot(d, d) > p.GetRadiusSquare();
-  } else {
-    const LazilyBoundRef& r=this->GetBoundObject(p.GetRef());
-    bool has_within = r.points.HasWithin(pos, sqrt(p.GetRadiusSquare()));
-    return op==COP_LE ? has_within : !has_within;
-  }
+  } 
+  const LazilyBoundRef& r=this->GetBoundObject(p.GetRef());
+  bool has_within = r.points.HasWithin(pos, sqrt(p.GetRadiusSquare()));
+  return op==COP_LE ? has_within : !has_within;
 }
 
 
@@ -117,7 +116,8 @@ QueryState::QueryState(const QueryImpl& query, const EntityHandle& ref)
     r_.reset(new LazilyBoundData);
     r_->refs.resize(query.bracketed_expr_.size());
     for (size_t i=0;i<query.bracketed_expr_.size(); ++i) {
-      EntityView view=ref.Select(Query(query.bracketed_expr_[i]));
+      EntityView view=ref.Select(Query(query.bracketed_expr_[i]), 
+                                 QueryFlag::NO_BONDS);
       add_points_to_organizer(r_->refs[i].points, view);
     }    
   }
