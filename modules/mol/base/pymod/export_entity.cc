@@ -21,6 +21,11 @@
 using namespace boost::python;
 
 #include <ost/mol/entity_view.hh>
+#include <ost/mol/impl/entity_impl.hh>
+#include <ost/mol/impl/chain_impl.hh>
+#include <ost/mol/impl/residue_impl.hh>
+#include <ost/mol/impl/atom_impl.hh>
+
 #include <ost/mol/query.hh>
 #include <ost/mol/mol.hh>
 #include "bounds.hh"
@@ -85,12 +90,20 @@ PyObject* get_pos2(EntityHandle& entity, bool id_sorted)
       nad[2]=static_cast<npy_float>(pos[2]);
     }
   } else {
-    for(AtomHandleIter it=entity.AtomsBegin();it!=entity.AtomsEnd();++it,nad+=3) {
-      geom::Vec3 pos=(*it).GetPos();
-      nad[0]=static_cast<npy_float>(pos[0]);
-      nad[1]=static_cast<npy_float>(pos[1]);
-      nad[2]=static_cast<npy_float>(pos[2]);
-    }
+    impl::EntityImplPtr ei=entity.Impl();
+    for(impl::ChainImplList::iterator cit=ei->GetChainList().begin();
+        cit!=ei->GetChainList().end();++cit) {
+      for (impl::ResidueImplList::iterator rit = (*cit)->GetResidueList().begin(),
+          ret = (*cit)->GetResidueList().end(); rit != ret; ++rit) {
+            
+        for (impl::AtomImplList::iterator ait = (*rit)->GetAtomList().begin(), 
+            aet = (*rit)->GetAtomList().end(); ait != aet; ++ait, nad+=3) {
+
+          geom::Vec3 pos=(*ait)->TransformedPos();
+          nad[0]=static_cast<npy_float>(pos[0]);
+          nad[1]=static_cast<npy_float>(pos[1]);
+          nad[2]=static_cast<npy_float>(pos[2]);
+    }}}
   }
   return na;
 }
