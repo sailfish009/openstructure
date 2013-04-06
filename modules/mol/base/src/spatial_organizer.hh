@@ -51,6 +51,23 @@ private:
     }
 
     int u,v,w;
+
+    static Index Max(const Index& a, const Index& b) {
+      Index m;
+      m.u = a.u > b.u ? a.u : b.u;
+      m.v = a.v > b.v ? a.v : b.v;
+      m.w = a.w > b.w ? a.w : b.w;
+      return m;
+    }
+
+    static Index Min(const Index& a, const Index& b) {
+      Index m;
+      m.u = a.u < b.u ? a.u : b.u;
+      m.v = a.v < b.v ? a.v : b.v;
+      m.w = a.w < b.w ? a.w : b.w;
+      return m;
+    }
+
   };
 
   struct Entry {
@@ -73,10 +90,17 @@ public:
   }
 
   void Add(const ITEM& item, const VEC& pos) {
+    bool first = map_.empty();
     Index indx=gen_index(pos);
     map_[indx].push_back(Entry(item,pos));
+    if (!first) {
+      min_ = Index::Min(min_, indx); 
+      max_ = Index::Max(max_, indx); 
+    } else {
+      min_ = indx;
+      max_ = indx;
+    }
   }
-
   void Remove(const ITEM& item) {
     typename ItemMap::iterator i=map_.begin();
     for (; i!=map_.end(); ++i) {
@@ -91,8 +115,11 @@ public:
 
   bool HasWithin(const VEC& pos, Real dist) const {
     Real dist2=dist*dist;
-    Index imin = gen_index(pos-VEC(dist,dist,dist));
-    Index imax = gen_index(pos+VEC(dist,dist,dist));
+    Index imin = Index::Max(min_, gen_index(pos-VEC(dist,dist,dist)));
+    Index imax = Index::Min(max_, gen_index(pos+VEC(dist,dist,dist)));
+    if ((imax.u-imin.u+1)*(imax.v-imin.v+1)*(imax.w-imin.w+1)>map_.size()) {
+      return this->has_within_all_buckets(pos, dist2);
+    }
     for(int wc=imin.w;wc<=imax.w;++wc) {
       for(int vc=imin.v;vc<=imax.v;++vc) {
         for(int uc=imin.u;uc<=imax.u;++uc) {
@@ -161,12 +188,30 @@ public:
   void Swap(SpatialOrganizer& o) {
     map_.swap(o.map_);
     std::swap(delta_,o.delta_);
+    std::swap(min_, o.min_);
+    std::swap(max_, o.max_);
   }
 
 private:
-
+  bool has_within_all_buckets(const VEC& pos, Real dist2) const {
+    for (typename ItemMap::const_iterator 
+         i = map_.begin(), e = map_.end(); i!=e; ++i) {
+      for(typename EntryList::const_iterator j = i->second.begin();
+          j != i->second.end(); ++j) {
+        Real delta_x = j->pos[0]-pos[0];
+        Real delta_y = j->pos[1]-pos[1];
+        Real delta_z = j->pos[2]-pos[2];
+        if(delta_x*delta_x+delta_y*delta_y+delta_z*delta_z<=dist2) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
   ItemMap map_;
   Real delta_;
+  Index min_;
+  Index max_;
 
   Index gen_index(const VEC& pos) const {
     Index nrvo(static_cast<int>(round(pos[0]/delta_)),
