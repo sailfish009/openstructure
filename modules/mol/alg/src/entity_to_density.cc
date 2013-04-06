@@ -126,18 +126,21 @@ public:
              (img::Point(-static_cast<int>(x_limit),-static_cast<int>(y_limit),0),
               img::Point(x_limit,y_limit,z_limit));
 
-    mol::AtomViewIter iterator_end = entity_view_.AtomsEnd();
-    for (mol::AtomViewIter iterator = entity_view_.AtomsBegin();
-           iterator!=iterator_end; ++iterator)
-    {
+
+    for (ChainViewList::const_iterator ci = entity_view_.GetChainList().begin(),
+        ce = entity_view_.GetChainList().end(); ci != ce; ++ci) {
+    for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
+          re = ci->GetResidueList().end(); ri != re; ++re) {
+    for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
+          ae = ri->GetAtomList().end(); ai!= ae; ++ai) {
       AtomScatteringPropsTable::iterator table_iter =
                                              scatt_props_table_.begin();
       bool found = false;
       while (found != true && table_iter!=scatt_props_table_.end())
       {
-        if ( (*table_iter).element == (*iterator).GetElement())
+        if ( (*table_iter).element == (*ai).GetElement())
         {        
-          geom::Vec3 coord = (*iterator).GetPos();
+          geom::Vec3 coord = ai->GetPos();
 
           if (coord[0] >= map_start_[0] &&
               coord[0] <= map_end_[0] &&
@@ -199,7 +202,7 @@ public:
         }
         ++table_iter;
       }
-    }
+    }}} // loop over atoms
   }
 
   template <typename T, class D>
@@ -280,17 +283,20 @@ public:
     geom::Vec3 sampling = is.GetSampling().GetPixelSampling();
     img::Extent is_extent = is.GetExtent();
 
-    mol::AtomViewIter iterator_end = effective_entity_view.AtomsEnd();
-    for (mol::AtomViewIter iterator = effective_entity_view.AtomsBegin();
-         iterator!=iterator_end; ++iterator) {
+    for (ChainViewList::const_iterator ci = effective_entity_view.GetChainList().begin(),
+        ce = effective_entity_view.GetChainList().end(); ci != ce; ++ci) {
+    for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
+        re = ci->GetResidueList().end(); ri != re; ++re) {
+    for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
+        ae = ri->GetAtomList().end(); ai!= ae; ++ai) {
       AtomScatteringPropsTable::iterator table_iter =
                                              scatt_props_table_.begin();
       bool found = false;
       while (found != true && table_iter!=scatt_props_table_.end()) {
-        if ((*table_iter).element == (*iterator).GetElement()) {
+        if ((*table_iter).element == ai->GetElement()) {
           found = true;
           Real a = (*table_iter).atomic_weight;
-          geom::Vec3 coord = (*iterator).GetPos();
+          geom::Vec3 coord = ai->GetPos();
           if (coord[0] >= map_start[0] &&
               coord[0] <= map_end[0] &&
               coord[1] >= map_start[1] &&
@@ -341,7 +347,7 @@ public:
         }
         ++table_iter;
       }
-    }
+    }}}
   }
 
   template <typename T, class D>
