@@ -42,10 +42,10 @@ namespace {
 std::pair<long int,long int> (*lddt_a)(const mol::EntityView&, const mol::alg::GlobalRDMap& , std::vector<Real>, int, const String&)=&mol::alg::LocalDistDiffTest;
 Real (*lddt_c)(const mol::EntityView&, const mol::EntityView& , Real, Real, const String&)=&mol::alg::LocalDistDiffTest;
 Real (*lddt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistDiffTest;
-mol::EntityView (*fc_a)(const mol::EntityView&, const mol::alg::ClashingDistances&,bool)=&mol::alg::FilterClashes;
-mol::EntityView (*fc_b)(const mol::EntityHandle&, const mol::alg::ClashingDistances&, bool)=&mol::alg::FilterClashes;
-mol::EntityView (*csc_a)(const mol::EntityView&, const mol::alg::StereoChemicalParams&, const mol::alg::StereoChemicalParams&, Real, Real, bool)=&mol::alg::CheckStereoChemistry;
-mol::EntityView (*csc_b)(const mol::EntityHandle&, const mol::alg::StereoChemicalParams&, const mol::alg::StereoChemicalParams&, Real, Real, bool)=&mol::alg::CheckStereoChemistry;
+std::pair<mol::EntityView,mol::alg::ClashingInfo> (*fc_a)(const mol::EntityView&, const mol::alg::ClashingDistances&,bool)=&mol::alg::FilterClashes;
+std::pair<mol::EntityView,mol::alg::ClashingInfo> (*fc_b)(const mol::EntityHandle&, const mol::alg::ClashingDistances&, bool)=&mol::alg::FilterClashes;
+std::pair<mol::EntityView,mol::alg::StereoChemistryInfo> (*csc_a)(const mol::EntityView&, const mol::alg::StereoChemicalParams&, const mol::alg::StereoChemicalParams&, Real, Real, bool)=&mol::alg::CheckStereoChemistry;
+std::pair<mol::EntityView,mol::alg::StereoChemistryInfo> (*csc_b)(const mol::EntityHandle&, const mol::alg::StereoChemicalParams&, const mol::alg::StereoChemicalParams&, Real, Real, bool)=&mol::alg::CheckStereoChemistry;
 mol::CoordGroupHandle (*superpose_frames1)(mol::CoordGroupHandle&, mol::EntityView&, int, int, int)=&mol::alg::SuperposeFrames;
 mol::CoordGroupHandle (*superpose_frames2)(mol::CoordGroupHandle&,  mol::EntityView&, mol::EntityView&, int, int)=&mol::alg::SuperposeFrames;
 
@@ -170,5 +170,30 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("ResidueNamesMatch",&mol::alg::ResidueNamesMatch,
       (arg("probe"), arg("reference"), arg("log_as_error")=false));
 
- 
+  class_<mol::alg::BondLengthInfo> ("BondLengthInfo" ,init <>())
+    .def(init<Real,Real,int>())
+    .def("GetAvgLength",&mol::alg::BondLengthInfo::GetAvgLength)
+    .def("GetAvgZscore",&mol::alg::BondLengthInfo::GetAvgZscore)
+    .def("GetCount",&mol::alg::BondLengthInfo::GetCount)
+  ;
+
+  class_<mol::alg::ClashingInfo> ("ClashingInfo" ,init <>())
+    .def(init<int,Real>())
+    .def("GetClashCount",&mol::alg::ClashingInfo::GetClashCount)
+    .def("GetAverageOffset",&mol::alg::ClashingInfo::GetAverageOffset)
+  ;
+
+  class_<mol::alg::StereoChemistryInfo> ("StereoChemistryInfo" ,init <>())
+      .def(init<Real,int,int,Real,int,int, const std::map<String,mol::alg::BondLengthInfo>&>())
+      .def("GetAvgZscoreBonds",&mol::alg::StereoChemistryInfo::GetAvgZscoreBonds)
+      .def("GetBadBondCount",&mol::alg::StereoChemistryInfo::GetBadBondCount)
+      .def("GetBondCount",&mol::alg::StereoChemistryInfo::GetBondCount)
+      .def("GetAvgZscoreAngles",&mol::alg::StereoChemistryInfo::GetAvgZscoreAngles)
+      .def("GetBadAngleCount",&mol::alg::StereoChemistryInfo::GetBadAngleCount)
+      .def("GetAngleCount",&mol::alg::StereoChemistryInfo::GetAngleCount)
+      .def("GetAvgBondLengthInfo",&mol::alg::StereoChemistryInfo::GetAvgBondLengthInfo)
+    ;
+
+
+
 }

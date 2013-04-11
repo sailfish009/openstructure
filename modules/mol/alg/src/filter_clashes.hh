@@ -24,6 +24,80 @@
 
 namespace ost { namespace mol { namespace alg {
 
+class BondLengthInfo
+{
+public:
+  BondLengthInfo(): avg_length_(0),avg_zscore_(0),count_(0) {}
+  BondLengthInfo(Real avg_length,Real avg_zscore, int count):
+    avg_length_(avg_length),
+    avg_zscore_(avg_zscore),
+    count_(count){}
+  Real GetAvgLength() {return avg_length_;}
+  Real GetAvgZscore() {return avg_zscore_;}
+  int GetCount() {return count_;}
+
+private:
+  Real avg_length_;
+  Real avg_zscore_;
+  int count_;
+};
+
+
+class ClashingInfo
+{
+
+public:
+  ClashingInfo(): clash_count_(0), average_offset_ (0) {}
+  ClashingInfo (int clash_count, Real average_offset):
+    clash_count_(clash_count), average_offset_ (average_offset) {}
+  int GetClashCount() {return clash_count_;}
+  Real GetAverageOffset() {return average_offset_;}
+
+private:
+  int clash_count_;
+  Real average_offset_;
+};
+
+class StereoChemistryInfo
+{
+public:
+  StereoChemistryInfo():
+     avg_zscore_bonds_(0),
+     bad_bond_count_(0),
+     bond_count_(0),
+     avg_zscore_angles_(0),
+     bad_angle_count_(0),
+     angle_count_(0),
+     avg_bond_length_info_(std::map<String,BondLengthInfo>()) {}
+  StereoChemistryInfo(Real avg_zscore_bonds, int bad_bond_count, int bond_count,
+                      Real avg_zscore_angles, int bad_angle_count, int angle_count,
+                      const std::map<String,BondLengthInfo>& avg_bond_length_info):
+    avg_zscore_bonds_(avg_zscore_bonds),
+    bad_bond_count_(bad_bond_count),
+    bond_count_(bond_count),
+    avg_zscore_angles_(avg_zscore_angles),
+    bad_angle_count_(bad_angle_count),
+    angle_count_(angle_count),
+    avg_bond_length_info_(avg_bond_length_info) {}
+  Real GetAvgZscoreBonds() {return avg_zscore_bonds_;}
+  int GetBadBondCount() {return bad_bond_count_;}
+  int GetBondCount() {return bond_count_;}
+  Real GetAvgZscoreAngles() {return avg_zscore_angles_;}
+  int GetBadAngleCount() {return bad_angle_count_;}
+  int GetAngleCount() {return angle_count_;}
+  std::map<String,BondLengthInfo> GetAvgBondLengthInfo() {return avg_bond_length_info_;}
+
+private:
+  Real avg_zscore_bonds_;
+  int bad_bond_count_;
+  int bond_count_;
+  Real avg_zscore_angles_;
+  int bad_angle_count_;
+  int angle_count_;
+  std::map<String,BondLengthInfo> avg_bond_length_info_;
+};
+
+
 /// \brief List of reference atom-atom distances to detect clashes between non-bonded atoms 
 class DLLEXPORT_OST_MOL_ALG ClashingDistances
 {
@@ -54,7 +128,7 @@ public:
   
 private:
 
-  std::map <String,std::pair<float,float> > min_distance_;
+  std::map <String,std::pair<Real,Real> > min_distance_;
   Real default_min_distance_;
   Real default_min_distance_tolerance_;
   bool valid_flag_;
@@ -91,7 +165,7 @@ public:
   
 private:
 
-  std::map<std::pair<String,String>,std::pair<float,float> >  params_;
+  std::map<std::pair<String,String>,std::pair<Real,Real> >  params_;
  
 };
 
@@ -113,7 +187,7 @@ StereoChemicalParams DLLEXPORT_OST_MOL_ALG FillStereoChemicalParams(const String
 /// If a clash is detected in the backbone, all atoms in the residue are removed. This behavior is changed 
 /// by the always_remove_bb flag: when the flag is set to true all atoms in the residue are removed even if
 /// a clash is just detected in the side-chain
-EntityView DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityView& ent, 
+std::pair<EntityView,ClashingInfo> DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityView& ent,
                                                const ClashingDistances& min_distances, bool always_remove_bb=false);
 
 /// \brief Filters a structure based on detected clashes between non bonded atoms. Handle version
@@ -123,7 +197,7 @@ EntityView DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityView& ent,
 /// If a clash is detected in the backbone, all atoms in the residue are removed. This behavior is changed 
 /// by the always_remove_bb flag: when the flag is set to true all atoms in the residue are removed even if
 /// a clash is just detected in the side-chain
-EntityView DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityHandle& ent, 
+std::pair<EntityView,ClashingInfo> DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityHandle& ent,
                                                const ClashingDistances& min_distances, bool always_remove_bb=false);
 
 /// \brief Filters a structure based on detected stereo-chemical violations. Entity version
@@ -133,7 +207,7 @@ EntityView DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityHandle& ent,
 /// all atoms in the side chain are removed from the structure. If a violation is detected in the backbone, all 
 /// atoms in the residue are removed. This behavior is changed by the always_remove_bb flag: when the flag is 
 /// set to true all atoms in the residue are removed even if a violation is just detected in the side-chain
-EntityView DLLEXPORT_OST_MOL_ALG CheckStereoChemistry(const EntityView& ent, 
+std::pair<EntityView,StereoChemistryInfo> DLLEXPORT_OST_MOL_ALG CheckStereoChemistry(const EntityView& ent,
                                                       const StereoChemicalParams& bond_table, 
                                                       const StereoChemicalParams& angle_table,
                                                       Real bond_tolerance,
@@ -147,7 +221,7 @@ EntityView DLLEXPORT_OST_MOL_ALG CheckStereoChemistry(const EntityView& ent,
 /// all atoms in the side chain are removed from the structure. If a violation is detected in the backbone, all 
 /// atoms in the residue are removed. This behavior is changed by the always_remove_bb flag: when the flag is 
 /// set to true all atoms in the residue are removed even if a violation is just detected in the side-chain
-EntityView DLLEXPORT_OST_MOL_ALG CheckStereoChemistry(const EntityHandle& ent, 
+std::pair<EntityView,StereoChemistryInfo> DLLEXPORT_OST_MOL_ALG CheckStereoChemistry(const EntityHandle& ent,
                                                       const StereoChemicalParams& bond_table, 
                                                       const StereoChemicalParams& angle_table,
                                                       Real bond_tolerance,

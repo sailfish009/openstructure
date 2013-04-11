@@ -373,21 +373,42 @@ int main (int argc, char **argv)
         std::cout << "Error reading the Clashing section of the stereo-chemical parameter file." << std::endl;
         exit(-1);
       }
-      // performs structural checks and filters the structure   
+      // performs structural checks and filters the structure
+      StereoChemistryInfo stereo_chemistry_info;
       try { 
-        v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
+        std::pair<EntityView,StereoChemistryInfo> csc_result = alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
+        v = csc_result.first;
+        stereo_chemistry_info = csc_result.second;
       } catch (std::exception& e) {       
         std::cout << "An error occurred during the structure quality checks, stage 1:" << std::endl;    
         std::cout << e.what() << std::endl;
         exit(-1);
       }
+      std::cout << "Average Z-Score for bond lengths: " << std::fixed << std::setprecision(5) << stereo_chemistry_info.GetAvgZscoreBonds() << std::endl;
+      std::cout << "Bonds outside of tolerance range: " << stereo_chemistry_info.GetBadBondCount() << " out of " << stereo_chemistry_info.GetBondCount() << std::endl;
+      std::cout << "Bond\tAvg Length\tAvg zscore\tNum Bonds" << std::endl;
+      std::map<String,BondLengthInfo> avg_bond_length_info = stereo_chemistry_info.GetAvgBondLengthInfo();
+      for (std::map<String,BondLengthInfo>::const_iterator abli_it=avg_bond_length_info.begin();abli_it!=avg_bond_length_info.end();++abli_it) {
+        String key = (*abli_it).first;
+        BondLengthInfo bond_length_info = (*abli_it).second;
+        std::cout << key << "\t" << std::fixed << std::setprecision(5) << std::left << std::setw(10) <<
+                     bond_length_info.GetAvgLength() << "\t" << std::left << std::setw(10) << bond_length_info.GetAvgZscore() << "\t" << bond_length_info.GetCount()  << std::endl;
+      }
+      std::cout << "Average Z-Score angle widths: " << std::fixed << std::setprecision(5) << stereo_chemistry_info.GetAvgZscoreAngles() << std::endl;
+      std::cout << "Angles outside of tolerance range: " << stereo_chemistry_info.GetBadAngleCount() << " out of " << stereo_chemistry_info.GetAngleCount() << std::endl;
+      ClashingInfo clash_info;
       try {
-        v=alg::FilterClashes(v,nonbonded_table);
+        std::pair<EntityView,ClashingInfo> fc_result = alg::FilterClashes(v,nonbonded_table);
+        v = fc_result.first;
+        clash_info = fc_result.second;
       } catch (std::exception& e) {       
         std::cout << "An error occurred during the structure quality checks, stage 2:" << std::endl;    
         std::cout << e.what() << std::endl;
         exit(-1);
       }
+      std::cout << clash_info.GetClashCount() << " non-bonded short-range distances shorter than tolerance distance" << std::endl;
+      std::cout << "Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << clash_info.GetAverageOffset() << std::endl;
+
     }
     if (cov.first==0) {
       std::cout << "Global LDDT score: 0.0" << std::endl;

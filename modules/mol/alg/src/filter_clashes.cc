@@ -329,7 +329,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
 }  
 
 
-EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
+std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityView& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
 {
   Real running_sum_zscore_bonds=0.0;
   Real running_sum_zscore_angles=0.0;
@@ -487,10 +487,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
   }
   Real avg_zscore_bonds = running_sum_zscore_bonds/static_cast<float>(bond_count);
   Real avg_zscore_angles = running_sum_zscore_angles/static_cast<float>(angle_count);
-  std::cout << "Average Z-Score for bond lengths: " << std::fixed << std::setprecision(5) << avg_zscore_bonds << std::endl;
-  std::cout << "Bonds outside of tolerance range: " << bad_bond_count << " out of " << bond_count << std::endl;
-  std::cout << "Bond\tAvg Length\tAvg zscore\tNum Bonds" << std::endl;
-
+  std::map<String,BondLengthInfo> avg_bond_length_info;
   for (std::map<String,Real>::const_iterator bls_it=bond_length_sum.begin();bls_it!=bond_length_sum.end();++bls_it) {
     String key = (*bls_it).first;
     int counter=bond_counter_sum[key];
@@ -498,22 +495,23 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
     Real sum_bond_zscore=bond_zscore_sum[key];
     Real avg_length=sum_bond_length/static_cast<Real>(counter);
     Real avg_zscore=sum_bond_zscore/static_cast<Real>(counter);
-    std::cout << key << "\t" << std::fixed << std::setprecision(5) << std::left << std::setw(10) << avg_length << "\t" << std::left << std::setw(10) << avg_zscore << "\t" << counter  << std::endl;
+    BondLengthInfo bond_info(avg_length,avg_zscore,counter);
+    avg_bond_length_info[key]=bond_info;
   }
-  std::cout << "Average Z-Score angle widths: " << std::fixed << std::setprecision(5) << avg_zscore_angles << std::endl;
-  std::cout << "Angles outside of tolerance range: " << bad_angle_count << " out of " << angle_count << std::endl;
+  StereoChemistryInfo info(avg_zscore_bonds, bad_bond_count, bond_count,avg_zscore_angles,
+                           bad_angle_count, angle_count,avg_bond_length_info);
   filtered.AddAllInclusiveBonds();
-  return filtered;
+  return std::make_pair<EntityView,StereoChemistryInfo>(filtered,info);
 }
 
 
-EntityView CheckStereoChemistry(const EntityHandle& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
+std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityHandle& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
 {
   return CheckStereoChemistry(ent.CreateFullView(), bond_table, angle_table, bond_tolerance, angle_tolerance, always_remove_bb);
 }
 
 
-EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_distances, bool always_remove_bb)
+std::pair<EntityView,ClashingInfo> FilterClashes(const EntityView& ent, const ClashingDistances& min_distances, bool always_remove_bb)
 {
   int distance_count = 0;
   int bad_distance_count = 0;
@@ -549,7 +547,6 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
         if (ele2=="H" || ele2=="D") {
           continue;
         }
-
 
         // In theory, this should also trigger for disulfide bonds, but 
         // since we don't detect disulfides correctly, we can't count on that 
@@ -607,15 +604,14 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
   if (bad_distance_count!=0) {
     average_offset = average_offset_sum / static_cast<Real>(bad_distance_count);
   }
-  std::cout << bad_distance_count << " non-bonded short-range distances shorter than tolerance distance" << std::endl;
-  std::cout << "Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << average_offset << std::endl;
+  ClashingInfo info(bad_distance_count,average_offset);
   filtered.AddAllInclusiveBonds();
-  return filtered;
+  return std::make_pair<EntityView,ClashingInfo>(filtered,info);
 }
 
 
-EntityView FilterClashes(const EntityHandle& ent,  
-                         const ClashingDistances& min_distances, bool always_remove_bb)
+std::pair<EntityView,ClashingInfo> FilterClashes(const EntityHandle& ent,
+                                                 const ClashingDistances& min_distances, bool always_remove_bb)
 {
   return FilterClashes(ent.CreateFullView(), min_distances, always_remove_bb);
 }
