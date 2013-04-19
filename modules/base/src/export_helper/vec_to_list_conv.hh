@@ -25,32 +25,24 @@
 #include <vector>
 namespace ost{
 
-/// \brief helper to convert between python list and std::vector
+/// \brief helper to convert between python list tuple and std::vecot
 /// 
 /// Usage:
-/// #include vec_to_list_conv.hh
-/// std::vector<Real> fancy_vector();
-/// boost::python::list fancy_list = VecToList<Real>(fancy_vector);
+///
+/// register_to_python_converter<VectorToListConverter<T>,
+///                              std::vector<T>>()
                         
 
 template<typename T>
-boost::python::list VecToList(std::vector<T>& vec){
-  boost::python::list l;
-  for(typename std::vector<T>::iterator it=vec.begin();it!=vec.end();++it){
-    l.append(*it);
+struct VectorToListConverter {
+  static PyObject* convert(const std::vector<T>& vec) {
+    boost::python::list l;
+    for(typename std::vector<T>::const_iterator it=vec.begin();it!=vec.end();++it){
+      l.append(*it);
+    }
+    return boost::python::incref(l.ptr());
   }
-  return l;
-}
-
-template<typename T>
-std::vector<T> ListToVec(boost::python::list& l){
-
-  std::vector<T> vec;
-  for (int i = 0; i < boost::python::len(l); ++i){
-    vec.push_back(boost::python::extract<T>(l[i]));
-  }
-  return vec;
-}
+};
 
 }
 
