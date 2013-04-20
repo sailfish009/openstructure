@@ -7,7 +7,7 @@ set(OST_BASE_PYMOD_SOURCES
 if (NOT ENABLE_STATIC)
   pymod(NAME base OUTPUT_DIR ost 
         CPP ${OST_BASE_PYMOD_SOURCES} 
-        PY settings.py stutil.py table.py xmlrunner.py testutils.py)
+        PY settings.py stutil.py table.py table_selector.py xmlrunner.py testutils.py)
 endif() 
 
 if(WIN32)
