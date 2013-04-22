@@ -1699,6 +1699,10 @@ class TestTable(unittest.TestCase):
     #check wether error gets raised when two operands are not separated by an operator
     self.assertRaises(ValueError,tab.Select,'a=1 b=1.0')
 
+    #check whether error gets raised when inconsistent types are compared
+    self.assertRaises(ValueError,tab.Select,'c>d')
+    self.assertRaises(ValueError,tab.Select,'c+d=5')
+
     from ost.table_selector import *
 
     selector=TableSelector(tab.col_types,tab.col_names,'')
