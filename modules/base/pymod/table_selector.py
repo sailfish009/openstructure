@@ -240,9 +240,9 @@ class TableSelector:
       
     unique_type=list(set(column_types))
     if len(unique_type)>1:
-      raise RuntimeError('Try to compare columns '+','.join(column_names)+' which have inconsistent types!')
+      raise ValueError('Try to compare columns '+','.join(column_names)+' which have inconsistent types!')
     if len(unique_type)==0:
-      raise RuntimeError('Try to evaluate subexpression '+' '.join(subexpression)+' that contains no valid column name of current table!')
+      raise ValueError('Try to evaluate subexpression '+' '.join(subexpression)+' that contains no valid column name of current table!')
     
     for item in subexpression:
       if item in self.valid_operators:
