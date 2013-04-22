@@ -830,15 +830,15 @@ Statistics for column %(col)s
 
     Operands have to be the name of a column or an expression that can be parsed to 
     float, int, bool or string.
-    Valid operators are: and, or, !=, <=, >=, =, <, >, +, -, *, / 
+    Valid operators are: and, or, !=, !, <=, >=, ==, =, <, >, +, -, *, / 
     
     .. code-block:: python
     
       subtab=tab.Select('col_a>0.5 and (col_b=5 or col_c=5)')
 
     The selection query should be self explaining. Allowed parenthesis are: (), [], {}, 
-    whereas parenthesis mismatches get recognized. If there is a row containing 'None'
-    in a query relevant column, it will be neglected.
+    whereas parenthesis mismatches get recognized. Expressions like '3<=col_a>=col_b'
+    throw an error, due to problems in figuring out the evaluation order.
 
     There are two special expressions:
 
@@ -850,8 +850,8 @@ Statistics for column %(col)s
       #selects rows, where col_a=1 or col_a=2 or col_a=3
       subtab=tab.Select('col_a=1,2,3')
 
-    Be aware, that there is no typechecking! Non consistent combinations of types
-    can lead to weird behaviour!
+    Only consistent types can be compared. If col_a is of type string and ccol_b is of type int, 
+    following expression would throw an error: 'col_a<ccol_b'
 
     """
 
