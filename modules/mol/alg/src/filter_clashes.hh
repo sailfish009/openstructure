@@ -21,7 +21,7 @@
 
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/alg/module_config.hh>
-
+#include <ost/mol/alg/distance_test_common.hh>
 namespace ost { namespace mol { namespace alg {
 
 class BondLengthInfo
@@ -42,20 +42,81 @@ private:
   int count_;
 };
 
+class ClashEvent
+{
+public:
+  ClashEvent(): atom1_(UniqueAtomIdentifier()),atom2_(UniqueAtomIdentifier()),mdl_dist_(0.0),adjusted_ref_dist_(0.0) {}
+  ClashEvent(const UniqueAtomIdentifier& atom1,const UniqueAtomIdentifier& atom2, Real mdl_dist, Real adjusted_ref_dist ):
+    atom1_(atom1),atom2_(atom2),mdl_dist_(mdl_dist),adjusted_ref_dist_(adjusted_ref_dist) {}
+  UniqueAtomIdentifier GetFirstAtom() const { return atom1_; }
+  UniqueAtomIdentifier GetSecondAtom() const { return atom2_; }
+  Real GetModelDistance() const { return mdl_dist_; }
+  Real GetAdjustedReferenceDistance() const { return adjusted_ref_dist_; }
+private:
+  UniqueAtomIdentifier atom1_;
+  UniqueAtomIdentifier atom2_;
+  Real mdl_dist_;
+  Real adjusted_ref_dist_;
+};
 
 class ClashingInfo
 {
 
 public:
-  ClashingInfo(): clash_count_(0), average_offset_ (0) {}
-  ClashingInfo (int clash_count, Real average_offset):
-    clash_count_(clash_count), average_offset_ (average_offset) {}
-  int GetClashCount() {return clash_count_;}
-  Real GetAverageOffset() {return average_offset_;}
+  ClashingInfo(): clash_count_(0), average_offset_ (0), clash_list_(std::vector<ClashEvent>()) {}
+  ClashingInfo (int clash_count, Real average_offset, const std::vector<ClashEvent>& clash_list):
+    clash_count_(clash_count), average_offset_ (average_offset),clash_list_(clash_list) {}
+  int GetClashCount() const {return clash_count_/2.0;}
+  Real GetAverageOffset() const {return average_offset_;}
+  std::vector<ClashEvent> GetClashList() const;
 
 private:
   int clash_count_;
   Real average_offset_;
+  std::vector<ClashEvent> clash_list_;
+};
+
+class StereoChemicalBondViolation
+{
+public:
+  StereoChemicalBondViolation():
+    atom1_(UniqueAtomIdentifier()),atom2_(UniqueAtomIdentifier()),mdl_value_(0.0),allowed_range_(std::pair<Real,Real>(0.0,0.0)) {}
+  StereoChemicalBondViolation(const UniqueAtomIdentifier& atom1,
+                              const UniqueAtomIdentifier& atom2,
+                              Real mdl_value, std::pair<Real,Real> allowed_range ):
+    atom1_(atom1),atom2_(atom2),mdl_value_(mdl_value),allowed_range_(allowed_range) {}
+  UniqueAtomIdentifier GetFirstAtom() const { return atom1_; }
+  UniqueAtomIdentifier GetSecondAtom() const { return atom2_; }
+  Real GetModelValue() const { return mdl_value_; }
+  std::pair<Real,Real> GetAllowedRange() const { return allowed_range_; }
+private:
+  UniqueAtomIdentifier atom1_;
+  UniqueAtomIdentifier atom2_;
+  Real mdl_value_;
+  std::pair<Real,Real> allowed_range_;
+};
+
+class StereoChemicalAngleViolation
+{
+public:
+  StereoChemicalAngleViolation():
+    atom1_(UniqueAtomIdentifier()),atom2_(UniqueAtomIdentifier()),atom3_(UniqueAtomIdentifier()),mdl_value_(0.0),allowed_range_(std::pair<Real,Real>(0.0,0.0)) {}
+  StereoChemicalAngleViolation(const UniqueAtomIdentifier& atom1,
+                               const UniqueAtomIdentifier& atom2,
+                               const UniqueAtomIdentifier& atom3,
+                               Real mdl_value, std::pair<Real,Real> allowed_range ):
+    atom1_(atom1),atom2_(atom2),atom3_(atom3),mdl_value_(mdl_value),allowed_range_(allowed_range) {}
+  UniqueAtomIdentifier GetFirstAtom() const { return atom1_; }
+  UniqueAtomIdentifier GetSecondAtom() const { return atom2_; }
+  UniqueAtomIdentifier GetThirdAtom() const { return atom3_; }
+  Real GetModelValue() const { return mdl_value_; }
+  std::pair<Real,Real> GetAllowedRange() const { return allowed_range_; }
+private:
+  UniqueAtomIdentifier atom1_;
+  UniqueAtomIdentifier atom2_;
+  UniqueAtomIdentifier atom3_;
+  Real mdl_value_;
+  std::pair<Real,Real> allowed_range_;
 };
 
 class StereoChemistryInfo
@@ -68,24 +129,33 @@ public:
      avg_zscore_angles_(0),
      bad_angle_count_(0),
      angle_count_(0),
-     avg_bond_length_info_(std::map<String,BondLengthInfo>()) {}
+     avg_bond_length_info_(std::map<String,BondLengthInfo>()),
+     bond_violation_list_(std::vector<StereoChemicalBondViolation>()),
+     angle_violation_list_(std::vector<StereoChemicalAngleViolation>()) {}
   StereoChemistryInfo(Real avg_zscore_bonds, int bad_bond_count, int bond_count,
                       Real avg_zscore_angles, int bad_angle_count, int angle_count,
-                      const std::map<String,BondLengthInfo>& avg_bond_length_info):
+                      const std::map<String,BondLengthInfo>& avg_bond_length_info,
+                      const std::vector<StereoChemicalBondViolation>& bond_violation_list,
+                      const std::vector<StereoChemicalAngleViolation>& angle_violation_list):
     avg_zscore_bonds_(avg_zscore_bonds),
     bad_bond_count_(bad_bond_count),
     bond_count_(bond_count),
     avg_zscore_angles_(avg_zscore_angles),
     bad_angle_count_(bad_angle_count),
     angle_count_(angle_count),
-    avg_bond_length_info_(avg_bond_length_info) {}
-  Real GetAvgZscoreBonds() {return avg_zscore_bonds_;}
-  int GetBadBondCount() {return bad_bond_count_;}
-  int GetBondCount() {return bond_count_;}
-  Real GetAvgZscoreAngles() {return avg_zscore_angles_;}
-  int GetBadAngleCount() {return bad_angle_count_;}
-  int GetAngleCount() {return angle_count_;}
+    avg_bond_length_info_(avg_bond_length_info),
+    bond_violation_list_(bond_violation_list),
+    angle_violation_list_(angle_violation_list) {}
+  Real GetAvgZscoreBonds() const {return avg_zscore_bonds_;}
+  int GetBadBondCount() const {return bad_bond_count_;}
+  int GetBondCount() const {return bond_count_;}
+  Real GetAvgZscoreAngles() const {return avg_zscore_angles_;}
+  int GetBadAngleCount() const {return bad_angle_count_;}
+  int GetAngleCount() const {return angle_count_;}
   std::map<String,BondLengthInfo> GetAvgBondLengthInfo() {return avg_bond_length_info_;}
+  std::vector<StereoChemicalBondViolation> GetBondViolationList() { return bond_violation_list_; }
+  std::vector<StereoChemicalAngleViolation> GetAngleViolationList() { return angle_violation_list_; }
+
 
 private:
   Real avg_zscore_bonds_;
@@ -95,6 +165,8 @@ private:
   int bad_angle_count_;
   int angle_count_;
   std::map<String,BondLengthInfo> avg_bond_length_info_;
+  std::vector<StereoChemicalBondViolation> bond_violation_list_;
+  std::vector<StereoChemicalAngleViolation> angle_violation_list_;
 };
 
 
