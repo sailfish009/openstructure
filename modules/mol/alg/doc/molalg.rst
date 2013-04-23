@@ -4,6 +4,7 @@
 .. module:: ost.mol.alg
    :synopsis: Algorithms operating on molecular structures
 
+
 .. function:: LocalDistDiffTest(model, reference, tolerance, radius, local_ldt_property_string="")
   
   This function calculates the agreement of local contacts between a model and 
@@ -40,6 +41,7 @@
   :param local_ldt_property_string: the base name for the ResidueHandle properties that store the local scores
 
   :returns: the Local Distance Difference Test score
+
   
 .. function:: LocalDistDiffTest(model, distance_list, tolerance_list, sequence_separation=0,  local_ldt_property_string="")
   
@@ -67,6 +69,7 @@
   :returns: a tuple containing the counts of the conserved distances in the model and of all the checked 
             distances
 
+
 .. function::  LocalDistDiffTest(alignment, tolerance, radius, ref_index=0, mdl_index=1);
 
   Calculates the Local Distance Difference Test score (see previous functions) starting from an
@@ -89,6 +92,7 @@
 
   :returns: the Local Distance Difference Test score
 
+
 .. function::  LDDTHA(model, distance_list, sequence_separation=0);
 
   This function calculates the Local Distance Difference Test - High Accuracy score (see previous functions).
@@ -110,6 +114,7 @@
   :param sequence_separation: sequence separation parameter used when computing the score
 
   :returns: the Local Distance Difference Test score
+
 
 .. function:: CreateDistanceList(reference, radius);
 .. function:: CreateDistanceListFromMultipleReferences(reference_list, tolerance_list, sequence_separation, radius);
@@ -149,6 +154,7 @@
   :param radius: inclusion radius (in Angstroms) used to determine the distances included in the list
   
   :returns: class `~ost.mol.alg.GlobalRDMap`
+
   
 .. class:: UniqueAtomIdentifier
 
@@ -180,19 +186,27 @@
 
      Returns the name of the atom, as a String
 
+  .. method:: GetQualifiedAtomName()
+
+     Returns the qualified name of the atom (the chain name, followed by a unique residue identifier and the atom name. For example:  “A.GLY2.CA”)
+
+
 .. class:: ResidueRDMap
 
   Dictionary-like object containing the a list of distances that originate from the a single residue residue, to
   check during a run of the Local Distance Difference Test algorithm 
 
+
 .. class:: GlobalRDMap
 
   Dictionary-like object containing all the :class:`~ost.mol.alg.ResidueRDMap` objects related to residues
   of a single structure
+
   
 .. function: PrintResidueRDMap(residue_distance_list)
 
   Prints to standard output all the distances contained in a :class:`~ost.mol.ResidueRDMap` object 
+
 
 .. function: PrintGlobalRDMap(global_distance_list)
 
@@ -207,6 +221,7 @@ Steric Clashes
 
 The following function detects steric clashes in atomic structures. Two atoms are clashing if their euclidian distance is smaller than a threshold value (minus a tolerance offset). 
 
+
 .. function:: FilterClashes(entity, clashing_distances, always_remove_bb=False)
 
   This function filters out residues with non-bonded clashing atoms. If the clashing atom 
@@ -215,8 +230,9 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   by the always_remove_bb flag: when the flag is set to True the whole residue is removed even if
   a clash is just detected in the side-chain.
 
-  The function performs the filtering directly on the the entity which is passed as an argument. The entity
-  gets altered by the function.
+  The function returns a view containing all elements (residues, atoms) that have not been removed from the 
+  input structure, plus a :class:`~ost.mol.alg.ClashingInfo` object containing information about the 
+  detected clashes.
   
   Two atoms are defined as clashing if their distance is shorter than the reference distance minus a tolerance
   threshold. The information about the clashing distances and the tolerance thresholds for all possible pairs of 
@@ -230,7 +246,8 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   :type clashing_distances: :class:`~ost.mol.alg.ClashingDistances`
   :param always_remove_bb: if set to True, the whole residue is removed even if the clash happens in the side-chain
 
-  :returns: The filtered :class:`~ost.mol.EntityView`
+  :returns: A tuple of two elements: The filtered :class:`~ost.mol.EntityView`, and a :class:`~ost.mol.alg.ClashingInfo` object
+
 
 .. function:: CheckStereoChemistry(entity,bond_stats,angle_stats,bond_tolerance,angle_tolerance,always_remove_bb=False)
 
@@ -240,9 +257,8 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   by the always_remove_bb flag: when the flag is set to True the whole residue is removed even if
   a violation is just detected in the side-chain
 
-  The function performs the filtering directly on the the entity which is passed as an argument. The entity
-  gets altered by the function.
-  
+  The function returns a view containing all elements (residues, atoms) that have not been removed from the input structure, plus a :class:`~ost.mol.alg.StereoChemistryInfo` object containing information about the detected stereo-chemical violations.
+    
   A violation is defined as a bond length that lies outside of the range: [mean_length-std_dev*bond_tolerance <-> meanlength+std_dev*bond_tolerance] or an angle width lying outside of the range [mean_width-std_dev*angle_tolerance <-> mean_width+std_dev*angle_tolerance ]. The information about the mean lengths and widths and the corresponding standard deviations is passed to the function using two parameters.
 
   Hydrogen and deuterium atoms are ignored by this function.
@@ -257,7 +273,162 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   :param angle_tolerance: tolerance for angle widths (in standard deviations)£
   :param always_remove_bb: if set to True, the whole residue is removed even if a violation in just detected in the side-chain
 
-  :returns: The filtered :class:`~ost.mol.EntityView`
+  :returns: A tuple of two elements: The filtered :class:`~ost.mol.EntityView`, and a :class:`~ost.mol.alg.StereoChemistryInfo` object
+
+
+.. class:: ClashingInfo
+
+  This object is returned by the FilterClashes function, and contains information about the clashes detected by the function. 
+
+  .. method:: GetClashCount()
+
+     This method returns the number of clashes between non-bonded atoms detected in the input structure
+
+  .. method:: GetAverageOffset()
+
+     This methods returns a value in Angstroms representing the average offset by which clashing atoms lie closer than the minimum acceptable distance (which of course differs for each possible pair of elements)
+
+     :returns: the average offset, in Angstroms
+
+  .. method:: GetClashList()
+
+     Returns the list of detected inter-atomic clashes
+
+     :returns: a list of :class:`~ost.mol.alg.ClashEvent` objects
+
+
+.. class:: ClashEvent
+
+  This object contains all the information relative to a single clash detected by the FilterClashes function
+
+  .. method:: GetFirstAtom()
+  .. method:: GetSecondAtom()
+
+     These two methods return the two atoms which clash
+
+     :returns: :class:`~ost.mol.alg.UniqueAtomIdentifier`
+
+  .. method:: GetModelDistance()
+
+     This method returns the distance between the two clashing atoms as observed in the model
+
+     :returns: the distance in Angstroms between the two atoms
+
+  .. method:: GetAdjustedReferenceDistance()
+
+     This method returns the minimum acceptable distance between the two atoms involved in the clash, as defined in the :class:`~ost.mol.alg.ClashingDistances` class
+
+     :returns: the minimum acceptable distance in Angstroms
+
+
+.. class:: StereoChemistryInfo
+
+  This object is returned by the CheckStereoChemistry function, and contains information about bond lengths and planar angle widths in the structure that diverge from the parameters tabulated by Engh and Huber in the International Tables of Crystallography. Only elements that diverge from the tabulated value by a minimum  number of standard deviations (defined when the CheckStereoChemistry function is called) are reported.
+
+  .. method:: GetBadBondCount()
+
+     This method returns the number of bonds where a serious violation was detected
+
+  .. method:: GetBondCount()
+
+     This method returns the total number of bonds in the structure checked by the CheckStereoChemistry function
+
+  .. method GetAvgZscoreBonds()
+
+     This method returns the average z-score of all the bond lengths in the structure, computed using Engh and Huber's mean and standard deviation values.
+
+     :returns: The average z-score of bond lengths
+
+  .. method:: GetBadAngleCount()  
+
+     This method returns the number of planar angles where a serious violation was detected
+
+  .. method:: GetAngleCount()
+
+     This method returns the total number of planar angles in the structure checked by the CheckStereoChemistry function
+
+  .. method:: GetAvgZscoreAngles()
+
+     This method returns the average z-score of all the planar angle widths, computed using Engh and Huber's mean and standard deviation values.
+
+     :returns: The average z-score of planar angle widths
+
+  .. method:: GetBondViolationList()
+
+     Returns the list of bond length violations detected in the structure
+
+     :returns: a list of :class:`~ost.mol.alg.StereoChemicalBondViolation` objects
+
+  .. method:: GetAngleViolationList()
+
+     Returns the list of angle width violations detected in the structure
+
+     :returns: a list of :class:`~ost.mol.alg.StereoChemicalAngleViolation` objects
+
+
+.. class:: StereoChemicalBondViolation
+
+  This object contains all the information relative to a single detected violation of stereo-chemical parameters in a bond length
+
+  .. method:: GetFirstAtom()
+
+     Returns the first atom of the bond
+
+     :returns: :class:`~ost.mol.alg.UniqueAtomIdentifier`
+
+  .. method:: GetSecondAtom()
+
+     Returns the first atom of the bond
+
+     :returns: :class:`~ost.mol.alg.UniqueAtomIdentifier`
+
+  .. method:: GetBondLength()
+
+     Returns the length of the bond as observed in the model
+
+     :returns: the bond length in Angstroms
+
+  .. method:: GetAllowedRange()
+
+     Returns the allowed range of bond lengths, according to the Engh and Huber's tabulated parameters and the tolerance threshold used when CheckStereoChemistry function was called
+
+     :returns: a tuple containing the minimum and maximum allowed bond lengths in Angstroms
+
+
+.. class:: StereoChemicalAngleViolation
+
+  This object contains all the information relative to a single detected violation of stereo-chemical parameters in a planar angle width
+
+  .. method:: GetFirstAtom()
+
+     Returns the first atom that defines the planar angle 
+
+     :returns: :class:`~ost.mol.alg.UniqueAtomIndentifier`
+
+  .. method:: GetSecondAtom()
+
+     Returns the vertex atom of the planar angle
+
+     :returns: :class:`~ost.mol.alg.UniqueAtomIdentifier`
+
+  .. method:: GetThirdAtom()
+
+     Returns the third atom that defines the planar angle
+
+     :returns: :class:`~ost.mol.alg.UniqueAtomIdentifier`
+
+  .. method:: GetAngleWidth()
+
+     Returns the width of the planar angle as observed in the model
+
+     :returns: the angle width in degrees
+
+  .. method:: GetAllowedRange()
+
+     Returns the allowed range of angle widths, according to the Engh and Huber's tabulated parameters and the tolerance threshold used when the CheckStereoChemistry function was called
+
+     :returns: a tuple containing the minimum and maximum allowed angle widths in degrees
+
 
 .. class:: ClashingDistances
 
@@ -351,6 +522,7 @@ The following function detects steric clashes in atomic structures. Two atoms ar
 
     Prints all distances in the list to standard output  
 
+
 .. function:: FillClashingDistances(file_content)
 .. function:: FillBondStereoChemicalParams(file_content)
 .. function:: FillAngleStereoChemicalParams(file_content)
@@ -362,6 +534,7 @@ The following function detects steric clashes in atomic structures. Two atoms ar
 
   :returns: :class:`~ost.mol.alg.ClashingDistances` and :class:`~ost.mol.alg.StereoChemicalParams` respectively
 
+
 .. function:: FillClashingDistancesFromFile(filename)
 .. function:: FillBondStereoChemicalParamsFromFile(filename)
 .. function:: FillAngleStereoChemicalParamsFromFile(filename)
@@ -371,6 +544,7 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   passed to the function can be a full path.
 
   :returns: :class:`~ost.mol.alg.ClashingDistances` and :class:`~ost.mol.alg.StereoChemicalParams` respectively
+
 
 .. function:: DefaultClashingDistances()
 .. function:: DefaultBondStereoChemicalParams()

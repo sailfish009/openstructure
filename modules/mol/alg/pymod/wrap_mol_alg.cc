@@ -196,7 +196,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
            Real, const std::pair<Real, Real>& >())
       .def("GetFirstAtom",&mol::alg::StereoChemicalBondViolation::GetFirstAtom)
       .def("GetSecondAtom",&mol::alg::StereoChemicalBondViolation::GetSecondAtom)
-      .def("GetModelValue",&mol::alg::StereoChemicalBondViolation::GetModelValue)
+      .def("GetBondLength",&mol::alg::StereoChemicalBondViolation::GetBondLength)
       .def("GetAllowedRange",&mol::alg::StereoChemicalBondViolation::GetAllowedRange)
   ;
 
@@ -206,7 +206,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
       .def("GetFirstAtom",&mol::alg::StereoChemicalAngleViolation::GetFirstAtom)
       .def("GetSecondAtom",&mol::alg::StereoChemicalAngleViolation::GetSecondAtom)
       .def("GetThirdAtom",&mol::alg::StereoChemicalAngleViolation::GetThirdAtom)
-      .def("GetModelValue",&mol::alg::StereoChemicalAngleViolation::GetModelValue)
+      .def("GetAngleWidth",&mol::alg::StereoChemicalAngleViolation::GetAngleWidth)
       .def("GetAllowedRange",&mol::alg::StereoChemicalAngleViolation::GetAllowedRange)
   ;
 

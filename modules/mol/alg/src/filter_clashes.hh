@@ -87,7 +87,7 @@ public:
     atom1_(atom1),atom2_(atom2),mdl_value_(mdl_value),allowed_range_(allowed_range) {}
   UniqueAtomIdentifier GetFirstAtom() const { return atom1_; }
   UniqueAtomIdentifier GetSecondAtom() const { return atom2_; }
-  Real GetModelValue() const { return mdl_value_; }
+  Real GetBondLength() const { return mdl_value_; }
   std::pair<Real,Real> GetAllowedRange() const { return allowed_range_; }
 private:
   UniqueAtomIdentifier atom1_;
@@ -109,7 +109,7 @@ public:
   UniqueAtomIdentifier GetFirstAtom() const { return atom1_; }
   UniqueAtomIdentifier GetSecondAtom() const { return atom2_; }
   UniqueAtomIdentifier GetThirdAtom() const { return atom3_; }
-  Real GetModelValue() const { return mdl_value_; }
+  Real GetAngleWidth() const { return mdl_value_; }
   std::pair<Real,Real> GetAllowedRange() const { return allowed_range_; }
 private:
   UniqueAtomIdentifier atom1_;
