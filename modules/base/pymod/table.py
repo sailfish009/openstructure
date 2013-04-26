@@ -850,17 +850,15 @@ Statistics for column %(col)s
       #selects rows, where col_a=1 or col_a=2 or col_a=3
       subtab=tab.Select('col_a=1,2,3')
 
-    Only consistent types can be compared. If col_a is of type string and ccol_b is of type int, 
-    following expression would throw an error: 'col_a<ccol_b'
+    Only consistent types can be compared. If col_a is of type string and col_b is of type int, 
+    following expression would throw an error: 'col_a<col_b'
 
     """
 
-    import traceback
     try:
-      from table_selector import *
+      from table_selector import TableSelector
     except:
-      traceback.print_exc()
-      raise ImportError("Tried to import the file table_selector.py, but could not find it!")
+      raise ImportError("Tried to import from the file table_selector.py, but could not find it!")
 
     selector=TableSelector(self.col_types, self.col_names, query)
 

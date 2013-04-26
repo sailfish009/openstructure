@@ -1703,7 +1703,7 @@ class TestTable(unittest.TestCase):
     self.assertRaises(ValueError,tab.Select,'c>d')
     self.assertRaises(ValueError,tab.Select,'c+d=5')
 
-    from ost.table_selector import *
+    from ost.table_selector import TableSelector
 
     selector=TableSelector(tab.col_types,tab.col_names,'')
 
