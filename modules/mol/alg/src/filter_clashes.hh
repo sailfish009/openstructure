@@ -24,7 +24,7 @@
 #include <ost/mol/alg/distance_test_common.hh>
 namespace ost { namespace mol { namespace alg {
 
-class BondLengthInfo
+class DLLEXPORT_OST_MOL_ALG BondLengthInfo
 {
 public:
   BondLengthInfo(): avg_length_(0),avg_zscore_(0),count_(0) {}
@@ -42,7 +42,7 @@ private:
   int count_;
 };
 
-class ClashEvent
+class DLLEXPORT_OST_MOL_ALG ClashEvent
 {
 public:
   ClashEvent(): atom1_(UniqueAtomIdentifier()),atom2_(UniqueAtomIdentifier()),mdl_dist_(0.0),adjusted_ref_dist_(0.0) {}
@@ -59,7 +59,7 @@ private:
   Real adjusted_ref_dist_;
 };
 
-class ClashingInfo
+class DLLEXPORT_OST_MOL_ALG ClashingInfo
 {
 
 public:
@@ -76,7 +76,7 @@ private:
   std::vector<ClashEvent> clash_list_;
 };
 
-class StereoChemicalBondViolation
+class DLLEXPORT_OST_MOL_ALG StereoChemicalBondViolation
 {
 public:
   StereoChemicalBondViolation():
@@ -96,7 +96,7 @@ private:
   std::pair<Real,Real> allowed_range_;
 };
 
-class StereoChemicalAngleViolation
+class DLLEXPORT_OST_MOL_ALG StereoChemicalAngleViolation
 {
 public:
   StereoChemicalAngleViolation():
@@ -119,7 +119,7 @@ private:
   std::pair<Real,Real> allowed_range_;
 };
 
-class StereoChemistryInfo
+class DLLEXPORT_OST_MOL_ALG StereoChemistryInfo
 {
 public:
   StereoChemistryInfo():
