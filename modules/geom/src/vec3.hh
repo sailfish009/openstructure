@@ -228,9 +228,25 @@ public:
     base_type::operator=(rhs);
     return *this;
   }
+  //! comparable
+  bool operator==(const Vec3List& rhs) const
+  {
+    if (this->size()!=rhs.size()){
+    throw std::length_error("Vec3List must have the same size");
+    }
+    for (unsigned int i=0;i!=this->size();++i) {
+      if (((*this)[i])!=((rhs)[i])){
+        return false;
+      }
+    }
+    return true;
+  }
   //! addable op
   Vec3List& operator+=(const Vec3List& rhs)
   { 
+    if (this->size()!=rhs.size()){
+      throw std::length_error("Vec3List must have the same size");
+    }
     for (unsigned int i=0;i!=this->size();++i) {
       (*this)[i]+=(rhs)[i];
     }
@@ -246,7 +262,10 @@ public:
   
   //! subtractable op
   Vec3List& operator-=(const Vec3List& rhs)
-  {
+  { 
+    if (this->size()!=rhs.size()){
+      throw std::length_error("Vec3List must have the same size");
+    }
     for (unsigned int i=0;i!=this->size();++i) {
       (*this)[i]-=(rhs)[i];
     }
