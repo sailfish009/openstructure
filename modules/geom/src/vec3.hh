@@ -207,7 +207,13 @@ namespace geom {
   // TODO: move to separate file
   class Mat3;
 
-class DLLEXPORT_OST_GEOM Vec3List : public std::vector<Vec3> {
+class DLLEXPORT_OST_GEOM Vec3List : 
+  public std::vector<Vec3>,
+  private boost::equality_comparable<Vec3List>,
+  private boost::additive<Vec3List>,
+  private boost::additive<Vec3List, Real>,
+  private boost::multiplicative<Vec3List, Real>
+  {
 public:
   typedef std::vector<Vec3> base_type;
   Vec3List() : base_type() {}
@@ -222,7 +228,67 @@ public:
     base_type::operator=(rhs);
     return *this;
   }
-
+  //! addable op
+  Vec3List& operator+=(const Vec3List& rhs)
+  { 
+    for (unsigned int i=0;i!=this->size();++i) {
+      (*this)[i]+=(rhs)[i];
+    }
+    return *this;
+  }
+  Vec3List& operator+=(Real d)
+  {
+    for (unsigned int i=0;i!=this->size();++i) {
+      (*this)[i]+=d;
+    }
+    return *this;
+  }
+  
+  //! subtractable op
+  Vec3List& operator-=(const Vec3List& rhs)
+  {
+    for (unsigned int i=0;i!=this->size();++i) {
+      (*this)[i]-=(rhs)[i];
+    }
+    return *this;
+  }
+  
+  Vec3List& operator-=(Real d)
+  {
+    for (unsigned int i=0;i!=this->size();++i) {
+      (*this)[i]-=d;
+    }
+    return *this;
+  }
+  //! negateable
+  //Vec3List3 operator-() const
+  //{
+  //  geom::Vec3List vl;
+  //  for (unsigned int i=0;i!=this->size();++i) {
+  //    geom::Vec3 v=(*this)[i];
+  //    vl.push_back(-v);
+  //  }
+  //  return vl;
+  //}
+  
+  //! multipliable
+  Vec3List& operator*=(Real d)
+  {
+    for (unsigned int i=0;i!=this->size();++i) {
+      (*this)[i]*=d;
+    }
+    return *this;
+  }
+  
+  //! dividable
+  Vec3List& operator/=(Real d)
+  {
+    for (unsigned int i=0;i!=this->size();++i) {
+      (*this)[i]/=d;
+    }
+    return *this;
+  }
+  
   // TODO: move some or all of these to stand-alone functions
   Mat3 GetInertia() const;
   Vec3 GetCenter() const;
