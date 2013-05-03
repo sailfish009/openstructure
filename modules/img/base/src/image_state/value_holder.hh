@@ -32,6 +32,7 @@
 #include <ost/img/data_types.hh>
 #include <ost/img/size.hh>
 
+#include "index.hh"
 #include "type_fw.hh"
 
 namespace value_holder_test {
@@ -104,14 +105,32 @@ public:
     The lookup is based on an integer triplet encapsulated within
     Index.
   */
-  V& Value(const Index& i);
+  V& Value(const Index& i)
+  {
+  #ifdef USE_ROW_ORDER
+    assert(i.w<depth_);
+    return data_[i.u*height_depth_ + i.v*depth_ +i.w];
+  #else
+    assert(i.v<height_);
+    return data_[i.w*width_height_ + i.v*height_ +i.u];
+  #endif
+  }
 
   //! return direct ro access to the value without boundary check
   /*!
     The lookup is based on an integer triplet encapsulated within
     Index.
   */
-  const V& Value(const Index& i) const;
+  const V& Value(const Index& i) const
+  {
+  #ifdef USE_ROW_ORDER
+    assert(i.w<depth_);
+    return data_[i.u*height_depth_ + i.v*depth_ +i.w];
+  #else
+    assert(i.v<height_);
+    return data_[i.w*width_height_ + i.v*height_ +i.u];
+  #endif
+  }
 
   //! return pointer to raw data
   VPtr GetData() {return &data_[0];}

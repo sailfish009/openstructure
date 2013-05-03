@@ -110,7 +110,7 @@ class DLLEXPORT_OST_IMG_BASE Extent {
   Point GetCenter() const;
 
   //! Return size of extent
-  const Size& GetSize() const;
+  Size GetSize() const;
   int GetWidth() const;
   int GetHeight() const;
   int GetDepth() const;
@@ -140,8 +140,6 @@ class DLLEXPORT_OST_IMG_BASE Extent {
 
  private:
   Point start_,end_;
-  Size size_;
-  int dim_;
 
   void set(const Point& p1, const Point& p2);
   bool equal(const Extent& b) const;
