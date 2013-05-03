@@ -37,7 +37,7 @@ struct fnc_expl_convolute_wrap_op {
     for(ExtentIterator it1(ex1);!it1.AtEnd(); ++it1) {
       T1 val(0);
       for(ExtentIterator it2(rhs->GetExtent());!it2.AtEnd();++it2) {
-	val+=lhs->Value(ex1.WrapAround(it1-it2)) * Val2Val<T2,T1>(rhs->Value(it2));
+	val+=lhs->Value(ex1.WrapAround(Point(it1)-Point(it2))) * Val2Val<T2,T1>(rhs->Value(it2));
       }
       res->Value(it1) = val;
     }
@@ -56,7 +56,7 @@ struct fnc_expl_convolute_op {
     for(ExtentIterator it1(ex1);!it1.AtEnd(); ++it1) {
       T1 val(0);
       for(ExtentIterator it2(rhs->GetExtent());!it2.AtEnd();++it2) {
-	val+=lhs->GetCheckedValue(it1-it2) * Val2Val<T2,T1>(rhs->Value(it2));
+	val+=lhs->GetCheckedValue(Point(it1)-Point(it2)) * Val2Val<T2,T1>(rhs->Value(it2));
       }
       res->Value(it1) = val;
     }

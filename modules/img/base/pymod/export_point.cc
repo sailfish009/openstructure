@@ -33,8 +33,8 @@ namespace ost { namespace img {
 
 
 int point_len(const Point& p) {return 3;}
-int point_getitem(const Point& p, int i) {return p[i];}
-void point_setitem(Point& p, int i, int v) {p[i]=v;}
+int point_getitem(const Point& p, int i) {return p.At(i);}
+void point_setitem(Point& p, int i, int v) {p.At(i)=v;}
 
 }}
 
@@ -48,6 +48,9 @@ void export_Point()
     .def(init<const Vec3&>(args("vec")))
     .def(init<const Vec4&>(args("vec")))
     .def(init<const Point&>(args("point")))
+    .def_readwrite("x", &Point::x)
+    .def_readwrite("y", &Point::y)
+    .def_readwrite("z", &Point::z)
     .def("Mirror",&Point::Mirror)
     .def("ToVec2",&Point::ToVec2)
     .def("ToVec3",&Point::ToVec3)
