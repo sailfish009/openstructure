@@ -50,7 +50,11 @@ ImageHandle DLLEXPORT_OST_IMG_BASE CreateImage(const Extent& ext=Extent(),
                                                 DataType type=REAL,
                                                 DataDomain dom=SPATIAL);
 
-//! convenience variant to create images
+//! convenience variants to create images
+ImageHandle DLLEXPORT_OST_IMG_BASE CreateImage(const Size& s,
+                                                DataType type=REAL,
+                                                DataDomain dom=SPATIAL);
+
 ImageHandle DLLEXPORT_OST_IMG_BASE CreateImage(const Size& s, const Point& o,
                                                 DataType type=REAL,
                                                 DataDomain dom=SPATIAL);
