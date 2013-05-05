@@ -744,6 +744,7 @@ endmacro()
 #-------------------------------------------------------------------------------
 macro(ost_find_python_module MODULE)
   if (NOT PYTHON_MODULE_${MODULE})
+    message(STATUS "Searching for python module ${MODULE} for ${PYTHON_BINARY}")
     execute_process(COMMAND ${PYTHON_BINARY} -c "import ${MODULE}"
                     OUTPUT_QUIET ERROR_QUIET
                     RESULT_VARIABLE _IMPORT_ERROR)
