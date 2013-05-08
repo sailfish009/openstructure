@@ -36,7 +36,7 @@ using namespace ost::mol;
 namespace {
 
 template<class T>
-std::vector<T> from_list(const list& seq)
+std::vector<T> from_list(const object& seq)
 {
   std::vector<T> nrvo;
   for (int i = 0; i < len(seq); ++i) {
@@ -62,9 +62,12 @@ StringMethod find_chain_str=&EntityView::FindChain;
 QSMethod select_string=&EntityView::Select;
 QueryMethod  select_query=&EntityView::Select;
 
-EntityView create_view(const list& seq)
+EntityView create_view(const object& seq)
 {
-  if(len(seq)==0) return EntityView();
+  
+  if(len(seq)==0) {
+    return EntityView();
+  }
   extract<AtomHandle> get_handle(seq[0]);
   if(get_handle.check()) {
     return CreateViewFromAtomList(from_list<AtomHandle>(seq));
@@ -209,6 +212,7 @@ void export_EntityView()
   def("Intersection", &Intersection);
 
   def("CreateViewFromAtoms", create_view);
+  def("CreateViewFromAtomList", create_view);
   
   def("CreateEntityFromView", &CreateEntityFromView, 
       arg("handle")=EntityHandle());
