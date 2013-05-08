@@ -274,14 +274,13 @@ class HelpMenu(QMenu):
   def _ShowAboutDialog(self):
     _InitSplash()
 
-
 def _InitMenu():
-  mbar=gui.GostyApp.Instance().perspective.GetMenuBar()
-  file_menu=FileMenu(mbar)
-  scene_menu=SceneMenu(mbar)
-  win_menu=WindowMenu(mbar)
-  help_menu=HelpMenu(mbar)
-  mbar.addMenu(file_menu)
-  mbar.addMenu(scene_menu)
-  mbar.addMenu(win_menu)
-  mbar.addMenu(help_menu)
+  _InitMenu.mbar=gui.GostyApp.Instance().perspective.GetMenuBar()
+  file_menu=FileMenu(_InitMenu.mbar)
+  scene_menu=SceneMenu(_InitMenu.mbar)
+  win_menu=WindowMenu(_InitMenu.mbar)
+  help_menu=HelpMenu(_InitMenu.mbar)
+  _InitMenu.mbar.addMenu(file_menu)
+  _InitMenu.mbar.addMenu(scene_menu)
+  _InitMenu.mbar.addMenu(win_menu)
+  _InitMenu.mbar.addMenu(help_menu)
