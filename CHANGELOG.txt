@@ -2,6 +2,9 @@ Changes In Release 1.3.3
 --------------------------------------------------------------------------------
 
   * fix context menu/main menu for newer Qt versions 
+  * CreateEntityFromView remembers chemical type (BZDNG-430)
+  * Fix remote=true for MMCIF loader (BZDNG-449)
+
 Changes In Release 1.3.2
 --------------------------------------------------------------------------------
 
