@@ -373,9 +373,9 @@ class SelectMenuPoints(QtCore.QObject):
           gfx.Scene().Add(gfx_ent)
       else:    
         ost.LogError("invalid query: %s" % q.error)
-   
+
 def _InitContextMenu(app):
-  cm=app.scene_win.GetContextMenu()
-  AlignmentContextMenu(cm)
-  SurfaceContextMenu(cm)
-  SelectMenuPoints(cm)
+  _InitContextMenu.cm=app.scene_win.GetContextMenu()
+  _InitContextMenu.am=AlignmentContextMenu(_InitContextMenu.cm)
+  _InitContextMenu.sc=SurfaceContextMenu(_InitContextMenu.cm)
+  _InitContextMenu.sm=SelectMenuPoints(_InitContextMenu.cm)
