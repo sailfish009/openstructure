@@ -96,9 +96,9 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
   int first=0;
   if (v.GetResidueList().size()==0) {
     if (glob_dist_list.size()==0) {
-      return std::make_pair<int,int>(0,-1);
+      return std::make_pair(0,-1);
     } else {    
-      return std::make_pair<int,int>(0,glob_dist_list.size());
+      return std::make_pair(0,glob_dist_list.size());
     }  
   }
   ChainView vchain=v.GetChainList()[0];
@@ -110,7 +110,7 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
       first++;
     }
   }
-  return std::make_pair<int,int>(first,second);
+  return std::make_pair(first,second);
 }
 
 bool is_resnum_in_globalrdmap(const ResNum& resnum, const GlobalRDMap& glob_dist_list)

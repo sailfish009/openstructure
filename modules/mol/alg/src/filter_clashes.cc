@@ -89,10 +89,10 @@ std::vector<ClashEvent> ClashingInfo::GetClashList() const
   for (std::vector<ClashEvent>::const_iterator cl_it=clash_list_.begin();cl_it!=clash_list_.end();++cl_it) {
     UniqueAtomIdentifier atom1 = cl_it->GetFirstAtom();
     UniqueAtomIdentifier atom2 = cl_it->GetSecondAtom();
-    UAtomIdentifiers check = std::make_pair<UniqueAtomIdentifier,UniqueAtomIdentifier>(atom2,atom1);
+    UAtomIdentifiers check = std::make_pair(atom2,atom1);
     if (std::find(seen_list.begin(),seen_list.end(),check)==seen_list.end()) {
       return_list.push_back(*cl_it);
-      seen_list.push_back(std::make_pair<UniqueAtomIdentifier,UniqueAtomIdentifier>(atom1,atom2));
+      seen_list.push_back(std::make_pair(atom1,atom2));
     }
   }
   return return_list;
@@ -103,7 +103,7 @@ void ClashingDistances::SetClashingDistance(const String& ele1,const String& ele
   std::stringstream stkey;
   stkey << ele1 << "--" << ele2;
   String key=stkey.str();
-  min_distance_[key]=std::make_pair<Real,Real>(min_distance,tolerance);
+  min_distance_[key]=std::make_pair(min_distance,tolerance);
 }
 
 std::pair<Real,Real> ClashingDistances::GetClashingDistance(const String& ele1,const String& ele2) const
@@ -160,13 +160,13 @@ bool ClashingDistances::IsEmpty() const
 
 void StereoChemicalParams::SetParam(const String& param, const String& residue, Real value, Real st_dev)
 {
-  std::pair<String,String> key = std::make_pair<String,String>(param,residue);
-  params_[key]=std::make_pair<Real,Real>(value,st_dev);
+  std::pair<String,String> key = std::make_pair(param,residue);
+  params_[key]=std::make_pair(value,st_dev);
 }
 
 std::pair<Real,Real> StereoChemicalParams::GetParam(const String& param,const String& residue) const
 {
-  std::pair<String,String> key = std::make_pair<String,String>(param,residue);
+  std::pair<String,String> key = std::make_pair(param,residue);
   std::map<std::pair<String,String>,std::pair<float,float> >::const_iterator find_ci = params_.find(key);
   if (find_ci == params_.end()) {
       std::stringstream serr;
@@ -178,7 +178,7 @@ std::pair<Real,Real> StereoChemicalParams::GetParam(const String& param,const St
 
 bool StereoChemicalParams::ContainsParam(const String& param,const String& residue) const
 {
-  std::pair<String,String> key = std::make_pair<String,String>(param,residue);
+  std::pair<String,String> key = std::make_pair(param,residue);
   std::map<std::pair<String,String>,std::pair<float,float> >::const_iterator find_ci = params_.find(key);
   if (find_ci == params_.end()) {
     return false;
@@ -402,7 +402,7 @@ std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityView&
               bad_bond_count++;
               UniqueAtomIdentifier atom_ui(atom.GetResidue().GetChain().GetName(),atom.GetResidue().GetNumber(),atom.GetResidue().GetName(),atom.GetName());
               UniqueAtomIdentifier other_atom_ui(other_atom.GetResidue().GetChain().GetName(),other_atom.GetResidue().GetNumber(),other_atom.GetResidue().GetName(),other_atom.GetName());
-              StereoChemicalBondViolation bond_v(atom_ui,other_atom_ui,blength,std::make_pair<Real,Real>(min_length,max_length));
+              StereoChemicalBondViolation bond_v(atom_ui,other_atom_ui,blength,std::make_pair(min_length,max_length));
               bond_violation_list.push_back(bond_v);
               remove_sc=true;
               if (always_remove_bb==true) {
@@ -472,7 +472,7 @@ std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityView&
               UniqueAtomIdentifier atom1_ui(atom1.GetResidue().GetChain().GetName(),atom1.GetResidue().GetNumber(),atom1.GetResidue().GetName(),atom1.GetName());
               UniqueAtomIdentifier atom_ui(atom.GetResidue().GetChain().GetName(),atom.GetResidue().GetNumber(),atom.GetResidue().GetName(),atom.GetName());
               UniqueAtomIdentifier atom2_ui(atom2.GetResidue().GetChain().GetName(),atom2.GetResidue().GetNumber(),atom2.GetResidue().GetName(),atom2.GetName());
-              StereoChemicalAngleViolation angle_v(atom1_ui,atom_ui,atom2_ui,awidth,std::make_pair<Real,Real>(min_width,max_width));
+              StereoChemicalAngleViolation angle_v(atom1_ui,atom_ui,atom2_ui,awidth,std::make_pair(min_width,max_width));
               angle_violation_list.push_back(angle_v);
               remove_sc=true;
               if (always_remove_bb==true) {
@@ -529,7 +529,7 @@ std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityView&
                            bad_angle_count, angle_count,avg_bond_length_info,
                            bond_violation_list,angle_violation_list);
   filtered.AddAllInclusiveBonds();
-  return std::make_pair<EntityView,StereoChemistryInfo>(filtered,info);
+  return std::make_pair(filtered,info);
 }
 
 
@@ -639,7 +639,7 @@ std::pair<EntityView,ClashingInfo> FilterClashes(const EntityView& ent, const Cl
   }
   ClashingInfo info(bad_distance_count,average_offset,clash_list);
   filtered.AddAllInclusiveBonds();
-  return std::make_pair<EntityView,ClashingInfo>(filtered,info);
+  return std::make_pair(filtered,info);
 }
 
 

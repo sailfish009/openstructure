@@ -168,6 +168,8 @@ public:
 
   bool operator<(const Point &p) const;
 
+  Point& operator*=(int s) {x*=s;y*=s;z*=s;return *this;}
+  
   // conversion to vectors
   Vec2 ToVec2() const;
   Vec3 ToVec3() const;

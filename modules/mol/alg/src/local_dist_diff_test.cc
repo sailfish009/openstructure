@@ -367,8 +367,8 @@ GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist)
              continue;
          }
          Real dist=geom::Length(ai->GetPos()-aj->GetPos());
-         UAtomIdentifiers atoms = std::make_pair<UniqueAtomIdentifier,UniqueAtomIdentifier>(first_atom,second_atom); 
-         std::pair<Real,Real> values = std::make_pair<Real,Real>(dist,dist);  
+         UAtomIdentifiers atoms = std::make_pair(first_atom,second_atom); 
+         std::pair<Real,Real> values = std::make_pair(dist,dist);  
          res_dist_list[atoms]=values;
        }
      }   
@@ -424,11 +424,11 @@ std::pair<long int,long int> LocalDistDiffTest(const EntityView& mdl, const Glob
 {
   if (!mdl.GetResidueCount()) {
     LOG_WARNING("model structures doesn't contain any residues");
-    return std::make_pair<long int,long int>(0,0);
+    return std::make_pair(0,0);
   }
   if (glob_dist_list.size()==0) {
     LOG_WARNING("global reference list is empty");
-    return std::make_pair<long int,long int>(0,0);
+    return std::make_pair(0,0);
   }
   std::vector<std::pair<long int, long int> > overlap_list(mdl.GetResidueCount(), std::pair<long int, long int>(0, 0));
   check_and_swap(glob_dist_list,mdl,cutoff_list,sequence_separation,overlap_list);
@@ -460,7 +460,7 @@ std::pair<long int,long int> LocalDistDiffTest(const EntityView& mdl, const Glob
     }
   }
   overlap_list.clear();
-  return std::make_pair<long int,long int>(total_ov.first,total_ov.second);
+  return std::make_pair(total_ov.first,total_ov.second);
 }
 
 Real LocalDistDiffTest(const EntityView& mdl, const EntityView& target, Real cutoff, Real max_dist, const String& local_lddt_property_string)
