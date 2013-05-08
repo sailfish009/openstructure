@@ -130,7 +130,7 @@ public:
     for (ChainViewList::const_iterator ci = entity_view_.GetChainList().begin(),
         ce = entity_view_.GetChainList().end(); ci != ce; ++ci) {
     for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
-          re = ci->GetResidueList().end(); ri != re; ++re) {
+          re = ci->GetResidueList().end(); ri != re; ++ri) {
     for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
           ae = ri->GetAtomList().end(); ai!= ae; ++ai) {
       AtomScatteringPropsTable::iterator table_iter =
@@ -286,7 +286,7 @@ public:
     for (ChainViewList::const_iterator ci = effective_entity_view.GetChainList().begin(),
         ce = effective_entity_view.GetChainList().end(); ci != ce; ++ci) {
     for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
-        re = ci->GetResidueList().end(); ri != re; ++re) {
+        re = ci->GetResidueList().end(); ri != re; ++ri) {
     for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
         ae = ri->GetAtomList().end(); ai!= ae; ++ai) {
       AtomScatteringPropsTable::iterator table_iter =

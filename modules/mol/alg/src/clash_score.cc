@@ -47,7 +47,7 @@ Real ClashScore(const EntityView& ent_a, const EntityView& ent_b)
   for (ChainViewList::const_iterator ci = ent_a.GetChainList().begin(),
        ce = ent_a.GetChainList().end(); ci != ce; ++ci) {
     for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
-         re = ci->GetResidueList().end(); ri != re; ++re) {
+         re = ci->GetResidueList().end(); ri != re; ++ri) {
       for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
            ae = ri->GetAtomList().end(); ai!= ae; ++ai) {
         AtomViewList clashees=ent_b.FindWithin(ai->GetPos(), 
@@ -70,7 +70,7 @@ Real ClashScore(const EntityHandle& ent_a, const EntityView& ent_b)
   for (ChainViewList::const_iterator ci = ent_b.GetChainList().begin(),
        ce = ent_b.GetChainList().end(); ci != ce; ++ci) {
     for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
-         re = ci->GetResidueList().end(); ri != re; ++re) {
+         re = ci->GetResidueList().end(); ri != re; ++ri) {
       for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
            ae = ri->GetAtomList().end(); ai!= ae; ++ai) {
         AtomHandleList clashees=ent_a.FindWithin(ai->GetPos(), 
