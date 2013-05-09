@@ -45,6 +45,8 @@ struct DLLEXPORT_OST_MOL_ALG SuperpositionResult {
   }
   int ncycles;
   Real rmsd;
+  Real rmsd_superposed_atoms;
+  Real fraction_superposed;
   geom::Mat4 transformation;
   mol::EntityView entity_view1;
   mol::EntityView entity_view2;
@@ -63,6 +65,8 @@ public:
   static MeanSquareMinimizer FromPointLists(const std::vector<geom::Vec3>& points,
                                             const std::vector<geom::Vec3>& points_ref);
   SuperpositionResult MinimizeOnce() const;
+
+  SuperpositionResult IterativeMinimize(int ncycles=5, Real distance_threshold=2.0) const;
 
   ~MeanSquareMinimizer();
   
@@ -92,16 +96,16 @@ SuperpositionResult DLLEXPORT_OST_MOL_ALG SuperposeSVD(const std::vector<geom::V
                                                        const std::vector<geom::Vec3>& pl2);
 
 /// \brief iterative superposition
-SuperpositionResult DLLEXPORT_OST_MOL_ALG IterativeSuperposition(mol::EntityView& ev1,
-                                                    mol::EntityView& ev2,
-                                                    int ncycles,
-                                                    Real distance_threshold,
-                                                    bool apply_transform);
+SuperpositionResult DLLEXPORT_OST_MOL_ALG IterativeSuperposeSVD(const mol::EntityView& ev1,
+                                                                const mol::EntityView& ev2,
+                                                                int max_cycles,
+                                                                Real distance_threshold,
+                                                                bool apply_transform);
 
 /// \brief calculates RMSD for two entity view 
 Real DLLEXPORT_OST_MOL_ALG CalculateRMSD(const mol::EntityView& ev1,
-                                          const mol::EntityView& ev2,
-                                          const geom::Mat4& transformation);
+                                         const mol::EntityView& ev2,
+                                         const geom::Mat4& transformation);
 
 
 

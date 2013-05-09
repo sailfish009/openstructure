@@ -39,6 +39,8 @@ void export_svdSuperPose()
   class_<SuperpositionResult>("SuperpositionResult", init<>())
     .def_readwrite("ncycles", &SuperpositionResult::ncycles)
     .def_readwrite("rmsd", &SuperpositionResult::rmsd)
+    .def_readwrite("fraction_superposed", &SuperpositionResult::fraction_superposed)
+    .def_readwrite("rmsd_superposed_atoms", &SuperpositionResult::rmsd_superposed_atoms)
     .def_readwrite("transformation",
                &SuperpositionResult::transformation)
     .def_readwrite("view1",
@@ -49,6 +51,7 @@ void export_svdSuperPose()
   def("SuperposeAtoms", &SuperposeAtoms,(arg("apply_transform")=true));
   def("SuperposeSVD", sup1, (arg("apply_transform")=true));
   def("SuperposeSVD", sup2, (arg("apply_transform")=true));
+  def("IterativeSuperposeSVD", &IterativeSuperposeSVD,(arg("max_iterations")=5, arg("distance_threshold")=3.0,arg("apply_transform")=true));
   def("CalculateRMSD", &CalculateRMSD, (arg("transformation")=geom::Mat4()));
 }
 

@@ -25,10 +25,12 @@
 #include <Eigen/Array>
 #include <Eigen/SVD>
 #include <Eigen/LU>
+#include <Eigen/Dense>
 
 
 #include <ost/base.hh>
 #include <ost/geom/vec3.hh>
+#include <ost/geom/mat4.hh>
 #include <ost/mol/alg/svd_superpose.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/residue_handle.hh>
@@ -44,6 +46,7 @@ namespace ost { namespace mol { namespace alg {
 using boost::bind;
 typedef Eigen::Matrix<Real,3,1> EVec3;
 typedef Eigen::Matrix<Real,3,3> EMat3;
+typedef Eigen::Matrix<Real,4,4> EMat4;
 typedef Eigen::Matrix<Real,1,3> ERVec3;
 typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> EMatX;
 typedef Eigen::Matrix<Real,1,Eigen::Dynamic> ERVecX;
@@ -89,6 +92,32 @@ Real calc_rmsd_for_atom_lists(const mol::AtomViewList& atoms1,
   return rmsd;
 }
 
+Real calc_rmsd_for_ematx(const EMatX& atoms1,
+                         const EMatX& atoms2,
+                         const EMat4& transformation)
+{
+  EMatX transformed_atoms1 = EMatX::Zero(atoms1.rows(), 3);
+
+  EMatX vector = EMatX::Zero(4,1);
+  EMatX transformed_vector = EMatX::Zero(4,1);
+  vector(3,0)=1;
+
+  for(int i=0;i<atoms1.rows();++i){
+    vector.block<3,1>(0,0)=atoms1.block<1,3>(i,0).transpose();
+    transformed_vector = transformation*vector;
+    transformed_atoms1.block<1,3>(i,0)=transformed_vector.block<3,1>(0,0).transpose();
+  }
+
+  EMatX diff = EMatX::Zero(atoms1.rows(),atoms1.cols());
+  EMatX squared_dist = EMatX::Zero(atoms1.rows(),1);
+
+  diff = transformed_atoms1-atoms2;
+  squared_dist = (diff.cwise()*diff).rowwise().sum(); 
+
+  return sqrt(squared_dist.sum()/squared_dist.rows());
+
+}
+
 Real CalculateRMSD(const mol::EntityView& ev1,
                    const mol::EntityView& ev2,
                    const geom::Mat4& transformation) {
@@ -104,7 +133,36 @@ geom::Vec3 EigenVec3ToVec3(const EVec3 &vec)
 
 geom::Mat3 EigenMat3ToMat3(const EMat3 &mat)
 {
-  return geom::Mat3(mat.data());
+  geom::Mat3 return_mat;
+  for(int i=0;i<3;++i){
+    for(int j=0;j<3;++j){
+      return_mat(i,j) = mat(i,j);
+    }
+  }
+  return return_mat;
+  //return geom::Mat3(mat.data());
+}
+
+geom::Mat4 EigenMat4ToMat4(const EMat4 &mat)
+{ 
+  geom::Mat4 return_mat;
+  for(int i=0;i<4;++i){
+    for(int j=0;j<4;++j){
+      return_mat(i,j) = mat(i,j);
+    }
+  }
+  return return_mat;
+  //return geom::Mat4(mat.data());
+}
+
+EMatX Mat4ToEigenMat4(const geom::Mat4 &mat){
+  EMat4 res = EMat4::Zero();
+  for(int i=0;i<4;++i){
+    for(int j=0;j<4;++j){
+      res(i,j)=mat.At(i,j);
+    }
+  }
+  return res;
 }
 
 EVec3 Vec3ToEigenRVec(const geom::Vec3 &vec)
@@ -126,6 +184,7 @@ EMatX MatrixShiftedBy(EMatX mat, ERVecX vec)
   return result;
 }
 
+
 class MeanSquareMinimizerImpl {
 public:
   MeanSquareMinimizerImpl(int n_atoms, bool alloc_atoms):
@@ -145,7 +204,16 @@ public:
     atoms1_.row(index) = ERVec3(Vec3ToEigenVec(pos));
   }
 
+  SuperpositionResult Minimize(const EMatX& atoms, const EMatX& atoms_ref) const;
+
+  EMatX TransformEMatX(const EMatX& mat, const EMat4& transformation) const;
+
+  std::pair<EMatX,EMatX> CreateMatchingSubsets(const EMatX& atoms, const EMatX& atoms_ref, Real distance_threshold) const;
+
+  SuperpositionResult IterativeMinimize(int ncycles, Real distance_threshold) const;
+
   SuperpositionResult MinimizeOnce() const;
+
 private:
   int   n_atoms_;
   bool  alloc_atoms_;
@@ -155,9 +223,11 @@ private:
 
 
 MeanSquareMinimizer MeanSquareMinimizer::FromAtomLists(const AtomViewList& atoms,
-                                                       const AtomViewList& atoms_ref) {
+                                                       const AtomViewList& atoms_ref) 
+{
   int n_atoms = atoms.size();
-  if (n_atoms != atoms_ref.size()) {
+  int n_atoms_ref = atoms_ref.size();
+  if (n_atoms != n_atoms_ref) {
     throw Error("atom counts do not match");
   }
   if (n_atoms<3) {
@@ -174,9 +244,11 @@ MeanSquareMinimizer MeanSquareMinimizer::FromAtomLists(const AtomViewList& atoms
 }
 
 MeanSquareMinimizer MeanSquareMinimizer::FromPointLists(const std::vector<geom::Vec3>& points,
-                                                        const std::vector<geom::Vec3>& points_ref) {
+                                                        const std::vector<geom::Vec3>& points_ref) 
+{
   int n_points = points.size();
-  if (n_points != points.size()) {
+  int n_points_ref = points_ref.size();
+  if (n_points != n_points_ref) {
     throw Error("point counts do not match");
   }
   if (n_points<3) {
@@ -192,19 +264,126 @@ MeanSquareMinimizer MeanSquareMinimizer::FromPointLists(const std::vector<geom::
   return msm;
 }
 
-SuperpositionResult MeanSquareMinimizerImpl::MinimizeOnce() const {
-  ERVec3 avg1 = atoms1_.colwise().sum()/atoms1_.rows();
-  ERVec3 avg2 = atoms2_.colwise().sum()/atoms2_.rows();
+SuperpositionResult MeanSquareMinimizerImpl::MinimizeOnce() const{
+  return this->Minimize(atoms1_,atoms2_);
+}
+
+SuperpositionResult MeanSquareMinimizerImpl::IterativeMinimize(int max_cycles, Real distance_threshold) const{
+
+  std::vector<EMat4> transformation_matrices;
+  EMat4 transformation_matrix;
+  EMatX atoms = atoms1_;
+  SuperpositionResult res;
+  EMat4 diff;
+  std::pair<EMatX,EMatX> subsets;
+  EMat4 identity_matrix = EMat4::Identity();
+
+  //do initial superposition
+
+  res = this->Minimize(atoms, atoms2_);
+  transformation_matrices.push_back(Mat4ToEigenMat4(res.transformation));
+
+  //note, that the initial superposition is the first cycle...
+  int cycles=1;
+
+  for(;cycles<max_cycles;++cycles){
+    atoms = this->TransformEMatX(atoms, transformation_matrices.back());
+    subsets = this->CreateMatchingSubsets(atoms, atoms2_, distance_threshold);
+    res = this->Minimize(subsets.first,subsets.second);
+    transformation_matrix = Mat4ToEigenMat4(res.transformation);
+    transformation_matrices.push_back(transformation_matrix);
+
+    diff = transformation_matrix-identity_matrix;
+
+    if(diff.cwise().abs().sum()<0.001){
+      break;
+    }
+
+  }
+  
+  res.rmsd_superposed_atoms = calc_rmsd_for_ematx(subsets.first, subsets.second, transformation_matrices.back());
+  res.fraction_superposed = float(subsets.first.rows())/atoms1_.rows();
+
+  //combine the transformations into one transformation
+  transformation_matrix = transformation_matrices.back();
+  transformation_matrices.pop_back();
+  while(!transformation_matrices.empty()){
+    transformation_matrix*=transformation_matrices.back();
+    transformation_matrices.pop_back();
+  }
+
+  res.transformation = EigenMat4ToMat4(transformation_matrix);
+  res.ncycles=cycles;
+
+  return res;
+
+}
+
+EMatX MeanSquareMinimizerImpl::TransformEMatX(const EMatX& mat, const EMat4& transformation) const {
+
+  EMatX transformed_mat = EMatX::Zero(mat.rows(), 3);
+
+  EMatX vector = EMatX::Zero(4,1);
+  EMatX transformed_vector = EMatX::Zero(4,1);
+  vector(3,0)=1;
+
+  for(int i=0;i<mat.rows();++i){
+    vector.block<3,1>(0,0)=mat.block<1,3>(i,0).transpose();
+    transformed_vector = transformation*vector;
+    transformed_mat.block<1,3>(i,0)=transformed_vector.block<3,1>(0,0).transpose();
+  }
+
+  return transformed_mat;
+}
+
+std::pair<EMatX, EMatX> MeanSquareMinimizerImpl::CreateMatchingSubsets(const EMatX& atoms, const EMatX& atoms_ref, Real distance_threshold) const{
+
+
+  EMatX diff = EMatX::Zero(atoms.rows(),atoms.cols());
+  EMatX dist = EMatX::Zero(atoms.rows(),1);
+
+  diff = atoms-atoms_ref;
+  dist = (diff.cwise()*diff).rowwise().sum(); 
+  dist = dist.cwise().sqrt();
+  
+  for(int i = 0; i < dist.rows(); ++i){
+    if(dist(i,0) <= distance_threshold){
+      dist(i,0) = 1;
+    }
+    else{
+      dist(i,0) = 0;
+    }
+  }
+
+  EMatX atoms_subset = EMatX::Zero(int(dist.sum()),3);
+  EMatX atoms_ref_subset = EMatX::Zero(int(dist.sum()),3);
+
+  int actual_pos=0;
+
+  for(int i = 0; i < dist.rows() ; ++i){
+    if(dist(i,0)==1){
+      atoms_subset.row(actual_pos) = atoms.row(i);
+      atoms_ref_subset.row(actual_pos) = atoms_ref.row(i);
+      ++actual_pos;
+    }
+  }
+  return std::make_pair(atoms_subset, atoms_ref_subset);
+}
+
+
+SuperpositionResult MeanSquareMinimizerImpl::Minimize(const EMatX& atoms, const EMatX& atoms_ref) const {
+  ERVec3 avg = atoms.colwise().sum()/atoms.rows();
+  ERVec3 avg_ref = atoms_ref.colwise().sum()/atoms_ref.rows();
 
   // SVD only determines the rotational component of the superposition
   // we need to manually shift the centers of the two point sets on onto 
   // origin
 
-  EMatX atoms1 = MatrixShiftedBy(atoms1_, avg1);
-  EMatX atoms2 = MatrixShiftedBy(atoms2_, avg2).transpose();
+  EMatX atoms_shifted = MatrixShiftedBy(atoms, avg);
+  EMatX atoms_ref_shifted = MatrixShiftedBy(atoms_ref, avg_ref).transpose();
 
   // determine rotational component
-  Eigen::SVD<EMat3> svd(atoms2*atoms1);
+  Eigen::SVD<EMat3> svd(atoms_ref_shifted*atoms_shifted);
   EMatX matrixVT=svd.matrixV().transpose();
 
   //determine rotation
@@ -222,9 +401,10 @@ SuperpositionResult MeanSquareMinimizerImpl::MinimizeOnce() const {
   
   SuperpositionResult res;
 
-  geom::Vec3 shift = EigenVec3ToVec3(avg2);
-  geom::Vec3 com_vec = -EigenVec3ToVec3(avg1);
-  geom::Mat3 rot = EigenMat3ToMat3(rotation.transpose());
+  geom::Vec3 shift = EigenVec3ToVec3(avg_ref);
+  geom::Vec3 com_vec = -EigenVec3ToVec3(avg);
+  //geom::Mat3 rot = EigenMat3ToMat3(rotation.transpose());
+  geom::Mat3 rot = EigenMat3ToMat3(rotation);
   geom::Mat4 mat4_com, mat4_rot, mat4_shift;
   mat4_rot.PasteRotation(rot);
   mat4_shift.PasteTranslation(shift);
@@ -256,6 +436,10 @@ SuperpositionResult MeanSquareMinimizer::MinimizeOnce() const {
   return impl_->MinimizeOnce();
 }
 
+SuperpositionResult MeanSquareMinimizer::IterativeMinimize(int ncycles, Real distance_threshold) const {
+  return impl_->IterativeMinimize(ncycles, distance_threshold);
+}
+
 SuperpositionResult SuperposeAtoms(const mol::AtomViewList& atoms1,
                                    const mol::AtomViewList& atoms2,
                                    bool apply_transform=true)
@@ -265,6 +449,8 @@ SuperpositionResult SuperposeAtoms(const mol::AtomViewList& atoms1,
   
   result.ncycles=1;
   result.rmsd = calc_rmsd_for_atom_lists(atoms1, atoms2, result.transformation);
+  result.rmsd_superposed_atoms = result.rmsd;
+  result.fraction_superposed = 1.0;
   if (apply_transform) {
     mol::AtomView jv=atoms1.front();
     mol::XCSEditor ed=jv.GetEntity().GetHandle().EditXCS();
@@ -294,6 +480,29 @@ SuperpositionResult SuperposeSVD(const std::vector<geom::Vec3>& pl1,
   
   result.ncycles=1;
   result.rmsd = calc_rmsd_for_point_lists(pl1, pl2, result.transformation);
+  return result;
+}
+
+SuperpositionResult IterativeSuperposeSVD(const mol::EntityView& ev,
+                                          const mol::EntityView& ev_ref,
+                                          int max_cycles,
+                                          Real distance_threshold,
+                                          bool apply_transform){
+
+  AtomViewList atoms = ev.GetAtomList();
+  AtomViewList atoms_ref = ev_ref.GetAtomList();
+
+  MeanSquareMinimizer msm = MeanSquareMinimizer::FromAtomLists(atoms, atoms_ref);
+  SuperpositionResult result = msm.IterativeMinimize(max_cycles, distance_threshold);
+  result.rmsd = calc_rmsd_for_atom_lists(atoms, atoms_ref, result.transformation);
+  if (apply_transform) {
+    mol::AtomView jv=atoms.front();
+    mol::XCSEditor ed=jv.GetEntity().GetHandle().EditXCS();
+    ed.ApplyTransform(result.transformation);
+  }
+
+  result.entity_view1 = ev;
+  result.entity_view2 = ev_ref;
   return result;
 }
 

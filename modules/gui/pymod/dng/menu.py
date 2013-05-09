@@ -190,12 +190,22 @@ class SceneMenu(QMenu):
       i += 1
       gfx_ent_2 = sel.GetActiveNode(i)
     sd = superpositiondialog.SuperpositionDialog(gfx_ent_1, gfx_ent_2)
-    if sd.rmsd != None:
+    if sd.rmsd_superposed_atoms != None:
       if sd.reference == 0:
-        gfx_ent_1.UpdatePositions()
+        gfx_ent_2.UpdatePositions()
         gfx.Scene().CenterOn(gfx_ent_1)
       else:
+        gfx_ent_1.UpdatePositions()
+        gfx.Scene().CenterOn(gfx_ent_2)
+      LogScript('RMSD: %.3f'%sd.rmsd)  
+      LogScript('RMSD superposed atoms: %.3f'%sd.rmsd_superposed_atoms) 
+      LogScript('fraction superposed: %.3f'%sd.fraction_superposed)   
+    elif sd.rmsd != None:
+      if sd.reference == 0:
         gfx_ent_2.UpdatePositions()
+        gfx.Scene().CenterOn(gfx_ent_1)
+      else:
+        gfx_ent_1.UpdatePositions()
         gfx.Scene().CenterOn(gfx_ent_2)
       LogScript('RMSD: %.3f'%sd.rmsd)
 

@@ -259,7 +259,7 @@ def MatchResidueByGlobalAln(ent_a, ent_b, atoms='all'):
   return _MatchResidueByAln(ent_a, ent_b, atoms, ost.seq.alg.GlobalAlign)
 
 
-def Superpose(ent_a, ent_b, match='number', atoms='all'):
+def Superpose(ent_a, ent_b, match='number', atoms='all', iterative=False, max_iterations=5, distance_threshold=3.0):
   """
   Superposes the model entity onto the reference. To do so, two views are
   created, returned with the result. **atoms** describes what goes in to these
@@ -310,5 +310,8 @@ def Superpose(ent_a, ent_b, match='number', atoms='all'):
   else:
     raise ValueError(not_supported)
   ## action
-  res=ost.mol.alg.SuperposeSVD(view_a, view_b)
+  if iterative:
+    res=ost.mol.alg.IterativeSuperposeSVD(view_a, view_b, max_iterations, distance_threshold)
+  else:
+    res=ost.mol.alg.SuperposeSVD(view_a, view_b)
   return res
