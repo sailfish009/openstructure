@@ -44,8 +44,9 @@ public:
 
   RuleBasedProcessor(CompoundLibPtr compound_lib, bool fe, bool sh, ConopAction ur, 
                      ConopAction ua, bool bf, bool at, bool cn, bool aa, ConopAction zo): 
-    lib_(compound_lib), fix_element_(fe), strict_hydrogens_(sh), unk_res_treatment_(ur), 
-    unk_atom_treatment_(ua),Processor(bf, at, cn, aa, zo) {}
+    Processor(bf, at, cn, aa, zo), lib_(compound_lib), fix_element_(fe), 
+    strict_hydrogens_(sh), unk_res_treatment_(ur), 
+    unk_atom_treatment_(ua) {}
   ConopAction GetUnkResidueTreatment() const {
     return unk_res_treatment_;
   }
