@@ -27,6 +27,7 @@
 #include <ost/geom/geom.hh>
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/alg/module_config.hh>
+#include <ost/mol/atom_view.hh>
 
 namespace ost { namespace mol { 
   
@@ -49,25 +50,32 @@ struct DLLEXPORT_OST_MOL_ALG SuperpositionResult {
   mol::EntityView entity_view2;
 };
 
-class SuperposerSVDImpl;
 
-/// \brief efficiently superpose a bunch of models with the same number of atoms
-/// Choose either two EntityViews or two AtomViewLists.
-class DLLEXPORT_OST_MOL_ALG SuperposerSVD {
+// the mean square minimizer is split into a private and a public class to avoid 
+// exposing the lib Eigen classes to the outside world
+class MeanSquareMinimizerImpl;
+
+
+class DLLEXPORT_OST_MOL_ALG MeanSquareMinimizer {
 public:
-  SuperposerSVD(int natoms, bool alloc_atoms);
-  ~SuperposerSVD();
-  SuperpositionResult Run(const mol::EntityView& ev1,
-                          const mol::EntityView& ev2);
+  static MeanSquareMinimizer FromAtomLists(const mol::AtomViewList& atoms,
+                                           const mol::AtomViewList& atoms_ref);
+  static MeanSquareMinimizer FromPointLists(const std::vector<geom::Vec3>& points,
+                                            const std::vector<geom::Vec3>& points_ref);
+  SuperpositionResult MinimizeOnce() const;
 
-  SuperpositionResult Run(const mol::AtomViewList& atoms1,
-                          const mol::AtomViewList& atoms2);
+  ~MeanSquareMinimizer();
+  
 
-  SuperpositionResult Run(const std::vector<geom::Vec3>& pl1,
-                          const std::vector<geom::Vec3>& pl2);
+  MeanSquareMinimizer& operator=(const MeanSquareMinimizer& rhs);
+  MeanSquareMinimizer(const MeanSquareMinimizer& rhs);
+  void swap(MeanSquareMinimizer& rhs) {
+    std::swap(rhs.impl_, impl_);
+  }
 
-private:
-  SuperposerSVDImpl* impl_;
+protected:
+  MeanSquareMinimizer(): impl_(NULL) {}
+  MeanSquareMinimizerImpl* impl_;
 };
 
 /// \brief takes the corresponding atoms and superposes them
@@ -96,9 +104,6 @@ Real DLLEXPORT_OST_MOL_ALG CalculateRMSD(const mol::EntityView& ev1,
                                           const geom::Mat4& transformation);
 
 
-/// \example superpose.py
-/// 
-/// Superpose 1AKE and 4AKE by a least squares fitting algorithm
-/// \sa \ref superpose.py "Superposing entities"
+
 }}}//ns
 #endif

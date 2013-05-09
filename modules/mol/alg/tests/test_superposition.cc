@@ -87,15 +87,11 @@ BOOST_AUTO_TEST_CASE(superposition_svd)
   XCSEditor ed=f1.e.EditXCS();
   EntityView ev2 = f2.e.CreateFullView();
   ChainHandle ch1=f1.e.GetChainList()[0];
-  ResidueHandleIter rit=ch1.ResiduesBegin();
-  for (;rit!=ch1.ResiduesEnd();++rit){
-    ResidueHandle resh=*rit;
-    AtomHandleIter at=resh.AtomsBegin();
-    for (;at!=resh.AtomsEnd();++at){
-      AtomHandle atom=*at;
+  AtomHandleList atoms = f1.e.GetAtomList();
+  for (AtomHandleList::const_iterator i = atoms.begin(), e = atoms.end(); i !=e ; ++i) {
+      AtomHandle atom=*i;
       ed.SetAtomPos(atom, geom::EulerTransformation(0.1, 0, 0)*atom.GetPos()
                   +geom::Vec3(0, 5, 0));
-    }
   }
   SuperpositionResult res;
   res=SuperposeSVD(ev1, ev2, true);

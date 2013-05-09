@@ -35,7 +35,6 @@
 #include <ost/img/size.hh>
 
 #include "value_holder.hh"
-#include "index.hh"
 
 namespace ost { namespace img { namespace image_state {
 
@@ -151,29 +150,6 @@ void ValueHolder<V>::Swap(ValueHolder& vh)
 }
 
 
-template <typename V>
-V& ValueHolder<V>::Value(const Index& i)
-{
-#ifdef USE_ROW_ORDER
-  assert(i.w<depth_);
-  return data_[i.u*height_depth_ + i.v*depth_ +i.w];
-#else
-  assert(i.v<height_);
-  return data_[i.w*width_height_ + i.v*height_ +i.u];
-#endif
-}
-
-template <typename V>
-const V& ValueHolder<V>::Value(const Index& i) const
-{
-#ifdef USE_ROW_ORDER
-  assert(i.w<depth_);
-  return data_[i.u*height_depth_ + i.v*depth_ +i.w];
-#else
-  assert(i.v<height_);
-  return data_[i.w*width_height_ + i.v*height_ +i.u];
-#endif
-}
 
 
 template <typename V>

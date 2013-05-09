@@ -980,14 +980,13 @@ std::vector<std::vector<String> > MMCifReader::UnPackOperExperession(StringRef e
 void MMCifReader::ParsePdbxStructAssemblyGen(const std::vector<StringRef>& columns)
 {
   MMCifBioUAssembly assembly;
-  assembly.biounit = MMCifInfoBioUnit();
 
-  assembly.biounit.SetID(columns[indices_[ASSEMBLY_ID]].str());
+  assembly.biounit_id = columns[indices_[ASSEMBLY_ID]].str();
 
   std::vector<StringRef> tmp_chains=columns[indices_[ASYM_ID_LIST]].split(',');
   std::vector<StringRef>::const_iterator tc_it;
   for (tc_it = tmp_chains.begin(); tc_it != tmp_chains.end(); ++tc_it) {
-    assembly.biounit.AddChain(tc_it->str());
+    assembly.chains.push_back(tc_it->str());
   }
 
   assembly.operations =
@@ -1619,19 +1618,22 @@ void MMCifReader::OnEndData()
   std::vector<MMCifInfoTransOpPtr> operations = info_.GetOperations();
   info_.SetStructRefs(struct_refs_);
   std::vector<MMCifInfoTransOpPtr>::const_iterator buop_it;
+  MMCifInfoBioUnit biounit;
   for (bua_it = bu_assemblies_.begin();
        bua_it != bu_assemblies_.end();
        ++bua_it) {
+    biounit = MMCifInfoBioUnit();
     // pair with pdbx_struct_assembly entry
-    buom_it = bu_origin_map_.find(bua_it->biounit.GetID());
+    buom_it = bu_origin_map_.find(bua_it->biounit_id);
     if (buom_it == bu_origin_map_.end()) {
       throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                                                "No pdbx_struct_assembly.id '"+
-                                               bua_it->biounit.GetID() +
+                                               bua_it->biounit_id +
                          "' found as requested by pdbx_struct_assembly_gen.")); 
     }
-    bua_it->biounit.SetDetails(buom_it->second);
-    bua_it->biounit.SetID(buom_it->first);
+    biounit.SetDetails(buom_it->second);
+    biounit.SetID(buom_it->first);
+    biounit.SetChainList(bua_it->chains);
 
     // pair with pdbx_struct_oper_list
     for (aol_it = bua_it->operations.begin();
@@ -1656,9 +1658,9 @@ void MMCifReader::OnEndData()
                           "' found as requested by pdbx_struct_assembly_gen."));
         }
       }
-      bua_it->biounit.AddOperations(operation_list);
+      biounit.AddOperations(operation_list);
     }
-    info_.AddBioUnit(bua_it->biounit);
+    info_.AddBioUnit(biounit);
   }
   bu_assemblies_.clear();
 

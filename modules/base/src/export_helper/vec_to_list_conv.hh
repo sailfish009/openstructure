@@ -16,44 +16,34 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GUI_LOADER_MANAGER_HH
-#define OST_GUI_LOADER_MANAGER_HH
+
+
+#ifndef VEC_LIST_CONV_HH
+#define VEC_LIST_CONV_HH
+
+#include <boost/python.hpp>
 #include <vector>
+namespace ost{
 
-#include <boost/shared_ptr.hpp>
+/// \brief helper to convert between python list tuple and std::vecot
+/// 
+/// Usage:
+///
+/// register_to_python_converter<VectorToListConverter<T>,
+///                              std::vector<T>>()
+                        
 
-#include <QString>
-#include <QMap>
-
-#include <ost/gui/remote_site_loader.hh>
-
-namespace ost { namespace gui {
-
-class DLLEXPORT_OST_GUI LoaderManager {
-
-public:
-  LoaderManager();
-  virtual ~LoaderManager();
-  std::vector<String> GetSiteLoaderIdents();
-  void AddRemoteSiteLoader(const QString& ident, RemoteSiteLoader* site_loader);
-  void RemoveRemoteSiteLoader(const QString& ident);
-  RemoteSiteLoader* GetRemoteSiteLoader(const QString& ident);
-  RemoteSiteLoader* GetCurrentSiteLoader();
-  RemoteSiteLoader* GetDefaultRemoteSiteLoader();
-  QString GetDefaultRemoteSiteIdent();
-  void SetDefaultRemoteSiteIdent(const QString& ident);
-  QMenu* GetSiteMenu();
-
-private:
-  QMap<QString,RemoteSiteLoader*> site_loaders_;
-  QActionGroup* site_actions_;
-  QString default_site_;
-
-
+template<typename T>
+struct VectorToListConverter {
+  static PyObject* convert(const std::vector<T>& vec) {
+    boost::python::list l;
+    for(typename std::vector<T>::const_iterator it=vec.begin();it!=vec.end();++it){
+      l.append(*it);
+    }
+    return boost::python::incref(l.ptr());
+  }
 };
 
-typedef boost::shared_ptr<LoaderManager> LoaderManagerPtr;
+}
 
-} }
-
-#endif /* OST_GUI_LOADER_MANAGER_HH */
+#endif

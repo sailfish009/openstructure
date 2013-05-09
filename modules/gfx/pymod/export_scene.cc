@@ -69,6 +69,22 @@ void (Scene::*scene_set_bg1)(const Color&) = &Scene::SetBackground;
 void (Scene::*scene_set_bg2)(const Gradient&) = &Scene::SetBackground;
 void (Scene::*scene_set_bg3)(const Bitmap&) = &Scene::SetBackground;
 
+tuple scene_get_hemi_p(Scene* s)
+{
+  geom::Vec4 hfp=s->GetHemiParams();
+  return make_tuple(hfp[0],hfp[1],hfp[2],hfp[3]);
+}
+
+void scene_set_hemi_p(Scene* s, tuple p)
+{
+  geom::Vec4 hfp;
+  hfp[0]=extract<float>(p[0]);
+  hfp[1]=extract<float>(p[1]);
+  hfp[2]=extract<float>(p[2]);
+  hfp[3]=extract<float>(p[3]);
+  s->SetHemiParams(hfp);
+}
+
 } // anon ns
 
 
@@ -135,6 +151,8 @@ void export_Scene()
     .add_property("bg",
                   &Scene::GetBackground, 
                   scene_set_bg1)
+    .add_property("bg_stereo_mode",&Scene::GetBackgroundStereoMode,&Scene::SetBackgroundStereoMode)
+    .add_property("bg_stereo_offset",&Scene::GetBackgroundStereoOffset,&Scene::SetBackgroundStereoOffset)
     .def("GetProjection",&Scene::GetProjection)
     .add_property("projection",&Scene::GetProjection)
     .def("GetInvertedProjection",&Scene::GetInvertedProjection)
@@ -244,5 +262,6 @@ void export_Scene()
     .add_property("bounding_box",scene_get_bb1)
     .add_property("export_aspect",&Scene::GetExportAspect,&Scene::SetExportAspect)
     .add_property("show_export_aspect",&Scene::GetShowExportAspect,&Scene::SetShowExportAspect)
+    .add_property("hemi_params",scene_get_hemi_p,scene_set_hemi_p)
   ;
 }

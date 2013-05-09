@@ -143,6 +143,16 @@ geom::Vec3 PrimList::GetCenter() const
   return cen;
 }
 
+void PrimList::SetLineWidth(float w)
+{
+  GfxObj::SetLineWidth(w);
+  va_.SetLineWidth(line_width_);
+  simple_va_.SetLineWidth(line_width_);
+  for(std::vector<IndexedVertexArray>::iterator it=vas_.begin();it!=vas_.end();++it) {
+    it->SetLineWidth(line_width_);
+  }
+}
+
 void PrimList::OnRenderModeChange()
 {
   // noop
@@ -323,6 +333,7 @@ void PrimList::prep_simple_va()
   simple_va_.SetTwoSided(true);
   simple_va_.SetAALines(GetAALines());
   simple_va_.SetOpacity(GetOpacity());
+  simple_va_.SetLineWidth(line_width_);
 
   for(SpherePrimList::const_iterator it=points_.begin();it!=points_.end();++it) {
     simple_va_.Add(it->position,geom::Vec3(),it->color);
@@ -342,6 +353,7 @@ void PrimList::prep_va()
   va_.SetCullFace(true);
   va_.SetColorMaterial(true);
   va_.SetMode(0x4);
+  va_.SetLineWidth(line_width_);
 
   for(SpherePrimList::const_iterator it=spheres_.begin();it!=spheres_.end();++it) {
     va_.AddSphere(SpherePrim(it->position, it->radius, it->color), 

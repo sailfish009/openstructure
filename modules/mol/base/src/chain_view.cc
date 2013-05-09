@@ -72,6 +72,17 @@ public:
   }
   EntityViewDataWeakPtr entity;
   ResidueViewList residues;
+  std::map<unsigned long, ResidueView> handle_to_view;
+
+  ResidueView ViewForHandle(const ResidueHandle& r)
+  {
+    std::map<unsigned long, ResidueView>::iterator i=handle_to_view.find(r.GetHashCode());
+    if (i!=handle_to_view.end()) {
+      return i->second;
+    }
+    return ResidueView();
+  }
+
   bool            in_sequence;
 };
 
@@ -184,10 +195,7 @@ ResidueView ChainView::FindResidue(const ResidueHandle& residue) const {
 
 ResidueView ChainView::ViewForHandle(const ResidueHandle& handle) const {
   this->CheckValidity();  
-  const ResidueViewList& l=data_->residues;
-  ResidueViewList::const_iterator i;
-  i=std::find_if(l.begin(), l.end(), bind(&ResidueView::GetHandle, _1)==handle);
-  return i==data_->residues.end() ? ResidueView() : *i;
+  return data_->ViewForHandle(handle);
 }
 
 
@@ -209,6 +217,7 @@ ResidueView ChainView::AddResidue(const ResidueHandle& residue_handle,
       data_->in_sequence=false;
   }  
   data_->residues.push_back(rv);
+  data_->handle_to_view[rv.GetHandle().GetHashCode()] = rv;
   if (flags & ViewAddFlag::INCLUDE_ATOMS) {
     const impl::AtomImplList& l=residue_handle.Impl()->GetAtomList();
     for (impl::AtomImplList::const_iterator i=l.begin(); i!=l.end(); ++i) {
@@ -267,6 +276,7 @@ void ChainView::RemoveResidue(ResidueView view) {
     }
   }
   data_->residues.erase(to_del);
+  data_->handle_to_view.erase(view.GetHandle().GetHashCode());
 }
 
 ResidueView ChainView::AddResidue(const ResidueView& residue_view, 
@@ -287,6 +297,7 @@ ResidueView ChainView::AddResidue(const ResidueView& residue_view,
       data_->in_sequence=false;
   }
   data_->residues.push_back(rv);
+  data_->handle_to_view[rv.GetHandle().GetHashCode()] = rv;
   if (flags & ViewAddFlag::INCLUDE_ATOMS) {
     AtomViewList::const_iterator i=residue_view.GetAtomList().begin();
     for (; i!=residue_view.GetAtomList().end(); ++i) {
@@ -301,6 +312,7 @@ void ChainView::RemoveResidues() {
   std::for_each(data_->residues.begin(), data_->residues.end(),
                 bind(&ResidueView::RemoveAtoms, _1));
   data_->residues.clear();
+  data_->handle_to_view.clear();
 }
 
 

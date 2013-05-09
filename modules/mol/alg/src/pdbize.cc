@@ -38,7 +38,7 @@ namespace {
 
 bool copy_atoms(ResidueView src_res, ResidueHandle dst_res, XCSEditor& edi, 
                 const geom::Mat4 transform) {
-  bool needs_adjustment = false;
+  bool needs_adjustment_ = false;
   for (AtomViewList::const_iterator 
        i = src_res.GetAtomList().begin(), 
        e = src_res.GetAtomList().end(); i != e; ++i) {
@@ -49,43 +49,39 @@ bool copy_atoms(ResidueView src_res, ResidueHandle dst_res, XCSEditor& edi,
                                          i->GetBFactor(), i->IsHetAtom());
     geom::Vec3 pos = new_atom.GetPos();
     for (int j = 0; j<3; ++j) {
-      needs_adjustment|= pos[j]<=-1000 || pos[j]>=10000;
+      needs_adjustment_|= pos[j]<=-1000 || pos[j]>=10000;
     }
   }
-  return needs_adjustment;
+  return needs_adjustment_;
 }
 
 }
-EntityHandle PDBize(EntityView asu, const geom::Mat4List& transforms, 
-                    seq::SequenceList seqres, int min_polymer_size, 
-                    bool shift_to_fit)
+
+void PDBize::Add(EntityView asu, const geom::Mat4List& transforms, 
+                 seq::SequenceList seqres)
 {
-  EntityHandle pdb_bu = CreateEntity();
-  XCSEditor edi = pdb_bu.EditXCS(BUFFERED_EDIT);
+  XCSEditor edi = ent_.EditXCS(BUFFERED_EDIT);
 
   ChainHandle ligand_chain;
   ChainHandle water_chain;
-  const char* curr_chain_name = POLYPEPTIDE_CHAIN_NAMES;
-  bool needs_adjustment = false;
   int last_rnum = 0;
-  std::map<ResidueHandle, ResidueHandle> dst_to_src_map;
   for (geom::Mat4List::const_iterator i = transforms.begin(), 
        e = transforms.end(); i != e; ++i) {
     for (ChainViewList::const_iterator j = asu.GetChainList().begin(),
          e2 =asu.GetChainList().end(); j != e2; ++j) {
       ChainView chain = *j; 
       int chain_length = chain.GetResidueCount();
-      if (chain_length < min_polymer_size && seqres.IsValid()) {
+      if (chain_length < min_polymer_size_ && seqres.IsValid()) {
         seq::SequenceHandle s = seqres.FindSequence(chain.GetName());
         if (s.IsValid())
           chain_length = s.GetLength();
       }
-      if (chain.IsPolymer() && chain_length >= min_polymer_size) {
-        if (*curr_chain_name == 0) {
+      if (chain.IsPolymer() && chain_length >= min_polymer_size_) {
+        if (*curr_chain_name_ == 0) {
           throw std::runtime_error("running out of chain names");
         }
-        ChainHandle new_chain = edi.InsertChain(String(1, curr_chain_name[0]));
-        curr_chain_name++;
+        ChainHandle new_chain = edi.InsertChain(String(1, curr_chain_name_[0]));
+        curr_chain_name_++;
         edi.SetChainDescription(new_chain, chain.GetDescription());
         edi.SetChainType(new_chain, chain.GetType());
         new_chain.SetStringProp("original_name", chain.GetName());
@@ -97,8 +93,8 @@ EntityHandle PDBize(EntityView asu, const geom::Mat4List& transforms,
              e3 = chain.GetResidueList().end(); k != e3; ++k) {
           ResidueHandle new_res = edi.AppendResidue(new_chain, k->GetName(),
                                                     k->GetNumber());
-          dst_to_src_map[new_res] = k->GetHandle();
-          needs_adjustment |= copy_atoms(*k, new_res, edi, *i);
+          dst_to_src_map_[new_res] = k->GetHandle();
+          needs_adjustment_ |= copy_atoms(*k, new_res, edi, *i);
         }
         continue;
       }
@@ -113,8 +109,8 @@ EntityHandle PDBize(EntityView asu, const geom::Mat4List& transforms,
           ResidueHandle new_res = edi.AppendResidue(water_chain, k->GetName());
           new_res.SetStringProp("type", StringFromChainType(chain.GetType()));
           new_res.SetStringProp("description", chain.GetDescription());
-          dst_to_src_map[new_res] = k->GetHandle();
-          needs_adjustment |= copy_atoms(*k, new_res, edi, *i);
+          dst_to_src_map_[new_res] = k->GetHandle();
+          needs_adjustment_ |= copy_atoms(*k, new_res, edi, *i);
         }
         continue;
       }
@@ -135,23 +131,28 @@ EntityHandle PDBize(EntityView asu, const geom::Mat4List& transforms,
         if (chain.HasProp("pdb_auth_chain_name"))
           new_res.SetStringProp("pdb_auth_chain_name", 
                                 chain.GetStringProp("pdb_auth_chain_name"));
-        dst_to_src_map[new_res] = k->GetHandle();
+        dst_to_src_map_[new_res] = k->GetHandle();
         ins_code += 1;
-        needs_adjustment |= copy_atoms(*k, new_res, edi, *i);
+        needs_adjustment_ |= copy_atoms(*k, new_res, edi, *i);
       }
       last_rnum+=1;
     }
   }
-  if (needs_adjustment && shift_to_fit) {
-    geom::Vec3 min_coord = pdb_bu.GetBounds().GetMin();
+}
+
+EntityHandle PDBize::Finish(bool shift_to_fit) {
+
+  if (needs_adjustment_ && shift_to_fit) {
+    geom::Vec3 min_coord = ent_.GetBounds().GetMin();
     geom::Mat4 tf(1, 0, 0, -999 - min_coord[0],
                   0, 1, 0, -999 - min_coord[1],
                   0, 0, 1, -999 - min_coord[2],
                   0, 0, 0, 1);
+    XCSEditor edi = ent_.EditXCS();
     edi.ApplyTransform(tf);
   }
-  TransferConnectivity(pdb_bu, dst_to_src_map);
-  return pdb_bu;
+  TransferConnectivity(ent_, dst_to_src_map_);
+  return ent_;
 }
 
 }}}

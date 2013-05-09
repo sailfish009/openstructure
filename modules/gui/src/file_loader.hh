@@ -24,8 +24,6 @@
 #include <ost/gfx/gfx_object.hh>
 
 #include <ost/gui/module_config.hh>
-#include <ost/gui/remote_site_loader.hh>
-#include <ost/gui/loader_manager.hh>
 
 #include <ost/io/io_exception.hh>
 #include <ost/io/entity_io_handler.hh>
@@ -64,7 +62,6 @@ private:
   static gfx::GfxObjP NoHandlerFound(const QString& filename);
   virtual ~FileLoader();
 
-  static LoaderManagerPtr loader_manager_;
 
 #if OST_IMG_ENABLED
   static QList<img::ImageHandle> loaded_images_;
@@ -72,9 +69,7 @@ private:
 
 public:
   static void LoadObject(const QString& filename, const QString& selection=QString());
-  static void LoadFrom(const QString& id, const QString& site=QString(), const QString& selection=QString());
   static std::vector<String> GetSiteLoaderIdents();
-  static LoaderManagerPtr GetLoaderManager();
 };
 
 } }

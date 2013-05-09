@@ -21,6 +21,7 @@
 
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/entity_handle.hh>
+#include <ost/mol/residue_handle.hh>
 #include <ost/seq/sequence_list.hh>
 #include "module_config.hh"
 
@@ -31,9 +32,24 @@ extern const char* POLYPEPTIDE_CHAIN_NAMES;
 extern const char* LIGAND_CHAIN_NAME;
 extern const char* WATER_CHAIN_NAME;
 
-mol::EntityHandle DLLEXPORT_OST_MOL_ALG
-PDBize(mol::EntityView asu, const geom::Mat4List& transforms, seq::SequenceList seqres, 
-       int min_polymer_size=10, bool shift_to_fit=true);
+class DLLEXPORT_OST_MOL_ALG PDBize {
+public:
+  explicit PDBize(int min_polymer_size=10):
+    min_polymer_size_(min_polymer_size), ent_(mol::CreateEntity()),
+    curr_chain_name_(POLYPEPTIDE_CHAIN_NAMES), needs_adjustment_(false)
+  {}
+
+  void Add(mol::EntityView asu, const geom::Mat4List& transforms,
+           seq::SequenceList seqres);
+
+  EntityHandle Finish(bool shift_to_fit=true);
+private:
+  int                                   min_polymer_size_;
+  EntityHandle                          ent_;
+  const char*                           curr_chain_name_;
+  bool                                  needs_adjustment_;
+  std::map<ResidueHandle,ResidueHandle> dst_to_src_map_;
+};
 
 }}}
 #endif

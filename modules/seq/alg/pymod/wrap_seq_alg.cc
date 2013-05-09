@@ -26,6 +26,7 @@
 #include <ost/seq/alg/subst_weight_matrix.hh>
 #include <ost/seq/alg/local_align.hh>
 #include <ost/seq/alg/global_align.hh>
+#include <ost/seq/alg/entropy.hh>
 using namespace boost::python;
 using namespace ost::seq;
 using namespace ost::seq::alg;
@@ -58,5 +59,6 @@ BOOST_PYTHON_MODULE(_ost_seq_alg)
       arg("gap_open")=-5, arg("gap_ext")=-2));
   def("GlobalAlign", &GlobalAlign,(arg("seq1"),arg("seq2"),arg("subst_weight"), 
       arg("gap_open")=-5, arg("gap_ext")=-2));
+  def("ShannonEntropy", &ShannonEntropy, (arg("aln"), arg("ignore_gaps")=true));
 
 }

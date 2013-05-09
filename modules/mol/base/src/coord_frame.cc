@@ -420,8 +420,15 @@ namespace ost { namespace mol {
   
   void GetPositions(const EntityView& sele, std::vector<geom::Vec3>& ref_pos){
     ref_pos.reserve(sele.GetAtomCount());
-    for (mol::AtomViewIter a=sele.AtomsBegin(),e=sele.AtomsEnd(); a!=e; ++a) {
-      ref_pos.push_back((*a).GetPos());
+    for (ChainViewList::const_iterator ci = sele.GetChainList().begin(),
+         ce = sele.GetChainList().end(); ci != ce; ++ci) {
+      for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
+           re = ci->GetResidueList().end(); ri != re; ++ri) {
+        for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
+             ae = ri->GetAtomList().end(); ai != ae; ++ai) {
+          ref_pos.push_back(ai->GetPos());
+        }
+      }
     }
   }
 

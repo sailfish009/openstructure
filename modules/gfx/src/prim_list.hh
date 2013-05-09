@@ -74,6 +74,7 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
 
   virtual void OnRenderModeChange();
 
+  virtual void SetLineWidth(float w);
   /// \brief clear all prims
   void Clear();
 

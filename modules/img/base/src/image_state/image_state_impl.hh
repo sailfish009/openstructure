@@ -142,10 +142,18 @@ public:
     retrieve actual value. No boundary check is performed
     here, this is the responsibility of the caller!
   */
-  T& Value(const Point& p);
+  T& Value(const Point& p)
+  {
+    assert(domain_.GetExtent().Contains(p));
+    return data_.Value(domain_.Point2Index(p));
+  }
 
   // retrieve ro value at specified point
-  const T& Value(const Point& p) const;
+  const T& Value(const Point& p) const
+  {
+    assert(domain_.GetExtent().Contains(p));
+    return data_.Value(domain_.Point2Index(p));
+  }
 
   //! retrieve boundary checked value
   T GetCheckedValue(const Point& p) const;

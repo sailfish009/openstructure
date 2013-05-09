@@ -21,11 +21,7 @@
 /*
   integer triplet based point
 
-  Author: Ansgar Philippsen
-*/
-
-/*
-  TODO: use boost operator
+  Authors: Ansgar Philippsen, Andreas Schenk
 */
 
 #ifndef IMG_POINT_H
@@ -33,6 +29,7 @@
 
 #include <vector>
 #include <iosfwd>
+#include <boost/operators.hpp>
 
 #include <ost/img/module_config.hh>
 #include "vecmat.hh"
@@ -43,36 +40,117 @@ namespace ost { namespace img {
 class Size;
 
 //! class encapsulating 1D to 3D point
-class DLLEXPORT_OST_IMG_BASE Point {
+class DLLEXPORT_OST_IMG_BASE Point: boost::additive<Point,
+                                    boost::additive2<Point, Size,
+                                    boost::multipliable2<Point,int,
+                                    boost::less_than_comparable<Point,
+                                    boost::equality_comparable<Point> > > > >{
 public:
-  Point();
-  Point(const Point &p);
+  Point():
+    x(),
+    y(),
+    z()
+  {
+  }
+  
+  Point(const Point &p):
+    x(p.x),
+    y(p.y),
+    z(p.z)
+  {
+  } 
+
 
   //! 1D int constructor
-  explicit Point(int a);
+  Point(int a):
+    x(a),
+    y(),
+    z()
+  {
+  } 
+
   //! 2D int constructor
-  Point(int a, int b);
+  Point(int a, int b):
+    x(a),
+    y(b),
+    z()
+  {
+  } 
+
   //! 3D int constructor
-  Point(int a, int b, int c);
+  Point(int a, int b, int c):
+    x(a),
+    y(b),
+    z(c)
+  {
+  }
+  
   //! conversion from Vec2
-  explicit Point(const Vec2& v);
+  Point(const Vec2& v):
+    x(static_cast<int>(round(v[0]))),
+    y(static_cast<int>(round(v[1]))),
+    z()
+  {
+  } 
+
 
   //! conversion from Vec3
-  explicit Point(const Vec3& v);
+  Point(const Vec3& v):
+    x(static_cast<int>(round(v[0]))),
+    y(static_cast<int>(round(v[1]))),
+    z(static_cast<int>(round(v[2])))
+  {
+  } 
+
 
   //! conversion from Vec4 (normalization)
-  explicit Point(const Vec4& v);
+  explicit Point(const Vec4& v):
+    x(static_cast<int>(round(v[0]))),
+    y(static_cast<int>(round(v[1]))),
+    z(static_cast<int>(round(v[2])))
+  {
+    if(std::abs(v[3])<1e-100) {
+      throw geom::OutOfRangeException("4th element of Vec4 is too close to zero for normalization");
+    } else {
+      Real sf = 1.0/v[3];
+      x*=sf;
+      y*=sf;
+      z*=sf;
+    }
+  }
 
   //! (implicit) conversion of size to point
-  Point(const Size& s);
+  Point(const Size& size);
 
   //! return mirror point according to planes
   Point Mirror(int planes);
 
   // operators
-  int operator[](unsigned int index) const;
+  int& operator[](unsigned int index) 
+  {
+    assert(index<=2);
+    return (&x)[index];
+  }
+  
+  int operator[](unsigned int index) const 
+  {
+    assert(index<=2);
+    return (&x)[index];
+  }
+  // operators
 
-  int& operator[](unsigned int index);
+  int& At(unsigned int index) 
+  {
+    if(index>2) throw std::range_error("Point index out of range");
+    return (&x)[index];
+  }
+  
+  int At(unsigned int index) const 
+  {
+    if(index>2) throw geom::OutOfRangeException("Point index out of range");
+    return (&x)[index];
+  }
+
 
   Point& operator=(const Point& p);
 
@@ -82,49 +160,24 @@ public:
 
   Point operator-() const;
 
-  bool operator==(const Point &p) const;
-
-  bool operator!=(const Point &p) const;
-
-  bool operator<(const Point &p) const;
-
-  bool operator<=(const Point &p) const;
-
-  bool operator>(const Point &p) const;
-
-  bool operator>=(const Point &p) const;
-
   Point& operator+=(const Size& p);
 
   Point& operator-=(const Size& p);
+
+  bool operator==(const Point &p) const;
+
+  bool operator<(const Point &p) const;
 
   // conversion to vectors
   Vec2 ToVec2() const;
   Vec3 ToVec3() const;
   Vec4 ToVec4() const;
 
-private:
-  int data_[3];
-
-  bool equal(const Point &p) const;
-  bool less(const Point &p) const;
-  Point neg() const;
-
-  friend Point absolute(const Point&);
-
-  Point absolute() const;
+  int x;
+  int y;
+  int z;
 };
 
-DLLEXPORT_OST_IMG_BASE Point operator+(const Point& p1, const Point& p2);
-DLLEXPORT_OST_IMG_BASE Point operator-(const Point& p1, const Point& p2);
-
-  /*
-Point operator+(const Point& p, const Size& s);
-Point operator+(const Size& s, const Point& p);
-
-Point operator-(const Point& p, const Size& s);
-Point operator-(const Size& s, const Point& p);
-  */
 
 DLLEXPORT_OST_IMG_BASE std::ostream& operator<<(std::ostream& os, const Point &p);
 

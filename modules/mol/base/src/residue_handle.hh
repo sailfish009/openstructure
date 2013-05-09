@@ -26,7 +26,6 @@
 #include <ost/mol/module_config.hh>
 #include <ost/mol/residue_base.hh>
 #include <ost/mol/entity_visitor_fw.hh>
-#include <ost/mol/iterator_fw.hh>
 
 namespace ost { namespace mol {
 
@@ -167,22 +166,11 @@ public:
   bool SwitchAtomPos(const String& group);
   //@}
 
-  /// \brief  Get iterator pointing to the beginning of the atoms
-  ///
-  ///  Atom iterators are not fail-safe, meaning that when new atoms are
-  /// inserted the iterators become invalid and the behaviour is undefined. To
-  /// iterate over the residue while inserting/deleting atoms use GetAtomList().
-  /// \sa     AtomsEnd(), GetAtomList()
-  AtomHandleIter AtomsBegin() const;
-  
   /// \brief get this handle
   /// 
   /// This method exists as a convenience duck-typing in Python.
   ResidueHandle GetHandle() const;
   unsigned long GetHashCode() const;
-  /// \brief Get iterator pointing to the beginning of the atoms
-  /// \sa AtomsBegin(), GetAtomList()
-  AtomHandleIter AtomsEnd() const;
 
   /// \brief return view based on a query object
   /// \sa Query

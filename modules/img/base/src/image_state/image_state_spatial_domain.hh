@@ -108,9 +108,10 @@ public:
   }
 
   Index Point2Index(const Point& p) const {
-    return Index(p[0]-extent_.GetStart()[0],
-                 p[1]-extent_.GetStart()[1],
-                 p[2]-extent_.GetStart()[2]);
+    Point start=extent_.GetStart();
+    return Index(p[0]-start[0],
+                 p[1]-start[1],
+                 p[2]-start[2]);
   }
   
 private:

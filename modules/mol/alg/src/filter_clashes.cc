@@ -82,6 +82,22 @@ String angle_string(const ost::mol::AtomHandle& atom1, const ost::mol::AtomView&
 
 namespace ost { namespace mol { namespace alg {
 
+std::vector<ClashEvent> ClashingInfo::GetClashList() const
+{
+  std::vector<ClashEvent> return_list;
+  std::vector<UAtomIdentifiers> seen_list;
+  for (std::vector<ClashEvent>::const_iterator cl_it=clash_list_.begin();cl_it!=clash_list_.end();++cl_it) {
+    UniqueAtomIdentifier atom1 = cl_it->GetFirstAtom();
+    UniqueAtomIdentifier atom2 = cl_it->GetSecondAtom();
+    UAtomIdentifiers check = std::make_pair<UniqueAtomIdentifier,UniqueAtomIdentifier>(atom2,atom1);
+    if (std::find(seen_list.begin(),seen_list.end(),check)==seen_list.end()) {
+      return_list.push_back(*cl_it);
+      seen_list.push_back(std::make_pair<UniqueAtomIdentifier,UniqueAtomIdentifier>(atom1,atom2));
+    }
+  }
+  return return_list;
+}
+
 void ClashingDistances::SetClashingDistance(const String& ele1,const String& ele2, Real min_distance, Real tolerance)
 {
   std::stringstream stkey;
@@ -329,8 +345,10 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
 }  
 
 
-EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
+std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityView& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
 {
+  std::vector<StereoChemicalBondViolation> bond_violation_list;
+  std::vector<StereoChemicalAngleViolation> angle_violation_list;
   Real running_sum_zscore_bonds=0.0;
   Real running_sum_zscore_angles=0.0;
   int bond_count = 0;
@@ -382,6 +400,10 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             if (blength < min_length || blength > max_length) {
               LOG_INFO("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "FAIL")
               bad_bond_count++;
+              UniqueAtomIdentifier atom_ui(atom.GetResidue().GetChain().GetName(),atom.GetResidue().GetNumber(),atom.GetResidue().GetName(),atom.GetName());
+              UniqueAtomIdentifier other_atom_ui(other_atom.GetResidue().GetChain().GetName(),other_atom.GetResidue().GetNumber(),other_atom.GetResidue().GetName(),other_atom.GetName());
+              StereoChemicalBondViolation bond_v(atom_ui,other_atom_ui,blength,std::make_pair<Real,Real>(min_length,max_length));
+              bond_violation_list.push_back(bond_v);
               remove_sc=true;
               if (always_remove_bb==true) {
                 remove_bb=true;
@@ -446,7 +468,12 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             Real zscore = (awidth - ref_width)/ref_stddev;
             if (awidth < min_width || awidth > max_width) {
               LOG_INFO("ANGLE:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << angle_str << " " << min_width << " " << max_width << " " << awidth << " " << zscore << " " << "FAIL")
-              bad_angle_count++;   
+              bad_angle_count++;
+              UniqueAtomIdentifier atom1_ui(atom1.GetResidue().GetChain().GetName(),atom1.GetResidue().GetNumber(),atom1.GetResidue().GetName(),atom1.GetName());
+              UniqueAtomIdentifier atom_ui(atom.GetResidue().GetChain().GetName(),atom.GetResidue().GetNumber(),atom.GetResidue().GetName(),atom.GetName());
+              UniqueAtomIdentifier atom2_ui(atom2.GetResidue().GetChain().GetName(),atom2.GetResidue().GetNumber(),atom2.GetResidue().GetName(),atom2.GetName());
+              StereoChemicalAngleViolation angle_v(atom1_ui,atom_ui,atom2_ui,awidth,std::make_pair<Real,Real>(min_width,max_width));
+              angle_violation_list.push_back(angle_v);
               remove_sc=true;
               if (always_remove_bb==true) {
                 remove_bb=true;
@@ -487,10 +514,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
   }
   Real avg_zscore_bonds = running_sum_zscore_bonds/static_cast<float>(bond_count);
   Real avg_zscore_angles = running_sum_zscore_angles/static_cast<float>(angle_count);
-  LOG_SCRIPT("Average Z-Score for bond lengths: " << std::fixed << std::setprecision(5) << avg_zscore_bonds);
-  LOG_SCRIPT("Bonds outside of tolerance range: " << bad_bond_count << " out of " << bond_count);
-  LOG_SCRIPT("Bond\tAvg Length\tAvg zscore\tNum Bonds")
-
+  std::map<String,BondLengthInfo> avg_bond_length_info;
   for (std::map<String,Real>::const_iterator bls_it=bond_length_sum.begin();bls_it!=bond_length_sum.end();++bls_it) {
     String key = (*bls_it).first;
     int counter=bond_counter_sum[key];
@@ -498,22 +522,26 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
     Real sum_bond_zscore=bond_zscore_sum[key];
     Real avg_length=sum_bond_length/static_cast<Real>(counter);
     Real avg_zscore=sum_bond_zscore/static_cast<Real>(counter);
-    LOG_SCRIPT(key << "\t" << std::fixed << std::setprecision(5) << std::left << std::setw(10) << avg_length << "\t" << std::left << std::setw(10) << avg_zscore << "\t" << counter);
+    BondLengthInfo bond_info(avg_length,avg_zscore,counter);
+    avg_bond_length_info[key]=bond_info;
   }
-  LOG_SCRIPT("Average Z-Score angle widths: " << std::fixed << std::setprecision(5) << avg_zscore_angles);
-  LOG_SCRIPT("Angles outside of tolerance range: " << bad_angle_count << " out of " << angle_count);
-  return filtered;
+  StereoChemistryInfo info(avg_zscore_bonds, bad_bond_count, bond_count,avg_zscore_angles,
+                           bad_angle_count, angle_count,avg_bond_length_info,
+                           bond_violation_list,angle_violation_list);
+  filtered.AddAllInclusiveBonds();
+  return std::make_pair<EntityView,StereoChemistryInfo>(filtered,info);
 }
 
 
-EntityView CheckStereoChemistry(const EntityHandle& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
+std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityHandle& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
 {
   return CheckStereoChemistry(ent.CreateFullView(), bond_table, angle_table, bond_tolerance, angle_tolerance, always_remove_bb);
 }
 
 
-EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_distances, bool always_remove_bb)
+std::pair<EntityView,ClashingInfo> FilterClashes(const EntityView& ent, const ClashingDistances& min_distances, bool always_remove_bb)
 {
+  std::vector<ClashEvent> clash_list;
   int distance_count = 0;
   int bad_distance_count = 0;
   Real average_offset_sum = 0.0;
@@ -549,7 +577,6 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
           continue;
         }
 
-
         // In theory, this should also trigger for disulfide bonds, but 
         // since we don't detect disulfides correctly, we can't count on that 
         // and we instead allow S-S distances down to 1.8.       
@@ -566,6 +593,10 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
         if (d<threshold*threshold) {
           LOG_INFO(atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue().GetName() << " " << atom2.GetResidue().GetNumber() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << " " << sqrt(d)-threshold << " " << "FAIL")
           bad_distance_count++; 
+          UniqueAtomIdentifier atom_ui(atom.GetResidue().GetChain().GetName(),atom.GetResidue().GetNumber(),atom.GetResidue().GetName(),atom.GetName());
+          UniqueAtomIdentifier atom2_ui(atom2.GetResidue().GetChain().GetName(),atom2.GetResidue().GetNumber(),atom2.GetResidue().GetName(),atom2.GetName());
+          ClashEvent clash_event(atom_ui,atom2_ui,sqrt(d),threshold);
+          clash_list.push_back(clash_event);
           average_offset_sum+=sqrt(d)-threshold;
           remove_sc=true;
           if (always_remove_bb==true) {
@@ -606,14 +637,14 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
   if (bad_distance_count!=0) {
     average_offset = average_offset_sum / static_cast<Real>(bad_distance_count);
   }
-  LOG_SCRIPT(bad_distance_count << " non-bonded short-range distances shorter than tolerance distance");
-  LOG_SCRIPT("Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << average_offset);
-  return filtered;
+  ClashingInfo info(bad_distance_count,average_offset,clash_list);
+  filtered.AddAllInclusiveBonds();
+  return std::make_pair<EntityView,ClashingInfo>(filtered,info);
 }
 
 
-EntityView FilterClashes(const EntityHandle& ent,  
-                         const ClashingDistances& min_distances, bool always_remove_bb)
+std::pair<EntityView,ClashingInfo> FilterClashes(const EntityHandle& ent,
+                                                 const ClashingDistances& min_distances, bool always_remove_bb)
 {
   return FilterClashes(ent.CreateFullView(), min_distances, always_remove_bb);
 }

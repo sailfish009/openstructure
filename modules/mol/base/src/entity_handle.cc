@@ -20,13 +20,15 @@
 #include <ost/log.hh>
 
 #include "impl/entity_impl.hh"
+
+#include "atom_view.hh"
 #include "bond_handle.hh"
 #include "torsion_handle.hh"
 #include "entity_visitor.hh"
 #include "atom_handle.hh"
+#include "residue_handle.hh"
 #include "chain_handle.hh"
 #include "entity_handle.hh"
-#include "iterator.hh"
 #include "impl/chain_impl.hh"
 #include "impl/atom_impl.hh"
 #include "impl/residue_impl.hh"
@@ -315,68 +317,6 @@ AtomHandle EntityHandle::FindAtom(const String& chain_name,
 }
 
 
-ResidueHandleIter EntityHandle::ResiduesBegin() const {
-  this->CheckValidity();
-  if (Impl()->GetChainList().empty()) {
-    return ResidueHandleIter();
-  }
-  impl::EntityImplPtr i=Impl();
-  impl::ChainImplPtr chain=i->GetChainList().front();
-  return ResidueHandleIter(impl::begin(i->GetChainList()),
-                           impl::begin(chain->GetResidueList()), i, true);
-}
-
-ResidueHandleIter EntityHandle::ResiduesEnd() const {
-  this->CheckValidity();
-  if (Impl()->GetChainList().empty()) {
-    return ResidueHandleIter();
-  }
-  impl::EntityImplPtr i=Impl();
-  impl::ChainImplPtr chain=i->GetChainList().back();
-  return ResidueHandleIter(impl::end(i->GetChainList()),
-                           impl::end(chain->GetResidueList()), i, false);
-}
-
-ChainHandleIter EntityHandle::ChainsBegin() const {
-  this->CheckValidity();
-  return ChainHandleIter(Impl()->GetChainList().begin());
-}
-
-
-ChainHandleIter EntityHandle::ChainsEnd() const {
-  return ChainHandleIter(Impl()->GetChainList().end());
-}
-
-
-AtomHandleIter EntityHandle::AtomsBegin() const {
-  this->CheckValidity();
-  impl::EntityImplPtr ent=Impl();
-  if (ent->GetChainList().empty()) {
-    return AtomHandleIter();
-  }
-  impl::ResidueImplList& r=ent->GetChainList().front()->GetResidueList();
-  if (r.empty()) {
-    return AtomHandleIter();
-  }
-  return AtomHandleIter(impl::begin(ent->GetChainList()), impl::begin(r),
-                        impl::begin(r.front()->GetAtomList()), ent, true);
-}
-
-AtomHandleIter EntityHandle::AtomsEnd() const 
-{
-  this->CheckValidity();
-  impl::EntityImplPtr ent=Impl();
-  if (ent->GetChainList().empty()) {
-    return AtomHandleIter();
-  }
-  impl::ResidueImplList& r=ent->GetChainList().back()->GetResidueList();
-  if (r.empty()) {
-    return AtomHandleIter();
-  }
-  return AtomHandleIter(impl::end(ent->GetChainList()), impl::end(r),
-                        impl::end(r.back()->GetAtomList()), ent, false);
-}
-
 XCSEditor EntityHandle::EditXCS(EditMode mode) const
 {
   this->CheckValidity();
@@ -395,7 +335,14 @@ ResidueHandleList EntityHandle::GetResidueList() const
 {
   this->CheckValidity();
   ResidueHandleList residues;
-  std::copy(ResiduesBegin(), ResiduesEnd(), std::back_inserter(residues));
+  residues.reserve(this->GetResidueCount());
+  for (impl::ChainImplList::const_iterator i = Impl()->GetChainList().begin(),
+       e = Impl()->GetChainList().end(); i != e; ++i) {
+    for (impl::ResidueImplList::const_iterator j = (*i)->GetResidueList().begin(),
+         e2 = (*i)->GetResidueList().end(); j != e2; ++j) {
+      residues.push_back(ResidueHandle(*j));
+    }
+  }
   return residues;
 }
 
@@ -404,20 +351,37 @@ AtomHandleList EntityHandle::GetAtomList() const
 {
   this->CheckValidity();
   AtomHandleList atoms;
-  std::copy(AtomsBegin(), AtomsEnd(), std::back_inserter(atoms));
+  atoms.reserve(this->GetAtomCount());
+  for (impl::ChainImplList::const_iterator i = Impl()->GetChainList().begin(),
+       e = Impl()->GetChainList().end(); i != e; ++i) {
+    for (impl::ResidueImplList::const_iterator j = (*i)->GetResidueList().begin(),
+         e2 = (*i)->GetResidueList().end(); j != e2; ++j) {
+      for (impl::AtomImplList::const_iterator k = (*j)->GetAtomList().begin(),
+           e3 = (*j)->GetAtomList().end(); k != e3; ++k) {
+        atoms.push_back(AtomHandle(*k));
+      }
+    }
+  }
   return atoms;
 }
 
-geom::Vec3List EntityHandle::GetAtomPosList() const {
+bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
+{
+  return a1.GetIndex()<a2.GetIndex();
+}
+
+geom::Vec3List EntityHandle::GetAtomPosList(bool ordered_by_index) const {
   this->CheckValidity();
   geom::Vec3List atom_pos_list;
   atom_pos_list.reserve(this->GetAtomCount());
   AtomHandleList atom_list=this->GetAtomList();
+  if (ordered_by_index){
+    std::sort(atom_list.begin(),atom_list.end(),less_index);
+  }
   for (AtomHandleList::const_iterator a=atom_list.begin(), e=atom_list.end(); a!=e; ++a) {
     atom_pos_list.push_back(a->GetPos());
   }
   return atom_pos_list;
-  //return Impl()->GetAtomPosList();
 }
   
 EntityHandle EntityHandle::GetHandle() const

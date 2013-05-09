@@ -311,19 +311,6 @@ void ImageStateImpl<T,D>::AdjustPhaseOrigin(const Point& p)
 }
 
 
-template <typename T, class D>
-T& ImageStateImpl<T,D>::Value(const Point& p)
-{
-  assert(domain_.GetExtent().Contains(p));
-  return data_.Value(domain_.Point2Index(p));
-}
-
-template <typename T, class D>
-const T& ImageStateImpl<T,D>::Value(const Point& p) const
-{
-  assert(domain_.GetExtent().Contains(p));
-  return data_.Value(domain_.Point2Index(p));
-}
 
 template <typename T, class D>
 T ImageStateImpl<T,D>::GetCheckedValue(const Point& p) const

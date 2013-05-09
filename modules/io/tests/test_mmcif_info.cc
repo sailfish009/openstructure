@@ -109,16 +109,41 @@ BOOST_AUTO_TEST_CASE(mmcif_info_biounit)
   MMCifInfoBioUnit bu = MMCifInfoBioUnit();
 
   bu.SetDetails("author_defined_assembly");
+  bu.SetID("1");
+  bu.AddChain("B");
   bu.AddChain("A");
 
   BOOST_CHECK(bu.GetDetails() == "author_defined_assembly");
   BOOST_CHECK(bu.GetChainList().back() == "A");
+  std::vector<std::pair<int, int> > tr = bu.GetChainIntervalList();
+  BOOST_CHECK(tr[0].first == 0);
+  BOOST_CHECK(tr[0].second == 2);
+
+  std::vector<String> chains;
+  chains.push_back("B");
+  bu.SetChainList(chains);
+  BOOST_CHECK(bu.GetChainList().back() == "B");
+  tr = bu.GetChainIntervalList();
+  BOOST_CHECK(tr[0].first == 0);
+  BOOST_CHECK(tr[0].second == 1);
 
   MMCifInfo info = MMCifInfo();
   info.AddBioUnit(bu);
   std::vector<MMCifInfoBioUnit> biounits = info.GetBioUnits();
   BOOST_CHECK(biounits.size() == 1);
   BOOST_CHECK(biounits.back() == bu);
+
+  info.AddBioUnit(bu);
+  bu.SetID("2");
+  info.AddBioUnit(bu);
+  biounits = info.GetBioUnits();
+  BOOST_CHECK(biounits.size() == 2);
+  tr = biounits.front().GetChainIntervalList();
+  BOOST_CHECK(tr.size() == 2);
+  BOOST_CHECK(tr[0].first == 0);
+  BOOST_CHECK(tr[0].second == 1);
+  BOOST_CHECK(tr[1].first == 1);
+  BOOST_CHECK(tr[1].second == 2);
 
   BOOST_MESSAGE("  done.");
 }
@@ -148,6 +173,10 @@ BOOST_AUTO_TEST_CASE(mmcif_info_transoperation)
   MMCifInfoBioUnit bu = MMCifInfoBioUnit();
   bu.AddOperations(ops);
   BOOST_CHECK((*(bu.GetOperations().begin()->begin())) == op);
+  std::vector<std::pair<int, int> > tr = bu.GetOperationsIntervalList();
+  BOOST_CHECK(tr.size() == 1);
+  BOOST_CHECK(tr.back().first == 0);
+  BOOST_CHECK(tr.back().second == 1);
 
   BOOST_MESSAGE("  done.");
 }

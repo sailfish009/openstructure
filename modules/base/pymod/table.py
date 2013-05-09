@@ -820,378 +820,6 @@ Statistics for column %(col)s
     return filt_tab
 
 
-  def _EvaluateEqualNone(self, lhs, rhs):
-    return (lhs==None or lhs!=lhs) == (rhs==None or rhs!=rhs)
- 
-  def _EvaluateNonEqualNone(self, lhs, rhs):
-    return (lhs==None or lhs!=lhs) != (rhs==None or rhs!=rhs)
- 
-  def _EvaluateAnd(self, lhs, rhs):
-    return lhs and rhs
-
-  def _EvaluateOr(self, lhs, rhs):
-    return lhs or rhs
-
-  def _EvaluateEqual(self, lhs, rhs):
-    return lhs==rhs
-
-  def _EvaluateNonEqual(self, lhs, rhs):
-    return lhs!=rhs
-
-  def _EvaluateLower(self, lhs, rhs):
-    return lhs<rhs
-
-  def _EvaluateGreater(self, lhs, rhs):
-    return lhs>rhs
-
-  def _EvaluateLowerEqual(self, lhs, rhs):
-    return lhs<=rhs
-
-  def _EvaluateGreaterEqual(self, lhs, rhs):
-    return lhs>=rhs
-
-  def _EvaluateAdd(self, lhs, rhs):
-    if lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
-      return None
-    return lhs+rhs
-
-  def _EvaluateSubtract(self, lhs, rhs):
-    if lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
-      return None
-    return lhs-rhs
-
-  def _EvaluateMultiply(self, lhs, rhs):
-    if lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
-      return None
-    return lhs*rhs
-
-  def _EvaluateDivide(self, lhs, rhs):
-    if lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
-      return None
-    return lhs/rhs
-
-
-  def _EvaluateOperator(self, op, lhs, rhs):
-
-    if op=='+':
-      return self._EvaluateAdd(lhs, rhs)
-    elif op=='-':
-      return self._EvaluateSubtract(lhs, rhs)
-    elif op=='/':
-      return self._EvaluateDivide(lhs, rhs)
-    elif op=='*':
-      return self._EvaluateMultiply(lhs, rhs)
-    elif lhs==None or lhs!=lhs or rhs==None or rhs!=rhs:
-      if op=='=':
-        return self._EvaluateEqualNone(lhs,rhs)
-      elif op=='!=':
-        return self._EvaluateNonEqualNone(lhs,rhs)
-      return None
-    elif op=='and':
-      return self._EvaluateAnd(lhs, rhs)
-    elif op=='or':
-      return self._EvaluateOr(lhs, rhs)
-    elif op=='=':
-      return self._EvaluateEqual(lhs, rhs)
-    elif op=='!=':
-      return self._EvaluateNonEqual(lhs, rhs)
-    elif op=='<':
-      return self._EvaluateLower(lhs, rhs)
-    elif op=='>':
-      return self._EvaluateGreater(lhs, rhs)
-    elif op=='<=':
-      return self._EvaluateLowerEqual(lhs, rhs)
-    elif op=='>=':
-      return self._EvaluateGreaterEqual(lhs, rhs)
-
-    else:
-      raise ValueError('Unknown operator: '+op)
-
-  def _EvaluateRPN(self, RPNExp, valid_operators):
-    #Evaluates the reverse polish notation
-    stack=list()
-    while True:
-      if len(RPNExp)==0:
-        break
-      exp=RPNExp.pop(0)
-      if exp in valid_operators:
-        if len(stack)<2:
-          raise ValueError('Cannot evaluate operator on less than two operands!')
-        rhs=stack.pop()
-        lhs=stack.pop()
-        result=self._EvaluateOperator(exp, lhs, rhs)
-        if result==None:
-          return False
-        stack.append(result)
-      else:
-        stack.append(exp)
-    if len(stack)>1:
-      raise ValueError('Too many operands for given operators!')
-    return stack.pop()
-
-  def _ShuntingYard(self, split_expression, valid_operators, precedence):
-    #Creates the so called reverse polish notation out of the expression parser output.
-    #note, that there won't be parenthesis anymore and potential parenthesis
-    #mismatches get recognized.
-    #The shunting yard algorithm from dijkstra gets used.
-
-    output_stack=list()
-    operator_stack=list()
-
-    while True:
-      if len(split_expression)==0:
-        while True:
-          if len(operator_stack)==0:
-            break
-          if operator_stack[-1] in ['(',')']:
-            raise ValueError('Parenthesis mismatch!')
-          output_stack.append(operator_stack.pop())
-        break
-
-      exp=split_expression.pop(0)
-
-      if exp == '(':
-        operator_stack.append('(')
-        continue
-
-      if exp in valid_operators:
-        prec=precedence[exp]
-        while len(operator_stack)>0:
-          if operator_stack[-1]=='(':
-            break
-          elif prec>=precedence[operator_stack[-1]]:
-            output_stack.append(operator_stack.pop())
-          else:
-            break
-        operator_stack.append(exp)
-        continue
-        
-      if exp == ')':
-        while True:
-          if len(operator_stack)==0:
-            raise ValueError('Parenthesis mismatch!')
-          if operator_stack[-1]=='(':
-            operator_stack.pop()
-            break
-          output_stack.append(operator_stack.pop())
-        continue
-
-      output_stack.append(exp)
-
-    return output_stack
-
-  def _EvaluateOperand(self, operand):
-
-    import re
-
-    float_expression=re.compile('[-+]?[0-9]*\.[0-9]+(?:[eE][-+]?[0-9]+)?$')
-    int_expression=re.compile('[-+]?[0-9]+(?:[eE][-+]?[0-9]+)?$')
-    bool_expression=re.compile('true$|True$|false$|False$')
-    none_expression=re.compile('None$|none$|nan$|NAN$|NaN$')
-
-    if re.match(float_expression,operand):
-      return float(operand)
-    elif re.match(int_expression, operand):
-      return int(operand)
-    elif re.match(bool_expression,operand):
-      if operand == 'false' or operand == 'False':
-        return False
-      return True
-    elif re.match(none_expression,operand):
-      return None
-    return operand
-
-    #If nothing above matches, operand must be a string, full string
-    #gets returned.
-
-
-  def _LexerHelper(self, operand):
-    if len(operand.strip())>0:
-      if ' ' in operand.strip():
-        raise ValueError('Cannot Evaluate %s'%(operand))
-      return [operand.strip()]
-    return []
-
-
-
-  def _ExpressionLexer(self, expression, valid_operators, precedence):
-
-    #Reads token after token and searches for brackets and valid_operators
-    #everything, that doesn't match the above is assumed to be an operand
-    #and is cast into the most likely type based on regular expression
-    #Note, that there is no check, wether the operands can be processed by
-    #their corresponding operators (with respect to types)!
-
-    split_expression=list()
-    actual_position=0
-    eaten_stuff=''
-
-    while True:
-
-      if actual_position>=len(expression):
-        if len(eaten_stuff.strip())>0:
-          op=eaten_stuff.strip()
-          if ' ' in op:
-            raise ValueError('cannot evaluate %s'%(op))
-          split_expression.append(op)
-
-        #check for problematic cases like 'a<=b<=c'. We don't know which operator to evaluate first
-        for i in range(len(split_expression)-3):
-          if (split_expression[i] in valid_operators) and (split_expression[i+2] in valid_operators):
-            if precedence[split_expression[i]]==precedence[split_expression[i+2]]:
-              raise ValueError('Cannot Evaluate '+' '.join(split_expression[i:i+3])+' since both operators have same precedence!')
-
-
-        #handle , operator
-        #replaces an expression like 'rnum=1,2,3' with '(rnum=1 or rnum=2 or rnum=3)'
-
-        temp_split_expression=list()
-        skips=0
-
-        for i in range(len(split_expression)):
-          if skips>0:
-            skips-=1
-            continue
-          if ',' in split_expression[i]:
-
-            if split_expression[max(0,i-1)] != '=' and split_expression[min(i+1,len(split_expression)-1)] != '=':
-              raise ValueError('Can evaluate \',\' sign only in combination with \'=\'')
-
-            single_operands=split_expression[i].split(',')
-
-            if split_expression[max(0,i-1)]=='=':
-              if i-2<0:
-                raise ValueError('Does it really make sense to start with an \'=\'')
-              main_operand=split_expression[i-2]
-              temp_split_expression.pop()
-              temp_split_expression.pop()
-              skips=0
-
-            else:
-              if i+2>len(split_expression)-1:
-                raise ValueError('Does it really make sense to end with an \'=\'')
-              main_operand=split_expression[i+2]
-              skips=2
-
-            temp_expression=list(['('])
-            temp_expression+=' or '.join(['%s = %s'% (a,b) for (a,b) in zip(len(single_operands)*[main_operand],single_operands)]).split()
-            temp_expression.append(')')
-            temp_split_expression+=temp_expression
-            continue
-
-          temp_split_expression.append(split_expression[i])
-
-        split_expression=temp_split_expression
-
-        #handle ':' operator
-        #replaces an expression like 'col_a=x:y' with '(col_a>=x and col_a<=y)'
-        
-        temp_split_expression=list()
-        skips=0
-
-        for i in range(len(split_expression)):
-          if skips>0:
-            skips-=1
-            continue
-          if ':' in split_expression[i]:
-            if split_expression[max(0,i-1)] != '=' and split_expression[min(i+1,len(split_expression)-1)] != '=':
-              raise ValueError('Can evaluate \':\' sign only in combination with \'=\'')
-            if len(split_expression[i].split(':')) != 2:
-              raise ValueError('Can operate \':\' operator only on 2 operands')
-            
-            #even though we are still in the lexer, its necessary to evaluate the next
-            #expressions... They will be written back into the splitexpression as string again
-            lhs=self._EvaluateOperand(split_expression[i].split(':')[0])
-            rhs=self._EvaluateOperand(split_expression[i].split(':')[1])
-
-            template_expression=['(','','<=','','and','','<=','',')']
-
-            if split_expression[max(0,i-1)] == '=':
-              if i-2<0:
-                raise ValueError('Does it really make sense to start with an \'=\'?')
-              temp_split_expression.pop()
-              temp_split_expression.pop()
-              template_expression[3]=split_expression[i-2]
-              template_expression[5]=split_expression[i-2]
-              skips=0
-
-            else:
-              if i+2>len(split_expression)-1:
-                raise ValueError('Does it really make sense to end with an \'=\'?')
-              template_expression[3]=split_expression[i+2]
-              template_expression[5]=split_expression[i+2]
-              skips=2 
-
-            template_expression[1]=str(min(lhs,rhs))
-            template_expression[7]=str(max(lhs,rhs))
-            temp_split_expression+=template_expression
-            continue
-
-          temp_split_expression.append(split_expression[i])
-  
-        split_expression=temp_split_expression
-
-        return split_expression
-
-      token=expression[actual_position]
-
-      if token.isspace():
-        split_expression+=self._LexerHelper(eaten_stuff)
-        actual_position+=1
-        eaten_stuff=''
-        continue
-
-      if token in ['(','[','{']:
-        split_expression+=self._LexerHelper(eaten_stuff)
-        split_expression.append('(')
-        actual_position+=1
-        eaten_stuff=''
-        continue
-
-      if token in [')',']','}']:
-        split_expression+=self._LexerHelper(eaten_stuff)
-        split_expression.append(')')
-        actual_position+=1
-        eaten_stuff=''
-        continue
-
-      if token in ['+','-','*','/','=']:
-        split_expression+=self._LexerHelper(eaten_stuff)
-        split_expression.append(token)
-        actual_position+=1
-        eaten_stuff=''
-        continue
-
-      if token == '!':
-        if actual_position+1==len(expression):
-          raise ValueError('Cannot evaluate \'!\'')
-        if expression[actual_position+1]== '=':
-          split_expression+=self._LexerHelper(eaten_stuff)
-          split_expression.append('!=')
-          actual_position+=2
-          eaten_stuff=''
-          continue
-        else:
-          raise ValueError('Cannot evaluate single \'!\'')
-
-      if token in ['<','>']:
-        if actual_position+1<len(expression):
-          if expression[actual_position+1]=='=':
-            split_expression+=self._LexerHelper(eaten_stuff)
-            split_expression.append(token+'=')
-            actual_position+=2
-            eaten_stuff=''
-            continue
-        split_expression+=self._LexerHelper(eaten_stuff)
-        split_expression.append(token)
-        actual_position+=1
-        eaten_stuff=''
-        continue
-
-      eaten_stuff+=token
-      actual_position+=1
-
-
   def Select(self, query):
 
     """
@@ -1202,15 +830,15 @@ Statistics for column %(col)s
 
     Operands have to be the name of a column or an expression that can be parsed to 
     float, int, bool or string.
-    Valid operators are: and, or, !=, <=, >=, =, <, >, +, -, *, / 
+    Valid operators are: and, or, !=, !, <=, >=, ==, =, <, >, +, -, *, / 
     
     .. code-block:: python
     
       subtab=tab.Select('col_a>0.5 and (col_b=5 or col_c=5)')
 
     The selection query should be self explaining. Allowed parenthesis are: (), [], {}, 
-    whereas parenthesis mismatches get recognized. If there is a row containing 'None'
-    in a query relevant column, it will be neglected.
+    whereas parenthesis mismatches get recognized. Expressions like '3<=col_a>=col_b'
+    throw an error, due to problems in figuring out the evaluation order.
 
     There are two special expressions:
 
@@ -1222,41 +850,22 @@ Statistics for column %(col)s
       #selects rows, where col_a=1 or col_a=2 or col_a=3
       subtab=tab.Select('col_a=1,2,3')
 
-    Be aware, that there is no typechecking! Non consistent combinations of types
-    can lead to weird behaviour!
+    Only consistent types can be compared. If col_a is of type string and col_b is of type int, 
+    following expression would throw an error: 'col_a<col_b'
 
     """
 
-    valid_operators=['and','or','!=','<=','>=','=','<','>','+','-','*','/']
+    try:
+      from table_selector import TableSelector
+    except:
+      raise ImportError("Tried to import from the file table_selector.py, but could not find it!")
 
-    #http://en.wikipedia.org/wiki/Order_of_operations
-
-    precedence={'or':6 , 'and':5 , '!=':4 , '=':4 , '<=':3 , 
-                '>=':3 , '<':3 , '>':3 , '+':2 , '-':2 , '*':1 , '/':1}
-
-    split_expression=self._ExpressionLexer(query, valid_operators, precedence)
-    rpn_expression=self._ShuntingYard(list(split_expression), valid_operators, precedence)
-
-    tab_indices=list()
-    exp_indices=list()
-
-    #extract indices for tab values and cast other operands in their most likely type based on
-    #regular expressions
-    for i, exp in enumerate(rpn_expression):
-      if exp in self.col_names:
-        tab_indices.append(self.GetColIndex(exp))
-        exp_indices.append(i)
-        continue
-      elif exp in valid_operators or exp in ['(',')']:
-        continue
-      rpn_expression[i] = self._EvaluateOperand(exp)
+    selector=TableSelector(self.col_types, self.col_names, query)
 
     selected_tab=Table(list(self.col_names), list(self.col_types))
 
     for row in self.rows:
-      for ti, ei in zip(tab_indices, exp_indices):
-        rpn_expression[ei] = row[ti]
-      if self._EvaluateRPN(list(rpn_expression), valid_operators):
+      if selector.EvaluateRow(row):
         selected_tab.AddRow(row)
 
     return selected_tab
@@ -1859,51 +1468,68 @@ Statistics for column %(col)s
         max_idx = i
     return max_val, max_idx
 
-  def PlotBar(self, cols, x_labels=None, x_labels_rotation='horizontal', y_title=None, title=None, 
-              colors=None, yerr_cols=None, width=0.8, bottom=0, 
-              legend=True, save=False):
+  def PlotBar(self, cols=None, rows=None, xlabels=None, set_xlabels=True, xlabels_rotation='horizontal', y_title=None, title=None, 
+              colors=None, width=0.8, bottom=0, legend=False, legend_names=None, show=False, save=False):
 
     """
-    Create a barplot of the data in cols. Every element of a column will be represented
-    as a single bar. If there are several columns, each row will be grouped together.
+    Create a barplot of the data in cols. Every column will be represented
+    at one position. If there are several rows, each column will be grouped 
+    together.
 
-    :param cols: Column names with data. If cols is a string, every element of that column
-                 will be represented as a single bar. If cols is a list, every row resulting
-                 of these columns will be grouped together. Every value of the table still
-                 is represented by a single bar.
+    :param cols: List of column names. Every column will be represented as a 
+                 single bar. If cols is None, every column of the table gets 
+                 plotted.
+    :type cols: :class:`list`
 
-    :param x_labels: Label for every row on x-axis.
-    :type x_labels: :class:`list`
-    
-    :param x_labels_rotation: Can either be 'horizontal', 'vertical' or a number that 
-                              describes the rotation in degrees.
+    :param rows: List of row indices. Values from given rows will be plotted 
+                 in parallel at one column position. If set to None, all rows 
+                 of the table will be plotted. Note, that the maximum number 
+                 of rows is 7.
+    :type rows: :class:`list`
+
+    :param xlabels: Label for every col on x-axis. If set to None, the column 
+                    names are used. The xlabel plotting can be supressed by 
+                    the parameter set_xlabel.
+    :type xlabels: :class:`list`
+
+    :param set_xlabels: Controls whether xlabels are plotted or not.
+    :type set_xlabels: :class:`bool`
+
+    :param x_labels_rotation: Can either be 'horizontal', 'vertical' or an 
+                              integer, that describes the rotation in degrees.
 
     :param y_title: Y-axis description
     :type y_title: :class:`str`
 
-    :title: Title
+    :title: Title of the plot. No title appears if set to None
     :type title: :class:`str`
 
-    :param colors: Colors of the different bars in each group. Must be a list of valid
-                   colornames in matplotlib. Length of color and cols must be consistent.
+    :param colors: Colors of the different bars in each group. Must be a list 
+                   of valid colors in matplotlib. Length of color and rows must 
+                   be consistent.
     :type colors: :class:`list`
 
-    :param yerr_cols: Columns containing the y-error information. Can either be a string
-                      if only one column is plotted or a list otherwise. Length of
-                      yerr_cols and cols must be consistent.
-
-    :param width: The available space for the groups on the x-axis is divided by the exact
-                  number of groups. The parameters width is the fraction of what is actually
-                  used. If it would be 1.0 the bars of the different groups would touch each other.
+    :param width: The available space for the groups on the x-axis is divided 
+                  by the exact number of groups. The parameters width is the 
+                  fraction of what is actually used. If it would be 1.0 the 
+                  bars of the different groups would touch each other.
+                  Value must be in [0;1]
     :type width: :class:`float`
 
     :param bottom: Bottom
     :type bottom: :class:`float`
 
-    :param legend: Legend for color explanation, the corresponding column respectively.
+    :param legend: Legend for color explanation, the corresponding row 
+                   respectively. If set to True, legend_names must be provided.
     :type legend: :class:`bool`
 
-    :param save: If set, a png image with name $save in the current working directory will be saved.
+    :param legend_names: List of names, that describe the differently colored 
+                         bars. Length must be consistent with number of rows.
+
+    :param show: If set to True, the plot is directly displayed.
+
+    :param save: If set, a png image with name save in the current working 
+                 directory will be saved.
     :type save: :class:`str`
 
     """
@@ -1911,47 +1537,50 @@ Statistics for column %(col)s
       import numpy as np
       import matplotlib.pyplot as plt
     except:
-      raise ImportError('PlotBar relies on numpy and matplotlib, but I could not import it!')
-    
-    if len(cols)>7:
-      raise ValueError('More than seven bars at one position looks rather meaningless...')
+      raise ImportError('PlotBar relies on numpy and matplotlib, but I could' \
+                        'not import it!')
       
     standard_colors=['b','g','y','c','m','r','k']
     data=[]
-    yerr_data=[]
 
-    if not isinstance(cols, list):
-      cols=[cols]
-      
-    if yerr_cols:
-      if not isinstance(yerr_cols, list):
-        yerr_cols=[yerr_cols]
-      if len(yerr_cols)!=len(cols):
-        raise RuntimeError ('Number of cols and number of error columns must be consistent!')
-      
-    for c in cols:
-      cid=self.GetColIndex(c)
-      temp=list()
-      for r in self.rows:
-        temp.append(r[cid])
-      data.append(temp)  
-      
-    if yerr_cols:
-      for c in yerr_cols:
-        cid=self.GetColIndex(c)
-        temp=list()
-        for r in self.rows:
-          temp.append(r[cid])
-        yerr_data.append(temp)
+    if cols==None:
+      cols=self.col_names
+
+    if width<=0 or width>1:
+      raise ValueError('Width must be in [0;1]')
+
+    if rows==None:
+      if len(self.rows)>7:
+        raise ValueError('Table contains too many rows to represent them at one '\
+                         'bar position in parallel. You can Select a Subtable or '\
+                         'specify the parameter rows with a list of row indices '\
+                         '(max 7)')
+      else:
+        rows=range(len(self.rows))
     else:
-      for i in range(len(cols)):
-        yerr_data.append(None)
+      if not isinstance(rows,list):
+        rows=[rows]
+      if len(rows)>7:
+        raise ValueError('Too many rows to represent (max 7). Please note, that '\
+                         'data from multiple rows from one column gets '\
+                         'represented at one position in parallel.')
 
-    if not colors:
-      colors=standard_colors[:len(cols)]
+    for r_idx in rows:
+      row=self.rows[r_idx] 
+      temp=list()
+      for c in cols:
+        try:
+          c_idx=self.GetColIndex(c)
+        except:
+          raise ValueError('Cannot find column with name '+str(c))
+        temp.append(row[c_idx])
+      data.append(temp)  
 
-    if len(cols)!=len(colors):
-      raise RuntimeError("Number of columns and number of colors must be consistent!")
+    if colors==None:
+      colors=standard_colors[:len(rows)]
+
+    if len(rows)!=len(colors):
+      raise ValueError("Number of rows and number of colors must be consistent!")
 
     ind=np.arange(len(data[0]))
     single_bar_width=float(width)/len(data)
@@ -1959,40 +1588,45 @@ Statistics for column %(col)s
     fig=plt.figure()
     ax=fig.add_subplot(111)
     legend_data=[]
+
     for i in range(len(data)):
-      legend_data.append(ax.bar(ind+i*single_bar_width,data[i],single_bar_width,bottom=bottom,color=colors[i],yerr=yerr_data[i], ecolor='black')[0])
+      legend_data.append(ax.bar(ind+i*single_bar_width+(1-width)/2,data[i],single_bar_width,bottom=bottom,color=colors[i])[0])
       
     if title!=None:
-      nice_title=title
-    else:
-      nice_title="coolest barplot on earth"
-    ax.set_title(nice_title, size='x-large', fontweight='bold')  
+      ax.set_title(title, size='x-large', fontweight='bold')  
     
     if y_title!=None:
       nice_y=y_title
     else:
-      nice_y="score" 
+      nice_y="value" 
     ax.set_ylabel(nice_y)
     
-    if x_labels:
-      if len(data[0])!=len(x_labels):
-        raise ValueError('Number of xlabels is not consistent with number of rows!')
+    if xlabels:
+      if len(data[0])!=len(xlabels):
+        raise ValueError('Number of xlabels is not consistent with number of cols!')
     else:
-      x_labels=list()
-      for i in range(1,len(data[0])+1):
-        x_labels.append('Row '+str(i))
+      xlabels=cols
       
-    ax.set_xticks(ind+width*0.5)
-    ax.set_xticklabels(x_labels, rotation = x_labels_rotation)
+    if set_xlabels:
+      ax.set_xticks(ind+0.5)
+      ax.set_xticklabels(xlabels, rotation = xlabels_rotation)
+    else:
+      ax.set_xticks([])
       
-    if legend:
-      if legend == True:
-        ax.legend(legend_data, cols)   
-      else:
-        ax.legend(legend_data, legend)
-      
+    if legend == True:
+      if legend_names==None:
+        raise ValueError('You must provide legend names! e.g. names for the rows, '\
+                         'that are printed in parallel.')
+      if len(legend_names)!=len(data):
+        raise ValueError('length of legend_names must be consistent with number '\
+                         'of plotted rows!')
+      ax.legend(legend_data, legend_names)   
+
     if save:
       plt.savefig(save)
+
+    if show:
+      plt.show()
     
     return plt
       

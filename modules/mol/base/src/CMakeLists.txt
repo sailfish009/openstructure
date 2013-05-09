@@ -19,7 +19,6 @@ entity_property_mapper.cc
 entity_view.cc
 entity_visitor.cc
 ics_editor.cc
-iterator.cc
 not_connected_error.cc
 property_id.cc
 query.cc
@@ -69,8 +68,6 @@ entity_visitor.hh
 entity_visitor_fw.hh
 handle_type_fw.hh
 ics_editor.hh
-iterator.hh
-iterator_fw.hh
 not_connected_error.hh
 property_id.hh
 query.hh

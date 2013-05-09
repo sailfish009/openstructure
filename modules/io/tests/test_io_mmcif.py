@@ -70,14 +70,38 @@ class TestMMCifInfo(unittest.TestCase):
     b.SetDetails('Details')
     self.assertEquals(b.GetDetails(), 'Details')
     b.AddChain('A')
+    b.AddChain('B')
     cl = b.GetChainList()
+    il = b.GetChainIntervalList()
     self.assertEquals(cl[0], 'A')
+    self.assertEquals(il[0][0], 0)
+    self.assertEquals(il[0][1], 2)
+    s = ost.StringList()
+    s.append('B')
+    s.append('C')
+    s.append('D')
+    b.SetChainList(s)
+    cl = b.GetChainList()
+    il = b.GetChainIntervalList()
+    self.assertEquals(il[0][0], 0)
+    self.assertEquals(il[0][1], 3)
+    self.assertEquals(cl[0], 'B')
+    self.assertEquals(cl[1], 'C')
+    self.assertEquals(cl[2], 'D')
 
     i = io.MMCifInfo()
     i.AddBioUnit(b)
+    i.AddBioUnit(b)
+    b.SetID("2")
+    i.AddBioUnit(b)
 
     bl = i.GetBioUnits()
-    self.assertEquals(len(bl), 1)
+    il = bl[0].GetChainIntervalList()
+    self.assertEquals(il[0][0], 0)
+    self.assertEquals(il[0][1], 3)
+    self.assertEquals(il[1][0], 3)
+    self.assertEquals(il[1][1], 6)
+    self.assertEquals(len(bl), 2)
 
 
   def test_mmcifinfo_transoperation(self):
@@ -103,6 +127,10 @@ class TestMMCifInfo(unittest.TestCase):
     b.AddOperations(ol)
     oll = b.GetOperations()
     self.assertEquals(oll[0][0].GetID(), '1')
+    tr_ol = b.GetOperationsIntervalList()
+    self.assertEquals(len(tr_ol), 1)
+    self.assertEquals(tr_ol[0][0], 0)
+    self.assertEquals(tr_ol[0][1], 1)
 
   def test_mmcifinfo_biounit_pdbize(self):
     ent, seqres, info = io.LoadMMCIF("testfiles/mmcif/3T6C.cif.gz",

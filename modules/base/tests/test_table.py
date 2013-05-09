@@ -1682,19 +1682,6 @@ class TestTable(unittest.TestCase):
                 c=[True,True,True,True,False,False,False,False,None,None],
                 d=['a','b','c','d','e','f','g','h','i','j'])
 
-    valid_operators=['and','or','!=','<=','>=','=','<','>','+','-','*','/']
-
-    precedence={'or':6 , 'and':5 , '!=':4 , '=':4 , '<=':3 , 
-                '>=':3 , '<':3 , '>':3 , '+':2 , '-':2 , '*':1 , '/':1}
-
-    #check wether special operators get parsed correctly
-    exp_one=['a','=','1','and','(','1.0','<=','b','and','b','<=','2.0',')']
-    exp_two=['a','=','1','and','(','b','=','1.0','or','b','=','2.0',')']
-    self.assertEquals(tab._ExpressionLexer('a=1 and b=1.0:2.0', valid_operators, precedence),exp_one)
-    self.assertEquals(tab._ExpressionLexer('a=1 and 1.0:2.0=b', valid_operators, precedence),exp_one)
-    self.assertEquals(tab._ExpressionLexer('a=1 and b=1.0,2.0', valid_operators, precedence),exp_two)
-    self.assertEquals(tab._ExpressionLexer('a=1 and 1.0,2.0=b', valid_operators, precedence),exp_two)
-    self.assertRaises(ValueError, tab._ExpressionLexer,'a=1 and b=1.0:2.0:3.0',valid_operators, precedence)
 
     #check wether error gets raised in problematic cases like: a=1=b
     self.assertRaises(ValueError, tab.Select, 'a=1=b and c=True')
@@ -1712,42 +1699,56 @@ class TestTable(unittest.TestCase):
     #check wether error gets raised when two operands are not separated by an operator
     self.assertRaises(ValueError,tab.Select,'a=1 b=1.0')
 
+    #check whether error gets raised when inconsistent types are compared
+    self.assertRaises(ValueError,tab.Select,'c>d')
+    self.assertRaises(ValueError,tab.Select,'c+d=5')
+
+    from ost.table_selector import TableSelector
+
+    selector=TableSelector(tab.col_types,tab.col_names,'')
+
     #check some examples for dijkstras shunting yard algorithm
     query_one='a=1:4 and ((b>5.0 or b<2.0) and c=True)'
-    split_exp_one=tab._ExpressionLexer(query_one,valid_operators,precedence)
-    rpn_one=['1', 'a', '<=', 'a', '4', '<=', 'and', 'b', '5.0', '>', 'b', '2.0', '<', 'or', 'c', 'True', '=', 'and', 'and']
+    split_exp_one=selector._ExpressionLexer(query_one)
+    parsed_exp_one=selector._ParseExpression(split_exp_one)
+    rpn_one=[1, 'a', '<=', 'a', 4, '<=', 'and', 'b', 5.0, '>', 'b', 2.0, '<', 'or', 'c', True, '=', 'and', 'and']
     query_two='(a=1,2) or (b>5.0+a or b<2.0)'
-    split_exp_two=tab._ExpressionLexer(query_two,valid_operators,precedence)
-    rpn_two=['a', '1', '=', 'a', '2', '=', 'or', 'b', '5.0', 'a', '+', '>', 'b', '2.0', '<', 'or', 'or']
-    self.assertEquals(tab._ShuntingYard(split_exp_one,valid_operators,precedence),rpn_one)
-    self.assertEquals(tab._ShuntingYard(split_exp_two,valid_operators,precedence),rpn_two)
+    split_exp_two=selector._ExpressionLexer(query_two)
+    parsed_exp_two=selector._ParseExpression(split_exp_two)
+    rpn_two=['a', 1, '=', 'a', 2, '=', 'or', 'b', 5.0, 'a', '+', '>', 'b', 2.0, '<', 'or', 'or']
+    self.assertEquals(selector._ShuntingYard(parsed_exp_one),rpn_one)
+    self.assertEquals(selector._ShuntingYard(parsed_exp_two),rpn_two)
 
     #check operator evaluations
-    self.assertTrue(tab._EvaluateOperator('=',False,False))
-    self.assertFalse(tab._EvaluateOperator('=',False,True))
-    self.assertTrue(tab._EvaluateOperator('and',True,True))
-    self.assertFalse(tab._EvaluateOperator('and',True,False))
-    self.assertTrue(tab._EvaluateOperator('or',True,False))
-    self.assertTrue(tab._EvaluateOperator('or',False,True))
-    self.assertFalse(tab._EvaluateOperator('or',False,False))
-    self.assertTrue(tab._EvaluateOperator('!=',False,True))
-    self.assertFalse(tab._EvaluateOperator('!=',True,True))
-    self.assertTrue(tab._EvaluateOperator('<=',1.0,2.0))
-    self.assertTrue(tab._EvaluateOperator('<=',1.0,1.0))
-    self.assertFalse(tab._EvaluateOperator('<=',2.0,1.0))
-    self.assertFalse(tab._EvaluateOperator('>=',1.0,2.0))
-    self.assertTrue(tab._EvaluateOperator('>=',2.0,1.0))
-    self.assertTrue(tab._EvaluateOperator('>=',1.0,1.0))
-    self.assertTrue(tab._EvaluateOperator('<',1.0,2.0))
-    self.assertFalse(tab._EvaluateOperator('<',2.0,1.0))
-    self.assertFalse(tab._EvaluateOperator('<',1.0,1.0))
-    self.assertFalse(tab._EvaluateOperator('>',1.0,2.0))
-    self.assertTrue(tab._EvaluateOperator('>',2.0,1.0))
-    self.assertFalse(tab._EvaluateOperator('>',1.0,1.0))
-    self.assertEqual(tab._EvaluateOperator('+',1,1),2)
-    self.assertEqual(tab._EvaluateOperator('-',1,1),0)
-    self.assertEqual(tab._EvaluateOperator('*',2,2),4)
-    self.assertEqual(tab._EvaluateOperator('/',2,2),1)
+    self.assertTrue(selector._EvaluateOperator('=',False,False))
+    self.assertFalse(selector._EvaluateOperator('=',False,True))
+    self.assertTrue(selector._EvaluateOperator('and',True,True))
+    self.assertFalse(selector._EvaluateOperator('and',True,False))
+    self.assertTrue(selector._EvaluateOperator('or',True,False))
+    self.assertTrue(selector._EvaluateOperator('or',False,True))
+    self.assertFalse(selector._EvaluateOperator('or',False,False))
+    self.assertTrue(selector._EvaluateOperator('!=',False,True))
+    self.assertFalse(selector._EvaluateOperator('!=',True,True))
+    self.assertTrue(selector._EvaluateOperator('<=',1.0,2.0))
+    self.assertTrue(selector._EvaluateOperator('<=',1.0,1.0))
+    self.assertFalse(selector._EvaluateOperator('<=',2.0,1.0))
+    self.assertFalse(selector._EvaluateOperator('>=',1.0,2.0))
+    self.assertTrue(selector._EvaluateOperator('>=',2.0,1.0))
+    self.assertTrue(selector._EvaluateOperator('>=',1.0,1.0))
+    self.assertTrue(selector._EvaluateOperator('<',1.0,2.0))
+    self.assertFalse(selector._EvaluateOperator('<',2.0,1.0))
+    self.assertFalse(selector._EvaluateOperator('<',1.0,1.0))
+    self.assertFalse(selector._EvaluateOperator('>',1.0,2.0))
+    self.assertTrue(selector._EvaluateOperator('>',2.0,1.0))
+    self.assertFalse(selector._EvaluateOperator('>',1.0,1.0))
+    self.assertEqual(selector._EvaluateOperator('+',1,1),2)
+    self.assertEqual(selector._EvaluateOperator('-',1,1),0)
+    self.assertEqual(selector._EvaluateOperator('*',2,2),4)
+    self.assertEqual(selector._EvaluateOperator('/',2,2),1)
+    self.assertEqual(selector._EvaluateOperator('+',None,5),None)
+    self.assertEqual(selector._EvaluateOperator('-',2,None),None)
+    self.assertEqual(selector._EvaluateOperator('/',2,None),None)
+    self.assertEqual(selector._EvaluateOperator('*',None,3),None)
 
     #check a few rpn evaluation examples
 
@@ -1755,9 +1756,9 @@ class TestTable(unittest.TestCase):
     rpn_two=[1, 0, '<=', 2, 4, '<=', 'and', 6.0, 5.0, '>', 2.0, 2.0, '<', 'or', True, True, '=', 'and', 'and']
     rpn_three=[1, 0, '<=', 2, 4, '<=', 'or', 6.0, 5.0, '>', 2.0, 2.0, '<', 'or', True, True, '=', 'and', 'and']
 
-    self.assertTrue(tab._EvaluateRPN(rpn_one, valid_operators))
-    self.assertFalse(tab._EvaluateRPN(rpn_two, valid_operators))
-    self.assertTrue(tab._EvaluateRPN(rpn_three, valid_operators))
+    self.assertTrue(selector._EvaluateRPN(rpn_one))
+    self.assertFalse(selector._EvaluateRPN(rpn_two))
+    self.assertTrue(selector._EvaluateRPN(rpn_three))
 
     #check a few selection examples
 
@@ -1766,12 +1767,19 @@ class TestTable(unittest.TestCase):
     query_three='d=e,f,j and a!=4'
     query_four='(b=2.0:3.0 and c=False) or (b<1.0 and c)'
     query_five='b=0.0:1.2,2.5:8.0'
+    query_six='c=None'
+    query_seven='c!=None'
+    query_eight='b/0.5=2'
 
     self.assertEqual([0,1,2,3], list(r[0] for r in tab.Select(query_one).rows))
     self.assertEqual([2,3], list(r[0] for r in tab.Select(query_two).rows))
     self.assertEqual([5,9], list(r[0] for r in tab.Select(query_three).rows))
     self.assertEqual([0,7], list(r[0] for r in tab.Select(query_four).rows))
     self.assertEqual([0,1,2,3,8,9], list(r[0] for r in tab.Select(query_five).rows))
+    self.assertEqual([8,9], list(r[0] for r in tab.Select(query_six).rows))
+    self.assertEqual([0,1,2,3,4,5,6,7], list(r[0] for r in tab.Select(query_seven).rows))
+    self.assertEqual([1], list(r[0] for r in tab.Select(query_eight).rows))
+
 
     
 if __name__ == "__main__":

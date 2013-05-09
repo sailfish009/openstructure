@@ -32,7 +32,6 @@
 #include "handle_type_fw.hh"
 #include "residue_prop.hh"
 #include "entity_visitor_fw.hh"
-#include "iterator_fw.hh"
 #include "sec_structure.hh"
 
 namespace ost { namespace mol {
@@ -133,28 +132,6 @@ public:
   /// want to determine the number of residues, use the dedicated
   /// \c ChainHandle::GetResidueCount
   ResidueHandleList GetResidueList() const;
-
-  /// \brief  Get iterator pointing to begin of residues
-  /// 
-  /// \note   Iterators are not fail-safe, meaning that the behaviour is
-  ///         undefined when using a ResidueHandleIter and residues are inserted
-  ///         or removed from the chain
-  /// \code
-  /// ResidueHandleIter res_it=chain.ResiduesBegin(), 
-  ///                   res_end=chain.ResiduesEnd();
-  /// for (; res_it!=res_end; ++res_it) {
-  ///   ResidueHandle res=*res_it;
-  ///   // do something with residue
-  /// }
-  ///  \endcode
-  ResidueHandleIter ResiduesBegin() const;
-
-  /// \brief  Get iterator pointing to the end of the residues
-  /// \sa     ResiduesBegin
-  ResidueHandleIter ResiduesEnd() const;
-  
-  AtomHandleIter AtomsBegin() const;
-  AtomHandleIter AtomsEnd() const;
 
   /// \brief Get entity's mass
   Real GetMass() const;

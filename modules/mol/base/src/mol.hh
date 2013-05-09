@@ -31,7 +31,6 @@
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/residue_view.hh>
 #include <ost/mol/atom_view.hh>
-#include <ost/mol/iterator.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/ics_editor.hh>
 #endif

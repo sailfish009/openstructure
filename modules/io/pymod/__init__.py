@@ -62,30 +62,6 @@ def _override(val1, val2):
   else:
     return val1
 
-def __GetModelFromPDB(model_id, output_dir, file_pattern='pdb%s.ent.gz'):
-  file_name = file_pattern % model_id
-  file_path = os.path.join(output_dir,file_name)
-  try:
-    server="ftp.wwpdb.org"
-    ftp=ftplib.FTP(server,"anonymous","user@")
-    ftp.cwd("pub/pdb/data/structures/all/pdb")
-    ftp_retrfile=open(file_path,"wb")
-    ftp.retrbinary("RETR "+file_name,ftp_retrfile.write)
-    ftp_retrfile.close()
-  except:
-    conn=httplib.HTTPConnection('www.pdb.org')
-    conn.request('GET', '/pdb/files/%s.pdb.gz' % model_id )
-    response=conn.getresponse()
-    if response.status==200:
-      data=response.read()
-      f=open(os.path.join(output_dir, file_pattern % model_id), 'w+')
-      f.write(data)
-      f.close()
-    else:
-      conn.close()
-      return False
-  return os.path.getsize(file_path) > 0
-
 def LoadPDB(filename, restrict_chains="", no_hetatms=None,
             fault_tolerant=None, load_multi=False, quack_mode=None,
             join_spread_atom_records=None, calpha_only=None,
@@ -157,12 +133,11 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
   prof.join_spread_atom_records=_override(prof.join_spread_atom_records,
                                           join_spread_atom_records)
 
+  tmp_file = None # avoid getting out of scope
   if remote:
-    output_dir = tempfile.gettempdir()
-    if __GetModelFromPDB(filename, output_dir):
-      filename = os.path.join(output_dir, 'pdb%s.ent.gz' % filename)
-    else:
-      raise IOError('Can not load PDB %s from www.pdb.org'%filename) 
+    from ost.io.remote import RemoteGet
+    tmp_file =RemoteGet(filename)
+    filename = tmp_file.name
   
   conop_inst=conop.Conopology.Instance()
   if prof.processor:
@@ -358,60 +333,50 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
 # MMCifInfoBioUnit.PDBize, since this function is not included in SPHINX.
 def _PDBize(biounit, asu, seqres=None, min_polymer_size=10,
             transformation=False):
+  pdbizer = mol.alg.PDBize(min_polymer_size=min_polymer_size)
+
+  chains = biounit.GetChainList()
+  c_intvls = biounit.GetChainIntervalList()
+  o_intvls = biounit.GetOperationsIntervalList()
+  ss = seqres
+  if not ss:
+    ss = seq.CreateSequenceList()
   # create list of operations
   # for cartesian products, operations are stored in a list, multiplied with
   # the next list of operations and re-stored... until all lists of operations
   # are multiplied in an all-against-all manner.
   operations = biounit.GetOperations()
-  trans_matrices = geom.Mat4List()
-  if len(operations) > 0:
-    for op in operations[0]:
-      rot = geom.Mat4()
-      rot.PasteRotation(op.rotation)
-      trans = geom.Mat4()
-      trans.PasteTranslation(op.translation)
-      tr = geom.Mat4()
-      tr = trans * rot
-      trans_matrices.append(tr)
-    for op_n in range(1, len(operations)):
-      tmp_ops = list()
-      for o in operations[op_n]:
+  for i in range(0,len(c_intvls)):
+    trans_matrices = geom.Mat4List()
+    l_operations = operations[o_intvls[i][0]:o_intvls[i][1]]
+    if len(l_operations) > 0:
+      for op in l_operations[0]:
         rot = geom.Mat4()
-        rot.PasteRotation(o.rotation)
+        rot.PasteRotation(op.rotation)
         trans = geom.Mat4()
-        trans.PasteTranslation(o.translation)
+        trans.PasteTranslation(op.translation)
         tr = geom.Mat4()
         tr = trans * rot
-        for t_o in trans_matrices:
-          tp = t_o * tr
-          tmp_ops.append(tp)
-      trans_matrices = tmp_ops
-  # select chains into a view as basis for each transformation
-  assu = asu.Select('cname=' + ','.join(biounit.GetChainList()))
-  # use each transformation on the view, store as entity and transform, PDBize
-  # the result while adding everything to one large entity
-  ss = seqres
-  if not ss:
-    ss = seq.SequenceList()
-
-  pdb_bu = mol.alg.PDBize(assu, trans_matrices, ss, min_polymer_size=min_polymer_size, 
-                          shift_to_fit=transformation)
+        trans_matrices.append(tr)
+      for op_n in range(1, len(l_operations)):
+        tmp_ops = list()
+        for o in l_operations[op_n]:
+          rot = geom.Mat4()
+          rot.PasteRotation(o.rotation)
+          trans = geom.Mat4()
+          trans.PasteTranslation(o.translation)
+          tr = geom.Mat4()
+          tr = trans * rot
+          for t_o in trans_matrices:
+            tp = t_o * tr
+            tmp_ops.append(tp)
+        trans_matrices = tmp_ops
+    # select chains into a view as basis for each transformation
+    assu = asu.Select('cname='+','.join(chains[c_intvls[i][0]:c_intvls[i][1]]))
+    pdbizer.Add(assu, trans_matrices, ss)
+  pdb_bu = pdbizer.Finish(transformation)
   if transformation:
     return pdb_bu, pdb_bu.GetTransformationMatrix()
   return pdb_bu
 
 MMCifInfoBioUnit.PDBize = _PDBize
-
-## \example fft_li.py
-#
-# This scripts loads one or more images and shows their Fourier Transforms on 
-# the screen. A viewer is opened for each loaded image. The Fourier Transform 
-# honors the origin of the reference system, which is assumed to be at the 
-# center of the image.
-#
-# Usage:
-#
-# \code giplt view_ft.py <image1> [<image2> <image3> .... ] \endcode
-#
-# <BR>
-# <BR>

@@ -21,6 +21,7 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
 
+#include <ost/export_helper/pair_to_tuple_conv.hh>
 #include <ost/io/mol/io_profile.hh>
 #include <ost/io/mol/mmcif_reader.hh>
 #include <ost/io/mol/mmcif_info.hh>
@@ -172,23 +173,44 @@ void export_mmcif_io()
   	.add_property("seq_rnum", &MMCifInfoStructRefSeqDif::GetSeqRNum)
   	.add_property("db_rnum", &MMCifInfoStructRefSeqDif::GetDBRNum)
   ;
+
+  typedef std::pair<int, int> IntPair;
+  to_python_converter<IntPair, PairToTupleConverter<int, int> >();
+  typedef std::vector<IntPair> VectorIntPair;
+  class_<VectorIntPair>("VectorIntPair", init<>())
+    .def(vector_indexing_suite<VectorIntPair, true>())
+  ;
+
   class_<MMCifInfoBioUnit>("MMCifInfoBioUnit", init<>())
     .def("SetDetails", &MMCifInfoBioUnit::SetDetails)
     .def("GetDetails", &MMCifInfoBioUnit::GetDetails)
     .def("AddChain", &MMCifInfoBioUnit::AddChain)
+    .def("SetChainList", &MMCifInfoBioUnit::SetChainList)
     .def("GetChainList", make_function(&MMCifInfoBioUnit::GetChainList,
                                    return_value_policy<copy_const_reference>()))
+    .def("GetChainIntervalList",
+         make_function(&MMCifInfoBioUnit::GetChainIntervalList,
+                       return_value_policy<copy_const_reference>()))
     .def("AddOperations", &MMCifInfoBioUnit::AddOperations)
     .def("GetOperations", make_function(&MMCifInfoBioUnit::GetOperations,
                                    return_value_policy<copy_const_reference>()))
+    .def("GetOperationsIntervalList",
+         make_function(&MMCifInfoBioUnit::GetOperationsIntervalList,
+                       return_value_policy<copy_const_reference>()))
     .def("SetID", &MMCifInfoBioUnit::SetID)
     .def("GetID", &MMCifInfoBioUnit::GetID)
     .add_property("details", &MMCifInfoBioUnit::GetDetails,
                   &MMCifInfoBioUnit::SetDetails)
     .add_property("chains", make_function(&MMCifInfoBioUnit::GetChainList,
                                    return_value_policy<copy_const_reference>()))
+    .add_property("chainintervalls", make_function(
+                                  &MMCifInfoBioUnit::GetChainIntervalList,
+                                  return_value_policy<copy_const_reference>()))
     .add_property("operations", make_function(&MMCifInfoBioUnit::GetOperations,
                                    return_value_policy<copy_const_reference>()))
+    .add_property("operationsintervalls", make_function(
+                                  &MMCifInfoBioUnit::GetOperationsIntervalList,
+                                  return_value_policy<copy_const_reference>()))
     .add_property("id", &MMCifInfoBioUnit::GetID, &MMCifInfoBioUnit::SetID)
   ;
 

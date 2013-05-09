@@ -109,6 +109,7 @@ Scene::Scene():
   light_amb_(0.1,0.1,0.1),
   light_diff_(0.9,0.9,0.9),
   light_spec_(0.5,0.5,0.5),
+  hemi_param_(0.4,1.0,0.0,1.0),
   cor_flag_(false),
   fix_cor_flag_(true),
   fog_flag_(true),
@@ -138,6 +139,8 @@ Scene::Scene():
   scene_right_tex_(),
   bg_mode_(0),
   update_bg_(false),
+  bg_stereo_mode_(false),
+  bg_stereo_offset_(20.0),
   bg_grad_(),
   bg_bm_(),
   bg_tex_(),
@@ -337,6 +340,12 @@ float Scene::GetAmbientOcclusionSize() const
 #else
   return 1.0;
 #endif
+}
+
+void Scene::SetHemiParams(const geom::Vec4& p)
+{
+  hemi_param_=p;
+  RequestRedraw();
 }
 
 void Scene::SetShadingMode(const std::string& smode)
@@ -649,6 +658,20 @@ void Scene::SetBackground(const Bitmap& bm)
   RequestRedraw();
 }
 
+void Scene::SetBackgroundStereoMode(bool m)
+{
+  if(bg_stereo_mode_==m) return;
+  bg_stereo_mode_=m;
+  RequestRedraw();
+}
+
+void Scene::SetBackgroundStereoOffset(float o)
+{
+  if(bg_stereo_offset_==o) return;
+  bg_stereo_offset_=o;
+  RequestRedraw();
+}
+
 Color Scene::GetBackground() const
 {
   return background_;
@@ -819,6 +842,17 @@ void Scene::RenderGL()
   }
 
   prep_blur();
+
+#if OST_SHADER_SUPPORT_ENABLED
+  {
+    GLuint cpr=Shader::Instance().GetCurrentProgram();
+    GLuint loc=glGetUniformLocation(cpr,"hemi_param");
+    if(loc>0) {
+      glUniform4f(loc,hemi_param_[0],hemi_param_[1],hemi_param_[2],hemi_param_[3]);
+    }
+  }
+#endif
+
 
   if(stereo_mode_==1 || stereo_mode_==2 || stereo_mode_==3) {
     render_stereo();
@@ -2075,6 +2109,26 @@ namespace {
         glEnd();
       }
 
+      void DrawStereoTex(GLuint tex_id, int w, int h, float x_offset) {
+        glEnable(GL_TEXTURE_2D);
+#if OST_SHADER_SUPPORT_ENABLED
+        if(OST_GL_VERSION_2_0) {
+          glActiveTexture(GL_TEXTURE0);
+        }
+#endif
+        glBindTexture(GL_TEXTURE_2D, tex_id);
+        glColor3f(0.0,0.0,0.0);
+        glBegin(GL_QUADS);
+        float fracw = 0.5*static_cast<float>(vp_width_)/static_cast<float>(w);
+        float frach = 0.5*static_cast<float>(vp_height_)/static_cast<float>(h);
+        float xo = -x_offset/static_cast<float>(vp_width_);
+        glTexCoord2f(-fracw+xo,-frach); glVertex3i(0,0,1);
+        glTexCoord2f(-fracw+xo,frach); glVertex3i(0,vp_height_,1);
+        glTexCoord2f(fracw+xo,frach); glVertex3i(vp_width_,vp_height_,1);
+        glTexCoord2f(fracw+xo,-frach); glVertex3i(vp_width_,0,1);
+        glEnd();
+     }
+
       ~ViewportRenderer() {
         glBindTexture(GL_TEXTURE_2D, 0);
         glDisable(GL_TEXTURE_2D);
@@ -2094,7 +2148,20 @@ namespace {
 #endif
       }
   };
-}
+
+  double unproj_x() {
+    GLdouble gl_mmat[]={1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+    GLdouble gl_pmat[16];
+    glGetDoublev(GL_PROJECTION_MATRIX,gl_pmat);
+    GLint gl_vp[]={0,0,1,1};
+
+    double res[3];
+    gluUnProject(0.5,0.5,1.0,
+                 gl_mmat,gl_pmat,gl_vp,
+                 &res[0],&res[1],&res[2]);
+    return res[0];
+  }
+} // anon ns
 
 void Scene::render_bg()
 {
@@ -2106,9 +2173,16 @@ void Scene::render_bg()
     update_bg_=false;
   }
 
+  //double zfar_x_offset=unproj_x();
+  float zfar_x_offset=static_cast<float>(stereo_eye_)*bg_stereo_offset_;
   {
+    // this goes to orthogonal display mode
     ViewportRenderer vpr(vp_width_,vp_height_);
-    vpr.DrawTex(bg_tex_);
+    if(bg_stereo_mode_) {
+      vpr.DrawStereoTex(bg_tex_,bg_bm_.width,bg_bm_.height, zfar_x_offset);
+    } else {
+      vpr.DrawTex(bg_tex_);
+    }
     // dtor takes care of the rest
   }
 

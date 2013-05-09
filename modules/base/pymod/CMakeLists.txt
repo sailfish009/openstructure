@@ -7,10 +7,14 @@ set(OST_BASE_PYMOD_SOURCES
 if (NOT ENABLE_STATIC)
   pymod(NAME base OUTPUT_DIR ost 
         CPP ${OST_BASE_PYMOD_SOURCES} 
-        PY settings.py stutil.py table.py xmlrunner.py testutils.py)
+        PY settings.py stutil.py table.py table_selector.py xmlrunner.py testutils.py)
 endif() 
 
-set(SQ "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\'")
+if(WIN32)
+  set(SQ "'")
+else(WIN32)
+  set(SQ "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\'")
+endif(WIN32)
 set(SUBST_DICT "ALL_ADDITIONAL_MODULES=")
 if(ENABLE_GUI)
   set(SUBST_DICT "${SUBST_DICT},${SQ}gui${SQ}")

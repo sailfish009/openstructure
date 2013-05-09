@@ -27,6 +27,8 @@
 #ifndef IMG_GUI_DATA_VIEWER_PROXY_H
 #define IMG_GUI_DATA_VIEWER_PROXY_H
 
+#include "sip_handler.hh"
+
 #include <boost/shared_ptr.hpp>
 #include <QPointer>
 
@@ -38,8 +40,6 @@
 #include <ost/gui/data_viewer/overlay_manager_fw.hh>
 #include <ost/gui/data_viewer/data_viewer.hh>
 #include <ost/gui/module_config.hh>
-
-#include "sip_handler.hh"
 
 class QWidget;
 class QString;

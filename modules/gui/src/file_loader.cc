@@ -60,7 +60,6 @@
 #include <QMenuBar>
 namespace ost { namespace gui {
 
-LoaderManagerPtr FileLoader::loader_manager_ = LoaderManagerPtr();
 
 #if OST_IMG_ENABLED
   QList<img::ImageHandle> FileLoader::loaded_images_;
@@ -160,36 +159,6 @@ gfx::GfxObjP FileLoader::NoHandlerFound(const QString& filename)
     FileLoader::HandleError(e,IO_LOADING,filename);
   }
   return gfx::GfxObjP();
-}
-
-void FileLoader::LoadFrom(const QString& id, const QString& site, const QString& selection)
-{
-  if(!loader_manager_)
-    loader_manager_ = LoaderManagerPtr(new LoaderManager());
-  RemoteSiteLoader* remote_site = loader_manager_->GetRemoteSiteLoader(site);
-  if(remote_site){
-    remote_site->LoadById(id,selection);
-  }
-  else{
-    remote_site = loader_manager_->GetCurrentSiteLoader();
-    if(remote_site){
-      remote_site->LoadById(id,selection);
-    }
-  }
-}
-
-LoaderManagerPtr FileLoader::GetLoaderManager()
-{
-  if(!loader_manager_)
-    loader_manager_ = LoaderManagerPtr(new LoaderManager());
-  return loader_manager_;
-}
-
-std::vector<String> FileLoader::GetSiteLoaderIdents()
-{
-  if(!loader_manager_)
-    loader_manager_ = LoaderManagerPtr(new LoaderManager());
-  return loader_manager_->GetSiteLoaderIdents();
 }
 
 void FileLoader::HandleError(const Error& e, ErrorType type, const QString& filename, gfx::GfxObjP obj)

@@ -91,7 +91,6 @@ void usage()
   std::cerr << "   -v <level> verbosity level (0=results only,1=problems reported, 2=full report)" << std::endl;
   std::cerr << "   -b <value> tolerance in stddevs for bonds" << std::endl;
   std::cerr << "   -a <value> tolerance in stddevs for angles" << std::endl;
-  std::cerr << "   -m <value> clashing distance for unknwon atom types" << std::endl;
   std::cerr << "   -r <value> distance inclusion radius" << std::endl;
   std::cerr << "   -i <value> sequence separation" << std::endl;
   std::cerr << "   -e         print version" << std::endl;
@@ -105,7 +104,11 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
   int second=0;
   int first=0;
   if (v.GetResidueList().size()==0) {
-    return std::make_pair<int,int>(0,1);
+    if (glob_dist_list.size()==0) {
+      return std::make_pair<int,int>(0,-1);
+    } else {    
+      return std::make_pair<int,int>(0,glob_dist_list.size());
+    }  
   }
   ChainView vchain=v.GetChainList()[0];
   for (GlobalRDMap::const_iterator i=glob_dist_list.begin();i!=glob_dist_list.end();++i)
@@ -344,6 +347,7 @@ int main (int argc, char **argv)
     std::cout << "Stereo-chemical and steric clash checks: Off " << std::endl;
   }
   std::cout << "Inclusion Radius: " << radius << std::endl;
+
   std::cout << "Sequence separation: " << sequence_separation << std::endl;
   if (structural_checks) {
     std::cout << "Parameter filename: " << parameter_filename << std::endl;
@@ -355,6 +359,12 @@ int main (int argc, char **argv)
     LOG_INFO("CLASH INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  Observed  Difference  Status");
   }
   LOG_INFO("LDDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
+
+  // error if the reference structure is empty
+  if (glob_dist_list.size()==0) {
+    std::cout << "ERROR: No valid distance to check in the reference structure(s). Please check that the first chain of the reference structure(s) contains a peptide." << std::endl;
+    exit(-1);
+  }
 
   // cycles through the models to evaluate 
   for (size_t i=0; i<files.size(); ++i) {
@@ -369,13 +379,13 @@ int main (int argc, char **argv)
     EntityView outv=model.GetChainList()[0].Select("peptide=true");
     for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
          ref_list_it != ref_list.end(); ++ref_list_it) {
-      bool cons_check = ResidueNamesMatch(v,*ref_list_it);
+      bool cons_check = ResidueNamesMatch(v,*ref_list_it,consistency_checks);
       if (cons_check==false) {
         if (consistency_checks==true) {
-          LOG_ERROR("Residue names in model: " << files[i] << " are inconsistent with one or more references");
+          LOG_ERROR("Residue names in model: " << files[i] << " and in reference structure(s) are inconsistent.");
           exit(-1);            
         } else {
-          LOG_WARNING("Residue names in model: " << files[i] << " are inconsistent with one or more references");
+          LOG_WARNING("Residue names in model: " << files[i] << " and in reference structure(s) are inconsistent.");
         }   
       } 
     }
@@ -385,7 +395,11 @@ int main (int argc, char **argv)
     String filestring=BFPathToString(pathstring);
     std::cout << "File: " << files[i] << std::endl; 
     std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
-    std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
+    if (cov.second == -1) {
+      std::cout << "Coverage: 0 (0 out of 0 residues)" << std::endl;
+    } else {
+      std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
+    }
 
     if (structural_checks) {
       // reads in parameter files   
@@ -419,21 +433,42 @@ int main (int argc, char **argv)
         std::cout << "Error reading the Clashing section of the stereo-chemical parameter file." << std::endl;
         exit(-1);
       }
-      // performs structural checks and filters the structure   
+      // performs structural checks and filters the structure
+      StereoChemistryInfo stereo_chemistry_info;
       try { 
-        v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
+        std::pair<EntityView,StereoChemistryInfo> csc_result = alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
+        v = csc_result.first;
+        stereo_chemistry_info = csc_result.second;
       } catch (std::exception& e) {       
         std::cout << "An error occurred during the structure quality checks, stage 1:" << std::endl;    
         std::cout << e.what() << std::endl;
         exit(-1);
       }
+      std::cout << "Average Z-Score for bond lengths: " << std::fixed << std::setprecision(5) << stereo_chemistry_info.GetAvgZscoreBonds() << std::endl;
+      std::cout << "Bonds outside of tolerance range: " << stereo_chemistry_info.GetBadBondCount() << " out of " << stereo_chemistry_info.GetBondCount() << std::endl;
+      std::cout << "Bond\tAvg Length\tAvg zscore\tNum Bonds" << std::endl;
+      std::map<String,BondLengthInfo> avg_bond_length_info = stereo_chemistry_info.GetAvgBondLengthInfo();
+      for (std::map<String,BondLengthInfo>::const_iterator abli_it=avg_bond_length_info.begin();abli_it!=avg_bond_length_info.end();++abli_it) {
+        String key = (*abli_it).first;
+        BondLengthInfo bond_length_info = (*abli_it).second;
+        std::cout << key << "\t" << std::fixed << std::setprecision(5) << std::left << std::setw(10) <<
+                     bond_length_info.GetAvgLength() << "\t" << std::left << std::setw(10) << bond_length_info.GetAvgZscore() << "\t" << bond_length_info.GetCount()  << std::endl;
+      }
+      std::cout << "Average Z-Score angle widths: " << std::fixed << std::setprecision(5) << stereo_chemistry_info.GetAvgZscoreAngles() << std::endl;
+      std::cout << "Angles outside of tolerance range: " << stereo_chemistry_info.GetBadAngleCount() << " out of " << stereo_chemistry_info.GetAngleCount() << std::endl;
+      ClashingInfo clash_info;
       try {
-        v=alg::FilterClashes(v,nonbonded_table);
+        std::pair<EntityView,ClashingInfo> fc_result = alg::FilterClashes(v,nonbonded_table);
+        v = fc_result.first;
+        clash_info = fc_result.second;
       } catch (std::exception& e) {       
         std::cout << "An error occurred during the structure quality checks, stage 2:" << std::endl;    
         std::cout << e.what() << std::endl;
         exit(-1);
       }
+      std::cout << clash_info.GetClashCount() << " non-bonded short-range distances shorter than tolerance distance" << std::endl;
+      std::cout << "Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << clash_info.GetAverageOffset() << std::endl;
+
     }
     if (cov.first==0) {
       std::cout << "Global LDDT score: 0.0" << std::endl;
@@ -462,54 +497,61 @@ int main (int argc, char **argv)
     } else {
       std::cout << "Chain\tResName\tResNum\tAsses.\tScore\t(Conserved/Total, over " << cutoffs.size() << " thresholds)" << std::endl;
     }
-    for (ResidueViewIter rit=outv.ResiduesBegin();rit!=outv.ResiduesEnd();++rit){
-      ResidueView ritv=*rit;
-      ResNum rnum = ritv.GetNumber();
-      bool assessed = false;
-      String assessed_string="No";
-      bool quality_problems = false;
-      String quality_problems_string="No";
-      Real lddt_local = -1;
-      String lddt_local_string="-";
-      int conserved_dist = -1;
-      int total_dist = -1;
-      String dist_string = "-";
-      if (is_resnum_in_globalrdmap(rnum,glob_dist_list)) {
-        assessed = true;
-        assessed_string="Yes";
-      }
-      if (ritv.HasProp("stereo_chemical_violation_sidechain") || ritv.HasProp("steric_clash_sidechain")) {
-        quality_problems = true;
-        quality_problems_string="Yes";
-      }
-      if (ritv.HasProp("stereo_chemical_violation_backbone") || ritv.HasProp("steric_clash_backbone")) {
-        quality_problems = true;
-        quality_problems_string="Yes+";
-      }
-
-      if (assessed==true) {
-        if (ritv.HasProp(label)) {
-          lddt_local=ritv.GetFloatProp(label);
-          std::stringstream stkeylddt;
-          stkeylddt <<  std::fixed << std::setprecision(4) << lddt_local;
-          lddt_local_string=stkeylddt.str();
-          conserved_dist=ritv.GetIntProp(label+"_conserved");
-          total_dist=ritv.GetIntProp(label+"_total");
-          std::stringstream stkeydist;
-          stkeydist << "("<< conserved_dist << "/" << total_dist << ")";
-          dist_string=stkeydist.str();
-        } else {
-          lddt_local = 0;
-          lddt_local_string="0.0000";
-          conserved_dist = 0;
-          total_dist = 0;
-          dist_string="(0/0)";
+    for (ChainViewList::const_iterator ci = outv.GetChainList().begin(),
+         ce = outv.GetChainList().end(); ci != ce; ++ci) {
+      for (ResidueViewList::const_iterator rit = ci->GetResidueList().begin(),
+           re = ci->GetResidueList().end(); rit != re; ++rit) {
+     
+        ResidueView ritv=*rit;
+        ResNum rnum = ritv.GetNumber();
+        bool assessed = false;
+        String assessed_string="No";
+        bool quality_problems = false;
+        String quality_problems_string="No";
+        Real lddt_local = -1;
+        String lddt_local_string="-";
+        int conserved_dist = -1;
+        int total_dist = -1;
+        String dist_string = "-";
+        if (is_resnum_in_globalrdmap(rnum,glob_dist_list)) {
+          assessed = true;
+          assessed_string="Yes";
         }
-      }
-      if (structural_checks) {
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << quality_problems_string << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
-      } else {
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
+        if (ritv.HasProp("stereo_chemical_violation_sidechain") || 
+            ritv.HasProp("steric_clash_sidechain")) {
+          quality_problems = true;
+          quality_problems_string="Yes";
+        }
+        if (ritv.HasProp("stereo_chemical_violation_backbone") || 
+            ritv.HasProp("steric_clash_backbone")) {
+          quality_problems = true;
+          quality_problems_string="Yes+";
+        }
+
+        if (assessed==true) {
+          if (ritv.HasProp(label)) {
+            lddt_local=ritv.GetFloatProp(label);
+            std::stringstream stkeylddt;
+            stkeylddt <<  std::fixed << std::setprecision(4) << lddt_local;
+            lddt_local_string=stkeylddt.str();
+            conserved_dist=ritv.GetIntProp(label+"_conserved");
+            total_dist=ritv.GetIntProp(label+"_total");
+            std::stringstream stkeydist;
+            stkeydist << "("<< conserved_dist << "/" << total_dist << ")";
+            dist_string=stkeydist.str();
+          } else {
+            lddt_local = 0;
+            lddt_local_string="0.0000";
+            conserved_dist = 0;
+            total_dist = 0;
+            dist_string="(0/0)";
+          }
+        }
+        if (structural_checks) {
+          std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << quality_problems_string << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
+        } else {
+          std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
+        }
       }
     }
     std::cout << std::endl;

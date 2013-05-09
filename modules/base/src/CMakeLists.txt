@@ -37,6 +37,7 @@ boost_filesystem_helper.hh
 set(OST_EXPORT_HELPERS
 generic_property_def.hh 
 pair_to_tuple_conv.hh 
+vec_to_list_conv.hh
 )
 module(NAME base SOURCES ${OST_BASE_SOURCES} 
        HEADERS ${OST_EXPORT_HELPERS} IN_DIR export_helper 

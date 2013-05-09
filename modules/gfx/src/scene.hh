@@ -143,7 +143,10 @@ class DLLEXPORT_OST_GFX Scene {
   void SetAmbientOcclusionSize(float f);
   /// experimental feature
   float GetAmbientOcclusionSize() const;
-  
+ 
+  void SetHemiParams(const geom::Vec4&);
+  geom::Vec4 GetHemiParams() const {return hemi_param_;}
+
   /// \brief select shading mode
   /// one of fallback, basic, default, hf, toon1, toon2
   void SetShadingMode(const std::string& smode);
@@ -349,6 +352,15 @@ class DLLEXPORT_OST_GFX Scene {
 
   /// \brief get background color
   Color GetBackground() const;
+
+  /// \brief use bg bitmap for stereo mode
+  /// this tiles the background bitmap at the far plane
+  void SetBackgroundStereoMode(bool);
+  bool GetBackgroundStereoMode() const {return bg_stereo_mode_;}
+
+  /// background tile left/right offset
+  void SetBackgroundStereoOffset(float);
+  float GetBackgroundStereoOffset() const {return bg_stereo_offset_;}
 
   /// \brief center rotation on the given point
   void SetCenter(const geom::Vec3& cen);
@@ -565,6 +577,7 @@ private:
   Color light_amb_;
   Color light_diff_;
   Color light_spec_;
+  geom::Vec4 hemi_param_;
 
   bool cor_flag_;
   bool fix_cor_flag_;
@@ -594,12 +607,14 @@ private:
   unsigned int stereo_mode_;
   unsigned int stereo_alg_;
   bool stereo_inverted_;
-  unsigned int stereo_eye_;
+  int stereo_eye_;
   Real stereo_iod_,stereo_distance_;
   unsigned int scene_left_tex_;
   unsigned int scene_right_tex_;
   unsigned int bg_mode_;
   bool update_bg_;
+  bool bg_stereo_mode_;
+  float bg_stereo_offset_;
   Gradient bg_grad_;
   Bitmap bg_bm_;
   unsigned int bg_tex_;

@@ -26,7 +26,7 @@ import re
 from PyQt4 import QtCore, QtGui, QtNetwork
 from ost.gui import FileLoader
 
-
+"""
 class BaseRemoteLoader(gui.RemoteSiteLoader):
   def __init__(self):
     gui.RemoteSiteLoader.__init__(self)
@@ -195,3 +195,4 @@ class GenericLoader(BaseRemoteLoader):
       default = bool(int(group.GetAttribute(GenericLoader.DEFAULT_ATTRIBUTE_NAME)))
 
     return GenericLoader(name, url, up_case, file_type, tmp_url, img, default)
+"""

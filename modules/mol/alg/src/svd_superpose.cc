@@ -17,9 +17,6 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-/*
- * Author Juergen Haas
- */
 #include <stdexcept>
 #include <iostream>
 #include <boost/bind.hpp>
@@ -34,9 +31,13 @@
 #include <ost/geom/vec3.hh>
 #include <ost/mol/alg/svd_superpose.hh>
 #include <ost/mol/xcs_editor.hh>
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/residue_view.hh>
+#include <ost/mol/chain_view.hh>
+#include <ost/mol/chain_handle.hh>
 #include <ost/mol/view_op.hh>
 #include <ost/mol/atom_view.hh>
-#include <ost/mol/iterator.hh>
+
 namespace ost { namespace mol { namespace alg {
 
 
@@ -47,50 +48,36 @@ typedef Eigen::Matrix<Real,1,3> ERVec3;
 typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> EMatX;
 typedef Eigen::Matrix<Real,1,Eigen::Dynamic> ERVecX;
 
-Real CalculateRMSD(const mol::EntityView& ev1,
-                   const mol::EntityView& ev2,
-                   const geom::Mat4& transformation) {
-  mol::EntityView evt;
-  mol::EntityHandle eht, eh1;
-  int counta=ev1.GetAtomCount();
-  int countb=ev2.GetAtomCount();
-  if (counta!=countb){
-    throw Error("atom counts of the two views are not equal");
-  }
-  eht=ev1.GetHandle();
-  int natoms=ev1.GetAtomCount();
+
+
+
+
+Real calc_rmsd_for_point_lists(const std::vector<geom::Vec3>& points1,
+                              const std::vector<geom::Vec3>& points2,
+                              const geom::Mat4& transformation)
+{
+  
   Real rmsd=0.0;
-  mol::AtomViewIter a_ev1=ev1.AtomsBegin();
-  mol::AtomViewIter a_ev1_end=ev1.AtomsEnd();
-  mol::AtomViewIter a_ev2=ev2.AtomsBegin();
-  for (int counter=0; a_ev1_end!=a_ev1; ++a_ev1, ++a_ev2, ++counter) {
-    mol::AtomView av1=*a_ev1;
-    geom::Vec3 apos=av1.GetPos();
-    mol::AtomView av2=*a_ev2;
-    geom::Vec3 bpos=av2.GetPos();
-    Real val=geom::Length2(geom::Vec3(transformation*geom::Vec4(apos))-bpos);
+  std::vector<geom::Vec3>::const_iterator a_ev1=points1.begin();
+  std::vector<geom::Vec3>::const_iterator a_ev1_end=points1.end();
+  std::vector<geom::Vec3>::const_iterator a_ev2=points2.begin();
+  for (; a_ev1_end!=a_ev1; ++a_ev1, ++a_ev2) {
+    Real val=geom::Length2(geom::Vec3(transformation*geom::Vec4(*a_ev1))-*a_ev2);
     rmsd+=val;
   }
-  rmsd=sqrt(rmsd/natoms);
+  rmsd=sqrt(rmsd/points1.size());
   return rmsd;
 }
 
-
-
-
 Real calc_rmsd_for_atom_lists(const mol::AtomViewList& atoms1,
-                                const mol::AtomViewList& atoms2,
-                                const geom::Mat4& transformation)
+                              const mol::AtomViewList& atoms2,
+                              const geom::Mat4& transformation)
 {
-  mol::EntityView evt;
-  mol::EntityHandle eht, eh1;
-//  convert view ev1 to handle
-  int natoms=static_cast<int>(atoms1.size());
   Real rmsd=0.0;
   mol::AtomViewList::const_iterator a_ev1=atoms1.begin();
   mol::AtomViewList::const_iterator a_ev1_end=atoms1.end();
   mol::AtomViewList::const_iterator a_ev2=atoms2.begin();
-  for (int counter=0; a_ev1_end!=a_ev1; ++a_ev1, ++a_ev2, ++counter) {
+  for (; a_ev1_end!=a_ev1; ++a_ev1, ++a_ev2) {
     mol::AtomView av1=*a_ev1;
     geom::Vec3 apos=av1.GetPos();
     mol::AtomView av2=*a_ev2;
@@ -98,335 +85,215 @@ Real calc_rmsd_for_atom_lists(const mol::AtomViewList& atoms1,
     Real val=geom::Length2(geom::Vec3(transformation*geom::Vec4(apos))-bpos);
     rmsd+=val;
   }
-  rmsd=sqrt(rmsd/natoms);
+  rmsd=sqrt(rmsd/atoms1.size());
   return rmsd;
 }
 
-class SuperposerSVDImpl {
-public:
-  SuperposerSVDImpl(int natoms, bool alloc_atoms):
-    natoms_(natoms), alloc_atoms_(alloc_atoms)
-  {
+Real CalculateRMSD(const mol::EntityView& ev1,
+                   const mol::EntityView& ev2,
+                   const geom::Mat4& transformation) {
 
-    ERVec3 avg1_=EVec3::Zero();
-    ERVec3 avg2_=EVec3::Zero();
-
-    if (alloc_atoms_) {
-      atoms1_=EMatX::Zero(natoms,3);
-      atoms2_=EMatX::Zero(natoms,3);
-    }
-
-  }
-private:
-  int natoms_;
-  bool alloc_atoms_;
-  EMatX atoms1_;
-  EMatX atoms2_;
-public:  
-  void EntToMatrices(const mol::EntityView& ev1, const mol::EntityView& ev2);
-  geom::Vec3 EigenVec3ToVec3(const EVec3 &vec);
-  geom::Mat3 EigenMat3ToMat3(const EMat3 &mat);
-  EVec3 Vec3ToEigenRVec(const geom::Vec3 &vec);
-  EVec3 Vec3ToEigenVec(const geom::Vec3 &vec);
-  EMatX SubtractVecFromMatrixRows(EMatX Mat,
-                                  ERVecX Vec);
-  SuperpositionResult Run(const mol::AtomViewList& atoms1,          
-                          const mol::AtomViewList& atoms2);
-  SuperpositionResult Run(const std::vector<geom::Vec3>& pl1,
-                          const std::vector<geom::Vec3>& pl2);
-  SuperpositionResult DoSuperposition();
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW //needed only if *fixed* sized matrices are
-                                    //members of classes  
-};
-
-SuperposerSVD::~SuperposerSVD()
-{
-  assert(impl_);
-  delete impl_;
+  return calc_rmsd_for_atom_lists(ev1.GetAtomList(), ev2.GetAtomList(), 
+                                  transformation);
 }
 
-
-SuperposerSVD::SuperposerSVD(int natoms, bool alloc_atoms):
-  impl_(new SuperposerSVDImpl(natoms, alloc_atoms))
-{
-  
-}
-
-geom::Vec3 SuperposerSVDImpl::EigenVec3ToVec3(const EVec3 &vec)
+geom::Vec3 EigenVec3ToVec3(const EVec3 &vec)
 {
   return geom::Vec3(vec.data());
 }
 
-geom::Mat3 SuperposerSVDImpl::EigenMat3ToMat3(const EMat3 &mat)
+geom::Mat3 EigenMat3ToMat3(const EMat3 &mat)
 {
   return geom::Mat3(mat.data());
 }
 
-EVec3 SuperposerSVDImpl::Vec3ToEigenRVec(const geom::Vec3 &vec)
+EVec3 Vec3ToEigenRVec(const geom::Vec3 &vec)
 {
   return EVec3(&vec[0]);
 }
 
-EVec3 SuperposerSVDImpl::Vec3ToEigenVec(const geom::Vec3 &vec)
+EVec3 Vec3ToEigenVec(const geom::Vec3 &vec)
 {
   return EVec3(&vec[0]);
 }
 
-EMatX SuperposerSVDImpl::SubtractVecFromMatrixRows(EMatX Mat,
-                                               ERVecX Vec)
+EMatX MatrixShiftedBy(EMatX mat, ERVecX vec)
 {
-
-  for (int row=0;  row<Mat.rows();++row) {
-    Mat.row(row)-=Vec;
+  EMatX result = mat;
+  for (int row=0;  row<mat.rows();++row) {
+    result.row(row) -= vec;
   }
-  return Mat;
+  return result;
 }
 
-void SuperposerSVDImpl::EntToMatrices(const mol::EntityView& ev1,
-                                      const mol::EntityView& ev2)
-{
-  //Now iterate over atoms in entities and extract coords into Nx3 matrices
-  //for superposition
-  mol::AtomViewIter a_ev1=ev1.AtomsBegin();
-  mol::AtomViewIter a_ev1_end=ev1.AtomsEnd();
-  mol::AtomViewIter a_ev2=ev2.AtomsBegin();
-  ERVec3 e;
-  geom::Vec3 pos;
-  mol::AtomView av1, av2;
-
-  for (int counter=0; a_ev1_end!=a_ev1; ++a_ev1, ++a_ev2, ++counter) {
-  av1=*a_ev1;
-  pos=av1.GetPos();
-  e=SuperposerSVDImpl::Vec3ToEigenVec(pos);
-  atoms1_.row(counter)=e ;
-  av2=*a_ev2;
-  pos=av2.GetPos();
-  e=SuperposerSVDImpl::Vec3ToEigenVec(pos);
-  atoms2_.row(counter)=e;
+class MeanSquareMinimizerImpl {
+public:
+  MeanSquareMinimizerImpl(int n_atoms, bool alloc_atoms):
+    n_atoms_(n_atoms), alloc_atoms_(alloc_atoms) 
+  {
+    if (alloc_atoms_) {
+      atoms1_=EMatX::Zero(n_atoms_, 3);
+      atoms2_=EMatX::Zero(n_atoms_, 3);
+    }
   }
+
+  void SetRefPos(size_t index, const geom::Vec3& pos) {
+    atoms2_.row(index) = ERVec3(Vec3ToEigenVec(pos));
+  }
+
+  void SetPos(size_t index, const geom::Vec3& pos) {
+    atoms1_.row(index) = ERVec3(Vec3ToEigenVec(pos));
+  }
+
+  SuperpositionResult MinimizeOnce() const;
+private:
+  int   n_atoms_;
+  bool  alloc_atoms_;
+  EMatX atoms1_;
+  EMatX atoms2_;
+};
+
+
+MeanSquareMinimizer MeanSquareMinimizer::FromAtomLists(const AtomViewList& atoms,
+                                                       const AtomViewList& atoms_ref) {
+  int n_atoms = atoms.size();
+  if (n_atoms != atoms_ref.size()) {
+    throw Error("atom counts do not match");
+  }
+  if (n_atoms<3) {
+    throw Error("at least 3 atoms are required for superposition");
+  }
+  MeanSquareMinimizer msm;
+  msm.impl_ = new MeanSquareMinimizerImpl(n_atoms, true);
+
+  for (size_t i = 0; i < atoms.size(); ++i ) {
+    msm.impl_->SetRefPos(i, atoms_ref[i].GetPos());
+    msm.impl_->SetPos(i, atoms[i].GetPos());
+  }
+  return msm;
 }
 
+MeanSquareMinimizer MeanSquareMinimizer::FromPointLists(const std::vector<geom::Vec3>& points,
+                                                        const std::vector<geom::Vec3>& points_ref) {
+  int n_points = points.size();
+  if (n_points != points.size()) {
+    throw Error("point counts do not match");
+  }
+  if (n_points<3) {
+    throw Error("at least 3 points are required for superposition");
+  }
+  MeanSquareMinimizer msm;
+  msm.impl_ = new MeanSquareMinimizerImpl(n_points, true);
 
-SuperpositionResult SuperposerSVDImpl::DoSuperposition()
-{
-  ERVec3 avg1_=atoms1_.colwise().sum()/atoms1_.rows();
-  ERVec3 avg2_=atoms2_.colwise().sum()/atoms2_.rows();
-  //center the structures
-  atoms1_=this->SubtractVecFromMatrixRows(atoms1_, avg1_);
-  atoms2_=this->SubtractVecFromMatrixRows(atoms2_, avg2_);
-  EMatX atoms2=atoms2_.transpose();
+  for (size_t i = 0; i < points.size(); ++i ) {
+    msm.impl_->SetRefPos(i, points_ref[i]);
+    msm.impl_->SetPos(i, points[i]);
+  }
+  return msm;
+}
 
-  //single value decomposition
-  Eigen::SVD<EMat3> svd(atoms2*atoms1_);
+SuperpositionResult MeanSquareMinimizerImpl::MinimizeOnce() const {
+  ERVec3 avg1 = atoms1_.colwise().sum()/atoms1_.rows();
+  ERVec3 avg2 = atoms2_.colwise().sum()/atoms2_.rows();
 
+  // SVD only determines the rotational component of the superposition
+  // we need to manually shift the centers of the two point sets on onto 
+  // origin
+
+  EMatX atoms1 = MatrixShiftedBy(atoms1_, avg1);
+  EMatX atoms2 = MatrixShiftedBy(atoms2_, avg2).transpose();
+
+  // determine rotational component
+  Eigen::SVD<EMat3> svd(atoms2*atoms1);
   EMatX matrixVT=svd.matrixV().transpose();
+
   //determine rotation
   Real detv=matrixVT.determinant();
   Real dett=svd.matrixU().determinant();
   Real det=detv*dett;
-  EMat3 ERot;
+  EMat3 rotation;
   if (det<0) {
     EMat3 tmat=EMat3::Identity();
     tmat(2,2)=-1;
-    ERot=(svd.matrixU()*tmat)*matrixVT;
-  }else{
-    ERot=svd.matrixU()*matrixVT;
+    rotation = (svd.matrixU()*tmat)*matrixVT;
+  } else {
+    rotation = svd.matrixU()*matrixVT;
   }
-
+  
   SuperpositionResult res;
-  //  prepare rmsd calculation
-  geom::Vec3 shift=SuperposerSVDImpl::EigenVec3ToVec3(avg2_);
-  geom::Vec3 com_vec=-SuperposerSVDImpl::EigenVec3ToVec3(avg1_);
-  geom::Mat3 rot=SuperposerSVDImpl::EigenMat3ToMat3(ERot.transpose());
+
+  geom::Vec3 shift = EigenVec3ToVec3(avg2);
+  geom::Vec3 com_vec = -EigenVec3ToVec3(avg1);
+  geom::Mat3 rot = EigenMat3ToMat3(rotation.transpose());
   geom::Mat4 mat4_com, mat4_rot, mat4_shift;
   mat4_rot.PasteRotation(rot);
   mat4_shift.PasteTranslation(shift);
   mat4_com.PasteTranslation(com_vec);
   //save whole transformation
-  res.transformation=geom::Mat4(mat4_shift*mat4_rot*mat4_com);
+  res.transformation = geom::Mat4(mat4_shift*mat4_rot*mat4_com);
   return res;
+}
 
+MeanSquareMinimizer& MeanSquareMinimizer::operator=(const MeanSquareMinimizer& rhs) {
+  MeanSquareMinimizer tmp(rhs);
+  this->swap(tmp);
+  return *this;
+}
+
+MeanSquareMinimizer::MeanSquareMinimizer(const MeanSquareMinimizer& rhs) {
+  if (rhs.impl_)
+    impl_ = new MeanSquareMinimizerImpl(*rhs.impl_);
+  else
+    impl_ = NULL;
 }
 
 
-SuperpositionResult SuperposerSVD::Run(const mol::EntityView& ev1,
-                                        const mol::EntityView& ev2)
-{
-  impl_->EntToMatrices(ev1, ev2);
-  SuperpositionResult r=impl_->DoSuperposition();
-  r.rmsd=CalculateRMSD(ev1, ev2, r.transformation);
-  return r;
+MeanSquareMinimizer::~MeanSquareMinimizer() {
+  if (impl_) delete impl_;
 }
 
-SuperpositionResult SuperposerSVD::Run(const mol::AtomViewList& atoms1,
-                                       const mol::AtomViewList& atoms2)
-{
-  return impl_->Run(atoms1, atoms2);
+SuperpositionResult MeanSquareMinimizer::MinimizeOnce() const {
+  return impl_->MinimizeOnce();
 }
-
-SuperpositionResult SuperposerSVD::Run(const std::vector<geom::Vec3>& pl1,
-                                       const std::vector<geom::Vec3>& pl2)
-{
-  return impl_->Run(pl1,pl2);
-}
-  
-SuperpositionResult SuperposerSVDImpl::Run(const mol::AtomViewList& atoms1,
-                                           const mol::AtomViewList& atoms2)
-{
-   mol::AtomViewList::const_iterator a_ev1=atoms1.begin();
-   mol::AtomViewList::const_iterator a_ev1_end=atoms1.end();
-   mol::AtomViewList::const_iterator a_ev2=atoms2.begin();
-
-  for (int counter=0; a_ev1_end!=a_ev1; ++a_ev1, ++a_ev2, ++counter) {
-    mol::AtomView av=*a_ev1;
-    geom::Vec3 pos=av.GetPos();
-    ERVec3 e=SuperposerSVDImpl::Vec3ToEigenVec(pos);
-    atoms1_.row(counter)=e ;
-    av=*a_ev2;
-    pos=av.GetPos();
-    e=SuperposerSVDImpl::Vec3ToEigenVec(pos);
-    atoms2_.row(counter)=e;
-  }
-  return this->DoSuperposition();
-}
-
-SuperpositionResult SuperposerSVDImpl::Run(const std::vector<geom::Vec3>& pl1,
-                                           const std::vector<geom::Vec3>& pl2)
-{
-  for (unsigned int counter=0; counter<pl1.size();++counter) {
-    atoms1_.row(counter)=ERVec3(SuperposerSVDImpl::Vec3ToEigenVec(pl1[counter]));
-    atoms2_.row(counter)=ERVec3(SuperposerSVDImpl::Vec3ToEigenVec(pl2[counter]));
-  }
-  return this->DoSuperposition();
-}
-
 
 SuperpositionResult SuperposeAtoms(const mol::AtomViewList& atoms1,
                                    const mol::AtomViewList& atoms2,
                                    bool apply_transform=true)
 {
-  int counta=static_cast<int>(atoms1.size());
-  int countb=static_cast<int>(atoms2.size());
-  if (counta!=countb){
-    throw Error("atom counts do not match");
+  MeanSquareMinimizer msm = MeanSquareMinimizer::FromAtomLists(atoms1, atoms2);
+  SuperpositionResult result = msm.MinimizeOnce();
+  
+  result.ncycles=1;
+  result.rmsd = calc_rmsd_for_atom_lists(atoms1, atoms2, result.transformation);
+  if (apply_transform) {
+    mol::AtomView jv=atoms1.front();
+    mol::XCSEditor ed=jv.GetEntity().GetHandle().EditXCS();
+    ed.ApplyTransform(result.transformation);
   }
-  if ((counta<3)){
-    throw Error("at least 3 atoms are required");
-  }
-  SuperposerSVD sp(counta, true);
+  return result;
 
-  SuperpositionResult res=sp.Run(atoms1, atoms2);
-  //save rmsd info
-  res.rmsd=calc_rmsd_for_atom_lists(atoms1, atoms2, res.transformation);
-  res.ncycles=1;
-  mol::AtomView jv=atoms1.front();
-  if (apply_transform){
-    mol::XCSEditor ed=jv.GetResidue().GetChain().GetEntity().GetHandle().EditXCS();
-    ed.ApplyTransform(res.transformation);
-  }
-  return res;
 }
 
 SuperpositionResult SuperposeSVD(const mol::EntityView& ev1,
                                  const mol::EntityView& ev2,
                                  bool apply_transform=true) {
-  int counta=ev1.GetAtomCount();
-  int countb=ev2.GetAtomCount();
-  if (counta!=countb){
-    throw Error("atom counts of the two views are not equal");
-  }
-  if ((counta<3)){
-    throw Error("atom counts of any view must be larger or "
-                             "equal 3");
-  }
-  int nrows=counta;
-  SuperposerSVD sp(nrows, true);
-  SuperpositionResult res=sp.Run(ev1, ev2);
-  res.entity_view1=ev1;
-  res.entity_view2=ev2;
-  res.ncycles=1;
-  //save rmsd info
-  res.rmsd=CalculateRMSD(ev1, ev2, res.transformation);
-  if (apply_transform){
-    mol::XCSEditor ed=ev1.GetHandle().EditXCS();
-    ed.ApplyTransform(res.transformation);
-  }
-  return res;
+  AtomViewList atoms1 = ev1.GetAtomList();
+  AtomViewList atoms2 = ev2.GetAtomList();
+
+  SuperpositionResult result = SuperposeAtoms(atoms1, atoms2, apply_transform);
+  result.entity_view1 = ev1;
+  result.entity_view2 = ev2;
+  return result;
 }
 
 SuperpositionResult SuperposeSVD(const std::vector<geom::Vec3>& pl1,
                                  const std::vector<geom::Vec3>& pl2)
 {
-  if (pl1.size()!=pl2.size()){
-    throw Error("pointlist lengths not equal");
-  }
-  if ((pl1.size()<3)){
-    throw Error("three or more points required");
-  }
-  SuperposerSVD sp(pl1.size(), true);
-  SuperpositionResult res=sp.Run(pl1, pl2);
-  res.entity_view1=EntityView();
-  res.entity_view2=EntityView();
-  res.ncycles=1;
-  res.rmsd=0.0;
-  return res;
-}
-
-SuperpositionResult IterativeSuperposition(mol::EntityView& ev1,
-                                           mol::EntityView& ev2,
-                                           int ncycles,
-                                           Real dist_thres,
-                                           bool apply_transform=true) {
-  SuperpositionResult result;
-  int counter=0;
-  mol::AtomViewList atoms_a, atoms_b;
-  std::copy(ev1.AtomsBegin(), ev1.AtomsEnd(), std::back_inserter(atoms_a));
-  std::copy(ev2.AtomsBegin(), ev2.AtomsEnd(), std::back_inserter(atoms_b));
-  bool converged=false;
-
-  if (dist_thres<=0){
-    dist_thres=5.0;
-  }
-  counter=0;
-  while (!converged) {
-    if (atoms_a.size()<3) {
-      return result;
-    }
-    result=SuperposeAtoms(atoms_a, atoms_b, false);
-    converged=ncycles<=counter;
-    if (converged) {
-      continue;
-    }
-    converged=true;
-    for (mol::AtomViewList::iterator i=atoms_a.begin(), j=atoms_b.begin(),
-         e=atoms_a.end(); i!=e; ++i, ++j) {
-      mol::AtomView iv=*i;
-      mol::AtomView jv=*j;
-
-      if (geom::Length(geom::Vec3(result.transformation*geom::Vec4(iv.GetPos()))-jv.GetPos())>dist_thres) {
-        *i=*j=mol::AtomView();
-        converged=false;
-      }
-    }
-    if (!converged) {
-      mol::AtomViewList::iterator end;
-      mol::AtomView invalid_atom;
-      end=std::remove(atoms_a.begin(), atoms_a.end(), invalid_atom);
-      atoms_a.erase(end, atoms_a.end());
-      end=std::remove(atoms_b.begin(), atoms_b.end(), invalid_atom);
-      atoms_b.erase(end, atoms_b.end());
-    }
-    counter++;
-
-  }
-  result.ncycles=counter;
-  result.entity_view1=CreateViewFromAtomList(atoms_a);
-  result.entity_view2=CreateViewFromAtomList(atoms_b);
-
-  if (apply_transform){
-    mol::XCSEditor ed=ev1.GetHandle().EditXCS();
-    ed.ApplyTransform(result.transformation);
-  }
+  MeanSquareMinimizer msm = MeanSquareMinimizer::FromPointLists(pl1, pl2);
+  SuperpositionResult result = msm.MinimizeOnce();
+  
+  result.ncycles=1;
+  result.rmsd = calc_rmsd_for_point_lists(pl1, pl2, result.transformation);
   return result;
 }
 

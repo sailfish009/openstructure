@@ -25,8 +25,6 @@ import ost
 
 from PyQt4 import QtCore, QtGui
 from ost.gui import FileLoader
-from ost.gui.scene.file_loader import GenericLoader
-from ost.gui.scene.loader_manager_widget import LoaderManagerWidget
 from ost.gui.init_splash import _InitSplash
 from ost.gui.dng import termuse
 class InitMenuBar(QtCore.QObject):
@@ -74,15 +72,6 @@ class InitMenuBar(QtCore.QObject):
     self.connect(reset, QtCore.SIGNAL('triggered()'), self.ResetView)
     window.addAction(reset)
     
-    #Options
-    #Add file loader to menu
-    loader_manager = QtGui.QAction('File &Loader', self)
-    loader_manager.setStatusTip('Loader Manager')
-    self.connect(loader_manager, QtCore.SIGNAL('triggered()'), self.LoaderManager)
-    options.addAction(loader_manager)
-    
-    self.loader_manager = LoaderManagerWidget()
-    
   def Exit(self):
     reply = QtGui.QMessageBox()
     reply.addButton(QtGui.QMessageBox.Yes)
@@ -93,9 +82,6 @@ class InitMenuBar(QtCore.QObject):
     if(QtCore.QFileInfo(filename).isFile()):
       FileLoader.LoadObject(str(filename))
 
-  def LoaderManager(self):
-    self.loader_manager.exec_()
-  
   def OpenDocs(self):
     QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://www.openstructure.org/docs/"))
     

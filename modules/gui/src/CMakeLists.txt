@@ -166,7 +166,6 @@ set(OST_GUI_HEADERS
 file_browser.hh
 file_type_dialog.hh
 file_viewer.hh
-remote_loader.hh
 gl_canvas.hh
 gl_win.hh
 scene_menu.hh
@@ -176,7 +175,6 @@ module_config.hh
 main.hh
 main_area.hh
 perspective.hh
-remote_site_loader.hh
 scene_selection.hh
 main_window.hh
 dock_widget.hh
@@ -188,7 +186,6 @@ widget_pool.hh
 widget_registry.hh
 widget_state_saver.hh
 file_loader.hh
-loader_manager.hh
 )
 
 set(OST_GUI_SOURCES
@@ -198,7 +195,6 @@ widget_registry.cc
 file_browser.cc
 file_type_dialog.cc
 file_viewer.cc
-remote_loader.cc
 main.cc
 gl_canvas.cc
 dock_widget.cc
@@ -208,7 +204,6 @@ scene_menu.cc
 widget.cc
 admin.cc
 widget_pool.cc
-remote_site_loader.cc
 messages/message_widget.cc
 messages/message_box_widget.cc
 messages/log_reader.cc
@@ -237,7 +232,6 @@ widget_state_saver.cc
 scene_selection.cc
 widget_geom_handler.cc
 file_loader.cc
-loader_manager.cc
 panels/button_bar.cc
 panels/drop_box.cc
 panels/panel_bar.cc
@@ -305,7 +299,6 @@ set(HEADERS_TO_BE_MOCCED
 file_browser.hh
 file_type_dialog.hh
 file_viewer.hh
-remote_loader.hh
 gl_canvas.hh
 gl_win.hh
 scene_menu.hh
@@ -452,7 +445,8 @@ set(QT_USE_QTOPENGL 1)
 set(QT_USE_QTNETWORK 1)
 include(${QT_USE_FILE})
 qt4_wrap_cpp(OST_GUI_MOCS "${HEADERS_TO_BE_MOCCED}" 
-             OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
+             OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED
+                     -DBOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
        HEADERS ${OST_GUI_TOOLS_HEADERS} IN_DIR tools
                ${OST_GUI_SEQUENCE_VIEWER_HEADERS} IN_DIR sequence_viewer
@@ -475,7 +469,8 @@ endif()
 include_directories(${PYTHON_INCLUDE_PATH})
 qt4_add_resources(OST_QT_RESOURCE dngr.qrc)
 qt4_wrap_cpp(OST_GOSTY_MOC "gosty.hh"
-             OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
+             OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED
+                     -DBOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 
 set(LINK LINK ${BOOST_PROGRAM_OPTIONS_LIBRARIES})
 

@@ -141,6 +141,7 @@ public:
   
   void SetRadius(Real radius);
   
+  void SetIndex (const unsigned long index);
   
   const geom::Mat3& GetAnisou() const;
   

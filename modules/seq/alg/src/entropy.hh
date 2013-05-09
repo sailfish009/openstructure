@@ -16,20 +16,21 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_ITERATOR_FW_HH
-#define OST_ITERATOR_FW_HH
+#ifndef OST_SEQ_ALG_ENTROPY_HH
+#define OST_SEQ_ALG_ENTROPY_HH
 
-namespace ost { namespace mol {
+#include <vector>
 
+#include <ost/seq/alignment_handle.hh>
 
-class ChainHandleIter;
-class ResidueHandleIter;
-class AtomHandleIter;
+#include "module_config.hh"
 
-class ResidueViewIter;
-class AtomViewIter;
-class ChainViewIter;
+namespace ost { namespace seq { namespace alg {
 
-}} //ns
+/// \brief calculates the Shannon entropy for each column in the alignment
+std::vector<Real> DLLEXPORT_OST_SEQ_ALG ShannonEntropy(const AlignmentHandle& aln, 
+                                                       bool ignore_gaps=true);
 
+}}}
 #endif
+
