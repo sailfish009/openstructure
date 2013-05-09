@@ -25,7 +25,6 @@
 #include <Eigen/Array>
 #include <Eigen/SVD>
 #include <Eigen/LU>
-#include <Eigen/Dense>
 
 
 #include <ost/base.hh>
