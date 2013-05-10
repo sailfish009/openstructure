@@ -25,7 +25,7 @@
 #include <Eigen/Array>
 #include <Eigen/SVD>
 #include <Eigen/LU>
-
+#include <Eigen/StdVector>
 
 #include <ost/base.hh>
 #include <ost/geom/vec3.hh>
@@ -269,7 +269,8 @@ SuperpositionResult MeanSquareMinimizerImpl::MinimizeOnce() const{
 
 SuperpositionResult MeanSquareMinimizerImpl::IterativeMinimize(int max_cycles, Real distance_threshold) const{
 
-  std::vector<EMat4> transformation_matrices;
+  // see http://eigen.tuxfamily.org/dox/TopicStlContainers.html
+  std::vector<EMat4,Eigen::aligned_allocator<EMat4> > transformation_matrices;
   EMat4 transformation_matrix;
   EMatX atoms = atoms1_;
   SuperpositionResult res;
