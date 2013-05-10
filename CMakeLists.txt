@@ -257,7 +257,9 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   # with multiple -fno-strict-aliasing flags, triggering a complete rebuild whenever
   # cmake is run
   set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-strict-aliasing")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes")
+  if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER "4.6")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes")
+  endif("${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER "4.6")
   if(HIDDEN_VISIBILITY) 
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
     set (_HIDDEN_VIS ON)
