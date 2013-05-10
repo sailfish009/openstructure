@@ -192,10 +192,10 @@ class SceneMenu(QMenu):
     sd = superpositiondialog.SuperpositionDialog(gfx_ent_1, gfx_ent_2)
     if sd.rmsd != None:
       if sd.reference == 0:
-        gfx_ent_1.UpdatePositions()
+        gfx_ent_2.UpdatePositions()
         gfx.Scene().CenterOn(gfx_ent_1)
       else:
-        gfx_ent_2.UpdatePositions()
+        gfx_ent_1.UpdatePositions()
         gfx.Scene().CenterOn(gfx_ent_2)
       LogScript('RMSD: %.3f'%sd.rmsd)
 
