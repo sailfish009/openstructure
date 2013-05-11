@@ -29,8 +29,8 @@ namespace ost{
 /// 
 /// Usage:
 ///
-/// register_to_python_converter<VectorToListConverter<T>,
-///                              std::vector<T>>()
+/// boost::python::to_python_converter<std::vector<T>,
+  ///                                  VectorToListConverter<T> >()
                         
 
 template<typename T>

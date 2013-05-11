@@ -24,8 +24,8 @@ namespace ost {
 /// 
 /// Usage:
 /// 
-/// register_to_python_converter<PairToTupleConverter<T1, T2>, 
-///                              std::pair<T1, T2>>()
+/// boost::python::to_python_converter<std::pair<T1, T2>, 
+///                                    PairToTupleConverter<T1, T2> >()
 template<class T1, class T2>
 struct PairToTupleConverter {
   static PyObject* convert(const std::pair<T1, T2>& pair) {
