@@ -25,6 +25,7 @@
 #include <boost/filesystem/convenience.hpp>
 #include <ost/base.hh>
 #include <ost/boost_filesystem_helper.hh>
+#include <ost/mol/chain_view.hh>
 #include <ost/mol/alg/local_dist_diff_test.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/io/mol/pdb_reader.hh>
@@ -34,7 +35,6 @@
 #include <ost/string_ref.hh>
 #include <ost/conop/amino_acids.hh>
 #include <ost/conop/rule_based.hh>
-#include <ost/mol/iterator.hh>
 #include <ost/platform.hh>
 #include <ost/log.hh>
 #include <ost/mol/alg/consistency_checks.hh>
