@@ -86,7 +86,7 @@ public:
   }
   
   //! conversion from Vec2
-  Point(const Vec2& v):
+  explicit Point(const Vec2& v):
     x(static_cast<int>(round(v[0]))),
     y(static_cast<int>(round(v[1]))),
     z()
@@ -95,7 +95,7 @@ public:
 
 
   //! conversion from Vec3
-  Point(const Vec3& v):
+  explicit Point(const Vec3& v):
     x(static_cast<int>(round(v[0]))),
     y(static_cast<int>(round(v[1]))),
     z(static_cast<int>(round(v[2])))
