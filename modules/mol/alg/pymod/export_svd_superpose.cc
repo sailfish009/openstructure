@@ -21,6 +21,7 @@
  * Author Juergen Haas
  */
 #include <boost/python.hpp>
+#include <Eigen/StdVector>
 
 #include <ost/geom/mat4.hh>
 #include <ost/mol/alg/svd_superpose.hh>
