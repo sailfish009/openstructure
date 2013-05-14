@@ -427,6 +427,8 @@ String StringFromConopAction(ConopAction action) {
     case CONOP_WARN:
       return "warn";
   }
+  assert(0 && "unhandled conop action");
+  return "unhandled conop action";
 }
 
 bool Processor::AreResiduesConsecutive(mol::ResidueHandle r1, 
