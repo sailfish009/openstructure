@@ -115,7 +115,7 @@ std::pair<Real,Real> ClashingDistances::GetClashingDistance(const String& ele1,c
     stkey << ele2 << "--" << ele1;
   }  
   String key=stkey.str();
-  std::map <String,std::pair<float,float> >::const_iterator find_ci= min_distance_.find(key);
+  std::map <String,std::pair<Real,Real> >::const_iterator find_ci= min_distance_.find(key);
   if (find_ci == min_distance_.end()) {
       std::stringstream serr;
       serr << "Entry for distance " << stkey <<  " not found in the parameter table";   
@@ -132,7 +132,7 @@ Real ClashingDistances::GetAdjustedClashingDistance(const String& ele1,const Str
 
 void ClashingDistances::PrintAllDistances() const
 {
-   for (std::map <String,std::pair<float,float> >::const_iterator index = min_distance_.begin();index != min_distance_.end();++index) {
+   for (std::map <String,std::pair<Real,Real> >::const_iterator index = min_distance_.begin();index != min_distance_.end();++index) {
      std::cout << index->first << "\t" << index->second.first << "\t" << index->second.second << std::endl;
    }    
 }
@@ -140,7 +140,7 @@ void ClashingDistances::PrintAllDistances() const
 Real ClashingDistances::GetMaxAdjustedDistance() const
 {
   Real max_adjusted_distance=0;
-  for (std::map <String,std::pair<float,float> >::const_iterator index = min_distance_.begin();index != min_distance_.end();++index) {
+  for (std::map <String,std::pair<Real,Real> >::const_iterator index = min_distance_.begin();index != min_distance_.end();++index) {
     Real distance = index->second.first; 
     Real tolerance = index->second.second; 
     if ((distance-tolerance) > max_adjusted_distance) {
@@ -167,7 +167,7 @@ void StereoChemicalParams::SetParam(const String& param, const String& residue, 
 std::pair<Real,Real> StereoChemicalParams::GetParam(const String& param,const String& residue) const
 {
   std::pair<String,String> key = std::make_pair(param,residue);
-  std::map<std::pair<String,String>,std::pair<float,float> >::const_iterator find_ci = params_.find(key);
+  std::map<std::pair<String,String>,std::pair<Real,Real> >::const_iterator find_ci = params_.find(key);
   if (find_ci == params_.end()) {
       std::stringstream serr;
       serr << "Entry " << param <<  " for residue " << residue << " not found in the parameter table";   
@@ -179,7 +179,7 @@ std::pair<Real,Real> StereoChemicalParams::GetParam(const String& param,const St
 bool StereoChemicalParams::ContainsParam(const String& param,const String& residue) const
 {
   std::pair<String,String> key = std::make_pair(param,residue);
-  std::map<std::pair<String,String>,std::pair<float,float> >::const_iterator find_ci = params_.find(key);
+  std::map<std::pair<String,String>,std::pair<Real,Real> >::const_iterator find_ci = params_.find(key);
   if (find_ci == params_.end()) {
     return false;
   }    
@@ -188,7 +188,7 @@ bool StereoChemicalParams::ContainsParam(const String& param,const String& resid
 
 void StereoChemicalParams::PrintAllParameters() const 
 {
-   for (std::map <std::pair<String,String>,std::pair<float,float> >::const_iterator index = params_.begin();index != params_.end();++index) {
+   for (std::map <std::pair<String,String>,std::pair<Real,Real> >::const_iterator index = params_.begin();index != params_.end();++index) {
      std::cout << index->first.first << "\t" << index->first.second << "\t" << index->second.first << "\t" << index->second.second << std::endl;
    }    
 };
