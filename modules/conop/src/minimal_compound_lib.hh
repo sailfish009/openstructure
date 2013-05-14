@@ -11,7 +11,7 @@ typedef boost::shared_ptr<MinimalCompoundLib> MinimalCompoundLibPtr;
 
 // a minimal compound lib containing the definitions of the 20 standard 
 // amino acids and standard nucleotides
-class MinimalCompoundLib : public CompoundLibBase {
+class DLLEXPORT_OST_CONOP MinimalCompoundLib : public CompoundLibBase {
 public:
   MinimalCompoundLib() {}
   virtual CompoundPtr FindCompound(const String& id, 
