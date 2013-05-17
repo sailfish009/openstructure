@@ -78,8 +78,8 @@ namespace ost { namespace gfx { namespace impl {
        Shader::Instance().GetCurrentName()=="hf") {
       Shader::Instance().Activate("fast_sphere_hf");
       GLuint cpr=Shader::Instance().GetCurrentProgram();
-      GLuint loc=glGetUniformLocation(cpr,"hemi_param");
-      if(loc>0) {
+      GLint loc=glGetUniformLocation(cpr,"hemi_param");
+      if(loc>=0) {
         geom::Vec4 hp=Scene::Instance().GetHemiParams();
         glUniform4f(loc,hp[0],hp[1],hp[2],hp[3]);
       }

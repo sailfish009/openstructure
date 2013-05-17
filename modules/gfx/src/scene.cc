@@ -846,8 +846,8 @@ void Scene::RenderGL()
 #if OST_SHADER_SUPPORT_ENABLED
   {
     GLuint cpr=Shader::Instance().GetCurrentProgram();
-    GLuint loc=glGetUniformLocation(cpr,"hemi_param");
-    if(loc>0) {
+    GLint loc=glGetUniformLocation(cpr,"hemi_param");
+    if(loc>=0) {
       glUniform4f(loc,hemi_param_[0],hemi_param_[1],hemi_param_[2],hemi_param_[3]);
     }
   }
