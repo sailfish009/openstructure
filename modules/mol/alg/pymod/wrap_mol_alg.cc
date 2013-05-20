@@ -22,6 +22,7 @@
 #include <ost/config.hh>
 #include <ost/mol/alg/local_dist_diff_test.hh>
 #include <ost/mol/alg/distance_test_common.hh>
+#include <ost/mol/alg/distance_rmsd_test.hh>
 #include <ost/mol/alg/superpose_frames.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/mol/alg/consistency_checks.hh>
@@ -108,8 +109,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   export_entity_to_density();
   #endif
   
-  to_python_converter<std::pair<Real,Real>,
-                      PairToTupleConverter<Real, Real> >();
+
 
   def("LocalDistDiffTest", lddt_a, (arg("sequence_separation")=0,arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_c, (arg("local_lddt_property_string")=""));
@@ -122,7 +122,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("CreateDistanceList",&mol::alg::CreateDistanceList);
   def("CreateDistanceListFromMultipleReferences",&create_distance_list_from_multiple_references);
 
-
+  def("DistanceRMSDTest", &mol::alg::DistanceRMSDTest, (arg("sequence_separation")=0,arg("local_lddt_property_string")=""));
 
   def("SuperposeFrames", superpose_frames1, 
       (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
@@ -158,14 +158,6 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
     .def("GetAtomName",&mol::alg::UniqueAtomIdentifier::GetAtomName)
     .def("GetQualifiedAtomName",&mol::alg::UniqueAtomIdentifier::GetQualifiedAtomName)
   ;    
-  
-  class_<mol::alg::ResidueRDMap>("ResidueRDMap")
-    .def(map_indexing_suite<mol::alg::ResidueRDMap>())
-  ;
-  
-  class_<mol::alg::GlobalRDMap>("GlobalRDMap")
-    .def(map_indexing_suite<mol::alg::GlobalRDMap>())
-  ;
   
   def("FillClashingDistances",&fill_clashing_distances_wrapper);
   def("FillStereoChemicalParams",&fill_stereochemical_params_wrapper);
@@ -217,9 +209,6 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
     .def("GetClashList",&mol::alg::ClashingInfo::GetClashList)
   ;
 
-  to_python_converter<std::pair<mol::EntityView,mol::alg::ClashingInfo>,
-                      PairToTupleConverter<mol::EntityView, mol::alg::ClashingInfo> >();
-
   class_<mol::alg::StereoChemistryInfo> ("StereoChemistryInfo" ,init <>())
       .def(init<Real,int,int,Real,int,int, const std::map<String,mol::alg::BondLengthInfo>&,
                const std::vector<mol::alg::StereoChemicalBondViolation>&,
@@ -235,9 +224,20 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
       .def("GetAngleViolationList",&mol::alg::StereoChemistryInfo::GetAngleViolationList)
     ;
 
-  to_python_converter<std::pair<mol::EntityView,mol::alg::StereoChemistryInfo>,
-                        PairToTupleConverter<mol::EntityView, mol::alg::StereoChemistryInfo> >();
+  to_python_converter<std::pair<ost::mol::alg::UniqueAtomIdentifier,ost::mol::alg::UniqueAtomIdentifier>,
+                      PairToTupleConverter<ost::mol::alg::UniqueAtomIdentifier, ost::mol::alg::UniqueAtomIdentifier> >();
 
+  to_python_converter<std::pair<Real,Real>,
+                      PairToTupleConverter<Real, Real> >();
+
+  to_python_converter<std::pair<Real,long int>,
+                      PairToTupleConverter<Real, long int> >();
+
+  to_python_converter<std::pair<mol::EntityView,mol::alg::StereoChemistryInfo>,
+                      PairToTupleConverter<mol::EntityView, mol::alg::StereoChemistryInfo> >();
+
+  to_python_converter<std::pair<mol::EntityView,mol::alg::ClashingInfo>,
+                      PairToTupleConverter<mol::EntityView, mol::alg::ClashingInfo> >();
 
   to_python_converter<std::vector<mol::alg::ClashEvent>,
                       VectorToListConverter<mol::alg::ClashEvent> >();
@@ -247,5 +247,15 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
 
   to_python_converter<std::vector<mol::alg::StereoChemicalAngleViolation>,
                       VectorToListConverter<mol::alg::StereoChemicalAngleViolation> >();
+
+  class_<mol::alg::ResidueRDMap>("ResidueRDMap")
+    .def(map_indexing_suite<mol::alg::ResidueRDMap,true>())
+  ;
+
+  class_<mol::alg::GlobalRDMap>("GlobalRDMap")
+    .def(map_indexing_suite<mol::alg::GlobalRDMap,true>())
+  ;
+
+  def("DRMSD",&mol::alg::DRMSD);
 
 }

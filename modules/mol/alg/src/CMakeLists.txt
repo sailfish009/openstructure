@@ -4,6 +4,7 @@ set(OST_MOL_ALG_HEADERS
   sec_structure_segments.hh
   local_dist_diff_test.hh
   distance_test_common.hh
+  distance_rmsd_test.hh
   superpose_frames.hh
   filter_clashes.hh
   construct_cbeta.hh
@@ -19,6 +20,7 @@ set(OST_MOL_ALG_SOURCES
   sec_structure_segments.cc
   local_dist_diff_test.cc
   distance_test_common.cc
+  distance_rmsd_test.cc
   superpose_frames.cc
   filter_clashes.cc
   construct_cbeta.cc

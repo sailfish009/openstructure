@@ -116,6 +116,73 @@
   :returns: the Local Distance Difference Test score
 
 
+.. function:: DistanceRMSDTest(model, distance_list, cap_difference, sequence_separation=0,  local_drmsd_property_string="")
+  
+  This function performs a Distance RMSD Test on a provided model, and calculates the two values that are necessary to determine 
+  the Distance RMSD Score, namely the sum of squared distance deviations and the number of distances on which the sum was computed. 
+
+  The Distance RMSD Test (or DRMSD Test) computes the deviation in the length of local contacts between a model and 
+  a reference structure and expresses it in the form of a score value. The score has an an RMSD-like form, with the deviations 
+  in the RMSD formula computed as contact distance differences. The score is open-ended, with a value of zero meaning complete 
+  agreement of local contact distances, and a positive value revealing a disagreement of magnitude proportional to the score value
+  itself. This score does not require any superposition between the model and the reference.
+  
+  This function processes a list of distances provided by the user, together with their length in the reference structure. 
+  For each distance that is found in the model, its difference with the reference length is computed and used as deviation term in the RMSD-like 
+  formula.  When a distance is not present in the model because one or both the atoms are missing, a default deviation value provided by the 
+  user is used. 
+
+  The function only processes distances between atoms that do not belong to the same residue, and considers only standard residues 
+  in the first chain of the model. For residues with symmetric sidechains (GLU, ASP, ARG, VAL, PHE, TYR), the 
+  naming of the atoms is ambiguous. For these residues, the function computes the Distance RMSD Test score that each 
+  naming convention would generate when considering all non-ambiguous surrounding atoms.
+  The solution that gives the lower score is then picked to compute the final Distance RMSD Score for the whole model.
+  
+  A sequence separation parameter can be passed to the function. If this happens, only distances between residues
+  whose separation is higher than the provided parameter are considered when computing the score
+
+  If a string is passed as last parameter to the function, the function computes the Distance RMSD Score
+  for each residue and saves it as a float property in the ResidueHandle, with the passed string
+  as property name. Additionally, the actual sum of squared deviations and the number of distances on which it was computed 
+  are stored as properties in the ResidueHandle. The property names are respectively <passed string>_sum (a float property) and 
+  <passed string>_count (an integer property)
+
+  :param model: the model structure
+  :type model: :class:`~ost.mol.EntityView`
+  :param distance_list: the list of distances to check.  
+  :type distance_list: :class:`~ost.mol.alg.GlobalRDMap`. This class stores two length values for each distance. Only the first is used by this function as
+                      reference length. The second is ignored.
+  :param cap_difference: a default deviation value to be used when a distance is not found in the model
+  :param sequence_separation: sequence separation parameter used when computing the score
+  :param local_ldt_property_string: the base name for the ResidueHandle properties that store the local scores
+
+  :returns: a tuple containing the sum of squared distance deviations, and the number of distances on which it was computed.
+
+
+.. function::  DRMSD(model, distance_list, cap_difference, sequence_separation=0);
+
+  This function calculates the Distance RMSD Test score (see previous function).
+  
+  The function only considder distances between atoms not belonging to the same residue, and only compares the input distance list to the first
+   chain of the model structure. It requires, in addition to the model and the list themselves, a default deviation value to be used in the DRMSD
+   Test when a distance is not found in the model.  
+
+  The local Local Distance Difference Test score values are stored in the ResidueHandles of the model passed to the 
+  function in a float property called "localdrmsd" 
+
+  A sequence separation parameter can be passed to the function. If this happens, only distances between residues
+  whose separation is higher than the provided parameter are considered when computing the score
+
+  :param model: the model structure
+  :type model: :class:`~ost.mol.EntityView`
+  :param distance_list: the list of distances to check for conservation
+  :type distance_list: :class:`~ost.mol.alg.GlobalRDMap`. This class stores two length values for each distance. Only the first is used by this function as
+                      reference length. The second is ignored.
+  :param sequence_separation: sequence separation parameter used when computing the score
+  :param cap_difference: a default deviation value to be used when a distance is not found in the model
+  :returns: the Distance RMSD Test score
+
+
 .. function:: CreateDistanceList(reference, radius);
 .. function:: CreateDistanceListFromMultipleReferences(reference_list, tolerance_list, sequence_separation, radius);
 
@@ -153,7 +220,7 @@
   :param sequence_separation: sequence separation parameter used when computing the LDDT score
   :param radius: inclusion radius (in Angstroms) used to determine the distances included in the list
   
-  :returns: class `~ost.mol.alg.GlobalRDMap`
+  :returns: :class:`~ost.mol.alg.GlobalRDMap`
 
   
 .. class:: UniqueAtomIdentifier
@@ -203,15 +270,38 @@
   of a single structure
 
   
-.. function: PrintResidueRDMap(residue_distance_list)
+.. function:: PrintResidueRDMap(residue_distance_list)
 
-  Prints to standard output all the distances contained in a :class:`~ost.mol.ResidueRDMap` object 
+  Prints to standard output all the distances contained in a :class:`~ost.mol.alg.ResidueRDMap` object 
 
 
-.. function: PrintGlobalRDMap(global_distance_list)
+.. function:: PrintGlobalRDMap(global_distance_list)
 
-  Prints to standard output all the distances contained in each of the :class:`~ost.mol.ResidueRDMap` objects that
-  make up a :class:`~ost.mol.GlobalRDMap` object
+  Prints to standard output all the distances contained in each of the :class:`~ost.mol.alg.ResidueRDMap` objects that
+  make up a :class:`~ost.mol.alg.GlobalRDMap` object
+
+
+.. function:: Swappable(residue_name,atom_name)
+
+  This function checks if an atom in a residue has a symmetry equivalent. It returns true if the atom belongs to a residue with a symmetric side-chain
+   and a symmetry equivalent atom exists, otherwise it returns false. 
+
+  :param residue_name: a string containing the name of the residue to which the atom belongs
+  :param atom_name: a string containing the name of the atom
+  
+  :returns: True if the atom has a symmetry equivalent, false otherwise
+
+
+.. function:: SwappedName(atom_name)
+  
+   If the atom does belongs to a residue with a symmetric side-chain and if the atom has a symmetry
+   equivalent, the function returns the name of the symmetry equivalent atom, otherwise it returns the name of the original
+   atom
+
+  :param atom_name: a string containing the name of the atom
+  
+  :returns: A string containing the same of the symmetry equivalent atom if the input atom has one, otherwise the name of the input atom itself.
+
 
 
 .. _steric-clashes:

@@ -24,7 +24,17 @@
 
 namespace ost { namespace mol { namespace alg {
 
+/// \brief Returns the name of the symmetry equivalent atom in residues with symmetric side-chains
+///
+/// If the atom does belongs to a residue with a symmetric side-chain and if the atom has a symmetry
+/// equivalent, the function returns the name of the symmetry equivalent atom, otherwise it returns
+///  the name of the original atom
 String DLLEXPORT_OST_MOL_ALG SwappedName(const String& name);
+
+/// \brief Checks if an atom in a residue has a symmetry equivalent
+///
+/// Returns true if the atom belongs to a residue with a symmetric side-chain and a symmetry equivalent
+/// atom exists. Returns false otherwise 
 bool DLLEXPORT_OST_MOL_ALG Swappable(const String& rname, const String& aname);
 
 /// \brief Contains the infomation needed to uniquely identify an atom in a structure
