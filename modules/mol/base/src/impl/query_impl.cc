@@ -441,7 +441,6 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
   }
   String value_string=query_string_.substr(v.GetValueRange().Loc, 
                                            v.GetValueRange().Length);
-  bool is_bool = false;
   switch (v.GetType()) {
     case tok::Identifier:
       if (sel.type==Prop::INT || sel.id>=Prop::CUSTOM) {
