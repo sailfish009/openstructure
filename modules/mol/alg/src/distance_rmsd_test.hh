@@ -53,10 +53,11 @@ namespace ost { namespace mol { namespace alg {
 /// residue properties. Specifically, the local residue-based Distance RMSD score is stored in a float property 
 /// as the provided string, while the residue-based sum of squared distances and the number of distances checked 
 /// are saved in two properties named <string>_sum (a float property) and <string>_count (an int property).
-std::pair<Real,long int> DistanceRMSDTest(const EntityView& mdl,
-                          const GlobalRDMap& glob_dist_list,
-                          Real cap_distance, int sequence_separation = 0,
-                          const String& local_drmsdt_property_string="");
+std::pair<Real,long int> DLLEXPORT_OST_MOL_ALG 
+DistanceRMSDTest(const EntityView& mdl,
+                 const GlobalRDMap& glob_dist_list,
+                 Real cap_distance, int sequence_separation = 0,
+                 const String& local_drmsdt_property_string="");
 
 
 /// \brief Computes the Distance RMSD Test given a list of distances to check and a model 
@@ -67,7 +68,9 @@ std::pair<Real,long int> DistanceRMSDTest(const EntityView& mdl,
 ///
 /// A sequence separation parameter can be passed to the function. If this happens, only distances between residues
 /// whose separation is higher than the provided parameter are considered when computing the score.
-Real DLLEXPORT_OST_MOL_ALG DRMSD(const EntityView& v, const GlobalRDMap& global_dist_list, Real cap_distance, int sequence_separation=0);
+Real DLLEXPORT_OST_MOL_ALG DRMSD(const EntityView& v, 
+                                 const GlobalRDMap& global_dist_list, 
+                                 Real cap_distance, int sequence_separation=0);
 
 }}}
 

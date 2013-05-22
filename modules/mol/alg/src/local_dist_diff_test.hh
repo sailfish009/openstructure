@@ -46,11 +46,10 @@ namespace ost { namespace mol { namespace alg {
 /// residue properties. Specifically, the local residue-based lddt score is stored in a float property named
 /// as the provided string, while the residue-based number of conserved and total distances are saved in two 
 /// int properties named <string>_conserved and <string>_total.
-std::pair<long int,long int> DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
-                                         const GlobalRDMap& dist_list,
-                                         std::vector<Real> cutoff_list,
-                                         int sequence_separation = 0, 
-                                         const String& local_ldt_property_string="");
+std::pair<long int,long int> DLLEXPORT_OST_MOL_ALG 
+LocalDistDiffTest(const EntityView& mdl, const GlobalRDMap& dist_list,
+                  std::vector<Real> cutoff_list, int sequence_separation = 0, 
+                  const String& local_ldt_property_string="");
 
 /// \brief Calculates the Local Distance Difference Score for a given model with respect to a given target
 ///
