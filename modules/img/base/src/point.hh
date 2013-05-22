@@ -113,9 +113,9 @@ public:
       throw geom::OutOfRangeException("4th element of Vec4 is too close to zero for normalization");
     } else {
       Real sf = 1.0/v[3];
-      x*=sf;
-      y*=sf;
-      z*=sf;
+      x = static_cast<int>(x*sf);
+      y = static_cast<int>(y*sf);
+      z = static_cast<int>(z*sf);
     }
   }
 
