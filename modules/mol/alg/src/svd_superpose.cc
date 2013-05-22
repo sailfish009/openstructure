@@ -266,19 +266,20 @@ SuperpositionResult MeanSquareMinimizerImpl::MinimizeOnce() const{
 
 SuperpositionResult MeanSquareMinimizerImpl::IterativeMinimize(int max_cycles, Real distance_threshold) const{
 
+  EMat4 transformation_matrix_old;
   EMat4 transformation_matrix;
   EMatX transformed_atoms;
-  EMatX subset1;
-  EMatX subset2;
+  EMatX subset1 = atoms1_;
+  EMatX subset2 = atoms2_;
   SuperpositionResult res;
   EMat4 diff;
   std::vector<int> matching_indices;
-  EMat4 identity_matrix = EMat4::Identity();
 
   //do initial superposition
 
   res = this->Minimize(atoms1_, atoms2_);
   transformation_matrix = Mat4ToEigenMat4(res.transformation);
+  transformation_matrix_old = transformation_matrix;
 
   //note, that the initial superposition is the first cycle...
   int cycles=1;
@@ -302,11 +303,14 @@ SuperpositionResult MeanSquareMinimizerImpl::IterativeMinimize(int max_cycles, R
     res = this->Minimize(subset1,subset2);
     transformation_matrix = Mat4ToEigenMat4(res.transformation);
 
-    diff = transformation_matrix-identity_matrix;
+    diff = transformation_matrix_old-transformation_matrix;
 
     if(diff.cwise().abs().sum()<0.0001){
+      ++cycles;
       break;
     }
+
+    transformation_matrix_old = transformation_matrix;
 
   }
   
@@ -479,7 +483,9 @@ SuperpositionResult IterativeSuperposeSVD(const mol::EntityView& ev,
   AtomViewList atoms_ref = ev_ref.GetAtomList();
 
   MeanSquareMinimizer msm = MeanSquareMinimizer::FromAtomLists(atoms, atoms_ref);
+
   SuperpositionResult result = msm.IterativeMinimize(max_cycles, distance_threshold);
+
   result.rmsd = calc_rmsd_for_atom_lists(atoms, atoms_ref, result.transformation);
   if (apply_transform) {
     mol::AtomView jv=atoms.front();
