@@ -212,27 +212,41 @@ public:
     CheckHandleValidity(*static_cast<const H*>(this));    
     if(HasProp(key)) {
       GenericPropValue value=this->GetImpl()->GenericProp(key);
-      if (value.which()==1) {
-        return boost::get<Real>(this->GetImpl()->GenericProp(key));
-      } else if (value.which()==2) {
-        return boost::get<int>(this->GetImpl()->GenericProp(key));
+      switch (value.which()) {
+        case 1:
+          return boost::get<Real>(value);
+        case 2:
+          return static_cast<Real>(boost::get<int>(value));
+        case 3:
+          return static_cast<Real>(boost::get<bool>(value));
       }
       std::ostringstream m("");
       m << "property '" << key << "' is not numeric";
       throw GenericPropError(m.str());
-    } else {
-      std::ostringstream m("");
-      m << "unknown property " << key;
-      throw GenericPropError(m.str());
     }
+    std::ostringstream m("");
+    m << "unknown property " << key;
+    throw GenericPropError(m.str());
   }
-
-
   /// \brief returns integer property, raises an exception if it does not exist
   int GetIntProp(const String& key) const
   {
     CheckHandleValidity(*static_cast<const H*>(this));    
-    return this->gp_get<int>(key);
+    if (HasProp(key)){
+      GenericPropValue value=this->GetImpl()->GenericProp(key);
+      switch (value.which()) {
+        case 2:
+          return boost::get<int>(value);
+        case 3:
+          return boost::get<bool>(value);
+      }
+      std::ostringstream m("");
+      m << "property '" << key << "' is not integral";
+      throw GenericPropError(m.str());
+    }
+    std::ostringstream m("");
+    m << "unknown property " << key;
+    throw GenericPropError(m.str());
   }
 
   /// \brief returns boolean property, raises an exception if it does not exist
@@ -256,24 +270,38 @@ public:
     CheckHandleValidity(*static_cast<const H*>(this));    
     if(this->HasProp(key)) {
       GenericPropValue value=GetImpl()->GenericProp(key);
-      if (value.which()==1) {
-        return boost::get<Real>(GetImpl()->GenericProp(key));
-      } else if (value.which()==2) {
-        return boost::get<int>(GetImpl()->GenericProp(key));
+      switch (value.which()) {
+        case 1:
+          return boost::get<Real>(value);
+        case 2:
+          return static_cast<Real>(boost::get<int>(value));
+        case 3:
+          return static_cast<Real>(boost::get<bool>(value));
       }
       std::ostringstream m("");
       m << "property '" << key << "' is not numeric";
       throw GenericPropError(m.str());
-    } else {
-      return def;
     }
+    return def;
   }
 
   /// \brief returns integer property, or the given default if it does not exist
   int GetIntProp(const String& key, int def) const
   {
     CheckHandleValidity(*static_cast<const H*>(this));    
-    return this->gp_get<int>(key, def);
+    if(this->HasProp(key)) {
+      GenericPropValue value=GetImpl()->GenericProp(key);
+      switch (value.which()) {
+        case 2:
+          return boost::get<int>(value);
+        case 3:
+          return static_cast<int>(boost::get<bool>(value));
+      }
+      std::ostringstream m("");
+      m << "property '" << key << "' is not integral";
+      throw GenericPropError(m.str());
+    }
+    return def;
   }
 
   /// \brief returns boolean property, or the given default if it does not exist
