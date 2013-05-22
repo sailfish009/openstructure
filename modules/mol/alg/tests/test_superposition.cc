@@ -25,6 +25,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
 #include <ost/mol/mol.hh>
+ #include <ost/mol/builder.hh>
 
 using namespace ost;
 using namespace ost::mol;
@@ -33,48 +34,20 @@ using namespace ost::mol::alg;
 struct Fixture {
   Fixture() {
 
-    e=CreateEntity();
-    XCSEditor ed=e.EditXCS();
-    c=ed.InsertChain("A");
-    r=ed.AppendResidue(c, "XXX");
-    ab=ed.InsertAtom(r, "A", geom::Vec3(-5,-5,-5), "C");
-    ac=ed.InsertAtom(r, "B", geom::Vec3(-5, 5,-5), "C");
-    ad=ed.InsertAtom(r, "C", geom::Vec3(-5, 5, 5), "C");
-    ae=ed.InsertAtom(r, "D", geom::Vec3(-5,-5, 5), "C");
-    af=ed.InsertAtom(r, "E", geom::Vec3(5,-5, 5), "C");
-    ag=ed.InsertAtom(r, "F", geom::Vec3(5,-5,-5), "C");
-    ah=ed.InsertAtom(r, "G", geom::Vec3(5, 5,-5), "C");
-    ai=ed.InsertAtom(r, "H", geom::Vec3(5, 5, 5), "C");
-
-
-    BondHandle b1=ed.Connect(ab, ad);
-    BondHandle b2=ed.Connect(ad, ah);
-    BondHandle b3=ed.Connect(ah, ae);
-    BondHandle b4=ed.Connect(ae, ab);
-
-    BondHandle b5=ed.Connect(ac, ag);
-    BondHandle b6=ed.Connect(ag, ai);
-    BondHandle b7=ed.Connect(ai, af);
-    BondHandle b8=ed.Connect(af, ac);
-    BondHandle b9=ed.Connect(ab, ac);
-    BondHandle b10=ed.Connect(ah, ai);
-    BondHandle b11=ed.Connect(ae, ag);
-    BondHandle b12=ed.Connect(ad, af);
-
-
+    e = Builder()
+           .Chain("A")
+              .Residue("DUM")
+                .Atom("A",geom::Vec3(-5,-5,-5))
+                .Atom("B",geom::Vec3(-5, 5,-5))
+                .Atom("C",geom::Vec3(-5, 5, 5))
+                .Atom("D",geom::Vec3(-5,-5, 5))
+                .Atom("E",geom::Vec3(5,-5, 5))
+                .Atom("F",geom::Vec3(5,-5,-5))
+                .Atom("G",geom::Vec3(5, 5,-5))
+                .Atom("H",geom::Vec3(5, 5, 5));
 
   }
   EntityHandle e;
-  ChainHandle c;
-  ResidueHandle r;
-  AtomHandle ab;
-  AtomHandle ac;
-  AtomHandle ad;
-  AtomHandle ae;
-  AtomHandle af;
-  AtomHandle ag;
-  AtomHandle ah;
-  AtomHandle ai;
 
 };
 
@@ -86,7 +59,6 @@ BOOST_AUTO_TEST_CASE(superposition_svd)
   EntityView ev1 = f1.e.CreateFullView();
   XCSEditor ed=f1.e.EditXCS();
   EntityView ev2 = f2.e.CreateFullView();
-  ChainHandle ch1=f1.e.GetChainList()[0];
   AtomHandleList atoms = f1.e.GetAtomList();
   for (AtomHandleList::const_iterator i = atoms.begin(), e = atoms.end(); i !=e ; ++i) {
       AtomHandle atom=*i;
@@ -95,7 +67,38 @@ BOOST_AUTO_TEST_CASE(superposition_svd)
   }
   SuperpositionResult res;
   res=SuperposeSVD(ev1, ev2, true);
-  BOOST_CHECK(abs(res.rmsd)<0.0001);
+  BOOST_CHECK(res.rmsd<0.0001);
 }
+
+BOOST_AUTO_TEST_CASE(iterative_superposition_svd) 
+{
+  Fixture f1, f2;
+  EntityView ev1 = f1.e.CreateFullView();
+  EntityView ev2 = f2.e.CreateFullView();
+  XCSEditor ed=f1.e.EditXCS();
+  AtomHandleList atoms = f1.e.GetAtomList();
+  ed.SetAtomPos(atoms[0],geom::Vec3(-10,-10,-10));
+  for (AtomHandleList::const_iterator i = atoms.begin(), e = atoms.end(); i !=e ; ++i) {
+      AtomHandle atom=*i;
+      ed.SetAtomPos(atom, geom::EulerTransformation(0.1, 0, 0)*atom.GetPos()
+                  +geom::Vec3(0, 5, 0));
+  }
+  SuperpositionResult res_classic, res_1, res_2, res_3;
+  res_1=IterativeSuperposeSVD(ev1, ev2, 1, 5.0, false);
+  res_2=IterativeSuperposeSVD(ev1, ev2, 2, 5.0, false);
+  res_3=IterativeSuperposeSVD(ev1, ev2, 10, 5.0, false);
+  res_classic=SuperposeSVD(ev1,ev2, false); 
+  BOOST_CHECK(res_2.rmsd_superposed_atoms<0.0001);
+  BOOST_CHECK(res_2.rmsd>1.0);
+  BOOST_CHECK(res_1.rmsd==res_classic.rmsd);
+  BOOST_CHECK(res_1.ncycles==1);
+  BOOST_CHECK(res_2.ncycles==2);
+  BOOST_CHECK(res_1.fraction_superposed==1.0);
+  BOOST_CHECK(res_2.fraction_superposed==7.0/8.0);
+  BOOST_CHECK(res_3.ncycles==3);
+}
+
+
+
 
 BOOST_AUTO_TEST_SUITE_END();
