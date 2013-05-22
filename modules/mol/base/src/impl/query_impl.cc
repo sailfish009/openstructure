@@ -416,6 +416,17 @@ const QueryErrorDesc& QueryImpl::GetErrorDescription() const {
   return error_desc_;
 }
 
+
+bool is_literal_true(const String& value_string) {
+  return value_string=="true" || value_string == "True" || 
+         value_string == "TRUE";
+}
+
+bool is_literal_false(const String& value_string) {
+  return value_string=="false" || value_string == "False" || 
+         value_string == "FALSE";
+}
+
 bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
                            QueryLexer& lexer, ParamType& value) {
   QueryToken last=lexer.CurrentToken();                               
@@ -430,19 +441,29 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
   }
   String value_string=query_string_.substr(v.GetValueRange().Loc, 
                                            v.GetValueRange().Length);
+  bool is_bool = false;
   switch (v.GetType()) {
     case tok::Identifier:
-      if (sel.type==Prop::INT) {
+      if (sel.type==Prop::INT || sel.id>=Prop::CUSTOM) {
         // todo. Add check to test that the comparison operator is only one of
         // = and !=. The others don't make too much sense.
-
-        if (value_string=="true" || value_string=="True" || 
-            value_string=="TRUE") {
-          value=ParamType(int(1));
+        if (is_literal_true(value_string)) {
+          // these two if/else branches are unfortunate. but we need to cast
+          // the bool to either int or float, depending whether the result
+          // is to be used for generic properties (which are always floats)
+          // or for integral properties.
+          if (sel.type==Prop::INT) {
+            value=ParamType(int(1));
+          } else {
+            value=ParamType(Real(1));
+          }
           break;
-        } else if (value_string=="false" || value_string=="False" || 
-                   value_string=="FALSE") {   
-          value=ParamType(int(0));
+        } else if (is_literal_false(value_string)) {   
+          if (sel.type==Prop::INT) {
+            value=ParamType(int(0));
+          } else {
+            value=ParamType(Real(0));
+          }
           break;
         }
       }
@@ -672,11 +693,17 @@ Node* QueryImpl::ParsePropValueExpr(QueryLexer& lexer) {
     GenProp gen_prop(epm);
     if (op.GetType()==tok::Colon) {
       op=lexer.NextToken();
+      String value_str=query_string_.substr(op.GetValueRange().Loc,
+                                            op.GetValueRange().Length);
       if (!this->ExpectNotEnd(op, "value")) {
         return NULL;
       }
-      if (tok::FloatingValue!=op.GetType() && 
-          tok::IntegralValue!=op.GetType()) {
+      bool numeric = tok::FloatingValue==op.GetType() ||
+                     tok::IntegralValue==op.GetType() ||
+                     (tok::Identifier==op.GetType() &&
+                     (is_literal_true(value_str) ||
+                      is_literal_false(value_str)));
+      if (!numeric) {
         // BZDNG-204: issue specific warning when trying to use a string value 
         //     for a generic property. 
         if (op.GetType()==tok::String || op.GetType()==tok::Identifier) {
@@ -687,8 +714,13 @@ Node* QueryImpl::ParsePropValueExpr(QueryLexer& lexer) {
         this->ExpectNumeric(op);
         return NULL;
       }
-      gen_prop.default_val=atof(query_string_.substr(op.GetValueRange().Loc,
-                                      op.GetValueRange().Length).c_str());
+      if (is_literal_true(value_str)) {
+        gen_prop.default_val=1.0;
+      } else if (is_literal_false(value_str)) {
+        gen_prop.default_val=0.0;
+      } else {
+        gen_prop.default_val=atof(value_str.c_str());
+      }
       gen_prop.has_default=true;
       op=lexer.NextToken();
     }
