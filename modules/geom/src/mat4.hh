@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cstddef> // for size_t
 #include <ostream>
+#include <vector>
 
 #include <boost/operators.hpp>
 
@@ -135,6 +136,8 @@ i12, double i13, double i20, double i21, double i22, double i23, double i30, dou
 double i32, double i33);
 
 };
+
+typedef std::vector<Mat4> Mat4List;
 
 DLLEXPORT_OST_GEOM std::ostream& operator<<(std::ostream& os, const Mat4& m);
 

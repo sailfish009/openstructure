@@ -22,6 +22,7 @@
 #include "load_entity.hh"
 #include <ost/mol/xcs_editor.hh>
 #include <ost/io/io_manager.hh>
+#include <ost/io/mol/io_profile.hh>
 #include <ost/io/mol/entity_io_handler.hh>
 #include <ost/profile.hh>
 
@@ -38,19 +39,15 @@ void Import(mol::EntityHandle& eh, const String& filename, int flag)
   // TODO: proper error handling
 
   LOG_DEBUG("calling import on entity io handle");
-  /*
-    This should probably allow various parameters to be passed
-    to adjust the loading behaviour for a particular filter.
-    Alternatively, these settings could be done outside via
-    the main IOManager interface, as global settings per import plugin
-  */
   ent_io->Import(eh,filename);
 
   LOG_DEBUG("running conopology");
 
-  if(ent_io->RequiresBuilder()) {
-    conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();
-    conop::Conopology::Instance().ConnectAll(builder,eh,flag);
+  if(ent_io->RequiresProcessor()) {
+    IOProfile& prof = IOProfileRegistry::Instance().GetDefault();
+    if (prof.processor) {
+      prof.processor->Process(eh);
+    }
   }
 }
 

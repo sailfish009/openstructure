@@ -21,7 +21,6 @@
 #include <ost/log.hh>
 
 #include "conop.hh"
-#include "heuristic_builder.hh"
 #include <ost/profile.hh>
 
 namespace ost { namespace conop {
@@ -33,11 +32,8 @@ Conopology& Conopology::Instance()
   return impl;
 }
 
-Conopology::Conopology():
-  builder_map_()
+Conopology::Conopology()
 {
-  builder_map_["HEURISTIC"]=BuilderP(new HeuristicBuilder());
-  builder_map_["DEFAULT"]=builder_map_["HEURISTIC"];
   
   known_elements_.insert("AC");
   known_elements_.insert("AG");
@@ -150,146 +146,6 @@ Conopology::Conopology():
   known_elements_.insert("YB");
   known_elements_.insert("ZN");
   known_elements_.insert("ZR");
-}
-
-void Conopology::RegisterBuilder(const BuilderP& b, const String& name) {
-  if (!GetBuilder(name))
-  builder_map_[name]=b;
-}
-
-void Conopology::SetDefaultBuilder(const String& default_name) {
-  BuilderP builder=GetBuilder(default_name);
-  if (builder)
-    builder_map_["DEFAULT"]=builder;
-  else
-    throw ost::Error("trying to set unknown builder '"+
-                             default_name+"' as the default");
-}
-
-BuilderP Conopology::GetBuilder(const String& name)
-{
-  BuilderMap::iterator it=builder_map_.find(name);
-  if (it!=builder_map_.end()){
-    return (*it).second;
-  }
-  return BuilderP();
-}
-
-namespace {
-
-class PropAssigner: public mol::EntityVisitor {
-public:
-  PropAssigner(const BuilderP& builder): builder_(builder) {}
-  
-  virtual bool VisitResidue(const mol::ResidueHandle& res)
-  {
-    String key=builder_->IdentifyResidue(res);
-    if (key=="UNK" && res.GetKey()!="UNK" && res.GetKey()!="UNL") {
-      unk_res_[res.GetKey()]+=1;
-    }
-    builder_->FillResidueProps(res);
-    return true;
-  }
-  
-  virtual bool VisitAtom(const mol::AtomHandle& atom)
-  {
-    builder_->FillAtomProps(atom);
-    return false;
-  }
-  
-  virtual void OnExit()
-  {
-    for (std::map<String, int>::iterator i=unk_res_.begin(), 
-         e=unk_res_.end(); i!=e; ++i) {
-      if (i->second>1) {
-        LOG_WARNING("structure contains unknown residues with name " << i->first 
-                    << " ("<< i->second << "x)");
-      } else {        
-        LOG_WARNING("structure contains unknown residue with name " << i->first);
-      }
-
-    }
-  }
-private:
-  BuilderP builder_;
-  std::map<String, int>  unk_res_;  
-};
-
-class ChemClassAssigner : public mol::EntityVisitor {
-public:
-  ChemClassAssigner(BuilderP b): builder(b) { }
-  virtual bool VisitResidue(const mol::ResidueHandle& res)
-  {
-    if (res.GetChemClass()==mol::ChemClass()) {
-      builder->GuessChemClass(res);
-    }
-    return false;
-  }
-private:
-  BuilderP builder;
-};
-class Connector: public mol::EntityVisitor
-{
-public:
-  Connector(const BuilderP& b, bool peptide_bonds):
-    builder_(b),
-    prev_(),
-    peptide_bonds_(peptide_bonds)
-  {}
-
-  virtual bool VisitChain(const mol::ChainHandle& chain) {
-    prev_=mol::ResidueHandle(); // reset prev
-    return true;
-  }
-
-  virtual bool VisitResidue(const mol::ResidueHandle& res) {
-    builder_->ConnectAtomsOfResidue(res);
-    if (peptide_bonds_ && prev_) {
-      builder_->ConnectResidueToPrev(res,prev_);
-    }
-    prev_=res;
-    return false;
-  }
-
-private:
-  BuilderP builder_;
-  mol::ResidueHandle prev_;
-  bool peptide_bonds_;
-};
-
-class TorsionMaker: public mol::EntityVisitor
-{
-public:
-  TorsionMaker(const BuilderP& b):
-    builder_(b)
-  {}
-
-  virtual bool VisitChain(const mol::ChainHandle& chain) {
-    builder_->AssignTorsions(chain);
-    return false;
-  }
-
-private:
-  BuilderP builder_;
-};
-} // ns
-
-void Conopology::ConnectAll(const BuilderP& b, mol::EntityHandle eh, int flags)
-{
-  Profile profile_connect("ConnectAll");
-  LOG_DEBUG("Conopology: ConnectAll: building internal coordinate system");
-  mol::XCSEditor xcs_e=eh.EditXCS(mol::BUFFERED_EDIT);
-  PropAssigner a(b);
-  eh.Apply(a);
-  ChemClassAssigner cca(b);
-  eh.Apply(cca);
-  LOG_DEBUG("Conopology: ConnectAll: connecting all bonds");
-  Connector connector(b, !(flags & NO_PEPTIDE_BONDS));
-  eh.Apply(connector);
-
-  LOG_DEBUG("Conopology: ConnectAll: assigning all torsions");
-  TorsionMaker tmaker(b);
-  eh.Apply(tmaker);
 }
 
 bool Conopology::IsValidElement(const String& ele) const

@@ -29,7 +29,7 @@
 namespace ost { namespace io {
 
 
-bool EntityIOSDFHandler::RequiresBuilder() const
+bool EntityIOSDFHandler::RequiresProcessor() const
 {
   return false;
 }

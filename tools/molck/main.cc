@@ -67,14 +67,13 @@ CompoundLibPtr load_compound_lib(const String& custom_path)
   exe_path = std::string( result, (count > 0) ? count : 0 );
   #endif
   if (exe_path.empty()) { 
-    std::cerr << "Could not determine the path of the molck executable. Will only look for compounds.chemlib in the current working directory" << std::endl;
+    std::cerr << "Could not determine the path of the molck executable. Will only "
+       "look for compounds.chemlib in the current working directory" << std::endl;
   } else {
     fs::path path_and_exe(exe_path);
     fs::path path_only=path_and_exe.branch_path();
     fs::path share_path = path_only.branch_path();
-    share_path/="share";
-    share_path/="openstructure";
-    share_path/="compounds.chemlib";
+    share_path = share_path / "share" / "openstructure" / "compounds.chemlib";
 
     String share_path_string=BFPathToString(share_path);
       
@@ -89,37 +88,33 @@ CompoundLibPtr load_compound_lib(const String& custom_path)
   return CompoundLibPtr();
 }
 
+const char* USAGE=
+"this is molck - the molecule checker\n"
+"usage: molck [options] file1.pdb [file2.pdb [...]]\n"
+"options \n"
+"  --complib=path    location of the compound library file. If not provided, the \n"
+"    following locations are searched in this order: \n" 
+"    1. Working directory, 2. OpenStructure standard library location (if the \n"
+"    executable is part of a standard OpenStructure installation) \n"
+"  --rm=<a>,<b>      remove atoms and residues matching some criteria \n"
+"    zeroocc - Remove atoms with zero occupancy \n"
+"    hyd - Remove hydrogen atoms \n"
+"    oxt - Remove terminal oxygens \n"
+"    nonstd - Remove all residues not one of the 20 standard amino acids \n"
+"    unk - Remove unknown and atoms not following the nomenclature\n"
+"  --fix-ele         clean up element column\n"
+"  --stdout          write cleaned file(s) to stdout \n"
+"  --out=filename    write cleaned file(s) to disk. % characters in the filename are \n"
+"    replaced with the basename of the input file without extension. \n"
+"    Default: %-molcked.pdb \n"
+"  --color=auto|on|off \n"
+"    whether output should be colored\n"
+"  --map-nonstd   maps modified residues back to the parent amino acid, for example\n"
+"    MSE -> MET, SEP -> SER.\n";
+
 void usage()
 {
-  std::cerr << "usage: molck [options] file1.pdb [file2.pdb [...]]" << std::endl;
-  std::cerr << "options" << std::endl;
-  std::cerr << "  --complib=path   location of the compound library file" << std::endl;   
-  std::cerr << "                   If not provided, the following locations are searched" << std::endl;   
-  std::cerr << "                   in this order:" << std::endl;   
-  std::cerr << "                   1. Working directory" << std::endl;   
-  std::cerr << "                   2. OpenStructure standard library location" << std::endl;   
-  std::cerr << "                      (if the executable is part of a standard" << std::endl;
-  std::cerr << "                      OpenStructure installation)" << std::endl;
-  std::cerr << "  --rm=<a>,<b>   remove atoms and residues matching some criteria" << std::endl;
-  std::cerr << "          zeroocc  - Remove atoms with zero occupancy" << std::endl;
-  std::cerr << "          hyd      - Remove hydrogen atoms" << std::endl;
-  std::cerr << "          oxt      - Remove terminal oxygens" << std::endl;
-  std::cerr << "          nonstd   - Remove all residues not " << std::endl 
-            << "                     one of the 20 standard amino acids" << std::endl;
-  std::cerr << "          unk      - Remove unknown atoms and atoms that " << std::endl 
-            << "                     are not supposed to be part of a residue" << std::endl;
-  std::cerr << "  --fix-ele      clean up element column" << std::endl;
-  std::cerr << "  --stdout       write cleaned file(s) to stdout" << std::endl;
-  std::cerr << "  --fileout=blueprint   write cleaned file(s) to disk" << std::endl;  
-  std::cerr << "                        The blueprint string, which must contain a % character," << std::endl;
-  std::cerr << "                        is used to generate the output filename and path" << std::endl; 
-  std::cerr << "                        by replacing % with the input file name without" << std::endl;
-  std::cerr << "                        the extension. Output files automatically add" << std::endl; 
-  std::cerr << "                        '.pdb' extension" << std::endl;
-  std::cerr << "  --color=auto|on|off " << std::endl 
-            << "          whether output should be colored" << std::endl;
-  std::cerr << "  --map-nonstd   maps modified residues back to the parent amino " << std::endl 
-            << "          acid, e.g. MSE -> MET, SEP -> SER." << std::endl;
+  std::cerr << USAGE << std::endl;
   exit(0);
 }	
 
@@ -153,7 +148,8 @@ int main(int argc, char *argv[])
      "whether the output should be colored.")
     ("files", po::value< std::vector<String> >(), "input file(s)")
     ("stdout", "write cleaned file(s) to stdout")
-    ("fileout", po::value<String>(&output_blueprint_string), "write cleaned file to output using blueprint to determine path")
+    ("out,o", po::value<String>(&output_blueprint_string)->default_value("%-molcked.pdb"), 
+     "write cleaned file to output using blueprint to determine path")
     ("map-nonstd", "map non standard residues back to standard ones (e.g.: MSE->MET,SEP->SER,etc.)")
     ("fix-ele", "insert element") 
     ("complib", po::value<String>(&custom_path)->default_value(""),"location of the compound library file")       
@@ -184,11 +180,10 @@ int main(int argc, char *argv[])
   }    
   if (vm.count("stdout")) {
     write_to_stdout = true;
-  }
-  if (vm.count("fileout")) {
+  } else {
     write_to_file = true;
-    output_blueprint_string = vm["fileout"].as<String>();
-  }  
+    output_blueprint_string = vm["out"].as<String>();
+  }
   if (vm.count("map-nonstd")) {
     map_nonstd_res = true;
   }
@@ -266,7 +261,7 @@ int main(int argc, char *argv[])
     }
 
     XCSEditor edi=ent.EditXCS();
-    DiagEngine diags;
+    Diagnostics diags;
     Checker checker(lib, ent, diags);
     if (rm_zero_occ_atoms) {
       std::cerr << "removing atoms with zero occupancy" << std::endl;
@@ -306,8 +301,9 @@ int main(int argc, char *argv[])
     checker.CheckForCompleteness();
     checker.CheckForUnknownAtoms();
     checker.CheckForNonStandard();
-      for (size_t j=0; j<diags.GetDiags().size(); ++j) {
-      const Diag* diag=diags.GetDiags()[j];
+    for (Diagnostics::const_diag_iterator 
+         j = diags.diags_begin(), e = diags.diags_end(); j != e; ++j) {
+      const Diag* diag=*j;
       std::cerr << diag->Format(colored);
       switch (diag->GetType()) {
         case DIAG_UNK_ATOM:
@@ -360,24 +356,17 @@ int main(int argc, char *argv[])
     if (write_to_file) {
       fs::path input_file_path(files[i]);
       fs::path input_filename = BFPathStem(input_file_path);
- 
-
       String input_filename_string=BFPathToString(input_filename);
-
       size_t replstart =output_blueprint_string.find('%');	
-
-      if (replstart == String::npos) {
-        std::cerr << "The output blueprint string does not contain a % character" << std::endl;
-        exit(-1);
-      } 
       String output_blueprint_string_copy = output_blueprint_string;
-      output_blueprint_string_copy.replace(replstart,1,input_filename_string); 
-      output_blueprint_string_copy+=".pdb";
- 
+      if (replstart != String::npos) {
+        output_blueprint_string_copy.replace(replstart,1,input_filename_string); 
+      } 
       try {
         fs::path out_path(output_blueprint_string_copy);
-        if (!exists(out_path)) {
-          std::cerr << "Output path does not exist: " << output_blueprint_string_copy << std::endl;
+        if (out_path.has_parent_path() && !exists(out_path.parent_path())) {
+          std::cerr << "Output path does not exist: " 
+                    << output_blueprint_string_copy << std::endl;
           exit(-1);
         }
       } catch (std::exception& e) {
@@ -385,7 +374,8 @@ int main(int argc, char *argv[])
         size_t perden = String(e.what()).find("Permission denied");	
 
         if (perden != String::npos) {
-          std::cerr << "Cannot write into output directory: " << output_blueprint_string_copy << std::endl;
+          std::cerr << "Cannot write into output directory: " 
+                    << output_blueprint_string_copy << std::endl;
           exit(-1);
         } else {
           std::cerr << e.what() << std::endl;
@@ -394,7 +384,7 @@ int main(int argc, char *argv[])
       }
       std::cerr << "Writing out file: " << output_blueprint_string_copy << std::endl;
       PDBWriter writer(output_blueprint_string_copy, prof);
-       writer.Write(ent);
+      writer.Write(ent);
     }
   }
  

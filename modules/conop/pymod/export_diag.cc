@@ -16,16 +16,29 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_CONOP_BUILDER_FW_HH
-#define OST_CONOP_BUILDER_FW_HH
+//
+#include <boost/python.hpp>
+#include <ost/conop/diag.hh>
+using namespace ost;
 
-#include <boost/shared_ptr.hpp>
+using namespace boost::python;
+using namespace ost::conop;
 
-namespace ost { namespace conop {
 
-class Builder;
-typedef boost::shared_ptr<Builder> BuilderP;
+void export_diag() {
 
-}}
+  enum_<DiagType>("DiagType")
+    .value("DIAG_UNK_ATOM", DIAG_UNK_ATOM)
+    .value("DIAG_UNK_RESIDUE", DIAG_UNK_RESIDUE)
+    .value("(DIAG_MISSING_ATOM", DIAG_MISSING_ATOM)
+    .value("DIAG_NONSTD_RESIDUE", DIAG_NONSTD_RESIDUE)
+    .export_values()
+  ;
 
-#endif
+  class_<Diag>("Diag", init<DiagType,const char*>())
+    .def("__str__(self)__", &Diag::Format)
+  ;
+  class_<Diagnostics, DiagnosticsPtr>("Diagnostics")
+  ;
+}
+

@@ -29,7 +29,7 @@ using boost::unit_test_framework::test_suite;
 #include <ost/dyn_cast.hh>
 #include <ost/mol/mol.hh>
 #include <ost/conop/conop.hh>
-#include <ost/conop/rule_based_builder.hh>
+#include <ost/conop/heuristic.hh>
 
 #include <ost/io/mol/entity_io_pdb_handler.hh>
 #include <ost/io/pdb_reader.hh>
@@ -426,8 +426,8 @@ BOOST_AUTO_TEST_CASE(deuterium_import)
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   // we use conopology to mark amino acids as peptide-linking. 
-  conop::Conopology& conop_inst=conop::Conopology::Instance();
-  conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+  conop::HeuristicProcessor heu_proc;
+  heu_proc.Process(ent);
   // this check makes sure that we correctly detect deal with the deuterium
   // atoms in the residue.
   BOOST_CHECK(ent.FindResidue("A", 297).IsPeptideLinking());
@@ -440,8 +440,8 @@ BOOST_AUTO_TEST_CASE(bzdng_318)
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   // we use conopology to mark amino acids as peptide-linking.
-  conop::Conopology& conop_inst=conop::Conopology::Instance();
-  conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+  conop::HeuristicProcessor heu_proc;
+  heu_proc.Process(ent);
   {
     PDBWriter writer(std::string("testfiles/pdb/bzdng-318-out.pdb"),
                      IOProfile());
@@ -614,8 +614,9 @@ BOOST_AUTO_TEST_CASE(write_ter)
     reader.Import(ent);
     // we use conopology to mark amino acids as peptide-linking. this is require 
     // for proper TER output
-    conop::Conopology& conop_inst=conop::Conopology::Instance();
-    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    conop::HeuristicProcessor heu_proc;
+
+    heu_proc.Process(ent);
     writer.Write(ent);
   }
   BOOST_CHECK(compare_files("testfiles/pdb/ter.pdb", 
@@ -635,8 +636,8 @@ BOOST_AUTO_TEST_CASE(write_ter2)
     reader.Import(ent);
     // we use conopology to mark amino acids as peptide-linking. this is 
     // require for proper TER output
-    conop::Conopology& conop_inst=conop::Conopology::Instance();
-    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    conop::HeuristicProcessor heu_proc;
+    heu_proc.Process(ent);
     writer.Write(ent);
   }
   BOOST_CHECK(compare_files("testfiles/pdb/ter2.pdb", 
@@ -656,8 +657,8 @@ BOOST_AUTO_TEST_CASE(write_ter3)
     reader.Import(ent);
     // we use conopology to mark amino acids as peptide-linking. this is 
     // require for proper TER output
-    conop::Conopology& conop_inst=conop::Conopology::Instance();
-    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    conop::HeuristicProcessor heu_proc;
+    heu_proc.Process(ent);
     writer.Write(ent);
   }
   BOOST_CHECK(compare_files("testfiles/pdb/ter3.pdb", 
@@ -677,8 +678,8 @@ BOOST_AUTO_TEST_CASE(write_ter4)
     mol::ResidueHandle r2=edi.AppendResidue(ch, "GLY");
     mol::AtomHandle a2=edi.InsertAtom(r2, "N", geom::Vec3(35.0, -99.0, -10.5));
     mol::ChainHandle ch2=edi.InsertChain("B");
-    conop::Conopology& conop_inst=conop::Conopology::Instance();
-    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    conop::HeuristicProcessor heu_proc;
+    heu_proc.Process(ent);
     writer.Write(ent);
   }
   BOOST_CHECK(compare_files("testfiles/pdb/ter_emptychain.pdb",
@@ -698,8 +699,8 @@ BOOST_AUTO_TEST_CASE(write_ter5)
     mol::ResidueHandle r2=edi.AppendResidue(ch, "GLY");
     mol::AtomHandle a2=edi.InsertAtom(r2, "N", geom::Vec3(35.0, -99.0, -10.5));
     mol::ChainHandle ch2=edi.InsertChain("B");
-    conop::Conopology& conop_inst=conop::Conopology::Instance();
-    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    conop::HeuristicProcessor heu_proc;
+    heu_proc.Process(ent);
     writer.Write(ent.Select(""));
   }
   BOOST_CHECK(compare_files("testfiles/pdb/ter_view-emptychain.pdb",
@@ -717,8 +718,8 @@ BOOST_AUTO_TEST_CASE(write_ter6)
     
     mol::EntityHandle ent=mol::CreateEntity();
     reader.Import(ent);
-    conop::Conopology& conop_inst=conop::Conopology::Instance();
-    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    conop::HeuristicProcessor heu_proc;
+    heu_proc.Process(ent);
     writer.Write(ent);
   }
   BOOST_CHECK(compare_files("testfiles/pdb/ter4.pdb", 
@@ -734,8 +735,8 @@ BOOST_AUTO_TEST_CASE(write_conect)
     PDBWriter writer(String("testfiles/pdb/conect-out.pdb"), IOProfile());
     mol::EntityHandle ent=mol::CreateEntity();
     reader.Import(ent);
-    conop::Conopology& conop_inst=conop::Conopology::Instance();
-    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    conop::HeuristicProcessor heu_proc;
+    heu_proc.Process(ent);
     writer.Write(ent);
   }
   BOOST_CHECK(compare_files("testfiles/pdb/conect.pdb",
@@ -855,21 +856,18 @@ BOOST_AUTO_TEST_CASE(seqres_import)
   char * ost_root=getenv("OST_ROOT");
   if(!ost_root){
     std::cout << "WARNING: skipping SEQRES import unit test. " 
-              << "Rule-based builder is required" << std::endl;
+              << "Rule-based processor is required" << std::endl;
     return;
   }
   SetPrefixPath(ost_root);
   String lib_path=GetSharedDataPath()+"/compounds.chemlib";
   conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);  
   if (!compound_lib) {
-    std::cout << "WARNING: skipping SEQRES import unit test. " 
-              << "Rule-based builder is required" << std::endl;
+    std::cout << "WARNING: skipping SEQRES import unit test. Compound lib is " 
+              << "required" << std::endl;
     return;    
   }
-  conop::RuleBasedBuilderPtr rbb(new conop::RuleBasedBuilder(compound_lib));
-  conop::Conopology::Instance().RegisterBuilder(rbb, "RBB");
-  conop::Conopology::Instance().SetDefaultBuilder("RBB");
-
+  conop::Conopology::Instance().SetDefaultLib(compound_lib);
   String fname("testfiles/pdb/seqres.pdb");
   IOProfile profile;
   PDBReader reader(fname, profile);
@@ -927,8 +925,7 @@ BOOST_AUTO_TEST_CASE(charmm_rname)
 {
   {
     PDBWriter writer(String("testfiles/pdb/charmm_rname-out.pdb"),
-                     IOProfile("CHARMM", true, false, false,
-                               false, false, false, true));
+                     IOProfile("CHARMM", false, false, false, false, false));
 
     mol::EntityHandle ent=mol::CreateEntity();
     mol::XCSEditor edi=ent.EditXCS();
@@ -947,8 +944,7 @@ BOOST_AUTO_TEST_CASE(charmm_longcname)
 {
   {
     PDBWriter writer(String("testfiles/pdb/charmm_longcname-out.pdb"),
-                     IOProfile("CHARMM", true, false, false,
-                               false, false, false, true));
+                     IOProfile("CHARMM", false, false, false, false, false));
 
     mol::EntityHandle ent=mol::CreateEntity();
     mol::XCSEditor edi=ent.EditXCS();
@@ -967,8 +963,7 @@ BOOST_AUTO_TEST_CASE(write_charmm_ter)
 {
   {
     PDBWriter writer(String("testfiles/pdb/charmm_ter-out.pdb"),
-                     IOProfile("CHARMM", true, false, false,
-                               false, false, false, true));
+                     IOProfile("CHARMM", false, false, false, false, false));
 
     mol::EntityHandle ent=mol::CreateEntity();
     mol::XCSEditor edi=ent.EditXCS();
@@ -977,8 +972,8 @@ BOOST_AUTO_TEST_CASE(write_charmm_ter)
     mol::AtomHandle a=edi.InsertAtom(r, "N", geom::Vec3(32.0, -128.0, -2.5));
     mol::ResidueHandle r2=edi.AppendResidue(ch, "GLY");
     mol::AtomHandle a2=edi.InsertAtom(r2, "N", geom::Vec3(35.0, -99.0, -10.5));
-    conop::Conopology& conop_inst=conop::Conopology::Instance();
-    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    conop::HeuristicProcessor heu_proc;
+    heu_proc.Process(ent);
     writer.Write(ent);
   }
   BOOST_CHECK(compare_files("testfiles/pdb/charmm_ter.pdb",

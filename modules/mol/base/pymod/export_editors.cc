@@ -83,6 +83,8 @@ void (ICSEditor::*rotate_torsion_b)(const AtomHandle&, const AtomHandle&,
                                     const AtomHandle&, const AtomHandle&,
                                     Real, bool)=&ICSEditor::RotateTorsionAngle;
 
+void (EditorBase::*renumber_chain_a)(ChainHandle,const ResNumList&)=&EditorBase::RenumberChain;
+void (EditorBase::*renumber_chain_b)(const ChainHandle&,int, bool)=&EditorBase::RenumberChain;
 #if OST_NUMPY_SUPPORT_ENABLED
 template<typename T, bool O>
 void set_pos2_nc_t(XCSEditor& e, const AtomHandleList& alist, PyArrayObject* na)
@@ -261,7 +263,8 @@ void export_Editors()
     .def("ReorderResidues",&EditorBase::ReorderResidues)
     .def("ReorderAllResidues",&EditorBase::ReorderAllResidues)
     .def("RenumberAllResidues",&EditorBase::RenumberAllResidues)
-    .def("RenumberChain",&EditorBase::RenumberChain)
+    .def("RenumberChain",renumber_chain_a)
+    .def("RenumberChain",renumber_chain_b)
   ;
   
   void (XCSEditor::*apply_transform1)(const geom::Mat4&) = &XCSEditor::ApplyTransform;

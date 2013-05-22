@@ -29,47 +29,16 @@ STANDARD_AMINOACIDS=(
  'HIS', 'PHE',
 )
 
-def ConnectAll(ent):
+def SetDefaultLib(compound_lib):
   '''
-  Uses the current default builder to connect the atoms of the entity, assign 
-  torsions, and fill in missing or correct erroneous information such as the 
-  chemical class of the residues and the atom's element.
-  
-  :param ent: A valid entity
-  :type ent: :class:`~ost.mol.EntityHandle`
+  Set the default compound library. The compound library is used by various
+  functions of the framework that requires knowledge of naming and 
+  connectivity of residues.
   '''
   conop_inst=Conopology.Instance()
-  conop_inst.ConnectAll(conop_inst.GetBuilder("DEFAULT"), ent, 0)
-  
-def GetBuilder(name='DEFAULT'):
-  '''
-  Get registered builder by name
-  
-  :param name: The name of the builder
-  
-  :returns: The builder or None, if the builder doesn't exist
-  '''
-  return Conopology.Instance().GetBuilder(name)  
+  conop_inst.SetDefaultLib(compound_lib)
 
-def RegisterBuilder(builder, name):
-  '''
-  Register builder to OpenStructure
-  
-  :param builder: A instance of :class:`Builder`
-  
-  :param name: The name of the builder
-  '''
+def GetDefaultLib():
   conop_inst=Conopology.Instance()
-  conop_inst.RegisterBuilder(builder, name)
-  
-def SetDefaultBuilder(builder_name):
-  '''
-  Set the builder with the given name as the default. You will have to register
-  a builder with :func:`RegisterBuilder` before you will be able to set it as
-  the default.
+  return conop_inst.GetDefaultLib()
 
-  :raises: :exc:`RuntimeError` when trying to set a builder as the default that
-    has not been registered yet.
-  '''
-  conop_inst=Conopology.Instance()
-  conop_inst.SetDefaultBuilder(builder_name)

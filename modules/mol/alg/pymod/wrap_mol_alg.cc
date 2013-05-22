@@ -26,6 +26,7 @@
 #include <ost/mol/alg/superpose_frames.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/mol/alg/consistency_checks.hh>
+#include <ost/mol/alg/pdbize.hh>
 #include <ost/export_helper/pair_to_tuple_conv.hh>
 #include <ost/export_helper/vec_to_list_conv.hh>
 
@@ -165,6 +166,14 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("PrintGlobalRDMap",&mol::alg::PrintGlobalRDMap);
   def("PrintResidueRDMap",&mol::alg::PrintResidueRDMap);
  
+
+  class_<mol::alg::PDBize>("PDBize",
+                           init<int>(arg("min_polymer_size")=10))
+    .def("Add", &mol::alg::PDBize::Add, 
+         (arg("asu"), arg("transformations"), arg("seqres")))
+    .def("Finish", &mol::alg::PDBize::Finish, arg("shift_to_fit")=true)
+  ;
+
   def("ResidueNamesMatch",&mol::alg::ResidueNamesMatch,
       (arg("probe"), arg("reference"), arg("log_as_error")=false));
 

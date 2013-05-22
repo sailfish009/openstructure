@@ -195,6 +195,21 @@ if (ENABLE_INFO)
   find_package(Qt4 4.5.0 REQUIRED)
 endif()
 
+if (OPTIMIZE)
+  if (CXX_FLAGS)
+    set (CMAKE_CXX_FLAGS_RELEASE ${CXX_FLAGS})
+  endif()
+  if (C_FLAGS)
+    set (CMAKE_C_FLAGS_RELEASE ${C_FLAGS})
+  endif()
+else()
+  if (CXX_FLAGS)
+    set(CMAKE_CXX_FLAGS_DEBUG ${CXX_FLAGS})
+  endif()
+  if (C_FLAGS)
+    set(CMAKE_C_FLAGS_DEBUG ${C_FLAGS})
+  endif()
+endif()
 if (ENABLE_GFX)
   if(USE_MESA)
     find_package(Mesa REQUIRED)
@@ -312,6 +327,10 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
 
 #ost_match_boost_python_version(${PYTHON_LIBRARIES})
 
+if (CMAKE_COMPILER_IS_GNUCXX)
+   set(HIDDEN_VIS_MSG 
+       "\n   Hidden object visibility  (-DHIDDEN_VISIBILITY) : ${_HIDDEN_VIS}")
+endif()
 message(STATUS 
         "OpenStructure will be built with the following options:\n"
         "   Install Prefix                       (-DPREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
@@ -330,9 +349,6 @@ message(STATUS
         "   Compound Lib                   (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
         "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
         "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
-        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}")
-if (CMAKE_COMPILER_IS_GNUCXX)
-   message(STATUS
-        "   Hidden object visibility  (-DHIDDEN_VISIBILITY) :        ${_HIDDEN_VIS}")
-endif()
+        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}"
+        ${HIDDEN_VIS_MSG})
 

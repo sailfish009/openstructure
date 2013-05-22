@@ -42,7 +42,7 @@ public:
                              const String& format="auto");
   static bool ProvidesExport(const boost::filesystem::path& loc, 
                              const String& format="auto");
-  virtual bool RequiresBuilder() const;
+  virtual bool RequiresProcessor() const;
 
   static String GetFormatName() { return String("mmCIF"); }
   static String GetFormatDescription() { 

@@ -19,7 +19,7 @@
 import os, tempfile, ftplib, httplib
 
 from _ost_io import *
-from ost import mol, geom, conop
+from ost import mol, geom, conop, seq
 
 profiles=None
 
@@ -44,14 +44,16 @@ class IOProfiles:
 
 if not profiles:
   profiles=IOProfiles()
+  if conop.GetDefaultLib():
+    processor = conop.RuleBasedProcessor(conop.GetDefaultLib())
+  else:
+    processor = conop.HeuristicProcessor()
   profiles['STRICT']=IOProfile(dialect='PDB', fault_tolerant=False,
-                               strict_hydrogens=False, quack_mode=False)
+                               quack_mode=False, processor=processor.Copy())
   profiles['SLOPPY']=IOProfile(dialect='PDB', fault_tolerant=True,
-                               strict_hydrogens=False, quack_mode=True,
-                               bond_feasibility_check=True)
+                               quack_mode=True, processor=processor.Copy())
   profiles['CHARMM']=IOProfile(dialect='CHARMM', fault_tolerant=True,
-                               strict_hydrogens=False, quack_mode=False,
-                               bond_feasibility_check=True)
+                               quack_mode=False, processor=processor.Copy())
   profiles['DEFAULT']='STRICT'
 
 def _override(val1, val2):
@@ -64,7 +66,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
             fault_tolerant=None, load_multi=False, quack_mode=None,
             join_spread_atom_records=None, calpha_only=None,
             profile='DEFAULT', remote=False, dialect=None,
-            strict_hydrogens=None, seqres=False, bond_feasibility_check=None):
+            seqres=False, bond_feasibility_check=None):
   """
   Load PDB file from disk and return one or more entities. Several options 
   allow to customize the exact behaviour of the PDB import. For more information 
@@ -102,8 +104,6 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
 
   :type dialect: :class:`str`
   
-  :param strict_hydrogens: If set, overrides the value of 
-     :attr:`IOProfile.strict_hydrogens`.
 
   :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
       inexistent file
@@ -126,9 +126,10 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
   prof.no_hetatms=_override(prof.no_hetatms, no_hetatms)
   prof.dialect=_override(prof.dialect, dialect)
   prof.quack_mode=_override(prof.quack_mode, quack_mode)
-  prof.strict_hydrogens=_override(prof.strict_hydrogens, strict_hydrogens)
+  if prof.processor:
+    prof.processor.check_bond_feasibility=_override(prof.processor.check_bond_feasibility, 
+                                                    bond_feasibility_check)
   prof.fault_tolerant=_override(prof.fault_tolerant, fault_tolerant)
-  prof.bond_feasibility_check=_override(prof.bond_feasibility_check, bond_feasibility_check)
   prof.join_spread_atom_records=_override(prof.join_spread_atom_records,
                                           join_spread_atom_records)
 
@@ -139,13 +140,11 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
     filename = tmp_file.name
   
   conop_inst=conop.Conopology.Instance()
-  builder=conop_inst.GetBuilder("DEFAULT")
-  if prof.dialect=='PDB':
-    builder.dialect=conop.PDB_DIALECT
-  elif prof.dialect=='CHARMM':
-    builder.dialect=conop.CHARMM_DIALECT
-  builder.strict_hydrogens=prof.strict_hydrogens
-  builder.bond_feasibility_check=prof.bond_feasibility_check
+  if prof.processor:
+    if prof.dialect=='PDB':
+      prof.processor.dialect=conop.PDB_DIALECT
+    elif prof.dialect=='CHARMM':
+      prof.processor.dialect=conop.CHARMM_DIALECT
   reader=PDBReader(filename, prof)
   reader.read_seqres=seqres
   try:
@@ -154,7 +153,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
       while reader.HasNext():
         ent=mol.CreateEntity()
         reader.Import(ent, restrict_chains)
-        conop_inst.ConnectAll(builder, ent, 0)
+        if prof.processor:
+          prof.processor.Process(ent)
         ent_list.append(ent)
       if len(ent_list)==0:
         raise IOError("File '%s' doesn't contain any entities" % filename)
@@ -163,7 +163,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
       ent=mol.CreateEntity()
       if reader.HasNext():
         reader.Import(ent, restrict_chains)
-        conop_inst.ConnectAll(builder, ent, 0)
+        if prof.processor:
+          prof.processor.Process(ent)
       else:
         raise IOError("File '%s' doesn't contain any entities" % filename)
       if seqres:
@@ -255,7 +256,7 @@ def LoadCHARMMTraj(crd, dcd_file=None, profile='CHARMM',
       raise ValueError("No DCD filename given")
   return LoadCHARMMTraj_(crd, dcd_file, stride, lazy_load, detect_swap, swap_bytes)
 
-def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=None, profile='DEFAULT', remote=False, strict_hydrogens=None, seqres=False, info=False):
+def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=None, profile='DEFAULT', remote=False, seqres=False, info=False):
   """
   Load MMCIF file from disk and return one or more entities. Several options 
   allow to customize the exact behaviour of the MMCIF import. For more
@@ -275,9 +276,6 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
      
   :rtype: :class:`~ost.mol.EntityHandle`.
   
-  :param strict_hydrogens: If set, overrides the value of 
-     :attr:`IOProfile.strict_hydrogens`.
-
   :param seqres: Whether to read SEQRES records. If set to True, the loaded 
     entity and seqres entry will be returned as second item.
 
@@ -298,7 +296,6 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
     prof = profile.Copy()
 
   prof.calpha_only=_override(prof.calpha_only, calpha_only)
-  prof.strict_hydrogens=_override(prof.strict_hydrogens, strict_hydrogens)
   prof.fault_tolerant=_override(prof.fault_tolerant, fault_tolerant)
 
   if remote:
@@ -308,18 +305,14 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
     else:
       raise IOError('Can not load PDB %s from www.pdb.org'%filename) 
   
-  conop_inst = conop.Conopology.Instance()
-  builder = conop_inst.GetBuilder("DEFAULT")
-
-  builder.strict_hydrogens = prof.strict_hydrogens
-
   try:
     ent = mol.CreateEntity()
     reader = MMCifReader(filename, ent, prof)
     reader.read_seqres = seqres
     #if reader.HasNext():
     reader.Parse()
-    conop_inst.ConnectAll(builder, ent, 0)
+    if prof.processor:
+      prof.processor.Process(ent)
     #else:
     #  raise IOError("File doesn't contain any entities")
     if seqres and info:
@@ -340,39 +333,21 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
 # MMCifInfoBioUnit.PDBize, since this function is not included in SPHINX.
 def _PDBize(biounit, asu, seqres=None, min_polymer_size=10,
             transformation=False):
-  def _CopyAtoms(src_res, dst_res, edi, trans=geom.Mat4()):
-    atom_pos_wrong = False
-    for atom in src_res.atoms:
-      tmp_pos = geom.Vec4(atom.pos)
-      new_atom=edi.InsertAtom(dst_res, atom.name, geom.Vec3(trans*tmp_pos), 
-                              element=atom.element,
-                              occupancy=atom.occupancy, 
-                              b_factor=atom.b_factor,
-                              is_hetatm=atom.is_hetatom)
-      for p in range(0,3):
-        if new_atom.pos[p] <= -1000:
-          atom_pos_wrong = True
-        elif new_atom.pos[p] >= 10000:
-          atom_pos_wrong = True
-    return atom_pos_wrong
+  pdbizer = mol.alg.PDBize(min_polymer_size=min_polymer_size)
 
-  chain_names='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'
-  cur_chain_name = 0
-  water_chain = mol.ChainHandle()
-  ligand_chain = mol.ChainHandle()
-  a_pos_wrong = False
-  pdb_bu = mol.CreateEntity()
-  edi = pdb_bu.EditXCS(mol.BUFFERED_EDIT)
   chains = biounit.GetChainList()
   c_intvls = biounit.GetChainIntervalList()
   o_intvls = biounit.GetOperationsIntervalList()
+  ss = seqres
+  if not ss:
+    ss = seq.CreateSequenceList()
   # create list of operations
   # for cartesian products, operations are stored in a list, multiplied with
   # the next list of operations and re-stored... until all lists of operations
   # are multiplied in an all-against-all manner.
   operations = biounit.GetOperations()
   for i in range(0,len(c_intvls)):
-    trans_matrices = list()
+    trans_matrices = geom.Mat4List()
     l_operations = operations[o_intvls[i][0]:o_intvls[i][1]]
     if len(l_operations) > 0:
       for op in l_operations[0]:
@@ -398,95 +373,10 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10,
         trans_matrices = tmp_ops
     # select chains into a view as basis for each transformation
     assu = asu.Select('cname='+','.join(chains[c_intvls[i][0]:c_intvls[i][1]]))
-    # use each transformation on the view, store as entity and transform, PDBize
-    # the result while adding everything to one large entity
-    for tr in trans_matrices:
-      # do a PDBize, add each new entity to the end product
-      for chain in assu.chains:
-        residue_count = len(chain.residues)
-        if seqres:
-          seqres_chain = seqres.FindSequence(chain.name)
-          if seqres_chain.IsValid():
-            residue_count = len(seqres_chain)
-        if chain.is_polymer and residue_count >= min_polymer_size:
-          if len(chain_names) == cur_chain_name:
-            raise RuntimeError('Running out of chain names')
-          new_chain = edi.InsertChain(chain_names[cur_chain_name])
-          cur_chain_name += 1
-          edi.SetChainDescription(new_chain, chain.description)
-          edi.SetChainType(new_chain, chain.type)
-          new_chain.SetStringProp('original_name', chain.name)
-          if chain.HasProp("pdb_auth_chain_name"):
-            new_chain.SetStringProp("pdb_auth_chain_name", 
-                                    chain.GetStringProp("pdb_auth_chain_name"))
-          for res in chain.residues:
-            new_res = edi.AppendResidue(new_chain, res.name, res.number)
-            a_b = _CopyAtoms(res, new_res, edi, tr)
-            if not a_pos_wrong:
-              a_pos_wrong = a_b
-        elif chain.type == mol.CHAINTYPE_WATER:
-          if not water_chain.IsValid():
-            # water gets '-' as name
-            water_chain = edi.InsertChain('-')
-            edi.SetChainDescription(water_chain, chain.description)
-            edi.SetChainType(water_chain, chain.type)
-          for res in chain.residues:
-            new_res = edi.AppendResidue(water_chain, res.name)
-            new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
-            new_res.SetStringProp('description', chain.description)
-            a_b = _CopyAtoms(res, new_res, edi, tr)
-            if not a_pos_wrong:
-              a_pos_wrong = a_b
-        else:
-          if not ligand_chain.IsValid():
-            # all ligands, put in one chain, are named '_'
-            ligand_chain = edi.InsertChain('_')
-            last_rnum = 0
-          else:
-            last_rnum = ligand_chain.residues[-1].number.num
-          residues=chain.residues
-          ins_code='\0'
-          if len(residues)>1:
-            ins_code='A'
-          for res in chain.residues:
-            new_res = edi.AppendResidue(ligand_chain, res.name, 
-                                        mol.ResNum(last_rnum+1, ins_code))
-            new_res.SetStringProp('description', chain.description)
-            new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
-            new_res.SetStringProp("original_name", chain.name)
-            if chain.HasProp("pdb_auth_chain_name"):
-              new_res.SetStringProp("pdb_auth_chain_name",
-                                    chain.GetStringProp("pdb_auth_chain_name"))
-            ins_code = chr(ord(ins_code)+1)
-            a_b = _CopyAtoms(res, new_res, edi, tr)
-            if not a_pos_wrong:
-              a_pos_wrong = a_b
-  move_to_origin = None
-  if a_pos_wrong:
-    start = pdb_bu.bounds.min
-    move_to_origin = geom.Mat4(1,0,0,(-999 - start[0]),
-                               0,1,0,(-999 - start[1]),
-                               0,0,1,(-999 - start[2]),
-                               0,0,0,1)
-    edi = pdb_bu.EditXCS(mol.UNBUFFERED_EDIT)
-    edi.ApplyTransform(move_to_origin)
-  conop.ConnectAll(pdb_bu)
+    pdbizer.Add(assu, trans_matrices, ss)
+  pdb_bu = pdbizer.Finish(transformation)
   if transformation:
-    return pdb_bu, move_to_origin
+    return pdb_bu, pdb_bu.GetTransformationMatrix()
   return pdb_bu
 
 MMCifInfoBioUnit.PDBize = _PDBize
-
-## \example fft_li.py
-#
-# This scripts loads one or more images and shows their Fourier Transforms on 
-# the screen. A viewer is opened for each loaded image. The Fourier Transform 
-# honors the origin of the reference system, which is assumed to be at the 
-# center of the image.
-#
-# Usage:
-#
-# \code giplt view_ft.py <image1> [<image2> <image3> .... ] \endcode
-#
-# <BR>
-# <BR>

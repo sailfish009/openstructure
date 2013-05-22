@@ -29,7 +29,6 @@
 #include <ost/message.hh>
 
 #include <ost/conop/conop.hh>
-#include <ost/conop/rule_based_builder.hh>
 #include <ost/geom/mat3.hh>
 #include <ost/io/io_exception.hh>
 #include "pdb_reader.hh"
@@ -235,17 +234,17 @@ void PDBReader::ParseCompndEntry (const StringRef& line, int line_num)
 
 void PDBReader::ParseSeqRes(const StringRef& line, int line_num)
 {
-  conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
-  conop::RuleBasedBuilderPtr rbb=dyn_cast<conop::RuleBasedBuilder>(builder);
-  if (!rbb) {
+  conop::CompoundLibPtr comp_lib;
+  comp_lib = conop::Conopology::Instance().GetDefaultLib();
+   
+  if (!comp_lib) {
     if (!warned_rule_based_) {
-      LOG_WARNING("SEQRES import requires the rule-based builder. Ignoring "
+      LOG_WARNING("SEQRES import requires a compound library. Ignoring" 
                   "SEQRES records");      
     }
     warned_rule_based_=true;
     return;
   }
-  conop::CompoundLibPtr comp_lib=rbb->GetCompoundLib();  
   if (!seqres_.IsValid()) {
     seqres_=seq::CreateSequenceList();
   }

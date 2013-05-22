@@ -36,10 +36,9 @@
 
 #include <ost/log.hh>
 #include <ost/conop/conop.hh>
-#include <ost/conop/heuristic_builder.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/profile.hh>
-
+#include <ost/io/mol/io_profile.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/io/swap_util.hh>
 
@@ -331,7 +330,7 @@ void MAEReader::parse_and_add_atom(mol::EntityHandle ent,
 
 
 
-bool EntityIOMAEHandler::RequiresBuilder() const
+bool EntityIOMAEHandler::RequiresProcessor() const
 {
   return true;
 }
@@ -381,13 +380,14 @@ bool EntityIOMAEHandler::ProvidesExport(const boost::filesystem::path& loc,
 
 mol::EntityHandle LoadMAE(const String& file_name) 
 {
-  //conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();  
-  conop::BuilderP builder(new conop::HeuristicBuilder);
   MAEReader reader(file_name);
   mol::EntityHandle ent=mol::CreateEntity();
   mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
   reader.Import(ent);
-  conop::Conopology::Instance().ConnectAll(builder,ent);    
+  IOProfile& prof = IOProfileRegistry::Instance().GetDefault();
+  if (prof.processor) {
+    prof.processor->Process(ent);
+  }
   return ent;
 }
 

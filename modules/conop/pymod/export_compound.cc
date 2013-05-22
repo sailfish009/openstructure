@@ -127,7 +127,7 @@ void export_Compound() {
   class_<BondSpec>("BondSpec", no_init)
     .def_readonly("atom_one", &BondSpec::atom_one)
     .def_readonly("atom_two", &BondSpec::atom_two)    
-    .def_readonly("border", &BondSpec::order)
+    .def_readonly("order", &BondSpec::order)
 
   ;  
 

@@ -22,8 +22,8 @@
 #include <map>
 #include <ost/conop/module_config.hh>
 #include <ost/mol/entity_handle.hh>
-#include "builder_fw.hh"
-
+#include "processor.hh"
+#include "compound_lib.hh"
 namespace ost { namespace conop {
 
 
@@ -33,35 +33,23 @@ typedef enum {
 
   
 class DLLEXPORT_OST_CONOP Conopology {
-  typedef std::map<String,BuilderP> BuilderMap;
-
 public:
   // singleton
   static Conopology& Instance();
 
-  // retrieve a builder by name
-  BuilderP GetBuilder(const String& name="DEFAULT");
+  // returns the default compound library (if any)
+  CompoundLibPtr GetDefaultLib() const { return lib_; }
+  void SetDefaultLib(const CompoundLibPtr& lib) { lib_ = lib; }
 
-  /*
-    convenience function, connect all atoms with given coordinates,
-    such as after coordinate file import, based on a given builder
-
-    does this need to live within Conopology ?
-  */
-  void ConnectAll(const BuilderP& b, mol::EntityHandle eh, 
-                  int flags=0);
-
-  void RegisterBuilder(const BuilderP& b, const String& name);
-  void SetDefaultBuilder(const String& default_name);
-  
   bool IsValidElement(const String& element) const;
+
 private:
   Conopology();
   Conopology(const Conopology&) {}
   Conopology& operator=(const Conopology&) {return *this;}
 
-  BuilderMap builder_map_;
   std::set<String> known_elements_;
+  CompoundLibPtr lib_;
 };
 
 }} //

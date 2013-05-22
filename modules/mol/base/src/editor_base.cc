@@ -180,6 +180,14 @@ void EditorBase::DeleteChain(const ChainHandle& chain)
   ent_.Impl()->DeleteChain(chain.Impl());
 }
 
+void EditorBase::DeleteAtoms(const AtomHandleList& atoms)
+{
+  for (AtomHandleList::const_iterator i = atoms.begin(), e = atoms.end();
+       i != e; ++i) {
+    i->GetResidue().Impl()->DeleteAtom(i->Impl());
+  }
+}
+
 void EditorBase::DeleteAtom(const AtomHandle& atom_handle) 
 {
   CheckHandleValidity(atom_handle);
@@ -244,6 +252,12 @@ BondHandle EditorBase::Connect(const AtomHandle& first,
   CheckHandleValidity(first);
   CheckHandleValidity(second);
   return this->Connect(first,second,0.0, 0.0, 0.0, 1);
+}
+
+void EditorBase::RenumberChain(ChainHandle chain, const ResNumList& new_numbers)
+{
+  CheckHandleValidity(chain);
+  chain.Impl()->RenumberAllResidues(new_numbers);
 }
 
 BondHandle EditorBase::Connect(const AtomHandle& first,

@@ -1,10 +1,11 @@
 set(OST_CONOP_UNIT_TESTS
-  test_heuristic_builder.cc
-  test_rule_based_builder.cc
+  test_heuristic_conop.cc
   tests.cc
-  test_builder.cc
+  test_rule_based_conop.cc 
+  helper.cc 
   test_compound.py
   test_cleanup.py
+  test_processor.py
   test_nonstandard.py
 )
 

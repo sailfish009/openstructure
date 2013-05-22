@@ -57,7 +57,7 @@ public:
   // export data from entity view to provided stream
   virtual void Export(const mol::EntityView& ent, 
                       std::ostream& stream) const=0;
-  virtual bool RequiresBuilder() const=0;
+  virtual bool RequiresProcessor() const=0;
 };
 
 typedef boost::shared_ptr<EntityIOHandler> EntityIOHandlerP;

@@ -1,38 +1,13 @@
-// -----------------------------------------------------------------------------
-// This file is part of the OpenStructure project <www.openstructure.org>
-
-// Copyright (C) 2008-2011 by the OpenStructure authors
-
-// This library is free software; you can redistribute it and/or modify it under
-// the terms of the GNU Lesser General Public License as published by the Free
-// Software Foundation; either version 3.0 of the License, or (at your option)
-// any later version.
-// This library is distributed in the hope that it will be useful, but WITHOUT
-// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
-// details.
-
-// You should have received a copy of the GNU Lesser General Public License
-// along with this library; if not, write to the Free Software Foundation, Inc.,
-// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-// -----------------------------------------------------------------------------
-
-#include <ost/mol/mol.hh>
-#include <ost/platform.hh>
-#include <ost/conop/rule_based_builder.hh>
-#include <ost/conop/conop.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-#include <boost/test/auto_unit_test.hpp>
+#include <ost/mol/xcs_editor.hh>
+#include <ost/mol/bond_handle.hh>
 
-#include <ost/log.hh>
-using boost::unit_test_framework::test_suite;
-using namespace ost;
-using namespace ost::conop;
-//using namespace ost::io;
+#include "helper.hh"
+
 using namespace ost::mol;
-namespace {
-} // anon ns
+
+namespace ost { namespace conop {
 
 ResidueHandle make_cytosine(ChainHandle chain) 
 {
@@ -148,7 +123,6 @@ ResidueHandle make_defective_uracil2(ChainHandle chain)
 
   return res;
 }
-
 ResidueHandle make_1zk(ChainHandle chain)
 {
   XCSEditor edi=chain.GetEntity().EditXCS();
@@ -213,73 +187,6 @@ ResidueHandle make_1zk(ChainHandle chain)
   edi.InsertAtom(r, "C61", geom::Vec3(3.164, -9.631, 17.518),"C");
   edi.InsertAtom(r, "N11", geom::Vec3(4.497, -9.459, 17.386),"N");
   return r;
-}
-
-void verify_1zk_connectivity(const ResidueHandle& r1) 
-{
-  BOOST_CHECK(BondExists(r1.FindAtom("C"), r1.FindAtom("CA")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C"), r1.FindAtom("O")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CA"), r1.FindAtom("O1")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C1"), r1.FindAtom("C2")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C1"), r1.FindAtom("C1A")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C1"), r1.FindAtom("O1")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C2"), r1.FindAtom("C3")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C3"), r1.FindAtom("C4")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C4"), r1.FindAtom("C4A")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C4A"), r1.FindAtom("C5")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C4A"), r1.FindAtom("C1A")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C5"), r1.FindAtom("C6")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C6"), r1.FindAtom("C7")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C7"), r1.FindAtom("C8")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C8"), r1.FindAtom("C1A")));
-  BOOST_CHECK(BondExists(r1.FindAtom("N"), r1.FindAtom("CA1")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CA1"), r1.FindAtom("C9")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CA1"), r1.FindAtom("CB")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C9"), r1.FindAtom("O2")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CB"), r1.FindAtom("CG")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CG"), r1.FindAtom("ND1")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CG"), r1.FindAtom("CD2")));
-  BOOST_CHECK(BondExists(r1.FindAtom("ND1"), r1.FindAtom("CE1")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CD2"), r1.FindAtom("NE2")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CE1"), r1.FindAtom("NE2")));
-  BOOST_CHECK(BondExists(r1.FindAtom("N1"), r1.FindAtom("CA2")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CA2"), r1.FindAtom("CB1")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CA2"), r1.FindAtom("CH")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CB1"), r1.FindAtom("CG1")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CG1"), r1.FindAtom("CD1")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CG1"), r1.FindAtom("CD21")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CD1"), r1.FindAtom("CE11")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CD21"), r1.FindAtom("CE2")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CE11"), r1.FindAtom("CZ")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CE2"), r1.FindAtom("CZ")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CH"), r1.FindAtom("OH")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CH"), r1.FindAtom("CB11")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CB11"), r1.FindAtom("CA'")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CB11"), r1.FindAtom("OB1")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CA'"), r1.FindAtom("CB'")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CA'"), r1.FindAtom("CC")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CB'"), r1.FindAtom("CG11")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CB'"), r1.FindAtom("CG2")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CC"), r1.FindAtom("O3")));
-  BOOST_CHECK(BondExists(r1.FindAtom("N2"), r1.FindAtom("CA3")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CA3"), r1.FindAtom("CD")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CA3"), r1.FindAtom("CB2")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CD"), r1.FindAtom("O4")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CB2"), r1.FindAtom("CG12")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CB2"), r1.FindAtom("CG21")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CG12"), r1.FindAtom("CD11")));
-  BOOST_CHECK(BondExists(r1.FindAtom("N3"), r1.FindAtom("CM")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CM"), r1.FindAtom("C21")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C21"), r1.FindAtom("C31")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C21"), r1.FindAtom("N11")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C31"), r1.FindAtom("C41")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C41"), r1.FindAtom("C51")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C51"), r1.FindAtom("C61")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C61"), r1.FindAtom("N11")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C"), r1.FindAtom("N")));
-  BOOST_CHECK(BondExists(r1.FindAtom("C9"), r1.FindAtom("N1")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CC"), r1.FindAtom("N2")));
-  BOOST_CHECK(BondExists(r1.FindAtom("CD"), r1.FindAtom("N3")));
 }
 
 void verify_nucleotide_connectivity(const ResidueHandle& res) 
@@ -353,106 +260,122 @@ void verify_nucleotide_connectivity(const ResidueHandle& res)
     // TODO: Check that no other atoms are connected!
   }
 }
-void verify_nucleotide_link(const ResidueHandle& p3, const ResidueHandle& p5) 
+void verify_1zk_connectivity(const ResidueHandle& r1) 
 {
-  BOOST_CHECK(BondExists(p3.FindAtom("O3'"),
-                         p5.FindAtom("P")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C"), r1.FindAtom("CA")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C"), r1.FindAtom("O")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CA"), r1.FindAtom("O1")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C1"), r1.FindAtom("C2")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C1"), r1.FindAtom("C1A")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C1"), r1.FindAtom("O1")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C2"), r1.FindAtom("C3")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C3"), r1.FindAtom("C4")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C4"), r1.FindAtom("C4A")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C4A"), r1.FindAtom("C5")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C4A"), r1.FindAtom("C1A")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C5"), r1.FindAtom("C6")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C6"), r1.FindAtom("C7")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C7"), r1.FindAtom("C8")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C8"), r1.FindAtom("C1A")));
+  BOOST_CHECK(BondExists(r1.FindAtom("N"), r1.FindAtom("CA1")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CA1"), r1.FindAtom("C9")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CA1"), r1.FindAtom("CB")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C9"), r1.FindAtom("O2")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CB"), r1.FindAtom("CG")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CG"), r1.FindAtom("ND1")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CG"), r1.FindAtom("CD2")));
+  BOOST_CHECK(BondExists(r1.FindAtom("ND1"), r1.FindAtom("CE1")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CD2"), r1.FindAtom("NE2")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CE1"), r1.FindAtom("NE2")));
+  BOOST_CHECK(BondExists(r1.FindAtom("N1"), r1.FindAtom("CA2")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CA2"), r1.FindAtom("CB1")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CA2"), r1.FindAtom("CH")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CB1"), r1.FindAtom("CG1")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CG1"), r1.FindAtom("CD1")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CG1"), r1.FindAtom("CD21")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CD1"), r1.FindAtom("CE11")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CD21"), r1.FindAtom("CE2")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CE11"), r1.FindAtom("CZ")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CE2"), r1.FindAtom("CZ")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CH"), r1.FindAtom("OH")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CH"), r1.FindAtom("CB11")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CB11"), r1.FindAtom("CA'")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CB11"), r1.FindAtom("OB1")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CA'"), r1.FindAtom("CB'")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CA'"), r1.FindAtom("CC")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CB'"), r1.FindAtom("CG11")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CB'"), r1.FindAtom("CG2")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CC"), r1.FindAtom("O3")));
+  BOOST_CHECK(BondExists(r1.FindAtom("N2"), r1.FindAtom("CA3")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CA3"), r1.FindAtom("CD")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CA3"), r1.FindAtom("CB2")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CD"), r1.FindAtom("O4")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CB2"), r1.FindAtom("CG12")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CB2"), r1.FindAtom("CG21")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CG12"), r1.FindAtom("CD11")));
+  BOOST_CHECK(BondExists(r1.FindAtom("N3"), r1.FindAtom("CM")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CM"), r1.FindAtom("C21")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C21"), r1.FindAtom("C31")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C21"), r1.FindAtom("N11")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C31"), r1.FindAtom("C41")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C41"), r1.FindAtom("C51")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C51"), r1.FindAtom("C61")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C61"), r1.FindAtom("N11")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C"), r1.FindAtom("N")));
+  BOOST_CHECK(BondExists(r1.FindAtom("C9"), r1.FindAtom("N1")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CC"), r1.FindAtom("N2")));
+  BOOST_CHECK(BondExists(r1.FindAtom("CD"), r1.FindAtom("N3")));
 }
 
-void verify_nucleotide_nolink(const ResidueHandle& p3, const ResidueHandle& p5) 
+ResidueHandle make_arg(ChainHandle chain) 
 {
-  BOOST_CHECK(!BondExists(p3.FindAtom("O3'"),
-                          p5.FindAtom("P")));
+  XCSEditor e=chain.GetEntity().EditXCS();
+  ResidueHandle res = e.AppendResidue(chain, "ARG");
+  e.InsertAtom(res, "N",geom::Vec3(20.202,33.112,58.011));
+  e.InsertAtom(res, "CA",geom::Vec3(19.396,31.903,58.033));
+  e.InsertAtom(res, "C",geom::Vec3(18.608,31.739,59.328));
+  e.InsertAtom(res, "O",geom::Vec3(17.651,30.965,59.381));
+  e.InsertAtom(res, "CB",geom::Vec3(20.284,30.681,57.801));
+  e.InsertAtom(res, "CG",geom::Vec3(20.665,30.488,56.342));
+  e.InsertAtom(res, "CD",geom::Vec3(21.557,29.281,56.154));
+  e.InsertAtom(res, "NE",geom::Vec3(22.931,29.557,56.551));
+  e.InsertAtom(res, "CZ",geom::Vec3(23.901,28.653,56.528));
+  e.InsertAtom(res, "NH1",geom::Vec3(23.640,27.417,56.130));
+  e.InsertAtom(res, "NH2",geom::Vec3(25.132,28.980,56.893));
+  return res;
 }
 
-BOOST_AUTO_TEST_SUITE( conop );
-
-
-BOOST_AUTO_TEST_CASE(nucleotide_based_connect) 
+ResidueHandle make_leu(ChainHandle chain) 
 {
-  SetPrefixPath(getenv("OST_ROOT"));
-  String lib_path=GetSharedDataPath()+"/compounds.chemlib";
-  CompoundLibPtr compound_lib=CompoundLib::Load(lib_path);  
-  if (!compound_lib) {
-    std::cout << "WARNING: skipping NUCLEOTIDE_BASED connect unit test. " 
-              << "Rule-based builder is required" << std::endl;
-    return;    
-  }
-  RuleBasedBuilder rb_builder = RuleBasedBuilder(compound_lib);
+  XCSEditor e=chain.GetEntity().EditXCS();  
+  ResidueHandle res=e.AppendResidue(chain, "LEU");
 
-  RuleBasedBuilder drb_builder = RuleBasedBuilder(compound_lib);
-  drb_builder.SetBondFeasibilityCheck(false);
-  
-  EntityHandle e=CreateEntity();
-  ChainHandle c=e.EditXCS().InsertChain("A");
-  ResidueHandle c0=make_cytosine(c);
-  ResidueHandle u1=make_uracil1(c);
-  ResidueHandle u2=make_uracil2(c);
-  
-  EntityHandle de=CreateEntity();  
-  ChainHandle dc=de.EditXCS().InsertChain("A");
-  ResidueHandle du2=make_defective_uracil2(dc);
-
-
-  AtomHandleList atoms = e.GetAtomList();
-  for (AtomHandleList::const_iterator i = atoms.begin(), e = atoms.end(); i!=e; ++i ){
-    rb_builder.FillAtomProps(*i);
-  }
-
-  atoms = de.GetAtomList();
-  for (AtomHandleList::const_iterator i = atoms.begin(), e = atoms.end(); i!=e; ++i ){
-    drb_builder.FillAtomProps(*i);
-  }
-  
-  // running positive test
-  BOOST_MESSAGE("running distance based checks on cytosine");
-  rb_builder.ConnectAtomsOfResidue(c0);
-  verify_nucleotide_connectivity(c0);
-  BOOST_MESSAGE("running distance based checks on first uracil");
-  rb_builder.ConnectAtomsOfResidue(u1);
-  verify_nucleotide_connectivity(u1);
-  BOOST_MESSAGE("running distance based checks on second uracil");
-  rb_builder.ConnectAtomsOfResidue(u2);
-  verify_nucleotide_connectivity(u2);
-  BOOST_MESSAGE("connecting cytosine to first uracil");
-  rb_builder.ConnectResidueToNext(c0, u1);
-  verify_nucleotide_link(c0, u1);
-  BOOST_MESSAGE("connecting first uracil to second uracil");
-  rb_builder.ConnectResidueToNext(u1, u2);
-  verify_nucleotide_link(u1, u2);
-  // one negative test
-  BOOST_MESSAGE("connecting cytosine to second uracil");
-  rb_builder.ConnectResidueToNext(c0, u2);
-  verify_nucleotide_nolink(c0, u2);
-  
-  // running positive test
-  BOOST_MESSAGE("running distance based checks on defective uracil");
-  drb_builder.ConnectAtomsOfResidue(du2);
-  verify_nucleotide_connectivity(du2);
-  
+  e.InsertAtom(res, "N", geom::Vec3(19.003,32.473,60.366));
+  e.InsertAtom(res, "CA", geom::Vec3(18.330,32.402,61.664));
+  e.InsertAtom(res, "C", geom::Vec3(17.884,33.787,62.117));
+  e.InsertAtom(res, "O", geom::Vec3(17.853,34.091,63.308));
+  e.InsertAtom(res, "CB", geom::Vec3(19.269,31.793,62.710));
+  e.InsertAtom(res, "CG", geom::Vec3(19.695,30.340,62.501));
+  e.InsertAtom(res, "CD1", geom::Vec3(20.585,29.897,63.648));
+  e.InsertAtom(res, "CD2", geom::Vec3(18.461,29.459,62.420));
+  return res;
 }
 
-BOOST_AUTO_TEST_CASE(rule_based_connect_1zk) 
+ResidueHandle make_defective_leu(ChainHandle chain) 
 {
-  SetPrefixPath(getenv("OST_ROOT"));
-  String lib_path=GetSharedDataPath()+"/compounds.chemlib";
-  CompoundLibPtr compound_lib=CompoundLib::Load(lib_path);  
-  if (!compound_lib) {
-    std::cout << "WARNING: skipping NUCLEOTIDE_BASED connect unit test. " 
-              << "Rule-based builder is required" << std::endl;
-    return;    
-  }
+  XCSEditor e=chain.GetEntity().EditXCS();  
+  ResidueHandle res=e.AppendResidue(chain, "LEU");
 
-  boost::shared_ptr<RuleBasedBuilder> drb_builder(new RuleBasedBuilder(compound_lib));
-  Conopology::Instance().RegisterBuilder(drb_builder, "RBB");
-  Conopology::Instance().SetDefaultBuilder("RBB");
-  drb_builder->SetBondFeasibilityCheck(false);
-  EntityHandle e=CreateEntity();
-  ChainHandle c=e.EditXCS().InsertChain("A");
-  ResidueHandle r1=make_1zk(c);
-  Conopology::Instance().ConnectAll(drb_builder, e);
-  Conopology::Instance().SetDefaultBuilder("HEURISTIC");
-  verify_1zk_connectivity(r1);
+  e.InsertAtom(res, "N", geom::Vec3(19.003,32.473,60.366));
+  e.InsertAtom(res, "CA", geom::Vec3(18.330,32.402,61.664));
+  e.InsertAtom(res, "C", geom::Vec3(17.884,33.787,62.117));
+  e.InsertAtom(res, "O", geom::Vec3(17.853,34.091,63.308));
+  e.InsertAtom(res, "CB", geom::Vec3(19.269,31.793,102.710));
+  e.InsertAtom(res, "CG", geom::Vec3(19.695,30.340,62.501));
+  e.InsertAtom(res, "CD1", geom::Vec3(20.585,29.897,63.648));
+  e.InsertAtom(res, "CD2", geom::Vec3(18.461,29.459,62.420));
+  return res;
 }
 
-BOOST_AUTO_TEST_SUITE_END( );
+}}
+

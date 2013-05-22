@@ -11,14 +11,9 @@ class TestPDB(unittest.TestCase):
     ch = e.FindChain("A");
     self.assertEquals(ch.GetIntProp("mol_id"), 1)
 
-class TestPDB(unittest.TestCase):
-  def setUp(self):
-    pass
-
-  def test_compnd_parser(self):
-    profiles=io.IOProfiles()
-    profiles['FEAS_CHECK']=io.IOProfile(bond_feasibility_check=True)
-    profiles['NO_FEAS_CHECK']=io.IOProfile(bond_feasibility_check=False)
+  def test_no_bond_feasibility(self):
+    io.profiles['FEAS_CHECK']=io.IOProfile(processor=conop.HeuristicProcessor(check_bond_feasibility=True))
+    io.profiles['NO_FEAS_CHECK']=io.IOProfile(processor=conop.HeuristicProcessor(check_bond_feasibility=False))
         
     e1=io.LoadPDB('testfiles/pdb/simple_defective.pdb', restrict_chains="A",profile='FEAS_CHECK')
     e2=io.LoadPDB('testfiles/pdb/simple_defective.pdb', restrict_chains="A",profile='NO_FEAS_CHECK')

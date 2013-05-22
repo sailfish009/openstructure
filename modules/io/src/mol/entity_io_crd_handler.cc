@@ -36,6 +36,7 @@
 #include <ost/boost_filesystem_helper.hh>
 
 #include <ost/io/io_exception.hh>
+#include <ost/io/mol/io_profile.hh>
 #include <ost/io/swap_util.hh>
 
 #include "entity_io_crd_handler.hh"
@@ -345,8 +346,8 @@ bool CRDWriter::VisitAtom(const mol::AtomHandle& atom)
   return true;
 }
 
-/// \brief CHARMM file format requires builder
-bool EntityIOCRDHandler::RequiresBuilder() const
+/// \brief CHARMM file format requires processor
+bool EntityIOCRDHandler::RequiresProcessor() const
 {
   return true;
 }
@@ -406,12 +407,14 @@ bool EntityIOCRDHandler::ProvidesExport(const boost::filesystem::path& loc,
 mol::EntityHandle LoadCRD(const String& file_name) 
 {
   Profile profile_load("LoadCRD");
-  conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();  
   CRDReader reader(file_name);
   mol::EntityHandle ent=mol::CreateEntity();
   mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
   reader.Import(ent);
-  conop::Conopology::Instance().ConnectAll(builder,ent);    
+  IOProfile& prof = IOProfileRegistry::Instance().GetDefault();
+  if (prof.processor) {
+    prof.processor->Process(ent);
+  }
   return ent;
 }
 

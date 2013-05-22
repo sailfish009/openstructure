@@ -35,17 +35,17 @@ def _my_exit(code):
 sys._exit=sys.exit
 sys.exit=_my_exit
 
-def _InitRuleBasedBuilder():
+def _InitRuleBasedProcessor():
   compound_lib_path=os.path.join(ost.GetSharedDataPath(), 'compounds.chemlib')
   if os.path.exists(compound_lib_path):
     conop_inst=conop.Conopology.Instance()
     compound_lib=conop.CompoundLib.Load(compound_lib_path)
-    conop_inst.RegisterBuilder(conop.RuleBasedBuilder(compound_lib), 'RBB')
-    conop_inst.SetDefaultBuilder('RBB')
+    conop_inst.SetDefaultLib(compound_lib)
+    io.profiles['DEFAULT'].processor = conop.RuleBasedProcessor(compound_lib)
 
-# switch to rule-based builder for high fidelity if compounds.chemlib is 
+# switch to rule-based processor for high fidelity if compounds.chemlib is 
 # available
-_InitRuleBasedBuilder()
+_InitRuleBasedProcessor()
 
 def _CheckRestore():
   settings = QtCore.QSettings()
@@ -165,8 +165,8 @@ parser.add_option("-v", "--verbosity_level", action="store", type="int", dest="v
                   help="sets the verbosity level [default: %default]")
 parser.add_option("-s", "--script", action="callback", default=[], dest="script", type="string", callback=parse_script_option, help="executes a script (syntax: -s SCRIPT [options] [args]) Anything that follows this option is passed to the script")
 parser.add_option("-p", "--pdb_id", dest="pdb_ids", default=[],action="append", help="PDB file ID. The file will be retrieved from PDB")
-parser.add_option("-b", "--builder", dest="builder", default="HEURISTIC", help="Type of builder used by the progam (either RULE_BASED or HEURISTIC) [default: %default]")
-parser.add_option("-c", "--compound_library", dest="complib", default="compounds.chemlib", help="Compound library for the RULE_BASED builder (only used if --builder option is set to RULE_BASED, otherwise ignored [default: %default]")
+parser.add_option("-b", "--processor", dest="processor", default="HEURISTIC", help="Type of processor used by the progam (either RULE_BASED or HEURISTIC) [default: %default]")
+parser.add_option("-c", "--compound_library", dest="complib", default="compounds.chemlib", help="Compound library for the RULE_BASED processor (only used if --processor option is set to RULE_BASED, otherwise ignored [default: %default]")
 parser.add_option("-q", "--query", dest="query", default="", help="Selection query to be highlighted automatically upon loading (only used together with -p option or when a PDB file is loaded, otherwise ignored [default: None]")
 parser.add_option("-S","--stereo", dest="try_stereo", default=False, action="store_true",help="try to get a quad-buffer stereo visual")
 parser.disable_interspersed_args()
@@ -184,12 +184,12 @@ if len(parser.rargs)!=0:
 if len(options.script)!=0:
   script_argv=options.script
 
-if options.builder=="RULE_BASED":
+if options.processor=="RULE_BASED":
   from ost import conop
-  compound_lib=conop.CompoundLib.Load(options.complib)
-  rbb=conop.RuleBasedBuilder(compound_lib)
-  conop.Conopology.Instance().RegisterBuilder(rbb,'rbb')
-  conop.Conopology.Instance().SetDefaultBuilder('rbb')
+  if os.path.exists(options.complib):
+    compound_lib=conop.CompoundLib.Load(options.complib)
+    conop.SetDefaultLib(compound_lib)
+    io.profiles['DEFAULT'].processor = conop.RuleBasedProcessor(compound_lib)
 
 home = os.getenv('HOME') or os.getenv('USERPROFILE')
 _ostrc=os.path.join(home, '.ostrc')

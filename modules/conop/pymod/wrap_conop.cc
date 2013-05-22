@@ -19,20 +19,28 @@
 #include <boost/python.hpp>
 using namespace boost::python;
 
-void export_Builder();
+//void export_Builder();
 void export_Compound();
 void export_Sanitizer();
 void export_Conop();
 void export_RingFinder();
 void export_AminoAcids();
 void export_NonStandard();
+void export_processor();
+void export_rule_based();
+void export_heuristic();
+void export_diag();
 
 BOOST_PYTHON_MODULE(_ost_conop)
 {
-  export_Builder();
+ // export_Builder();
   export_Conop();
+  export_processor();
+  export_rule_based();
+  export_heuristic();
   export_Compound();
   export_RingFinder();
   export_AminoAcids();
   export_NonStandard();
+  export_diag();
 }
