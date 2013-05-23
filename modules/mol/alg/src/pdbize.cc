@@ -55,6 +55,14 @@ bool copy_atoms(ResidueView src_res, ResidueHandle dst_res, XCSEditor& edi,
   return needs_adjustment_;
 }
 
+void transfer_residue_properties(ResidueView src, ResidueHandle dst) {
+  dst.SetOneLetterCode(src.GetOneLetterCode());
+  dst.SetSecStructure(src.GetSecStructure());
+  dst.SetChemClass(src.GetChemClass());  
+  dst.SetIsProtein(src.IsProtein());
+  dst.SetIsLigand(src.IsLigand());
+}
+
 }
 
 void PDBize::Add(EntityView asu, const geom::Mat4List& transforms, 
@@ -93,6 +101,7 @@ void PDBize::Add(EntityView asu, const geom::Mat4List& transforms,
              e3 = chain.GetResidueList().end(); k != e3; ++k) {
           ResidueHandle new_res = edi.AppendResidue(new_chain, k->GetName(),
                                                     k->GetNumber());
+          transfer_residue_properties(*k, new_res);
           dst_to_src_map_[new_res] = k->GetHandle();
           needs_adjustment_ |= copy_atoms(*k, new_res, edi, *i);
         }
@@ -107,6 +116,7 @@ void PDBize::Add(EntityView asu, const geom::Mat4List& transforms,
         for (ResidueViewList::const_iterator k = chain.GetResidueList().begin(),
              e3 = chain.GetResidueList().end(); k != e3; ++k) {
           ResidueHandle new_res = edi.AppendResidue(water_chain, k->GetName());
+          transfer_residue_properties(*k, new_res);
           new_res.SetStringProp("type", StringFromChainType(chain.GetType()));
           new_res.SetStringProp("description", chain.GetDescription());
           dst_to_src_map_[new_res] = k->GetHandle();
@@ -125,6 +135,7 @@ void PDBize::Add(EntityView asu, const geom::Mat4List& transforms,
            e3 = chain.GetResidueList().end(); k != e3; ++k) {
         ResidueHandle new_res = edi.AppendResidue(ligand_chain, k->GetName(),
                                                   ResNum(last_rnum+1, ins_code));
+        transfer_residue_properties(*k, new_res);
         new_res.SetStringProp("type", StringFromChainType(chain.GetType()));
         new_res.SetStringProp("description", chain.GetDescription());
         new_res.SetStringProp("original_name", chain.GetName());
