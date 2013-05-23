@@ -498,10 +498,10 @@ SuperpositionResult IterativeSuperposeSVD(const mol::EntityView& ev,
   return result;
 }
 
-SuperpositionResult DLLEXPORT_OST_MOL_ALG IterativeSuperposeSVD(const std::vector<geom::Vec3>& pl1,
-                                                                const std::vector<geom::Vec3>& pl2,
-                                                                int max_cycles,
-                                                                Real distance_threshold){
+SuperpositionResult IterativeSuperposeSVD(const std::vector<geom::Vec3>& pl1,
+                                          const std::vector<geom::Vec3>& pl2,
+                                          int max_cycles,
+                                          Real distance_threshold){
 
   MeanSquareMinimizer msm = MeanSquareMinimizer::FromPointLists(pl1, pl2);
   SuperpositionResult result = msm.IterativeMinimize(max_cycles, distance_threshold);
