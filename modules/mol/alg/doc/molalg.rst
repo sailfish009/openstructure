@@ -423,7 +423,7 @@ The following function detects steric clashes in atomic structures. Two atoms ar
 
      This method returns the total number of bonds in the structure checked by the CheckStereoChemistry function
 
-  .. method GetAvgZscoreBonds()
+  .. method:: GetAvgZscoreBonds()
 
      This method returns the average z-score of all the bond lengths in the structure, computed using Engh and Huber's mean and standard deviation values.
 
