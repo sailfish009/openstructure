@@ -36,6 +36,8 @@ void export_svdSuperPose()
 {
   SuperpositionResult (*sup1)(const mol::EntityView&,const mol::EntityView&,bool) = SuperposeSVD;
   SuperpositionResult (*sup2)(const std::vector<geom::Vec3>&,const std::vector<geom::Vec3>& ) = SuperposeSVD;
+  SuperpositionResult (*sup3)(const mol::EntityView&,const mol::EntityView&, int, Real, bool) = IterativeSuperposeSVD;
+  SuperpositionResult (*sup4)(const std::vector<geom::Vec3>&,const std::vector<geom::Vec3>&, int, Real) = IterativeSuperposeSVD;
   class_<SuperpositionResult>("SuperpositionResult", init<>())
     .def_readwrite("ncycles", &SuperpositionResult::ncycles)
     .def_readwrite("rmsd", &SuperpositionResult::rmsd)
@@ -51,7 +53,8 @@ void export_svdSuperPose()
   def("SuperposeAtoms", &SuperposeAtoms,(arg("apply_transform")=true));
   def("SuperposeSVD", sup1, (arg("apply_transform")=true));
   def("SuperposeSVD", sup2, (arg("apply_transform")=true));
-  def("IterativeSuperposeSVD", &IterativeSuperposeSVD,(arg("max_iterations")=5, arg("distance_threshold")=3.0,arg("apply_transform")=true));
+  def("IterativeSuperposeSVD", sup3,(arg("max_iterations")=5, arg("distance_threshold")=3.0,arg("apply_transform")=true));
+  def("IterativeSuperposeSVD", sup4,(arg("max_iterations")=5, arg("distance_threshold")=3.0));
   def("CalculateRMSD", &CalculateRMSD, (arg("transformation")=geom::Mat4()));
 }
 

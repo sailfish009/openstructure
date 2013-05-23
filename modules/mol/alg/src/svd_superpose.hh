@@ -102,6 +102,14 @@ SuperpositionResult DLLEXPORT_OST_MOL_ALG IterativeSuperposeSVD(const mol::Entit
                                                                 Real distance_threshold,
                                                                 bool apply_transform);
 
+/// \brief iterative superposition of two point lists
+SuperpositionResult DLLEXPORT_OST_MOL_ALG IterativeSuperposeSVD(const std::vector<geom::Vec3>& pl1,
+                                                                const std::vector<geom::Vec3>& pl2,
+                                                                int max_cycles,
+                                                                Real distance_threshold);
+
+
+
 /// \brief calculates RMSD for two entity view 
 Real DLLEXPORT_OST_MOL_ALG CalculateRMSD(const mol::EntityView& ev1,
                                          const mol::EntityView& ev2,
