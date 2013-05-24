@@ -58,6 +58,9 @@ std::pair<Real, long int> calc_rmsd(const ResidueRDMap& res_distance_list, const
     }
     Real mdl_dist=geom::Length(av1.GetPos()-av2.GetPos());
     Real diff = mdl_dist-values.first;
+    if (diff > cap_distance) {
+        diff = cap_distance;
+    }
     if (log) {
 //      LOG_VERBOSE("drmsd:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName()
 //                  << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetName() << " " << av2.GetResidue().GetNumber() << " " << av2.GetName() << " "
