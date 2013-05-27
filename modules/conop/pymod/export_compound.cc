@@ -135,6 +135,9 @@ void export_Compound() {
     .def("Load", &CompoundLib::Load, arg("readonly")=true).staticmethod("Load")
     .def("FindCompound", &find_compound, 
          (arg("tlc"), arg("dialect")="PDB"))
+    .def("IsResidueComplete",&CompoundLib::IsResidueComplete, (arg("residue"), 
+                                                               arg("check_hydrogens")=false,
+                                                               arg("dialect")="PDB"))
     .def("ClearCache", &CompoundLib::ClearCache)
     .def("GetOSTVersionUsed", &CompoundLib::GetOSTVersionUsed)
     .def("GetCreationDate", &get_creation_date, (arg("comp_lib")))
