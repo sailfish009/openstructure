@@ -16,8 +16,10 @@ bool CompoundLibBase::IsResidueComplete(const ost::mol::ResidueHandle& res, bool
         }
       }
     }
-    if(!res.FindAtom(it->name).IsValid()){
-      return false;
+    else{
+      if(!res.FindAtom(it->name).IsValid()){
+        return false;
+      }
     }
   }
   return true;
