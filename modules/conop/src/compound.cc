@@ -22,15 +22,15 @@ namespace ost { namespace conop {
 
 
 int Compound::GetAtomSpecIndex(const String& name) const {
-  AtomSpecList::const_iterator i=atom_specs_.begin();
+  AtomSpecList::const_iterator i;
   // BZDNG-261: first search all primary atom names before falling back to
   // alternative names. There are some files where alternative atom names are 
   // used as primary names for other atoms
-  for (; i!=atom_specs_.end(); ++i) {
+  for (i=atom_specs_.begin(); i!=atom_specs_.end(); ++i) {
     if ((*i).name==name)
       return std::distance(atom_specs_.begin(), i);
   } 
-  for (; i!=atom_specs_.end(); ++i) {
+  for (i=atom_specs_.begin(); i!=atom_specs_.end(); ++i) {
     if ((*i).alt_name==name)
       return std::distance(atom_specs_.begin(), i);
   }
