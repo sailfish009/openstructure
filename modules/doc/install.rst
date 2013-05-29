@@ -74,11 +74,12 @@ The above command will clone OpenStructure into the directory called `directory-
 
   Some versions of curl have have trouble with the certificate of the 
   OpenStructure git server and fail to clone the repository. To work around 
-  this, disable the SSL certificate verification with the following command:
+  this, disable the SSL certificate verification by setting the following
+  environment variable:
   
   .. code-block:: bash
-  
-    git config --global http.sslVerify false
+
+    export GIT_SSL_NO_VERIFY=1
 
 
 Picking the right branch
