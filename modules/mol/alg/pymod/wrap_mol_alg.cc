@@ -30,7 +30,6 @@
 #include <ost/export_helper/pair_to_tuple_conv.hh>
 #include <ost/export_helper/vec_to_list_conv.hh>
 
-
 using namespace boost::python;
 using namespace ost;
 
@@ -110,8 +109,6 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   export_entity_to_density();
   #endif
   
-
-
   def("LocalDistDiffTest", lddt_a, (arg("sequence_separation")=0,arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_c, (arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_b, (arg("ref_index")=0, arg("mdl_index")=1));
@@ -166,7 +163,6 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("PrintGlobalRDMap",&mol::alg::PrintGlobalRDMap);
   def("PrintResidueRDMap",&mol::alg::PrintResidueRDMap);
  
-
   class_<mol::alg::PDBize>("PDBize",
                            init<int>(arg("min_polymer_size")=10))
     .def("Add", &mol::alg::PDBize::Add, 

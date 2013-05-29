@@ -50,7 +50,10 @@ class RemoteRepository:
 
     try:
       connection = urllib2.urlopen(remote_url)
-      status = connection.getcode()
+      if hasattr(connection, 'code'):
+        status = connection.code
+      else:
+        status = connection.getcode()
     except urllib2.HTTPError, e:
       status = e.code
     msg = 'Could not load %s from %s (status code %d)'

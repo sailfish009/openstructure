@@ -4,6 +4,17 @@ Changes in Release 1.4
   * Feasibility check set to off by default, atoms in compounds are now
     connected by the Builder irrespective of the distance between them
   * Speed improvement for bracketed within selections up to a factor of 20
+  * refactored and streamlined the conop interface. The builder classes
+    have been replaced by processors (HeuristicProcessor, RuleBasedProcessor)
+
+Changes In Release 1.3.3
+--------------------------------------------------------------------------------
+
+  * fix context menu/main menu for newer Qt versions 
+  * CreateEntityFromView remembers chemical type (BZDNG-430)
+  * fix gfx.PrimList.SetLineWidth
+  * Fix remote=true for MMCIF loader (BZDNG-449)
+  * made CreateViewFromAtoms more flexible (BZDNG-408)
 
 Changes In Release 1.3.2
 --------------------------------------------------------------------------------

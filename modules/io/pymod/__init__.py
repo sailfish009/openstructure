@@ -299,11 +299,9 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
   prof.fault_tolerant=_override(prof.fault_tolerant, fault_tolerant)
 
   if remote:
-    output_dir = tempfile.gettempdir()
-    if __GetModelFromPDB(filename, output_dir):
-      filename = os.path.join(output_dir, 'pdb%s.ent.gz' % filename)
-    else:
-      raise IOError('Can not load PDB %s from www.pdb.org'%filename) 
+    from ost.io.remote import RemoteGet
+    tmp_file =RemoteGet(filename, from_repo='cif')
+    filename = tmp_file.name
   
   try:
     ent = mol.CreateEntity()
