@@ -62,6 +62,7 @@ void export_Atom()
                   &AtomBase::SetName)
     .add_property("index", &AtomBase::GetIndex)
     .def("GetRadius", &AtomBase::GetRadius)
+    .def("SetRadius", &AtomBase::SetRadius)
     .def("GetElement", &AtomBase::GetElement, 
          return_value_policy<copy_const_reference>())
     .def("SetElement", &AtomBase::SetElement)
