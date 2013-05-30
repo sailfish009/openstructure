@@ -13,7 +13,7 @@ bool CompoundLibBase::IsResidueComplete(const ost::mol::ResidueHandle& res, bool
 
     if((it->element=="H" || it->element=="D") && (!check_hydrogens)) continue;
 
-    if(res.FindAtom(it->name).IsValid() || res.FindAtom(it->alt_name)) continue;
+    if(res.FindAtom(it->name).IsValid() || res.FindAtom(it->alt_name).IsValid()) continue;
 
     return false; 
 
