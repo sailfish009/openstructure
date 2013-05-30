@@ -42,8 +42,7 @@ ChainHandle EditorBase::InsertChain(const String& chain_name)
 
 ChainHandle EditorBase::InsertChain(const String& chain_name, ChainHandle chain, bool deep)
 {
-  impl::ChainImplPtr inserted_chain=ent_.Impl()->InsertChain(chain.Impl(), deep);
-  inserted_chain->SetName(chain_name);
+  impl::ChainImplPtr inserted_chain=ent_.Impl()->InsertChain(chain_name, chain.Impl(), deep);
   return inserted_chain;
 }
 

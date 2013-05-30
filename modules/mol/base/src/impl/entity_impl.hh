@@ -111,7 +111,7 @@ public:
   /// The chain will have no residues and atoms
   // force deep to be set explicitely, because it is better than implicit
   // (and since we are on the impl level interface consistency isn't that critical)
-  ChainImplPtr InsertChain(const ChainImplPtr& chain, bool deep);
+  ChainImplPtr InsertChain(const String& chain_name, const ChainImplPtr& chain, bool deep);
   ConnectorImplP Connect(const AtomImplPtr& first, const AtomImplPtr& second,
                          Real len, Real theta, Real phi,
                          unsigned char bond_order);

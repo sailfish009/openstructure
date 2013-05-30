@@ -126,9 +126,9 @@ EntityImplPtr EntityImpl::Copy()
   return ent_p;
 }
 
-ChainImplPtr EntityImpl::InsertChain(const ChainImplPtr& chain, bool deep)
+ChainImplPtr EntityImpl::InsertChain(const String& chain_name, const ChainImplPtr& chain, bool deep)
 {
-  ChainImplPtr dst_chain=this->InsertChain(chain->GetName());
+  ChainImplPtr dst_chain=this->InsertChain(chain_name);
   dst_chain->Assign(*chain.get());
   if(deep)
   {
@@ -147,7 +147,7 @@ void EntityImpl::ReplicateHierarchy(EntityImplPtr dest)
   for (ChainImplList::const_iterator i=chain_list_.begin(), 
        e1=chain_list_.end(); i!=e1; ++i) {
     ChainImplPtr src_chain=*i;
-    dest->InsertChain(src_chain,true);
+    dest->InsertChain(src_chain->GetName(),src_chain,true);
   }
 }
 
