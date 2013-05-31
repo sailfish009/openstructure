@@ -215,7 +215,10 @@ Real DLLEXPORT_OST_GEOM MinDistance(const Vec3List& l1, const Vec3List& l2);
 //! returns the minimal distance between the points in two Vec3List 
 //  with periodic boundaries in x,y,z given in basis_vec
 Real DLLEXPORT_OST_GEOM MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& basis_vec);
-
+//! returns the indices index1, index2 corresponding to the points in
+//! the Vec3List l1 and l2 having the minimal distance.
+std::vector<unsigned int> DLLEXPORT_OST_GEOM MinDistanceIndices(const Vec3List& l1, const Vec3List& l2);
+  
 //!wraps a vector in a box with periodic boundaries
 Vec3 DLLEXPORT_OST_GEOM WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& basis_vec);
 //!wraps all the verctors in a Vec3List in a box with periodic boundaries

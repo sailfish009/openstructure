@@ -68,6 +68,7 @@ void export_VecMat3_op()
   def("Distance2WithPBC",Vec3Distance2WithPBC);
   def("DistanceWithPBC",Vec3DistanceWithPBC);
   def("MinDistance",MinDistance);
+  def("MinDistanceIndices",MinDistanceIndices);
   def("MinDistanceWithPBC",MinDistanceWithPBC);
   def("WrapVec3",WrapVec3);
   def("WrapVec3List",WrapVec3List);
