@@ -264,6 +264,17 @@ public:
   /// \return details
   String GetDetails() const { return details_; }
 
+  /// \brief Set method details
+  ///
+  /// \param method details
+  void SetMethodDetails(String method_details) {
+    method_details_ = method_details;
+  }
+  /// \brief Get method details
+  ///
+  /// \return method details
+  String GetMethodDetails() const { return method_details_; }
+
   /// \brief Add a chain name
   ///
   /// \param chain chain name
@@ -360,6 +371,7 @@ public:
 private:
   String id_;                  ///< pdbx_struct_assembly.id
   String details_;             ///< pdbx_struct_assembly.details
+  String method_details_;      ///< pdbx_struct_assembly.method_details
   std::vector<String> chains_; ///< all chains of this this assembly
   std::vector<std::pair<int, int> > tr_chains_; //< chains of a transformation
   std::vector<std::vector<MMCifInfoTransOpPtr> > operations_;

@@ -578,6 +578,13 @@ private:
   } MMCifHSEntry;
   typedef std::vector<MMCifHSEntry> MMCifHSVector;
 
+  /// \struct store pdbx_struct_assembly info
+  typedef struct {
+    String details;
+    String method_details;
+  } MMCifPSAEntry;
+  typedef std::map<String, MMCifPSAEntry> MMCifPSAMap;
+
   // members
   MMCifCategory category_;
   int category_counts_[DONT_KNOW+1]; ///< overall no. of atom_site loops
@@ -605,10 +612,10 @@ private:
   MMCifInfo info_;      ///< info container
   MMCifCitationAuthorMap authors_map_;
   MMCifBioUAssemblyVector bu_assemblies_;
-  std::map<String, String> bu_origin_map_; ///< pdbx_struct_assembly.details
+  MMCifPSAMap bu_origin_map_; ///< pdbx_struct_assembly
   MMCifHSVector helix_list_; ///< for storing struct_conf sec.struct. data
   MMCifHSVector strand_list_; ///< for storing struct_conf sec.struct. data
-	MMCifInfoStructRefs struct_refs_;
+  MMCifInfoStructRefs struct_refs_;
 };
 
 }}

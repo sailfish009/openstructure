@@ -224,7 +224,7 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     this->TryStoreIdx(PSA_ID, "id", header);
     // optional
     indices_[PSA_DETAILS] = header.GetIndex("details");
-    //indices_[METHOD_DETAILS] = header.GetIndex("method_details");
+    indices_[METHOD_DETAILS] = header.GetIndex("method_details");
     cat_available = true;
   } else if (header.GetCategory() == "pdbx_struct_assembly_gen") {
     category_ = PDBX_STRUCT_ASSEMBLY_GEN;
@@ -870,15 +870,22 @@ void MMCifReader::ParseRefine(const std::vector<StringRef>& columns)
 
 void MMCifReader::ParsePdbxStructAssembly(const std::vector<StringRef>& columns)
 {
+  MMCifPSAEntry psa;
+
   if (indices_[PSA_DETAILS] != -1) {
-    bu_origin_map_.insert(std::pair<String,
-                                    String>(columns[indices_[PSA_ID]].str(),
-                                         columns[indices_[PSA_DETAILS]].str()));
+    psa.details = columns[indices_[PSA_DETAILS]].str();
   } else {
-    bu_origin_map_.insert(std::pair<String,
-                                    String>(columns[indices_[PSA_ID]].str(),
-                                            "?"));
+    psa.details = "?";
   }
+
+  if (indices_[METHOD_DETAILS] != -1) {
+    psa.method_details = columns[indices_[METHOD_DETAILS]].str();
+  } else {
+    psa.method_details = "?";
+  }
+
+  bu_origin_map_.insert(std::pair<String,
+                         MMCifPSAEntry>(columns[indices_[PSA_ID]].str(), psa));
 }
 
 void MMCifReader::StoreExpression(const char* l, const char* s,
@@ -1614,7 +1621,7 @@ void MMCifReader::OnEndData()
   std::vector<std::vector<String> >::const_iterator aol_it;
   std::vector<String>::const_iterator aob_it;
   std::vector<MMCifInfoTransOpPtr> operation_list;
-  std::map<String, String>::const_iterator buom_it;
+  std::map<String, MMCifPSAEntry>::const_iterator buom_it;
   std::vector<MMCifInfoTransOpPtr> operations = info_.GetOperations();
   info_.SetStructRefs(struct_refs_);
   std::vector<MMCifInfoTransOpPtr>::const_iterator buop_it;
@@ -1631,7 +1638,8 @@ void MMCifReader::OnEndData()
                                                bua_it->biounit_id +
                          "' found as requested by pdbx_struct_assembly_gen.")); 
     }
-    biounit.SetDetails(buom_it->second);
+    biounit.SetDetails(buom_it->second.details);
+    biounit.SetMethodDetails(buom_it->second.method_details);
     biounit.SetID(buom_it->first);
     biounit.SetChainList(bua_it->chains);
 

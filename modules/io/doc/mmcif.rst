@@ -501,6 +501,13 @@ of the annotation available.
     Also available as :meth:`GetDetails`. May also be modified by
     :meth:`SetDetails`.
 
+  .. attribute:: method_details
+
+    Details about the method used to determine this biological assembly.
+
+    Also available as :meth:`GetMethodDetails`. May also be modified by
+    :meth:`SetMethodDetails`.
+
   .. attribute:: chains
 
     Chains involved in this bio unit. If not provided, resembles an empty list.
@@ -551,6 +558,14 @@ of the annotation available.
   .. method:: SetDetails(details)
 
     See :attr:`details`
+
+  .. method:: GetMethodDetails()
+
+    See :attr:`method_details`
+
+  .. method:: SetMethodDetails(details)
+
+    See :attr:`method_details`
 
   .. method:: GetChainList()
 
@@ -997,5 +1012,5 @@ of the annotation available.
 ..  LocalWords:  SetChainList MMCifInfoTransOp ChainTypes MMCifInfoStructRef
 ..  LocalWords:  MMCifInfoRevisions bool difs MMCifInfoStructRefSeqDif rnum
 ..  LocalWords:  SetDateOriginal GetDateOriginal yyyy operationsintervalls
-..  LocalWords:  chainintervalls GetChainIntervalList
-..  LocalWords:  GetOperationsIntervalList
+..  LocalWords:  chainintervalls GetChainIntervalList GetMethodDetails
+..  LocalWords:  GetOperationsIntervalList SetMethodDetails

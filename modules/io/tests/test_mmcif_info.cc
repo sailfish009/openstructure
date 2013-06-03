@@ -109,11 +109,13 @@ BOOST_AUTO_TEST_CASE(mmcif_info_biounit)
   MMCifInfoBioUnit bu = MMCifInfoBioUnit();
 
   bu.SetDetails("author_defined_assembly");
+  bu.SetMethodDetails("PISA");
   bu.SetID("1");
   bu.AddChain("B");
   bu.AddChain("A");
 
   BOOST_CHECK(bu.GetDetails() == "author_defined_assembly");
+  BOOST_CHECK(bu.GetMethodDetails() == "PISA");
   BOOST_CHECK(bu.GetChainList().back() == "A");
   std::vector<std::pair<int, int> > tr = bu.GetChainIntervalList();
   BOOST_CHECK(tr[0].first == 0);

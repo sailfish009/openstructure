@@ -68,7 +68,11 @@ class TestMMCifInfo(unittest.TestCase):
   def test_mmcifinfo_biounit(self):
     b = io.MMCifInfoBioUnit()
     b.SetDetails('Details')
+    b.SetMethodDetails('MethodDetails')
     self.assertEquals(b.GetDetails(), 'Details')
+    self.assertEquals(b.GetMethodDetails(), 'MethodDetails')
+    b.method_details = 'AttrMethodDetails'
+    self.assertEquals(b.method_details, 'AttrMethodDetails')
     b.AddChain('A')
     b.AddChain('B')
     cl = b.GetChainList()
