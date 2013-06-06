@@ -29,6 +29,9 @@ if (NOT ENABLE_STATIC)
     endif()
   endif()
 
+  script(NAME ost_startup.py INPUT ost_startup.py.in SUBSTITUTE ${SUBST_DICT} 
+         TARGET ost_scripts OUTPUT_DIR "${LIB_DIR}/python${PYTHON_VERSION}/site-packages/ost" )    
+
   set(INIT_SCRIPTS 
     ost_startup.py
   )

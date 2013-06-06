@@ -48,7 +48,7 @@ option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
 option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some boost/boost_python combinations" OFF)
 option(COMPILE_TESTS "whether unit tests should be compiled by default" OFF)
 option(ENABLE_STATIC "whether static libraries should be compiled" OFF)
-option(DEBIAN_STYLE_LIBEXEC "whether 'libexec' should be put under 'lib/openstructure" OFF)
+option(UBUNTU_LAYOUT "whether Debian/Ubuntu's lib and libexec directory layout should be used" OFF)
 option(HIDDEN_VISIBILITY "on gcc, use -fvisibility=hidden" OFF)
 
 if (CXX)
@@ -140,10 +140,10 @@ else()
   set(_PROFILE OFF)
 endif()
 
-if (DEBIAN_STYLE_LIBEXEC)
-  set(_DEBIAN_STYLE_LIBEXEC ON)
+if (UBUNTU_LAYOUT)
+  set(_UBUNTU_LAYOUT ON)
 else()
-  set(_DEBIAN_STYLE_LIBEXEC OFF)
+  set(_UBUNTU_LAYOUT OFF)
 endif()
 
 add_definitions(-DEIGEN2_SUPPORT)
@@ -333,22 +333,22 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 endif()
 message(STATUS 
         "OpenStructure will be built with the following options:\n"
-        "   Install Prefix                       (-DPREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
-        "   RPath in install                  (-DUSE_RPATH) : ${_USE_RPATH}\n"
-        "   Info support                    (-DENABLE_INFO) : ${_INFO}\n"
-        "   Graphical interface              (-DENABLE_GUI) : ${_UI}\n"
-        "   OpenGL support                   (-DENABLE_GFX) : ${_OPENGL}\n"
-        "   OpenGL via Mesa                    (-DUSE_MESA) : ${_USE_MESA}\n"
-        "   Image Processing support         (-DENABLE_IMG) : ${_IMG}\n"
-        "   Shader support                   (-DUSE_SHADER) : ${_SHADER}\n"
-        "   Numpy support                     (-DUSE_NUMPY) : ${_NUMPY}\n"
-        "   SpaceNav Device support        (-DENABLE_SPNAV) : ${_SPNAV}\n"
-        "   Optimize                           (-DOPTIMIZE) : ${_OPT}\n"
-        "   Profiling support                   (-DPROFILE) : ${_PROFILE}\n"
-        "   Double Precision       (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
-        "   Compound Lib                   (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
-        "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
-        "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
-        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}"
+        "   Install Prefix                        (-DPREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
+        "   RPath in install                   (-DUSE_RPATH) : ${_USE_RPATH}\n"
+        "   Info support                     (-DENABLE_INFO) : ${_INFO}\n"
+        "   Graphical interface               (-DENABLE_GUI) : ${_UI}\n"
+        "   OpenGL support                    (-DENABLE_GFX) : ${_OPENGL}\n"
+        "   OpenGL via Mesa                     (-DUSE_MESA) : ${_USE_MESA}\n"
+        "   Image Processing support          (-DENABLE_IMG) : ${_IMG}\n"
+        "   Shader support                    (-DUSE_SHADER) : ${_SHADER}\n"
+        "   Numpy support                      (-DUSE_NUMPY) : ${_NUMPY}\n"
+        "   SpaceNav Device support         (-DENABLE_SPNAV) : ${_SPNAV}\n"
+        "   Optimize                            (-DOPTIMIZE) : ${_OPT}\n"
+        "   Profiling support                    (-DPROFILE) : ${_PROFILE}\n"
+        "   Double Precision        (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
+        "   Compound Lib                    (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
+        "   TMAlign and TMScore          (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
+        "   Static Libraries               (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
+        "   Debian/Ubuntu directory layout (-DUBUNTU_LAYOUT) : ${_UBUNTU_LAYOUT}"
         ${HIDDEN_VIS_MSG})
 
