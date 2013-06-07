@@ -25,7 +25,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
 #include <ost/mol/mol.hh>
- #include <ost/mol/builder.hh>
+#include <ost/mol/builder.hh>
+#include <ost/message.hh>
 
 using namespace ost;
 using namespace ost::mol;
@@ -96,6 +97,26 @@ BOOST_AUTO_TEST_CASE(iterative_superposition_svd)
   BOOST_CHECK(res_1.fraction_superposed==1.0);
   BOOST_CHECK(res_2.fraction_superposed==7.0/8.0);
   BOOST_CHECK(res_3.ncycles==3);
+
+  EntityHandle eh_2_atoms = Builder()
+                              .Chain("A")
+                                .Residue("D")
+                                  .Atom("A",geom::Vec3(0,0,0))
+                                  .Atom("B",geom::Vec3(0,0,0));
+
+  //Error, that has to be thrown during initialization of superposition object
+  BOOST_CHECK_THROW(IterativeSuperposeSVD(eh_2_atoms.CreateFullView(),
+                                          eh_2_atoms.CreateFullView(),
+                                          1,5.0,false), Error);
+
+  //forces an error, since there won't be enough atoms within the distance 
+  //threshold after the first superposition.
+  ed.SetAtomPos(atoms[0],geom::Vec3(50,50,50));
+  ed.SetAtomPos(atoms[1],geom::Vec3(50,50,50));
+  ed.SetAtomPos(atoms[2],geom::Vec3(50,50,50));
+  ed.SetAtomPos(atoms[3],geom::Vec3(50,50,50));
+
+  BOOST_CHECK_THROW(IterativeSuperposeSVD(ev1, ev2, 5, 5.0, false), Error);
 }
 
 

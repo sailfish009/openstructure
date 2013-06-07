@@ -289,6 +289,13 @@ SuperpositionResult MeanSquareMinimizerImpl::IterativeMinimize(int max_cycles, R
     transformed_atoms = this->TransformEMatX(atoms1_, transformation_matrix);
     matching_indices = this->CreateMatchingSubsets(transformed_atoms, atoms2_, distance_threshold);
 
+    if(matching_indices.size()<3){
+      std::stringstream ss;
+      ss<<"Failed to Converge, less than 3 superposable atoms in iteration ";
+      ss<<cycles<<"!";
+      throw Error(ss.str());
+    }
+
     subset1 = EMatX::Zero(matching_indices.size(),3);
     subset2 = EMatX::Zero(matching_indices.size(),3);
 
