@@ -1,11 +1,19 @@
 #include "compound_lib_base.hh"
+#include <ost/message.hh>
 
 namespace ost { namespace conop {
 
 bool CompoundLibBase::IsResidueComplete(const ost::mol::ResidueHandle& res, bool check_hydrogens, Compound::Dialect dialect) const{
 
   CompoundPtr compound = this->FindCompound(res.GetName(), dialect);
-  AtomSpecList a_spec = compound->GetAtomSpecs();
+  
+  if(!compound){
+    std::stringstream ss;
+    ss << "Could not find " << res.GetName() << " in compound library"; 
+    throw Error(ss.str());
+  }
+
+  const AtomSpecList& a_spec = compound->GetAtomSpecs();
 
   for(AtomSpecList::const_iterator it=a_spec.begin(); it!=a_spec.end();++it){
 
