@@ -25,6 +25,9 @@ elseif(CPACK_GENERATOR MATCHES "TGZ")
   install(CODE "
     if(NOT ${CMAKE_INSTALL_PREFIX} MATCHES \${CMAKE_INSTALL_PREFIX})
       set(LIB_DIR ${LIB_DIR})#pass libdir variable in install code block
+      set(LIBEXEC_PATH ${LIBEXEC_PATH})#pass libexec_path variable in install code block
+      set(_UBUNTU_LAYOUT ${_UBUNTU_LAYOUT})#pass ubuntu_layout variable in install code block
+      set(ARCH ${ARCH})#pass arch variable in install code block
       if(NOT ${_USE_RPATH} STREQUAL ON)
         message(\"======================================================================\")
         message(\"|          Warning, no rpaths will be embedded upon install.         |\")
@@ -37,7 +40,7 @@ elseif(CPACK_GENERATOR MATCHES "TGZ")
       set(OST_BINARIES \"\${CMAKE_INSTALL_PREFIX}/bin/lddt\"
                        \"\${CMAKE_INSTALL_PREFIX}/bin/chemdict_tool\"
                        \"\${CMAKE_INSTALL_PREFIX}/bin/molck\"
-                       \"\${CMAKE_INSTALL_PREFIX}/libexec/openstructure/gosty\")
+                       \"\${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/gosty\")
 
       copy_python(${PYTHON_INCLUDE_PATH} ${PYTHON_VERSION} new_python_binary)
       list(APPEND OST_BINARIES \${new_python_binary})

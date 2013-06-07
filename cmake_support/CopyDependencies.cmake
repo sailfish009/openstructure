@@ -450,7 +450,7 @@ endfunction(copy_python)
 # function read_config
 #=============================================================================
 function(read_config ost_config_var)
-  file(READ "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/ost_config" ost_config)
+  file(READ "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/ost_config" ost_config)
   set(${ost_config_var} "${ost_config}" PARENT_SCOPE)
 endfunction(read_config)
 
@@ -458,7 +458,7 @@ endfunction(read_config)
 # function write_config
 #=============================================================================
 function(write_config ost_config)
-  file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/ost_config" "${ost_config}")
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/ost_config" "${ost_config}")
 endfunction(write_config)
 
 #=============================================================================
@@ -626,13 +626,13 @@ endfunction(get_rpath)
 #=============================================================================
 function(copy_qt library_dir plugin_dir plugins)
   file(COPY "${library_dir}/Resources/qt_menu.nib"
-       DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/"
+       DESTINATION "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/"
        FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
   file(COPY ${plugin_dir}
-       DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/openstructure) 
-  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/*.dylib")
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}) 
+  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/*.dylib")
   set(${plugins} ${QT_PLUGINS} PARENT_SCOPE)
-  file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/qt.conf" "[Paths]\nPlugins=../plugins\n")
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/qt.conf" "[Paths]\nPlugins=../plugins\n")
 endfunction(copy_qt)
 
 #=============================================================================
@@ -819,10 +819,10 @@ endfunction(copy_python)
 #=============================================================================
 function(copy_qt library_dir plugin_dir plugins)
   file(COPY ${plugin_dir}
-       DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/openstructure) 
-  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/*.dll")
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}) 
+  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}-/*.dll")
   set(${plugins} ${QT_PLUGINS} PARENT_SCOPE)
-  file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/qt.conf" "[Paths]\nPlugins=../plugins\n")
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/qt.conf" "[Paths]\nPlugins=../plugins\n")
 endfunction(copy_qt)
 
 
@@ -916,13 +916,13 @@ endfunction(get_rpath)
 #=============================================================================
 function(copy_qt library_dir plugin_dir plugins)
   file(COPY ${plugin_dir}
-       DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/openstructure) 
-  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/*.so")
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}) 
+  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/*.so")
   foreach(plugin ${QT_PLUGINS})
     remove_rpath("${plugin}")
   endforeach(plugin)
   set(${plugins} ${QT_PLUGINS} PARENT_SCOPE)
-  file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/qt.conf" "[Paths]\nPlugins=../plugins\n")
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/qt.conf" "[Paths]\nPlugins=../plugins\n")
 endfunction(copy_qt)
 
 #=============================================================================
@@ -971,11 +971,22 @@ endfunction(copy_resolved_item)
 # function copy_python (Linux)
 #=============================================================================
 function(copy_python include_path version new_binary_path)
-
-
+  if (_UBUNTU_LAYOUT)
+    if ("${ARCH}" MATCHES "64")
+      set(UBUNTU_ARCH_STRING "x86_64")
+    else()  
+      set(UBUNTU_ARCH_STRING "i386")
+    endif()
+  endif()
   get_filename_component(real_python_include_path ${include_path} REALPATH)
   get_filename_component(python_root_dir ${real_python_include_path}/../.. REALPATH) 
-  file(COPY ${python_root_dir}/${LIB_DIR}/python${version}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version})
+  if (_UBUNTU_LAYOUT)
+    execute_process(COMMAND cp -rL ${python_root_dir}/${LIB_DIR}/python${version} ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/)
+    message("Output: ${out}")
+    message("Error: ${error}")
+  else()
+    file(COPY ${python_root_dir}/${LIB_DIR}/python${version}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version} PATTERN "*.pyc" EXCLUDE)
+  endif()
   file(GLOB  py_config_files "${include_path}/pyconfig*.h")
   file(COPY ${py_config_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/python${version})
   file(GLOB_RECURSE python_so_files "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version}/*.so")
@@ -983,7 +994,11 @@ function(copy_python include_path version new_binary_path)
     file(RPATH_REMOVE FILE "${so_file}")
   endforeach(so_file)
   read_config(ost_config)
-  file(GLOB python_libs "${python_root_dir}/${LIB_DIR}/libpython${version}.so*")
+  if (_UBUNTU_LAYOUT)
+    file(GLOB python_libs "${python_root_dir}/${LIB_DIR}/python${version}/config-${UBUNTU_ARCH_STRING}-linux-gnu/libpython${version}.so.*" FOLLOW_SYMLINKS)
+  else()
+    file(GLOB python_libs "${python_root_dir}/${LIB_DIR}/libpython${version}.so*")
+  endif()
   file(COPY ${python_libs} DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR})
   file(COPY ${python_root_dir}/bin/python${version} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
   set(${new_binary_path} "${CMAKE_INSTALL_PREFIX}/bin/python${version}" PARENT_SCOPE)
