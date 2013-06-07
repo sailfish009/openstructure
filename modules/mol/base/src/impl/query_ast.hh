@@ -68,7 +68,7 @@ class DLLEXPORT_OST_MOL StringOrRegexParam {
   String s_;
 };
 
-typedef boost::variant<int, float, WithinParam, StringOrRegexParam> ParamType;
+typedef boost::variant<int, Real, WithinParam, StringOrRegexParam> ParamType;
 
 // AST node, used internally for building the AST tree.
 class DLLEXPORT_OST_MOL Node {
