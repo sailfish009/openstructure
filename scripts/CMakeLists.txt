@@ -33,7 +33,6 @@ if (NOT ENABLE_STATIC)
          TARGET ost_scripts OUTPUT_DIR "${LIB_DIR}/python${PYTHON_VERSION}/site-packages/ost" )    
 
   set(INIT_SCRIPTS 
-    ost_startup.py
   )
   set(SPD "${LIB_DIR}/python${PYTHON_VERSION}/site-packages/ost")
   if (ENABLE_GUI)
