@@ -53,6 +53,9 @@ elseif(CPACK_GENERATOR MATCHES "TGZ")
       list(APPEND  OST_BINARIES \${qt_plugins})
 
       copy_dependencies(\"\${OST_BINARIES}\")
+
+      #copy examples into bundle
+      file (COPY ${CMAKE_SOURCE_DIR}/examples DESTINATION \"\${CMAKE_INSTALL_PREFIX}/share/openstructure/\") 
     endif(NOT ${CMAKE_INSTALL_PREFIX} MATCHES \${CMAKE_INSTALL_PREFIX})
   ")
 elseif(CPACK_GENERATOR MATCHES "TGZ_NODEP")
