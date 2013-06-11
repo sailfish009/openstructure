@@ -160,7 +160,7 @@ std::pair<Real,long int> DistanceRMSDTest(const EntityView& mdl, const GlobalRDM
         int mdl_res_index =mdlr.GetIndex();
         Real local_rmsd=sqrt(local_rmsd_data_list[mdl_res_index].first/(static_cast<Real>(local_rmsd_data_list[mdl_res_index].second) ? static_cast<Real>(local_rmsd_data_list[mdl_res_index].second) : 1));
         mdlr.SetFloatProp(local_drmsdt_property_string, local_rmsd);
-        mdlr.SetIntProp(local_drmsdt_property_string+"_sum", local_rmsd_data_list[mdl_res_index].first);
+        mdlr.SetFloatProp(local_drmsdt_property_string+"_sum", local_rmsd_data_list[mdl_res_index].first);
         mdlr.SetIntProp(local_drmsdt_property_string+"_count", local_rmsd_data_list[mdl_res_index].second);
       }
     }
