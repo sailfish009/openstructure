@@ -62,12 +62,9 @@ std::pair<Real, long int> calc_rmsd(const ResidueRDMap& res_distance_list, const
         diff = cap_distance;
     }
     if (log) {
-//      LOG_VERBOSE("drmsd:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName()
-//                  << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetName() << " " << av2.GetResidue().GetNumber() << " " << av2.GetName() << " "
-//                  << mdl_dist << " " << values.first << " " <<  diff)
       LOG_VERBOSE("drmsd:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName()
-                  << " " << av1.GetPos() << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetName() << " " << av2.GetResidue().GetNumber() << " " << av2.GetName() << " "
-                  << av2.GetPos() << " " << mdl_dist << " " << values.first << " " <<  diff)
+                  << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetName() << " " << av2.GetResidue().GetNumber() << " " << av2.GetName() << " "
+                  << mdl_dist << " " << values.first << " " <<  diff)
     }
     rmsd_data.first+=(diff*diff);
     if (!only_fixed) {
@@ -97,12 +94,6 @@ void drmsdt_check_and_swap(const GlobalRDMap& glob_dist_list, const EntityView& 
           rname=="PHE" || rname=="LEU" || rname=="ARG")) {
       continue;
     }
-//    std::pair<long int, long int> ov1=calc_rmsd(i->second, rnum,mdl_chain, sequence_separation,
-//                                          cap_distance, true, false, local_rmsd_data_list,false);
-
-//    std::pair<long int, long int> ov2=calc_rmsd(i->second, rnum, mdl_chain, sequence_separation,
-//                                          cap_distance, true, true, local_rmsd_data_list,false);
-
     std::pair<long int, long int> ov1=calc_rmsd(i->second, rnum,mdl_chain, sequence_separation,
                                             cap_distance, true, false, local_rmsd_data_list,true);
 
