@@ -213,6 +213,36 @@ class TestMMCifInfo(unittest.TestCase):
                                            0,0,0,1),
                                  epsilon=0.01), True)
 
+  def test_mmcifinfo_biounit_pdbize_multi_transformations(self):
+    # in case we have more than one set of chains & transformations,
+    # ligand/ water chains may mess up
+    ent, seqres, info = io.LoadMMCIF("testfiles/mmcif/2ast.cif.gz",
+                                     seqres=True,
+                                     info=True)
+    pdb_ent = info.GetBioUnits()[2].PDBize(ent, seqres=seqres)
+    # chains
+    self.assertEquals(str(pdb_ent.GetChainList()[0]), 'A')
+    self.assertEquals(str(pdb_ent.GetChainList()[1]), 'B')
+    self.assertEquals(str(pdb_ent.GetChainList()[2]), '_')
+    self.assertEquals(str(pdb_ent.GetChainList()[3]), '-')
+    self.assertEquals(str(pdb_ent.GetChainList()[4]), 'C')
+    self.assertEquals(str(pdb_ent.GetChainList()[5]), 'D')
+    self.assertEquals(str(pdb_ent.GetChainList()[6]), 'E')
+    self.assertEquals(str(pdb_ent.GetChainList()[7]), 'F')
+    self.assertEquals(str(pdb_ent.GetChainList()[8]), 'G')
+    self.assertEquals(str(pdb_ent.GetChainList()[9]), 'H')
+    # size of chains
+    self.assertEquals(len(pdb_ent.GetChainList()[0].GetResidueList()),  142)
+    self.assertEquals(len(pdb_ent.GetChainList()[1].GetResidueList()),  325)
+    self.assertEquals(len(pdb_ent.GetChainList()[2].GetResidueList()),    4)
+    self.assertEquals(len(pdb_ent.GetChainList()[3].GetResidueList()),  530)
+    self.assertEquals(len(pdb_ent.GetChainList()[4].GetResidueList()),  142)
+    self.assertEquals(len(pdb_ent.GetChainList()[5].GetResidueList()),  325)
+    self.assertEquals(len(pdb_ent.GetChainList()[6].GetResidueList()),   69)
+    self.assertEquals(len(pdb_ent.GetChainList()[7].GetResidueList()),   10)
+    self.assertEquals(len(pdb_ent.GetChainList()[8].GetResidueList()),   69)
+    self.assertEquals(len(pdb_ent.GetChainList()[9].GetResidueList()),   10)
+
   def test_mmcifinfo_structdetails(self):
     d = io.MMCifInfoStructDetails()
 

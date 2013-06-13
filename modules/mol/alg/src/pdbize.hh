@@ -46,6 +46,8 @@ public:
 private:
   int                                   min_polymer_size_;
   EntityHandle                          ent_;
+  ChainHandle                           ligand_chain_;
+  ChainHandle                           water_chain_;
   const char*                           curr_chain_name_;
   bool                                  needs_adjustment_;
   std::map<ResidueHandle,ResidueHandle> dst_to_src_map_;
