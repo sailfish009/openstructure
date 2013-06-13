@@ -33,13 +33,18 @@ typedef boost::shared_ptr<HeuristicProcessor> HeuristicProcessorPtr;
 
 class DLLEXPORT_OST_CONOP HeuristicProcessor  : public Processor {
 public:
-  HeuristicProcessor() {
+  HeuristicProcessor():
+    Processor(),
+    lib_()
+  {
   }
   virtual ProcessorPtr Copy() const {
     return ProcessorPtr(new HeuristicProcessor(*this));
   }
   HeuristicProcessor(bool bf, bool at, bool cn, bool aa, ConopAction zo): 
-    Processor(bf, at, cn, aa, zo) {}
+    Processor(bf, at, cn, aa, zo),
+    lib_()
+  {}
 
   virtual String ToString() const;
 protected:

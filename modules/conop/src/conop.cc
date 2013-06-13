@@ -32,7 +32,9 @@ Conopology& Conopology::Instance()
   return impl;
 }
 
-Conopology::Conopology()
+Conopology::Conopology():
+  known_elements_(),
+  lib_()
 {
   
   known_elements_.insert("AC");

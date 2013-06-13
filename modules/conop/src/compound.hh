@@ -70,12 +70,24 @@ struct DLLEXPORT_OST_CONOP Date {
 };
 
 struct DLLEXPORT_OST_CONOP AtomSpec {
-  AtomSpec()
-    : ordinal(0), is_leaving(false) {
+  AtomSpec():
+    ordinal(0),
+    name(),
+    alt_name(),
+    element(),
+    is_leaving(false),
+    is_aromatic()
+  {
   }
   AtomSpec(int o, const String& n, const String& a, const String& e,
-           bool l, bool r): ordinal(o), name(n), alt_name(a), element(e),
-    is_leaving(l), is_aromatic(r) {}
+           bool l, bool r):
+    ordinal(o),
+    name(n),
+    alt_name(a),
+    element(e),
+    is_leaving(l),
+    is_aromatic(r)
+  {}
   int    ordinal;
   String name;
   String alt_name;
@@ -93,10 +105,13 @@ struct DLLEXPORT_OST_CONOP AtomSpec {
 };
 
 struct DLLEXPORT_OST_CONOP BondSpec {
-  BondSpec()
-    : atom_one(0), atom_two(0), order(1) {
-
+  BondSpec():
+    atom_one(0),
+    atom_two(0),
+    order(1)
+  {
   }
+  
   BondSpec(int a, int b, int o): atom_one(a), atom_two(b), order(o) {}
   bool operator==(const BondSpec& rhs) const {
     return atom_one==rhs.atom_one && atom_two==rhs.atom_two;
@@ -126,8 +141,19 @@ public:
     AMBER  ='A',
   } Dialect;
   
-  Compound(const String& id)
-    : olc_('?'), tlc_(id), chem_class_(), chem_type_(), dialect_(Compound::PDB){
+  Compound(const String& id):
+    olc_('?'),
+    tlc_(id),
+    formula_(),
+    name_(),
+    atom_specs_(),
+    bond_specs_(),
+    chem_class_(),
+    chem_type_(),
+    dialect_(Compound::PDB),
+    creation_date_(),
+    mod_date_()
+  {
   }
 
   /// \brief three-letter code that is unique for every compound 

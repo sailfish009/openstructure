@@ -39,13 +39,19 @@ public:
 
   // returns the default compound library (if any)
   CompoundLibPtr GetDefaultLib() const { return lib_; }
-  void SetDefaultLib(const CompoundLibPtr& lib) { lib_ = lib; }
+  void SetDefaultLib(const CompoundLibPtr& lib)
+  { 
+    lib_ = lib; 
+  }
 
   bool IsValidElement(const String& element) const;
 
 private:
   Conopology();
-  Conopology(const Conopology&) {}
+  Conopology(const Conopology&):
+    known_elements_(),
+    lib_()
+  {}
   Conopology& operator=(const Conopology&) {return *this;}
 
   std::set<String> known_elements_;

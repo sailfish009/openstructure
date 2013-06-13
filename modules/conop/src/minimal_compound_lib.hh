@@ -13,7 +13,9 @@ typedef boost::shared_ptr<MinimalCompoundLib> MinimalCompoundLibPtr;
 // amino acids and standard nucleotides
 class DLLEXPORT_OST_CONOP MinimalCompoundLib : public CompoundLibBase {
 public:
-  MinimalCompoundLib() {}
+  MinimalCompoundLib():
+    CompoundLibBase()
+  {}
   virtual CompoundPtr FindCompound(const String& id, 
                                    Compound::Dialect dialect) const;
 private:

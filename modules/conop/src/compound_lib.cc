@@ -476,8 +476,15 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
   return CompoundPtr();
 }
 
-CompoundLib::CompoundLib() 
-  : conn_(NULL), chem_type_available_(false) {
+CompoundLib::CompoundLib():
+  CompoundLibBase(),
+  compound_cache_(),
+  conn_(NULL),
+  chem_type_available_(false),
+  name_available_(),
+  creation_date_(),
+  ost_version_used_()
+{
 }
 
 CompoundLib::~CompoundLib() {

@@ -8,7 +8,8 @@ IOProfileRegistry& IOProfileRegistry::Instance()
   return reg;
 }
 
-IOProfileRegistry::IOProfileRegistry()
+IOProfileRegistry::IOProfileRegistry():
+  profiles_()
 {
   profiles_["DEFAULT"]=IOProfile();
 }
