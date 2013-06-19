@@ -70,7 +70,6 @@ void PDBize::Add(EntityView asu, const geom::Mat4List& transforms,
 {
   XCSEditor edi = ent_.EditXCS(BUFFERED_EDIT);
 
-  int last_rnum = 0;
   for (geom::Mat4List::const_iterator i = transforms.begin(), 
        e = transforms.end(); i != e; ++i) {
     for (ChainViewList::const_iterator j = asu.GetChainList().begin(),
@@ -125,14 +124,14 @@ void PDBize::Add(EntityView asu, const geom::Mat4List& transforms,
       // deal with ligands...
       if (!ligand_chain_) {
         ligand_chain_ = edi.InsertChain(LIGAND_CHAIN_NAME);
-        last_rnum = 0;
+        last_rnum_ = 0;
       }
       char ins_code = chain.GetResidueCount()>1 ? 'A' : '\0';
      
       for (ResidueViewList::const_iterator k = chain.GetResidueList().begin(),
            e3 = chain.GetResidueList().end(); k != e3; ++k) {
         ResidueHandle new_res = edi.AppendResidue(ligand_chain_, k->GetName(),
-                                                  ResNum(last_rnum+1, ins_code));
+                                                  ResNum(last_rnum_+1, ins_code));
         transfer_residue_properties(*k, new_res);
         new_res.SetStringProp("type", StringFromChainType(chain.GetType()));
         new_res.SetStringProp("description", chain.GetDescription());
@@ -144,7 +143,7 @@ void PDBize::Add(EntityView asu, const geom::Mat4List& transforms,
         ins_code += 1;
         needs_adjustment_ |= copy_atoms(*k, new_res, edi, *i);
       }
-      last_rnum+=1;
+      last_rnum_+=1;
     }
   }
 }

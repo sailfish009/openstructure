@@ -36,7 +36,8 @@ class DLLEXPORT_OST_MOL_ALG PDBize {
 public:
   explicit PDBize(int min_polymer_size=10):
     min_polymer_size_(min_polymer_size), ent_(mol::CreateEntity()),
-    curr_chain_name_(POLYPEPTIDE_CHAIN_NAMES), needs_adjustment_(false)
+    curr_chain_name_(POLYPEPTIDE_CHAIN_NAMES), needs_adjustment_(false),
+    last_rnum_(0)
   {}
 
   void Add(mol::EntityView asu, const geom::Mat4List& transforms,
@@ -50,6 +51,7 @@ private:
   ChainHandle                           water_chain_;
   const char*                           curr_chain_name_;
   bool                                  needs_adjustment_;
+  int                                   last_rnum_;
   std::map<ResidueHandle,ResidueHandle> dst_to_src_map_;
 };
 

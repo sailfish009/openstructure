@@ -136,6 +136,19 @@ class TestMMCifInfo(unittest.TestCase):
     self.assertEquals(tr_ol[0][0], 0)
     self.assertEquals(tr_ol[0][1], 1)
 
+  def test_mmcifinfo_biounit_pdbize_with_multiple_transforms(self):
+    ent, seqres, info = io.LoadMMCIF("testfiles/mmcif/multiple_transforms.cif.gz",
+                                     seqres=True,
+                                     info=True)
+    pdb_ent = info.GetBioUnits()[0].PDBize(ent)
+    pdb_seqres_ent = info.GetBioUnits()[0].PDBize(ent, seqres)
+    chains = pdb_ent.chains
+    self.assertEquals([c.name for c in chains], 
+                      ['A', '_', '-', 'B', 'C', 'D'])
+    ligand_chain = chains[1]
+    ligand_residues = ligand_chain.residues
+    self.assertEquals([r.number for r in ligand_residues],
+                      [mol.ResNum(1), mol.ResNum(2), mol.ResNum(3), mol.ResNum(4)])
   def test_mmcifinfo_biounit_pdbize(self):
     ent, seqres, info = io.LoadMMCIF("testfiles/mmcif/3T6C.cif.gz",
                                      seqres=True,
