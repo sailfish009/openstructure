@@ -357,7 +357,7 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10,
         tr = trans * rot
         trans_matrices.append(tr)
       for op_n in range(1, len(l_operations)):
-        tmp_ops = list()
+        tmp_ops = geom.Mat4List()
         for o in l_operations[op_n]:
           rot = geom.Mat4()
           rot.PasteRotation(o.rotation)
