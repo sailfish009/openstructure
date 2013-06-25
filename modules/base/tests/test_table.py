@@ -218,7 +218,11 @@ class TestTable(unittest.TestCase):
     self.CompareColCount(tab, 0)
     self.CompareRowCount(tab, 0)
     self.assertRaises(ValueError, tab.GetColIndex, 'a')
-    
+  def testTableInitFromOldTable(self):
+    old_tab = Table(['a','b'],'ff')
+    new_tab = Table(old_tab.col_names,old_tab.col_types)
+    new_tab.AddCol('c','f')
+    self.assertEqual(old_tab.col_names, ['a','b'])
   def testGuessColumnType(self):
     self.assertEqual(GuessColumnType(['1', '1.3', '2']), 'float')
     self.assertEqual(GuessColumnType(['1', '1', '2']), 'int')

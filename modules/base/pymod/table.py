@@ -218,7 +218,8 @@ class Table(object):
   SUPPORTED_TYPES=('int', 'float', 'bool', 'string',)
   
   
-  def __init__(self, col_names=None, col_types=None, **kwargs):
+  def __init__(self, col_names=[], col_types=None, **kwargs):
+
     self.col_names=list(col_names)
     self.comment=''
     self.name=''
