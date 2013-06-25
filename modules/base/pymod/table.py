@@ -219,7 +219,7 @@ class Table(object):
   
   
   def __init__(self, col_names=None, col_types=None, **kwargs):
-    self.col_names=col_names
+    self.col_names=list(col_names)
     self.comment=''
     self.name=''
     
