@@ -64,6 +64,8 @@ protected:
   virtual void keyPressEvent(QKeyEvent* event);
   virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
   void scrollTo (const QModelIndex & index, ScrollHint hint = EnsureVisible);
+  virtual int sizeHintForColumn(int column) const;
+  virtual int sizeHintForRow(int row) const;
 
 private slots:
   void InitStaticColumn();
@@ -73,7 +75,6 @@ private slots:
   void ResizeHeight(int index, int, int size);
 
 private:
-
   std::pair<int, int> GetSimpleSelection(int row);
   QTableView* static_column_;
   QTableView* static_row_;
