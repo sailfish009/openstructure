@@ -115,6 +115,7 @@ ost::img::gui::DataViewer* GostyApp::CreateDataViewer(const ost::img::ImageHandl
   QMdiSubWindow* mdi=new QMdiSubWindow(this->GetPerspective()->GetMainArea());
   mdi->setWindowTitle(name);
   mdi->setWidget(viewer);
+  mdi->setFocusProxy(viewer);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
   mdi->setAttribute(Qt::WA_DeleteOnClose);
   viewer->setParent(mdi);

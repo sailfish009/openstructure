@@ -31,7 +31,7 @@ namespace ost { namespace gui {
 
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags):
   QMainWindow(parent,flags),
-  window_menu_(new QMenu("Windows")),
+  window_menu_(new QMenu("Panels")),
   dock_widget_map_()
 {
   connect(window_menu_,SIGNAL(triggered(QAction*)),this,SLOT(OnDockMenu(QAction*)));

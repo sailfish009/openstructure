@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 
 /*
-  Authors: Ansgar Philippsen, Andreas Schenk
+  Authors: Ansgar Philippsen, Andreas Schenk, Jeff Lovelace
 */
 
 #ifndef IMG_GUI_DATA_VIEWER_H
@@ -177,6 +177,9 @@ public slots:
   QPoint lastmouse_;
 
   void build(const ImageHandle& data);
+
+  void show_current_window_menu(void);
+
 
   void build_menu();
 };
