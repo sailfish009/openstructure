@@ -85,6 +85,7 @@ protected:
                          mol::ResidueHandle res, 
                          mol::AtomHandleList& remaining) const;
   void ProcessUnkAtoms(DiagnosticsPtr diags,
+                       mol::ResidueHandle res,
                        mol::AtomHandleList unks,
                        mol::AtomHandleList& remaining) const;
   virtual void DoProcess(DiagnosticsPtr diags, 
