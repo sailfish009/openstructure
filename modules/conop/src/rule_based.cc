@@ -63,7 +63,7 @@ void RuleBasedProcessor::DoProcess(DiagnosticsPtr diags,
         mol::AtomHandleList unk_atoms;
         unk_atoms = GetUnknownAtomsOfResidue(residue, compound, 
                                              this->GetStrictHydrogens());
-        this->ProcessUnkAtoms(diags, unk_atoms, atoms_to_connect);
+        this->ProcessUnkAtoms(diags, residue, unk_atoms, atoms_to_connect);
         residue.SetChemClass(mol::ChemClass(mol::ChemClass::UNKNOWN));
         residue.SetChemType(mol::ChemType(mol::ChemType::UNKNOWN));
         residue.SetOneLetterCode('?');
@@ -102,7 +102,7 @@ void RuleBasedProcessor::ProcessUnkResidue(DiagnosticsPtr diags,
          e = atoms.end(); i !=e; ++i) {
       remaining_atoms.push_back(*i);
       if (!Conopology::Instance().IsValidElement(i->GetElement()))
-        i->SetElement(GuessAtomElement(i->GetName(), i->IsHetAtom()));
+        i->SetElement(GuessAtomElement(i->GetName(), atoms.size()));
     }
   }
   // Don't do anything if treatment is set to SILENT
@@ -129,6 +129,7 @@ void RuleBasedProcessor::ProcessUnkResidue(DiagnosticsPtr diags,
 }
 
 void RuleBasedProcessor::ProcessUnkAtoms(DiagnosticsPtr diags,
+                                         mol::ResidueHandle res,
                                          mol::AtomHandleList unks,
                                          mol::AtomHandleList& remaining_atoms) const
 {
@@ -138,7 +139,7 @@ void RuleBasedProcessor::ProcessUnkAtoms(DiagnosticsPtr diags,
          e = unks.end(); i !=e; ++i) {
       remaining_atoms.push_back(*i);
       if (!Conopology::Instance().IsValidElement(i->GetElement()))
-        i->SetElement(GuessAtomElement(i->GetName(), i->IsHetAtom()));
+        i->SetElement(GuessAtomElement(i->GetName(), res.GetAtomCount()));
     }
   }
 

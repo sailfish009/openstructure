@@ -32,14 +32,16 @@ namespace ost { namespace conop {
 
 void HeuristicProcessor::ProcessUnkResidue(DiagnosticsPtr diags, 
                                            mol::ResidueHandle res) const {
-  res.SetChemClass(GuessChemClass(res));
   mol::AtomHandleList atoms = res.GetAtomList(); 
   for (mol::AtomHandleList::iterator 
        i = atoms.begin(), e = atoms.end(); i != e; ++i) {
     mol::AtomHandle a = *i;
     if (!Conopology::Instance().IsValidElement(a.GetElement()))
-      a.SetElement(GuessAtomElement(a.GetName(), a.IsHetAtom()));
+      a.SetElement(GuessAtomElement(a.GetName(), atoms.size()));
   }
+
+  res.SetChemClass(GuessChemClass(res));
+
   if (!this->GetConnect()) { return; }
   for (mol::AtomHandleList::iterator 
        i = atoms.begin(), e = atoms.end(); i != e; ++i) {
@@ -64,6 +66,9 @@ void HeuristicProcessor::DoProcess(DiagnosticsPtr diags,
       if (!compound) {
         // process unknown residue...
         this->ProcessUnkResidue(diags, residue);
+        if (this->GetConnectAminoAcids()) 
+          this->ConnectResidues(prev, residue);
+        prev = residue;
         continue;
       }
       this->ReorderAtoms(residue, compound, true);  

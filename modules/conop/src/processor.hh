@@ -126,7 +126,7 @@ String DLLEXPORT_OST_CONOP StringFromConopAction(ConopAction action);
 
 
 /// \brief guess element of atom based on name and hetatm flag
-String DLLEXPORT_OST_CONOP GuessAtomElement(const String& atom_name, bool hetatm);
+String DLLEXPORT_OST_CONOP GuessAtomElement(const String& atom_name, int atom_count);
 
 /// \brief guess chemclass based on atoms of residue
 mol::ChemClass DLLEXPORT_OST_CONOP GuessChemClass(mol::ResidueHandle res);

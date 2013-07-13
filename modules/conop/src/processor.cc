@@ -115,6 +115,7 @@ void AssignBackboneTorsions(mol::ResidueHandle prev,
     }
   }
 } 
+
 mol::ChemClass GuessChemClass(mol::ResidueHandle res)
 {
   mol::AtomHandle ca=res.FindAtom("CA");
@@ -131,7 +132,8 @@ mol::ChemClass GuessChemClass(mol::ResidueHandle res)
   }
   return mol::ChemClass();
 }
-String GuessAtomElement(const String& aname, bool hetatm)
+
+String GuessAtomElement(const String& aname, int atom_count)
 {
   static String l1[] = {
     "H","C","N","O","P","S","K"
@@ -156,7 +158,7 @@ String GuessAtomElement(const String& aname, bool hetatm)
   if(ele[0]=='H') {
     return "H";
   }
-  if (hetatm==false) {
+  if (atom_count > 1) {
     if (ele=="CA" || ele=="CB") {
       return "C";
     }

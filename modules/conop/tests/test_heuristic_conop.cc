@@ -19,6 +19,7 @@
 
 #include <ost/log.hh>
 #include <ost/mol/mol.hh>
+#include <ost/mol/builder.hh>
 #include <ost/conop/heuristic.hh>
 
 #define BOOST_TEST_DYN_LINK
@@ -138,6 +139,45 @@ BOOST_AUTO_TEST_CASE(does_assign_torsions) {
 
   BOOST_CHECK(l1.GetPsiTorsion().IsValid());
   BOOST_CHECK(a2.GetPsiTorsion().IsValid());
+}
+
+
+BOOST_AUTO_TEST_CASE(quack_types_unknown_residues) {
+  
+  mol::EntityHandle e = Builder()
+    .Chain("A")
+      .Residue("GLY")
+        .Atom("N", geom::Vec3(-8.22, 35.20, 22.39))
+        .Atom("CA", geom::Vec3(-8.28, 36.36, 21.49))
+        .Atom("C", geom::Vec3(-8.59, 35.93, 20.06))
+        .Atom("O", geom::Vec3(-7.88, 36.30, 19.12))
+        .Atom("CB", geom::Vec3(-6.96, 37.11, 21.53))
+      .Residue("SEP")
+        .Atom("N", geom::Vec3(-9.66, 35.16, 19.91))
+        .Atom("CA", geom::Vec3(-10.08, 34.66, 18.61))
+        .Atom("CB", geom::Vec3(-10.90, 33.38, 18.79))
+        .Atom("OG", geom::Vec3(-12.22, 33.66, 19.22))
+        .Atom("C", geom::Vec3(-10.84, 35.69, 17.77))
+        .Atom("O", geom::Vec3(-10.99, 35.54, 16.56))
+        .Atom("P", geom::Vec3(-12.43, 33.20, 20.70))
+        .Atom("O1P", geom::Vec3(-11.55, 34.04, 21.65))
+        .Atom("O2P", geom::Vec3(-12.05, 31.71, 20.86))
+        .Atom("O3P", geom::Vec3(-13.92, 33.41, 21.07))
+      .Residue("GLY")
+        .Atom("N", geom::Vec3(-11.31, 36.75, 18.43))
+        .Atom("CA", geom::Vec3(-12.04, 37.81, 17.75))
+        .Atom("C", geom::Vec3(-12.34, 38.94, 18.73))
+        .Atom("O", geom::Vec3(-13.45, 39.03, 19.26))
+  ;
+  HeuristicProcessor proc;
+  proc.Process(e);
+  BOOST_CHECK(e.FindResidue("A", 1).IsPeptideLinking());
+  BOOST_CHECK(e.FindResidue("A", 2).IsPeptideLinking());
+  BOOST_CHECK(e.FindResidue("A", 3).IsPeptideLinking());
+
+  BOOST_CHECK(mol::BondExists(e.FindAtom("A", 1, "C"), e.FindAtom("A", 2, "N")));
+  BOOST_CHECK(mol::BondExists(e.FindAtom("A", 2, "C"), e.FindAtom("A", 3, "N")));
+
 }
 
 BOOST_AUTO_TEST_SUITE_END();
