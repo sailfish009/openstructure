@@ -102,7 +102,7 @@ void RuleBasedProcessor::ProcessUnkResidue(DiagnosticsPtr diags,
          e = atoms.end(); i !=e; ++i) {
       remaining_atoms.push_back(*i);
       if (!Conopology::Instance().IsValidElement(i->GetElement()))
-        i->SetElement(GuessAtomElement(i->GetName(), atoms.size()));
+        i->SetElement(GuessAtomElement(i->GetName(), i->IsHetAtom(), atoms.size()));
     }
   }
   // Don't do anything if treatment is set to SILENT
@@ -139,7 +139,7 @@ void RuleBasedProcessor::ProcessUnkAtoms(DiagnosticsPtr diags,
          e = unks.end(); i !=e; ++i) {
       remaining_atoms.push_back(*i);
       if (!Conopology::Instance().IsValidElement(i->GetElement()))
-        i->SetElement(GuessAtomElement(i->GetName(), res.GetAtomCount()));
+        i->SetElement(GuessAtomElement(i->GetName(), i->IsHetAtom(), res.GetAtomCount()));
     }
   }
 

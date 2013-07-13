@@ -37,7 +37,7 @@ void HeuristicProcessor::ProcessUnkResidue(DiagnosticsPtr diags,
        i = atoms.begin(), e = atoms.end(); i != e; ++i) {
     mol::AtomHandle a = *i;
     if (!Conopology::Instance().IsValidElement(a.GetElement()))
-      a.SetElement(GuessAtomElement(a.GetName(), atoms.size()));
+      a.SetElement(GuessAtomElement(a.GetName(), a.IsHetAtom(), atoms.size()));
   }
 
   res.SetChemClass(GuessChemClass(res));
