@@ -49,7 +49,6 @@ void do_shrink(const ImageStateImpl<T,D>& isi, T& dest, const Extent& inner_ext)
   T sum(0);
   Real count=0.0;
   for(ExtentIterator bit(inner_ext);!bit.AtEnd();++bit) {
-    LOG_VERBOSE("inner extent point:" << Point(bit)<<","<<isi.GetExtent().Contains(Point(bit)));
     sum+=isi.Value(bit);
     count+=1.0;
   }

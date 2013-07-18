@@ -108,9 +108,11 @@ void MapIODxHandler::Import(img::MapHandle& mh, std::istream& infile, const Imag
   }
 
   String line;
-  int u_size,v_size,w_size;
-  Real x_orig=0, y_orig=0, z_orig=0;
-  Real u_spacing=0, v_spacing=0, w_spacing=0;
+  int u_size=0,v_size=0,w_size=0;
+  Real x_orig=0.0, y_orig=0.0, z_orig=0.0;
+  Real u_spacing=1.0, v_spacing=1.0, w_spacing=1.0;
+  size_t delta_count=0;
+  Real deltas[][3]={{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
   int num_gridpoints;
   img::MapHandle mh2;
   std::vector<String> tokens;
@@ -120,6 +122,7 @@ void MapIODxHandler::Import(img::MapHandle& mh, std::istream& infile, const Imag
     }
     // read gridpoints line
     if (boost::iequals(line.substr(0,35), "object 1 class gridpositions counts")) {
+      LOG_DEBUG("DXImport: reading gridpoints line [" << line << "]");
       boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
       int tokens_size = (int)tokens.size();
       if(tokens_size < 3) {
@@ -137,6 +140,7 @@ void MapIODxHandler::Import(img::MapHandle& mh, std::istream& infile, const Imag
     }
     // read grid origin line
     else if (boost::iequals(line.substr(0,6), "origin")) {
+      LOG_DEBUG("DXImport: reading origin line [" << line << "]");
       boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
       int tokens_size = (int)tokens.size();
       if(tokens_size < 3) {
@@ -154,41 +158,23 @@ void MapIODxHandler::Import(img::MapHandle& mh, std::istream& infile, const Imag
     }
     // read grid spacing line
     else if (boost::iequals(line.substr(0,5), "delta")) {
-      boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
-      int tokens_size = (int)tokens.size();
-      if(tokens_size < 3) {
-        String msg="Bad spacing line: Can't read spacing of grid points";
+      LOG_DEBUG("DXImport: reading delta line [" << line << "]");
+      boost::split(tokens, line, boost::is_any_of("\t "), boost::token_compress_on);
+      if(tokens.size() < 4) {
+        String msg="DXImport: expected delta line with 3 floats";
         throw IOException(msg);
       }
       try {
-        Real tmp;
-        tmp = boost::lexical_cast<Real>(boost::trim_copy(tokens[tokens_size-3]));
-        if(tmp != 0) {
-          u_spacing=tmp;
-        } else if(tmp == 0) {
-          tmp = boost::lexical_cast<Real>(boost::trim_copy(tokens[tokens_size-2]));
-          if(tmp != 0) {
-            v_spacing=tmp;
-          } else if(tmp == 0) {
-            tmp = boost::lexical_cast<Real>(boost::trim_copy(tokens[tokens_size-1]));
-            if(tmp != 0) {
-              w_spacing=tmp;
-            } else {
-              String msg="Bad spacing line: Can't read spacing of grid points";
-              throw IOException(msg);
-            }
+        if(delta_count<3) {
+          for(size_t i=0;i<3;++i) {
+            deltas[delta_count][i] = boost::lexical_cast<Real>(tokens[i+1]);
           }
+          ++delta_count;
         }
       } catch(boost::bad_lexical_cast&) {
-        format fmer= format("Bad spacing line: Can't convert String of origin"
-                   " '%s' to Real constant.") % line;
+        format fmer= format("Bad spacing line: Can't convert String of delta"
+                   " '%s' to Real constants.") % line;
         throw IOException(fmer.str());
-      }
-      // create map handle
-      if(u_spacing != 0 && v_spacing != 0 && w_spacing != 0) {
-        mh2 = CreateMap(img::Size(u_size,v_size,w_size));
-        mh2.SetAbsoluteOrigin(geom::Vec3(x_orig, y_orig, z_orig));
-        mh2.SetSpatialSampling(geom::Vec3(u_spacing,v_spacing,w_spacing));
       }
     }
     // read number of data points
@@ -207,6 +193,25 @@ void MapIODxHandler::Import(img::MapHandle& mh, std::istream& infile, const Imag
         throw IOException(fmer.str());
       }
 
+      // at this point enough info should be available to create map
+      if(u_size>1e5 || v_size>1e5 || w_size>1e5) {
+        format fmer=format("DXImport: nonsense mapsize read (%d %d %d)") % u_size % v_size % w_size;
+        throw IOException(fmer.str());
+      }
+      LOG_DEBUG("DXImport: creating map of size " << img::Size(u_size,v_size,w_size));
+      LOG_DEBUG("          at absolute origin " << geom::Vec3(x_orig, y_orig, z_orig));
+      mh2 = CreateMap(img::Size(u_size,v_size,w_size));
+      mh2.SetAbsoluteOrigin(geom::Vec3(x_orig, y_orig, z_orig));
+      if(delta_count==3) {
+        u_spacing=deltas[0][0];
+        v_spacing=deltas[1][1];
+        w_spacing=deltas[2][2];
+        LOG_DEBUG("          and spatial sampling " << geom::Vec3(u_spacing,v_spacing,w_spacing));
+        mh2.SetSpatialSampling(geom::Vec3(u_spacing,v_spacing,w_spacing));
+      } 
+
+      // and read in the values
+      // TODO: this is glacially slow
       Real value=0;
       for(int i=0; i<num_gridpoints; i+=3) {
         std::getline(infile,line);
@@ -225,6 +230,7 @@ void MapIODxHandler::Import(img::MapHandle& mh, std::istream& infile, const Imag
   }
   mh.Swap(mh2);
 }
+
 
 void MapIODxHandler::Export(const img::MapHandle& mh2,
                                   const bf::path& loc,const ImageFormatBase& formatstruct) const
