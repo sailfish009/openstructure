@@ -190,28 +190,28 @@ Real Rotation3::GetPhi() const
     return GetRotationAngle()*
         (q_.GetAxis().GetZ()/std::fabs(q_.GetAxis().GetZ()));
   }else{
-    return reduce_angle(M_PI-atan2(q_.GetAxis().GetX()*q_.GetAxis().GetZ()+
-                                   q_.GetAxis().GetY()*q_.GetAngle(),
-                                   q_.GetAxis().GetY()*q_.GetAxis().GetZ()-
-                                   q_.GetAxis().GetX()*q_.GetAngle()));
+    return reduce_angle(M_PI-atan2(q_.x*q_.z+
+                                   q_.y*q_.w,
+                                   q_.y*q_.z-
+                                   q_.x*q_.w));
   }
 }
 Real Rotation3::GetTheta() const
 {
-  return reduce_angle(acos(-q_.GetAxis().GetX()*q_.GetAxis().GetX()-
-                           q_.GetAxis().GetY()*q_.GetAxis().GetY()+
-                           q_.GetAxis().GetZ()*q_.GetAxis().GetZ()+
-                           q_.GetAngle()*q_.GetAngle()));
+  return reduce_angle(acos(-q_.x*q_.x-
+                           q_.y*q_.y+
+                           q_.z*q_.z+
+                           q_.w*q_.w));
 }
 Real Rotation3::GetPsi() const
 {
   if(GetTheta()<EPSILON){
     return 0.0;
   }else{
-    return reduce_angle(atan2(q_.GetAxis().GetX()*q_.GetAxis().GetZ()-
-                              q_.GetAxis().GetY()*q_.GetAngle(),
-                              q_.GetAxis().GetY()*q_.GetAxis().GetZ()+
-                              q_.GetAxis().GetX()*q_.GetAngle()));
+    return reduce_angle(atan2(q_.x*q_.z-
+                              q_.y*q_.w,
+                              q_.y*q_.z+
+                              q_.x*q_.w));
   }
 
 }
