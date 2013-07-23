@@ -328,7 +328,7 @@ Vec3 Rotation3::find_invariant_vector(Mat3 rot)
   case 2:
     result.SetX(1.0);
     result.SetY(-minors[1]/det);
-    result.SetZ(-minors[0]/det);
+    result.SetZ(minors[0]/det);
     break;
   case 3:
     result.SetZ(1.0);
@@ -338,7 +338,7 @@ Vec3 Rotation3::find_invariant_vector(Mat3 rot)
   case 4:
     result.SetY(1.0);
     result.SetX(-minors[5]/det);
-    result.SetZ(-minors[4]/det);
+    result.SetZ(-minors[3]/det);
     break;
   case 5:
     result.SetX(1.0);
