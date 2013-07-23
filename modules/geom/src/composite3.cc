@@ -302,7 +302,7 @@ Vec3 Rotation3::find_invariant_vector(Mat3 rot)
   Real minors[9];
   for(int i=2;i>=0;--i){
     for(int j=2;j>=0;--j){
-      minors[3*i+j]=Minor(rot,i,j);
+      minors[3*(2-i)+(2-j)]=Minor(rot,i,j);
     }
   }
   Real* where = ::std::max_element(minors, minors+9);
