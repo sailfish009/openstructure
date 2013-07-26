@@ -45,7 +45,7 @@ bool copy_atoms(ResidueView src_res, ResidueHandle dst_res, XCSEditor& edi,
 
     AtomHandle new_atom = edi.InsertAtom(dst_res, i->GetName(), 
                                          geom::Vec3(transform*i->GetPos()),
-                                         i->GetName(), i->GetOccupancy(), 
+                                         i->GetElement(), i->GetOccupancy(), 
                                          i->GetBFactor(), i->IsHetAtom());
     geom::Vec3 pos = new_atom.GetPos();
     for (int j = 0; j<3; ++j) {
