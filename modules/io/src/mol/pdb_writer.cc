@@ -78,6 +78,18 @@ bool atom_pos_ok(geom::Vec3 p) {
   }
   return true;
 }
+
+// write the serial field for ATOM and TER records, use '*****' for 
+// indexes > 99999 (borrowed from charmm)
+void write_serial(int serial, FormattedLine& line) {
+  // Avoid writing out atomnumbers larger than 5 digits
+  if (serial > 99999) {
+    line( 6, 5)=fmt::LPadded("*****");
+  } else {
+    line( 6, 5)=fmt::LPaddedInt(serial);
+  }
+}
+
 void write_atom(std::ostream& ostr, FormattedLine& line, 
                 const mol::AtomHandle& atom, int atomnum, 
                 bool is_pqr, bool charmm_style)
@@ -89,12 +101,7 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
   
   geom::Vec3 p=atom.GetPos();
   line( 0, 6)=record_name;
-  // Avoid writing out atomnumbers larger than 5 digits
-  if (atomnum > 99999) {
-    line( 6, 5)=fmt::LPadded("*****");
-  } else {
-    line( 6, 5)=fmt::LPaddedInt(atomnum);
-  }
+  write_serial(atomnum, line);
   String atom_name=atom.GetName();
   if (atom_name.size()>4) {
     throw IOException("Atom name '"+atom.GetQualifiedName()+
@@ -282,7 +289,7 @@ public:
   {
     counter_++;
     line_(0, 6)=StringRef("TER   ", 6);
-    line_( 6, 5)=fmt::LPaddedInt(counter_);
+    write_serial(counter_, line_);
     line_(17, 3)=fmt::LPadded(res.GetKey());
     if (!res.GetChain().GetName().empty() && !charmm_style_) {
       line_[21]=res.GetChain().GetName()[0];
