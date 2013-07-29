@@ -32,7 +32,7 @@ class IOProfiles:
 
   def __setitem__(self, key, value):
     if isinstance(value, str):
-      value=self[value]
+      value=self[value].Copy()
     IOProfileRegistry.Instance().Set(key, value)
     self._dict[key]=value
 

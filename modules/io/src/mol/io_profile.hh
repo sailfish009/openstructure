@@ -49,7 +49,6 @@ public:
   bool                no_hetatms;
   bool                calpha_only;
   conop::ProcessorPtr processor;
-
   IOProfile Copy()
   {
     return IOProfile(dialect, quack_mode, fault_tolerant, join_spread_atom_records, 
@@ -86,6 +85,9 @@ public:
   }
   
   IOProfile& GetDefault() { return profiles_["DEFAULT"]; }
+  void RemoveProfiles() {
+    profiles_.clear();
+  }
 private:
   IOProfileRegistry();
   std::map<String, IOProfile> profiles_;

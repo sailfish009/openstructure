@@ -11,6 +11,14 @@ class TestPDB(unittest.TestCase):
     ch = e.FindChain("A");
     self.assertEquals(ch.GetIntProp("mol_id"), 1)
 
+  def test_properly_assigns_profile_properties(self):
+    io.profiles['TEST'] = io.IOProfile()
+    io.profiles['TEST'].quack_mode = False
+    self.assertFalse(io.profiles['TEST'].quack_mode)
+    self.assertFalse(io.profiles['TEST'].Copy().quack_mode)
+    io.profiles['TEST'].quack_mode = True
+    self.assertTrue(io.profiles['TEST'].quack_mode)
+    self.assertTrue(io.profiles['TEST'].Copy().quack_mode)
   def test_no_bond_feasibility(self):
     io.profiles['FEAS_CHECK']=io.IOProfile(processor=conop.HeuristicProcessor(check_bond_feasibility=True))
     io.profiles['NO_FEAS_CHECK']=io.IOProfile(processor=conop.HeuristicProcessor(check_bond_feasibility=False))
