@@ -29,10 +29,10 @@ if(ENABLE_INFO)
   set(SUBST_DICT ${SUBST_DICT},${SQ}info${SQ})
 endif(ENABLE_INFO)
 
-
-script(NAME __init__.py
-       INPUT __init__.py.in
-       SUBSTITUTE "${SUBST_DICT}"
-       TARGET ost_base_pymod
-       OUTPUT_DIR "${LIB_DIR}/python${PYTHON_VERSION}/site-packages/ost")
-
+if(NOT ENABLE_STATIC)
+  script(NAME __init__.py
+         INPUT __init__.py.in
+         SUBSTITUTE "${SUBST_DICT}"
+         TARGET ost_base_pymod
+         OUTPUT_DIR "${LIB_DIR}/python${PYTHON_VERSION}/site-packages/ost")
+endif()
