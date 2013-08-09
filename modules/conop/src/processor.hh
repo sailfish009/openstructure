@@ -70,7 +70,7 @@ public:
     assign_torsions_(at), connect_(cn), connect_aa_(aa),
     zero_occ_treatment_(zo) {}
   Processor(): check_bond_feasibility_(false),
-    assign_torsions_(false), connect_(true), connect_aa_(true),
+    assign_torsions_(true), connect_(true), connect_aa_(true),
     zero_occ_treatment_(CONOP_SILENT) {}
   void SetConnect(bool connect) {
     connect_ = connect;
