@@ -106,13 +106,20 @@ void PDBize::Add(EntityView asu, const geom::Mat4List& transforms,
       }
       if (chain.GetType() == CHAINTYPE_WATER) {
         if (!water_chain_) {
+          last_water_rnum_ = ResNum(0, 'Z');
           water_chain_ = edi.InsertChain(WATER_CHAIN_NAME);
           edi.SetChainDescription(water_chain_, chain.GetDescription());
           edi.SetChainType(water_chain_, chain.GetType());
         }
         for (ResidueViewList::const_iterator k = chain.GetResidueList().begin(),
              e3 = chain.GetResidueList().end(); k != e3; ++k) {
-          ResidueHandle new_res = edi.AppendResidue(water_chain_, k->GetName());
+          if (last_water_rnum_.GetInsCode() == 'Z') {
+            last_water_rnum_ = ResNum(last_water_rnum_.GetNum()+1, 'A');
+          } else {
+            last_water_rnum_.SetInsCode(last_water_rnum_.GetInsCode()+1);
+          }
+          ResidueHandle new_res = edi.AppendResidue(water_chain_, k->GetName(), 
+                                                    last_water_rnum_);
           transfer_residue_properties(*k, new_res);
           new_res.SetStringProp("type", StringFromChainType(chain.GetType()));
           new_res.SetStringProp("description", chain.GetDescription());
