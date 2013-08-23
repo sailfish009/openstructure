@@ -85,12 +85,18 @@ public:
   }
   
   IOProfile& GetDefault() { return profiles_["DEFAULT"]; }
-  void RemoveProfiles() {
-    profiles_.clear();
+  static void RemoveProfiles() {
+    if (IOProfileRegistry::alive) {
+      IOProfileRegistry::Instance().profiles_.clear();
+    }
+  }
+  ~IOProfileRegistry() {
+    alive = false;
   }
 private:
   IOProfileRegistry();
   std::map<String, IOProfile> profiles_;
+  static bool alive;
 };
 
 }}

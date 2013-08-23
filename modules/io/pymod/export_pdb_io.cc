@@ -34,7 +34,7 @@ void (PDBWriter::*write_a)(const mol::EntityHandle&)=&PDBWriter::Write;
 void (PDBWriter::*write_b)(const mol::EntityView&)=&PDBWriter::Write;
 
 void remove_profiles() {
-  IOProfileRegistry::Instance().RemoveProfiles();
+  IOProfileRegistry::RemoveProfiles();
 }
 
 void export_pdb_io()
