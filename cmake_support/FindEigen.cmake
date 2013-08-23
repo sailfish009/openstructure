@@ -2,26 +2,13 @@
 # Once done this will define
 #
 #  EIGEN2_FOUND - system has eigen lib
-#  EIGEN2_INCLUDE_DIR - the eigen include directory
+#  EIGEN2_INCLUDE_DIRS - the eigen include directories
 
-# Copyright (c) 2006, 2007 Montel Laurent, <montel@kde.org>
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
-#adapted for OpenStructure by Juergen Haas <juergen.haas@unibas.ch>
+find_path(EIGEN2_INCLUDE_DIR NAMES Eigen/Core
+          PATH_SUFFIXES eigen2
+)
 
-if (EIGEN2_INCLUDE_DIR)
-
-  # in cache already
-  set(EIGEN2_FOUND TRUE)
-
-else (EIGEN2_INCLUDE_DIR)
-
-  find_path(EIGEN2_INCLUDE_DIR NAMES Eigen/Core
-     PATH_SUFFIXES eigen2
-     HINTS
-     ${INCLUDE_INSTALL_DIR}
-   )
-endif(EIGEN2_INCLUDE_DIR)
+set(EIGEN2_INCLUDE_DIRS ${EIGEN2_INCLUDE_DIR}) 
 
 include (FindPackageHandleStandardArgs)
 find_package_handle_standard_args (EIGEN DEFAULT_MSG EIGEN2_INCLUDE_DIR)

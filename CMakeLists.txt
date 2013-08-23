@@ -285,10 +285,10 @@ endif()
 
 # basic environment
 include_directories(${Boost_INCLUDE_DIRS} 
-                    ${FFTW_INCLUDE_PATH} 
-                    ${EIGEN2_INCLUDE_DIR}
-                    ${TIFF_INCLUDE_DIR}
-                    ${PNG_INCLUDE_DIR}
+                    ${FFTW_INCLUDE_DIRS} 
+                    ${EIGEN2_INCLUDE_DIRS}
+                    ${TIFF_INCLUDE_DIRS}
+                    ${PNG_INCLUDE_DIRS}
                     )
 if(USE_NUMPY)
 include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
