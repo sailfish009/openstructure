@@ -51,7 +51,6 @@ bool RenderOptions::RemoveObserver(EntityP entity)
 
 void RenderOptions::NotifyStateChange()
 {
-  InputEvent event = InputEvent(INPUT_DEVICE_MOUSE,INPUT_COMMAND_REBUILD,0);
   EntityPObservers::const_iterator observers_it = this->observers_.begin() ;
   while( observers_it != this->observers_.end() )
   {

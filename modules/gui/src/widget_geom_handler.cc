@@ -34,7 +34,6 @@ void WidgetGeomHandler::LoadGeom(const QString& prefix)
   settings.beginGroup(prefix+this->objectName());
   if (settings.contains("pos") && settings.contains("size")) {
     QPoint pos = settings.value("pos").toPoint();
-    QSize size = settings.value("size").toSize();
     Qt::WindowStates state = Qt::WindowStates(settings.value("state").toInt());
     widget_->move(pos);
     widget_->setWindowState(state);

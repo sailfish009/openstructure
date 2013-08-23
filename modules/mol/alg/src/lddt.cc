@@ -506,7 +506,6 @@ int main (int argc, char **argv)
         ResNum rnum = ritv.GetNumber();
         bool assessed = false;
         String assessed_string="No";
-        bool quality_problems = false;
         String quality_problems_string="No";
         Real lddt_local = -1;
         String lddt_local_string="-";
@@ -519,12 +518,10 @@ int main (int argc, char **argv)
         }
         if (ritv.HasProp("stereo_chemical_violation_sidechain") || 
             ritv.HasProp("steric_clash_sidechain")) {
-          quality_problems = true;
           quality_problems_string="Yes";
         }
         if (ritv.HasProp("stereo_chemical_violation_backbone") || 
             ritv.HasProp("steric_clash_backbone")) {
-          quality_problems = true;
           quality_problems_string="Yes+";
         }
 

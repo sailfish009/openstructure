@@ -311,8 +311,6 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
   sublist.at(0).direction=geom::Normalize(p1-p0);
   unsigned int i=1;
   for(;i<sublist.size()-1;++i) {
-    geom::Vec3 p10 = p0-p1;
-    geom::Vec3 p12 = p2-p1;
     geom::Vec3 dir=geom::Normalize(p2-p0);
     sublist.at(i).direction=dir;
     geom::Vec3 orth=geom::Normalize(geom::Cross(dir,sublist[i].normal));
