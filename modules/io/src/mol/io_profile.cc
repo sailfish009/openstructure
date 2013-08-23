@@ -2,6 +2,7 @@
 
 namespace ost { namespace io {
 
+bool IOProfileRegistry::alive = false;
 IOProfileRegistry& IOProfileRegistry::Instance()
 {
   static IOProfileRegistry reg;
@@ -11,6 +12,7 @@ IOProfileRegistry& IOProfileRegistry::Instance()
 IOProfileRegistry::IOProfileRegistry():
   profiles_()
 {
+  IOProfileRegistry::alive = true;
   profiles_["DEFAULT"]=IOProfile();
 }
 
