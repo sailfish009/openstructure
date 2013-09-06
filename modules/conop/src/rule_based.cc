@@ -47,7 +47,7 @@ void RuleBasedProcessor::DoProcess(DiagnosticsPtr diags,
       mol::ResidueHandle residue = *j;
       mol::AtomHandleList atoms_to_connect;
       CompoundPtr compound = lib_->FindCompound(residue.GetName(), Compound::PDB);
-      if (!compound) {
+      if (!compound && this->GetConnect()) {
         // process unknown residue...
         this->ProcessUnkResidue(diags, residue, atoms_to_connect);
         for (mol::AtomHandleList::iterator k = atoms_to_connect.begin(),
@@ -78,6 +78,16 @@ void RuleBasedProcessor::DoProcess(DiagnosticsPtr diags,
         for (mol::AtomHandleList::iterator k = atoms_to_connect.begin(),
              e3=atoms_to_connect.end(); k!= e3; ++k) {
           this->DistanceBasedConnect(*k);
+        }
+        if (!this->GetStrictHydrogens()) {
+          mol::AtomHandleList atoms = residue.GetAtomList();
+          for (mol::AtomHandleList::iterator k = atoms.begin(),
+               e3 = atoms.end(); k != e3; ++k) {
+            const String& ele = k->GetElement();
+            if ((ele == "D" || ele == "H") && k->GetBondCount() == 0) {
+              this->DistanceBasedConnect(*k);
+            }
+          }
         }
       }
       prev = residue;
