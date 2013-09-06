@@ -290,7 +290,12 @@ public:
     counter_++;
     line_(0, 6)=StringRef("TER   ", 6);
     write_serial(counter_, line_);
-    line_(17, 3)=fmt::LPadded(res.GetKey());
+    if(charmm_style_){
+      line_(17, 4)=fmt::RPadded(res.GetKey());
+    }
+    else{
+      line_(17, 3)=fmt::LPadded(res.GetKey()); 
+    }
     if (!res.GetChain().GetName().empty() && !charmm_style_) {
       line_[21]=res.GetChain().GetName()[0];
     }
