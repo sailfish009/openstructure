@@ -320,7 +320,7 @@ add_subdirectory(tools)
 # magic is done
 add_subdirectory(deployment)
 
-set(FILES_TO_BE_REMOVED ${CMAKE_SOURCE_DIR}/stage tests)
+set(FILES_TO_BE_REMOVED ${PROJECT_BINARY_DIR}/stage tests)
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
                              "${FILES_TO_BE_REMOVED}")
 
