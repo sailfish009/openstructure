@@ -332,7 +332,8 @@ def CalculateSurfaceVolume(entity, density=1.0, radius=1.5,  all_surf=False,
 def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
                      no_hydrogens=False, no_hetatoms=False, no_waters=False,
                      selection='',
-                     msms_exe=None, msms_env=None, keep_files=False):
+                     msms_exe=None, msms_env=None, keep_files=False,
+                     attach_asa=None, attach_esa=None):
   
   """
   Calculates molecular surface by using the external MSMS program
@@ -353,6 +354,8 @@ def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
   :param msms_exe:      msms executable (full path to executable)
   :param msms_env:      msms environment variable
   :param keep_files:    Do not delete temporary files
+  :param attach_asa:    Attaches per atom SASA to specified FloatProp at atom level
+  :param attach_esa:    Attaches per atom SESA to specified FloatProp at atom level
   :returns:             list of :class:`~ost.mol.SurfaceHandle` objects
   """
   import os
@@ -385,9 +388,16 @@ def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
           msms_data_file, msms_data_file, density, radius)
   if all_surf:
     command+=" -all"
+  if attach_asa != None or attach_esa != None:
+    command+=" -af %s" % os.path.join(msms_data_dir, "asa_atom")
 
   # run msms
   stdout_value=_RunMSMS(command)
+
+  # add sesa and asa to entity if attach_asa is specified
+  if attach_asa != None or attach_esa != None:
+      _ParseAreaFile(entity, selection, os.path.join(msms_data_dir, "asa_atom.area"),
+                     attach_asa, attach_esa)
 
   # parse msms output
   num_surf=0
