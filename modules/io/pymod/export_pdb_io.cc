@@ -22,6 +22,8 @@ using namespace boost::python;
 #include <ost/io/mol/io_profile.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/mol/pdb_writer.hh>
+#include <ost/io/mol/pdb_str.hh>
+
 using namespace ost;
 using namespace ost::io;
 
@@ -32,6 +34,9 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(load_PDB_ov, LoadPDB, 1, 2)
 
 void (PDBWriter::*write_a)(const mol::EntityHandle&)=&PDBWriter::Write;
 void (PDBWriter::*write_b)(const mol::EntityView&)=&PDBWriter::Write;
+
+String (*pdb_str_a)(const mol::EntityHandle&, const IOProfile&)=&EntityToPDBString;
+String (*pdb_str_b)(const mol::EntityView&, const IOProfile&)=&EntityToPDBString;
 
 void remove_profiles() {
   IOProfileRegistry::RemoveProfiles();
@@ -88,6 +93,12 @@ void export_pdb_io()
                   &PDBWriter::SetWriteMultiModel)
     .def("Write", write_b)    
   ;
+  def("EntityToPDBStr", pdb_str_a,
+      (arg("entity"), arg("profile")=IOProfile()));
+  def("EntityToPDBStr", pdb_str_b,
+      (arg("entity"), arg("profile")=IOProfile()));
+
+  def("PDBStrToEntity", &PDBStringToEntity, (arg("pdb_string"),arg("profile")=IOProfile()));
 
   // we need to make sure there are no pending references to Python objects
   // tied to the IOProfileRegistry singleton. The destructor of 

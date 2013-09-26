@@ -19,6 +19,7 @@ dcd_io.cc
 star_parser.cc
 mmcif_reader.cc
 mmcif_info.cc
+pdb_str.cc
 PARENT_SCOPE
 )
 
@@ -45,5 +46,6 @@ load_entity.hh
 surface_io_handler.hh
 load_surface.hh
 surface_io_msms_handler.hh
+pdb_str.hh
 PARENT_SCOPE
 )
