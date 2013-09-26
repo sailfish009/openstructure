@@ -92,6 +92,13 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False,
     LogError("WARNING: Specify either two SequenceHandles or one SequenceList")
     return
 
+  sequence_names = set()
+  for s in seq_list:
+    sequence_names.add(s.GetName())
+  if len(sequence_names) < len(seq_list):
+    raise ValueError("ClustalW can only process sequences with unique identifiers!")
+
+
   new_list = seq.CreateSequenceList()
   for s in seq_list:
     ss = s.Copy()
@@ -101,6 +108,7 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False,
     new_list.AddSequence(ss)
 
   seq_list = new_list
+
   
   temp_dir=utils.TempDirWithFiles((seq_list,))
   out=os.path.join(temp_dir.dirname, 'out.fasta')
