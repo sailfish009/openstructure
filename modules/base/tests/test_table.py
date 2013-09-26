@@ -488,9 +488,10 @@ class TestTable(unittest.TestCase):
     tab.AddRow(['x',3, 1.0], overwrite=None)
     tab.AddRow(['foo',6, 2.2], overwrite=None)
     tab.AddRow(['bar',9, 3.3], overwrite=None)
-    self.CompareColCount(tab, 3)
+    tab.AddCol('fourth','bool',itertools.cycle([True,False]))
+    self.CompareColCount(tab, 4)
     self.CompareRowCount(tab, 3)
-    self.CompareDataFromDict(tab, {'second': [3,6,9], 'first': ['x','foo','bar'], 'third': [1,2.2,3.3]})
+    self.CompareDataFromDict(tab, {'second': [3,6,9], 'first': ['x','foo','bar'], 'third': [1,2.2,3.3], 'fourth': [True,False,True]})
 
   def testTableAddMultiColMultiRowFromDict(self):
     '''
