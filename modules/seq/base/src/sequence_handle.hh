@@ -123,7 +123,7 @@ public:
   bool HasAttachedView() const;
   
   const String& GetRole() const;
-  
+
   bool operator==(const ConstSequenceHandle& rhs) const;
   bool operator!=(const ConstSequenceHandle& rhs) const;  
   
@@ -231,7 +231,11 @@ public:
   /// \brief get attached view. may be an invalid entity view
   /// \sa SequenceHandle::AttachView(const mol::EntityView&, const String&)
   mol::EntityView GetAttachedView() const;
-  
+
+  /// \brief remove '.', '-' as gaps and make sequence all-uppercase
+  /// Changes happen in place.
+  void Normalise();
+
   /// \brief create copy sequence
   /// The newly created sequence has the same attached view.
   SequenceHandle Copy() const;

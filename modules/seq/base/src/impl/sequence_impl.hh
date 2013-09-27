@@ -81,6 +81,9 @@ public:
   /// \brief Set sequence String
   void SetString(const String& seq);
 
+  /// \brief Remove everything 'unusual' from sequence
+  void Normalise();
+
   /// \brief replace substring starting from start to end
   void Replace(const String& str,int start, int end);
 

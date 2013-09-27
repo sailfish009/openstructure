@@ -30,7 +30,7 @@ Sequence Offset
 
 When using sequences and structures together, often the start of the structure 
 and the beginning of the sequence do not fall together. In the following case, 
-the alignment of sequences B and C only covers a subpart of structure A::
+the alignment of sequences B and C only covers a subsequence of structure A::
 
   A acefghiklmnpqrstuvwy
   B     ghiklm
@@ -167,6 +167,10 @@ The SequenceHandle
     Returns a string version of this sequence with all hyphens removed. Also
     available as the property :attr:`gapless_string`.
      
+  .. method:: Normalise()
+     
+    Remove '-' and '.' as gaps from the sequence and make it all upper case.
+    Works in place.
    
   .. method:: SetName()
   
@@ -205,7 +209,7 @@ The SequenceHandle
 
   Check whether the two sequences s1 and s2 match. This function performs are
   case-insensitive comparison of the two sequences. The character  'X' is
-  interpreted as a wildcard character that always matches the other sequence.
+  interpreted as a wild card character that always matches the other sequence.
 
 The SequenceList    
 --------------------------------------------------------------------------------
@@ -220,7 +224,7 @@ The AlignmentHandle
 --------------------------------------------------------------------------------
 
 The :class:`AlignmentHandle` represents a list of aligned sequences. In
-constrast to :class:`SequenceList`, an alignment requires all sequences to be of 
+contrast to :class:`SequenceList`, an alignment requires all sequences to be of 
 the same length. New instances of alignments are created with 
 :func:`CreateAlignment` and :func:`AlignmentFromSequenceList`.
 
@@ -431,4 +435,3 @@ an alignment:
   .. method:: RemoveSequence(index)
 
     Remove sequence at *index* from the alignment.
-
