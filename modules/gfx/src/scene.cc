@@ -1043,6 +1043,7 @@ void Scene::Remove(const GfxNodeP& go)
   if(!go) return;
   root_node_->Remove(go);
   this->NotifyObservers(bind(&SceneObserver::NodeRemoved, _1,go));
+  std::cerr << "Scene::Remove(node):" << go.use_count() << std::endl;
 }
 
 void Scene::RemoveAll()
@@ -1058,7 +1059,7 @@ void Scene::Remove(const String& name)
   if(fn.node) {
     root_node_->Remove(name);
     if(GfxObjP go = dyn_cast<GfxObj>(fn.node)) {
-      this->NotifyObservers(bind(&SceneObserver::NodeRemoved, _1,go));
+      this->NotifyObservers(bind(&SceneObserver::NodeRemoved, _1, go));
     }
   }
 }

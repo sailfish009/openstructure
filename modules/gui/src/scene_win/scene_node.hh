@@ -39,13 +39,13 @@ class DLLEXPORT_OST_GUI SceneNode : public QObject {
 public:
   SceneNode(SceneNode* node_parent);
   SceneNode(QObject* parent=0);
+  virtual ~SceneNode();
 
-  SceneNode* GetParent() const;
-  virtual void AddChild(SceneNode* node);
-  virtual void RemoveChild(SceneNode* node);
-  virtual bool IsParent(SceneNode* node) const;
+  SceneNode* GetParent() const { return dynamic_cast<SceneNode*>(this->parent()); }
+  void AddChild(SceneNode* node) {
+    node->setParent(this);
+  }
   virtual SceneNode* GetChild(int row) const;
-  virtual int GetChildCount() const;
   virtual int GetChildRow(const SceneNode* node) const;
   virtual int GetRow() const;
   virtual QVariant GetData(int column, int role);
@@ -54,7 +54,6 @@ public:
   virtual int GetColumnCount() const;
 private:
   SceneNode* parent_;
-  SceneNodeList nodes_;
 };
 
 }}

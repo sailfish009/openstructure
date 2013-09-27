@@ -29,27 +29,15 @@ SceneNode::SceneNode(QObject* parent):QObject(parent){
   parent_ = NULL;
 }
 
-SceneNode* SceneNode::GetParent() const{
-  return parent_;
-}
-
-void SceneNode::AddChild(SceneNode* node){
-  nodes_.append(node);
-}
-
-void SceneNode::RemoveChild(SceneNode* node){
-  nodes_.removeAll(node);
-}
-
 int SceneNode::GetChildRow(const SceneNode* node) const{
-  for(int i = 0; i < nodes_.size(); i++){
-    if(nodes_[i] == node)return i;
+  for(int i = 0; i < this->children().size(); i++){
+    if (this->children()[i] == node)
+      return i;
   }
   return -1;
 }
 
-int SceneNode::GetChildCount() const{
-  return nodes_.size();
+SceneNode::~SceneNode() {
 }
 
 int SceneNode::GetRow() const{
@@ -59,26 +47,13 @@ int SceneNode::GetRow() const{
   return 0;
 }
 
-bool SceneNode::IsParent(SceneNode* node) const{
-  if(node == this)return true;
-  for(int i = 0; i< nodes_.size(); i++){
-    if(nodes_[i]==node){
-      return true;
-    }
-    if(nodes_[i]->IsParent(node))
-      return true;
-  }
-  return false;
+SceneNode* SceneNode::GetChild(int row) const
+{
+  return dynamic_cast<SceneNode*>(this->children()[row]);
 }
 
-SceneNode* SceneNode::GetChild(int row) const{
-  if(row>=0 && row<nodes_.size()){
-    return nodes_[row];
-  }
-  return NULL;
-}
-
-QVariant SceneNode::GetData(int column, int role){
+QVariant SceneNode::GetData(int column, int role)
+{
   return QVariant();
 }
 

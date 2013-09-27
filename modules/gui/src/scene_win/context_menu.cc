@@ -199,16 +199,15 @@ void ContextMenu::ShowMenu(const QPoint& pos)
       flags &= ~SINGLE;
     }
     QMenu* menu = new QMenu();
-    QMapIterator<QAction*, ContextActionTypes> i(actions_);
+    QVectorIterator<std::pair<QAction*, ContextActionTypes> > i(actions_);
     flags ^= NOT_VISIBLE;
     flags ^= NOT_HIDDEN;
     while (i.hasNext()) {
-        i.next();
-        if (i.value() == (i.value() & flags)){
-          menu->addAction(i.key());
-        }
+      const std::pair<QAction*, ContextActionTypes>& value = i.next();
+      if (value.second == (value.second & flags)){
+        menu->addAction(value.first);
+      }
     }
-
     if(! menu->actions().empty()){
       menu->popup(pos);
     }
@@ -216,7 +215,7 @@ void ContextMenu::ShowMenu(const QPoint& pos)
 }
 
 void ContextMenu::AddAction(QAction* action,ContextActionTypes type){
-  actions_[action] = type;
+  actions_.push_back(std::make_pair(action, type));
 }
 
 void ContextMenu::AddView(){

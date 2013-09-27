@@ -33,7 +33,8 @@ GfxNode::GfxNode(const String& name):
 {}
 
 GfxNode::~GfxNode()
-{}
+{
+}
 
 GfxNode::GfxNode(const GfxNode& o) {}
 

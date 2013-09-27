@@ -89,6 +89,7 @@ public:
   Entity(const String& name,
          RenderMode::Type m,
          const mol::EntityView& ev);
+  virtual ~Entity();
 
   virtual geom::AlignedCuboid GetBoundingBox(bool use_tf=false) const;
 

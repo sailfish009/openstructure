@@ -30,32 +30,31 @@ RenderOptions::RenderOptions(){}
 
 bool RenderOptions::AddObserver(EntityP entity)
 {
-  if((std::find( this->observers_.begin(), this->observers_.end(), entity )) == this->observers_.end())
-  {
-    this->observers_.push_back( entity );
-    return true;
+  for (EntityWObservers::const_iterator
+       i = observers_.begin(), e = observers_.end(); i != e; ++i) {
+    if (i->lock() == entity)
+      return false;
   }
-  return false;
+  observers_.push_back(entity);
+  return true;
 }
 
 bool RenderOptions::RemoveObserver(EntityP entity)
 {
-  EntityPObservers::iterator found = std::find( this->observers_.begin(), this->observers_.end(), entity);
-  if( found != this->observers_.end() ){
-
-    this->observers_.erase(found);
-    return true;
+  for (EntityWObservers::iterator
+       i = observers_.begin(), e = observers_.end(); i != e; ++i) {
+    if (i->lock() == entity)
+      observers_.erase(i);
+      return true;
   }
   return false;
 }
 
 void RenderOptions::NotifyStateChange()
 {
-  EntityPObservers::const_iterator observers_it = this->observers_.begin() ;
-  while( observers_it != this->observers_.end() )
-  {
-    ( *observers_it )->OptionsChanged(this->GetRenderMode()) ;
-    observers_it++;
+  for (EntityWObservers::iterator
+       i = observers_.begin(), e = observers_.end(); i != e; ++i) {
+    i->lock()->OptionsChanged(this->GetRenderMode());
   }
 }
 

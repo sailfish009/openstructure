@@ -72,7 +72,9 @@ EntityNode::EntityNode(gfx::EntityP& entity, SceneNode* parent):
   custom_view_ = new LabelNode("Custom Views", this);
   model->AddNode(this, custom_view_);
 
-  node = new EntityPartNode("Full View", entity, mol::QueryViewWrapper(entity->GetView()), this);
+  node = new EntityPartNode("Full View", entity,
+                            mol::QueryViewWrapper(entity->GetView()),
+                            this);
   model->AddNode(this, node);
 
   node = new CurrentSelectionNode(entity, this);

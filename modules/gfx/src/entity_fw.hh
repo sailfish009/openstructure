@@ -20,11 +20,13 @@
 #define OST_GFX_ENTITY_FW_HH
 
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 namespace ost { namespace gfx {
 
 class Entity;
 typedef boost::shared_ptr<Entity> EntityP;
+typedef boost::weak_ptr<Entity> EntityW;
 
 }}
 

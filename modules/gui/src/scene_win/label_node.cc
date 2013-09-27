@@ -52,7 +52,7 @@ bool LabelNode::SetData(int column, const QVariant& value, int role){
     if (value.toBool()) {
       this->GetParent()->SetData(0,value,Qt::CheckStateRole);
     } else {
-      for(int i = 0; i<this->GetChildCount(); i++){
+      for(int i = 0; i<this->children().size(); i++){
         this->GetChild(i)->SetData(0,value,Qt::CheckStateRole);
       }
     }

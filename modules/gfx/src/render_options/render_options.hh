@@ -51,8 +51,8 @@ public:
   void NotifyStateChange();
 
 private:
-  typedef std::vector< EntityP > EntityPObservers;
-  EntityPObservers observers_;
+  typedef std::vector< EntityW > EntityWObservers;
+  EntityWObservers observers_;
 
 };
 

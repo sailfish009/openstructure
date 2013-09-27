@@ -103,6 +103,7 @@ void SceneSelection::CenterOnObjects() {
         geom::AlignedCuboid pair = obj->GetBoundingBox();
         min = geom::Min(min, pair.GetMin());
         max = geom::Max(max, pair.GetMax());
+        std::cerr << obj->GetName() << " " << min << " " << max << std::endl;
         changed=true;
       }
     }

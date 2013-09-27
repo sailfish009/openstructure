@@ -116,12 +116,9 @@ QModelIndex SceneWinModel::index(int row, int col,
 {
   SceneNode* parent_node = GetItem(parent);
 
-  SceneNode* child_node = parent_node->GetChild(row);
-  if (child_node) {
-    return createIndex(row, col, child_node);
-  } else {
-    return QModelIndex();    
-  }
+  if (parent_node->children().size() <= row)
+    return QModelIndex();
+  return createIndex(row, col, parent_node->GetChild(row));
 }
 
 QModelIndex SceneWinModel::parent(const QModelIndex& index) const
@@ -141,7 +138,7 @@ int SceneWinModel::rowCount(const QModelIndex& parent) const
 {
   SceneNode* parent_node = GetItem(parent);
 
-  return parent_node->GetChildCount();
+  return parent_node->children().size();
 }
 
 int SceneWinModel::columnCount(const QModelIndex& parent) const
@@ -270,8 +267,8 @@ void SceneWinModel::SelectionChanged(const gfx::GfxObjP& obj,
 
 void SceneWinModel::RenderModeChanged(const gfx::GfxNodeP& node)
 {
-  if(render_observers_.contains(node)){
-    render_observers_[node]->RenderModeChanged();
+  if(render_observers_.contains(node.get())){
+    render_observers_[node.get()]->RenderModeChanged();
   }
 }
 
@@ -288,7 +285,7 @@ bool SceneWinModel::AddNode(SceneNode* parent, SceneNode* child)
 {
   QModelIndex parent_index=this->GetIndexOf(parent);
   if(parent_index.isValid()){
-    int row = parent->GetChildCount();
+    int row = parent->children().size();
     this->beginInsertRows(parent_index,row,row);
     parent->AddChild(child);
     this->endInsertRows();
@@ -305,8 +302,9 @@ bool SceneWinModel::RemoveNode(SceneNode* node)
     QModelIndex parent_index =this->GetIndexOf(parent);
     int row = node->GetRow();
     this->beginRemoveRows(parent_index,row,row);
-    parent->RemoveChild(node);
     this->endRemoveRows();
+    node->setParent(NULL);
+    delete node;
     return true;
   }
   return false;
@@ -315,13 +313,13 @@ bool SceneWinModel::RemoveNode(SceneNode* node)
 
 void SceneWinModel::AttachRenderModeObserver(RenderModesNode* node)
 {
-  render_observers_.insert(node->GetGfxNode(),node);
+  render_observers_.insert(node->GetGfxNode().get(),node);
 }
 
 void SceneWinModel::DetachRenderModeObserver(RenderModesNode* node)
 {
-  if(render_observers_.contains(node->GetGfxNode())){
-    render_observers_.remove(node->GetGfxNode());
+  if(render_observers_.contains(node->GetGfxNode().get())){
+    render_observers_.remove(node->GetGfxNode().get());
   }
 }
 
@@ -351,7 +349,7 @@ QModelIndex SceneWinModel::GetIndex(SceneNode* node, QModelIndex parent,
   if(parent.isValid()){
     SceneNode* parent_node =reinterpret_cast<SceneNode*>(parent.internalPointer());
     if (parent_node == node) return parent;
-    for (int i=parent_node->GetChildCount()-1; i>=0; --i) {
+    for (int i=parent_node->children().size()-1; i>=0; --i) {
       SceneNode* child = parent_node->GetChild(i);
       if(child == node){
         if(column<child->GetColumnCount())

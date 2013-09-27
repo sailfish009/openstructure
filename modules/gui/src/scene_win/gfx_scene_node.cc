@@ -25,12 +25,15 @@
 #include <QFont>
 namespace ost { namespace gui {
 
-GfxSceneNode::GfxSceneNode(gfx::GfxNodeP gfx_node, SceneNode* parent):SceneNode(parent),gfx_node_(gfx_node){}
+GfxSceneNode::GfxSceneNode(gfx::GfxNodeP gfx_node, SceneNode* parent):
+  SceneNode(parent), gfx_node_(gfx_node) { }
 
-GfxSceneNode::GfxSceneNode(gfx::GfxNodeP gfx_node, QObject* parent):SceneNode(parent),gfx_node_(gfx_node){}
+GfxSceneNode::GfxSceneNode(gfx::GfxNodeP gfx_node, QObject* parent):
+  SceneNode(parent), gfx_node_(gfx_node) { }
 
 QVariant GfxSceneNode::GetData(int column, int role){
-  if(column<0 || column > 2)return QVariant();
+  if (column<0 || column > 2)
+    return QVariant();
 
   if (role==Qt::CheckStateRole && column==0) {
     return QVariant(gfx_node_->IsVisible() ? Qt::Checked : Qt::Unchecked);
@@ -52,7 +55,8 @@ int GfxSceneNode::GetColumnCount() const{
   return 2;
 }
 
-bool GfxSceneNode::SetData(int column, const QVariant& value, int role){
+bool GfxSceneNode::SetData(int column, const QVariant& value, int role)
+{
   if (column==0 && role == Qt::CheckStateRole) {
     if (value.toBool()) {
      this->GetParent()->SetData(0,value,Qt::CheckStateRole);

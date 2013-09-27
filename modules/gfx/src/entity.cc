@@ -135,6 +135,10 @@ Entity::Entity(const String& name,
 }
 
 
+Entity::~Entity()
+{
+}
+
 impl::EntityRenderer* Entity::GetOrCreateRenderer(RenderMode::Type rm)
 {
   RendererMap::iterator rit = renderer_.find(rm);
@@ -186,11 +190,11 @@ void Entity::init(RenderMode::Type rm)
   render_mode_=rm;
   trace_.ResetView(this->GetView());
   sel_=this->GetView().CreateEmptyView();  
-  impl::EntityRenderer* r=this->GetOrCreateRenderer(rm);
-  if(!r) return;
 
-  r->AddView(this->GetView());
-  r->UpdateViews();
+  impl::EntityRenderer* renderer=this->GetOrCreateRenderer(rm);
+
+  renderer->AddView(this->GetView());
+  renderer->UpdateViews();
   set_static_max_rad();
   
   Rebuild();
@@ -297,13 +301,17 @@ bool Entity::UpdateIfNeeded() const
     for (RendererMap::iterator i=renderer_.begin(), 
            e=renderer_.end(); i!=e; ++i) {
       EntityRenderer* renderer =i->second;
-      if (renderer->IsEnabled() && renderer->HasDataToRender()) {
-        if (renderer->IsDirty()) {
-          renderer->PrepareRendering();
-          updated=true;
-        }
-        renderer->VA().SetOpacity(opacity_);
+      if (!renderer->IsEnabled())
+        continue;
+      renderer->UpdateViews();
+      if (!renderer->HasDataToRender())
+        continue;
+
+      if (renderer->IsDirty()) {
+        renderer->PrepareRendering();
+        updated=true;
       }
+      renderer->VA().SetOpacity(opacity_);
     }
     if (updated) {
       this->CacheBoundingBox();
@@ -1135,22 +1143,23 @@ bool Entity::GetSeqHack() const
 
 void Entity::do_update_view() const
 {
-  // also signals an update in positions
-  if (update_view_) {
-    update_view_=false;    
-    cached_view_=qv_.GetEntityView();
-    trace_.ResetView(cached_view_);
-    for (RendererMap::iterator i=renderer_.begin(), 
-           e=renderer_.end(); i!=e; ++i) {
-      impl::EntityRenderer* r=i->second;
-      if (r->IsEnabled() && r->HasDataToRender()) {
-        r->ClearViews();
-        r->AddView(cached_view_);
-        r->UpdateViews();
-        r->FlagPositionsDirty();
-        r->PrepareRendering();
-      }
-    }
+  if (!update_view_)
+    return;
+  update_view_=false;
+  cached_view_=qv_.GetEntityView();
+  trace_.ResetView(cached_view_);
+  for (RendererMap::iterator
+       i=renderer_.begin(), e=renderer_.end(); i!=e; ++i) {
+    impl::EntityRenderer* renderer=i->second;
+    if (!renderer->IsEnabled())
+      continue;
+    renderer->ClearViews();
+    renderer->AddView(cached_view_);
+    renderer->UpdateViews();
+    if (!renderer->HasDataToRender())
+      continue;
+    renderer->FlagPositionsDirty();
+    renderer->PrepareRendering();
   }
 }
 
