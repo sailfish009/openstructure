@@ -105,6 +105,8 @@ Varia
 Extending OpenStructure
 --------------------------------------------------------------------------------
 
+**External Tools** :doc:`bindings <bindings/bindings>`
+
 **Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>` | :doc:`instructions for developers <contributing>`
 
 
