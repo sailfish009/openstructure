@@ -12,7 +12,7 @@ matplotlib.
 Basic Usage
 --------------------------------------------------------------------------------
 
-Populate table with data:
+Populate table with data and plot the data:
 
 .. code-block:: python
 
@@ -51,6 +51,37 @@ Iterating over table items:
   for foo, bar in tab.Zip('foo','bar'):
     print foo, bar
 
+Doing element wise mathematical operations on whole colums:
+
+.. code-block:: python
+
+  # create table with two columns, foo and bar both of int type
+  # and fill with values
+  tab=Table(['foo', 'bar'], 'ii', foo=[1,2,3,4], bar=[1,4,9,16])
+
+  # add new column by doing an element wise
+  # addition of column foo and column bar
+  tab.AddCol('qux', 'f', tab['foo']+tab['bar'])
+
+  print tab
+
+
+Select part of the table based on a query:
+
+.. code-block:: python
+
+  # create table with two columns, foo and bar both of int type
+  # and fill with values
+  tab=Table(['foo', 'bar'], 'ii', foo=[1,2,3,4], bar=[1,4,9,16])
+
+  # select all rows where foo>=2 and bar<10
+  subtab = tab.Select('foo>=2 and bar<10')
+  print subtab
+
+  # select all rows where foo>3 or bar=1
+  subtab = tab.Select('foo>3 or bar=1')
+  print subtab
+
 
 Functions You Might be Interested In
 --------------------------------------------------------------------------------
@@ -64,6 +95,7 @@ Functions You Might be Interested In
 :meth:`~ost.table.Merge`                      merge two tables together
 :meth:`~ost.table.Table.Sort`                 sort table by column
 :meth:`~ost.table.Table.Filter`               filter table by values
+:meth:`~ost.table.Table.Select`               select subtable based on query
 :meth:`~ost.table.Table.Zip`                  extract multiple columns at once
 :meth:`~ost.table.Table.SearchColNames`       search for matching column names
 
