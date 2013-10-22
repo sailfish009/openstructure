@@ -222,9 +222,12 @@ std::vector<unsigned int> DLLEXPORT_OST_GEOM MinDistanceIndices(const Vec3List& 
 Vec3List DLLEXPORT_OST_GEOM CalculateUnitCellVectors(const Vec3& ucell_size, const Vec3& ucell_angles);
 //!wraps a vector in a box with periodic boundaries
 Vec3 DLLEXPORT_OST_GEOM WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& ucell_size);
-//!wraps all the verctors in a Vec3List in a box with periodic boundaries
+//!wraps all the vectors in a Vec3List in a box with periodic boundaries
 Vec3List DLLEXPORT_OST_GEOM WrapVec3List(const Vec3List& vl,const Vec3& box_center,const Vec3& ucell_size);
-
+//!wraps a vector in a non-rothogonal box with periodic boundaries
+Vec3 DLLEXPORT_OST_GEOM WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& ucell_size,const Vec3& ucell_angles);
+//!wraps all the vectors in a Vec3List in a non-rothogonal box with periodic boundaries
+Vec3List DLLEXPORT_OST_GEOM WrapVec3List(const Vec3List& vl,const Vec3& box_center,const Vec3& ucell_size,const Vec3& ucell_angles);
   
 } // ns
 

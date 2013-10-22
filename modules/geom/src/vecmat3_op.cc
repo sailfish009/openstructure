@@ -288,5 +288,25 @@ Vec3List WrapVec3List(const Vec3List& vl, const Vec3& box_center,const Vec3& uce
   return vl_out;
 }
   
+Vec3 WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& ucell_size,const Vec3& ucell_angles){
+  Vec3List vl=CalculateUnitCellVectors(ucell_size,ucell_angles);
+  Vec3 v=v1-box_center,v_wrapped=v1,r;
+  for (int i=0; i<3; i++) {
+    r[2-i]=v[2-i]/vl[2-i][2-i];
+    v=v-r[2-i]*vl[2-i];
+    r[2-i]=(r[2-i] > 0.0) ? std::floor(r[2-i] + 0.5) : std::ceil(r[2-i] - 0.5);
+    v_wrapped=v_wrapped-vl[2-i]*r[2-i];
+  }
+  return v_wrapped;
+}
+
+Vec3List WrapVec3List(const Vec3List& vl, const Vec3& box_center,const Vec3& ucell_size,const Vec3& ucell_angles){
+  Vec3List vl_out;
+  vl_out.reserve(vl_out.size());
+  for (Vec3List::const_iterator v1=vl.begin(),e=vl.end();v1!=e ; v1++) {
+    vl_out.push_back(WrapVec3(*v1,box_center,ucell_size,ucell_angles));
+  }
+  return vl_out;
+}  
   
 } // ns
