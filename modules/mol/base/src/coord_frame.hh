@@ -77,7 +77,9 @@ public:
   geom::Vec3 GetCellAngles() const {
     return this->ucell_angles_;
   }
-
+  
+  geom::Vec3List GetCellVectors() const;
+  
   geom::Vec3 GetAtomPos(const AtomHandle& atom) const;
   geom::Vec3 GetAtomPos(int atom_index) const;
   Real GetDistanceBetwAtoms(const AtomHandle& a1, const AtomHandle& a2) const;

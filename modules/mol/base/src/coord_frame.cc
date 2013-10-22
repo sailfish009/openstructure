@@ -48,6 +48,11 @@ namespace ost { namespace mol {
     }
   }
 
+  geom::Vec3List CoordFrame::GetCellVectors() const
+  {
+    return geom::CalculateUnitCellVectors(ucell_size_,ucell_angles_);
+  }
+  
   geom::Vec3 CoordFrame::GetAtomPos(const AtomHandle& atom) const 
   {
     return this->GetAtomPos(atom.GetIndex());

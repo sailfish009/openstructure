@@ -250,6 +250,23 @@ std::vector<unsigned int> MinDistanceIndices(const Vec3List& l1, const Vec3List&
   }
   return il;
 }
+
+Vec3List CalculateUnitCellVectors(const Vec3& ucell_size, const Vec3& ucell_angles){
+  // Calculates the unit cell vectors from their sizes and angles.
+  // The angles are given as Vec3(gamma,beta,alpha)
+  geom::Vec3List ucell_vec;
+  geom::Vec3 ucell_vec1,ucell_vec2,ucell_vec3;
+  Real cosa=cos(ucell_angles[2]),cosb=cos(ucell_angles[1]);
+  Real cosg=cos(ucell_angles[0]),sing=sin(ucell_angles[0]);
+  ucell_vec1=geom::Vec3(ucell_size[0],0,0);
+  ucell_vec2=ucell_size[1]*geom::Vec3(cosg,sing,0);
+  ucell_vec3=ucell_size[2]*geom::Vec3(cosb,(cosa-cosb*cosg)/sing,\
+                                       pow(1-(cosa*cosa+cosb*cosb-2.*cosa*cosb*cosg)/(sing*sing),0.5));
+  ucell_vec.push_back(ucell_vec1);
+  ucell_vec.push_back(ucell_vec2);
+  ucell_vec.push_back(ucell_vec3);
+  return ucell_vec;  
+}
   
 Vec3 WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& basis_vec){
   Vec3 v;
