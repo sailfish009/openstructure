@@ -59,6 +59,19 @@ Real CalculateAverageAgreementWithDensityMap(const geom::Vec3List& vl, img::MapH
   }
   return sum/float(vl.size());
 }
+  
+std::vector< std::vector<Real> > PariwiseDistanceMatrix(const EntityView view1, const EntityView view2){
+  std::vector< std::vector<Real> > dist_mat;
+  unsigned int n1=view1.GetAtomCount(),n2=view2.GetAtomCount();
+  dist_mat.resize(n1,std::vector<Real>(n2,0));
+  AtomViewList atoms1=view1.GetAtomList(),atoms2=view2.GetAtomList();
+  for (unsigned int i=0; i!=n1; ++i){
+    for (unsigned int j=0; j!=n2; ++j) {
+      dist_mat[i][j]=geom::Distance(atoms1[i].GetPos(),atoms2[j].GetPos());
+    }
+  }
+  return dist_mat;
+}
 
 #endif
 void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 ucell_size, \

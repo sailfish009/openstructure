@@ -32,4 +32,5 @@ void export_StructureAnalysis()
   def("CalculateAgreementWithDensityMap",&CalculateAgreementWithDensityMap,(arg("pos_list"),arg("density_map")));
 #endif
   def("WrapEntityInPeriodicCell",&WrapEntityInPeriodicCell,(arg("Entity"),arg("cell_center"),arg("ucell_size"),arg("ucell_angles")=geom::Vec3(),arg("group_res")=true));
+  def("PariwiseDistanceMatrix",&PariwiseDistanceMatrix,(arg("EntityView1"),arg("EntityView2")));
 }
