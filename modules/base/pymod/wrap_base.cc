@@ -110,4 +110,9 @@ BOOST_PYTHON_MODULE(_ost_base)
     .def(vector_indexing_suite<std::vector<int> >())
     .def(geom::VectorAdditions<IntList>())
   ;
+  
+  typedef std::vector< FloatList > FloatMatrix;
+  class_<FloatMatrix>("FloatMatrix", init<>())
+  .def(vector_indexing_suite<FloatMatrix>())
+  ;
 }

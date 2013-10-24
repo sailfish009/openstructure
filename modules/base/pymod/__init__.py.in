@@ -18,7 +18,7 @@
 #------------------------------------------------------------------------------
 
 
-__all__=['Correl', 'FileLogSink', 'FloatList', 'GetCurrentLogSink', 'GetPrefixPath', 'GetSharedDataPath', 'GetVerbosityLevel', 'Histogram', 'IntList', 'LogDebug', 'LogError', 'LogInfo', 'LogScript', 'LogSink', 'LogTrace', 'LogVerbose', 'LogWarning', 'Max', 'Mean', 'Median', 'Min', 'MultiLogSink', 'PopLogSink', 'PopVerbosityLevel', 'PushLogSink', 'PushVerbosityLevel', 'Range', 'SetPrefixPath', 'StdDev', 'StreamLogSink', 'StringList', 'StringLogSink', 'Units', 'VERSION', 'VERSION_MAJOR', 'VERSION_MINOR', 'VERSION_PATCH', 'WITH_NUMPY', 'conop', 'geom', 'io', 'mol', 'seq', 'stutil' @ALL_ADDITIONAL_MODULES@]
+__all__=['Correl', 'FileLogSink', 'FloatList', 'FloatMatrix', 'GetCurrentLogSink', 'GetPrefixPath', 'GetSharedDataPath', 'GetVerbosityLevel', 'Histogram', 'IntList', 'LogDebug', 'LogError', 'LogInfo', 'LogScript', 'LogSink', 'LogTrace', 'LogVerbose', 'LogWarning', 'Max', 'Mean', 'Median', 'Min', 'MultiLogSink', 'PopLogSink', 'PopVerbosityLevel', 'PushLogSink', 'PushVerbosityLevel', 'Range', 'SetPrefixPath', 'StdDev', 'StreamLogSink', 'StringList', 'StringLogSink', 'Units', 'VERSION', 'VERSION_MAJOR', 'VERSION_MINOR', 'VERSION_PATCH', 'WITH_NUMPY', 'conop', 'geom', 'io', 'mol', 'seq', 'stutil' @ALL_ADDITIONAL_MODULES@]
 
 from _ost_base import *
 from stutil import *
