@@ -256,7 +256,7 @@ CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected, int first,
          j=indices.begin(), e2=indices.end(); j!=e2; ++j) {
       vecs[j-indices.begin()]=(*frame)[*j];
     }
-    filtered_cg.AddFrame(vecs);
+    filtered_cg.AddFrame(vecs,(*frame).GetCellSize(),(*frame).GetCellAngles());
   }
   return filtered_cg;
 }
