@@ -123,9 +123,11 @@ QModelIndex SceneWinModel::index(int row, int col,
 
 QModelIndex SceneWinModel::parent(const QModelIndex& index) const
 {
-  if(!index.isValid())return QModelIndex();
-
+  if(!index.isValid())
+    return QModelIndex();
   SceneNode* node = GetItem(index);
+  if (!node)
+    return QModelIndex();
   assert(node);
   SceneNode* parent_node = node->GetParent();
 
@@ -302,9 +304,8 @@ bool SceneWinModel::RemoveNode(SceneNode* node)
     QModelIndex parent_index =this->GetIndexOf(parent);
     int row = node->GetRow();
     this->beginRemoveRows(parent_index,row,row);
-    this->endRemoveRows();
-    node->setParent(NULL);
     delete node;
+    this->endRemoveRows();
     return true;
   }
   return false;

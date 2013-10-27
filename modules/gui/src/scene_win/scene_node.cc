@@ -29,7 +29,7 @@ SceneNode::SceneNode(QObject* parent):QObject(parent){
   parent_ = NULL;
 }
 
-int SceneNode::GetChildRow(const SceneNode* node) const{
+int SceneNode::GetChildRow(const SceneNode* node) const {
   for(int i = 0; i < this->children().size(); i++){
     if (this->children()[i] == node)
       return i;
@@ -41,7 +41,7 @@ SceneNode::~SceneNode() {
 }
 
 int SceneNode::GetRow() const{
-  if(parent_){
+  if (parent_) {
     return parent_->GetChildRow(this);
   }
   return 0;

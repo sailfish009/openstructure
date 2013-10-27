@@ -1043,7 +1043,6 @@ void Scene::Remove(const GfxNodeP& go)
   if(!go) return;
   root_node_->Remove(go);
   this->NotifyObservers(bind(&SceneObserver::NodeRemoved, _1,go));
-  std::cerr << "Scene::Remove(node):" << go.use_count() << std::endl;
 }
 
 void Scene::RemoveAll()
