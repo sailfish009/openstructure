@@ -4,6 +4,7 @@
 
 cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 project(OpenStructure CXX C)
+set (CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set (OST_VERSION_MAJOR 1)
 set (OST_VERSION_MINOR 3)
 set (OST_VERSION_PATCH 3)
