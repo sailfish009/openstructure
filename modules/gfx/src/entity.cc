@@ -1151,13 +1151,11 @@ void Entity::do_update_view() const
   for (RendererMap::iterator
        i=renderer_.begin(), e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* renderer=i->second;
-    if (!renderer->IsEnabled())
+    if (!renderer->IsEnabled() || !renderer->HasDataToRender())
       continue;
     renderer->ClearViews();
     renderer->AddView(cached_view_);
     renderer->UpdateViews();
-    if (!renderer->HasDataToRender())
-      continue;
     renderer->FlagPositionsDirty();
     renderer->PrepareRendering();
   }
