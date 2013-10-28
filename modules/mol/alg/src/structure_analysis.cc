@@ -60,7 +60,7 @@ Real CalculateAverageAgreementWithDensityMap(const geom::Vec3List& vl, img::MapH
   return sum/float(vl.size());
 }
   
-std::vector< std::vector<Real> > PariwiseDistanceMatrix(const EntityView view1, const EntityView view2){
+std::vector< std::vector<Real> > PariwiseDistanceMatrix(const EntityView& view1, const EntityView& view2){
   std::vector< std::vector<Real> > dist_mat;
   unsigned int n1=view1.GetAtomCount(),n2=view2.GetAtomCount();
   dist_mat.resize(n1,std::vector<Real>(n2,0));
@@ -73,6 +73,21 @@ std::vector< std::vector<Real> > PariwiseDistanceMatrix(const EntityView view1, 
   return dist_mat;
 }
 
+std::vector< std::vector<Real> > PariwiseDistanceMatrix(const EntityView& view){
+  std::vector< std::vector<Real> > dist_mat;
+  unsigned int n=view.GetAtomCount();
+  //dist_mat.resize(n,std::vector<Real>(n,0));
+  AtomViewList atoms1=view.GetAtomList(),atoms2=view.GetAtomList();
+  for (unsigned int i=0; i!=n; ++i){
+    dist_mat.push_back(std::vector<Real>(n-i-1,0));
+    for (unsigned int j=i+1; j!=n; ++j) {
+      dist_mat[i][j-i-1]=geom::Distance(atoms1[i].GetPos(),atoms2[j].GetPos());
+    }
+  }
+  return dist_mat;
+}
+  
+  
 #endif
 void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 ucell_size, \
                                                     const geom::Vec3 ucell_angles, bool group_residues){

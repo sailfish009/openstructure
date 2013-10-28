@@ -24,6 +24,9 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::mol::alg;
 
+std::vector< std::vector<Real> > (*pair_dist1)(const mol::EntityView&) = PariwiseDistanceMatrix;
+std::vector< std::vector<Real> > (*pair_dist2)(const mol::EntityView&,const mol::EntityView&) = PariwiseDistanceMatrix;
+
 void export_StructureAnalysis()
 {
   def("GetPosListFromView",&GetPosListFromView, (arg("view")));
@@ -32,5 +35,8 @@ void export_StructureAnalysis()
   def("CalculateAgreementWithDensityMap",&CalculateAgreementWithDensityMap,(arg("pos_list"),arg("density_map")));
 #endif
   def("WrapEntityInPeriodicCell",&WrapEntityInPeriodicCell,(arg("Entity"),arg("cell_center"),arg("ucell_size"),arg("ucell_angles")=geom::Vec3(),arg("group_res")=true));
-  def("PariwiseDistanceMatrix",&PariwiseDistanceMatrix,(arg("EntityView1"),arg("EntityView2")));
+  
+
+  def("PariwiseDistanceMatrix",pair_dist2,(arg("EntityView1"),arg("EntityView2")));
+  def("PariwiseDistanceMatrix",pair_dist1,(arg("EntityView")));
 }
