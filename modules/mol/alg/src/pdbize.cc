@@ -29,9 +29,9 @@
 
 namespace ost { namespace mol { namespace alg {
 
-DLLEXPORT const char* POLYPEPTIDE_CHAIN_NAMES="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
-DLLEXPORT const char* LIGAND_CHAIN_NAME="_";
-DLLEXPORT const char* WATER_CHAIN_NAME="-";
+const char* POLYPEPTIDE_CHAIN_NAMES="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
+const char* LIGAND_CHAIN_NAME="_";
+const char* WATER_CHAIN_NAME="-";
 
 
 namespace {

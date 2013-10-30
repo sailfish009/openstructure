@@ -18,7 +18,9 @@
 //------------------------------------------------------------------------------
 #include <iomanip>
 #if defined (_MSC_VER)
-#define BOOST_ALL_DYN_LINK 1
+  #define BOOST_ALL_DYN_LINK 1
+  #include <BaseTsd.h>
+  typedef SSIZE_T ssize_t;
 #endif
 #include <boost/program_options.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -142,9 +144,13 @@ CompoundLibPtr load_compound_lib(const String& custom_path)
   if (!_NSGetExecutablePath(result, &size)) {
     exe_path=String(result); 
   }
-  #else 
-  ssize_t count = readlink( "/proc/self/exe", result, 1024 );
-  exe_path = std::string( result, (count > 0) ? count : 0 );
+  #else
+    #if defined (_MSC_VER)
+      // todo find exe path on Windows
+    #else
+      ssize_t count = readlink( "/proc/self/exe", result, 1024 );
+      exe_path = std::string( result, (count > 0) ? count : 0 );
+    #endif
   #endif
   if (exe_path.empty()) { 
     std::cerr << "Could not determine the path of the molck executable. Will only "
