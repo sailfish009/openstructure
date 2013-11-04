@@ -242,6 +242,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
       throw Error("EntityView is empty");
     }
     std::vector<unsigned long> indices_ca;
+    std::pair<geom::Line3, Real> cylinder;
     geom::Line3 axis;
     Real sign;
     directions.reserve(ceil(traj.GetFrameCount()/float(stride)));
@@ -250,7 +251,8 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
     unsigned int n_atoms=indices_ca.size();
     for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
       CoordFramePtr frame=traj.GetFrame(i);
-      axis=frame->FitCylinder(indices_ca);
+      cylinder=frame->FitCylinder(indices_ca);
+      axis=cylinder.first;
       sign=geom::Dot(axis.GetDirection(),(*frame)[indices_ca[n_atoms-1]]-axis.GetOrigin());
       sign=sign/fabs(sign);
       directions.push_back(sign*axis.GetDirection());

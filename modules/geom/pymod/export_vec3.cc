@@ -21,8 +21,10 @@
 #include <ost/geom/vec3.hh>
 #include <ost/geom/geom.hh>
 #include <ost/geom/export_helper/vector.hh>
+#include <ost/export_helper/pair_to_tuple_conv.hh>
 
 using namespace boost::python;
+
 
 const Real Vec3_getitem(const geom::Vec3& v, int i) {
   return v.At(i);
@@ -116,4 +118,6 @@ void export_Vec3()
     .def("GetODRLine", &Vec3List::GetODRLine)
     .def("FitCylinder", &Vec3List::FitCylinder)
   ;
+  to_python_converter<std::pair<geom::Line3, Real>,
+  ost::PairToTupleConverter<geom::Line3, Real> >();
 }

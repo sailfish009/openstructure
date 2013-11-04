@@ -235,7 +235,7 @@ namespace ost { namespace mol {
     return this->GetODRPlane(indices);
   }  
   
-  geom::Line3 CoordFrame::FitCylinder(std::vector<unsigned long>& indices_ca) const {
+  std::pair<geom::Line3, Real> CoordFrame::FitCylinder(std::vector<unsigned long>& indices_ca) const {
     geom::Vec3List atoms_pos_list;
     int n_atoms=indices_ca.size();
     atoms_pos_list.reserve(n_atoms);
@@ -243,7 +243,7 @@ namespace ost { namespace mol {
       atoms_pos_list.push_back((*this)[*i1]);
     }
     //Initial guess
-    geom::Vec3 initial_axis=geom::Vec3(0.0,0.0,0.0),center=geom::Vec3(0.0,0.0,0.0);
+    geom::Vec3 initial_axis=geom::Vec3(0.0,0.0,0.0);
     if (n_atoms<5) {
       initial_axis=atoms_pos_list[n_atoms-1]-atoms_pos_list[0];
     }
@@ -252,14 +252,10 @@ namespace ost { namespace mol {
         initial_axis+=(*(i+4))-(*i);
       }
     }
-    for (geom::Vec3List::const_iterator i=atoms_pos_list.begin(),e=atoms_pos_list.end(); i!=e; ++i) {
-      center+=(*i);
-    }
-    center/=atoms_pos_list.size();
-    return atoms_pos_list.FitCylinder(initial_axis,center);
+    return atoms_pos_list.FitCylinder(initial_axis);
   }
 
-  geom::Line3 CoordFrame::FitCylinder(const mol::EntityView& view1) const {
+  std::pair<geom::Line3, Real> CoordFrame::FitCylinder(const mol::EntityView& view1) const {
     CheckHandleValidity(view1);
     std::vector<unsigned long> indices_ca;
     GetCaIndices(view1, indices_ca);

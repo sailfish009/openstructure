@@ -316,10 +316,13 @@ public:
   Plane GetODRPlane() const;
 
   //This function fits a cylinder to the positions in Vec3List
-  //It takes as argument an initial guess for the direction and the geometric
-  //center of the atoms. The center is not changed during optimisation as the
-  //best fitting cylinder can be shown to have its axis pass through the geometric center
-  Line3 FitCylinder(const Vec3& initial_direction, const Vec3& center) const;
+  //It takes as argument an initial guess for the direction.
+  //The center is set to the geometric centero of the atoms
+  //and is not changed during optimisation as the best fitting cylinder
+  //can be shown to have its axis pass through the geometric center
+  //It returns a pair containing a line3, giving the direction of the Cylinder
+  //and a Real containing the radius.
+  std::pair<Line3, Real> FitCylinder(const Vec3& initial_direction) const;
 };
 } // ns geom
 

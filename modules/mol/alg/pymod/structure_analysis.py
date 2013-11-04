@@ -127,7 +127,7 @@ def CalculateHelixAxis(sele1):
     return
   eh=sele1.GetHandle()
   f=GetFrameFromEntity(eh)
-  return f.FitCylinder(sele1)
+  return f.FitCylinder(sele1)[0]
 
 
 def CalculateDistanceDifferenceMatrix(sele1,sele2):

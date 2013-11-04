@@ -43,7 +43,7 @@ Real (CoordFrame::*get_min_dist)(const mol::EntityView&, const mol::EntityView&)
 Real (CoordFrame::*get_alpha)(const mol::EntityView&) const = &CoordFrame::GetAlphaHelixContent;
 geom::Line3 (CoordFrame::*get_odr_line)(const mol::EntityView&) const = &CoordFrame::GetODRLine;
 geom::Plane (CoordFrame::*get_odr_plane)(const mol::EntityView&) const = &CoordFrame::GetODRPlane;
-geom::Line3 (CoordFrame::*fit_cylinder)(const mol::EntityView&) const = &CoordFrame::FitCylinder;
+std::pair<geom::Line3,Real> (CoordFrame::*fit_cylinder)(const mol::EntityView&) const = &CoordFrame::FitCylinder;
 // TODO: move to geom
 geom::Line3 (CoordFrame::*get_odr_line2)() const = &geom::Vec3List::GetODRLine;
 
