@@ -11,7 +11,8 @@ from ost.table import *
 import ost
 
 HAS_NUMPY=True
-HAS_SCIPY=True
+HAS_SCIPY_STATS=True
+HAS_SCIPY_NDIMG=True
 HAS_MPL=True
 HAS_PIL=True
 try:
@@ -23,9 +24,16 @@ except ImportError:
 try:
   import scipy.stats.mstats
 except ImportError:
-  HAS_SCIPY=False
+  HAS_SCIPY_STATS=False
   print "Could not find scipy.stats.mstats: ignoring some table class unit tests"
   
+try:
+  import scipy.ndimage
+except ImportError:
+  HAS_SCIPY_NDIMG=False
+  print "Could not find scipy.ndimage: ignoring some table class unit tests"
+
+
 try:
   import matplotlib
   matplotlib.use('Agg')
@@ -1461,6 +1469,8 @@ class TestTable(unittest.TestCase):
     self.assertRaises(RuntimeError, tab.GetOptimalPrefactors, 'c',weights='d')
 
   def testGaussianSmooth(self):
+    if not HAS_SCIPY_NDIMG:
+      return
     tab = Table(['a','b','c','d','e','f'],'fffffi',
                 a=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
                 b=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
@@ -1574,7 +1584,7 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(tab.Correl('second','third'), -0.4954982578)
     
   def testSpearmanCorrel(self):
-    if not HAS_SCIPY:
+    if not HAS_SCIPY_STATS:
       return
     tab = self.CreateTestTable()
     self.assertEquals(tab.SpearmanCorrel('second','third'), None)
