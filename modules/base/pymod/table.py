@@ -2721,6 +2721,63 @@ Statistics for column %(col)s
     except ImportError:
       LogError("Function needs numpy, but I could not import it.")
       raise
+    
+  def ComputeLogROCAUC(self, score_col, class_col, score_dir='-',
+                       class_dir='-', class_cutoff=2.0):
+    '''
+    Computes the area under the curve of the log receiver operating 
+    characteristics (logROC) where the x-axis is semilogarithmic
+    using the trapezoidal rule.
+    
+    The logROC is computed with a lambda of 0.001 according to 
+    Rapid Context-Dependent Ligand Desolvation in Molecular Docking
+    Mysinger M. and Shoichet B., Journal of Chemical Information and Modeling
+    2010 50 (9), 1561-1573
+    
+    For more information about parameters of the ROC, see
+    :meth:`ComputeROC`.
+
+    :warning: The function depends on *numpy*
+    '''
+    try:
+      import numpy as np
+
+      roc = self.ComputeROC(score_col, class_col, score_dir,
+                            class_dir, class_cutoff)
+
+      if not roc:
+        return None
+      
+      rocxt, rocyt = roc
+      rocx=[]
+      rocy=[]
+      
+      # define lambda
+      l=0.001
+      
+      # remove all duplicate x-values
+      rocxt = [x if x>0 else l for x in rocxt]
+      for i in range(len(rocxt)-1):
+        if rocxt[i]==rocxt[i+1]:
+          continue
+        rocx.append(rocxt[i])
+        rocy.append(rocyt[i])
+      rocx.append(1.0)
+      rocy.append(1.0)
+      
+      # compute logauc
+      value = 0
+      for i in range(len(rocx)-1):
+        x = rocx[i]
+        if rocx[i]==rocx[i+1]:
+          continue
+        b = rocy[i+1]-rocx[i+1]*((rocy[i+1]-rocy[i])/(rocx[i+1]-rocx[i]))
+        value += ((rocy[i+1]-rocy[i])/math.log(10))+b*(math.log10(rocx[i+1])-math.log10(rocx[i]))
+      return value/math.log10(1.0/l)
+      
+    except ImportError:
+      LogError("Function needs numpy, but I could not import it.")
+      raise
 
   def PlotROC(self, score_col, class_col, score_dir='-',
               class_dir='-', class_cutoff=2.0,
@@ -2772,6 +2829,63 @@ Statistics for column %(col)s
       LogError("Function needs matplotlib, but I could not import it.")
       raise
     
+  def PlotLogROC(self, score_col, class_col, score_dir='-',
+                 class_dir='-', class_cutoff=2.0,
+                 style='-', title=None, x_title=None, y_title=None,
+                 clear=True, save=None):
+    '''
+    Plot an logROC curve where the x-axis is semilogarithmic using matplotlib 
+    
+    For more information about parameters of the ROC, see
+    :meth:`ComputeROC`, and for plotting see :meth:`Plot`.
+
+    :warning: The function depends on *matplotlib*
+    '''
+
+    try:
+      import matplotlib.pyplot as plt
+
+      roc = self.ComputeROC(score_col, class_col, score_dir,
+                                   class_dir, class_cutoff)
+      
+      if not roc:
+        return None
+
+      rocx, rocy = roc
+
+      if not title:
+        title = 'logROC of %s'%score_col
+
+      if not x_title:
+        x_title = 'false positive rate'
+
+      if not y_title:
+        y_title = 'true positive rate'
+
+      if clear:
+        plt.clf()
+     
+      rocx = [x if x>0 else 0.001 for x in rocx]
+      
+      
+      plt.plot(rocx, rocy, style)
+
+      plt.title(title, size='x-large', fontweight='bold')
+      plt.ylabel(y_title, size='x-large')
+      plt.xlabel(x_title, size='x-large')
+      
+      plt.xscale('log', basex=10)
+      plt.xlim(0.001, 1.0)
+      
+
+      if save:
+        plt.savefig(save)
+
+      return plt
+    except ImportError:
+      LogError("Function needs matplotlib, but I could not import it.")
+      raise  
+  
   def ComputeMCC(self, score_col, class_col, score_dir='-',
                  class_dir='-', score_cutoff=2.0, class_cutoff=2.0):
     '''

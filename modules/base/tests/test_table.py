@@ -32,7 +32,7 @@ try:
 except ImportError:
   HAS_SCIPY_NDIMG=False
   print "Could not find scipy.ndimage: ignoring some table class unit tests"
-
+  
 
 try:
   import matplotlib
@@ -1286,6 +1286,28 @@ class TestTable(unittest.TestCase):
                      save=os.path.join("testfiles","roc-out.png"))
     self.assertEquals(pl, None)
 
+  def testPlotLogROC(self):
+    if not HAS_MPL or not HAS_PIL:
+      return
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, True, False, True, True, True, False, False, True, False, True, False, True, False, False, False, True, False, True, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    pl = tab.PlotLogROC(score_col='score', score_dir='+',
+                        class_col='classific',
+                        save=os.path.join("testfiles","logroc-out.png"))
+    img1 = Image.open(os.path.join("testfiles","logroc-out.png"))
+    #img2 = Image.open(os.path.join("testfiles","roc.png"))
+    #self.CompareImages(img1, img2)
+
+    # no true positives
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    pl = tab.PlotLogROC(score_col='score', score_dir='+',
+                        class_col='classific',
+                        save=os.path.join("testfiles","logroc-out.png"))
+    self.assertEquals(pl, None)
+
   def testPlotROCSameValues(self):
     if not HAS_MPL or not HAS_PIL:
       return
@@ -1334,6 +1356,40 @@ class TestTable(unittest.TestCase):
                 score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
     auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
     self.assertEquals(auc, None)
+    
+  def testLogROCAUCforPerfectCurve(self):
+    if not HAS_NUMPY:
+      return
+    auc_ref = 1.0
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, True, True, True, True, True, False, False, False, False, False, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35])
+    
+    # test logAUC
+    auc = tab.ComputeLogROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+    
+    # test linear AUC
+    auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+      
+  def testCalcLogROCAUCRandomCurve(self):
+    if not HAS_NUMPY:
+      return
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, False, True, False, True, False, True, False, True, False, True, False],
+                score=[0.9, 0.9, 0.7, 0.7, 0.55, 0.55, 0.4, 0.4, 0.3, 0.3, 0.3, 0.3])
+    
+    # test logAUC
+    auc_ref = 0.1440197405305
+    auc = tab.ComputeLogROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+    
+    # test linear AUC    
+    auc_ref = 0.5
+    auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+
 
   def testCalcROCAUCWithCutoff(self):
     if not HAS_NUMPY:
