@@ -419,37 +419,6 @@ function(append_unique list_var value)
 endfunction(append_unique)
 
 
-#=============================================================================
-# function copy_python
-#=============================================================================
-function(copy_python include_path version new_binary_path)
-
-
-  get_filename_component(real_python_include_path ${include_path} REALPATH)
-  get_filename_component(python_root_dir ${real_python_include_path}/../.. REALPATH) 
-  file(COPY ${python_root_dir}/${LIB_DIR}/python${version}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version})
-  file(GLOB  py_config_files "${include_path}/pyconfig*.h")
-  file(COPY ${py_config_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/python${version})
-  file(GLOB_RECURSE python_so_files "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version}/*.so")
-  if(NOT APPLE)
-  foreach(so_file ${python_so_files})
-    remove_rpath("${so_file}")
-  endforeach(so_file)
-  endif(NOT APPLE)
-  read_config(ost_config)
-  if(APPLE)
-    file(COPY ${python_root_dir}/Resources/Python.app/Contents/MacOS/Python DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
-    set(${new_binary_path} "${CMAKE_INSTALL_PREFIX}/bin/Python" PARENT_SCOPE)
-    string(REGEX REPLACE "pyexec=\"[^\n\$]*\"" "pyexec=\"\$DNG_BINDIR/Python\"\nexport PYTHONHOME=\$DNG_ROOT" ost_config "${ost_config}")
-  else(APPLE)
-    file(GLOB python_libs "${python_root_dir}/${LIB_DIR}/libpython${version}.so*")
-    file(COPY ${python_libs} DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR})
-    file(COPY ${python_root_dir}/bin/python${version} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
-    set(${new_binary_path} "${CMAKE_INSTALL_PREFIX}/bin/python${version}" PARENT_SCOPE)
-    string(REGEX REPLACE "pyexec=\"[^\n\$]*\"" "pyexec=\"\$DNG_BINDIR/python${version}\"\nexport PYTHONHOME=\$DNG_ROOT" ost_config "${ost_config}")
-  endif(APPLE)
-  write_config("${ost_config}")
-endfunction(copy_python)
 
 #=============================================================================
 # function read_config
@@ -681,7 +650,7 @@ function(copy_python include_path version new_binary_path)
   file(COPY ${py_config_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/python${version})
   file(GLOB_RECURSE python_so_files "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version}/*.so")
   foreach(so_file ${python_so_files})
-    file(RPATH_REMOVE FILE "${so_file}")
+    remove_rpath( "${so_file}")
   endforeach(so_file)
   read_config(ost_config)
   file(COPY ${python_root_dir}/Resources/Python.app/Contents/MacOS/Python DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
@@ -690,6 +659,19 @@ function(copy_python include_path version new_binary_path)
   write_config("${ost_config}")
 endfunction(copy_python)
 
+#=============================================================================
+# function remove_rpath (OSX)
+#=============================================================================
+function(remove_rpath file)
+  get_rpath(${file} rpath)
+  if(${rpath})
+    execute_process(COMMAND stat -f %Mp%Lp "${file}" OUTPUT_VARIABLE permissions)
+    execute_process(COMMAND chmod ugo+wx "${file}")
+    string(SUBSTRING ${permissions} 0 3 permissions)
+    file(RPATH_REMOVE FILE "${file}")
+    execute_process(COMMAND chmod ${permissions} "${file}")
+  endif(${rpath})
+endfunction(remove_rpath)
 
 elseif(WIN32 AND NOT UNIX)
 
