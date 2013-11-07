@@ -253,6 +253,11 @@ function(resolve_item context item exepath resolved_item_var)
   if(UNIX AND NOT WIN32)
     find_file(ri "${item}" ${exepath}  NO_DEFAULT_PATH)
     find_file(ri "${item}" ${exepath}  /usr/lib)
+    if(APPLE)
+      find_file(ri "${item}" PATHS ENV DYLD_LIBRARY_PATH  NO_DEFAULT_PATH)
+    else(APPLE)
+      find_file(ri "${item}" PATHS  ENV LD_LIBRARY_PATH NO_DEFAuLT_PATH)
+    endif(APPLE)
   else(UNIX AND NOT WIN32)
     find_program(ri "${item}" PATHS "${exepath}" NO_DEFAULT_PATH)
     find_program(ri "${item}" PATHS "${CMAKE_INSTALL_PREFIX}/bin" NO_DEFAULT_PATH)
@@ -625,7 +630,11 @@ endfunction(get_rpath)
 # function copy_qt (OSX)
 #=============================================================================
 function(copy_qt library_dir plugin_dir plugins)
-  file(COPY "${library_dir}/Resources/qt_menu.nib"
+  find_file(QT_MENU_NIB qt_menu.nib PATHS ${library_dir}/QtGui.framework/Versions/4 ${library_dir} PATH_SUFFIXES Resources)
+  if(NOT QT_MENU_NIB)
+    message(FATAL "qt_menu.nib not found")
+  endif(NOT QT_MENU_NIB)
+  file(COPY "${QT_MENU_NIB}"
        DESTINATION "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/"
        FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
   file(COPY ${plugin_dir}
