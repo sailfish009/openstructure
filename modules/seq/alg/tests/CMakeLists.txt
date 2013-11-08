@@ -5,6 +5,7 @@ set(OST_SEQ_ALG_UNIT_TESTS
   test_renumber.py
   test_local_align.py
   test_global_align.py
+  test_semiglobal_align.py
   test_weight_matrix.py
   test_aligntoseqres.py
 )
