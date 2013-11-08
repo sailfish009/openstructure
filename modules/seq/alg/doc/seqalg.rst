@@ -133,3 +133,32 @@
 
   :returns: list of column entropies
 
+.. function:: SemiGlobalAlign(seq1, seq2, subst_weight, gap_open=-5, gap_ext=-2)
+
+  Performs a semi-global alignment of *seq1* and *seq2* and returns the best-
+  scoring alignment. The algorithm is Needleman/Wunsch same as GlobalAlign, but
+  without any gap penalty for starting or ending gaps. This is prefereble 
+  whenever one of the sequences is significantly shorted than the other.
+  This make it also suitable for fragment assembly.
+  
+  **Example:**
+  
+  .. code-block:: python
+  
+    seq_a=seq.CreateSequence('A', 'abcdefghijklmnok')
+    seq_b=seq.CreateSequence('B', 'cdehijk')
+    alns=seq.alg.GlobalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
+    print alns[0].ToString(80)
+    # >>> A abcdefghijklmnok
+    # >>> B --cde--hijk-----
+
+  :param seq1: A valid sequence
+  :type seq1: :class:`~ost.seq.ConstSequenceHandle`
+  :param seq2: A valid sequence  
+  :type seq2: :class:`~ost.seq.ConstSequenceHandle`
+  
+  :param subst_weigth: The substitution weights matrix
+  :type subst_weight: :class:`SubstWeightMatrix`
+  :param gap_open: The gap opening penalty. Must be a negative number
+  :param gap_ext: The gap extension penalty. Must be a negative number
+  :returns: best-scoring alignment of *seq1* and *seq2*.
