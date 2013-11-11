@@ -153,7 +153,7 @@ def _ParseMmAlign(lines):
   alignment = seq.CreateAlignment()
   alignment.AddSequence(seq2)
   alignment.AddSequence(seq1)
-  return MMAlignResult(rmsd, aln_length, tm_score, tf, seq2, alignment)
+  return MMAlignResult(rmsd, tm_score, aln_length, tf, seq2, alignment)
 
 def _RunMmAlign(mmalign, tmp_dir):
   model1_filename=os.path.join(tmp_dir, 'model01.pdb')
