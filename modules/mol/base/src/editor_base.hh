@@ -248,6 +248,20 @@ public:
   ///
   /// All associated torsions and bonds will be removed as well
   void DeleteAtoms(const AtomHandleList& atoms);
+
+  /// \ brief Delete bond
+  ///
+  /// \param bond
+  ///         Is the bond to remove. If no such bond exists, this method will
+  ///         have no effect
+  void DeleteBond(const BondHandle& bond);
+
+  /// \ brief Delete a set of bond
+  ///
+  /// \param bonds
+  ///         bonds to remove. If no such bonds exist, this method will
+  ///         have no effect
+  void DeleteBonds(const BondHandleList& bonds);
   
   /// \brief Add named torsion to entity
   TorsionHandle AddTorsion(const String& name, const AtomHandle& a1,

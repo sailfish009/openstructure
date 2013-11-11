@@ -193,6 +193,19 @@ void EditorBase::DeleteAtom(const AtomHandle& atom_handle)
   atom_handle.GetResidue().Impl()->DeleteAtom(atom_handle.Impl());
 }
 
+void EditorBase::DeleteBond(const BondHandle& bond)
+{
+  bond.GetFirst().Impl()->DeleteConnector(bond.Impl(),true);
+}
+
+void EditorBase::DeleteBonds(const BondHandleList& bond_list)
+{
+  for(BondHandleList::const_iterator i = bond_list.begin();
+      i != bond_list.end(); ++i){
+    i->GetFirst().Impl()->DeleteConnector(i->Impl(),true);
+  }
+}
+
 void EditorBase::DeleteResidue(const ResidueHandle& residue_handle) 
 {
   CheckHandleValidity(residue_handle);
