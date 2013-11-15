@@ -99,7 +99,7 @@ template <> void set_new_type<IT_STRING,IT_BOOL>(EleImpl& item)
 template <> void set_new_type<IT_STRING,IT_VECTOR>(EleImpl& item)
 {
   static String num("[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?");
-  boost::regex expression("\\(("+num+"),("+num+"),("+num+")\\)");
+  boost::regex expression("\\[ *("+num+") *, *("+num+") *, *("+num+") *\\]");
   boost::cmatch what;
 
   if(boost::regex_match(item.GetStringRepr().c_str(), what, expression)) { 

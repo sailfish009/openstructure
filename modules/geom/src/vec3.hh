@@ -195,6 +195,10 @@ inline Vec3 operator/(Real d, const Vec3& v)
   return nrvo;
 }
 
+// The following operator is among other things used to write vector
+// data into info files. If its format is changed, the string to
+// vector type cast in item_type_cast.hh has to be changed
+// accordingly.
 inline std::ostream& operator<<(std::ostream& os, const Vec3& v)
 {
   os << "[" << v.x << ", " << v.y << ", " << v.z << "]";
