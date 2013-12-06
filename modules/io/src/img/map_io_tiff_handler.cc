@@ -324,6 +324,7 @@ void MapIOTiffHandler::do_export(const img::MapHandle& image,TIFF* tfile,TIF& fo
   TIFFSetField(tfile,TIFFTAG_YRESOLUTION,yreso);
   TIFFSetField(tfile,TIFFTAG_PLANARCONFIG,1);
   TIFFSetField(tfile,TIFFTAG_ORIENTATION,ORIENTATION_TOPLEFT);
+  TIFFSetField(tfile,TIFFTAG_PHOTOMETRIC,1); // 1=zero is black
   if(image.GetDomain()!=img::SPATIAL){
     throw IOException("Frequency export not implemented.");
   }
