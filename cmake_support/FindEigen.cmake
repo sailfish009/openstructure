@@ -6,6 +6,7 @@
 
 find_path(EIGEN2_INCLUDE_DIR NAMES Eigen/Core
           PATH_SUFFIXES eigen2
+          PATH_SUFFIXES eigen3
 )
 
 set(EIGEN2_INCLUDE_DIRS ${EIGEN2_INCLUDE_DIR}) 
