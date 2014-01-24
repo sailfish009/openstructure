@@ -901,6 +901,7 @@ endmacro()
 set(_BOOST_MIN_VERSION 1.31)
 
 macro(setup_boost)
+  set (Boost_NO_BOOST_CMAKE TRUE)
   find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS python REQUIRED)
   set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
   set(Boost_LIBRARIES)
