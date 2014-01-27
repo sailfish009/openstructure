@@ -206,6 +206,7 @@ def AverageDistanceMatrixFromTraj(t,sele,first=0,last=-1):
   M=npy.zeros([n_atoms,n_atoms])
   for i,a1 in enumerate(sele.atoms):
     for j,a2 in enumerate(sele.atoms):
+      if j>i:continue
       d=ost.mol.alg.AnalyzeDistanceBetwAtoms(t,a1.GetHandle(),a2.GetHandle())[first:last]
       M[i,j]=npy.mean(d)
       M[j,i]=npy.mean(d)
