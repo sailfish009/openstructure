@@ -211,5 +211,23 @@ def AverageDistanceMatrixFromTraj(t,sele,first=0,last=-1):
       M[j,i]=npy.mean(d)
   return M
 
-
+def AnalyzeDistanceFluctuationMatrix(t,sele,first=0,last=-1):
+  try:
+    import numpy as npy
+  except ImportError:
+    LogError("Function needs numpy, but I could not import it.")
+    raise
+  n_atoms=sele.GetAtomCount()
+  M=npy.zeros([n_atoms,n_atoms])
+  for i,a1 in enumerate(sele.atoms):
+    for j,a2 in enumerate(sele.atoms):
+      if i>j:continue
+      d=ost.mol.alg.AnalyzeDistanceBetwAtoms(t,a1.GetHandle(),a2.GetHandle())[first:last]
+      M[j,i]=npy.std(d)
+      M[i,j]=npy.std(d)
+  return M
+  
+  
+  
+  
     
