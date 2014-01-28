@@ -52,9 +52,11 @@ public:
     w_(w),
     n_(1)
   {
-    m_[0]=val;
-    for(unsigned int i=1;i<MAX_MOMENT;++i){
-      m_[i]=0.0;
+    if(MAX_MOMENT>0){
+      m_[0]=val;
+      for(unsigned int i=1;i<MAX_MOMENT;++i){
+        m_[i]=0.0;
+      }
     }
   }
 
