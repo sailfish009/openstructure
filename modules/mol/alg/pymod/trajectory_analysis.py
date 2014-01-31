@@ -228,7 +228,13 @@ def AnalyzeDistanceFluctuationMatrix(t,sele,first=0,last=-1):
       M[i,j]=npy.std(d)
   return M
   
-  
-  
-  
+def IterativeSuperposition(t,sele,threshold=1.0,initial_sele=None,iterations=5,ref_frame=0):
+  if initial_sele:current_sele=initial_sele
+  else: current_sele=sele
+  for i in range(iterations):
+    t=ost.mol.alg.SuperposeFrames(t,current_sele,ref=ref_frame)
+    al=[a for a in sele.atoms if ost.mol.alg.AnalyzeRMSF(t,ost.mol.CreateViewFromAtoms([a]))<threshold]
+    if len(al)==0:return
+    current_sele=ost.mol.CreateViewFromAtoms(al)
+  return current_sele
     
