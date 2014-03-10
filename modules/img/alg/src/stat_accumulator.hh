@@ -20,6 +20,7 @@
 #ifndef OST_STAT_ACCUMULATOR_HH
 #define OST_STAT_ACCUMULATOR_HH
 
+#include <limits>
 #include <boost/math/special_functions/binomial.hpp>
 #include <ost/base.hh>
 #include <ost/message.hh>
@@ -35,6 +36,8 @@ public:
   StatAccumulator():
     sum_(0.0),
     sum2_(0.0),
+    max_(-std::numeric_limits<Real>::max()),
+    min_(std::numeric_limits<Real>::max()),
     m_(),
     w_(0.0),
     n_(0)
@@ -48,6 +51,8 @@ public:
   StatAccumulator(Real val, Real w=1.0):
     sum_(val),
     sum2_(val*val),
+    max_(val),
+    min_(val),
     m_(),
     w_(w),
     n_(1)
@@ -86,7 +91,8 @@ public:
 
     sum_+=acc.sum_;
     sum2_+=acc.sum2_;
-
+    max_=std::max<Real>(max_,acc.max_);
+    min_=std::min<Real>(min_,acc.min_);
     if(MAX_MOMENT>0){
       Real delta=acc.m_[0]-m_[0];
       Real delta_w=delta/wn;
@@ -130,6 +136,16 @@ public:
   Real GetNumSamples() const
   {
     return n_;
+  }
+
+  Real GetMaximum() const
+  {
+    return max_;
+  }
+
+  Real GetMinimum() const
+  {
+    return min_;
   }
 
   Real GetWeight() const
@@ -212,6 +228,8 @@ public:
 private:
   Real sum_;
   Real sum2_;
+  Real max_;
+  Real min_;
   Real m_[MAX_MOMENT];
   Real w_;
   unsigned int n_;
