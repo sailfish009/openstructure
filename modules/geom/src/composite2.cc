@@ -291,15 +291,17 @@ Polygon2::circular_iterator Polygon2::FindSegment(std::vector<Vec2>::const_itera
 }
 void Polygon2::Erase(circular_iterator first,circular_iterator last)
 {
+  std::vector<Vec2>::iterator vfirst=first,vlast=last;
   if(first!=cbegin()){
     for(circular_iterator it=first;it!=last;++it){
       if(it==cbegin()){ //special case with wrap around
-        std::vector<Vec2>::erase(first,end());
-        std::vector<Vec2>::erase(begin(),last);
+        std::vector<Vec2>::iterator vbegin=begin(),vend=end();
+        std::vector<Vec2>::erase(vfirst,vend);
+        std::vector<Vec2>::erase(vbegin,vlast);
       }
     }
   }
-  std::vector<Vec2>::erase(first,last);
+  std::vector<Vec2>::erase(vfirst,vlast);
 }
 
 Circle2::Circle2():
