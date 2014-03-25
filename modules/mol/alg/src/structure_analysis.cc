@@ -90,7 +90,7 @@ std::vector< std::vector<Real> > PariwiseDistanceMatrix(const EntityView& view){
   
 #endif
 void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 ucell_size, \
-                                                    const geom::Vec3 ucell_angles, bool group_residues){
+                                                    const geom::Vec3 ucell_angles, bool group_residues,bool follow_bonds){
   mol::XCSEditor edi=eh.EditXCS(mol::BUFFERED_EDIT);
   bool orthogonal;
   if (ucell_angles==geom::Vec3()){ orthogonal=true; }
@@ -103,14 +103,37 @@ void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom:
       ResidueHandle r=residues[i];
       AtomHandleList atoms=r.GetAtomList();
       geom::Vec3 ref_pos=atoms[0].GetPos();
-      if (orthogonal) {
-        for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
-          edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),ref_pos,ucell_size));
-        }}
-      else {
-        for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
-          edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),ref_pos,ucell_size,ucell_angles));
-        }}
+      if (follow_bonds) {
+        int natoms=r.GetAtomCount(),n=1,cycles=1;
+        AtomHandle a=atoms[0];
+        AtomHandleList wrapped_atoms;
+        wrapped_atoms.reserve(natoms);
+        wrapped_atoms.push_back(a);
+        while (n<natoms and cycles<natoms) {
+          ++cycles;
+          for (AtomHandleList::iterator a=wrapped_atoms.begin(), e=wrapped_atoms.end(); a!=e; ++a) {
+            AtomHandleList al=(*a).GetBondPartners();
+            ref_pos=(*a).GetPos();
+            for (AtomHandleList::iterator a2=al.begin(), e2=al.end(); a2!=e2; ++a2) {
+              if (std::find(wrapped_atoms.begin(),wrapped_atoms.end(), *a2) !=wrapped_atoms.end()){
+                continue;
+              } else {
+                ++n;
+                wrapped_atoms.push_back(*a2);
+                if (orthogonal) {
+                    edi.SetAtomPos((*a2),geom::WrapVec3((*a2).GetPos(),ref_pos,ucell_size));
+                } else {
+                  edi.SetAtomPos((*a2),geom::WrapVec3((*a2).GetPos(),ref_pos,ucell_size,ucell_angles));
+          }}}}}
+      } else {
+        if (orthogonal) {
+          for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
+            edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),ref_pos,ucell_size));
+          }}
+        else {
+          for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
+            edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),ref_pos,ucell_size,ucell_angles));
+        }}}
     }
     for (unsigned int i=0; i<n_residues; ++i) {
       ResidueHandle r=residues[i];
