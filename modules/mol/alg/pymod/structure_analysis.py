@@ -135,7 +135,7 @@ def CalculateDistanceDifferenceMatrix(sele1,sele2):
   This function calculates the pairwise distance differences between two EntityViews.
   The two EntityViews should have the same number of atoms
   It returns an NxN DistanceDifferenceMatrix M (where N is the number of atoms in sele1)
-  where M[i,j]=(sele2.atoms[i].pos-sele2.atoms[j].pos)-(sele1.atoms[i].pos-sele1.atoms[j].pos)
+  where M[i,j]=|sele2.atoms[i].pos-sele2.atoms[j].pos|-|sele1.atoms[i].pos-sele1.atoms[j].pos|
   """
   try:import numpy as npy
   except ImportError:
