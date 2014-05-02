@@ -150,7 +150,7 @@ def CalculateDistanceDifferenceMatrix(sele1,sele2):
   n_atoms=sele1.GetAtomCount()
   M=npy.zeros([n_atoms,n_atoms])
   for i,a1 in enumerate(sele1.atoms):
-    for j,a2 in enumerate(sele2.atoms):
+    for j,a2 in enumerate(sele1.atoms):
       if i>=j:continue
       d1=ost.geom.Distance(a1.pos,a2.pos)
       d2=ost.geom.Distance(sele2.atoms[i].pos,sele2.atoms[j].pos)
