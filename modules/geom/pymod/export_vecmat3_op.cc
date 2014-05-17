@@ -38,6 +38,7 @@ Real (*Mat3Comp)(const Mat3& m, unsigned int i, unsigned int j)       = &Comp;
 Real (*Mat3Minor)(const Mat3& m, unsigned int i, unsigned int j)      = &Minor;
 Vec3 (*Vec3Min)(const Vec3&, const Vec3&) = &Min;
 Vec3 (*Vec3Max)(const Vec3&, const Vec3&) = &Max;
+Real (*Vec3SignedAngle)(const Vec3& v1, const Vec3& v2, const Vec3& v3) = &SignedAngle;
 Real (*Vec3Distance2WithPBC)(const Vec3&, const Vec3&, const Vec3&)   = &Distance2WithPBC;
 Real (*Vec3DistanceWithPBC)(const Vec3&, const Vec3&, const Vec3&)    = &DistanceWithPBC;
 Vec3 (*wrap_vec3_1)(const Vec3&, const Vec3&, const Vec3&)               = &WrapVec3;
@@ -56,6 +57,7 @@ void export_VecMat3_op()
   def("Distance",Vec3Distance);  
   def("Equal",Mat3Equal, (arg("m1"), arg("m2"), arg("epsilon")=EPSILON));
   def("DihedralAngle", &DihedralAngle);
+  def("SignedAngle", Vec3SignedAngle, (arg("v1"), arg("v2"),arg("ref_normal")));
   def("Dot",Mat3Dot);
   def("Det",Mat3Det);
   def("Cross",Vec3Cross);

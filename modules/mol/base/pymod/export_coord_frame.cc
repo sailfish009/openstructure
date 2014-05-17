@@ -43,7 +43,11 @@ Real (CoordFrame::*get_min_dist)(const mol::EntityView&, const mol::EntityView&)
 Real (CoordFrame::*get_alpha)(const mol::EntityView&) const = &CoordFrame::GetAlphaHelixContent;
 geom::Line3 (CoordFrame::*get_odr_line)(const mol::EntityView&) const = &CoordFrame::GetODRLine;
 geom::Plane (CoordFrame::*get_odr_plane)(const mol::EntityView&) const = &CoordFrame::GetODRPlane;
-std::pair<geom::Line3,Real> (CoordFrame::*fit_cylinder)(const mol::EntityView&) const = &CoordFrame::FitCylinder;
+boost::python::tuple wrap_FitCylinder(const CoordFrame& f,const mol::EntityView& ev) {
+  std::pair<geom::Line3,Real> pair=f.FitCylinder(ev);
+  return boost::python::make_tuple<geom::Line3,Real>(pair.first,pair.second);
+}  
+
 // TODO: move to geom
 geom::Line3 (CoordFrame::*get_odr_line2)() const = &geom::Vec3List::GetODRLine;
 
@@ -83,7 +87,7 @@ void export_CoordFrame()
     .def("GetODRLine",get_odr_line)
     .def("GetODRLine",get_odr_line2)
     .def("GetAlphaHelixContent",get_alpha)
-    .def("FitCylinder",fit_cylinder)
+    .def("FitCylinder",wrap_FitCylinder)
   ;
   def("CreateCoordFrame",create_coord_frame1);
   def("CreateCoordFrame",create_coord_frame2);
