@@ -11,5 +11,6 @@ naccess.py
 blast.py
 cadscore.py
 kclust.py
+ialign.py
 )
 pymod(NAME bindings PY ${OST_BINDINGS})

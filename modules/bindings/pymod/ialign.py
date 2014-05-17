@@ -120,7 +120,9 @@ def _ParseiAlign(lines):
   return iAlignResult(rmsd, tf, alignment, is_score, aln_residues, aln_contacts)
 
 def _RuniAlign(ialign, tmp_dir, options={}):
-  opts = {'a' : 1}   # concise output
+  opts = {'a' : 1,  # concise output
+          'w' : tmp_dir
+         } 
   opts.update(options)
   cmd_opts = []
   for k, v in opts.iteritems():
@@ -143,6 +145,8 @@ def _RuniAlign(ialign, tmp_dir, options={}):
   lines=ps.stdout.readlines()
   if (len(lines))<22:
     _CleanupFiles(tmp_dir)
+    #for l in lines:
+    #  print l
     raise RuntimeError("iAlign superposition failed")
   return _ParseiAlign(lines)
 
