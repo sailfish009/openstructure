@@ -52,7 +52,7 @@ def smooth(vec,n):
 From here on the module needs numpy
 """
 
-def RMSD_Matrix_From_Traj(t,sele,first=0,last=-1):
+def RMSD_Matrix_From_Traj(t,sele,first=0,last=-1,align=True,align_sele=None):
   """
   This function calculates a matrix M such that M[i,j] is the
   RMSD of the EntityView sele between frames i and j of the trajectory t
@@ -64,14 +64,16 @@ def RMSD_Matrix_From_Traj(t,sele,first=0,last=-1):
     last=-1 : the last frame of t to be used
   Returns a numpy NxN matrix, where n is the number of frames.
   """
+  if not align_sele:align_sele=sele
   try:
     import numpy as npy
     if last==-1:last=t.GetFrameCount()
     n_frames=last-first
     rmsd_matrix=npy.identity(n_frames)
     for i in range(n_frames):
-      t=ost.mol.alg.SuperposeFrames(t,sele,begin=first,end=last,ref=i)
-      eh=t.GetEntity()
+      if align:
+        t=ost.mol.alg.SuperposeFrames(t,align_sele,begin=first,end=last,ref=i)
+        eh=t.GetEntity()
       t.CopyFrame(i)
       rmsd_matrix[i,:]=ost.mol.alg.AnalyzeRMSD(t,sele,sele)
       if i==0:
