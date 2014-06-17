@@ -83,7 +83,13 @@ def ParseBlastOutput(string, seqid_thres=0, evalue_thres=float("infinity")):
     bit_score=float(_GetValue(hsp, 'Hsp_bit-score'))
     score=float(_GetValue(hsp, 'Hsp_score'))
     evalue=float(_GetValue(hsp, 'Hsp_evalue'))
-    identity=float(_GetValue(hsp, 'Hsp_identity'))
+    try:
+      identity=float(_GetValue(hsp, 'Hsp_identity'))
+    except AssertionError:
+      # The Hsp_identity tag is not a 'must' in the BLAST XML format. It
+      # describes the number of matching characters. Hence we assume, if it is
+      # missing, there are 0 matches.
+      identity=0
     hsp_align_len=float(_GetValue(hsp, 'Hsp_align-len'))
     seqid=identity/hsp_align_len
     query_offset=_GetInt(hsp, 'Hsp_query-from')-1
