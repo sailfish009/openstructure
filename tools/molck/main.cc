@@ -10,6 +10,7 @@
 #include <ost/conop/amino_acids.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/mol/pdb_writer.hh>
+#include <ost/io/mol/mmcif_reader.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/conop/nonstandard.hh>
 #if defined(__APPLE__)
@@ -26,15 +27,25 @@ namespace fs=boost::filesystem;
 EntityHandle load_x(const String& file, const IOProfile& profile)
 {
   try {
-    PDBReader reader(file, profile);
-    if (reader.HasNext()) {
-      EntityHandle ent=CreateEntity();
-      reader.Import(ent);
+    EntityHandle ent = CreateEntity();
+    if(file.compare(file.length() - 6, 6, ".mmcif") == 0 ||
+       file.compare(file.length() - 4, 4, ".cif") == 0){
+      MMCifReader reader(file,ent,profile);
+      reader.Parse();
       return ent;
     }
-    std::cerr << "ERROR: '" << file << "' does not contain any ATOM records. "
+    //if its not mmcif, we assume the file to be in pdb format without even
+    //looking at the filename
+    else{
+      PDBReader reader(file, profile);
+      if (reader.HasNext()) {
+        reader.Import(ent);
+        return ent;
+      }
+      std::cerr << "ERROR: '" << file << "' does not contain any ATOM records. "
               << "Are you sure this is a PDB file?" << std::endl;
-    return EntityHandle();
+      return EntityHandle();
+    }
   } catch (std::exception& e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
     return EntityHandle();
