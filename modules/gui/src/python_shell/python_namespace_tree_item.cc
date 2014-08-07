@@ -17,9 +17,9 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
+#include "python_namespace_tree_item.hh"
 #include <ost/base.hh>
 
-#include "python_namespace_tree_item.hh"
 
 
 

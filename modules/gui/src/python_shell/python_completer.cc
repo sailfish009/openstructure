@@ -20,10 +20,10 @@
   Authors: Marco Biasini, Andreas Schenk
  */
 
-#include <iostream>
 
 #include "python_completer.hh"
 #include "python_namespace_tree_model.hh"
+#include <iostream>
 #include <QStringList>
 
 

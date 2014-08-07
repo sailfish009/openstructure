@@ -20,20 +20,19 @@
   Authors: Marco Biasini, Andreas Schenk
  */
 
-#include <iostream>
 
 
 #include "python_shell_widget.hh"
-
+#include "state_machine.hh"
+#include "state.hh"
 #include "gutter.hh"
-
 #include "string_literal_positions.hh"
-
 #include "python_shell_text_document_layout.hh"
-
 #include "python_completer.hh"
 #include "path_completer.hh"
 #include "transition.hh"
+
+#include <iostream>
 
 #include <QApplication>
 #include <QFontMetrics>

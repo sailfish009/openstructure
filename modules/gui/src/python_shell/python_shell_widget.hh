@@ -25,13 +25,11 @@
 #define OST_GUI_PYTHON_SHELL_WIDGET_HH
 
 
-#include <ost/gui/module_config.hh>
 #include "python_interpreter.hh"
 #include "shell_history.hh"
 #include  "python_shell_fw.hh"
 #include "python_syntax_highlighter.hh"
-#include "state_machine.hh"
-#include "state.hh"
+#include <ost/gui/module_config.hh>
 
 #include <QPlainTextEdit>
 #include <QHash>
@@ -41,7 +39,10 @@ namespace ost { namespace gui {
 class Gutter;
 class PythonCompleter;
 class PathCompleter;
+class State;
+class StateMachine;
 
+typedef std::vector<GutterBlock> GutterBlockList;
 
 class DLLEXPORT_OST_GUI PythonShellWidget : public QPlainTextEdit {
 

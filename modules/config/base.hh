@@ -19,7 +19,6 @@
 #ifndef OST_BASE_HH
 #define OST_BASE_HH
 
-#include <string>
 #include <cmath>
 #include <math.h>
 #include <complex>
