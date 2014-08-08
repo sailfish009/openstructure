@@ -267,6 +267,10 @@ ImageStateBasePtr FFTFnc::VisitState(const ImageStateImpl<T,D>& s) const
   throw FFTException(ostr.str());
 }
 
+// force explicit instantiation to make intel compiler happy
+template ImageStateBasePtr FFTFnc::VisitState<float,FrequencyDomain>(const ImageStateImpl<float,FrequencyDomain>& ) const;
+template ImageStateBasePtr FFTFnc::VisitState<unsigned short,SpatialDomain>(const ImageStateImpl<unsigned short,SpatialDomain>& ) const;
+
 }  //alg ns
 
 template class TEMPLATE_DEF_EXPORT image_state::ImageStateConstModOPAlgorithm<alg::FFTFnc>;

@@ -103,7 +103,20 @@ template struct fnc_paste_ip<Word,SpatialDomain,Complex,HalfFrequencyDomain>;
 template struct fnc_paste_ip<Real,FrequencyDomain,Complex,HalfFrequencyDomain>;
 template struct fnc_paste_ip<Complex,FrequencyDomain,Complex,HalfFrequencyDomain>;
 template struct fnc_paste_ip<Complex,HalfFrequencyDomain,Complex,HalfFrequencyDomain>;
+template struct fnc_paste_ip<Real,FrequencyDomain,Complex,SpatialDomain>;
+template struct fnc_paste_ip<Real,FrequencyDomain,unsigned short,SpatialDomain>;
+template struct fnc_paste_ip<Complex,FrequencyDomain,unsigned short,SpatialDomain>;
+template struct fnc_paste_ip<Complex,HalfFrequencyDomain,unsigned short,SpatialDomain>;
+template struct fnc_paste_ip<Complex,HalfFrequencyDomain,Real,SpatialDomain>;
+template struct fnc_paste_ip<Complex,HalfFrequencyDomain,Complex,SpatialDomain>;
+template struct fnc_paste_ip<Complex,FrequencyDomain,Complex,SpatialDomain>;
+template struct fnc_paste_ip<Complex,FrequencyDomain,Real,SpatialDomain>;
+template struct fnc_paste_ip<Real,FrequencyDomain,Real,SpatialDomain>;
 
+template struct fnc_add_ip<Real,SpatialDomain,Real,SpatialDomain>;
+template struct fnc_sub_ip<Real,SpatialDomain,Real,SpatialDomain>;
+template struct fnc_mul_ip<Real,SpatialDomain,Real,SpatialDomain>;
+template struct fnc_div_ip<Real,SpatialDomain,Real,SpatialDomain>;
 }
 
 template struct dispatch::binary_dispatch_ip<binop::fnc_add_ip>;
