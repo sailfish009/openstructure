@@ -222,9 +222,9 @@ public:
          const P6& p6,                           \
          const P7& p7,                           \
          const P8& p8,                           \
-         const P8& p9,                           \
-         const P8& pa,                           \
-         const P9& pb):                          \
+         const P9& p9,                           \
+         const PA& pa,                           \
+         const PB& pb):                          \
     FNC(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,pa,pb) {}
 
 
