@@ -16,23 +16,23 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <utility>
-#include <vector>
-#include <signal.h>
-#include <iostream>
-#include <sstream>
-#include <ctime>
 
-#include <ost/gui/module_config.hh>
-#include <ost/log.hh>
-#include <ost/platform.hh>
 #include <ost/gui/python_shell/text_logger.hh>
 #include <ost/gui/python_shell/python_shell.hh>
 #include <ost/gui/python_shell/python_interpreter.hh>
 #include "gl_win.hh"
 #include "widget_state_saver.hh"
 #include "gosty.hh"
+#include <ost/log.hh>
+#include <ost/platform.hh>
+#include <ost/gui/module_config.hh>
 
+#include <utility>
+#include <vector>
+#include <signal.h>
+#include <iostream>
+#include <sstream>
+#include <ctime>
 // must come last
 #include <QApplication>
 #include <QResource>

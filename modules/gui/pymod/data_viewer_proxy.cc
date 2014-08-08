@@ -22,9 +22,9 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#include <ost/message.hh>
 
 #include "data_viewer_proxy.hh"
+#include <ost/message.hh>
 
 namespace ost { namespace img { namespace gui {
 

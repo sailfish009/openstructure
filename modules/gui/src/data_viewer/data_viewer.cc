@@ -23,6 +23,7 @@
   Authors: Ansgar Philippsen, Andreas Schenk, Jeff Lovelace
 */
 
+#include <ost/gui/gosty_app.hh>
 #include <cassert>
 #include <iostream>
 //#include <cstring>
@@ -33,7 +34,6 @@
 #include <ost/message.hh>
 //#include <ost/img/alg/fft.hh>   
 #include <ost/img/alg/norm.hh>   
-#include <ost/gui/gosty_app.hh>
 #include <ost/gui/dock_widget.hh>
 
 #include <ost/gui/perspective.hh>

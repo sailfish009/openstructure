@@ -16,9 +16,9 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/gui/gosty_app.hh>
 #include <ost/dyn_cast.hh>
 #include <ost/mol/view_op.hh>
-#include <ost/gui/gosty_app.hh>
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/entity.hh>
 

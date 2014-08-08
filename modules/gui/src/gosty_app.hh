@@ -25,8 +25,8 @@
 
 
 #include <ost/config.hh>
-#include <ost/gui/module_config.hh>
 #include <ost/gui/main.hh>
+#include <ost/gui/module_config.hh>
 #include <ost/gui/widget_geom_handler.hh>
 
 
