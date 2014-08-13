@@ -77,14 +77,14 @@ def AnalyzeHelixKink(t,sele,proline=False):
   """
   This function calculates the bend,wobble and face-shift angles
   in an alpha-helix over a trajectory. The determination is more stable if
-  there are at least 4 residues on each side (8 is even better) of the prolin around which
+  there are at least 4 residues on each side (8 is even better) of the proline around which
   the helix is kinked. The selection should contain all residues in the correct
   order and with no gaps and no missing C-alphas.
   Input:
     t     : The trajectory to be analyzed (CoordGroup)
     sele  : A selection containing the alpha helix to be analyzed (EntityView)
     proline=False : An EntityView containing only the proline (or another residue) around which the
-                    helix is kinked. If False, the proline will be serached for automatically
+                    helix is kinked. If False, the proline will be searched for automatically
   Output:
     (bend_angle,face_shift,wobble_angle) : a tuple of FloatLists
   """
@@ -104,9 +104,9 @@ def AnalyzeHelixKink(t,sele,proline=False):
   ca3_pos=ost.mol.alg.AnalyzeAtomPos(t,ca_3.GetHandle())
   ca4_pos=ost.mol.alg.AnalyzeAtomPos(t,ca_4.GetHandle())
   #Now we calculate the bend angle
-  bend_angle=[]
-  face_shift=[]
-  wobble_angle=[]
+  bend_angle=ost.FloatList()
+  face_shift=ost.FloatList()
+  wobble_angle=ost.FloatList()
   for i in range(n_frames):
     bend_angle.append(__CalculateBendAngle(pre_proline_axis[i],post_proline_axis[i]))
     face_shift.append(__CalculateFaceShift(pre_proline_axis[i],post_proline_axis[i],pre_proline_centers[i],post_proline_centers[i],proline_pos[i],ca3_pos[i],ca4_pos[i],bend_angle[i]))
