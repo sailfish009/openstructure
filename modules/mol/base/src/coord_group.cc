@@ -146,7 +146,8 @@ void CoordGroupHandle::AddFrames(const CoordGroupHandle& cg)
       throw IntegrityError("Atom number don't match");
     }
     for (size_t i=0; i<cg.GetFrameCount(); ++i) {
-      source_->AddFrame(*cg.GetFrame(i));
+      CoordFramePtr p = cg.GetFrame(i);
+      source_->AddFrame(*p,p->GetCellSize(),p->GetCellAngles());
     }
   } else {
     throw IntegrityError("Can't add frame to immutable CoordGroup");
