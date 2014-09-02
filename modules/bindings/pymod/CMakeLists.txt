@@ -13,5 +13,6 @@ blast.py
 cadscore.py
 kclust.py
 ialign.py
+align_3dcomb.py
 )
 pymod(NAME bindings PY ${OST_BINDINGS})

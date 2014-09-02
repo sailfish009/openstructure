@@ -7,3 +7,4 @@ from ost.bindings import naccess
 from ost.bindings import hbplus
 from ost.bindings import clustalw
 from ost.bindings import cadscore
+from ost.bindings import align_3dcomb
