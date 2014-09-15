@@ -51,6 +51,7 @@ option(COMPILE_TESTS "whether unit tests should be compiled by default" OFF)
 option(ENABLE_STATIC "whether static libraries should be compiled" OFF)
 option(UBUNTU_LAYOUT "whether Debian/Ubuntu's lib and libexec directory layout should be used" OFF)
 option(HIDDEN_VISIBILITY "on gcc, use -fvisibility=hidden" OFF)
+option(ENABLE_MM "whether openmm support is added" OFF)
 
 if (CXX)
   set(CMAKE_CXX_COMPILER ${CXX})
@@ -234,6 +235,10 @@ if(USE_NUMPY)
   find_package(Numpy REQUIRED)
 endif()
 
+if(ENABLE_MM)
+  find_package(OpenMM REQUIRED)
+endif()
+
 if (ENABLE_IMG)
   find_package(FFTW REQUIRED)
   find_package(TIFF REQUIRED)
@@ -290,6 +295,7 @@ include_directories(${Boost_INCLUDE_DIRS}
                     ${EIGEN2_INCLUDE_DIRS}
                     ${TIFF_INCLUDE_DIR}
                     ${PNG_INCLUDE_DIRS}
+                    ${OPEN_MM_INCLUDE_DIRS}
                     )
 if(USE_NUMPY)
 include_directories(${PYTHON_NUMPY_INCLUDE_DIR})

@@ -1,0 +1,61 @@
+#ifndef OST_MMMODELLER_HH
+#define OST_MMMODELLER_HH
+
+
+#include <vector>
+#include <set>
+
+#include <ost/platform.hh>
+#include <ost/io/mol/pdb_reader.hh>
+#include <ost/mol/entity_handle.hh>
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/atom_handle.hh>
+#include <ost/geom/vec3.hh>
+#include <ost/geom/composite.hh>
+#include <ost/geom/transform.hh>
+#include <ost/mol/xcs_editor.hh>
+#include <ost/mol/bond_handle.hh>
+#include <ost/message.hh>
+//#include <ost/mol/mm/gromacs_data.hh>
+#include <ost/mol/bounding_box.hh>
+#include <ost/mol/mm/buildingblock.hh>
+#include <ost/mol/mm/forcefield.hh>
+#include <ost/mol/mm/mm_settings.hh>
+#include <ost/mol/mm/index.hh>
+#include <ost/mol/mm/topology.hh>
+#include <ost/conop/heuristic.hh>
+#include <ost/mol/spatial_organizer.hh>
+
+
+namespace ost { namespace mol{ namespace mm{
+
+class MMModeller{
+public:
+
+  static void GenerateDisulfidBonds(ost::mol::EntityHandle& handle);
+
+  static void GenerateCYSHEMEBonds(ost::mol::EntityHandle& handle);
+
+  static void GenerateHISHEMEBonds(ost::mol::EntityHandle& handle);
+
+  static void GenerateMETHEMEBonds(ost::mol::EntityHandle& handle);
+
+  //may sound pretty stupid...
+  //But this is necessary if we want to compare our energies with
+  //the energies calculated by gromacs. When ost writes and entity
+  //down to disk, it uses 3 digits precision.
+  //If we feed this into gromacs, it also produces a topology
+  //with three digits precision. The problem is, that gromacs
+  //uses nm, therefore the precision gets lowered tenfold.
+  //To take care of that it is necessary to lower our precision...
+  static void LowerPrecision(ost::mol::EntityHandle& handle);
+
+  static void AssignPDBNaming(ost::mol::EntityHandle& handle);
+
+  static void AssignGromacsNaming(ost::mol::EntityHandle& handle);
+};
+
+
+}}}
+
+#endif
