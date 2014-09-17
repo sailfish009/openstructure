@@ -22,7 +22,7 @@ bool ChemdictParser::OnBeginData(const StringRef& data_name)
 }
 
 bool ChemdictParser::OnBeginLoop(const StarLoopDesc& header)
-{ 
+{  
   if (header.GetCategory()=="chem_comp_atom") {
     loop_type_=ATOM_SPEC;
     indices_[ATOM_NAME]=header.GetIndex("atom_id");
@@ -30,7 +30,8 @@ bool ChemdictParser::OnBeginLoop(const StarLoopDesc& header)
     indices_[ELE]=header.GetIndex("type_symbol");      
     indices_[IS_LEAVING]=header.GetIndex("pdbx_leaving_atom_flag");
     indices_[IS_AROMATIC]=header.GetIndex("pdbx_aromatic_flag");
-    indices_[ORDINAL]=header.GetIndex("pdbx_ordinal");      
+    indices_[ORDINAL]=header.GetIndex("pdbx_ordinal");     
+    indices_[CHARGE]=header.GetIndex("charge");      
     return true;
   } else if (header.GetCategory()=="chem_comp_bond") {
     loop_type_=BOND_SPEC;
@@ -54,6 +55,7 @@ void ChemdictParser::OnDataRow(const StarLoopDesc& header,
     atom.ordinal=columns[indices_[ORDINAL]].to_int().second-1;
     atom.element=columns[indices_[ELE]].str();
     atom.is_aromatic=columns[indices_[IS_AROMATIC]][0]=='Y';
+    atom.charge=columns[indices_[CHARGE]].to_int().second;
     compound_->AddAtom(atom);
     atom_map_[atom.name]=atom.ordinal;
   } else if (loop_type_==BOND_SPEC) {
@@ -126,6 +128,10 @@ void ChemdictParser::OnDataItem(const StarDataItem& item)
     } else if (item.GetName()==StringRef("pdbx_modified_date", 18)) {
       compound_->SetModificationDate(Date::FromString(item.GetValue()));
     }
+     else if (item.GetName()==StringRef("pdbx_formal_charge", 18)) {
+      compound_->SetCharge(item.GetValue().to_int().second);
+       //std::cout << compound_->GetID() << compound_->GetCharge() << "\n" ;
+      }
   } else if (item.GetName()==StringRef("atom_id", 7)) {
     atom_.name=item.GetValue().str();
   } else if (item.GetName()==StringRef("alt_atom_id", 11)) {

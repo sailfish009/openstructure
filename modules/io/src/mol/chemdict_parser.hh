@@ -75,12 +75,13 @@ private:
     IS_LEAVING=4,
     ELE=5,
     STEREO_CONF=6,
+    CHARGE=7,
     ATOM_ID1=0,
     ATOM_ID2=1,
     BOND_ORDER=2
   } PropIndex;
   char                                    last_;
-  int                                     indices_[10];
+  int                                     indices_[11];
   bool                                    insert_;
   static std::map<String, mol::ChemClass> tm_;  
   static std::map<String, mol::ChemType>  xtm_;
