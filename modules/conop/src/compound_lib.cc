@@ -224,6 +224,7 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
     modi_date_str=modi_date.ToString();
     sqlite3_bind_text(stmt, 7, crea_date_str.c_str(), crea_date_str.length(), NULL);
     sqlite3_bind_text(stmt, 8, modi_date_str.c_str(), modi_date_str.length(), NULL);
+    sqlite3_bind_text(stmt, 9, compound->GetName().c_str(), compound->GetName().length(), NULL);
     int charge=compound->GetCharge();
     sqlite3_bind_int(stmt, 10, charge);
   } else {
