@@ -739,15 +739,17 @@ void real_dumper(BinaryOStream<CONVERSIONTYPE>& f, header_base& header, const Co
   char this_dummy; //create dummy variable to give to Progress as this
   Progress::Instance().Register(&this_dummy,header.ns*header.nr,100);
   for(int ss=0;ss<header.ns;++ss) {
+    std::vector<B> buffer(header.nr*header.nc);
     pnt[maps]=header.nsstart+ss;
     for(int sr=0;sr<header.nr;++sr) {
       pnt[mapr]=header.nrstart+sr;
       for(int sc=0;sc<header.nc;++sc) {
         pnt[mapc]=header.ncstart+sc;
-        f << static_cast<B>(norm.Convert(isr->Value(pnt)));
+        buffer[header.nc*sr+sc]=img::Val2Val<Real,B>(norm.Convert(isr->Value(pnt)));
       }
       Progress::Instance().AdvanceProgress(&this_dummy);
     }
+    f.write(&buffer[0],header.nr*header.nc);
   }
   Progress::Instance().DeRegister(&this_dummy);
 }
