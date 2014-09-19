@@ -28,7 +28,10 @@ class DLLEXPORT_OST_IO MRC: public ImageFormatBase
 {
  public:
 
-  MRC(bool normalize_on_save = false, Subformat subformat = MRC_AUTO_FORMAT ,Endianess endianness_on_save = OST_LOCAL_ENDIAN);
+  MRC(bool normalize_on_save = false, Subformat subformat = MRC_AUTO_FORMAT ,Endianess endianness_on_save = OST_LOCAL_ENDIAN, Format bit_depth = OST_DEFAULT_FORMAT);
+
+  Format GetBitDepth() const;
+  void SetBitDepth ( Format bitdepth);
 
   Endianess GetEndianessOnSave() const;
   void SetEndianessOnSave(Endianess end);
@@ -46,12 +49,13 @@ class DLLEXPORT_OST_IO MRC: public ImageFormatBase
   Subformat subformat_;
   bool normalize_on_save_;
   Endianess endianess_on_save_;
+  Format bit_depth_;
 };
 
 class DLLEXPORT_OST_IO CCP4: public MRC
 {
  public:
-  CCP4(bool normalize_on_save = false, Endianess endianness_on_save = OST_LOCAL_ENDIAN);
+  CCP4(bool normalize_on_save = false, Endianess endianness_on_save = OST_LOCAL_ENDIAN, Format bit_depth = OST_DEFAULT_FORMAT);
 };
 
 typedef CCP4 MAP;
