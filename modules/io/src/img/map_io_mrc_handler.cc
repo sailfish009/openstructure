@@ -74,7 +74,7 @@ u v w x . . .     d*c*b*a b c d   3
 #include <ost/base.hh>
 
 #include <ost/img/image_state.hh>
-#include <ost/img/alg/stat.hh>
+#include <ost/img/alg/stat_accumulator.hh>
 #include <ost/img/alg/normalizer_factory.hh>
 #include <ost/img/util.hh>
 #include <ost/img/progress.hh>
@@ -294,11 +294,19 @@ public:
       y=1.0;
       z=1.0;
     }
-    ost::img::alg::Stat stat;
-    im.Apply(stat);
-    amin=stat.GetMinimum();
-    amax=stat.GetMaximum();
-    amean=stat.GetMean();
+    ost::img::alg::StatAccumulator<1> acc;
+    if(im.GetType()==img::REAL) {
+      img::image_state::RealSpatialImageState *isr=dynamic_cast<img::image_state::RealSpatialImageState*>(im.ImageStatePtr().get());
+      if(! isr){
+        throw(IOException("MRC/CCP4 export: dynamic cast failed in header base."));
+      }
+      for(Real* ptr = isr->Data().GetData(); ptr<isr->Data().GetEnd(); ++ptr) {
+        acc(*ptr);
+      }
+      amin=acc.GetMinimum();
+      amax=acc.GetMaximum();
+      amean=acc.GetMean();
+    }
     for(unsigned int i=0;i<800;++i)
     {
       label[i]=' ';
