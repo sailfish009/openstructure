@@ -204,6 +204,10 @@ public:
   {
     return read_helper(value,n);
   }
+  BinaryIStream& read(int8_t* value,std::streamsize n)
+  {
+    return read_helper(value,n);
+  }
   BinaryIStream& read(int16_t* value,std::streamsize n)
   {
     return read_helper(value,n);

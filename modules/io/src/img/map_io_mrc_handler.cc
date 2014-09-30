@@ -841,7 +841,7 @@ void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
     } else {
       throw IOException("internal error in MRC io: expected ComplexHalfFrequencyImageState");
     }
-  } else if (header.mode>=0 && header.mode<=2) {
+  } else if (header.mode==0 || header.mode==2 || header.mode==5 || header.mode==6 || header.mode==7) {
     img::Size msize;
     msize[header.mapc-1]=header.nc;
     msize[header.mapr-1]=header.nr;
@@ -861,11 +861,15 @@ void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
     LOG_INFO("resulting image extent: " << image.GetExtent());
     if(img::image_state::RealSpatialImageState *rs=dynamic_cast<img::image_state::RealSpatialImageState*>(image.ImageStatePtr().get())) {
       if(header.mode==0) {
-        detail::real_filler<uchar,CONVERSIONTYPE>(*rs,f,header);
-      } else if(header.mode==1) {
-        detail::real_filler<unsigned short,CONVERSIONTYPE>(*rs,f,header);
+        detail::real_filler<int8_t,CONVERSIONTYPE>(*rs,f,header);
+      } else if(header.mode==1 || header.mode==5) {
+        detail::real_filler<int16_t,CONVERSIONTYPE>(*rs,f,header);
       } else if(header.mode==2) {
         detail::real_filler<float,CONVERSIONTYPE>(*rs,f,header);
+      } else if(header.mode==6) {
+        detail::real_filler<uint16_t,CONVERSIONTYPE>(*rs,f,header);
+      } else if(header.mode==7) {
+        detail::real_filler<int32_t,CONVERSIONTYPE>(*rs,f,header);
       }
     } else {
       throw IOException("internal error in MRC/CCP4 io: expected RealSpatialImageState");
