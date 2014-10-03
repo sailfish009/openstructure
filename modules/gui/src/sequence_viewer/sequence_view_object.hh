@@ -23,6 +23,7 @@
   Author: Stefan Scheuber
  */
 
+#ifndef Q_MOC_RUN
 
 #include <ost/mol/entity_handle.hh>
 
@@ -38,7 +39,7 @@
 #include "seq_text_painter.hh"
 
 #include "base_view_object.hh"
-
+#endif
 
 namespace ost { namespace gui {
 
