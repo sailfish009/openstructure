@@ -23,11 +23,14 @@
   Author: Stefan Scheuber
  */
 
+#ifndef Q_MOC_RUN
+
 #include <ost/seq/alignment_handle.hh>
 
 #include <ost/gfx/gradient.hh>
 
 #include "sequence_view_object.hh"
+#endif
 
 namespace ost { namespace gui {
 

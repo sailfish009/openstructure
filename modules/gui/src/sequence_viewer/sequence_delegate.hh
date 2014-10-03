@@ -23,10 +23,12 @@
   Author: Stefan Scheuber
  */
 
+#ifndef Q_MOC_RUN
 
 #include "sequence_model.hh"
 #include <QItemDelegate>
 #include <QModelIndex>
+#endif
 
 namespace ost { namespace gui {
 

@@ -23,6 +23,7 @@
   Author: Stefan Scheuber
  */
 
+#ifndef Q_MOC_RUN
 
 #include <ost/seq/alignment_handle.hh>
 
@@ -39,6 +40,7 @@
 #include <QToolBar>
 #include <QModelIndex>
 #include <QItemSelection>
+#endif
 
 namespace ost { 
 

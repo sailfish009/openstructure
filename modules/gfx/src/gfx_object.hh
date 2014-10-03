@@ -26,6 +26,7 @@
 #ifdef check
 #undef check
 #endif
+#ifndef Q_MOC_RUN
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <vector>
@@ -41,7 +42,7 @@
 #include "vertex_array.hh"
 #include "input.hh"
 #include "exporter_fw.hh"
-
+#endif
 namespace ost { namespace gfx {
 
 class Scene; // fw decl
