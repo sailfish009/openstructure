@@ -19,7 +19,8 @@ typedef boost::shared_ptr<TerminiConstructor> TerminiConstructorPtr;
 typedef boost::shared_ptr<BlockModifier> BlockModifierPtr;
 
 typedef enum {
-  GromacsBlockModifiers
+  GromacsBlockModifiers,
+  HeuristicBlockModifiers
 } BlockModifierType;
 
 class HydrogenConstructor{

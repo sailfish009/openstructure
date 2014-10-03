@@ -1,6 +1,7 @@
 #include <boost/python.hpp>
 #include <ost/mol/mm/block_modifiers.hh>
 #include <ost/mol/mm/gromacs_block_modifiers.hh>
+#include <ost/mol/mm/heuristic_block_modifiers.hh>
 
 using namespace boost::python;
 
@@ -55,9 +56,14 @@ void export_BlockModifiers()
     .def("AddDeleteAtom",&ost::mol::mm::GromacsBlockModifier::AddDeleteAtom)
   ;
  
+  class_<ost::mol::mm::HeuristicHydrogenConstructor, bases<ost::mol::mm::HydrogenConstructor> >("HeuristicHydrogenConstructor", init<ost::mol::mm::BuildingBlockPtr>())
+  .def("ApplyOnBuildingBlock",&ost::mol::mm::HeuristicHydrogenConstructor::ApplyOnBuildingBlock)
+  .def("ApplyOnResidue",&ost::mol::mm::HeuristicHydrogenConstructor::ApplyOnResidue)
+  ;
 
   boost::python::register_ptr_to_python<ost::mol::mm::GromacsHydrogenConstructorPtr>();
   boost::python::register_ptr_to_python<ost::mol::mm::GromacsBlockModifierPtr>();
-
+  boost::python::register_ptr_to_python<ost::mol::mm::HeuristicHydrogenConstructorPtr>();
+  
 }
 

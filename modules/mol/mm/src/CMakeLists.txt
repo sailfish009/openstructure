@@ -4,6 +4,7 @@ set(OST_MOL_MM_HEADERS
   buildingblock.hh
   block_modifiers.hh
   gromacs_block_modifiers.hh
+  heuristic_block_modifiers.hh
   mm_interaction.hh
   mm_settings.hh
   simulation.hh 
@@ -23,6 +24,7 @@ set(OST_MOL_MM_SOURCES
   gromacs_reader.cc
   buildingblock.cc
   gromacs_block_modifiers.cc
+  heuristic_block_modifiers.cc
   mm_interaction.cc
   simulation.cc
   mm_modeller.cc
