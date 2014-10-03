@@ -23,6 +23,7 @@
   Author: Stefan Scheuber
  */
 
+#ifndef Q_MOC_RUN
 
 #include <ost/mol/chain_view.hh>
 
@@ -37,6 +38,8 @@
 
 #include <QAbstractTableModel>
 #include <QItemSelection>
+#endif
+
 namespace ost { namespace gui {
 
 class SequenceModel : public QAbstractTableModel
