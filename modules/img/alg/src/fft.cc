@@ -268,7 +268,7 @@ ImageStateBasePtr FFTFnc::VisitState(const ImageStateImpl<T,D>& s) const
 }
 
 // force explicit instantiation to make intel compiler happy
-template ImageStateBasePtr FFTFnc::VisitState<float,FrequencyDomain>(const ImageStateImpl<float,FrequencyDomain>& ) const;
+template ImageStateBasePtr FFTFnc::VisitState<Real,FrequencyDomain>(const ImageStateImpl<Real,FrequencyDomain>& ) const;
 template ImageStateBasePtr FFTFnc::VisitState<unsigned short,SpatialDomain>(const ImageStateImpl<unsigned short,SpatialDomain>& ) const;
 
 }  //alg ns
