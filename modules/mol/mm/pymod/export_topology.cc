@@ -335,6 +335,7 @@ void export_Topology()
     .def("ResetExclusions",&ost::mol::mm::Topology::ResetExclusions)
     .def("AddHarmonicPositionRestraint",&ost::mol::mm::Topology::AddHarmonicPositionRestraint,(arg("index"),arg("ref_position"),arg("k"),arg("x_scale")=1.0,arg("y_scale")=1.0,arg("z_scale")=1.0))
     .def("AddHarmonicDistanceRestraint",&ost::mol::mm::Topology::AddHarmonicDistanceRestraint)
+    .def("Merge",&ost::mol::mm::Topology::Merge)
     //single atom parameter getter and setter functions
     .def("SetSigmas",&WrapSetSigmas)
     .def("SetSigma",&ost::mol::mm::Topology::SetSigma)
