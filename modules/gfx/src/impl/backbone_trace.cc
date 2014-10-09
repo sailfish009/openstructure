@@ -123,13 +123,15 @@ private:
 BackboneTrace::BackboneTrace():
   view_(),
   node_list_list_(),
-  seq_hack_(false)
+  seq_hack_(false),
+  twist_hack_(false)
 {}
 
 BackboneTrace::BackboneTrace(const mol::EntityView& ent):
   view_(ent),
   node_list_list_(),
-  seq_hack_(false)
+  seq_hack_(false),
+  twist_hack_(false)
 {
   Rebuild();
 }
