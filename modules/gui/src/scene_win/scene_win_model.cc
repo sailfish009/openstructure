@@ -114,6 +114,9 @@ void SceneWinModel::Update()
 QModelIndex SceneWinModel::index(int row, int col, 
                                  const QModelIndex& parent) const
 {
+  if (!hasIndex(row, col, parent)){
+    return QModelIndex();
+  }
   SceneNode* parent_node = GetItem(parent);
 
   if (parent_node->children().size() <= row)
