@@ -202,16 +202,29 @@ def _MatchResidueByAln(ent_a, ent_b, atoms, alnmethod):
     seq_b = ost.seq.CreateSequence(chain_b.name, s_b)
     aln_a_b = alnmethod(seq_a, seq_b, ost.seq.alg.BLOSUM62)
     ## evaluate alignment
-    for aln in aln_a_b:
-      ## bind chain to alignment
-      aln.AttachView(0, chain_a.Select('protein=True'))
-      aln.AttachView(1, chain_b.Select('protein=True'))
-      ## select residues (only replacement edges)
+    max_aln_res = 0
+    for a in range(0, len(aln_a_b)):
+      aln = aln_a_b[a]
+      aln_res_len = 0
+      match_list = list()
       for i in range(0, aln.GetLength()):
         if aln.sequences[0][i]!='-' and aln.sequences[1][i]!='-':
-          r_a = aln.GetResidue(0,i)
-          r_b = aln.GetResidue(1,i)
-          result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)
+          aln_res_len += 1
+          match_list.append(i)
+      if aln_res_len > max_aln_res:
+        max_aln_res = aln_res_len
+        max_aln_idx = a
+        max_matches = match_list
+
+    aln = aln_a_b[max_aln_idx]
+    ## bind chain to alignment
+    aln.AttachView(0, chain_a.Select('protein=True'))
+    aln.AttachView(1, chain_b.Select('protein=True'))
+    ## select residues (only replacement edges)
+    for i in max_matches:
+      r_a = aln.GetResidue(0,i)
+      r_b = aln.GetResidue(1,i)
+      result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)
   result_a.AddAllInclusiveBonds()
   result_b.AddAllInclusiveBonds()
   return result_a, result_b
