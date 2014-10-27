@@ -50,8 +50,6 @@ public:
 
   ost::mol::EntityHandle GetEntity() { return top_->GetEntity(); }
 
-  ost::mol::EntityHandle GetEntityStandardNaming();
-
   geom::Vec3List GetPositions(bool enforce_periodic_box = false, bool in_angstrom = true);
 
   geom::Vec3List GetVelocities();
@@ -125,7 +123,6 @@ private:
   SystemPtr system_;
   IntegratorPtr integrator_;
   ContextPtr context_;
-  MMSettingsPtr settings_;
   TopologyPtr top_;
   std::vector<MMObserverPtr> observers_;
   std::vector<int> time_to_notify_;

@@ -3,8 +3,7 @@
 namespace ost{ namespace mol{ namespace mm{
 
 Simulation::Simulation(const ost::mol::EntityHandle& handle, 
-                       const MMSettingsPtr settings): 
-                                         settings_(settings){
+                       const MMSettingsPtr settings){
 
   //note, that ent_ will be "completed" inside this function!
   //(hydrogens and shit)
@@ -14,8 +13,7 @@ Simulation::Simulation(const ost::mol::EntityHandle& handle,
 }
 
 Simulation::Simulation(const TopologyPtr top,
-                       const MMSettingsPtr settings): 
-                                         settings_(settings){
+                       const MMSettingsPtr settings){
 
   this->Init(top);
 }
@@ -79,14 +77,6 @@ void Simulation::Init(const TopologyPtr top){
   if(settings_->init_temperature > 0.0){
     context_->setVelocitiesToTemperature(settings_->init_temperature);
   }
-}
-
-ost::mol::EntityHandle Simulation::GetEntityStandardNaming(){
-  ost::mol::EntityHandle ent = top_->GetEntity();
-  ent = ent.Copy();
-  settings_->forcefield->AssignFFSpecificNames(ent,true);
-  MMModeller::AssignPDBNaming(ent);
-  return ent;
 }
 
 geom::Vec3List Simulation::GetPositions(bool enforce_periodic_box, bool in_angstrom){
