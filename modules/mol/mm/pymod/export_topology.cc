@@ -314,10 +314,10 @@ void export_Topology()
   ;
 
   class_<ost::mol::mm::Topology>("Topology",no_init)
-//    .def(init<ost::mol::EntityHandle&,ost::mol::mm::MMSettingsPtr>())
-//    .def(init<ost::mol::EntityHandle&, std::vector<Real>&>())
 
     .def("__init__",make_constructor(&WrapTopologyConstructor))
+    .def("Save",&ost::mol::mm::Topology::Save)
+    .def("Load",&ost::mol::mm::Topology::Load).staticmethod("Load")
     .def("GetEntity",&ost::mol::mm::Topology::GetEntity)
     //interaction adding functions
     .def("AddHarmonicBond",&ost::mol::mm::Topology::AddHarmonicBond)

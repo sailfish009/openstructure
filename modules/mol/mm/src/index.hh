@@ -64,6 +64,10 @@ public:
   Index(uint a) {
     (*this)[0]=a;
   }
+  template <typename DS>
+  void Serialize(DS& ds){
+    ds & (*this)[0];    
+  }
 };
 template <>
 class Index<2> : public impl::IndexBase<2> {
@@ -72,6 +76,11 @@ public:
   Index(uint a, uint b) {
     (*this)[0]=a;
     (*this)[1]=b;    
+  }
+  template <typename DS>
+  void Serialize(DS& ds){
+    ds & (*this)[0];    
+    ds & (*this)[1];    
   }
 };
 template <>
@@ -82,6 +91,12 @@ public:
     (*this)[0]=a;
     (*this)[1]=b;    
     (*this)[2]=c;        
+  }
+  template <typename DS>
+  void Serialize(DS& ds){
+    ds & (*this)[0];    
+    ds & (*this)[1];    
+    ds & (*this)[2];    
   }
 };
 template <>
@@ -94,6 +109,13 @@ public:
     (*this)[2]=c;        
     (*this)[3]=d;            
   }
+  template <typename DS>
+  void Serialize(DS& ds){
+    ds & (*this)[0];    
+    ds & (*this)[1];    
+    ds & (*this)[2];    
+    ds & (*this)[3];    
+  }
 };
 template <>
 class Index<5> : public impl::IndexBase<5> {
@@ -105,6 +127,14 @@ public:
     (*this)[2]=c;        
     (*this)[3]=d;            
     (*this)[4]=e;                
+  }
+  template <typename DS>
+  void Serialize(DS& ds){
+    ds & (*this)[0];    
+    ds & (*this)[1];    
+    ds & (*this)[2];    
+    ds & (*this)[3];    
+    ds & (*this)[4];    
   }
 };
 template <>
@@ -119,6 +149,15 @@ public:
     (*this)[4]=e;
     (*this)[5]=f;    
   }
+  template <typename DS>
+  void Serialize(DS& ds){
+    ds & (*this)[0];    
+    ds & (*this)[1];    
+    ds & (*this)[2];    
+    ds & (*this)[3];    
+    ds & (*this)[4];    
+    ds & (*this)[5];    
+  }
 };
 template <>
 class Index<7> : public impl::IndexBase<7> {
@@ -132,6 +171,16 @@ public:
     (*this)[4]=e;
     (*this)[5]=f;    
     (*this)[6]=g;        
+  }
+  template <typename DS>
+  void Serialize(DS& ds){
+    ds & (*this)[0];    
+    ds & (*this)[1];    
+    ds & (*this)[2];    
+    ds & (*this)[3];    
+    ds & (*this)[4];    
+    ds & (*this)[5];    
+    ds & (*this)[6];    
   }
 };
 template<uint D>

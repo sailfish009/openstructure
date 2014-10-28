@@ -9,34 +9,35 @@ Simulation::Simulation(const ost::mol::EntityHandle& handle,
   //(hydrogens and shit)
 
   TopologyPtr top = TopologyCreator::Create(handle,settings);
-  this->Init(top);
+  this->Init(top, settings);
 }
 
 Simulation::Simulation(const TopologyPtr top,
                        const MMSettingsPtr settings){
 
-  this->Init(top);
+  this->Init(top, settings);
 }
 
-void Simulation::Init(const TopologyPtr top){
+void Simulation::Init(const TopologyPtr top,
+                      const MMSettingsPtr settings){
 
 
   top_ = top;
-  integrator_ = settings_->integrator;
+  integrator_ = settings->integrator;
   if(!integrator_){
     throw ost::Error("Settings must have a valid integrator attached to set up a simulation!");
   }
-  system_ = SystemCreator::Create(top_,settings_,system_force_mapper_); 
+  system_ = SystemCreator::Create(top_,settings,system_force_mapper_); 
   ost::mol::EntityHandle ent = top_->GetEntity();
   original_masses_ = top_->GetMasses();
 
   //setting up the context, which combines the system with an integrator
   //to proceed in time, but first we have to load the proper platform
 
-  OpenMM::Platform::loadPluginsFromDirectory (settings_->openmm_plugin_directory);
+  OpenMM::Platform::loadPluginsFromDirectory (settings->openmm_plugin_directory);
   OpenMM::Platform* platform;
 
-  switch(settings_->platform){
+  switch(settings->platform){
     case Reference:{
       platform = &OpenMM::Platform::getPlatformByName("Reference");
       break;
@@ -74,8 +75,8 @@ void Simulation::Init(const TopologyPtr top){
   //make sure the context satisfies the distance constraints
   context_->applyConstraints(0.00001);
 
-  if(settings_->init_temperature > 0.0){
-    context_->setVelocitiesToTemperature(settings_->init_temperature);
+  if(settings->init_temperature > 0.0){
+    context_->setVelocitiesToTemperature(settings->init_temperature);
   }
 }
 

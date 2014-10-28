@@ -116,7 +116,8 @@ public:
   void SetPeriodicBoxExtents(geom::Vec3& vec);
 
 private:
-  void Init(const ost::mol::mm::TopologyPtr top);
+  void Init(const ost::mol::mm::TopologyPtr top, 
+            const MMSettingsPtr settings);
 
   int TimeToNextNotification();
 

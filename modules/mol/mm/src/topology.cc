@@ -20,25 +20,29 @@ Topology::Topology(const ost::mol::EntityHandle& ent, const std::vector<Real>& m
   fudge_lj_ = 1.0;
   fudge_qq_ = 1.0;
 
-  for(uint i = 0; i < atom_list_.size(); ++i){
-    atom_index_mapper_[atom_list_[i].GetHashCode()] = i;
-  }  
+  this->InitMappers();
+}
 
-  for(uint i = 0; i < res_list_.size(); ++i){
-    residue_index_mapper_[res_list_[i].GetHashCode()] = i;
+TopologyPtr Topology::Load(const String& filename){
+
+  if (!boost::filesystem::exists(filename)) {
+    std::stringstream ss;
+    ss << "Could not open topology. File '"
+       << filename << "' does not exist";
+    throw ost::io::IOException(ss.str());
   }
 
-  std::map<String,uint> per_residue_mapper;
-  ost::mol::AtomHandleList residue_atom_list;
-  for(uint i = 0; i < num_residues_; ++i){
-    per_residue_mapper.clear();
-    residue_atom_list = res_list_[i].GetAtomList();
-    for(ost::mol::AtomHandleList::iterator j = residue_atom_list.begin();
-        j != residue_atom_list.end(); ++j){
-      per_residue_mapper[j->GetName()] = atom_index_mapper_[j->GetHashCode()];
-    }
-    atom_name_mapper_.push_back(per_residue_mapper);
-  }
+  std::ifstream stream(filename.c_str(), std::ios_base::binary);
+  io::BinaryDataSource ds(stream);
+  TopologyPtr top_p(new Topology);
+  ds >> *top_p;
+  return top_p;
+}
+
+void Topology::Save(const String& filename){
+  std::ofstream stream(filename.c_str(), std::ios_base::binary);
+  io::BinaryDataSink ds(stream);
+  ds << *this;  
 }
 
 uint Topology::AddHarmonicBond(uint index_one,
@@ -1330,6 +1334,28 @@ void Topology::Merge(TopologyPtr p){
                                       final_index_mapper[(*i)[1]]));
   }
 
+}
+
+void Topology::InitMappers(){
+  for(uint i = 0; i < atom_list_.size(); ++i){
+    atom_index_mapper_[atom_list_[i].GetHashCode()] = i;
+  }  
+
+  for(uint i = 0; i < res_list_.size(); ++i){
+    residue_index_mapper_[res_list_[i].GetHashCode()] = i;
+  }
+
+  std::map<String,uint> per_residue_mapper;
+  ost::mol::AtomHandleList residue_atom_list;
+  for(uint i = 0; i < num_residues_; ++i){
+    per_residue_mapper.clear();
+    residue_atom_list = res_list_[i].GetAtomList();
+    for(ost::mol::AtomHandleList::iterator j = residue_atom_list.begin();
+        j != residue_atom_list.end(); ++j){
+      per_residue_mapper[j->GetName()] = atom_index_mapper_[j->GetHashCode()];
+    }
+    atom_name_mapper_.push_back(per_residue_mapper);
+  }
 }
 
 
