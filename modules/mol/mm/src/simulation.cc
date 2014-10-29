@@ -18,6 +18,91 @@ Simulation::Simulation(const TopologyPtr top,
   this->Init(top, settings);
 }
 
+void Simulation::Save(const String& filename){
+  std::ofstream stream(filename.c_str(), std::ios_base::binary);
+  io::BinaryDataSink ds(stream);
+  ds << *top_;
+  geom::Vec3List positions = this->GetPositions(false,false);
+  for(geom::Vec3List::iterator i = positions.begin(); 
+      i != positions.end(); ++i){
+    ds & (*i)[0];
+    ds & (*i)[1];
+    ds & (*i)[2];
+  }
+  context_->createCheckpoint(stream);  
+}
+
+SimulationPtr Simulation::Load(const String& filename, MMSettingsPtr settings){
+  if (!boost::filesystem::exists(filename)) {
+    std::stringstream ss;
+    ss << "Could not open topology. File '"
+       << filename << "' does not exist";
+    throw ost::io::IOException(ss.str());
+  }
+
+  SimulationPtr sim_ptr(new Simulation);
+
+  std::ifstream stream(filename.c_str(), std::ios_base::binary);
+  io::BinaryDataSource ds(stream);
+  TopologyPtr top_p(new Topology);
+  ds >> *top_p;
+
+  sim_ptr->original_masses_ = top_p->GetMasses(); 
+
+  sim_ptr->top_ = top_p;
+
+  sim_ptr->system_ = SystemCreator::Create(sim_ptr->top_,settings,
+                                       sim_ptr->system_force_mapper_);
+
+  sim_ptr->integrator_ = settings->integrator;
+
+  OpenMM::Platform::loadPluginsFromDirectory (settings->openmm_plugin_directory);
+  OpenMM::Platform* platform;
+
+  switch(settings->platform){
+    case Reference:{
+      platform = &OpenMM::Platform::getPlatformByName("Reference");
+      break;
+    }
+    case OpenCL:{
+      platform = &OpenMM::Platform::getPlatformByName("OpenCL");
+      break;
+    }
+    case CUDA:{
+      platform = &OpenMM::Platform::getPlatformByName("CUDA");
+      break;
+    }
+    case CPU:{
+      platform = &OpenMM::Platform::getPlatformByName("CPU");
+      break;
+    }
+  }
+
+  sim_ptr->context_ = ContextPtr(new OpenMM::Context(*(sim_ptr->system_),
+                                                     *(sim_ptr->integrator_),
+                                                     *platform));
+
+  std::vector<OpenMM::Vec3> positions;
+  OpenMM::Vec3 open_mm_vec;
+  Real a,b,c;
+  for(int i = 0; i < sim_ptr->system_->getNumParticles(); ++i){
+    ds & a;
+    ds & b;
+    ds & c;
+    open_mm_vec[0] = a;
+    open_mm_vec[1] = b;
+    open_mm_vec[2] = c;
+    positions.push_back(open_mm_vec);
+  }
+  sim_ptr->context_->setPositions(positions);
+
+  sim_ptr->context_->loadCheckpoint(stream);
+
+  return sim_ptr;
+}
+
+
+
 void Simulation::Init(const TopologyPtr top,
                       const MMSettingsPtr settings){
 
@@ -575,8 +660,6 @@ void Simulation::SetPeriodicBoxExtents(geom::Vec3& vec){
   OpenMM::Vec3 ucell_c(0.0,0.0,vec[2]/10.0);
   context_->setPeriodicBoxVectors(ucell_a,ucell_b,ucell_c);
 }
-
-
 
 }}}
 

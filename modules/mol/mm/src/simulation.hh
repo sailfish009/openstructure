@@ -47,6 +47,9 @@ public:
   Simulation(const ost::mol::mm::TopologyPtr top,
              const MMSettingsPtr settings);
 
+  void Save(const String& filename);
+
+  static SimulationPtr Load(const String& filename, MMSettingsPtr settings);
 
   ost::mol::EntityHandle GetEntity() { return top_->GetEntity(); }
 
@@ -116,6 +119,9 @@ public:
   void SetPeriodicBoxExtents(geom::Vec3& vec);
 
 private:
+
+  Simulation() { } //hidden constructor... 
+
   void Init(const ost::mol::mm::TopologyPtr top, 
             const MMSettingsPtr settings);
 
@@ -127,7 +133,7 @@ private:
   TopologyPtr top_;
   std::vector<MMObserverPtr> observers_;
   std::vector<int> time_to_notify_;
-  std::map<FuncType,unsigned int> system_force_mapper_;
+  std::map<FuncType,uint> system_force_mapper_;
   std::vector<Real> original_masses_;
 };
 

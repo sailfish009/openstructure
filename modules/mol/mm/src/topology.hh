@@ -38,6 +38,9 @@ public:
 
   Topology(const ost::mol::EntityHandle& ent, const std::vector<Real>& masses);
 
+  Topology() { } //should not be accessible from Python to avoid messing around
+                 //with empty topology
+
   static TopologyPtr Load(const String& filename);
 
   void Save(const String& filename);
@@ -787,8 +790,6 @@ public:
   }
 
 private:
-
-  Topology() { } //hidden constructor without parameters
 
   void InitMappers();
 
