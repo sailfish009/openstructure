@@ -35,7 +35,7 @@ void Simulation::Save(const String& filename){
 SimulationPtr Simulation::Load(const String& filename, MMSettingsPtr settings){
   if (!boost::filesystem::exists(filename)) {
     std::stringstream ss;
-    ss << "Could not open topology. File '"
+    ss << "Could not open simulation File '"
        << filename << "' does not exist";
     throw ost::io::IOException(ss.str());
   }
