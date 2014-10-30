@@ -134,7 +134,6 @@ private:
   std::vector<MMObserverPtr> observers_;
   std::vector<int> time_to_notify_;
   std::map<FuncType,uint> system_force_mapper_;
-  std::vector<Real> original_masses_;
 };
 
 }}} //ns

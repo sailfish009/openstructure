@@ -47,8 +47,6 @@ SimulationPtr Simulation::Load(const String& filename, MMSettingsPtr settings){
   TopologyPtr top_p(new Topology);
   ds >> *top_p;
 
-  sim_ptr->original_masses_ = top_p->GetMasses(); 
-
   sim_ptr->top_ = top_p;
 
   sim_ptr->system_ = SystemCreator::Create(sim_ptr->top_,settings,
@@ -114,7 +112,6 @@ void Simulation::Init(const TopologyPtr top,
   }
   system_ = SystemCreator::Create(top_,settings,system_force_mapper_); 
   ost::mol::EntityHandle ent = top_->GetEntity();
-  original_masses_ = top_->GetMasses();
 
   //setting up the context, which combines the system with an integrator
   //to proceed in time, but first we have to load the proper platform
@@ -487,8 +484,9 @@ void Simulation::AddPositionConstraints(const std::vector<uint>& index){
 }
 
 void Simulation::ResetPositionConstraints(){
-  for(uint i = 0; i < original_masses_.size(); ++i){
-    system_->setParticleMass(i,original_masses_[i]);
+  std::vector<Real> original_masses = top_->GetMasses();
+  for(uint i = 0; i < original_masses.size(); ++i){
+    system_->setParticleMass(i,original_masses[i]);
   }
   top_->ResetPositionConstraints();
   context_->reinitialize();
