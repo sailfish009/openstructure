@@ -82,9 +82,9 @@ public:
     ds & has_name_wildcard_;
 
     if(ds.IsSource()){
-      int num_types;
-      int num_names;
-      int num_param;
+      int num_types = 0;
+      int num_names = 0;
+      int num_param = 0;
       ds & num_types;
       ds & num_names;
       ds & num_param;

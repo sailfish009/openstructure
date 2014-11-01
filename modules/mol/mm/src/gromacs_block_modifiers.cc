@@ -194,24 +194,10 @@ void GromacsHydrogenConstructor::ApplyOnResidue(ost::mol::ResidueHandle& res, os
   std::vector<geom::Vec3> hydrogen_positions;
   std::vector<geom::Vec3> anchor_positions;
 
-  bool hydrogens_present;
-
   for(uint a=0;a<add_number_.size();++a){
 
     hydrogen_names = hydrogen_names_[a];
 
-   /*
-    bool hydrogens_present = true;
-    for(std::vector<String>::iterator i = hydrogen_names.begin();
-        i != hydrogen_names.end(); ++i){
-      if(!res.FindAtom(*i).IsValid()){
-        hydrogens_present = false;
-        break;
-      }
-    }
-
-    if(hydrogens_present) continue;
-    */
     number = add_number_[a];
     method = methods_[a];
     anchor_names = anchor_atom_names_[a];
@@ -219,8 +205,6 @@ void GromacsHydrogenConstructor::ApplyOnResidue(ost::mol::ResidueHandle& res, os
     hydrogen_positions.clear();
     anchor_positions.clear();
     anchor_atoms.clear();
-
-    
 
     String atom_name;
     ost::mol::ResidueHandle temp_res;
@@ -279,7 +263,6 @@ void GromacsHydrogenConstructor::ApplyOnResidue(ost::mol::ResidueHandle& res, os
       if(!atom.IsValid()){
         atom = ed.InsertAtom(res,hydrogen_names[b],hydrogen_positions[b],"H");
       }
-      //ed.Connect(atom, anchor_atoms[0]);
     }
   }
 }
@@ -482,25 +465,4 @@ void GromacsBlockModifier::CheckInteractionToAdd(MMInteractionPtr p, const Strin
 
 }
 
-
-
-
 }}}//ns
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
