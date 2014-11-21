@@ -652,6 +652,7 @@ TopologyPtr TopologyCreator::Create(const ost::mol::EntityHandle& handle,
 
   if(settings->add_dihedrals){
     //handle dihedrals
+    std::set<Index<4> > dihedrals_to_delete;
     for(uint i = 0; i < top->GetNumResidues(); ++i){
       interaction_list = building_blocks[i]->GetDihedrals();
       for(std::vector<MMInteractionPtr>::iterator j = interaction_list.begin();
@@ -681,13 +682,19 @@ TopologyPtr TopologyCreator::Create(const ost::mol::EntityHandle& handle,
             ss << "defines dihedral, that doesn't exist!";
             throw ost::Error(ss.str());
           }
-          dihedrals.erase(dihedral_index);
+          
+          dihedrals_to_delete.insert(dihedral_index);
           //only periodic dihedrals are supported... 
           parameters = (*j)->GetParam();
           top->AddPeriodicDihedral(one,two,three,four,
                                    parameters[0],parameters[1],parameters[2]);
         }
       }
+    }
+    
+    for(std::set<Index<4> >::iterator i = dihedrals_to_delete.begin();
+        i != dihedrals_to_delete.end(); ++i){
+      dihedrals.erase(*i);
     }
 
     //add pointers of dihedrals definitions, that are not already parametrized
@@ -726,6 +733,7 @@ TopologyPtr TopologyCreator::Create(const ost::mol::EntityHandle& handle,
 
   if(settings->add_impropers){
     //handle impropers
+    std::set<Index<4> > impropers_to_delete;
     for(uint i = 0; i < building_blocks.size(); ++i){
       interaction_list = building_blocks[i]->GetImpropers();
       for(std::vector<MMInteractionPtr>::iterator j = interaction_list.begin();
@@ -740,7 +748,7 @@ TopologyPtr TopologyCreator::Create(const ost::mol::EntityHandle& handle,
           uint three = top->GetAtomIndex(i, interaction_atom_names[2]);
           uint four = top->GetAtomIndex(i, interaction_atom_names[3]);
           Index<4> improper_index(one,two,three,four);
-          impropers.erase(improper_index);
+          impropers_to_delete.insert(improper_index);
           parameters = (*j)->GetParam();
           switch((*j)->GetFuncType()){
             case PeriodicImproper:{
@@ -760,6 +768,12 @@ TopologyPtr TopologyCreator::Create(const ost::mol::EntityHandle& handle,
         }
       }
     }
+    
+    for(std::set<Index<4> >::iterator i = impropers_to_delete.begin();
+        i != impropers_to_delete.end(); ++i){
+      impropers.erase(*i);
+    }
+    
     //add pointers of improper definitions, that are not already parametrized
     //in the building blocks
 
