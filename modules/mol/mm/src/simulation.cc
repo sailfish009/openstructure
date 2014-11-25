@@ -180,19 +180,29 @@ geom::Vec3List Simulation::GetForces(){
   return return_vec;
 }
 
-void Simulation::SetPositions(geom::Vec3List& positions, bool in_angstrom){
+void Simulation::SetPositions(const geom::Vec3List& positions, bool in_angstrom){
   if(top_->GetNumAtoms() != positions.size()){
     throw ost::Error("Number of positions does not correspond to number of atoms in topology!");
   }
-  if(in_angstrom) positions /= 10;
   std::vector<OpenMM::Vec3> openmm_positions;
   OpenMM::Vec3 open_mm_vec;
-  for(geom::Vec3List::iterator i = positions.begin();
-      i != positions.end(); ++i){
-    open_mm_vec[0] = (*i)[0];
-    open_mm_vec[1] = (*i)[1];
-    open_mm_vec[2] = (*i)[2];
-    openmm_positions.push_back(open_mm_vec);
+  if(in_angstrom){
+    for(geom::Vec3List::const_iterator i = positions.begin();
+        i != positions.end(); ++i){
+      open_mm_vec[0] = (*i)[0]*0.1;
+      open_mm_vec[1] = (*i)[1]*0.1;
+      open_mm_vec[2] = (*i)[2]*0.1;
+      openmm_positions.push_back(open_mm_vec);
+    }
+  }
+  else{
+    for(geom::Vec3List::const_iterator i = positions.begin();
+        i != positions.end(); ++i){
+      open_mm_vec[0] = (*i)[0];
+      open_mm_vec[1] = (*i)[1];
+      open_mm_vec[2] = (*i)[2];
+      openmm_positions.push_back(open_mm_vec);
+    }
   }
   context_->setPositions(openmm_positions);
 }

@@ -59,7 +59,7 @@ public:
 
   geom::Vec3List GetForces();
 
-  void SetPositions(geom::Vec3List& positions, bool in_angstrom = true);
+  void SetPositions(const geom::Vec3List& positions, bool in_angstrom = true);
 
   void SetVelocities(geom::Vec3List& velocities);
 
