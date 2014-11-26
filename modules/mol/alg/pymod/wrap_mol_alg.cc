@@ -27,8 +27,10 @@
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/mol/alg/consistency_checks.hh>
 #include <ost/mol/alg/pdbize.hh>
+#include <ost/mol/alg/contact_overlap.hh>
 #include <ost/export_helper/pair_to_tuple_conv.hh>
 #include <ost/export_helper/vec_to_list_conv.hh>
+
 
 using namespace boost::python;
 using namespace ost;
@@ -37,6 +39,7 @@ void export_svdSuperPose();
 void export_TrajectoryAnalysis();
 void export_StructureAnalysis();
 void export_Clash();
+void export_contact_overlap();
 #if OST_IMG_ENABLED
 void export_entity_to_density();
 #endif
@@ -105,6 +108,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   export_TrajectoryAnalysis();
   export_StructureAnalysis();
   export_Clash();
+  export_contact_overlap();
   #if OST_IMG_ENABLED
   export_entity_to_density();
   #endif

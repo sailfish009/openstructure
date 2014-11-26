@@ -244,7 +244,7 @@ if (ENABLE_STATIC)
   set(Boost_LIBRARIES)
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost ${_BOOST_MIN_VERSION} 
-               COMPONENTS filesystem system iostreams regex REQUIRED)
+               COMPONENTS filesystem system iostreams regex thread REQUIRED)
   find_package(ZLIB REQUIRED)
    
   if (UNIX AND NOT APPLE)
