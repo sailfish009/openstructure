@@ -6,7 +6,7 @@ namespace ost { namespace io {
 
 The io module deals with input and output of \ref mol::EntityHandle "entities",
 \ref seq::AlignmentHandle "multiple sequence alignments" and 
-\ref iplt::ImageHandle "map data". Importers for common file formats such as PDB, 
+\ref ost::img::ImageHandle "map data". Importers for common file formats such as PDB, 
 SDF, FASTA, CLUSTAL W, DX and the CHARMM files are available. 
 
 

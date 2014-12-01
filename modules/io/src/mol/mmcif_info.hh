@@ -180,7 +180,9 @@ public:
 
   /// \brief Set the translational vector
   ///
-  /// \param 
+  /// \param x
+  /// \param y
+  /// \param z
   void SetVector(Real x, Real y, Real z)
   {
     translation_.SetX(x);
@@ -194,7 +196,15 @@ public:
 
   /// \brief Set the rotational matrix
   ///
-  /// \param 
+  /// \param i00
+  /// \param i01
+  /// \param i02
+  /// \param i10
+  /// \param i11
+  /// \param i12
+  /// \param i20
+  /// \param i21
+  /// \param i22
   void SetMatrix(Real i00, Real i01, Real i02,
                  Real i10, Real i11, Real i12,
                  Real i20, Real i21, Real i22)
@@ -266,7 +276,7 @@ public:
 
   /// \brief Set method details
   ///
-  /// \param method details
+  /// \param method_details
   void SetMethodDetails(String method_details) {
     method_details_ = method_details;
   }
@@ -435,7 +445,7 @@ public:
 
   /// \brief Set the start page for a publication
   ///
-  /// \param start
+  /// \param first
   void SetPageFirst(String first) { page_first_ = first; }
 
   /// \brief Get the start page of a publication
@@ -445,7 +455,7 @@ public:
 
   /// \brief Set the end page for a publication
   ///
-  /// \param end
+  /// \param last
   void SetPageLast(String last) { page_last_ = last; }
 
   /// \brief Get the last page of a publication

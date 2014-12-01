@@ -41,7 +41,7 @@ public:
 
   /// \brief Set entity name
   ///
-  /// \param entity_name is the new entity name.
+  /// \param ent_name is the new entity name.
   ///
   /// \sa      EntityBase::GetName
   void SetName(const String& ent_name);

@@ -33,10 +33,6 @@ namespace ost { namespace mol {
 ///
 /// Groups common functionality for AtomView and AtomHandle.
 ///
-/// Most of the atom properties such as temperature factor, element, radius
-/// and charge can be accessed with #GetAtomProps() that returns an object of
-/// type AtomProp.
-///
 /// Like \ref ResidueBase residues, \ref ChainBase "chains" and 
 /// \ref EntityBase "entities" atoms are generic property containers and may as 
 /// such store \ref generic_properties "custom properties".

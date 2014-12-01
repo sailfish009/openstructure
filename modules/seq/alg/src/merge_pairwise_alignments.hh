@@ -37,7 +37,7 @@ namespace ost { namespace seq { namespace alg {
 /// The method does not produce the optimal multiple sequence alignemnt for all 
 /// the sequences.
 /// 
-/// \param pairwise_alignments is a list of AlignmentHandles, each containing
+/// \param pairwise_alns is a list of AlignmentHandles, each containing
 ///      two sequences
 /// \param ref_seq is the reference sequence. The reference sequence must not
 ///      contain any gaps.
