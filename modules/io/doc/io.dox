@@ -28,7 +28,7 @@ control over the exact loading behaviour.
 
 Some of the file formats for molecules do not explicitly define bonds. The
 IO handlers for these file formats make use of the conop module to infer
-connectivity information (see \ref ost::conop::Builder "Builder"). 
+connectivity information.
 
 \subsection io_handler IO Handlers
 

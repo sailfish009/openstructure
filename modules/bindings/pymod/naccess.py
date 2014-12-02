@@ -25,9 +25,9 @@ from ost import geom
 
 ## \brief Method to check if naccess executable is present
 #
-# \param naccess Explicit path to msms executable
-# \return         Path to the executable
-# \exception      FileNotFound if executable is not found
+# \param naccess_exe Explicit path to naccess executable
+# \return            Path to the executable
+# \exception         FileNotFound if executable is not found
 def _GetExecutable(naccess_exe):
   return settings.Locate('naccess', explicit_file_name=naccess_exe)
 
@@ -101,11 +101,11 @@ def _ParseAsaFile(entity, file, asa_atom):
       
 ## \brief Reads Area file (.rsa) and attach asa (absolute + relative) per residue to an entitiy
 #
-# \param entity   EntityHandle or EntityView for attaching sasa on atom level
-# \param file     Filename of .rsa file
-# \param asa_atom Name of the float property for absolute SASA
-# \param asa_atom Name of the float property for relative SASA
-# \exception         RuntimeError if residue names are not the same  
+# \param enti       EntityHandle or EntityView for attaching sasa on atom level
+# \param file       Filename of .rsa file
+# \param asa_abs    Name of the float property for absolute SASA
+# \param asa_rel    Name of the float property for relative SASA
+# \exception        RuntimeError if residue names are not the same
 
 def _ParseRsaFile(enti,file, asa_abs, asa_rel):
   area_fh = open(file)
@@ -156,6 +156,7 @@ def __CleanupFiles(dir_name):
 # This method starts the external MSMS executable and returns the stdout of MSMS
 #
 # \param command          Command to execute
+# \param temp_dir
 # \return                 stdout of MSMS
 # \exception              CalledProcessError for non-zero return value
 def _RunNACCESS(command, temp_dir):
@@ -185,7 +186,7 @@ def _RunNACCESS(command, temp_dir):
 # \param include_hetatm     Calculate surface including hetatms
 # \param include_water      Calculate surface including water
 # \param selection          Calculate surface for subset of entity
-# \param naccess  _exe      msms executable (full path to executable)
+# \param naccess_exe        msms executable (full path to executable)
 # \param keep_files         Do not delete temporary files
 # \param asa_abs            Attaches per residue absolute SASA to specified FloatProp on residue level
 # \param asa_rel            Attaches per residue relative SASA to specified FloatProp on residue level

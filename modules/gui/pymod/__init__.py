@@ -22,7 +22,7 @@ import sip
 
 
 ## \brief Opens a DataViewer 
-# \sa \ref fft_li.py "View Fourier Transform Example" \sa \ref modulate_image.py "Modulate Image Example"
+# \sa \example fft_li.py "View Fourier Transform Example" \sa \ref modulate_image.py "Modulate Image Example"
 def _close_event_override_(event):
   print "close event"
 def _set_data_override_(data):

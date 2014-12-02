@@ -31,9 +31,6 @@ namespace ost { namespace conop {
 
 
 /// \brief copies all atom of src_res to dst_res, gets compound lib from builder
-/// \param has_cbeta will be set to true if the src_res has a cbeta and the 
-///      dst_residue is not a glycine, it will be inserted if in the dst should
-///      be one and in src it was not present
 
                              
 bool DLLEXPORT_OST_CONOP CopyResidue(ost::mol::ResidueHandle src_res,
@@ -41,16 +38,16 @@ bool DLLEXPORT_OST_CONOP CopyResidue(ost::mol::ResidueHandle src_res,
                                      ost::mol::XCSEditor& edi);
 
 /// \brief copies all atom of src_res to dst_res, requires a compound lib 
-/// \param has_cbeta will be set to true if the src_res has a cbeta and the 
-///      dst_residue is not a glycine, it will be inserted if in the dst should
-///      be one and in src it was not present
 bool DLLEXPORT_OST_CONOP CopyResidue(ost::mol::ResidueHandle src_res,
                                      ost::mol::ResidueHandle dst_res,
                                      ost::mol::XCSEditor& edi, CompoundLibPtr lib);
 
                              
 /// \brief copies all atom of src_res to dst_res
-/// \param has_cbeta will be set to true if the src_res has a cbeta and the 
+/// \param src_res
+/// \param dst_res
+/// \param edi
+/// \param has_cbeta will be set to true if the src_res has a cbeta and the
 ///      dst_residue is not a glycine                             
 bool DLLEXPORT_OST_CONOP CopyIdentical(ost::mol::ResidueHandle src_res,
                                        ost::mol::ResidueHandle dst_res,
