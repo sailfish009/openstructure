@@ -116,7 +116,7 @@ bool MaskOverlay::OnMouseEvent(QMouseEvent* e,  DataViewerPanel* dvp,
         new_poly_=geom::Polygon2();
         add_mode_=true;
       }
-      new_poly_.AddNode(mousepos);
+      new_poly_.AddNode(mousepos-shift_);
     } else {
       if(active_>=0){
         geom::Polygon2 pol=polygons_[active_];
