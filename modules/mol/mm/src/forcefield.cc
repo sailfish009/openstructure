@@ -781,6 +781,49 @@ void Forcefield::AddAtomRenamingRule(const String& res_name,
   atom_renaming_ff_specific_[res_name].push_back(std::make_pair(old_atom_name,new_atom_name));
 }
 
+String Forcefield::GetResidueRenamingMain(const String& name) const{
+  boost::unordered_map<String, ResidueNamesPtr>::const_iterator i = res_renaming_ff_specific_.find(name);
+  if(i == res_renaming_ff_specific_.end()){
+    return name;
+  }
+  return i->second->main;  
+}
+
+String Forcefield::GetResidueRenamingNTer(const String& name) const{
+  boost::unordered_map<String, ResidueNamesPtr>::const_iterator i = res_renaming_ff_specific_.find(name);
+  if(i == res_renaming_ff_specific_.end()){
+    return name;
+  }
+  return i->second->nter;  
+}
+
+
+String Forcefield::GetResidueRenamingCTer(const String& name) const{
+  boost::unordered_map<String, ResidueNamesPtr>::const_iterator i = res_renaming_ff_specific_.find(name);
+  if(i == res_renaming_ff_specific_.end()){
+    return name;
+  }
+  return i->second->cter;  
+}
+
+String Forcefield::GetResidueRenamingTwoTer(const String& name) const{
+  boost::unordered_map<String, ResidueNamesPtr>::const_iterator i = res_renaming_ff_specific_.find(name);
+  if(i == res_renaming_ff_specific_.end()){
+    return name;
+  }
+  return i->second->twoter;  
+}
+
+String Forcefield::GetAtomRenaming(const String& res_name, const String& atom_name) const{
+  boost::unordered_map<String,std::vector<std::pair<String,String> > >::const_iterator i = atom_renaming_ff_specific_.find(res_name);
+  if(i == atom_renaming_ff_specific_.end()) return atom_name;
+  for(std::vector<std::pair<String,String> >::const_iterator j = i->second.begin(), e = i->second.end();
+      j != e; ++j){
+    if(atom_name == j->first) return j->second; 
+  } 
+  return atom_name;
+}
+
 void Forcefield::AssignFFSpecificNames(ost::mol::EntityHandle& handle, bool reverse) const{
 
   //the whole FF specific renaming procedure assumes a standard naming,

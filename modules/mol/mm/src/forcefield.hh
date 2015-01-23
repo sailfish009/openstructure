@@ -151,6 +151,16 @@ public:
                            const String& old_atom_name,
                            const String& new_atom_name);
 
+  String GetResidueRenamingMain(const String& name) const;
+
+  String GetResidueRenamingNTer(const String& name) const;
+
+  String GetResidueRenamingCTer(const String& name) const;
+
+  String GetResidueRenamingTwoTer(const String& name) const;
+
+  String GetAtomRenaming(const String& res_name, const String& atom_name) const;
+
   void AddHydrogenConstructor(const String& residue_name, HydrogenConstructorPtr p){
     hydrogen_constructors_[residue_name] = p;
   }

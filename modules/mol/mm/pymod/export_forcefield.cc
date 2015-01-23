@@ -78,6 +78,11 @@ void export_Forcefield()
     .def("SetFudgeLJ",&ost::mol::mm::Forcefield::SetFudgeLJ) 
     .def("SetFudgeQQ",&ost::mol::mm::Forcefield::SetFudgeQQ) 
     .def("SetGenPairs",&ost::mol::mm::Forcefield::SetGenPairs) 
+    .def("GetResidueRenamingMain",&ost::mol::mm::Forcefield::GetResidueRenamingMain,(arg("res_name")))
+    .def("GetResidueRenamingNTer",&ost::mol::mm::Forcefield::GetResidueRenamingNTer,(arg("res_name")))
+    .def("GetResidueRenamingCTer",&ost::mol::mm::Forcefield::GetResidueRenamingCTer,(arg("res_name")))
+    .def("GetResidueRenamingTwoTer",&ost::mol::mm::Forcefield::GetResidueRenamingTwoTer,(arg("res_name")))
+    .def("GetAtomRenaming",&ost::mol::mm::Forcefield::GetAtomRenaming,(arg("res_name"),arg("atom_name")))
     .def("AssignFFSpecificNames",&ost::mol::mm::Forcefield::AssignFFSpecificNames,(arg("ent"),arg("reverse")=true))
   ;
 
