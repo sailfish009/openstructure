@@ -36,7 +36,7 @@ class Topology{
 
 public:
 
-  Topology(const ost::mol::EntityHandle& ent, const std::vector<Real>& masses);
+  Topology(const std::vector<Real>& masses);
 
   Topology() { } //should not be accessible from Python to avoid messing around
                  //with empty topology
@@ -206,14 +206,6 @@ public:
 
   void SetHarmonicDistanceRestraintParameters(uint index, Real length, Real force_constant);
 
-  ost::mol::EntityHandle GetEntity() const { return ent_; };
-
-  uint GetAtomIndex(const ost::mol::AtomHandle& at) const;
-
-  uint GetAtomIndex(uint residue_index, const String& atom_name) const;
-
-  uint GetResidueIndex(const ost::mol::ResidueHandle& res) const;
-
   const std::vector<std::pair<Index<2>, std::vector<Real> > >& GetHarmonicBonds() const { return harmonic_bonds_; }
  
   const std::vector<std::pair<Index<3>, std::vector<Real> > >& GetHarmonicAngles() const { return harmonic_angles_; }
@@ -334,9 +326,7 @@ public:
 
   std::vector<uint> GetHarmonicDistanceRestraintIndices(uint atom_index) const;
 
-  uint GetNumAtoms() { return num_atoms_; }
-
-  uint GetNumResidues() { return num_residues_; }
+  uint GetNumParticles() { return num_particles_; }
 
   uint GetNumHarmonicBonds() { return harmonic_bonds_.size(); }
 
@@ -364,132 +354,16 @@ public:
 
   uint GetNumExclusions() { return exclusions_.size(); }
 
-  void Merge(TopologyPtr p);
-
-  void SetEntityPositions(const geom::Vec3List& positions);
+  void Merge(ost::mol::EntityHandle& ent, TopologyPtr other, const ost::mol::EntityHandle& other_ent);
 
   template <typename DS>
   void Serialize(DS& ds){
-    
-    ds & num_atoms_;
-    ds & num_residues_;
 
-    uint num_chains = 0;
-    uint num_residues = 0;
-    uint num_atoms = 0;
-    uint num_bonded_atoms = 0;
-    Real x_pos = 0.0;
-    Real y_pos = 0.0;
-    Real z_pos = 0.0;
-    Real bfac = 0.0;
-    Real occ = 0.0;
-    bool is_hetatm = false;
-    String chain_name = "X";
-    String res_name = "XXX";
-    int resnum_num = 0;
-    char resnum_code = '\0';
-    String atom_name = "X";
-    String atom_element = "X";
-    uint atom_index = 0;
+
     uint num_items = 0;
     Index<2> actual_index;
 
-    if(ds.IsSource()){
-      ost::mol::EntityHandle ent = ost::mol::CreateEntity();
-      ost::mol::XCSEditor ed = ent.EditXCS();
-      ds & num_chains;
-      for(uint i = 0; i < num_chains; ++i){
-        ds & chain_name;
-        ds & num_residues;
-        ost::mol::ChainHandle chain = ed.InsertChain(chain_name);
-        for(uint j = 0; j < num_residues; ++j){
-          ds & res_name;
-          ds & resnum_num;
-          ds & resnum_code;
-          ds & num_atoms;
-          ost::mol::ResNum num(resnum_num,resnum_code);
-          ost::mol::ResidueHandle res = ed.AppendResidue(chain,res_name,num);
-          for(uint k = 0; k < num_atoms; ++k){
-            ds & atom_name;
-            ds & atom_element;
-            ds & x_pos;
-            ds & y_pos;
-            ds & z_pos;
-            ds & bfac;
-            ds & occ;
-            ds & is_hetatm;
-            geom::Vec3 pos(x_pos,y_pos,z_pos);
-            ed.InsertAtom(res,atom_name,pos,atom_element,occ,bfac,is_hetatm);
-          }
-        }
-      }
-      ent_ = ent;
-      atom_list_ = ent_.GetAtomList();
-      res_list_ = ent_.GetResidueList();
-      for(uint i = 0; i < atom_list_.size(); ++i){
-        ds & num_bonded_atoms;
-        for(uint j = 0; j < num_bonded_atoms; ++j){
-          ds & atom_index;
-          ed.Connect(atom_list_[i],atom_list_[atom_index]);
-        }
-      }
-      InitMappers();
-    }
-    else{
-      num_chains = ent_.GetChainCount();
-      ds & num_chains;
-      ost::mol::ChainHandleList chain_list = ent_.GetChainList();
-      for(ost::mol::ChainHandleList::iterator i = chain_list.begin();
-          i != chain_list.end(); ++i){
-        chain_name = i->GetName();
-        num_residues = i->GetResidueCount();
-        ds & chain_name;
-        ds & num_residues;
-        ost::mol::ResidueHandleList res_list = i->GetResidueList();
-        for(ost::mol::ResidueHandleList::iterator j = res_list.begin();
-            j != res_list.end(); ++j){
-          res_name = j->GetKey();
-          resnum_num = j->GetNumber().GetNum();
-          resnum_code = j->GetNumber().GetInsCode(); 
-          num_atoms = j->GetAtomCount();
-          ds & res_name;
-          ds & resnum_num;
-          ds & resnum_code;
-          ds & num_atoms;
-          ost::mol::AtomHandleList atom_list = j->GetAtomList();
-          for(ost::mol::AtomHandleList::iterator k = atom_list.begin();
-              k != atom_list.end(); ++k){
-            atom_name = k->GetName();
-            atom_element = k->GetElement();
-            geom::Vec3 pos = k->GetPos();
-            bfac = k->GetBFactor();
-            occ = k->GetOccupancy();
-            is_hetatm = k->IsHetAtom();
-            ds & atom_name;
-            ds & atom_element;
-            ds & pos[0];
-            ds & pos[1];
-            ds & pos[2];
-            ds & bfac;
-            ds & occ;
-            ds & is_hetatm;
-          }
-        }
-      }
-      ost::mol::AtomHandleList bonded_atoms;
-      for(ost::mol::AtomHandleList::iterator i = atom_list_.begin();
-          i != atom_list_.end(); ++i){
-        bonded_atoms = i->GetBondPartners();
-        num_bonded_atoms = bonded_atoms.size();
-        ds & num_bonded_atoms;
-        for(ost::mol::AtomHandleList::iterator j = bonded_atoms.begin();
-            j != bonded_atoms.end(); ++j){
-          atom_index = this->GetAtomIndex(*j);
-          ds & atom_index;
-        }
-      }
-    }
-
+    ds & num_particles_;
     ds & fudge_qq_;
     ds & fudge_lj_;
 
@@ -791,18 +665,7 @@ public:
 
 private:
 
-  void InitMappers();
-
-  ost::mol::EntityHandle ent_;
-  ost::mol::AtomHandleList atom_list_;
-  ost::mol::ResidueHandleList res_list_;
-
-  uint num_atoms_;
-  uint num_residues_;
-
-  std::map<long,uint> atom_index_mapper_;
-  std::map<long,uint> residue_index_mapper_;
-  std::vector<std::map<String,uint> > atom_name_mapper_;
+  uint num_particles_;
 
   //fudge parameters for lj 1,4 pairs
   Real fudge_qq_;

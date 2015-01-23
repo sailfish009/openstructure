@@ -45,13 +45,14 @@ public:
              const MMSettingsPtr settings);
 
   Simulation(const ost::mol::mm::TopologyPtr top,
+             const ost::mol::EntityHandle& handle,
              const MMSettingsPtr settings);
 
   void Save(const String& filename);
 
   static SimulationPtr Load(const String& filename, MMSettingsPtr settings);
 
-  ost::mol::EntityHandle GetEntity() { return top_->GetEntity(); }
+  ost::mol::EntityHandle GetEntity() { return ent_; }
 
   geom::Vec3List GetPositions(bool enforce_periodic_box = false, bool in_angstrom = true);
 
@@ -63,7 +64,7 @@ public:
 
   void SetVelocities(geom::Vec3List& velocities);
 
-  void UpdateTopologyPositions(bool enforce_periodic_box = false);
+  void UpdatePositions(bool enforce_periodic_box = false);
 
   void MinimizeEnergy(const String& type = "steep", Real tolerance = 1.0, int max_iterations = 1000);
 
@@ -134,6 +135,7 @@ private:
   std::vector<MMObserverPtr> observers_;
   std::vector<int> time_to_notify_;
   std::map<FuncType,uint> system_force_mapper_;
+  ost::mol::EntityHandle ent_;
 };
 
 }}} //ns

@@ -39,7 +39,7 @@ prof = io.IOProfile(dialect='PDB', fault_tolerant=False,
 
 ent = io.LoadPDB('ethanol.pdb', profile=prof)
 masses = [12.011,12.011,15.999,1.008,1.008,1.008,1.008,1.008,1.008]
-top = Topology(ent,masses)
+top = Topology(masses)
 
 #all per atom parameters have to be set at once...
 charges = [-0.18,0.145,-0.683,0.06,0.06,0.06,0.06,0.06,0.418]
@@ -144,7 +144,7 @@ settings.integrator = VerletIntegrator(0.0001)
 cc_bond_index = top.GetHarmonicBondIndices(0,1)[0]
 
 #create the simulation
-sim = Simulation(top,settings)
+sim = Simulation(top,ent,settings)
 go = gfx.Entity("ethanol",sim.GetEntity())
 go.SetRenderMode(gfx.CUSTOM)
 scene.Add(go)

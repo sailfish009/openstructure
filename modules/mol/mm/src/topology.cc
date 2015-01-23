@@ -6,21 +6,11 @@ namespace ost{ namespace mol{ namespace mm{
 
 
 
-Topology::Topology(const ost::mol::EntityHandle& ent, const std::vector<Real>& masses){
-
-  num_atoms_ = ent.GetAtomCount();
-  if(num_atoms_ != masses.size()){
-    throw ost::Error("Number of atoms in entity and number of masses do not match when creating topology!");
-  }
-  ent_ = ent.Copy();
-  num_residues_ = ent_.GetResidueCount();
-  atom_list_ = ent_.GetAtomList();
-  res_list_ = ent_.GetResidueList();
+Topology::Topology(const std::vector<Real>& masses){
+  num_particles_ = masses.size();
   atom_masses_ = masses;
   fudge_lj_ = 1.0;
   fudge_qq_ = 1.0;
-
-  this->InitMappers();
 }
 
 TopologyPtr Topology::Load(const String& filename){
@@ -50,8 +40,8 @@ uint Topology::AddHarmonicBond(uint index_one,
                                Real bond_length,
                                Real force_constant){
 
-  if(index_one >= num_atoms_ || index_two >= num_atoms_){
-    throw ost::Error("Index of bond atom exceeds number of atoms present in topology!");
+  if(index_one >= num_particles_ || index_two >= num_particles_){
+    throw ost::Error("Index of bond particle exceeds number of particles present in topology!");
   }
   Index<2> index(index_one,index_two);
   std::vector<Real> parameters;
@@ -67,9 +57,9 @@ uint Topology::AddHarmonicAngle(uint index_one,
                                 Real angle,
                                 Real force_constant){
 
-  if(uint(index_one) >= num_atoms_ || uint(index_two) >= num_atoms_ || 
-     uint(index_three) >= num_atoms_){
-    throw ost::Error("Index of angle atom exceeds number of atoms present in topology!");
+  if(uint(index_one) >= num_particles_ || uint(index_two) >= num_particles_ || 
+     uint(index_three) >= num_particles_){
+    throw ost::Error("Index of angle particle exceeds number of particles present in topology!");
   }
   Index<3> index(index_one,index_two,index_three); 
   std::vector<Real> parameters;
@@ -87,9 +77,9 @@ uint Topology::AddUreyBradleyAngle(uint index_one,
                                    Real bond_length,
                                    Real bond_force_constant){
 
-  if(index_one >= num_atoms_ || index_two >= num_atoms_ || 
-     index_three >= num_atoms_){
-    throw ost::Error("Index of angle atom exceeds number of atoms present in topology!");
+  if(index_one >= num_particles_ || index_two >= num_particles_ || 
+     index_three >= num_particles_){
+    throw ost::Error("Index of angle particle exceeds number of particles present in topology!");
   }
   Index<3> index(index_one,index_two,index_three); 
   std::vector<Real> parameters;
@@ -109,9 +99,9 @@ uint Topology::AddPeriodicDihedral(uint index_one,
                                    Real phase,
                                    Real force_constant){
 
-  if(index_one >= num_atoms_ || index_two >= num_atoms_||
-     index_three >= num_atoms_ || index_four >= num_atoms_){
-    throw ost::Error("Index of dihedral atom exceeds number of atoms present in topology!");
+  if(index_one >= num_particles_ || index_two >= num_particles_||
+     index_three >= num_particles_ || index_four >= num_particles_){
+    throw ost::Error("Index of dihedral particle exceeds number of particles present in topology!");
   }
   Index<4> index(index_one,index_two,index_three,index_four);
   std::vector<Real> parameters;
@@ -130,9 +120,9 @@ uint Topology::AddPeriodicImproper(uint index_one,
                                    Real phase,
                                    Real force_constant){
 
-  if(index_one >= num_atoms_ || index_two >= num_atoms_||
-     index_three >= num_atoms_ || index_four >= num_atoms_){
-    throw ost::Error("Index of improper atom exceeds number of atoms present in topology!");
+  if(index_one >= num_particles_ || index_two >= num_particles_||
+     index_three >= num_particles_ || index_four >= num_particles_){
+    throw ost::Error("Index of improper particle exceeds number of particles present in topology!");
   }
   Index<4> index(index_one,index_two,index_three,index_four);
   std::vector<Real> parameters;
@@ -150,9 +140,9 @@ uint Topology::AddHarmonicImproper(uint index_one,
                                    Real angle,
                                    Real force_constant){
 
-  if(index_one >= num_atoms_ || index_two >= num_atoms_||
-     index_three >= num_atoms_ || index_four >= num_atoms_){
-    throw ost::Error("Index of improper atom exceeds number of atoms present in topology!");
+  if(index_one >= num_particles_ || index_two >= num_particles_||
+     index_three >= num_particles_ || index_four >= num_particles_){
+    throw ost::Error("Index of improper particle exceeds number of particles present in topology!");
   }
   Index<4> index(index_one,index_two,index_three,index_four);
   std::vector<Real> parameters;
@@ -170,10 +160,10 @@ uint Topology::AddCMap(uint index_one,
                        int dimension,
                        std::vector<Real> values){
 
-  if(index_one >= num_atoms_ || index_two >= num_atoms_ ||
-     index_three >= num_atoms_ || index_four >= num_atoms_ ||
-     index_five >= num_atoms_){
-    throw ost::Error("Index of cmap atom exceeds number of atoms present in topology!");
+  if(index_one >= num_particles_ || index_two >= num_particles_ ||
+     index_three >= num_particles_ || index_four >= num_particles_ ||
+     index_five >= num_particles_){
+    throw ost::Error("Index of cmap particle exceeds number of particles present in topology!");
   }
   if(uint(dimension * dimension) != values.size()){
     throw ost::Error("Dimension of CMap is inconsistent with its values!");
@@ -188,8 +178,8 @@ uint Topology::AddLJPair(uint index_one,
                          Real sigma,
                          Real epsilon){
 
-  if(index_one >= num_atoms_ || index_two >= num_atoms_){
-    throw ost::Error("Index of lj pair atom exceeds number of atoms present in topology!");
+  if(index_one >= num_particles_ || index_two >= num_particles_){
+    throw ost::Error("Index of lj pair particle exceeds number of particles present in topology!");
   }
   Index<2> index(index_one,index_two);
   Index<2> reverse_index(index_two,index_one);
@@ -208,8 +198,8 @@ uint Topology::AddExclusion(uint index_one,
                             uint index_two){
   Index<2> index(index_one,index_two);
   Index<2> reverse_index(index_two,index_one);
-  if(index_one >= num_atoms_ || index_two >= num_atoms_){
-    throw ost::Error("Index of exclusion atom exceeds number of atoms present in topology!");
+  if(index_one >= num_particles_ || index_two >= num_particles_){
+    throw ost::Error("Index of exclusion particle exceeds number of particles present in topology!");
   }
   if(added_exclusions_.find(index) != added_exclusions_.end() || added_exclusions_.find(reverse_index) != added_exclusions_.end()){
     throw ost::Error("This particular exclusion has already been set!");
@@ -223,8 +213,8 @@ uint Topology::AddDistanceConstraint(uint index_one,
                                      uint index_two,
                                      Real distance){
 
-  if(index_one >= num_atoms_ || index_two >= num_atoms_){
-    throw ost::Error("Index of distance constraint atom exceeds number of atoms present in topology!");
+  if(index_one >= num_particles_ || index_two >= num_particles_){
+    throw ost::Error("Index of distance constraint atom exceeds number of particles present in topology!");
   }
   Index<2> index(index_one,index_two);
   Index<2> reverse_index(index_two,index_one);
@@ -239,8 +229,8 @@ uint Topology::AddDistanceConstraint(uint index_one,
 }
 
 void Topology::AddPositionConstraint(uint index){
-  if(index >= num_atoms_){
-    throw ost::Error("Index of position constraint exceeds number of atoms present in topology!");
+  if(index >= num_particles_){
+    throw ost::Error("Index of position constraint exceeds number of particles present in topology!");
   }
   std::vector<uint>::iterator it = std::find(position_constraints_.begin(),position_constraints_.end(),index);
   if(it != position_constraints_.end()) return; //already present
@@ -249,8 +239,8 @@ void Topology::AddPositionConstraint(uint index){
 
 uint Topology::AddHarmonicPositionRestraint(uint ind, const geom::Vec3& ref_position, Real k, 
                                             Real x_scale, Real y_scale, Real z_scale){
-  if(ind >= num_atoms_){
-    throw ost::Error("Index of harmonic distance constraint exceeds number of atoms present in topology!");
+  if(ind >= num_particles_){
+    throw ost::Error("Index of harmonic distance constraint exceeds number of particles present in topology!");
   }
   Index<1> index(ind);
   std::vector<Real> parameters;
@@ -268,8 +258,8 @@ uint Topology::AddHarmonicPositionRestraint(uint ind, const geom::Vec3& ref_posi
 
 uint Topology::AddHarmonicDistanceRestraint(uint index_one, uint index_two,
                                             Real length, Real force_constant){
-  if(index_one >= num_atoms_ || index_two >= num_atoms_){
-    throw ost::Error("Index of distance restraint atom exceeds number of atoms present in topology!");
+  if(index_one >= num_particles_ || index_two >= num_particles_){
+    throw ost::Error("Index of distance restraint atom exceeds number of particles present in topology!");
   }
   Index<2> index(index_one,index_two);
   std::vector<Real> parameters;
@@ -280,8 +270,8 @@ uint Topology::AddHarmonicDistanceRestraint(uint index_one, uint index_two,
 }
 
 void Topology::SetSigmas(const std::vector<Real>& sigmas){
-  if(sigmas.size() != num_atoms_){
-    throw ost::Error("Expect the same number of sigma parameters than atoms!");
+  if(sigmas.size() != num_particles_){
+    throw ost::Error("Expect the same number of sigma parameters than particles!");
   }
   sigmas_ = sigmas;
 }
@@ -290,15 +280,15 @@ void Topology::SetSigma(uint index, Real sigma){
   if(sigmas_.empty()){
     throw ost::Error("Modification of sigma parameter requires initial assignment of sigma parameters in globo!");
   }
-  if(index >= num_atoms_){
-    throw ost::Error("Given atom index exceeds number off available atoms!");
+  if(index >= num_particles_){
+    throw ost::Error("Given particle index exceeds number of available particles!");
   }
   sigmas_[index] = sigma;
 }
 
 void Topology::SetEpsilons(const std::vector<Real>& epsilons){
-  if(epsilons.size() != num_atoms_){
-    throw ost::Error("Expect the same number of epsilon parameters than atoms!");
+  if(epsilons.size() != num_particles_){
+    throw ost::Error("Expect the same number of epsilon parameters than particles!");
   }
   epsilons_ = epsilons;
 }
@@ -307,15 +297,15 @@ void Topology::SetEpsilon(uint index, Real epsilon){
   if(epsilons_.empty()){
     throw ost::Error("Modification of epsilon parameter requires initial assignment of epsilon parameters in globo!");
   }
-  if(index >= num_atoms_){
-    throw ost::Error("Given atom index exceeds number off available atoms!");
+  if(index >= num_particles_){
+    throw ost::Error("Given particle index exceeds number of available particles!");
   }
   epsilons_[index] = epsilon;
 }
 
 void Topology::SetGBSARadii(const std::vector<Real>& gbsa_radii){
-  if(gbsa_radii.size() != num_atoms_){
-    throw ost::Error("Expect the same number of gbsa parameters than atoms!");
+  if(gbsa_radii.size() != num_particles_){
+    throw ost::Error("Expect the same number of gbsa parameters than particles!");
   }
   gbsa_radii_ = gbsa_radii;
 }
@@ -324,15 +314,15 @@ void Topology::SetGBSARadius(uint index, Real radius){
   if(gbsa_radii_.empty()){
     throw ost::Error("Modification of gbsa radius requires initial assignment of gbsa radii in globo!");
   }
-  if(index >= num_atoms_){
-    throw ost::Error("Given atom index exceeds number off available atoms!");
+  if(index >= num_particles_){
+    throw ost::Error("Given particle index exceeds number of available particles!");
   }
   gbsa_radii_[index] = radius;
 }
 
 void Topology::SetOBCScalings(const std::vector<Real>& obc_scaling){
-  if(obc_scaling.size() != num_atoms_){
-    throw ost::Error("Expect the same number of gbsa parameters than atoms!");
+  if(obc_scaling.size() != num_particles_){
+    throw ost::Error("Expect the same number of gbsa parameters than particles!");
   }
   obc_scaling_ = obc_scaling;
 }
@@ -341,15 +331,15 @@ void Topology::SetOBCScaling(uint index, Real scaling){
   if(obc_scaling_.empty()){
     throw ost::Error("Modification of obc scaling parameter requires initial assignment of obc scaling parameters in globo!");
   }
-  if(index >= num_atoms_){
-    throw ost::Error("Given atom index exceeds number off available atoms!");
+  if(index >= num_particles_){
+    throw ost::Error("Given particle index exceeds number of available particles!");
   }
   obc_scaling_[index] = scaling;
 }
 
 void Topology::SetCharges(const std::vector<Real>& charges){
-  if(charges.size() != num_atoms_){
-    throw ost::Error("Expect the same number of charges than atoms!");
+  if(charges.size() != num_particles_){
+    throw ost::Error("Expect the same number of charges than particles!");
   }
   charges_ = charges;
 }
@@ -358,15 +348,15 @@ void Topology::SetCharge(uint index, Real charge){
   if(charges_.empty()){
     throw ost::Error("Modification of charge parameter requires initial assignment of charges in globo!");
   }
-  if(index >= num_atoms_){
-    throw ost::Error("Given atom index exceeds number off available atoms!");
+  if(index >= num_particles_){
+    throw ost::Error("Given particle index exceeds number of available particles!");
   }
   charges_[index] = charge;  
 }
 
 void Topology::SetMasses(const std::vector<Real>& masses){
-  if(masses.size() != num_atoms_){
-    throw ost::Error("Expect masses vector to have the same number of elements than atoms in the topologies entity!");
+  if(masses.size() != num_particles_){
+    throw ost::Error("Expect masses vector to have the same number of elements than particles in the topologies entity!");
   }
   atom_masses_ = masses;
 }
@@ -375,8 +365,8 @@ void Topology::SetMass(uint index, Real mass){
   if(atom_masses_.empty()){
     throw ost::Error("Modification of mass parameter requires initial assignment of masses in globo!");
   }
-  if(index >= num_atoms_){
-    throw ost::Error("Given atom index exceeds number off available atoms!");
+  if(index >= num_particles_){
+    throw ost::Error("Given particle index exceeds number of available particles!");
   }
   atom_masses_[index] = mass;
 
@@ -625,112 +615,40 @@ void Topology::SetHarmonicDistanceRestraintParameters(uint index, Real length,
 
 }
 
-uint Topology::GetAtomIndex(const ost::mol::AtomHandle& at) const{
-  std::map<long,uint>::const_iterator i = atom_index_mapper_.find(at.GetHashCode());
-  if(i == atom_index_mapper_.end()){
-    throw ost::Error("Could not find atom in attached entity!");
-  }
-  return i->second;
-}
-
-
-uint Topology::GetResidueIndex(const ost::mol::ResidueHandle& res) const{
-  std::map<long,uint>::const_iterator i = residue_index_mapper_.find(res.GetHashCode());
-  if(i == residue_index_mapper_.end()){
-    throw ost::Error("Could not find residue in attached entity!");
-  }
-  return i->second;
-}
-
-uint Topology::GetAtomIndex(uint residue_index, const String& atom_name) const{
-  if(residue_index < 0 || residue_index >= num_residues_){
-    throw ost::Error("Residue index out of bounds");
-  }
-  if(atom_name[0] == '+'){
-    ost::mol::ResidueHandle actual_res = res_list_[residue_index];
-    ost::mol::ResidueHandle next_residue = actual_res.GetNext();
-    if(!next_residue){
-      throw ost::Error("Could not get next residue!");
-    }
-    String next_atom_name = atom_name.substr(1);
-    std::map<String,uint>::const_iterator it = atom_name_mapper_[this->GetResidueIndex(next_residue)].find(next_atom_name);
-    if(it == atom_name_mapper_[this->GetResidueIndex(next_residue)].end()){
-      std::stringstream ss;
-      ss << "Could not find required atom " << next_atom_name;
-      ss << " from residue " << next_residue.GetQualifiedName();
-    }
-    return it->second;
-  }
-  if(atom_name[0] == '-'){
-    ost::mol::ResidueHandle actual_res = res_list_[residue_index];
-    ost::mol::ResidueHandle prev_residue = actual_res.GetPrev();
-    if(!prev_residue){
-      throw ost::Error("Could not get prev residue!");
-    }
-    String prev_atom_name = atom_name.substr(1);
-    std::map<String,uint>::const_iterator it = atom_name_mapper_[this->GetResidueIndex(prev_residue)].find(prev_atom_name);
-    if(it == atom_name_mapper_[this->GetResidueIndex(prev_residue)].end()){
-      std::stringstream ss;
-      ss << "Could not find required atom " << prev_atom_name;
-      ss << " from residue " << prev_residue.GetQualifiedName();
-    }
-    return it->second;
-  }
-  std::map<String,uint>::const_iterator it = atom_name_mapper_[residue_index].find(atom_name);
-  if(it == atom_name_mapper_[residue_index].end()){
-    std::stringstream ss;
-    ss << "Could not find required atom " << atom_name;
-    ss << " from residue " << res_list_[residue_index].GetQualifiedName();
-  }
-  return it->second;
-}
-
 Real Topology::GetMass(uint index) const{
-  if(index >= num_atoms_) throw ost::Error("Provided index exceeds number of atoms present in topology!");
+  if(index >= num_particles_) throw ost::Error("Provided index exceeds number of particles present in topology!");
   return atom_masses_[index];
 }
 
 Real Topology::GetSigma(uint index) const{
-  if(index >= num_atoms_) throw ost::Error("Provided index exceeds number of atoms present in topology!");
+  if(index >= num_particles_) throw ost::Error("Provided index exceeds number of particles present in topology!");
   if(sigmas_.empty()) throw ost::Error("No sigmas set!");
   return sigmas_[index];
 }
 
 Real Topology::GetEpsilon(uint index) const{
-  if(index >= num_atoms_) throw ost::Error("Provided index exceeds number of atoms present in topology!");
+  if(index >= num_particles_) throw ost::Error("Provided index exceeds number of particles present in topology!");
   if(epsilons_.empty()) throw ost::Error("No epsilons set!");
   return epsilons_[index];
 }
 
 Real Topology::GetGBSARadius(uint index) const{
-  if(index >= num_atoms_) throw ost::Error("Provided index exceeds number of atoms present in topology!");
+  if(index >= num_particles_) throw ost::Error("Provided index exceeds number of particles present in topology!");
   if(gbsa_radii_.empty()) throw ost::Error("No gbsa radii set!");
   return gbsa_radii_[index];
 }
 
 Real Topology::GetOBCScaling(uint index) const{
-  if(index >= num_atoms_) throw ost::Error("Provided index exceeds number of atoms present in topology!");
+  if(index >= num_particles_) throw ost::Error("Provided index exceeds number of particles present in topology!");
   if(obc_scaling_.empty()) throw ost::Error("No obc scalings set!");
   return obc_scaling_[index];
 }
 
 
 Real Topology::GetCharge(uint index) const{
-  if(index >= num_atoms_) throw ost::Error("Provided index exceeds number of atoms present in topology!");
+  if(index >= num_particles_) throw ost::Error("Provided index exceeds number of particles present in topology!");
   if(charges_.empty()) throw ost::Error("No charges set!");
   return charges_[index];
-}
-
-
-void Topology::SetEntityPositions(const geom::Vec3List& positions){
-  if(positions.size() != num_atoms_){
-    throw ost::Error("Expect positions vector to have the same number of elements than atoms in the topologies entity!");
-  }
-  ost::mol::XCSEditor ed = ent_.EditXCS(ost::mol::BUFFERED_EDIT);
-  for(uint i = 0; i < num_atoms_; ++i){
-    ed.SetAtomPos(atom_list_[i],positions[i]);
-  }
-  ed.UpdateICS();
 }
 
 std::vector<uint> Topology::GetHarmonicBondIndices(uint index_one,
@@ -990,33 +908,77 @@ std::vector<uint> Topology::GetHarmonicDistanceRestraintIndices(uint atom_index)
   return return_indices;
 }
 
-void Topology::Merge(TopologyPtr p){  
+void Topology::Merge(ost::mol::EntityHandle& ent, TopologyPtr other, 
+                     const ost::mol::EntityHandle& other_ent){
+
+  //check whether the particle numbers match
+  if(num_particles_ != static_cast<uint>(ent.GetAtomCount())){
+    throw ost::Error("Num Particles is not consistent with num atoms of provided ent!");
+  }
+
+  if(other->GetNumParticles() != static_cast<uint>(other_ent.GetAtomCount())){
+    throw ost::Error("Num Particles is not consistent with num atoms of provided other_ent!");
+  } 
+
   //check whether there is chain from the new entity is already present in the actual entity 
-  ost::mol::EntityHandle source_ent = p->GetEntity();
-  ost::mol::ChainHandleList source_chains = source_ent.GetChainList();
-  for(ost::mol::ChainHandleList::iterator i = source_chains.begin();
-      i != source_chains.end(); ++i){
-    if(ent_.FindChain(i->GetName()).IsValid()){
+  ost::mol::ChainHandleList other_chains = other_ent.GetChainList();
+  for(ost::mol::ChainHandleList::iterator i = other_chains.begin(), 
+      e = other_chains.end(); i != e; ++i){
+    if(ent.FindChain(i->GetName()).IsValid()){
       std::stringstream ss;
-      ss << "Chain with name \"" << i->GetName() << "\" from source topology";
+      ss << "Chain with name \"" << i->GetName() << "\" from other topology";
       ss << "is already present in destination topology!";
       throw ost::Error(ss.str());
     }
   }
   //check whether the fudge parameters are consistent
-  if(p->GetFudgeLJ() != fudge_lj_ || p->GetFudgeQQ() != fudge_qq_){
+  if(other->fudge_lj_ != fudge_lj_ || other->fudge_qq_ != fudge_qq_){
     throw ost::Error("Expect the fudge parameters of source topology to consistent with the fudge parameters from the destination topology!");
   }
+
+  if(!charges_.empty()){
+    if(other->charges_.empty()){
+      throw ost::Error("Cannot merge topology without charges into a topology with defined charges!");
+    }
+  }
+
+  if(!sigmas_.empty()){
+    if(other->sigmas_.empty()){
+      throw ost::Error("Cannot merge topology without lj sigmas into a topology with defined sigmas!");
+    }
+  }
+
+  if(!epsilons_.empty()){
+    if(other->epsilons_.empty()){
+      throw ost::Error("Cannot merge topology without lj epsilons into a topology with defined epsilons!");
+    }
+  }
+
+  if(!gbsa_radii_.empty()){
+    if(other->gbsa_radii_.empty()){
+      throw ost::Error("Cannot merge topology without gbsa radii into a topology with defined radii!");
+    }
+  }
+
+  if(!obc_scaling_.empty()){
+    if(other->obc_scaling_.empty()){
+      throw ost::Error("Cannot merge topology without obc scaling into a topology with defined scaling!");
+    }
+  }
+
+  uint old_num_particles = num_particles_;
+  num_particles_ = num_particles_ + other->GetNumParticles();
 
   //mapper of hashcode from source atom to index in added_atom list
   std::map<long,int> index_mapper;
   ost::mol::AtomHandleList added_atoms;
 
+
   //let's create an editor to copy over all chains, residues and atoms
-  //from the source topologies entity
-  ost::mol::XCSEditor ed = ent_.EditXCS(ost::mol::BUFFERED_EDIT);
-  for(ost::mol::ChainHandleList::iterator i = source_chains.begin();
-      i != source_chains.end(); ++i){
+  //from the other topologies entity
+  ost::mol::XCSEditor ed = ent.EditXCS(ost::mol::BUFFERED_EDIT);
+  for(ost::mol::ChainHandleList::iterator i = other_chains.begin(),
+      e = other_chains.end(); i != e; ++i){
     ost::mol::ResidueHandleList res_list = i->GetResidueList();
     ost::mol::ChainHandle added_chain = ed.InsertChain(i->GetName());
 
@@ -1034,7 +996,7 @@ void Topology::Merge(TopologyPtr p){
   }
 
   //let's rebuild the connectivity
-  ost::mol::BondHandleList bond_list = source_ent.GetBondList();
+  ost::mol::BondHandleList bond_list = other_ent.GetBondList();
   for(ost::mol::BondHandleList::iterator i = bond_list.begin();
       i != bond_list.end(); ++i){
     ed.Connect(added_atoms[index_mapper[i->GetFirst().GetHashCode()]],
@@ -1042,253 +1004,157 @@ void Topology::Merge(TopologyPtr p){
   }
   ed.UpdateICS();
 
-  //let's update the remaining structural data
-  atom_list_ = ent_.GetAtomList();
-  res_list_ = ent_.GetResidueList();
-  num_atoms_ = atom_list_.size();
-  num_residues_ = res_list_.size();
-
-  //let's update the index mappers
-  for(uint i = 0; i < num_atoms_; ++i){
-    if(atom_index_mapper_.find(atom_list_[i].GetHashCode()) == atom_index_mapper_.end()){
-      atom_index_mapper_[atom_list_[i].GetHashCode()] = i;
-      continue;
-    }
-    //indices of atoms that have already been there must not be changed
-    if(atom_index_mapper_[atom_list_[i].GetHashCode()] != i){
-      throw ost::Error("Updating indices during merging process went horribly wrong!");
-    }
-  }
-
-  for(uint i = 0; i != num_residues_; ++i){
-    if(residue_index_mapper_.find(res_list_[i].GetHashCode()) == residue_index_mapper_.end()){
-      residue_index_mapper_[res_list_[i].GetHashCode()] = i;
-      continue;
-    }
-    //indices of residues that have already been there must not be changed
-    if(residue_index_mapper_[res_list_[i].GetHashCode()] != i){
-      throw ost::Error("Updating indices during merging process went horribly wrong!");
-    }
-  }
-
-  atom_name_mapper_.clear(); //let's rebuild from scratch
-  std::map<String,uint> per_residue_mapper;
-  ost::mol::AtomHandleList residue_atom_list;
-  for(uint i = 0; i < num_residues_; ++i){
-    per_residue_mapper.clear();
-    residue_atom_list = res_list_[i].GetAtomList();
-    for(ost::mol::AtomHandleList::iterator j = residue_atom_list.begin();
-        j != residue_atom_list.end(); ++j){
-      per_residue_mapper[j->GetName()] = atom_index_mapper_[j->GetHashCode()];
-    }
-    atom_name_mapper_.push_back(per_residue_mapper);
-  }
- 
-  //let's first generate an index mapper from source atom indices to the indices in
-  //the destination entity
-  ost::mol::AtomHandleList source_atoms = source_ent.GetAtomList();
-  std::map<int,int> final_index_mapper;
-  for(uint i = 0; i < source_atoms.size(); ++i){
-    final_index_mapper[i] = atom_index_mapper_[added_atoms[index_mapper[source_atoms[i].GetHashCode()]].GetHashCode()];
-  }
-
   //let's map over masses
-  std::vector<Real> source_masses = p->GetMasses();
-
-  for(uint i = 0; i < source_atoms.size(); ++i){
-    atom_masses_.push_back(0.0);
-  }
-  for(uint i = 0; i < source_atoms.size(); ++i){
-    atom_masses_[final_index_mapper[i]] = source_masses[i];
-  }
+  atom_masses_.resize(old_num_particles + other->GetNumParticles());
+  memcpy(&atom_masses_[old_num_particles],&other->atom_masses_[0],other->GetNumParticles() * sizeof(Real));
 
   //let's map over the other per atom parameters if they're defined in the destination topology
   if(!charges_.empty()){
-    std::vector<Real> source_charges = p->GetCharges();
-    if(source_charges.empty()){
-      throw ost::Error("Cannot merge topology without charges into a topology with defined charges!");
-    }
-    for(uint i = 0; i < source_charges.size(); ++i){
-      charges_.push_back(0.0);
-    }
-    for(uint i = 0; i < source_charges.size(); ++i){
-      charges_[final_index_mapper[i]] = source_charges[i];
-    }
+    charges_.resize(old_num_particles + other->GetNumParticles());
+    memcpy(&charges_[old_num_particles],&other->charges_[0],other->GetNumParticles() * sizeof(Real));
   }
 
   if(!sigmas_.empty()){
-    std::vector<Real> source_sigmas = p->GetSigmas();
-    if(source_sigmas.empty()){
-      throw ost::Error("Cannot merge topology without lj sigmas into a topology with defined sigmas!");
-    }
-    for(uint i = 0; i < source_sigmas.size(); ++i){
-      sigmas_.push_back(0.0);
-    }
-    for(uint i = 0; i < source_sigmas.size(); ++i){
-      sigmas_[final_index_mapper[i]] = source_sigmas[i];
-    }
+    sigmas_.resize(old_num_particles + other->GetNumParticles());
+    memcpy(&sigmas_[old_num_particles],&other->sigmas_[0],other->GetNumParticles() * sizeof(Real));
   }
 
   if(!epsilons_.empty()){
-    std::vector<Real> source_epsilons= p->GetEpsilons();
-    if(source_epsilons.empty()){
-      throw ost::Error("Cannot merge topology without lj epsilons into a topology with defined epsilons!");
-    }
-    for(uint i = 0; i < source_epsilons.size(); ++i){
-      epsilons_.push_back(0.0);
-    }
-    for(uint i = 0; i < source_epsilons.size(); ++i){
-      epsilons_[final_index_mapper[i]] = source_epsilons[i];
-    }
+    epsilons_.resize(old_num_particles + other->GetNumParticles());
+    memcpy(&epsilons_[old_num_particles],&other->epsilons_[0],other->GetNumParticles() * sizeof(Real));
   }
 
   if(!gbsa_radii_.empty()){
-    std::vector<Real> source_radii= p->GetGBSARadii();
-    if(source_radii.empty()){
-      throw ost::Error("Cannot merge topology without gbsa radii into a topology with defined radii!");
-    }
-    for(uint i = 0; i < source_radii.size(); ++i){
-      gbsa_radii_.push_back(0.0);
-    }
-    for(uint i = 0; i < source_radii.size(); ++i){
-      gbsa_radii_[final_index_mapper[i]] = source_radii[i];
-    }
+    gbsa_radii_.resize(old_num_particles + other->GetNumParticles());
+    memcpy(&gbsa_radii_[old_num_particles],&other->gbsa_radii_[0],other->GetNumParticles() * sizeof(Real));
   }
 
   if(!obc_scaling_.empty()){
-    std::vector<Real> source_scaling= p->GetOBCScalings();
-    if(source_scaling.empty()){
-      throw ost::Error("Cannot merge topology without obc scaling into a topology with defined scaling!");
-    }
-    for(uint i = 0; i < source_scaling.size(); ++i){
-      obc_scaling_.push_back(0.0);
-    }
-    for(uint i = 0; i < source_scaling.size(); ++i){
-      obc_scaling_[final_index_mapper[i]] = source_scaling[i];
-    }
+    obc_scaling_.resize(old_num_particles + other->GetNumParticles());
+    memcpy(&obc_scaling_[old_num_particles],&other->obc_scaling_[0],other->GetNumParticles() * sizeof(Real));
   }
 
   //finally, all the interactions get mapped over
 
-  const std::vector<std::pair<Index<2>, std::vector<Real> > >& harmonic_bonds = p->GetHarmonicBonds();
+  const std::vector<std::pair<Index<2>, std::vector<Real> > >& harmonic_bonds = other->GetHarmonicBonds();
   if(!harmonic_bonds.empty()){
     for(std::vector<std::pair<Index<2>, std::vector<Real> > >::const_iterator i = harmonic_bonds.begin();
         i != harmonic_bonds.end(); ++i){
-      this->AddHarmonicBond(final_index_mapper[i->first[0]],
-                            final_index_mapper[i->first[1]],
+      this->AddHarmonicBond(old_num_particles + i->first[0],
+                            old_num_particles + i->first[1],
                             i->second[0],i->second[1]);
     }
   }
 
-  const std::vector<std::pair<Index<3>, std::vector<Real> > >& harmonic_angles = p->GetHarmonicAngles();
+  const std::vector<std::pair<Index<3>, std::vector<Real> > >& harmonic_angles = other->GetHarmonicAngles();
   if(!harmonic_angles.empty()){
     for(std::vector<std::pair<Index<3>, std::vector<Real> > >::const_iterator i = harmonic_angles.begin();
         i != harmonic_angles.end(); ++i){
-      this->AddHarmonicAngle(final_index_mapper[i->first[0]],
-                             final_index_mapper[i->first[1]],
-                             final_index_mapper[i->first[2]],
+      this->AddHarmonicAngle(old_num_particles + i->first[0],
+                             old_num_particles + i->first[1],
+                             old_num_particles + i->first[2],
                              i->second[0],i->second[1]);
     }
   }
 
-  const std::vector<std::pair<Index<3>, std::vector<Real> > >& urey_bradley_angles = p->GetUreyBradleyAngles();
+  const std::vector<std::pair<Index<3>, std::vector<Real> > >& urey_bradley_angles = other->GetUreyBradleyAngles();
   if(!urey_bradley_angles.empty()){
     for(std::vector<std::pair<Index<3>, std::vector<Real> > >::const_iterator i = urey_bradley_angles.begin();
         i != urey_bradley_angles.end(); ++i){
-      this->AddUreyBradleyAngle(final_index_mapper[i->first[0]],
-                                final_index_mapper[i->first[1]],
-                                final_index_mapper[i->first[2]],
+      this->AddUreyBradleyAngle(old_num_particles + i->first[0],
+                                old_num_particles + i->first[1],
+                                old_num_particles + i->first[2],
                                 i->second[0],i->second[1],
                                 i->second[2],i->second[3]);
     }
   }
 
-  const std::vector<std::pair<Index<4>, std::vector<Real> > >& periodic_dihedrals = p->GetPeriodicDihedrals();
+  const std::vector<std::pair<Index<4>, std::vector<Real> > >& periodic_dihedrals = other->GetPeriodicDihedrals();
   if(!periodic_dihedrals.empty()){
     for(std::vector<std::pair<Index<4>, std::vector<Real> > >::const_iterator i = periodic_dihedrals.begin();
         i != periodic_dihedrals.end(); ++i){
-      this->AddPeriodicDihedral(final_index_mapper[i->first[0]],
-                                final_index_mapper[i->first[1]],
-                                final_index_mapper[i->first[2]],
-                                final_index_mapper[i->first[3]],
+      this->AddPeriodicDihedral(old_num_particles + i->first[0],
+                                old_num_particles + i->first[1],
+                                old_num_particles + i->first[2],
+                                old_num_particles + i->first[3],
                                 int(i->second[0]),i->second[1],i->second[2]);
     }
   }
 
-  const std::vector<std::pair<Index<4>, std::vector<Real> > >& periodic_impropers = p->GetPeriodicImpropers();
+  const std::vector<std::pair<Index<4>, std::vector<Real> > >& periodic_impropers = other->GetPeriodicImpropers();
   if(!periodic_impropers.empty()){
     for(std::vector<std::pair<Index<4>, std::vector<Real> > >::const_iterator i = periodic_impropers.begin();
         i != periodic_impropers.end(); ++i){
-      this->AddPeriodicImproper(final_index_mapper[i->first[0]],
-                                final_index_mapper[i->first[1]],
-                                final_index_mapper[i->first[2]],
-                                final_index_mapper[i->first[3]],
+      this->AddPeriodicImproper(old_num_particles + i->first[0],
+                                old_num_particles + i->first[1],
+                                old_num_particles + i->first[2],
+                                old_num_particles + i->first[3],
                                 int(i->second[0]),i->second[1],i->second[2]);
     }
   }
 
-  const std::vector<std::pair<Index<4>, std::vector<Real> > >& harmonic_impropers = p->GetHarmonicImpropers();
+  const std::vector<std::pair<Index<4>, std::vector<Real> > >& harmonic_impropers = other->GetHarmonicImpropers();
   if(!harmonic_impropers.empty()){
     for(std::vector<std::pair<Index<4>, std::vector<Real> > >::const_iterator i = harmonic_impropers.begin();
         i != harmonic_impropers.end(); ++i){
-      this->AddHarmonicImproper(final_index_mapper[i->first[0]],
-                                final_index_mapper[i->first[1]],
-                                final_index_mapper[i->first[2]],
-                                final_index_mapper[i->first[3]],
+      this->AddHarmonicImproper(old_num_particles + i->first[0],
+                                old_num_particles + i->first[1],
+                                old_num_particles + i->first[2],
+                                old_num_particles + i->first[3],
                                 i->second[0],i->second[1]);
     }
   }
 
-  const std::vector<std::pair<Index<5>, std::vector<Real> > >& cmaps = p->GetCMaps();
+  const std::vector<std::pair<Index<5>, std::vector<Real> > >& cmaps = other->GetCMaps();
   if(!cmaps.empty()){
     for(std::vector<std::pair<Index<5>, std::vector<Real> > >::const_iterator i = cmaps.begin();
         i != cmaps.end(); ++i){
       uint dimension = sqrt(i->second.size());
-      this->AddCMap(final_index_mapper[i->first[0]],
-                    final_index_mapper[i->first[1]],
-                    final_index_mapper[i->first[2]],
-                    final_index_mapper[i->first[3]],
-                    final_index_mapper[i->first[4]],
+      this->AddCMap(old_num_particles + i->first[0],
+                    old_num_particles + i->first[1],
+                    old_num_particles + i->first[2],
+                    old_num_particles + i->first[3],
+                    old_num_particles + i->first[4],
                     dimension,i->second);
     }
   }
 
-  const std::vector<std::pair<Index<2>, std::vector<Real> > >& ljpairs = p->GetLJPairs();
+  const std::vector<std::pair<Index<2>, std::vector<Real> > >& ljpairs = other->GetLJPairs();
   if(!ljpairs.empty()){
     for(std::vector<std::pair<Index<2>, std::vector<Real> > >::const_iterator i = ljpairs.begin();
         i != ljpairs.end(); ++i){
-      this->AddLJPair(final_index_mapper[i->first[0]],
-                      final_index_mapper[i->first[1]],
+      this->AddLJPair(old_num_particles + i->first[0],
+                      old_num_particles + i->first[1],
                       i->second[0],i->second[1]);
     }
   }
 
 
-  const std::vector<std::pair<Index<2>, std::vector<Real> > >& distance_constraints = p->GetDistanceConstraints();
+  const std::vector<std::pair<Index<2>, std::vector<Real> > >& distance_constraints = other->GetDistanceConstraints();
   if(!distance_constraints.empty()){
     for(std::vector<std::pair<Index<2>, std::vector<Real> > >::const_iterator i = distance_constraints.begin();
         i != distance_constraints.end(); ++i){
-      this->AddDistanceConstraint(final_index_mapper[i->first[0]],
-                                  final_index_mapper[i->first[1]],
+      this->AddDistanceConstraint(old_num_particles + i->first[0],
+                                  old_num_particles + i->first[1],
                                   i->second[0]);
     }
   }
 
-  const std::vector<Index<2> >& exclusions = p->GetExclusions();
+  const std::vector<Index<2> >& exclusions = other->GetExclusions();
   if(!exclusions.empty()){
     for(std::vector<Index<2> >::const_iterator i = exclusions.begin();
         i != exclusions.end(); ++i){
-      this->AddExclusion(final_index_mapper[(*i)[0]],
-                          final_index_mapper[(*i)[1]]);
+      this->AddExclusion(old_num_particles + (*i)[0],
+                         old_num_particles + (*i)[1]);
     }
   }
 
-  const std::vector<std::pair<Index<1>,std::vector<Real> > >& harmonic_position_restraints = p->GetHarmonicPositionRestraints();
+  const std::vector<std::pair<Index<1>,std::vector<Real> > >& harmonic_position_restraints = other->GetHarmonicPositionRestraints();
   if(!harmonic_position_restraints.empty()){
     for(std::vector<std::pair<Index<1>,std::vector<Real> > >::const_iterator i = harmonic_position_restraints.begin();
         i != harmonic_position_restraints.end(); ++i){
       geom::Vec3 ref_pos(i->second[0],i->second[1],i->second[2]);
-      this->AddHarmonicPositionRestraint(final_index_mapper[i->first[0]],
+      this->AddHarmonicPositionRestraint(old_num_particles + i->first[0],
                                          ref_pos,
                                          i->second[3],
                                          i->second[4],
@@ -1297,66 +1163,43 @@ void Topology::Merge(TopologyPtr p){
     }
   }
 
-  const std::vector<std::pair<Index<2>,std::vector<Real> > >& harmonic_distance_restraints = p->GetHarmonicDistanceRestraints();
+  const std::vector<std::pair<Index<2>,std::vector<Real> > >& harmonic_distance_restraints = other->GetHarmonicDistanceRestraints();
   if(!harmonic_distance_restraints.empty()){
     for(std::vector<std::pair<Index<2>,std::vector<Real> > >::const_iterator i = harmonic_distance_restraints.begin();
         i != harmonic_distance_restraints.end(); ++i){
-      this->AddHarmonicDistanceRestraint(final_index_mapper[i->first[0]],
-                                         final_index_mapper[i->first[1]],
+      this->AddHarmonicDistanceRestraint(old_num_particles + i->first[0],
+                                         old_num_particles + i->first[1],
                                          i->second[0],
                                          i->second[1]);
     }
   }
 
-  const std::vector<uint>& position_constraints = p->GetPositionConstraints();
+  const std::vector<uint>& position_constraints = other->GetPositionConstraints();
   if(!position_constraints.empty()){
     for(std::vector<uint>::const_iterator i = position_constraints.begin();
         i != position_constraints.end(); ++i){
-      this->AddPositionConstraint(final_index_mapper[*i]);
+      this->AddPositionConstraint(old_num_particles + (*i));
     }
   }
 
-  for(std::set<Index<2> >::iterator i = p->added_lj_pairs_.begin();
-      i != p->added_lj_pairs_.end(); ++i){
-    added_lj_pairs_.insert(Index<2>(final_index_mapper[(*i)[0]],
-                                    final_index_mapper[(*i)[1]]));
+  for(std::set<Index<2> >::iterator i = other->added_lj_pairs_.begin();
+      i != other->added_lj_pairs_.end(); ++i){
+    added_lj_pairs_.insert(Index<2>(old_num_particles + (*i)[0],
+                                    old_num_particles + (*i)[1]));
   }
 
-  for(std::set<Index<2> >::iterator i = p->added_distance_constraints_.begin();
-      i != p->added_distance_constraints_.end(); ++i){
-    added_distance_constraints_.insert(Index<2>(final_index_mapper[(*i)[0]],
-                                                final_index_mapper[(*i)[1]]));
+  for(std::set<Index<2> >::iterator i = other->added_distance_constraints_.begin();
+      i != other->added_distance_constraints_.end(); ++i){
+    added_distance_constraints_.insert(Index<2>(old_num_particles + (*i)[0],
+                                                old_num_particles + (*i)[1]));
   }
 
-  for(std::set<Index<2> >::iterator i = p->added_exclusions_.begin();
-      i != p->added_exclusions_.end(); ++i){
-    added_exclusions_.insert(Index<2>(final_index_mapper[(*i)[0]],
-                                      final_index_mapper[(*i)[1]]));
+  for(std::set<Index<2> >::iterator i = other->added_exclusions_.begin();
+      i != other->added_exclusions_.end(); ++i){
+    added_exclusions_.insert(Index<2>(old_num_particles + (*i)[0],
+                                      old_num_particles + (*i)[1]));
   }
 
 }
-
-void Topology::InitMappers(){
-  for(uint i = 0; i < atom_list_.size(); ++i){
-    atom_index_mapper_[atom_list_[i].GetHashCode()] = i;
-  }  
-
-  for(uint i = 0; i < res_list_.size(); ++i){
-    residue_index_mapper_[res_list_[i].GetHashCode()] = i;
-  }
-
-  std::map<String,uint> per_residue_mapper;
-  ost::mol::AtomHandleList residue_atom_list;
-  for(uint i = 0; i < num_residues_; ++i){
-    per_residue_mapper.clear();
-    residue_atom_list = res_list_[i].GetAtomList();
-    for(ost::mol::AtomHandleList::iterator j = residue_atom_list.begin();
-        j != residue_atom_list.end(); ++j){
-      per_residue_mapper[j->GetName()] = atom_index_mapper_[j->GetHashCode()];
-    }
-    atom_name_mapper_.push_back(per_residue_mapper);
-  }
-}
-
 
 }}}//ns

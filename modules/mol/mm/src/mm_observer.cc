@@ -3,7 +3,8 @@
 namespace ost { namespace mol{ namespace mm{
 
 void TrajObserver::Init(boost::shared_ptr<OpenMM::Context> c, 
-                        TopologyPtr top){
+                        TopologyPtr top,
+                        ost::mol::EntityHandle& ent){
 
   if(registered_){
     throw ost::Error("Can register observer to only one simulation!");
@@ -12,8 +13,6 @@ void TrajObserver::Init(boost::shared_ptr<OpenMM::Context> c,
   registered_ = true;
 
   context_ = c;
-  ost::mol::EntityHandle ent = top->GetEntity().Copy();
-  MMModeller::AssignPDBNaming(ent);
   c_group_ = ost::mol::CreateCoordGroup(ent.GetAtomList());
 }
 
@@ -26,7 +25,8 @@ void TrajObserver::Notify(){
 
 
 void TrajWriter::Init(boost::shared_ptr<OpenMM::Context> c, 
-                      TopologyPtr top){
+                      TopologyPtr top,
+                      ost::mol::EntityHandle& ent){
 
   if(registered_){
     throw ost::Error("Can register observer to only one simulation!");
@@ -37,13 +37,13 @@ void TrajWriter::Init(boost::shared_ptr<OpenMM::Context> c,
   context_ = c;
   ost::io::IOProfile profile("CHARMM",false,false,false,false,false);
   ost::io::PDBWriter writer(pdb_filename_, profile);
-  writer.Write(top->GetEntity().GetAtomList());
+  writer.Write(ent.GetAtomList());
 
   stream_.open(dcd_filename_.c_str(), std::ios::binary);
 
-  x.resize(top->GetNumAtoms());
-  y.resize(top->GetNumAtoms());
-  z.resize(top->GetNumAtoms());
+  x.resize(top->GetNumParticles());
+  y.resize(top->GetNumParticles());
+  z.resize(top->GetNumParticles());
 
 
   // size of first header block in bytes
@@ -101,7 +101,7 @@ void TrajWriter::Init(boost::shared_ptr<OpenMM::Context> c,
 
   // atom count block
   stream_.write(reinterpret_cast<char*>(&four), 4);
-  int32_t atom_count=top->GetNumAtoms();  
+  int32_t atom_count=top->GetNumParticles();  
   stream_.write(reinterpret_cast<char*>(&atom_count), 4);
   stream_.write(reinterpret_cast<char*>(&four), 4);
 }

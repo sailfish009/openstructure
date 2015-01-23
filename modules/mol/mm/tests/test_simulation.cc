@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_simulation_basics){
 
   settings->integrator = IntegratorPtr(new OpenMM::VerletIntegrator(0.002));
 
-  Simulation sim(top, settings);
+  Simulation sim(top, test_ent, settings);
 
 
   //we check, wether the reset functions have the desired effect on the topology
@@ -134,10 +134,10 @@ BOOST_AUTO_TEST_CASE(test_simulation_energy_calculations){
 
   settings->integrator = IntegratorPtr(new OpenMM::VerletIntegrator(0.002));
 
-  Simulation sim(top, settings);
+  Simulation sim(top, test_ent,settings);
 
   sim.MinimizeEnergy("steep",1.0,200);
-  sim.UpdateTopologyPositions();
+  sim.UpdatePositions();
 
   ost::mol::EntityHandle minimized_ent = sim.GetEntity();
 

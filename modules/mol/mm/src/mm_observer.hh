@@ -31,7 +31,8 @@ public:
   virtual void Notify() = 0;
 
   virtual void Init(boost::shared_ptr<OpenMM::Context> c,
-                    TopologyPtr top) = 0;
+                    TopologyPtr top,
+                    ost::mol::EntityHandle& ent) = 0;
 
   virtual int Rythm() = 0;
 
@@ -45,7 +46,8 @@ public:
   TrajObserver(int rythm): rythm_(rythm), registered_(false) { }
 
   void Init(boost::shared_ptr<OpenMM::Context> c, 
-            TopologyPtr top);
+            TopologyPtr top,
+            ost::mol::EntityHandle& ent);
 
   void Notify();
 
@@ -75,7 +77,8 @@ public:
                                                                                  frames_(0) { }
 
   void Init(boost::shared_ptr<OpenMM::Context> c, 
-            TopologyPtr top);
+            TopologyPtr top,
+            ost::mol::EntityHandle& ent);
 
   void Notify();
 

@@ -36,10 +36,9 @@ namespace{
     return l;
   }
 
-  ost::mol::mm::TopologyPtr WrapTopologyConstructor(ost::mol::EntityHandle& handle, 
-                                     const boost::python::list& masses_list){
+  ost::mol::mm::TopologyPtr WrapTopologyConstructor(const boost::python::list& masses_list){
     std::vector<Real> masses_vector = ListToVec<Real>(masses_list);
-    ost::mol::mm::TopologyPtr p(new ost::mol::mm::Topology(handle,masses_vector));
+    ost::mol::mm::TopologyPtr p(new ost::mol::mm::Topology(masses_vector));
     return p;
   }
 
@@ -296,15 +295,11 @@ namespace{
   }
 
   boost::python::list GetHarmonicPositionRestraintIndicesSingleIndex(ost::mol::mm::TopologyPtr p, uint i){
-    std::vector<uint> return_vec = p->GetHarmonicPositionRestraintIndices(i);
+  std::vector<uint> return_vec = p->GetHarmonicPositionRestraintIndices(i);
     return VecToList<uint>(return_vec);
   }
 
 }
-
-long GetIndexA(ost::mol::mm::TopologyPtr top,ost::mol::AtomHandle& at) { return top->GetAtomIndex(at); }
-long GetIndexB(ost::mol::mm::TopologyPtr top,int r_idx,const String& aname) { return top->GetAtomIndex(r_idx,aname); }
-
 
 void export_Topology()
 {
@@ -318,7 +313,6 @@ void export_Topology()
     .def("__init__",make_constructor(&WrapTopologyConstructor))
     .def("Save",&ost::mol::mm::Topology::Save)
     .def("Load",&ost::mol::mm::Topology::Load).staticmethod("Load")
-    .def("GetEntity",&ost::mol::mm::Topology::GetEntity)
     //interaction adding functions
     .def("AddHarmonicBond",&ost::mol::mm::Topology::AddHarmonicBond)
     .def("AddHarmonicAngle",&ost::mol::mm::Topology::AddHarmonicAngle)
@@ -335,7 +329,6 @@ void export_Topology()
     .def("ResetExclusions",&ost::mol::mm::Topology::ResetExclusions)
     .def("AddHarmonicPositionRestraint",&ost::mol::mm::Topology::AddHarmonicPositionRestraint,(arg("index"),arg("ref_position"),arg("k"),arg("x_scale")=1.0,arg("y_scale")=1.0,arg("z_scale")=1.0))
     .def("AddHarmonicDistanceRestraint",&ost::mol::mm::Topology::AddHarmonicDistanceRestraint)
-    .def("Merge",&ost::mol::mm::Topology::Merge)
     //single atom parameter getter and setter functions
     .def("SetSigmas",&WrapSetSigmas)
     .def("SetSigma",&ost::mol::mm::Topology::SetSigma)
@@ -412,7 +405,7 @@ void export_Topology()
     .def("GetHarmonicPositionRestraintIndices",&GetHarmonicPositionRestraintIndicesSingleIndex)
 
     //functions to get amount of data in topology
-    .def("GetNumAtoms",&ost::mol::mm::Topology::GetNumAtoms)
+    .def("GetNumParticles",&ost::mol::mm::Topology::GetNumParticles)
     .def("GetNumHarmonicBonds",&ost::mol::mm::Topology::GetNumHarmonicBonds)
     .def("GetNumHarmonicAngles",&ost::mol::mm::Topology::GetNumHarmonicAngles)
     .def("GetNumPeriodicDihedrals",&ost::mol::mm::Topology::GetNumPeriodicDihedrals)
@@ -423,10 +416,9 @@ void export_Topology()
     .def("GetNumDistanceConstraints",&ost::mol::mm::Topology::GetNumDistanceConstraints)
     .def("GetNumExclusions",&ost::mol::mm::Topology::GetNumExclusions)
     .def("GetNumHarmonicPositionRestraints",&ost::mol::mm::Topology::GetNumHarmonicPositionRestraints)
-    .def("GetNumHarmonicDistanceRestraints",&ost::mol::mm::Topology::GetNumHarmonicDistanceRestraints)
-    //get internal indices
-    .def("GetAtomIndex",&GetIndexA)
-    .def("GetAtomIndex",&GetIndexB)                                                               
+    .def("GetNumHarmonicDistanceRestraints",&ost::mol::mm::Topology::GetNumHarmonicDistanceRestraints)  
+
+    .def("Merge",&ost::mol::mm::Topology::Merge)                                                           
   ;
 
   boost::python::register_ptr_to_python<ost::mol::mm::TopologyPtr>();

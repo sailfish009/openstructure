@@ -8,13 +8,19 @@ Simulation::Simulation(const ost::mol::EntityHandle& handle,
   //note, that ent_ will be "completed" inside this function!
   //(hydrogens and shit)
 
-  TopologyPtr top = TopologyCreator::Create(handle,settings);
+  ent_ = handle.Copy();
+  TopologyPtr top = TopologyCreator::Create(ent_,settings);
   this->Init(top, settings);
 }
 
 Simulation::Simulation(const TopologyPtr top,
+                       const ost::mol::EntityHandle& handle,
                        const MMSettingsPtr settings){
 
+  if(static_cast<uint>(handle.GetAtomCount()) != top->GetNumParticles()){
+    throw ost::Error("Number of atoms in entity must be consistent with number of particles in topology!");
+  }
+  ent_ = handle.Copy();
   this->Init(top, settings);
 }
 
@@ -29,6 +35,86 @@ void Simulation::Save(const String& filename){
     ds & (*i)[1];
     ds & (*i)[2];
   }
+
+  uint num_chains;
+  uint num_residues;
+  uint num_atoms;
+  uint num_bonded_atoms;
+  Real bfac;
+  Real occ;
+  bool is_hetatm;
+  String chain_name;
+  String res_name;
+  int resnum_num;
+  char resnum_code;
+  String atom_name;
+  String atom_element;
+  uint atom_index;
+
+  num_chains = ent_.GetChainCount();
+  ds & num_chains;
+  ost::mol::ChainHandleList chain_list = ent_.GetChainList();
+  for(ost::mol::ChainHandleList::iterator i = chain_list.begin();
+      i != chain_list.end(); ++i){
+    chain_name = i->GetName();
+    num_residues = i->GetResidueCount();
+    ds & chain_name;
+    ds & num_residues;
+    ost::mol::ResidueHandleList res_list = i->GetResidueList();
+    for(ost::mol::ResidueHandleList::iterator j = res_list.begin();
+        j != res_list.end(); ++j){
+      res_name = j->GetKey();
+      resnum_num = j->GetNumber().GetNum();
+      resnum_code = j->GetNumber().GetInsCode(); 
+      num_atoms = j->GetAtomCount();
+      ds & res_name;
+      ds & resnum_num;
+      ds & resnum_code;
+      ds & num_atoms;
+      ost::mol::AtomHandleList atom_list = j->GetAtomList();
+      for(ost::mol::AtomHandleList::iterator k = atom_list.begin();
+          k != atom_list.end(); ++k){
+        atom_name = k->GetName();
+        atom_element = k->GetElement();
+        geom::Vec3 pos = k->GetPos();
+        bfac = k->GetBFactor();
+        occ = k->GetOccupancy();
+        is_hetatm = k->IsHetAtom();
+        ds & atom_name;
+        ds & atom_element;
+        ds & pos[0];
+        ds & pos[1];
+        ds & pos[2];
+        ds & bfac;
+        ds & occ;
+        ds & is_hetatm;
+      }
+    }
+  }
+
+  ost::mol::AtomHandleList atom_list = ent_.GetAtomList();
+  ost::mol::AtomHandleList bonded_atoms;
+
+  std::map<long,int> atom_indices;
+  int actual_index = 0;
+  for(ost::mol::AtomHandleList::const_iterator i = atom_list.begin(), e = atom_list.end(); 
+      i != e; ++i){
+    atom_indices[i->GetHashCode()] = actual_index;
+    ++actual_index;
+  }
+
+  for(ost::mol::AtomHandleList::iterator i = atom_list.begin();
+      i != atom_list.end(); ++i){
+    bonded_atoms = i->GetBondPartners();
+    num_bonded_atoms = bonded_atoms.size();
+    ds & num_bonded_atoms;
+    for(ost::mol::AtomHandleList::iterator j = bonded_atoms.begin();
+        j != bonded_atoms.end(); ++j){
+      atom_index = atom_indices[j->GetHashCode()];
+      ds & atom_index;
+    }
+  }
+
   context_->createCheckpoint(stream);  
 }
 
@@ -94,6 +180,63 @@ SimulationPtr Simulation::Load(const String& filename, MMSettingsPtr settings){
   }
   sim_ptr->context_->setPositions(positions);
 
+  uint num_chains;
+  uint num_residues;
+  uint num_atoms;
+  uint num_bonded_atoms;
+  Real x_pos;
+  Real y_pos;
+  Real z_pos;
+  Real bfac;
+  Real occ;
+  bool is_hetatm;
+  String chain_name;
+  String res_name;
+  int resnum_num;
+  char resnum_code;
+  String atom_name;
+  String atom_element;
+  uint atom_index;
+
+  ost::mol::EntityHandle ent = ost::mol::CreateEntity();
+  ost::mol::XCSEditor ed = ent.EditXCS();
+  ds & num_chains;
+  for(uint i = 0; i < num_chains; ++i){
+    ds & chain_name;
+    ds & num_residues;
+    ost::mol::ChainHandle chain = ed.InsertChain(chain_name);
+    for(uint j = 0; j < num_residues; ++j){
+      ds & res_name;
+      ds & resnum_num;
+      ds & resnum_code;
+      ds & num_atoms;
+      ost::mol::ResNum num(resnum_num,resnum_code);
+      ost::mol::ResidueHandle res = ed.AppendResidue(chain,res_name,num);
+      for(uint k = 0; k < num_atoms; ++k){
+        ds & atom_name;
+        ds & atom_element;
+        ds & x_pos;
+        ds & y_pos;
+        ds & z_pos;
+        ds & bfac;
+        ds & occ;
+        ds & is_hetatm;
+        geom::Vec3 pos(x_pos,y_pos,z_pos);
+        ed.InsertAtom(res,atom_name,pos,atom_element,occ,bfac,is_hetatm);
+      }
+    }
+  }
+  ost::mol::AtomHandleList atom_list = ent.GetAtomList();
+  for(uint i = 0; i < atom_list.size(); ++i){
+    ds & num_bonded_atoms;
+    for(uint j = 0; j < num_bonded_atoms; ++j){
+      ds & atom_index;
+      ed.Connect(atom_list[i],atom_list[atom_index]);
+    }
+  }
+
+  sim_ptr->ent_ = ent;
+
   sim_ptr->context_->loadCheckpoint(stream);
 
   return sim_ptr;
@@ -111,7 +254,6 @@ void Simulation::Init(const TopologyPtr top,
     throw ost::Error("Settings must have a valid integrator attached to set up a simulation!");
   }
   system_ = SystemCreator::Create(top_,settings,system_force_mapper_); 
-  ost::mol::EntityHandle ent = top_->GetEntity();
 
   //setting up the context, which combines the system with an integrator
   //to proceed in time, but first we have to load the proper platform
@@ -140,7 +282,7 @@ void Simulation::Init(const TopologyPtr top,
 
   context_ = ContextPtr(new OpenMM::Context(*system_,*integrator_,*platform));
 
-  ost::mol::AtomHandleList atom_list = ent.GetAtomList();
+  ost::mol::AtomHandleList atom_list = ent_.GetAtomList();
   std::vector<OpenMM::Vec3> positions;
   geom::Vec3 ost_vec;
   OpenMM::Vec3 open_mm_vec;
@@ -152,6 +294,7 @@ void Simulation::Init(const TopologyPtr top,
     open_mm_vec[2] = ost_vec[2]/10;
     positions.push_back(open_mm_vec);
   }
+
   context_->setPositions(positions);
 
   //make sure the context satisfies the distance constraints
@@ -181,51 +324,61 @@ geom::Vec3List Simulation::GetForces(){
 }
 
 void Simulation::SetPositions(const geom::Vec3List& positions, bool in_angstrom){
-  if(top_->GetNumAtoms() != positions.size()){
-    throw ost::Error("Number of positions does not correspond to number of atoms in topology!");
+  if(top_->GetNumParticles() != positions.size()){
+    throw ost::Error("Number of positions does not correspond to number of particles in topology!");
   }
-  std::vector<OpenMM::Vec3> openmm_positions;
-  OpenMM::Vec3 open_mm_vec;
+  std::vector<OpenMM::Vec3> openmm_positions(top_->GetNumParticles());
+  OpenMM::Vec3* actual_pos = &openmm_positions[0];
   if(in_angstrom){
     for(geom::Vec3List::const_iterator i = positions.begin();
         i != positions.end(); ++i){
-      open_mm_vec[0] = (*i)[0]*0.1;
-      open_mm_vec[1] = (*i)[1]*0.1;
-      open_mm_vec[2] = (*i)[2]*0.1;
-      openmm_positions.push_back(open_mm_vec);
+      (*actual_pos)[0] = (*i)[0]*0.1;
+      (*actual_pos)[1] = (*i)[1]*0.1;
+      (*actual_pos)[2] = (*i)[2]*0.1;
+      ++actual_pos;
     }
   }
   else{
     for(geom::Vec3List::const_iterator i = positions.begin();
         i != positions.end(); ++i){
-      open_mm_vec[0] = (*i)[0];
-      open_mm_vec[1] = (*i)[1];
-      open_mm_vec[2] = (*i)[2];
-      openmm_positions.push_back(open_mm_vec);
+      (*actual_pos)[0] = (*i)[0];
+      (*actual_pos)[1] = (*i)[1];
+      (*actual_pos)[2] = (*i)[2];
+      ++actual_pos;
     }
   }
   context_->setPositions(openmm_positions);
 }
 
 void Simulation::SetVelocities(geom::Vec3List& velocities){
-  if(top_->GetNumAtoms() != velocities.size()){
-    throw ost::Error("Number of velocities does not correspond to number of atoms in topology!");
+  if(top_->GetNumParticles() != velocities.size()){
+    throw ost::Error("Number of velocities does not correspond to number of particles in topology!");
   }
-  std::vector<OpenMM::Vec3> openmm_velocities;
-  OpenMM::Vec3 open_mm_vec;
+  std::vector<OpenMM::Vec3> openmm_velocities(top_->GetNumParticles());
+  OpenMM::Vec3* actual_vel = &openmm_velocities[0];
   for(geom::Vec3List::iterator i = velocities.begin();
       i != velocities.end(); ++i){
-    open_mm_vec[0] = (*i)[0];
-    open_mm_vec[1] = (*i)[1];
-    open_mm_vec[2] = (*i)[2];
-    openmm_velocities.push_back(open_mm_vec);
+    (*actual_vel)[0] = (*i)[0];
+    (*actual_vel)[1] = (*i)[1];
+    (*actual_vel)[2] = (*i)[2];
+    ++actual_vel;
   }
   context_->setVelocities(openmm_velocities);
 }
 
-void Simulation::UpdateTopologyPositions(bool enforce_periodic_box){
-  geom::Vec3List positions = this->GetPositions(enforce_periodic_box);
-  top_->SetEntityPositions(positions);
+void Simulation::UpdatePositions(bool enforce_periodic_box){
+  if(top_->GetNumParticles() != static_cast<uint>(ent_.GetAtomCount())){
+    throw ost::Error("Num particles in topology and num atoms in entity are not consistent!");
+  }
+  geom::Vec3List positions = this->GetPositions(enforce_periodic_box, true);
+  ost::mol::XCSEditor ed = ent_.EditXCS();
+  ost::mol::AtomHandleList atom_list = ent_.GetAtomList();
+  ost::mol::AtomHandleList::iterator a = atom_list.begin();
+  ost::mol::AtomHandleList::iterator ae = atom_list.end();
+  geom::Vec3List::iterator v = positions.begin();
+  for(; a != ae; ++a, ++v){
+    ed.SetAtomPos(*a,*v);
+  }
 }
 
 void Simulation::MinimizeEnergy(const String& type, Real tolerance, int max_iterations){
@@ -291,7 +444,7 @@ Real Simulation::GetPotentialEnergy(){
 void Simulation::Register(MMObserverPtr o){
   observers_.push_back(o);
   time_to_notify_.push_back(o->Rythm());
-  o->Init(context_,top_);
+  o->Init(context_,top_,ent_);
 }
 
 int Simulation::TimeToNextNotification(){
@@ -472,7 +625,7 @@ void Simulation::ResetDistanceConstraint(uint index, Real constraint_length){
 }
 
 void Simulation::AddPositionConstraint(uint index){
-  if(index >= top_->GetNumAtoms()){
+  if(index >= top_->GetNumParticles()){
     throw ost::Error("Provided index exceeds number of atoms!");
   }
   system_->setParticleMass(index,0.0);
@@ -484,7 +637,7 @@ void Simulation::AddPositionConstraints(const std::vector<uint>& index){
 
   for(std::vector<uint>::const_iterator i = index.begin(); 
       i != index.end(); ++i){
-    if(*i >= top_->GetNumAtoms()){
+    if(*i >= top_->GetNumParticles()){
       throw ost::Error("Provided index exceeds number of atoms!");
     }
     system_->setParticleMass(*i,0.0);
@@ -553,7 +706,7 @@ void Simulation::ResetHarmonicDistanceRestraint(uint index, Real length, Real fo
 }
 
 void Simulation::ResetLJ(uint index, Real sigma, Real epsilon){
-  if(index >= top_->GetNumAtoms()){
+  if(index >= top_->GetNumParticles()){
     throw ost::Error("Provided index exceeds number of atoms!");
   }
   if(system_force_mapper_.find(LJ) == system_force_mapper_.end()){
@@ -573,7 +726,7 @@ void Simulation::ResetLJ(uint index, Real sigma, Real epsilon){
 }
 
 void Simulation::ResetGBSA(uint index, Real radius, Real scaling){
-  if(index >= top_->GetNumAtoms()){
+  if(index >= top_->GetNumParticles()){
     throw ost::Error("Provided index exceeds number of atoms!");
   }
   if(system_force_mapper_.find(GBSA) == system_force_mapper_.end()){
@@ -593,7 +746,7 @@ void Simulation::ResetGBSA(uint index, Real radius, Real scaling){
 }
 
 void Simulation::ResetCharge(uint index, Real charge){
-  if(index >= top_->GetNumAtoms()){
+  if(index >= top_->GetNumParticles()){
     throw ost::Error("Provided index exceeds number of atoms!");
   }
   if(system_force_mapper_.find(LJ) == system_force_mapper_.end()){
@@ -641,7 +794,7 @@ void Simulation::ResetCharge(uint index, Real charge){
 }
 
 void Simulation::ResetMass(uint index, Real mass){
-  if(index >= top_->GetNumAtoms()){
+  if(index >= top_->GetNumParticles()){
     throw ost::Error("Provided index exceeds number of atoms!");
   }
   system_->setParticleMass(index,mass);

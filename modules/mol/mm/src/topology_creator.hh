@@ -29,7 +29,7 @@ typedef boost::shared_ptr<TopologyCreator> TopologyCreatorPtr;
 
 class TopologyCreator {
 public:
-  static TopologyPtr Create(const ost::mol::EntityHandle& ent, 
+  static TopologyPtr Create(ost::mol::EntityHandle& ent, 
                             const MMSettingsPtr settings);
 
 };

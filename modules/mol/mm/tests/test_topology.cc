@@ -30,9 +30,7 @@ BOOST_AUTO_TEST_CASE(test_topology_basics){
   std::vector<Real> zero_real(0);
   std::vector<Real> lot_of_reals(test_ent.GetAtomCount());
 
-  BOOST_CHECK_THROW(Topology(test_ent,zero_real),ost::Error);
-
-  TopologyPtr top(new Topology(test_ent,lot_of_reals));
+  TopologyPtr top(new Topology(lot_of_reals));
 
   uint ui1(0), ui2(0), ui3(0), ui4(0), ui5(0);
   int i1(0), i5(0);  
@@ -283,49 +281,10 @@ BOOST_AUTO_TEST_CASE(test_topology_basics){
   BOOST_CHECK(top->GetHarmonicDistanceRestraintIndices(1).size() == 10);
   BOOST_CHECK(top->GetHarmonicDistanceRestraintIndices(2).size() == 0);
 
-  ost::mol::EntityHandle top_test_ent = top->GetEntity();
-  ost::mol::AtomHandleList atom_list = top_test_ent.GetAtomList();
-  top->AddPositionConstraint(atom_list[0]);
+  top->AddPositionConstraint(5);
   BOOST_CHECK(top->GetNumPositionConstraints() == 1);
   top->ResetPositionConstraints();
   BOOST_CHECK(top->GetNumPositionConstraints() == 0);
-}
-
-BOOST_AUTO_TEST_CASE(test_topology_index_getters){
-
-  String pdb_name = "1CRN.pdb";
-  ost::io::PDBReader reader(pdb_name, ost::io::IOProfile());
-  ost::mol::EntityHandle test_ent = ost::mol::CreateEntity();
-  reader.Import(test_ent);
-  ost::conop::ProcessorPtr processor(new ost::conop::HeuristicProcessor);
-  processor->Process(test_ent);
-
-  //check initialisation without settings
-  std::vector<Real> fake_masses(test_ent.GetAtomCount());
-  TopologyPtr top(new Topology(test_ent,fake_masses));
-  test_ent = top->GetEntity(); //we do a copy in the constructor of the topology
-
-  ost::mol::AtomHandleList atom_list = test_ent.GetAtomList();
-  ost::mol::ResidueHandleList res_list = test_ent.GetResidueList();
-
-  for(uint i = 0; i < atom_list.size(); ++i){
-    BOOST_CHECK(top->GetAtomIndex(atom_list[i]) == i);
-  }
-  for(uint i = 0; i < res_list.size(); ++i){
-    BOOST_CHECK(top->GetResidueIndex(res_list[i]) == i);
-  }
-
-  ost::mol::AtomHandle test_atom_one = res_list[10].FindAtom("CA");
-  ost::mol::AtomHandle test_atom_two = res_list[9].FindAtom("CA");
-  ost::mol::AtomHandle test_atom_three = res_list[11].FindAtom("CA");
-
-  uint index_one = top->GetAtomIndex(test_atom_one);
-  uint index_two = top->GetAtomIndex(test_atom_two);
-  uint index_three = top->GetAtomIndex(test_atom_three);
-
-  BOOST_CHECK(top->GetAtomIndex(10,"CA") == index_one);
-  BOOST_CHECK(top->GetAtomIndex(10,"-CA") == index_two);
-  BOOST_CHECK(top->GetAtomIndex(10,"+CA") == index_three);
 }
 
 BOOST_AUTO_TEST_CASE(test_topology_merge){
@@ -333,6 +292,8 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   String pdb_name = "1CRN.pdb";
   ost::io::PDBReader reader(pdb_name, ost::io::IOProfile());
   ost::mol::EntityHandle test_ent = ost::mol::CreateEntity();
+  ost::mol::EntityHandle temp;
+
   reader.Import(test_ent);
 
   ForcefieldPtr ff = Forcefield::Load("CHARMM27.dat");
@@ -354,7 +315,7 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
 
   //check whether error gets thrown when chain with same name is already present
   std::vector<Real> real_vec(6);
-  TopologyPtr merge_top_one(new Topology(new_ent,real_vec));
+  TopologyPtr merge_top_one(new Topology(real_vec));
   merge_top_one->SetCharges(real_vec);
   merge_top_one->SetOBCScalings(real_vec);
   merge_top_one->SetGBSARadii(real_vec);
@@ -363,10 +324,11 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   merge_top_one->SetFudgeQQ(1.0);
   merge_top_one->SetFudgeLJ(1.0);
   TopologyPtr top_one = TopologyCreator::Create(test_ent,settings);
-  BOOST_CHECK_THROW(top_one->Merge(merge_top_one),ost::Error); 
+  temp = test_ent.Copy();
+  BOOST_CHECK_THROW(top_one->Merge(temp,merge_top_one,new_ent),ost::Error); 
   ost::mol::XCSEditor ed = new_ent.EditXCS();
   ed.RenameChain(new_ent.GetChainList()[0],"B");
-  TopologyPtr merge_top_one_two(new Topology(new_ent,real_vec)); // I know...
+  TopologyPtr merge_top_one_two(new Topology(real_vec)); // I know...
   merge_top_one_two->SetCharges(real_vec);
   merge_top_one_two->SetOBCScalings(real_vec);
   merge_top_one_two->SetGBSARadii(real_vec);
@@ -374,11 +336,11 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   merge_top_one_two->SetEpsilons(real_vec);
   merge_top_one_two->SetFudgeQQ(1.0);
   merge_top_one_two->SetFudgeLJ(1.0);
-  BOOST_CHECK_NO_THROW(top_one->Merge(merge_top_one_two));
+  BOOST_CHECK_NO_THROW(top_one->Merge(temp,merge_top_one_two,new_ent));
 
 
   //check whether error gets thrown, when fudge parameters are inconsistent
-  TopologyPtr merge_top_two(new Topology(new_ent,real_vec));
+  TopologyPtr merge_top_two(new Topology(real_vec));
   merge_top_two->SetCharges(real_vec);
   merge_top_two->SetOBCScalings(real_vec);
   merge_top_two->SetGBSARadii(real_vec);
@@ -387,14 +349,15 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   merge_top_two->SetFudgeQQ(42.0);
   merge_top_two->SetFudgeLJ(42.0);
   TopologyPtr top_two = TopologyCreator::Create(test_ent,settings);
-  BOOST_CHECK_THROW(top_two->Merge(merge_top_two),ost::Error); 
+  temp = test_ent.Copy();
+  BOOST_CHECK_THROW(top_two->Merge(temp,merge_top_two,new_ent),ost::Error); 
   merge_top_two->SetFudgeQQ(1.0);
   merge_top_two->SetFudgeLJ(1.0);
-  BOOST_CHECK_NO_THROW(top_two->Merge(merge_top_two));
+  BOOST_CHECK_NO_THROW(top_two->Merge(temp,merge_top_two,new_ent));
 
 
   //check whether error gets thrown when charges are not set
-  TopologyPtr merge_top_three(new Topology(new_ent,real_vec));
+  TopologyPtr merge_top_three(new Topology(real_vec));
   merge_top_three->SetOBCScalings(real_vec);
   merge_top_three->SetGBSARadii(real_vec);
   merge_top_three->SetSigmas(real_vec);
@@ -402,13 +365,14 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   merge_top_three->SetFudgeQQ(1.0);
   merge_top_three->SetFudgeLJ(1.0);
   TopologyPtr top_three = TopologyCreator::Create(test_ent,settings);
-  BOOST_CHECK_THROW(top_three->Merge(merge_top_three),ost::Error); 
+  temp = test_ent.Copy();
+  BOOST_CHECK_THROW(top_three->Merge(temp,merge_top_three,new_ent),ost::Error); 
   TopologyPtr top_three_two = TopologyCreator::Create(test_ent,settings);
   merge_top_three->SetCharges(real_vec);
-  BOOST_CHECK_NO_THROW(top_three_two->Merge(merge_top_three));
+  BOOST_CHECK_NO_THROW(top_three_two->Merge(temp,merge_top_three,new_ent));
 
   //check whether error gets thrown when obc scaling factors are not set
-  TopologyPtr merge_top_four(new Topology(new_ent,real_vec));
+  TopologyPtr merge_top_four(new Topology(real_vec));
   merge_top_four->SetCharges(real_vec);
   merge_top_four->SetGBSARadii(real_vec);
   merge_top_four->SetSigmas(real_vec);
@@ -416,13 +380,14 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   merge_top_four->SetFudgeQQ(1.0);
   merge_top_four->SetFudgeLJ(1.0);
   TopologyPtr top_four = TopologyCreator::Create(test_ent,settings);
-  BOOST_CHECK_THROW(top_four->Merge(merge_top_four),ost::Error); 
+  temp = test_ent.Copy();
+  BOOST_CHECK_THROW(top_four->Merge(temp,merge_top_four,new_ent),ost::Error); 
   TopologyPtr top_four_two = TopologyCreator::Create(test_ent,settings);
   merge_top_four->SetOBCScalings(real_vec);
-  BOOST_CHECK_NO_THROW(top_four_two->Merge(merge_top_four));
+  BOOST_CHECK_NO_THROW(top_four_two->Merge(temp,merge_top_four,new_ent));
 
   //check whether error gets thrown when gbsa radii are not set
-  TopologyPtr merge_top_five(new Topology(new_ent,real_vec));
+  TopologyPtr merge_top_five(new Topology(real_vec));
   merge_top_five->SetCharges(real_vec);
   merge_top_five->SetOBCScalings(real_vec);
   merge_top_five->SetSigmas(real_vec);
@@ -430,13 +395,14 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   merge_top_five->SetFudgeQQ(1.0);
   merge_top_five->SetFudgeLJ(1.0);
   TopologyPtr top_five = TopologyCreator::Create(test_ent,settings);
-  BOOST_CHECK_THROW(top_five->Merge(merge_top_five),ost::Error); 
+  temp = test_ent.Copy();
+  BOOST_CHECK_THROW(top_five->Merge(temp,merge_top_five,new_ent),ost::Error); 
   TopologyPtr top_five_two = TopologyCreator::Create(test_ent,settings);
   merge_top_five->SetGBSARadii(real_vec);
-  BOOST_CHECK_NO_THROW(top_five_two->Merge(merge_top_five));
+  BOOST_CHECK_NO_THROW(top_five_two->Merge(temp,merge_top_five,new_ent));
 
   //check whether error gets thrown when sigmas are not set
-  TopologyPtr merge_top_six(new Topology(new_ent,real_vec));
+  TopologyPtr merge_top_six(new Topology(real_vec));
   merge_top_six->SetCharges(real_vec);
   merge_top_six->SetOBCScalings(real_vec);
   merge_top_six->SetGBSARadii(real_vec);  
@@ -444,13 +410,14 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   merge_top_six->SetFudgeQQ(1.0);
   merge_top_six->SetFudgeLJ(1.0);
   TopologyPtr top_six = TopologyCreator::Create(test_ent,settings);
-  BOOST_CHECK_THROW(top_six->Merge(merge_top_six),ost::Error); 
+  temp = test_ent.Copy();
+  BOOST_CHECK_THROW(top_six->Merge(temp,merge_top_six,new_ent),ost::Error); 
   TopologyPtr top_six_two = TopologyCreator::Create(test_ent,settings);
   merge_top_six->SetSigmas(real_vec);
-  BOOST_CHECK_NO_THROW(top_six_two->Merge(merge_top_six));
+  BOOST_CHECK_NO_THROW(top_six_two->Merge(temp,merge_top_six,new_ent));
 
   //check whether error gets thrown when epsilons are not set
-  TopologyPtr merge_top_seven(new Topology(new_ent,real_vec));
+  TopologyPtr merge_top_seven(new Topology(real_vec));
   merge_top_seven->SetCharges(real_vec);
   merge_top_seven->SetOBCScalings(real_vec);
   merge_top_seven->SetGBSARadii(real_vec); 
@@ -458,12 +425,13 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   merge_top_seven->SetFudgeQQ(1.0);
   merge_top_seven->SetFudgeLJ(1.0);
   TopologyPtr top_seven = TopologyCreator::Create(test_ent,settings);
-  BOOST_CHECK_THROW(top_seven->Merge(merge_top_seven),ost::Error); 
+  temp = test_ent.Copy();
+  BOOST_CHECK_THROW(top_seven->Merge(temp,merge_top_seven,new_ent),ost::Error); 
   TopologyPtr top_seven_two = TopologyCreator::Create(test_ent,settings);
   merge_top_seven->SetEpsilons(real_vec);
-  BOOST_CHECK_NO_THROW(top_seven_two->Merge(merge_top_seven));
+  BOOST_CHECK_NO_THROW(top_seven_two->Merge(temp,merge_top_seven,new_ent));
 
-  TopologyPtr merge_top_eight(new Topology(new_ent,real_vec));
+  TopologyPtr merge_top_eight(new Topology(real_vec));
   merge_top_eight->SetCharges(real_vec);
   merge_top_eight->SetOBCScalings(real_vec);
   merge_top_eight->SetGBSARadii(real_vec); 
@@ -473,7 +441,6 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   merge_top_eight->SetEpsilons(real_vec);
 
   //let's add every possible interaction
-
   merge_top_eight->AddHarmonicBond(0,1,42.0,42000.0);
   merge_top_eight->AddHarmonicAngle(0,1,2,24.0,24000.0);
   merge_top_eight->AddUreyBradleyAngle(1,2,3,1.0,2.0,3.0,4.0);
@@ -494,7 +461,7 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   merge_top_eight->AddHarmonicPositionRestraint(2,pos,10.0,5.0,6.0,7.0);
   merge_top_eight->AddHarmonicDistanceRestraint(1,2,10.0,1000.0);
 
-  TopologyPtr top_eight = TopologyCreator::Create(test_ent,settings);\
+  TopologyPtr top_eight = TopologyCreator::Create(test_ent,settings);
 
   uint num_harmonic_bonds = top_eight->GetNumHarmonicBonds();
   uint num_harmonic_angles = top_eight->GetNumHarmonicAngles();
@@ -510,7 +477,8 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   uint num_harmonic_position_restraints = top_eight->GetNumHarmonicPositionRestraints();
   uint num_harmonic_distance_restraints = top_eight->GetNumHarmonicDistanceRestraints();
 
-  top_eight->Merge(merge_top_eight);
+  temp = test_ent.Copy();
+  top_eight->Merge(temp, merge_top_eight, new_ent);
 
   BOOST_CHECK(top_eight->GetNumHarmonicBonds() == num_harmonic_bonds+1);
   BOOST_CHECK(top_eight->GetNumHarmonicAngles() == num_harmonic_angles+1);
@@ -526,28 +494,12 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   BOOST_CHECK(top_eight->GetNumHarmonicPositionRestraints() == num_harmonic_position_restraints+1);
   BOOST_CHECK(top_eight->GetNumHarmonicDistanceRestraints() == num_harmonic_distance_restraints+1);
 
-
-  //check wether the new indices are right...
-  ost::mol::EntityHandle top_ent = top_eight->GetEntity();
-  ost::mol::ChainHandle top_chain = top_ent.FindChain("B");
-  ost::mol::ResidueHandleList res_list = top_chain.GetResidueList();
-  ost::mol::AtomHandleList atom_list = top_chain.GetAtomList();
-  uint res_index_one = top_eight->GetResidueIndex(res_list[0]);
-  uint res_index_two = top_eight->GetResidueIndex(res_list[1]);
-  uint res_index_three = top_eight->GetResidueIndex(res_list[2]);
-  uint atom_index_zero = top_eight->GetAtomIndex(res_index_one,"A");
-  uint atom_index_one = top_eight->GetAtomIndex(res_index_one,"B");
-  uint atom_index_two = top_eight->GetAtomIndex(res_index_two,"A");
-  uint atom_index_three = top_eight->GetAtomIndex(res_index_two,"B");
-  uint atom_index_four = top_eight->GetAtomIndex(res_index_three,"A");
-  uint atom_index_five = top_eight->GetAtomIndex(res_index_three,"B");
-
-  BOOST_CHECK(atom_index_zero == top_eight->GetAtomIndex(atom_list[0]));
-  BOOST_CHECK(atom_index_one == top_eight->GetAtomIndex(atom_list[1]));
-  BOOST_CHECK(atom_index_two == top_eight->GetAtomIndex(atom_list[2]));
-  BOOST_CHECK(atom_index_three == top_eight->GetAtomIndex(atom_list[3]));
-  BOOST_CHECK(atom_index_four == top_eight->GetAtomIndex(atom_list[4]));
-  BOOST_CHECK(atom_index_five == top_eight->GetAtomIndex(atom_list[5]));
+  uint atom_index_zero = 0 + test_ent.GetAtomCount();
+  uint atom_index_one = 1 + test_ent.GetAtomCount();
+  uint atom_index_two = 2 + test_ent.GetAtomCount();
+  uint atom_index_three = 3 + test_ent.GetAtomCount();
+  uint atom_index_four = 4 + test_ent.GetAtomCount();
+  //uint atom_index_five = 5 + test_ent.GetAtomCount();
 
   //check whether the unique interactions are properly mapped
   BOOST_CHECK_THROW(top_eight->AddExclusion(atom_index_three,atom_index_four),ost::Error);
