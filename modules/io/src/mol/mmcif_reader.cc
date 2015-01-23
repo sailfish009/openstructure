@@ -750,13 +750,18 @@ void MMCifReader::ParseCitation(const std::vector<StringRef>& columns)
   // just add info
   cit.SetID(columns[indices_[CITATION_ID]].str());
   if (indices_[ABSTRACT_ID_CAS] != -1) {
-    cit.SetCAS(columns[indices_[ABSTRACT_ID_CAS]].str());
+    if (columns[indices_[ABSTRACT_ID_CAS]][0]!='?') {
+      cit.SetCAS(columns[indices_[ABSTRACT_ID_CAS]].str());
+    }
   }
   if (indices_[BOOK_ID_ISBN] != -1) {
-    cit.SetISBN(columns[indices_[BOOK_ID_ISBN]].str());
+    if (columns[indices_[BOOK_ID_ISBN]][0]!='?') {
+      cit.SetISBN(columns[indices_[BOOK_ID_ISBN]].str());
+    }
   }
   if (indices_[BOOK_TITLE] != -1) {
-    if (columns[indices_[BOOK_TITLE]] != StringRef(".", 1)) {
+    if ((columns[indices_[BOOK_TITLE]] != StringRef(".", 1)) &&
+        (columns[indices_[BOOK_TITLE]][0]!='?')) {
       cit.SetPublishedIn(columns[indices_[BOOK_TITLE]].str());
     }
   }
@@ -774,16 +779,24 @@ void MMCifReader::ParseCitation(const std::vector<StringRef>& columns)
     }
   }
   if (indices_[JOURNAL_VOLUME] != -1) {
-    cit.SetVolume(columns[indices_[JOURNAL_VOLUME]].str());
+    if (columns[indices_[JOURNAL_VOLUME]][0]!='?') {
+      cit.SetVolume(columns[indices_[JOURNAL_VOLUME]].str());
+    }
   }
   if (indices_[PAGE_FIRST] != -1) {
-    cit.SetPageFirst(columns[indices_[PAGE_FIRST]].str());
+    if (columns[indices_[PAGE_FIRST]][0]!='?') {
+      cit.SetPageFirst(columns[indices_[PAGE_FIRST]].str());
+    }
   }
   if (indices_[PAGE_LAST] != -1) {
-    cit.SetPageLast(columns[indices_[PAGE_LAST]].str());
+    if (columns[indices_[PAGE_LAST]][0]!='?') {
+      cit.SetPageLast(columns[indices_[PAGE_LAST]].str());
+    }
   }
   if (indices_[PDBX_DATABASE_ID_DOI] != -1) {
-    cit.SetDOI(columns[indices_[PDBX_DATABASE_ID_DOI]].str());
+    if (columns[indices_[PDBX_DATABASE_ID_DOI]][0]!='?') {
+      cit.SetDOI(columns[indices_[PDBX_DATABASE_ID_DOI]].str());
+    }
   }
   if (indices_[PDBX_DATABASE_ID_PUBMED] != -1) {
     if (columns[indices_[PDBX_DATABASE_ID_PUBMED]][0]!='?') {
@@ -1072,8 +1085,10 @@ void MMCifReader::ParseStruct(const std::vector<StringRef>& columns)
   }
 
   if (indices_[PDBX_FORMULA_WEIGHT] != -1) {
-    details.SetMass(this->TryGetReal(columns[indices_[PDBX_FORMULA_WEIGHT]],
-                                     "struct.pdbx_formula_weight"));
+    if (columns[indices_[PDBX_FORMULA_WEIGHT]][0] != '?') {
+      details.SetMass(this->TryGetReal(columns[indices_[PDBX_FORMULA_WEIGHT]],
+                                       "struct.pdbx_formula_weight"));
+    }
   }
 
   if (indices_[PDBX_FORMULA_WEIGHT_METHOD] != -1) {
