@@ -911,98 +911,22 @@ std::vector<uint> Topology::GetHarmonicDistanceRestraintIndices(uint atom_index)
 void Topology::Merge(ost::mol::EntityHandle& ent, TopologyPtr other, 
                      const ost::mol::EntityHandle& other_ent){
 
-  //check whether the particle numbers match
-  if(num_particles_ != static_cast<uint>(ent.GetAtomCount())){
-    throw ost::Error("Num Particles is not consistent with num atoms of provided ent!");
-  }
+  this->CheckEntToAdd(ent,other,other_ent);
+  this->CheckTopToAdd(other);
+  this->MergeEnt(ent, other_ent);
+  this->MergeTop(other);
+}
 
-  if(other->GetNumParticles() != static_cast<uint>(other_ent.GetAtomCount())){
-    throw ost::Error("Num Particles is not consistent with num atoms of provided other_ent!");
-  } 
+void Topology::Merge(TopologyPtr other){
 
-  //check whether there is chain from the new entity is already present in the actual entity 
-  ost::mol::ChainHandleList other_chains = other_ent.GetChainList();
-  for(ost::mol::ChainHandleList::iterator i = other_chains.begin(), 
-      e = other_chains.end(); i != e; ++i){
-    if(ent.FindChain(i->GetName()).IsValid()){
-      std::stringstream ss;
-      ss << "Chain with name \"" << i->GetName() << "\" from other topology";
-      ss << "is already present in destination topology!";
-      throw ost::Error(ss.str());
-    }
-  }
-  //check whether the fudge parameters are consistent
-  if(other->fudge_lj_ != fudge_lj_ || other->fudge_qq_ != fudge_qq_){
-    throw ost::Error("Expect the fudge parameters of source topology to consistent with the fudge parameters from the destination topology!");
-  }
+  this->CheckTopToAdd(other);
+  this->MergeTop(other);
+}
 
-  if(!charges_.empty()){
-    if(other->charges_.empty()){
-      throw ost::Error("Cannot merge topology without charges into a topology with defined charges!");
-    }
-  }
-
-  if(!sigmas_.empty()){
-    if(other->sigmas_.empty()){
-      throw ost::Error("Cannot merge topology without lj sigmas into a topology with defined sigmas!");
-    }
-  }
-
-  if(!epsilons_.empty()){
-    if(other->epsilons_.empty()){
-      throw ost::Error("Cannot merge topology without lj epsilons into a topology with defined epsilons!");
-    }
-  }
-
-  if(!gbsa_radii_.empty()){
-    if(other->gbsa_radii_.empty()){
-      throw ost::Error("Cannot merge topology without gbsa radii into a topology with defined radii!");
-    }
-  }
-
-  if(!obc_scaling_.empty()){
-    if(other->obc_scaling_.empty()){
-      throw ost::Error("Cannot merge topology without obc scaling into a topology with defined scaling!");
-    }
-  }
+void Topology::MergeTop(TopologyPtr other){
 
   uint old_num_particles = num_particles_;
   num_particles_ = num_particles_ + other->GetNumParticles();
-
-  //mapper of hashcode from source atom to index in added_atom list
-  std::map<long,int> index_mapper;
-  ost::mol::AtomHandleList added_atoms;
-
-
-  //let's create an editor to copy over all chains, residues and atoms
-  //from the other topologies entity
-  ost::mol::XCSEditor ed = ent.EditXCS(ost::mol::BUFFERED_EDIT);
-  for(ost::mol::ChainHandleList::iterator i = other_chains.begin(),
-      e = other_chains.end(); i != e; ++i){
-    ost::mol::ResidueHandleList res_list = i->GetResidueList();
-    ost::mol::ChainHandle added_chain = ed.InsertChain(i->GetName());
-
-    for(ost::mol::ResidueHandleList::iterator j = res_list.begin();
-        j != res_list.end(); ++j){
-      ost::mol::AtomHandleList atom_list = j->GetAtomList();
-      ost::mol::ResidueHandle added_residue = ed.AppendResidue(added_chain,*j);
-
-      for(ost::mol::AtomHandleList::iterator k = atom_list.begin();
-          k != atom_list.end(); ++k){
-        index_mapper[k->GetHashCode()] = added_atoms.size();
-        added_atoms.push_back(ed.InsertAtom(added_residue,*k));
-      }
-    }
-  }
-
-  //let's rebuild the connectivity
-  ost::mol::BondHandleList bond_list = other_ent.GetBondList();
-  for(ost::mol::BondHandleList::iterator i = bond_list.begin();
-      i != bond_list.end(); ++i){
-    ed.Connect(added_atoms[index_mapper[i->GetFirst().GetHashCode()]],
-               added_atoms[index_mapper[i->GetSecond().GetHashCode()]]);
-  }
-  ed.UpdateICS();
 
   //let's map over masses
   atom_masses_.resize(old_num_particles + other->GetNumParticles());
@@ -1200,6 +1124,111 @@ void Topology::Merge(ost::mol::EntityHandle& ent, TopologyPtr other,
                                       old_num_particles + (*i)[1]));
   }
 
+
+
+}
+
+void Topology::MergeEnt(ost::mol::EntityHandle& ent, const ost::mol::EntityHandle& other_ent){
+
+  //mapper of hashcode from source atom to index in added_atom list
+  std::map<long,int> index_mapper;
+  ost::mol::AtomHandleList added_atoms;
+
+  ost::mol::ChainHandleList other_chains = other_ent.GetChainList();
+
+  //let's create an editor to copy over all chains, residues and atoms
+  //from the other topologies entity
+  ost::mol::XCSEditor ed = ent.EditXCS(ost::mol::BUFFERED_EDIT);
+  for(ost::mol::ChainHandleList::iterator i = other_chains.begin(),
+      e = other_chains.end(); i != e; ++i){
+    ost::mol::ResidueHandleList res_list = i->GetResidueList();
+    ost::mol::ChainHandle added_chain = ed.InsertChain(i->GetName());
+
+    for(ost::mol::ResidueHandleList::iterator j = res_list.begin();
+        j != res_list.end(); ++j){
+      ost::mol::AtomHandleList atom_list = j->GetAtomList();
+      ost::mol::ResidueHandle added_residue = ed.AppendResidue(added_chain,*j);
+
+      for(ost::mol::AtomHandleList::iterator k = atom_list.begin();
+          k != atom_list.end(); ++k){
+        index_mapper[k->GetHashCode()] = added_atoms.size();
+        added_atoms.push_back(ed.InsertAtom(added_residue,*k));
+      }
+    }
+  }
+
+  //let's rebuild the connectivity
+  ost::mol::BondHandleList bond_list = other_ent.GetBondList();
+  for(ost::mol::BondHandleList::iterator i = bond_list.begin();
+      i != bond_list.end(); ++i){
+    ed.Connect(added_atoms[index_mapper[i->GetFirst().GetHashCode()]],
+               added_atoms[index_mapper[i->GetSecond().GetHashCode()]]);
+  }
+  ed.UpdateICS();
+}
+
+
+void Topology::CheckTopToAdd(TopologyPtr other){
+
+  if(other->fudge_lj_ != fudge_lj_ || other->fudge_qq_ != fudge_qq_){
+    throw ost::Error("Expect the fudge parameters of source topology to consistent with the fudge parameters from the destination topology!");
+  }
+
+  if(!charges_.empty()){
+    if(other->charges_.empty()){
+      throw ost::Error("Cannot merge topology without charges into a topology with defined charges!");
+    }
+  }
+
+  if(!sigmas_.empty()){
+    if(other->sigmas_.empty()){
+      throw ost::Error("Cannot merge topology without lj sigmas into a topology with defined sigmas!");
+    }
+  }
+
+  if(!epsilons_.empty()){
+    if(other->epsilons_.empty()){
+      throw ost::Error("Cannot merge topology without lj epsilons into a topology with defined epsilons!");
+    }
+  }
+
+  if(!gbsa_radii_.empty()){
+    if(other->gbsa_radii_.empty()){
+      throw ost::Error("Cannot merge topology without gbsa radii into a topology with defined radii!");
+    }
+  }
+
+  if(!obc_scaling_.empty()){
+    if(other->obc_scaling_.empty()){
+      throw ost::Error("Cannot merge topology without obc scaling into a topology with defined scaling!");
+    }
+  }
+}
+
+void Topology::CheckEntToAdd(ost::mol::EntityHandle& ent, TopologyPtr other,
+                             const ost::mol::EntityHandle& other_ent){
+
+  //check whether the particle numbers match
+  if(num_particles_ != static_cast<uint>(ent.GetAtomCount())){
+    throw ost::Error("Num Particles is not consistent with num atoms of provided ent!");
+  }
+
+  if(other->GetNumParticles() != static_cast<uint>(other_ent.GetAtomCount())){
+    throw ost::Error("Num Particles is not consistent with num atoms of provided other_ent!");
+  } 
+
+  //check whether there is a chain from the new entity is already 
+  //present in the actual entity 
+  ost::mol::ChainHandleList other_chains = other_ent.GetChainList();
+  for(ost::mol::ChainHandleList::iterator i = other_chains.begin(), 
+      e = other_chains.end(); i != e; ++i){
+    if(ent.FindChain(i->GetName()).IsValid()){
+      std::stringstream ss;
+      ss << "Chain with name \"" << i->GetName() << "\" from other topology";
+      ss << "is already present in destination topology!";
+      throw ost::Error(ss.str());
+    }
+  }
 }
 
 }}}//ns

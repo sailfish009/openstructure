@@ -356,6 +356,8 @@ public:
 
   void Merge(ost::mol::EntityHandle& ent, TopologyPtr other, const ost::mol::EntityHandle& other_ent);
 
+  void Merge(TopologyPtr other);
+
   template <typename DS>
   void Serialize(DS& ds){
 
@@ -664,6 +666,15 @@ public:
   }
 
 private:
+
+  void MergeTop(TopologyPtr other);
+
+  void MergeEnt(ost::mol::EntityHandle& ent, const ost::mol::EntityHandle& other_ent);
+
+  void CheckTopToAdd(TopologyPtr other);
+
+  void CheckEntToAdd(ost::mol::EntityHandle& ent, TopologyPtr other, 
+                     const ost::mol::EntityHandle& other_ent);
 
   uint num_particles_;
 
