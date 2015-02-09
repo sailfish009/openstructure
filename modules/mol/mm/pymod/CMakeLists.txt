@@ -9,6 +9,7 @@ set(OST_MOL_MM_PYMOD_SOURCES
   export_buildingblock.cc
   export_block_modifiers.cc
   export_topology.cc
+  export_modeller.cc
   wrap_mol_mm.cc
 )
 

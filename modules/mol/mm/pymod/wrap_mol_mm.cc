@@ -14,6 +14,7 @@ void export_Buildingblock();
 void export_Forcefield();
 void export_BlockModifiers();
 void export_Topology();
+void export_Modeller();
 
 
 BOOST_PYTHON_MODULE(_ost_mol_mm)
@@ -28,4 +29,5 @@ BOOST_PYTHON_MODULE(_ost_mol_mm)
   export_Buildingblock();
   export_BlockModifiers();
   export_Topology();
+  export_Modeller();
 }
