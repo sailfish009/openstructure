@@ -55,9 +55,6 @@ namespace ost{ namespace mol{ namespace mm{
 TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent, 
                                     const MMSettingsPtr settings){
 
-  if(settings->constrain_hangles == true && settings->constrain_hbonds == false){
-    throw ost::Error("If hangles is true, hbonds must also be true in settings object!");
-  }
 
   ost::mol::ResidueHandleList res_list = ent.GetResidueList();
   ost::mol::XCSEditor ed = ent.EditXCS(ost::mol::BUFFERED_EDIT);
@@ -481,7 +478,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
         }
       }
       if(settings->rigid_water){
-        if(residue_names_of_atoms[(*i)[0]] == "SOL" || residue_names_of_atoms[(*i)[1]] == "SOL"){
+        if(residue_names_of_atoms[(*i)[0]] == "SOL" && residue_names_of_atoms[(*i)[1]] == "SOL"){
           if(distance_constraints.find(*i) != distance_constraints.end()) continue;
           distance_constraints.insert(*i);
           Real distance;
@@ -499,71 +496,15 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
   if(settings->rigid_water){
     for(std::set<Index<3> >::iterator i = angles.begin();
         i != angles.end(); ++i){
-      if(residue_names_of_atoms[(*i)[0]] == "SOL" || residue_names_of_atoms[(*i)[0]] == "SOL" ||
+      if(residue_names_of_atoms[(*i)[0]] == "SOL" && residue_names_of_atoms[(*i)[0]] == "SOL" &&
          residue_names_of_atoms[(*i)[2]] == "SOL"){
-        //even for ideal_bond_length_constraints, we calculate the ideal angle every time...
-        //could be replaced...
+        //we only have to add the H-H distance constant, the O-H distance is already
+        //constrained above
         Real distance;
         if(settings->ideal_bond_length_constraints) distance = 0.15139; //HH distance taken from CHARMM      
         else distance = geom::Distance(atom_list[(*i)[0]].GetPos(),atom_list[(*i)[2]].GetPos())/10;
         top->AddDistanceConstraint((*i)[0],(*i)[2],distance);
         constrained_angles.insert(*i); 
-      }
-    }
-  }
-
-  if(settings->constrain_hangles){
-    for(std::set<Index<3> >::iterator i = angles.begin();
-        i != angles.end(); ++i){
-      if(atom_masses[(*i)[0]] < 1.1 && atom_masses[(*i)[2]] < 1.1){
-        //two hydrogens...
-        if(constrained_angles.find(*i) != constrained_angles.end()) continue;
-        Real distance;
-        if(settings->ideal_bond_length_constraints){
-          MMInteractionPtr bond_one = ff->GetBond(atom_types[(*i)[0]],atom_types[(*i)[1]]);
-          MMInteractionPtr bond_two = ff->GetBond(atom_types[(*i)[1]],atom_types[(*i)[2]]);
-          MMInteractionPtr angle = ff->GetAngle(atom_types[(*i)[0]],atom_types[(*i)[1]],atom_types[(*i)[2]]);
-          std::vector<Real> parameters;
-          Real l1,l2,a;
-          parameters = bond_one->GetParam();
-          l1 = parameters[0];
-          parameters = bond_two->GetParam();
-          l2 = parameters[0];
-          parameters = angle->GetParam();
-          a = parameters[0];
-          distance = sqrt(l1*l1+l2*l2-2*l1*l2*cos(a));
-        }      
-        else distance = geom::Distance(atom_list[(*i)[0]].GetPos(),atom_list[(*i)[2]].GetPos())/10;
-        top->AddDistanceConstraint((*i)[0],(*i)[2],distance);
-        constrained_angles.insert(*i); 
-        continue;
-      }
-
-      if(atom_masses[(*i)[1]] > 15.0 && atom_masses[(*i)[1]] < 17.0){
-        //central atom is an oxygen
-        if(atom_masses[(*i)[0]] < 1.1 || atom_masses[(*i)[2]] < 1.1){
-          //a hydrogen is attached to the oxygen...
-          if(constrained_angles.find(*i) != constrained_angles.end()) continue;
-          Real distance;
-          if(settings->ideal_bond_length_constraints){
-            MMInteractionPtr bond_one = ff->GetBond(atom_types[(*i)[0]],atom_types[(*i)[1]]);
-            MMInteractionPtr bond_two = ff->GetBond(atom_types[(*i)[1]],atom_types[(*i)[2]]);
-            MMInteractionPtr angle = ff->GetAngle(atom_types[(*i)[0]],atom_types[(*i)[1]],atom_types[(*i)[2]]);
-            std::vector<Real> parameters;
-            Real l1,l2,a;
-            parameters = bond_one->GetParam();
-            l1 = parameters[0];
-            parameters = bond_two->GetParam();
-            l2 = parameters[0];
-            parameters = angle->GetParam();
-            a = parameters[0];
-            distance = sqrt(l1*l1+l2*l2-2*l1*l2*cos(a));
-          }      
-          else distance = geom::Distance(atom_list[(*i)[0]].GetPos(),atom_list[(*i)[2]].GetPos())/10;
-          top->AddDistanceConstraint((*i)[0],(*i)[2],distance);
-          constrained_angles.insert(*i); 
-          continue;
-        }
       }
     }
   }

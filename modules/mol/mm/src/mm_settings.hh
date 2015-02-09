@@ -64,7 +64,6 @@ struct MMSettings{
                 add_nonbonded(true),
                 add_gbsa(false),
                 constrain_hbonds(false),
-                constrain_hangles(false),
                 constrain_bonds(false),
                 rigid_water(false),
                 strict_interactions(true),
@@ -109,7 +108,6 @@ struct MMSettings{
   bool add_nonbonded;
   bool add_gbsa;
   bool constrain_hbonds;
-  bool constrain_hangles;
   bool constrain_bonds;
   bool rigid_water;
   bool strict_interactions;
