@@ -69,17 +69,6 @@ char get_chemtype(CompoundPtr compound)
   return char(compound->GetChemType());
 }
 
-int get_charge(CompoundPtr compound)
-{
-  return int(compound->GetCharge());
-}
-
-void set_charge(CompoundPtr compound, int c)
-{
-  compound->SetCharge(c);
-}
-
-
 CompoundPtr find_compound(CompoundLibPtr comp_lib, 
                           const String& tlc, const String& dialect)
 {
@@ -106,9 +95,6 @@ void export_Compound() {
          return_value_policy<copy_const_reference>())
     .def("SetOneLetterCode", &Compound::SetOneLetterCode)
     .def("GetOneLetterCode", &Compound::GetOneLetterCode)
-    
-    .def("GetCharge", &Compound::GetCharge)
-    .def("SetCharge", &Compound::SetCharge)
 
     .add_property("three_letter_code", make_function(&Compound::GetID, return_value_policy<copy_const_reference>()))
     .add_property("name", 
@@ -143,7 +129,6 @@ void export_Compound() {
     .def_readonly("is_leaving", &AtomSpec::is_leaving)
     .def_readonly("is_aromatic", &AtomSpec::is_aromatic)
     .def_readonly("ordinal", &AtomSpec::ordinal)
-    .def_readonly("charge", &AtomSpec::charge)
   ;
   
   class_<BondSpec>("BondSpec", no_init)

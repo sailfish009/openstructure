@@ -49,8 +49,7 @@ const char* CREATE_CMD[]={
 "  formula           VARCHAR(64) NOT NULL,                                      "
 "  pdb_initial       TIMESTAMP,                                                 "
 "  pdb_modified      TIMESTAMP,                                                 "
-"  name              VARCHAR(256),                                              " 
-"  charge            INT                                                        " 
+"  name              VARCHAR(256)                                               " 
 ");",
 " CREATE UNIQUE INDEX IF NOT EXISTS commpound_tlc_index ON chem_compounds       "
 "                                  (tlc, dialect)",
@@ -63,8 +62,7 @@ const char* CREATE_CMD[]={
 " is_aromatic        VARCHAR(1) NOT NULL,                                       "
 " stereo_conf        VARCHAR(1) NOT NULL,                                       "
 " is_leaving         VARCHAR(1) NOT NULL,                                       "
-" ordinal            INT,                                                       "
-" charge             INT                                                        "
+" ordinal            INT                                                        "
 ");",
 " CREATE INDEX IF NOT EXISTS atom_name_index ON atoms                           "
 "                                  (compound_id, name, alt_name)",
@@ -87,13 +85,13 @@ const char* CREATE_CMD[]={
 
 
 const char* INSERT_COMPOUND_STATEMENT="INSERT INTO chem_compounds               "
-"        (tlc, olc, dialect, chem_class, chem_type, formula, pdb_initial, pdb_modified, name, charge) "
-" VALUES (?, ?, ?, ?, ?, ?, DATE(?), DATE(?), ?, ?)";
+"        (tlc, olc, dialect, chem_class, chem_type, formula, pdb_initial, pdb_modified, name) "
+" VALUES (?, ?, ?, ?, ?, ?, DATE(?), DATE(?), ?)";
 
 const char* INSERT_ATOM_STATEMENT="INSERT INTO atoms                            "
 "        (compound_id, name, alt_name, element, is_aromatic, stereo_conf,       "
-"         is_leaving, ordinal, charge)                                          "
-" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+"         is_leaving, ordinal)                                                  "
+" VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
 const char* INSERT_BOND_STATEMENT="insert into bonds                            "
 "        (compound_id, atom_one, atom_two, bond_order, stereo_conf)             "
@@ -224,9 +222,6 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
     modi_date_str=modi_date.ToString();
     sqlite3_bind_text(stmt, 7, crea_date_str.c_str(), crea_date_str.length(), NULL);
     sqlite3_bind_text(stmt, 8, modi_date_str.c_str(), modi_date_str.length(), NULL);
-    sqlite3_bind_text(stmt, 9, compound->GetName().c_str(), compound->GetName().length(), NULL);
-    int charge=compound->GetCharge();
-    sqlite3_bind_int(stmt, 10, charge);
   } else {
     LOG_ERROR(sqlite3_errmsg(conn_));
     sqlite3_finalize(stmt);
@@ -260,7 +255,6 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
       sqlite3_bind_int(stmt, 6, 0);                  
       sqlite3_bind_int(stmt, 7, a.is_leaving);
       sqlite3_bind_int(stmt, 8, a.ordinal);
-      sqlite3_bind_int(stmt, 9, a.charge);
       retval=sqlite3_step(stmt);
       assert(retval==SQLITE_DONE);
       atom_ids[a.ordinal]=sqlite3_last_insert_rowid(conn_);
@@ -369,7 +363,7 @@ CompoundLibPtr CompoundLib::Load(const String& database, bool readonly)
 }
 
 void CompoundLib::LoadAtomsFromDB(CompoundPtr comp, int pk) const {
-  String aq=str(format("SELECT name, alt_name, element, ordinal, is_leaving, charge "
+  String aq=str(format("SELECT name, alt_name, element, ordinal, is_leaving "
                        "FROM atoms WHERE compound_id=%d "
                        "ORDER BY ordinal ASC") % pk);  
   sqlite3_stmt* stmt;
@@ -385,7 +379,6 @@ void CompoundLib::LoadAtomsFromDB(CompoundPtr comp, int pk) const {
         atom_sp.element=String(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2))); 
         atom_sp.ordinal=sqlite3_column_int(stmt, 3);  
         atom_sp.is_leaving=bool(sqlite3_column_int(stmt, 4)!=0);
-        atom_sp.charge=sqlite3_column_int(stmt, 5);  
         comp->AddAtom(atom_sp);
       }
   } else {
@@ -428,7 +421,7 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
   if (i!=compound_cache_.end()) {
     return i->second;
   }
-  String query="SELECT id, tlc, olc, chem_class, dialect, formula, charge";
+  String query="SELECT id, tlc, olc, chem_class, dialect, formula";
   if(chem_type_available_) {
     query+=", chem_type";
     if(name_available_) {
@@ -457,12 +450,11 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
       compound->SetDialect(Compound::Dialect(sqlite3_column_text(stmt, 4)[0]));
       const char* f=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
       compound->SetFormula(f);
-      compound->SetCharge(sqlite3_column_int(stmt, 6));
       if(chem_type_available_) {
-        compound->SetChemType(mol::ChemType(sqlite3_column_text(stmt, 7)[0]));
+        compound->SetChemType(mol::ChemType(sqlite3_column_text(stmt, 6)[0]));
       }
       if (name_available_) {
-        const char* name=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
+        const char* name=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
         if (name) {
           compound->SetName(name);
         }

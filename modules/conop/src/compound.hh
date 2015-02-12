@@ -76,19 +76,17 @@ struct DLLEXPORT_OST_CONOP AtomSpec {
     alt_name(),
     element(),
     is_leaving(false),
-    is_aromatic(),
-    charge()
+    is_aromatic()
   {
   }
   AtomSpec(int o, const String& n, const String& a, const String& e,
-           bool l, bool r, int c):
+           bool l, bool r):
     ordinal(o),
     name(n),
     alt_name(a),
     element(e),
     is_leaving(l),
-    is_aromatic(r),
-    charge(c)
+    is_aromatic(r)
   {}
   int    ordinal;
   String name;
@@ -96,11 +94,11 @@ struct DLLEXPORT_OST_CONOP AtomSpec {
   String element;
   bool   is_leaving;
   bool   is_aromatic;
-  int    charge;
   bool operator==(const AtomSpec& rhs) const {
     return ordinal==rhs.ordinal && name==rhs.name && alt_name==rhs.alt_name &&
            element==rhs.element && is_leaving==rhs.is_leaving && 
-           is_aromatic==rhs.is_aromatic && charge==rhs.charge;
+           rhs.is_aromatic==rhs.is_aromatic;
+
   }
   bool operator!=(const AtomSpec& rhs) const {
     return !this->operator==(rhs);
@@ -155,8 +153,7 @@ public:
     chem_type_(),
     dialect_(Compound::PDB),
     creation_date_(),
-    mod_date_(),
-    charge_()
+    mod_date_()
   {
   }
 
@@ -245,10 +242,6 @@ public:
 
   const String& GetFormula() { return formula_; }
   
-  void SetCharge(int charge) { charge_=charge; }
-  
-  int GetCharge() { return charge_; }
-  
   const BondSpecList& GetBondSpecs() const {
     return bond_specs_;
   }
@@ -283,7 +276,6 @@ private:
   Dialect                      dialect_;  
   Date                         creation_date_;
   Date                         mod_date_;
-  int                          charge_;
 };
 
 typedef std::map<String, CompoundPtr> CompoundMap;
