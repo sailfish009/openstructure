@@ -1,8 +1,6 @@
 #ifndef OST_TOPOLOGY_CREATOR_HH
 #define OST_TOPOLOGY_CREATOR_HH
 
-#include <OpenMM.h>
-
 #include <vector>
 #include <map>
 #include <set>

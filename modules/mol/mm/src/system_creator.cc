@@ -1,4 +1,5 @@
 #include <ost/mol/mm/system_creator.hh>
+#include <OpenMM.h>
 
 namespace ost{ namespace mol{ namespace mm{
 
@@ -221,7 +222,28 @@ SystemPtr SystemCreator::Create(const TopologyPtr top,
   std::vector<Real> charges = top->GetCharges();
   if(!sigmas.empty() && !epsilons.empty() && !charges.empty()){
     OpenMM::NonbondedForce& nonbonded_force = *new OpenMM::NonbondedForce();
-    nonbonded_force.setNonbondedMethod(settings->nonbonded_method);
+    switch(settings->nonbonded_method){
+      case NoCutoff:{
+        nonbonded_force.setNonbondedMethod(OpenMM::NonbondedForce::NoCutoff);
+        break;
+      }
+      case CutoffNonPeriodic:{
+        nonbonded_force.setNonbondedMethod(OpenMM::NonbondedForce::CutoffNonPeriodic);
+        break;        
+      }
+      case CutoffPeriodic:{
+        nonbonded_force.setNonbondedMethod(OpenMM::NonbondedForce::CutoffPeriodic);
+        break;        
+      }
+      case Ewald:{
+        nonbonded_force.setNonbondedMethod(OpenMM::NonbondedForce::Ewald);
+        break;        
+      }
+      case PME:{
+        nonbonded_force.setNonbondedMethod(OpenMM::NonbondedForce::PME);
+        break;        
+      }
+    }
     //we can set the cutoff in any case, since it will have no effect when
     //nonbonded method is NoCutoff
     nonbonded_force.setCutoffDistance(settings->nonbonded_cutoff/10.0);
@@ -263,13 +285,13 @@ SystemPtr SystemCreator::Create(const TopologyPtr top,
       throw ost::Error("GBSA force requires atom charges to be set!");
     OpenMM::GBSAOBCForce& gbsa_force = *new OpenMM::GBSAOBCForce();
     sys->addForce(&gbsa_force);
-    if(settings->nonbonded_method == OpenMM::NonbondedForce::NoCutoff){
+    if(settings->nonbonded_method == NoCutoff){
       gbsa_force.setNonbondedMethod(OpenMM::GBSAOBCForce::NoCutoff);
     }
-    else if(settings->nonbonded_method == OpenMM::NonbondedForce::CutoffNonPeriodic){
+    else if(settings->nonbonded_method == CutoffNonPeriodic){
       gbsa_force.setNonbondedMethod(OpenMM::GBSAOBCForce::CutoffNonPeriodic);
     }
-    else if(settings->nonbonded_method == OpenMM::NonbondedForce::CutoffPeriodic){
+    else if(settings->nonbonded_method == CutoffPeriodic){
       gbsa_force.setNonbondedMethod(OpenMM::GBSAOBCForce::CutoffPeriodic);
     }
     else{
@@ -302,8 +324,8 @@ SystemPtr SystemCreator::Create(const TopologyPtr top,
     sys->setDefaultPeriodicBoxVectors(x_vec,y_vec,z_vec);
   }
   else if(settings->add_nonbonded && 
-           !(settings->nonbonded_method == OpenMM::NonbondedForce::NoCutoff ||
-            settings->nonbonded_method == OpenMM::NonbondedForce::CutoffNonPeriodic)){
+           !(settings->nonbonded_method == NoCutoff ||
+            settings->nonbonded_method == CutoffNonPeriodic)){
     throw ost::Error("Chosen nonbonded method requires to define the periodic box extents!");
   }
   //set the CMMMotion removing force if required

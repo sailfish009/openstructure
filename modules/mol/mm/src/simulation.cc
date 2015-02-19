@@ -1,4 +1,5 @@
 #include <ost/mol/mm/simulation.hh>
+#include <OpenMM.h>
 
 namespace ost{ namespace mol{ namespace mm{
 

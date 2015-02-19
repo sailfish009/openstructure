@@ -1,5 +1,5 @@
 #include <ost/mol/mm/state_extractor.hh>
-
+#include <OpenMM.h>
 
 namespace ost { namespace mol{ namespace mm{
 

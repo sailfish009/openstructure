@@ -2,8 +2,6 @@
 #define OST_MM_OBSERVER_HH
 
 
-#include <OpenMM.h>
-
 #include <boost/shared_ptr.hpp>
 
 #include <ost/io/mol/io_profile.hh>
@@ -15,6 +13,11 @@
 #include <ost/mol/mm/topology.hh>
 #include <ost/mol/mm/mm_modeller.hh>
 
+namespace OpenMM{
+  class Context; //hacky way of telling the Context is around.
+                 //will be included in source file to avoid
+                 //dependencies on external libraries
+}
 
 namespace ost { namespace mol{ namespace mm{
 
@@ -24,6 +27,7 @@ class TrajWriter;
 typedef boost::shared_ptr<MMObserver> MMObserverPtr;
 typedef boost::shared_ptr<TrajObserver> TrajObserverPtr;
 typedef boost::shared_ptr<TrajWriter> TrajWriterPtr;
+
 
 class MMObserver{
 public:
@@ -101,9 +105,6 @@ private:
   std::vector<float> x;
   std::vector<float> y;
   std::vector<float> z;
-  OpenMM::Vec3 ucell_a;
-  OpenMM::Vec3 ucell_b;
-  OpenMM::Vec3 ucell_c;
 };
 
 

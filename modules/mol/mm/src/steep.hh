@@ -1,7 +1,6 @@
 #ifndef OST_STEEP_H_
 #define OST_STEEP_H_
 
-#include <OpenMM.h>
 #include <ost/base.hh>
 #include <cmath>
 #include <sstream>
@@ -12,6 +11,11 @@
 
 #include <ost/message.hh>
 
+namespace OpenMM{
+  class Context; //hacky way of telling the Context is around.
+                 //will be included in source file to avoid
+                 //dependencies on external libraries
+}
 
 namespace ost { namespace mol { namespace mm{
 

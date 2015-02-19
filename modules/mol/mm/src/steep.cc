@@ -1,4 +1,5 @@
 #include <ost/mol/mm/steep.hh>
+#include <OpenMM.h>
 
 namespace ost{ namespace mol{ namespace mm{
 

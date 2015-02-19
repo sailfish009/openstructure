@@ -1,4 +1,5 @@
 #include <ost/mol/mm/mm_observer.hh>
+#include <OpenMM.h>
 
 namespace ost { namespace mol{ namespace mm{
 
@@ -121,6 +122,8 @@ void TrajWriter::Notify(){
   OpenMM::State openmm_state = context_->getState(0); //create minimal state
                                                       //to only extract periodic
                                                       //box information
+  OpenMM::Vec3 ucell_a,ucell_b,ucell_c;
+
   openmm_state.getPeriodicBoxVectors(ucell_a,ucell_b,ucell_c);
 
   int32_t out_n=positions.size()*4;

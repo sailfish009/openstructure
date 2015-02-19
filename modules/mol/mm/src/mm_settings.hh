@@ -1,7 +1,6 @@
 #ifndef OST_MM_SETTINGS_HH
 #define OST_MM_SETTINGS_HH
 
-#include <OpenMM.h>
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
@@ -9,6 +8,11 @@
 #include <ost/mol/residue_handle.hh>
 #include <ost/mol/mm/forcefield.hh>
 
+namespace OpenMM{
+  class Integrator;//hacky way of telling the Integrator us around
+                   //will be included in source file to avoid
+                   //dependencies on external libraries
+}
 
 namespace ost { namespace mol{ namespace mm{
 
@@ -24,6 +28,13 @@ enum Platform{
   CPU
 };
 
+enum NonbondedMethod{
+  NoCutoff,
+  CutoffNonPeriodic,
+  CutoffPeriodic,
+  Ewald,
+  PME
+};
 
 class TerminiExceptions{
 
@@ -71,7 +82,7 @@ struct MMSettings{
                 fix_heavy_atoms(false),
                 kill_electrostatics(false),
                 generate_disulfid_bonds(true),
-                nonbonded_method(OpenMM::NonbondedForce::NoCutoff),
+                nonbonded_method(NoCutoff),
                 nonbonded_cutoff(10.0),
                 remove_cmm_motion(true),
                 cmm_frequency(1),
@@ -93,8 +104,8 @@ struct MMSettings{
                 solute_dielectric(1.0), //this is for GBSA
                 reaction_field_dielectric(78.3),
                 use_dispersion_correction(true),
-                openmm_plugin_directory(OpenMM::Platform::getDefaultPluginsDirectory()),
-                custom_plugin_directory(OpenMM::Platform::getDefaultPluginsDirectory())
+                openmm_plugin_directory("/usr/local/openmm/lib/plugins"),
+                custom_plugin_directory("/usr/local/openmm/lib/plugins")
 
                   {   }
 
@@ -118,7 +129,7 @@ struct MMSettings{
   //automatically generate disulfid bonds
   bool generate_disulfid_bonds;
   //see export_openmm.cc for all possibilities
-  OpenMM::NonbondedForce::NonbondedMethod nonbonded_method;
+  NonbondedMethod nonbonded_method;
   Real nonbonded_cutoff;
   bool remove_cmm_motion;
   int cmm_frequency;

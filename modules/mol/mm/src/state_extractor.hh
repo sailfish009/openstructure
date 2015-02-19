@@ -4,10 +4,14 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
-#include <OpenMM.h>
 #include <ost/geom/vec3.hh>
 
+namespace OpenMM{
+  class Context; //hacky way of telling the Context is around.
+                 //will be included in source file to avoid
+                 //dependencies on external libraries
 
+}
 
 namespace ost { namespace mol{ namespace mm{
 

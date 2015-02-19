@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 #include <ost/mol/mm/mm_settings.hh>
+#include <OpenMM.h> //for definition of Integrator
 
 using namespace boost::python;
 
@@ -32,13 +33,20 @@ void export_MMSettings()
     .value("CPU", ost::mol::mm::CPU)
   ;
 
+  enum_<ost::mol::mm::NonbondedMethod>("NonbondedMethod")
+    .value("NoCutoff", ost::mol::mm::NoCutoff)
+    .value("CutoffNonPeriodic", ost::mol::mm::CutoffNonPeriodic)
+    .value("CutoffPeriodic", ost::mol::mm::CutoffPeriodic)
+    .value("Ewald", ost::mol::mm::Ewald)
+    .value("PME", ost::mol::mm::PME)
+  ;
+
   //export the termini exceptions object
   class_<ost::mol::mm::TerminiExceptions>("TerminiExceptions",init<>())
     .def("SetException", &ost::mol::mm::TerminiExceptions::SetException)
     .def("HasException", &ost::mol::mm::TerminiExceptions::HasException)
     .def("GetException", &ost::mol::mm::TerminiExceptions::GetException)
   ;
-
 
   //export the settings
 

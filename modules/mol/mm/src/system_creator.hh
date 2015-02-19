@@ -1,8 +1,6 @@
 #ifndef OST_SYSTEM_CREATOR_HH
 #define OST_SYSTEM_CREATOR_HH
 
-#include <OpenMM.h>
-
 #include <vector>
 #include <map>
 #include <set>
@@ -23,6 +21,12 @@
 
 #include <time.h>
 
+
+namespace OpenMM{
+  class System;  //hacky way of telling the System is around.
+                 //will be included in source file to avoid
+                 //dependencies on external libraries
+}
 
 namespace ost { namespace mol{ namespace mm{
 

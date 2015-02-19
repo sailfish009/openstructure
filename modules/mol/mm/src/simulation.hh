@@ -1,8 +1,6 @@
 #ifndef OST_SIMULATION_HH
 #define OST_SIMULATION_HH
 
-#include <OpenMM.h>
-
 #include <vector>
 #include <map>
 
@@ -21,20 +19,20 @@
 
 #include <time.h>
 
+namespace OpenMM{
+  class Integrator;
+  class Context;//hacky way of telling the Context and Integrator 
+                //are around.
+                //will be included in source file to avoid
+                //dependencies on external libraries
+}
+
 namespace ost { namespace mol{ namespace mm{
 
 class Simulation;
 
 typedef boost::shared_ptr<OpenMM::Integrator> IntegratorPtr;
-typedef boost::shared_ptr<OpenMM::VerletIntegrator> VerletIntegratorPtr;
-typedef boost::shared_ptr<OpenMM::BrownianIntegrator> BrownianIntegratorPtr;
-typedef boost::shared_ptr<OpenMM::LangevinIntegrator> LangevinIntegratorPtr;
-typedef boost::shared_ptr<OpenMM::VariableVerletIntegrator> VariableVerletIntegratorPtr;
-typedef boost::shared_ptr<OpenMM::VariableLangevinIntegrator> VariableLangevinIntegratorPtr;
 typedef boost::shared_ptr<OpenMM::Context> ContextPtr;
-typedef boost::shared_ptr<OpenMM::AndersenThermostat> AndersenThermostatPtr;
-typedef boost::shared_ptr<OpenMM::MonteCarloBarostat> MonteCarloBarostatPtr;
-
 typedef boost::shared_ptr<Simulation> SimulationPtr;
 
 class Simulation {
