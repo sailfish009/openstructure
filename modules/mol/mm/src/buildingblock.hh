@@ -109,7 +109,7 @@ public:
       masses_ = std::vector<Real>(num_atoms);
     }
 
-    for(unsigned int i = 0; i < num_atoms; ++i){
+    for(int i = 0; i < num_atoms; ++i){
       ds & atoms_[i];
       ds & types_[i];
       ds & charges_[i];
@@ -132,7 +132,7 @@ public:
     ds & num_cmaps;
     ds & num_constraints;
 
-    for(unsigned int i = 0; i < num_bonds; ++i){
+    for(int i = 0; i < num_bonds; ++i){
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
@@ -145,7 +145,7 @@ public:
       ds & *(bonds_[i]);
     }
 
-    for(unsigned int i = 0; i < num_angles; ++i){
+    for(int i = 0; i < num_angles; ++i){
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
@@ -158,7 +158,7 @@ public:
       ds & *(angles_[i]);
     }
 
-    for(unsigned int i = 0; i < num_dihedrals; ++i){
+    for(int i = 0; i < num_dihedrals; ++i){
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
@@ -171,7 +171,7 @@ public:
       ds & *(dihedrals_[i]);
     }
 
-    for(unsigned int i = 0; i < num_impropers; ++i){
+    for(int i = 0; i < num_impropers; ++i){
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
@@ -184,7 +184,7 @@ public:
       ds & *(impropers_[i]);
     }
 
-    for(unsigned int i = 0; i < num_exclusions; ++i){
+    for(int i = 0; i < num_exclusions; ++i){
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
@@ -197,7 +197,7 @@ public:
       ds & *(exclusions_[i]);
     }
 
-    for(unsigned int i = 0; i < num_cmaps; ++i){
+    for(int i = 0; i < num_cmaps; ++i){
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
@@ -210,7 +210,7 @@ public:
       ds & *(cmaps_[i]);
     }
 
-    for(unsigned int i = 0; i < num_constraints; ++i){
+    for(int i = 0; i < num_constraints; ++i){
       int func_type;
       if(ds.IsSource()){
         ds & func_type;

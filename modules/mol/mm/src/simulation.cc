@@ -161,6 +161,9 @@ SimulationPtr Simulation::Load(const String& filename, MMSettingsPtr settings){
       platform = &OpenMM::Platform::getPlatformByName("CPU");
       break;
     }
+    default:{
+      throw ost::Error("Invalid Platform when Loading simulation!");
+    }
   }
 
   sim_ptr->context_ = ContextPtr(new OpenMM::Context(*(sim_ptr->system_),
@@ -278,6 +281,9 @@ void Simulation::Init(const TopologyPtr top,
     case CPU:{
       platform = &OpenMM::Platform::getPlatformByName("CPU");
       break;
+    }
+    default:{
+      throw ost::Error("Invalid platform encountered when settings up simualation!");
     }
   }
 

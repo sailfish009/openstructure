@@ -1,6 +1,6 @@
-#include <ost/log.hh>
 #include <boost/python.hpp>
 #include <ost/mol/mm/buildingblock.hh>
+#include <ost/log.hh>
 #include <vector>
 
 using namespace boost::python;

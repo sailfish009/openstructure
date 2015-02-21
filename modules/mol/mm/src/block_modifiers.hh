@@ -26,6 +26,7 @@ typedef enum {
 class HydrogenConstructor{
 public:
   HydrogenConstructor() { }
+  virtual ~HydrogenConstructor() { }
   virtual void ApplyOnBuildingBlock(BuildingBlockPtr p) = 0;
   virtual void ApplyOnResidue(ost::mol::ResidueHandle& res, ost::mol::XCSEditor& ed) = 0;
   virtual void OnSave(ost::io::BinaryDataSink& ds) = 0;
@@ -35,6 +36,7 @@ public:
 class TerminiConstructor{
 public:
   TerminiConstructor() { }
+  virtual ~TerminiConstructor() { }
   virtual void ApplyOnBuildingBlock(BuildingBlockPtr p) = 0;
   virtual void ApplyOnResidue(ost::mol::ResidueHandle& res, ost::mol::XCSEditor& ed) = 0;
   virtual void OnSave(ost::io::BinaryDataSink& ds) = 0;
@@ -44,6 +46,7 @@ public:
 class BlockModifier{
 public:
   BlockModifier() { }
+  virtual ~BlockModifier() { }
   virtual void ApplyOnBuildingBlock(BuildingBlockPtr p) = 0;
   virtual void ApplyOnResidue(ost::mol::ResidueHandle& res, ost::mol::XCSEditor& ed) = 0;
   virtual void OnSave(ost::io::BinaryDataSink& ds) = 0;

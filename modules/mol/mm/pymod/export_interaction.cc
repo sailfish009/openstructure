@@ -1,10 +1,9 @@
-#include <vector>
-
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include <ost/mol/mm/mm_interaction.hh>
 
+#include <vector>
 
 using namespace boost::python;
 
