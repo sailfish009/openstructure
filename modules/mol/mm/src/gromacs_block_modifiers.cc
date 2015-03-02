@@ -260,9 +260,8 @@ void GromacsHydrogenConstructor::ApplyOnResidue(ost::mol::ResidueHandle& res, os
     for(int b=0;b<number;++b){
       //only add hydrogen if not already present!
       atom = res.FindAtom(hydrogen_names[b]);
-      if(!atom.IsValid()){
-        atom = ed.InsertAtom(res,hydrogen_names[b],hydrogen_positions[b],"H");
-      }
+      if(!atom.IsValid()) atom = ed.InsertAtom(res,hydrogen_names[b],hydrogen_positions[b],"H");
+      else ed.SetAtomPos(atom,hydrogen_positions[b]);  
     }
   }
 }
@@ -416,6 +415,7 @@ void GromacsBlockModifier::ApplyOnResidue(ost::mol::ResidueHandle& res, ost::mol
     for(int j=0; j<number; ++j){
       ost::mol::AtomHandle at = res.FindAtom(names[j]);
       if(!at.IsValid()) at = ed.InsertAtom(res,names[j],positions[j],ele);
+      else ed.SetAtomPos(at,positions[j]);
       ed.Connect(at, anchor_atoms[0]);
     }
   }
