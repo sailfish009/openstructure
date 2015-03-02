@@ -799,7 +799,7 @@ void MMCifReader::ParseCitation(const std::vector<StringRef>& columns)
     }
   }
   if (indices_[PDBX_DATABASE_ID_PUBMED] != -1) {
-    if (columns[indices_[PDBX_DATABASE_ID_PUBMED]][0]!='?') {
+    if (!is_undef(columns[indices_[PDBX_DATABASE_ID_PUBMED]])) {
       cit.SetPubMed(this->TryGetInt(columns[indices_[PDBX_DATABASE_ID_PUBMED]],
                                     "citation.pdbx_database_id_PubMed"));
     }
@@ -1085,7 +1085,7 @@ void MMCifReader::ParseStruct(const std::vector<StringRef>& columns)
   }
 
   if (indices_[PDBX_FORMULA_WEIGHT] != -1) {
-    if (columns[indices_[PDBX_FORMULA_WEIGHT]][0] != '?') {
+    if (!is_undef(columns[indices_[PDBX_FORMULA_WEIGHT]])) {
       details.SetMass(this->TryGetReal(columns[indices_[PDBX_FORMULA_WEIGHT]],
                                        "struct.pdbx_formula_weight"));
     }
