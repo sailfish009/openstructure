@@ -101,12 +101,9 @@ The basic functionality of editors is implemented in the EditorBase class.
      :param chain:       Must be a valid chain
      :param description: Description to be added
 
-  .. method:: InsertAtom(residue, atom_name, pos, 
-                         element="", occupancy=1.0, b_factor=0.0,
-                         is_hetatm=False)
+  .. method:: InsertAtom(residue, atom_name, pos, element="", occupancy=1.0, b_factor=0.0, is_hetatm=False)
   
-    Insert new atom and add it to residue. For atoms with alternative atom
-    locations use :meth:`InsertAltAtom`. If the element parameter is a valid 
+    Insert new atom and add it to residue. For atoms with alternative atom locations use :meth:`InsertAltAtom`. If the element parameter is a valid 
     element, the atom properties mass, charge, and radius are set to default 
     values for that element. If element is an empty string (or an invalid 
     element), the properties are set to rather meaningless default values. You 
@@ -135,6 +132,68 @@ The basic functionality of editors is implemented in the EditorBase class.
     :param is_hetatm: whether the atom is an atom coming from a HETATM record.
     :type is_hetatm:  bool
     :returns:         :class:`AtomHandle`
+
+  .. method:: InsertAltAtom(residue, atom_name, alt_group, pos, element="", occupancy=1.0, b_factor=0.0)
+
+    Insert new atom with alternative position indicator
+
+    :param residue:   is the parent residue and must be valid
+    :type residue:    :class:`ResidueHandle`
+    :param atom_name: is the atom name. While free to choose a name, it is
+                      advised  to properly name the atoms according to IUPAC
+                      rules as several algorithms as well as most
+                      :class:`builders <conop.Builder>` in the :mod:`conop`
+                      module rely on proper naming.
+    :type atom_name:  string
+    :param alt_group: group is the name of the alternative atom position group. 
+                      If no group of that name exists, it will be created.
+    :type alt_group:  string                 
+    :param pos:       is the position of the atom in global coordinates
+    :type pos:        :class:`~ost.geom.Vec3`
+    :param element:   is the atom's element. If set to a a valid element,
+                      atom properties such as mass, charge, radius are set 
+                      based on default values for that element. If the element 
+                      string is empty, or unknown, the properties are filled 
+                      with rather meaningless default values.
+    :type element:    class:`string`
+    :param occupancy: The occupancy of the atom. between 0 and 1
+    :type occupancy:  float
+    :param b_factor:  temperature factor.
+    :type  b_factor:  float
+
+    :returns:         :class:`AtomHandle`
+
+  .. method:: InsertAltAtom(residue, atom, alt_group)
+
+    Insert new atom with alternative position indicator
+
+    :param residue:   is the parent residue and must be valid
+    :type residue:    :class:`ResidueHandle`
+    :param atom:      Must be a valid Atom
+    :type atom:       :class:`AtomHandle`
+    :param alt_group: group is the name of the alternative atom position group. 
+                      If no group of that name exists, it will be created.
+    :type alt_group:  string                 
+    :returns:         :class:`AtomHandle`
+
+  .. method:: AddAltAtomPos(alt_group, atom, pos, occupancy=1.0, b_factor=0.0)
+    
+    Add an alternative atom position
+
+    :param alt_group: group is the name of the alternative atom position group. 
+                      If no group of that name exists, it will be created.
+    :type alt_group:  string 
+    :param atom:      It is required that the atom has been inserted via InsertAltAtom, 
+                      If the atom is a conventional atom without alternative location, 
+                      a Error will be thrown.
+    :type atom:       :class:`AtomHandle`                
+    :param pos:       is the position of the atom in global coordinates
+    :type pos:        :class:`~ost.geom.Vec3`
+    :param occupancy: The occupancy of the atom. between 0 and 1
+    :type occupancy:  float
+    :param b_factor:  temperature factor.
+    :type  b_factor:  float
+
 
   .. method:: AddTorsion(name, atom1, atom2, atom3, atom4)
   
@@ -172,10 +231,18 @@ The basic functionality of editors is implemented in the EditorBase class.
     :type residue: :class:`ResidueHandle`
     :param residue: A valid residue
     
-    
     :type atom: The atom to be deleted
     
     :type atom: :class:`EntityHandle`
+  
+  .. method:: DeleteAtoms(residue)
+  
+    Deletes a set specified atoms. All associated torsions and bonds will be 
+    removed as well
+    
+    :type residue: :class:`AtomHandleList`
+    :param residue: A valid set of atoms
+    
   
   .. method:: DeleteResidue(residue)
   
@@ -184,6 +251,14 @@ The basic functionality of editors is implemented in the EditorBase class.
     
     :type residue: :class:`ResidueHandle`
     :param residue: A valid residue
+
+  .. method:: DeleteResidues(chain)
+  
+    Deletes all the residues of given chain.
+    All associated atoms, residues, torsions and bonds will also be deleted
+    
+    :type chain: :class:`ChainHandle`
+    :param chain: A valid chain
 
   .. method:: DeleteChain(chain)
   
@@ -203,6 +278,56 @@ The basic functionality of editors is implemented in the EditorBase class.
     :param chain: `A valid chain`
     :type chain: :class:`ChainHandle`
 
+  .. method:: ReorderAllResidues()
+
+    Reorder residues of the all chains such that their residues numbers 
+    are continuously increasing. This function might be useful in cases of PDB 
+    files that do not list the residues from N to C terminus but rather use the 
+    residue number to describe their position in the chain.
+  
+  .. method:: RenumberAllResidues(start, keep_spacing)
+
+    Renumber residues of all chains
+              
+    :param start: Residues of every chain will be renumbered, 
+                  whereas the first residue gets the residue number start.
+    :type start: int 
+
+    :param keep_spacing: If set to false, residues will continously 
+                         Otherwise the spacings between the residues are kept
+    :type keep_spacing: bool
+
+  .. method:: RenumberChain(chain, new_numbers)
+
+    Renumber residues of the given chain
+              
+    :param chain: A valid chain
+    :type chain: :class:`ChainHandle` 
+
+    :param new_numbers: A valid ResNumList
+    :type new_numbers: :class:`ResNumList`
+
+  .. method:: RenumberChain(chain, start, keep_spacing)
+
+    Renumber residues of the given chain
+              
+    :param chain: A valid chain
+    :type chain: :class:`ChainHandle` 
+
+    :param start: Residues of given chain will be renumbered, 
+                  whereas the first residue gets the residue number start.
+    :type start: int 
+
+    :param keep_spacing: If set to false, residues will continously 
+                         Otherwise the spacings between the residues are kept
+    :type keep_spacing: bool
+  
+  .. method:: GetMode()
+
+    Get edit mode of editor
+
+    :returns: :class:`EditMode`
+
   .. method:: RenameAtom(atom, new_name)
 
      Change the name of atom to new_name without changing anything else.
@@ -212,6 +337,15 @@ The basic functionality of editors is implemented in the EditorBase class.
      :param new_name: is the new name. Free to choose and not verified to be a
                       valid atom identifier.
      :type new_name:  string
+  
+  .. method:: SetResidueNumber(residue, num)
+
+     Change the number of residue to num without changing anything else.
+
+     :param residue:  Must be a valid residue
+     :type residue:   :class:`ResidueHandle`
+     :param num: Residue number
+     :type num:  :class: `ResNum`
 
   .. method:: Connect(atom1, atom2)
               Connect(atom1, atom2, bond_order)
