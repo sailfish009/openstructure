@@ -11,11 +11,6 @@ please refer to :doc:`install`.
 What will be covered in this tutorial?
 --------------------------------------------------------------------------------
 
-This tutorial is aimed at users that would like to get their hands dirty and 
-execute commands in Python and write scripts rather clicking their way through a 
-shiny user interface. The user interface of OpenStructure is in a very early 
-state anyway that you probably won't go far by clicking your way through...
-
 The tutorial is divided into several parts. The first part of the tutorial is a 
 walk-through of the basic functionality you will be using in your everyday work, followed by an introduction to the :mod:`~ost.mol`, :mod:`~ost.img` and :mod:`~ost.seq` modules.
 
