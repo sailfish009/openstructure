@@ -1,2 +1,2 @@
 #!/bin/sh
-gosty harmony.py Harmony $@
+dng -s harmony.py
