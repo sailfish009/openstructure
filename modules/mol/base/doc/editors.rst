@@ -383,6 +383,14 @@ Euclidian space.
      
      :param transform: The transformation to be applied
      :type  transform: :class:`geom.Mat4`
+
+  .. method:: ApplyTransform(transform)
+  
+     Apply a transformation to the entity. The transformation is applied to all 
+     atoms positions.
+     
+     :param transform: The transformation to be applied
+     :type  transform: :class:`Transform`
      
   .. method:: SetTransform(transform)
   
@@ -390,7 +398,26 @@ Euclidian space.
      
      :param transform: The transformation to be applied
      :type  transform: :class:`geom.Mat4`
+
+  .. method:: SetTransform(transform)
+  
+     Set the entity transformation. See also :meth:`ApplyTransform`
      
+     :param transform: The transformation to be applied
+     :type  transform: :class:`Transform`
+  
+  .. method:: FixTransform()
+  
+     Set transformed positions to new original positions
+
+  .. method:: UpdateICS()
+  
+     Immediately update internal coordinate system
+   
+  .. method:: ForceUpdate()
+  
+     Force spatial organizer and ICS update workaround for delayed editor call from Python garbage collection
+  
   .. method:: SetAtomPos(atom, pos)
   
      Set the (transformed) position of atom. This method will also update the
@@ -401,8 +428,30 @@ Euclidian space.
      :type  atom: :class:`ost.mol.AtomHandle`
      :param pos: The new position
      :type  pos: :class:`~ost.geom.Vec3`
+
+  .. method:: SetAtomPos(atom, pos)
+  
+     Set the (transformed) position of atom. This method will also update the
+     original position of the atom by applying the inverse of the entity
+     transform.
      
-  .. method:: SetOriginalAtomPos(atom, pos)
+     :param atom_list: must be a valid atom handle list
+     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param pos_list: a numpy array of floats having a length of 3*atom_list.size()
+     :type  pos_list: numpy array
+
+  .. method:: SetAtomPos(atom, pos)
+  
+     Set the (transformed) position of atom. This method will also update the
+     original position of the atom by applying the inverse of the entity
+     transform.
+     
+     :param atom_list: must be a valid atom handle list
+     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param pos_list: a list of double having a length of 3*atom_list.size()
+     :type  pos_list: list
+    
+  .. method:: SetAtomOriginalPos(atom, pos)
      
      Set the original (untransformed) position of the atom. This method will
      also update the transformed position by applying the entity transform to
@@ -411,7 +460,67 @@ Euclidian space.
      :param atom: must be a valid atom handle
      :type  atom: :class:`ost.mol.AtomHandle`
      :param pos: The new untransformed position
+     :type  pos: :class:`~ost.geom.Vec3` 
+  
+
+  .. method:: SetAtomOriginalPos(atom_list, pos_list)
+     
+     Set the original (untransformed) position of the atoms in the given list. This method will
+     also update the transformed position by applying the entity transform to
+     the original pos.
+     
+     :param atom_list: must be a valid atom handle list
+     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param pos_list: a list of double having a length of 3*atom_list.size()
+     :type  pos_list: list
+
+  .. method:: SetAtomOriginalPos(atom_list, pos_list)
+     
+     Set the original (untransformed) position of the atoms in the given list. This method will
+     also update the transformed position by applying the entity transform to
+     the original pos.
+     
+     :param atom_list: must be a valid atom handle list
+     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param pos_list: a numpy array of floats having a length of 3*atom_list.size()
+     :type  pos_list: numpy array
+
+
+  .. method:: SetAtomTransformedPos(atom, pos)
+  
+     Set the (transformed) position of atom. This method will also update the
+     original position of the atom by applying the inverse of the entity
+     transform.
+     
+     :param atom: must be a valid atom handle
+     :type  atom: :class:`ost.mol.AtomHandle`
+     :param pos: The new position
      :type  pos: :class:`~ost.geom.Vec3`
+
+  .. method:: SetAtomTransformedPos(atom_list, pos_list)
+  
+     Set the (transformed) position of atom. This method will also update the
+     original position of the atom by applying the inverse of the entity
+     transform.
+
+     :param atom_list: must be a valid atom handle list
+     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param pos_list: a numpy array of floats having a length of 3*atom_list.size()
+     :type  pos_list: numpy array
+
+  .. method:: SetAtomTransformedPos(atom_list, pos_list)
+  
+     Set the (transformed) position of atom. This method will also update the
+     original position of the atom by applying the inverse of the entity
+     transform.
+
+     :param atom_list: must be a valid atom handle list
+     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param pos_list: a list of double having a length of 3*atom_list.size()
+     :type  pos_list: list
+
+
+
   
 Editor for the Internal Coordinate System
 --------------------------------------------------------------------------------
@@ -452,6 +561,75 @@ using an :class:`ICSEditor` is undefined and vice versa.
     :type angle: :class:`float`
     
     :raises: :exc:`RuntimeError` when the torsion handle is invalid
+
+
+  .. method:: SetTorsionAngle(atom1, atom2, atom3, atom4, angle, update_others=True)
+    
+    Set the angles of the given atoms. All connectors at the third atom (A3) will be adjusted accordingly. 
+    If you only want to adjust the bond between A3 and A4, and leave 
+    the other bonds untouched, use the :meth:`SetDihedralAngle` function
+    
+    :see: :meth:`UpdateXCS`
+    
+    :param atom1: The first atom. Must be valid
+    :type atom1: :class:`AtomHandle`
+    
+    :param atom2: The second atom. Must be valid
+    :type atom2: :class:`AtomHandle`
+    
+    :param atom3: The third atom. Must be valid
+    :type atom3: :class:`AtomHandle`
+
+    :param atom4: The third atom. Must be valid
+    :type atom4: :class:`AtomHandle`
+    
+    :param angle: The angle in radians
+    :type: angle: :class:`Real`
+    
+    :param update_others: Update all the the other torsion angles consequently
+    :type update_others: bool
+
+
+  .. method:: RotateTorsionAngle(torsion, delta, update_others=True)
+    
+    Rotate torsion angle
+    
+    :see: :meth:`UpdateXCS`
+    
+    :param torsion: A valid torsion
+    :type torsion: :class:`TorsionHandle`
+
+    :param delta: delta
+    :type delta: :class:`Real`
+    
+    :param update_others: Update all the the other torsion angles consequently
+    :type update_others: bool
+
+
+  .. method:: RotateTorsionAngle(atom1, atom2, atom3, atom4, angle, update_others=True)
+    
+    Rotate torsion angle
+    
+    :see: :meth:`UpdateXCS`
+    
+    :param atom1: The first atom. Must be valid
+    :type atom1: :class:`AtomHandle`
+    
+    :param atom2: The second atom. Must be valid
+    :type atom2: :class:`AtomHandle`
+    
+    :param atom3: The third atom. Must be valid
+    :type atom3: :class:`AtomHandle`
+
+    :param atom4: The third atom. Must be valid
+    :type atom4: :class:`AtomHandle`
+    
+    :param angle: The angle in radians
+    :type: angle: :class:`Real`
+    
+    :param update_others: Update all the the other torsion angles consequently
+    :type update_others: bool
+  
   
   .. method:: UpdateXCS()
   
