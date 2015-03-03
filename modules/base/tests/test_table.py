@@ -48,6 +48,19 @@ except ImportError:
   HAS_PIL=False
   print "Could not find python imagine library: ignoring some table class unit tests"
 
+# setting up an OST LogSink to capture error messages
+class _FetchLog(ost.LogSink):
+  def __init__(self):
+    ost.LogSink.__init__(self)
+    self.messages = dict()
+
+  def LogMessage(self, message, severity):
+    levels=['ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE']
+    level=levels[severity]
+    if not level in self.messages.keys():
+      self.messages[level] = list()
+    self.messages[level].append(message.strip())
+  
 class TestTable(unittest.TestCase):
 
   def tearDown(self):
@@ -1423,6 +1436,9 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(auc, auc_ref)
 
   def testCalcMCC(self):
+    log = _FetchLog()
+    ost.PushLogSink(log)
+
     tab = Table(['score', 'rmsd', 'class_rmsd', 'class_score', 'class_wrong'], 'ffbbb',
                 score=      [2.64, 1.11, 2.17, 0.45,0.15,0.85, 1.13, 2.90, 0.50, 1.03, 1.46, 2.83, 1.15, 2.04, 0.67, 1.27, 2.22, 1.90, 0.68, 0.36,1.04, 2.46, 0.91,0.60],
                 rmsd=[9.58,1.61,7.48,0.29,1.68,3.52,3.34,8.17,4.31,2.85,6.28,8.78,0.41,6.29,4.89,7.30,4.26,3.51,3.38,0.04,2.21,0.24,7.58,8.40],
@@ -1442,7 +1458,8 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(mcc, -0.1490711984)
     mcc = tab.ComputeMCC(score_col='class_wrong', class_col='class_rmsd')
     self.assertEquals(mcc,None)
-    
+    self.assertEquals(log.messages['WARNING'][0],
+    'Could not compute MCC: MCC is not defined since factor (tp + fp) is zero')
 
   def testCalcMCCPreclassified(self):
     tab = Table(['reference', 'prediction1', 'prediction2'],'bbb',
