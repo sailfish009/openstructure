@@ -860,6 +860,11 @@ used to skip frames in the analysis.
      consecutive frames analyzed.  
 
 
+:mod:`mol.alg.helix_kinks <ost.mol.alg.helix_kinks>` -- Algorithms to calculate Helix Kinks
+================================================================================================
 
+.. autofunction:: ost.mol.alg.helix_kinks.CalculateHelixKink
+
+.. autofunction:: ost.mol.alg.helix_kinks.AnalyzeHelixKink
 
 

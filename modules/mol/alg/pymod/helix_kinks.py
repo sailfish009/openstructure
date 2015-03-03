@@ -80,13 +80,17 @@ def AnalyzeHelixKink(t,sele,proline=False):
   there are at least 4 residues on each side (8 is even better) of the prolin around which
   the helix is kinked. The selection should contain all residues in the correct
   order and with no gaps and no missing C-alphas.
-  Input:
-    t     : The trajectory to be analyzed (CoordGroup)
-    sele  : A selection containing the alpha helix to be analyzed (EntityView)
-    proline=False : An EntityView containing only the proline (or another residue) around which the
-                    helix is kinked. If False, the proline will be serached for automatically
-  Output:
-    (bend_angle,face_shift,wobble_angle) : a tuple of FloatLists
+  
+  :param t: The trajectory to be analyzed
+  :type t: `~ost.mol.CoordGroup`
+  :param sele: A selection containing the alpha helix to be analyzed
+  :type sele: :class:`~ost.mol.EntityView`
+  :param proline=False: A selection containing only the proline (or another residue) around 
+   which the helix is kinked. If False, the proline will be serached for automatically
+  :type proline: :class:`ost.mol.EntityView`
+
+  :return: A tuple (bend_angle, face_shift, wobble_angle).
+  :rtype: (FloatList, FLoatList, FloatList)
   """
   n_frames=t.GetFrameCount()
   (proline,proline_ca)=__FindProline(sele,proline)
@@ -121,12 +125,15 @@ def CalculateHelixKink(sele,proline=False):
   there are at least 4 residues on each side (8 is even better) of the prolin around which
   the helix is kinked. The selection should contain all residues in the correct
   order and with no gaps and no missing C-alphas.
-  Input:
-    sele  : A selection containing the alpha helix to be analyzed (EntityView)
-    proline=False : An EntityView containing only the proline (or another residue) around which the
-                    helix is kinked. If False, the proline will be serached for automatically
-  Output:
-    (bend_angle,face_shift,wobble_angle) : a tuple of Floats
+  
+  :param sele: A selection containing the alpha helix to be analyzed
+  :type sele: :class:`~ost.mol.EntityView`
+  :param proline=False: A selection containing only the proline (or another residue) around 
+   which the helix is kinked. If False, the proline will be serached for automatically
+  :type proline: :class:`ost.mol.EntityView`
+
+  :return: A tuple (bend_angle, face_shift, wobble_angle).
+  :rtype: (float, float, float)
   """
   (proline,proline_ca)=__FindProline(sele,proline)
   proline_num=proline.GetNumber().num
