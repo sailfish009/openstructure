@@ -2,7 +2,7 @@ Scene Window
 ================================================================================
 .. currentmodule:: ost.gui
 
-The scene win holds a list of all graphical objects currently registered to
+The scene window holds a list of all graphical objects currently registered to
 the :class:`gfx.Scene`.
 
 .. image:: images/100208_Scene_Win.png
@@ -40,10 +40,10 @@ Context Menu
 The Context Menu of the Scene Window is context sensitive. So, dependent on what
 is selected in the :class:`SceneWin` the context menu changes.
 
-Context menu of an entity
+Context menu of an entity:
   .. image:: images/100614_entity_context_menu.png
  
-Context menu of an entity view
+Context menu of an entity view:
   .. image:: images/100614_context_menu_view.png
   
 It is possible to extend the Context Menu from python, by creating a QAction and 
@@ -53,7 +53,7 @@ be shown.
 
   .. code-block:: python
   
-    cm=gui.GostyApp.Instance().scene_win.GetContextMenu()
+    cm = gui.GostyApp.Instance().scene_win.GetContextMenu()
     action = QtGui.QAction("Test single entity", cm.qobject)
     cm.AddAction(action, gui.ContextActionType.ENTITY | gui.ContextActionType.SINGLE)
 
