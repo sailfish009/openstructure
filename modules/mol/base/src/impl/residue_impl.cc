@@ -70,7 +70,6 @@ AtomImplPtr ResidueImpl::InsertAtom(const AtomImplPtr& atom)
   dst_atom->SetBFactor(atom->GetBFactor());
   dst_atom->SetOccupancy(atom->GetOccupancy());
   dst_atom->SetHetAtom(atom->IsHetAtom());
-  dst_atom->SetIndex(atom->GetIndex());
 
   if (!atom->HasDefaultProps()) {
     dst_atom->SetRadius(atom->GetRadius());
