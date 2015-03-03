@@ -601,7 +601,7 @@ of the annotation available.
 
     See :attr:`operationsintervalls`
 
-.. function:: PDBize(asu, seqres=None, min_polymer_size=10, transformation=False)
+  .. function:: PDBize(asu, seqres=None, min_polymer_size=10, transformation=False)
 
     Returns the biological assembly (bio unit) for an entity. The new entity
     created is well suited to be saved as a PDB file. Therefore the function
