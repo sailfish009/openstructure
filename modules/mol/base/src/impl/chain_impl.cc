@@ -71,15 +71,68 @@ ResidueImplPtr ChainImpl::AppendResidue(const ResidueImplPtr& res, bool deep)
   dst_res->SetProtein(res->IsProtein());
   dst_res->SetChemType(res->GetChemType());
   dst_res->SetIsLigand(res->IsLigand());
-  if(deep)
-  {
+
+  if(deep){
     AtomImplList::iterator it=res->GetAtomList().begin(),
-                             it_end=res->GetAtomList().end();
-      for(;it!=it_end;++it)
-      {
-        AtomHandle atom=*it;
-        dst_res->InsertAtom(atom.Impl());
+                           it_end=res->GetAtomList().end();
+
+    if(res->HasAltAtoms()){
+
+      for(;it!=it_end;++it){
+
+        AtomImplPtr atom=*it;
+        std::vector<String> alt_gn = res->GetAltAtomGroupNames(atom);
+
+        if(alt_gn.empty()){
+          //there are no alternative locations for this atoms =>just add it
+          dst_res->InsertAtom(atom);
+        }
+
+        else{
+          AtomImplPtr dst_atom;
+          
+          dst_atom = dst_res->InsertAltAtom(atom->GetName(),alt_gn[0],
+                                            res->GetAltAtomPos(atom,alt_gn[0]),
+                                            atom->GetElement(),
+                                            res->GetAltAtomOcc(atom,alt_gn[0]),
+                                            res->GetAltAtomBFactor(atom,alt_gn[0]));
+          
+          //in the InsertAltAtom function only name, position and 
+          //element get passed when inserting the actual atom into the residue. 
+          //All the rest we have to map by ourself as we would call the 
+          //dst_res->InsertAtom(atom) function
+          dst_atom->Assign(*atom.get());
+          dst_atom->SetState(atom->GetState());
+          dst_atom->SetBFactor(atom->GetBFactor());
+          dst_atom->SetOccupancy(atom->GetOccupancy());
+          dst_atom->SetHetAtom(atom->IsHetAtom());
+          dst_atom->SetIndex(atom->GetIndex());
+
+          if (!atom->HasDefaultProps()) {
+            dst_atom->SetRadius(atom->GetRadius());
+            dst_atom->SetCharge(atom->GetCharge());
+            dst_atom->SetMass(atom->GetMass());
+            dst_atom->SetAnisou(atom->GetAnisou());
+          }
+
+          //the pos for the first alt group name is already added in the
+          //InsertAltAtom function, all the others get added here
+          for(std::vector<String>::iterator alt_gn_it = alt_gn.begin() + 1,
+              alt_gn_it_e = alt_gn.end(); alt_gn_it != alt_gn_it_e; ++alt_gn_it){
+
+            dst_res->AddAltAtomPos(*alt_gn_it,dst_atom,
+                                   res->GetAltAtomPos(atom,*alt_gn_it),
+                                   res->GetAltAtomOcc(atom,*alt_gn_it),
+                                   res->GetAltAtomBFactor(atom,*alt_gn_it));
+          }
+        }
       }
+    }
+    else{
+      for(;it!=it_end;++it){
+        dst_res->InsertAtom(*it);
+      }
+    }
   }
   return dst_res;
 }
