@@ -30,7 +30,7 @@ To load a PDB file, simply type
 
 .. code-block:: python
 
-   fragment=io.LoadPDB('/path/to/examples/code_fragments/entity/fragment.pdb')
+   fragment = io.LoadPDB('/path/to/examples/code_fragments/entity/fragment.pdb')
 
 This will load the fragment from the specified file 'fragment.pdb' and store the 
 result in fragment.  The :func:`~ost.io.LoadPDB` has many options, which, for
@@ -74,7 +74,7 @@ This will group the atoms by residue. And, for completeness, we will first group
       for atom in residue.atoms:
         print '    ', atom.name, atom.pos
 
-A protein fragment would not be complete without bonds: Let's see 
+A protein fragment would not be complete without bonds. Let's see 
 what bonds we have in there:
 
 .. code-block:: python
@@ -90,7 +90,7 @@ of the entity. The graphical representation is completely separate from the :cla
 
 .. code-block:: python
   
-  go=gfx.Entity("Fragment", fragment)
+  go = gfx.Entity("Fragment", fragment)
   scene.Add(go)
   scene.CenterOn(go)
 
@@ -100,7 +100,7 @@ Now you will see the fragment in the 3D window.
 Use the mouse to rotate, zoom in and shift the camera. Double clicking on an 
 atom will center the camera on that atom. If you want to learn more about the 
 :mod:`~ost.gfx` module, you are encouraged to read :doc:`the gfx 
-intro<intro-03>` and the :mod:`gfx documentation<ost.gfx`.
+intro<intro-03>` and the :mod:`gfx documentation<ost.gfx>`.
 
 Introduction to Views
 --------------------------------------------------------------------------------
@@ -116,11 +116,11 @@ views with handles in Python due to the dynamic nature of the language. An
 algorithm that is written for entities will almost always (with some care) also
 work for 
 :class:`EntityHandles <ost.mol.EntityHandle>`. This is referred to as 
-`duck-typing <http://en.wikipedia.org/wiki/Duck_typing>`_ (I don' t care if it 
-is a duck as long as it looks like a duck), a concept used all over the place
+`duck-typing <http://en.wikipedia.org/wiki/Duck_typing>`_ (I don't care if it 
+isn't a duck as long as it looks like a duck), a concept used all over the place
 in Python. For views, the same rule as for
 :class:`entities <ost.mol.EntityHandle>` applies: No atom can be part of the
-view without it's residue...
+view without it's residue.
 
 To familiarize yourself with the concept of views, we will use the fragment in 
 the 3D window of the last example.
@@ -133,11 +133,11 @@ The Query Language
 --------------------------------------------------------------------------------
 
 The first way to select parts of a structure is with a dedicated mini-language, 
-called :doc:`the query language <mol/base/query>`. In the Python Shell, type
+called :doc:`the query language <mol/base/query>`. In the Python shell, type
 
 .. code-block:: python
 
-  go.selection=fragment.Select('')
+  go.selection = fragment.Select('')
     
 The code performs a selection on the fragment and assigns the resulting view to 
 the selection of the graphical object. A green halo will be displayed around the 
@@ -150,7 +150,7 @@ chains, residues, atoms and bonds. To select lysine residues, type
 
 .. code-block:: python
 
-  go.selection=fragment.Select('rname=LYS')
+  go.selection = fragment.Select('rname=LYS')
     
 
 As you can see (image on the right), the only lysine residue is now 
@@ -161,7 +161,7 @@ number 1 to 3, the following statement will do the job:
 
 .. code-block:: python
 
-  go.selection=fragment.Select('rnum>=1 and rnum<=3')
+  go.selection = fragment.Select('rnum>=1 and rnum<=3')
     
 but this is very cumbersome. That's why there is a shortcut to this statement. 
 You can specify a range of values.
@@ -177,15 +177,15 @@ look at the :doc:`../mol/base/query`.
 Constructing Views Manually
 --------------------------------------------------------------------------------
 
-Sometimes the query language Is Not Enough (TM). For these cases the 
-construction of manual entities becomes neccessary. This is pretty straight 
+Sometimes the query language is not enough. For these cases the 
+construction of manual entities becomes necessary. This is pretty straight 
 forward:
 
 .. code-block:: python
 
-  view=fragment.CreateEmptyView()
-  ca=fragment.FindAtom('A', mol.ResNum(1), 'CA')
-  cb=fragment.FindAtom('A', mol.ResNum(1), 'CB')
+  view = fragment.CreateEmptyView()
+  ca = fragment.FindAtom('A', mol.ResNum(1), 'CA')
+  cb = fragment.FindAtom('A', mol.ResNum(1), 'CB')
   view.AddAtom(ca)
   view.AddAtom(cb)
   go.SetSelection(view)
@@ -197,7 +197,7 @@ to add the bond manually with
 
 .. code-block:: python
 
-  ca_cb=ca.FindBondToAtom(cb)
+  ca_cb = ca.FindBondToAtom(cb)
   view.AddBond(ca_cb)
     
 Or, as a very convenient shortcut 
@@ -206,6 +206,10 @@ add all bonds that have both bonding partners in the view.
 
 Don't forget to update the selection of the graphics object to see what view you 
 have created.
+
+.. code-block:: python
+
+  go.SetSelection(view)
 
 Saving an Entity
 --------------------------------------------------------------------------------
