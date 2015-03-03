@@ -282,8 +282,7 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
   :param info: Whether to return an info container with the other output.
                Returns a :class:`MMCifInfo` object as last item.
 
-  :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous
-  or inexistent file
+  :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous or non-existent file.
   """
   def _override(val1, val2):
     if val2!=None:

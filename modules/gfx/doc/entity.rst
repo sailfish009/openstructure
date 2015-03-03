@@ -31,7 +31,7 @@ Render Modes at the Connectivity Level
   .. image:: cpk.png
 
   
-  Renders atoms as spheres with radii proportional to their van-der-Waals 
+  Renders atoms as spheres with radii proportional to their van der Waals 
   radius.
 
 .. data:: CUSTOM
@@ -63,13 +63,13 @@ Render Modes at the Trace Level
 
   .. image:: line_trace.png
 
-  Renders the Calpha connected bys lines.
+  Renders the Calpha connected by lines.
   
 .. data:: HSC
 
   .. image:: hsc.png
 
-  Renders a Helix/Strand/Coil Cartoon.
+  Renders a helix/strand/coil cartoon.
 
 
 .. _render-options:
@@ -123,9 +123,9 @@ Entity API Reference
 .. class:: Entity(name, entity)
            Entity(name, render_mode, entity)
 
-  Graphical representation of entitites. 
+  Graphical representation of entities. 
   
-  :param name: Name of the entity
+  :param name: Name of the entity.
   :type  name: str
   :param render_mode: One of the :ref:`render-mode`.
      Defaults to :obj:`SIMPLE`.
@@ -147,8 +147,8 @@ Entity API Reference
     
     .. code-block:: python
     
-      go.selection=query
-      go.selection=go.view.Select(query)
+      go.selection = query
+      go.selection = go.view.Select(query)
     
     :type: :class:`~ost.mol.EntityView`
   
@@ -166,13 +166,13 @@ Entity API Reference
     the render mode of all atoms and bonds, whereas the second only changes the 
     display of atoms/bonds that are part of the view. If `keep` is set to false,
     the atoms and bonds that are part of the view will only be displayed in the 
-    new render mode, if keep is set to true, the atoms and bonds will be 
+    new render mode. If keep is set to true, the atoms and bonds will be 
     rendered with the new render mode in addition to whatever render mode they 
     were rendered previously.
     
     :param render_mode: One of the :ref:`render-mode`.
        Defaults to :obj:`SIMPLE`.
-    :param view: A valid entity view
+    :param view: A valid entity view.
     :type  view: :class:`~ost.mol.EntityView`
 
   .. method:: SetColor(color, selection='')
@@ -204,7 +204,7 @@ Entity API Reference
     :doc:`query language <../mol/base/query>`.
     
     In case a generic property is undefined for a certain element, the property 
-    the value of min is used for that element.
+    value of min is used for that element.
     
     :param prop: The name of the numeric property
     :type  prop: str
@@ -222,7 +222,7 @@ Entity API Reference
     
   .. method:: UpdatePositions()
   
-    Tells the graphical entity to update its vertex arrays. Use this functions 
+    Tells the graphical entity to update its vertex arrays. Use this function 
     when you modified coordinates of the underlying 
     :class:`~ost.mol.EntityHandle` and would like to see the changes on the 
     screen.
