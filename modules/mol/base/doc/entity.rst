@@ -1221,6 +1221,18 @@ The View Classes
     
     :type: bool
 
+  .. attribute:: geometric_center
+
+    Mid-point of the axis aligned bounding box of the entity.
+
+    :type: Vec3
+
+  .. attribute:: valid
+
+     Validity of handle.
+
+     :type: bool
+
   .. method:: AddAtom(atom_handle[, view_add_flags])
 
     Add atom to the view. If the residue of the atom is not already part of the 
@@ -1278,8 +1290,8 @@ The View Classes
     See :attr:`center_of_mass`
     
   .. method:: GetEntity()
-    
-    See :attr:`entity`
+
+    The parent entity.
 
   .. method:: GetGeometricCenter()
     
@@ -1425,7 +1437,13 @@ The View Classes
     The residue handle this view points to
     
     :type: :class:`ResidueHandle`
-    
+
+  .. attribute:: atoms
+
+    List of atoms in this view.
+
+    :type: :class:`AtomViewList`
+
   .. method:: RemoveAtom(atom_view)
   
     Remove atom from residue and all associated bonds. If the atom is not part 
