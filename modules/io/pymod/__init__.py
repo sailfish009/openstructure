@@ -269,20 +269,21 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
 
   :param fault_tolerant: Enable/disable fault-tolerant import. If set, overrides
      the value of :attr:`IOProfile.fault_tolerant`.
-  
+
   :param remote: If set to True, the method tries to load the pdb from the 
      remote pdb repository www.pdb.org. The filename is then interpreted as the 
      pdb id.
-     
+
   :rtype: :class:`~ost.mol.EntityHandle`.
-  
+
   :param seqres: Whether to read SEQRES records. If set to True, the loaded 
     entity and seqres entry will be returned as second item.
 
   :param info: Whether to return an info container with the other output.
                Returns a :class:`MMCifInfo` object as last item.
 
-  :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous or non-existent file.
+  :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous
+           or non-existent file.
   """
   def _override(val1, val2):
     if val2!=None:
