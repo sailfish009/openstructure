@@ -955,8 +955,7 @@ of the annotation available.
 
    Retrieve  database_pdb_rev.date_original.
 
-   :returns: database_pdb_rev.date_original as :class:`str` in format
-   'yyyy-mm-dd'
+   :returns: database_pdb_rev.date_original as :class:`str` in format 'yyyy-mm-dd'
 
    .. method:: AddRevision(int num, String date, String status)
 

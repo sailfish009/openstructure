@@ -298,24 +298,32 @@ def Superpose(ent_a, ent_b, match='number', atoms='all', iterative=False, max_it
 
   :param ent_a: The model entity
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+
   :param ent_b: The reference entity
   :type ent_b: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+
   :param match: Method to gather residues/ atoms
   :type match: :class:`str`
+
   :param atoms: The subset of atoms to be used in the superposition
   :type atoms: :class:`str`, :class:`list`, :class:`set`
+
   :param max_iterations: They number of iterations that will be run during 
-  iterative superposition
+                         iterative superposition
   :type max_iterations: :class:`int`
-  :param distance_threshold: The distance threshold between which two atoms that 
-  will be used in the next superposition iteration
+
+  :param distance_threshold: The distance threshold between which two atoms
+                             that will be used in the next superposition
+                             iteration
+  :type distance_threshold: :class:`float`
+
   :returns: An instance of :class:`SuperpositionResult`, containing members
 
-            * ``rmsd`` - RMSD of the superposed entities
+  * ``rmsd`` - RMSD of the superposed entities
 
-            * ``view1`` - First :class:`~ost.mol.EntityView` used
+  * ``view1`` - First :class:`~ost.mol.EntityView` used
 
-            * ``view2`` - Second :class:`~ost.mol.EntityView` used
+  * ``view2`` - Second :class:`~ost.mol.EntityView` used
   """
   not_supported="Superpose called with unsupported matching request."
   ## create views to superpose
