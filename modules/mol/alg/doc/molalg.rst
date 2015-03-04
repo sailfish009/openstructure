@@ -873,5 +873,9 @@ used to skip frames in the analysis.
 .. automodule:: ost.mol.alg.trajectory_analysis
    :members:
 
+:mod:`mol.alg.structure_analysis <ost.mol.alg.trajectory_analysis>` -- Functions to analyze structures
+=============================================================================================================
 
+.. automodule:: ost.mol.alg.structure_analysis
+   :members:
 
