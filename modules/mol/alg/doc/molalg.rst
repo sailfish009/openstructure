@@ -867,4 +867,11 @@ used to skip frames in the analysis.
 
 .. autofunction:: ost.mol.alg.helix_kinks.AnalyzeHelixKink
 
+:mod:`mol.alg.trajectory_analysis <ost.mol.alg.trajectory_analysis>` -- DRMSD, pairwise distances and more
+=============================================================================================================
+
+.. automodule:: ost.mol.alg.trajectory_analysis
+   :members:
+
+
 
