@@ -32,7 +32,7 @@ OpenStructure uses a bunch of OpenSource libraries. If you haven't already insta
  * `Boost <http://boost.org>`_ (1.37)
  * `libpng <http://www.libpng.org>`_ 
  * `Python <http://python.org>`_ (2.4)
- * `Qt <http://qt.nokia.com>`_ (4.5)
+ * `Qt <http://qt-project.org/>`_ (4.5)
 
 When you enable support for image processing, you will need:
 
@@ -139,7 +139,7 @@ By default, `CMake <http://cmake.org>`_ searches the standard directories for de
    activates the rule-based-builder. The compound library is based on 
    the component dictionary released by the PDB, and it specifies atoms
    of a certain residue or connectivities between atoms etc. The 
-   :doc:`conop/compoundlib` compound library itself is created from the 
+   :doc:`compound library <conop/compoundlib>` itself is created from the 
    component dictionary by calling the OpenStructure chemdict_tool. 
    By default this is switched off.
 
