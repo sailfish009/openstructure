@@ -4,7 +4,7 @@ from ost import io, geom, gfx, mol
 class World:
   def __init__(self):
     self.atom_string=mol.CreateEntity()
-    edi=self.atom_string.RequestXCSEditor(mol.EditMode.BUFFERED_EDIT)
+    edi=self.atom_string.EditXCS(mol.EditMode.BUFFERED_EDIT)
     chain=edi.InsertChain("A")
     r=edi.AppendResidue(chain, "STRING")
     prev_atom=mol.AtomHandle()
@@ -51,7 +51,7 @@ class World:
         force=((1.0/length)**12-(1.0/length)**6)*diff
         self.forces[i]+=force
         self.forces[j]-=force
-    edi=self.atom_string.RequestXCSEditor(mol.EditMode.BUFFERED_EDIT)
+    edi=self.atom_string.EditXCS(mol.EditMode.BUFFERED_EDIT)
     for force, atom in zip(self.forces, self.atom_string.atoms):
       edi.SetAtomPos(atom, atom.pos+force*0.004)
     self.go.Rebuild()

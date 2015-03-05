@@ -471,7 +471,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
 }
 
 void PDBReader::AssignMolIds(mol::EntityHandle ent) {
-  LOG_INFO("Assigning MOL_IDs");
+  LOG_VERBOSE("Assigning MOL_IDs");
   for (CompndList::const_iterator compnd_iterator=compnds_.begin(), e=compnds_.end();
        compnd_iterator!=e; ++compnd_iterator) {
     for (std::vector<String>::const_iterator chain_iterator = compnd_iterator->chains.begin();

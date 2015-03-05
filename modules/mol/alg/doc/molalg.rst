@@ -636,6 +636,18 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   :returns: true if the residue names are the same, false otherwise
 
 
+.. autofunction:: ParseAtomNames
+
+.. autofunction:: MatchResidueByNum
+
+.. autofunction:: MatchResidueByIdx
+
+.. autofunction:: MatchResidueByLocalAln
+
+.. autofunction:: MatchResidueByGlobalAln
+
+.. autofunction:: Superpose
+
 .. _traj-analysis:
 
 Trajectory Analysis
@@ -649,6 +661,45 @@ of the whole trajectory.
 
 All these functions have a "stride" argument that defaults to stride=1, which is 
 used to skip frames in the analysis.
+
+
+.. function:: SuperposeFrames(frames, sel, from=0, to=-1, ref=-1)
+
+  This function superposes the frames of the given coord group and returns them
+  as a new coord group.
+  
+  :param frames: The source coord group.
+  :type frames: :class:`~ost.mol.CoordGroupHandle`
+  :param sel: An entity view containing the selection of atoms to be used for     
+    superposition. If set to an invalid view, all atoms in the coord group are 
+    used.
+  :type sel: :class:`ost.mol.EntityView`
+  :param from: index of the first frame
+  :param to: index of the last frame plus one. If set to -1, the value is set to 
+     the number of frames in the coord group
+  :param ref: The index of the reference frame to use for superposition. If set 
+     to -1, the each frame is superposed to the previous frame.
+     
+  :returns: A newly created coord group containing the superposed frames.
+
+.. function:: SuperposeFrames(frames, sel, ref_view, from=0, to=-1)
+
+  Same as SuperposeFrames above, but the superposition is done on a reference
+  view and not on another frame of the trajectory.
+  
+  :param frames: The source coord group.
+  :type frames: :class:`~ost.mol.CoordGroupHandle`
+  :param sel: An entity view containing the selection of atoms of the frames to be used for     
+    superposition.
+  :type sel: :class:`ost.mol.EntityView`
+  :param ref_view: The reference view on which the frames will be superposed. The number
+    of atoms in this reference view should be equal to the number of atoms in sel.
+  :type ref_view: :class:`ost.mol.EntityView`
+  :param from: index of the first frame
+  :param to: index of the last frame plus one. If set to -1, the value is set to 
+     the number of frames in the coord group     
+  
+  :returns: A newly created coord group containing the superposed frames.
 
 
 .. function:: AnalyzeAtomPos(traj, atom1, stride=1)
@@ -808,53 +859,23 @@ used to skip frames in the analysis.
   :param stride: Size of the increment of the frame's index between two 
      consecutive frames analyzed.  
 
-.. function:: SuperposeFrames(frames, sel, from=0, to=-1, ref=-1)
 
-  This function superposes the frames of the given coord group and returns them
-  as a new coord group.
-  
-  :param frames: The source coord group.
-  :type frames: :class:`~ost.mol.CoordGroupHandle`
-  :param sel: An entity view containing the selection of atoms to be used for     
-    superposition. If set to an invalid view, all atoms in the coord group are 
-    used.
-  :type sel: :class:`ost.mol.EntityView`
-  :param from: index of the first frame
-  :param to: index of the last frame plus one. If set to -1, the value is set to 
-     the number of frames in the coord group
-  :param ref: The index of the reference frame to use for superposition. If set 
-     to -1, the each frame is superposed to the previous frame.
-     
-  :returns: A newly created coord group containing the superposed frames.
+:mod:`mol.alg.helix_kinks <ost.mol.alg.helix_kinks>` -- Algorithms to calculate Helix Kinks
+================================================================================================
 
-.. function:: SuperposeFrames(frames, sel, ref_view, from=0, to=-1)
+.. autofunction:: ost.mol.alg.helix_kinks.CalculateHelixKink
 
-  Same as SuperposeFrames above, but the superposition is done on a reference
-  view and not on another frame of the trajectory.
-  
-  :param frames: The source coord group.
-  :type frames: :class:`~ost.mol.CoordGroupHandle`
-  :param sel: An entity view containing the selection of atoms of the frames to be used for     
-    superposition.
-  :type sel: :class:`ost.mol.EntityView`
-  :param ref_view: The reference view on which the frames will be superposed. The number
-    of atoms in this reference view should be equal to the number of atoms in sel.
-  :type ref_view: :class:`ost.mol.EntityView`
-  :param from: index of the first frame
-  :param to: index of the last frame plus one. If set to -1, the value is set to 
-     the number of frames in the coord group     
-  
-  :returns: A newly created coord group containing the superposed frames.
+.. autofunction:: ost.mol.alg.helix_kinks.AnalyzeHelixKink
 
-.. autofunction:: ParseAtomNames
+:mod:`mol.alg.trajectory_analysis <ost.mol.alg.trajectory_analysis>` -- DRMSD, pairwise distances and more
+=============================================================================================================
 
-.. autofunction:: MatchResidueByNum
+.. automodule:: ost.mol.alg.trajectory_analysis
+   :members:
 
-.. autofunction:: MatchResidueByIdx
+:mod:`mol.alg.structure_analysis <ost.mol.alg.trajectory_analysis>` -- Functions to analyze structures
+=============================================================================================================
 
-.. autofunction:: MatchResidueByLocalAln
-
-.. autofunction:: MatchResidueByGlobalAln
-
-.. autofunction:: Superpose
+.. automodule:: ost.mol.alg.structure_analysis
+   :members:
 

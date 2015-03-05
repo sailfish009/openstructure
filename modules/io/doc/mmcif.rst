@@ -37,7 +37,7 @@ The following categories of a mmCIF file are considered by the reader:
 * ``struct_sheet_range``: Stores secondary structure information for sheets in
   the :class:`entity <ost.mol.EntityHandle>`
 * ``pdbx_database_PDB_obs_spr``: Verbose information on obsoleted/ superseded
-  entries, stored in :class:`MMCifInfoObsolete`.
+  entries, stored in :class:`MMCifInfoObsolete`
 * ``struct_ref`` stored in :class:`MMCifInfoStructRef`
 * ``struct_ref_seq`` stored in :class:`MMCifInfoStructRefSeq`
 * ``struct_ref_seq_dif`` stored in :class:`MMCifInfoStructRefDif`
@@ -46,7 +46,7 @@ The following categories of a mmCIF file are considered by the reader:
 Info Classes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Information from mmCIF files which goes beyond structural data, is kept in a
+Information from mmCIF files that goes beyond structural data, is kept in a
 special container, the :class:`MMCifInfo` class. Here is a detailed description
 of the annotation available.
 
@@ -115,11 +115,12 @@ of the annotation available.
     :param citation: Citation to be added.
     :type citation: :class:`MMCifInfoCitation`
 
+
   .. method:: AddAuthorsToCitation(id, authors)
 
     Adds a list of authors to a specific citation.
 
-    :param id: identifier of the citation
+    :param id: Identifier of the citation.
     :type id: :class:`str`
     :param authors: List of authors.
     :type authors: :class:`~ost.StringList`
@@ -195,7 +196,7 @@ of the annotation available.
     :type cif_chain_id: :class:`str`
     :returns: atom_site.auth_asym_id as :class:`str`
 
-  .. method:: AddPDBCMMCifhainTr(pdb_chain_id, cif_chain_id)
+  .. method:: AddPDBCMMCifChainTr(pdb_chain_id, cif_chain_id)
 
     Set up a translation for a certain PDB chain name to the mmCIF chain name.
 
@@ -247,7 +248,7 @@ of the annotation available.
 
   .. attribute:: cas
 
-    Stores a Chemical Abstract Service identifier, if available. If not
+    Stores a Chemical Abstract Service identifier if available. If not
     provided, resembles an empty string.
 
     Also available as :meth:`GetCAS`. May also be modified by :meth:`SetCas`.
@@ -297,7 +298,7 @@ of the annotation available.
   .. attribute:: doi
 
     Stores the Document Object Identifier as used by doi.org for a cited
-    document. If not provided, resembles a empty strings.
+    document. If not provided, resembles an empty string.
 
     Also available as :meth:`GetDOI`. May also be modified by :meth:`SetDOI`.
 
@@ -515,7 +516,7 @@ of the annotation available.
     Also available as :meth:`GetChainList`. May also be modified by
     :meth:`AddChain` or :meth:`SetChainList`.
 
-  .. attribute:: chainintervalls
+  .. attribute:: chainintervals
 
     List of intervals on the chain list. Needed if there a several sets of
     chains and transformations to create the bio unit. Comes as a list of
@@ -601,7 +602,7 @@ of the annotation available.
 
     See :attr:`operationsintervalls`
 
-.. function:: PDBize(asu, seqres=None, min_polymer_size=10, transformation=False)
+  .. function:: PDBize(asu, seqres=None, min_polymer_size=10, transformation=False)
 
     Returns the biological assembly (bio unit) for an entity. The new entity
     created is well suited to be saved as a PDB file. Therefore the function
@@ -613,10 +614,10 @@ of the annotation available.
       - Each polymer gets its own chain, named A-Z 0-9 a-z.
       - The description of non-polymer chains will be put into a generic string
         property called description on the residue level.
-      - ligands which resemble a polymer but have less than min_polymer_size
+      - Ligands that resemble a polymer but have less than *min_polymer_size*
         residues are assigned the same numeric residue number. The residues are
         distinguished by insertion code.
-      - sometimes bio units exceed the coordinate system storable in a PDB file.
+      - Sometimes bio units exceed the coordinate system storable in a PDB file.
         In that case, the box around the entity will be aligned to the lower
         left corner of the coordinate system.
 
@@ -660,7 +661,7 @@ of the annotation available.
 
   .. attribute:: casp_flag
 
-    Tells whether this structure was target in some competition.
+    Tells whether this structure was a target in some competition.
 
     Also available as :meth:`GetCASPFlag`. May also be modified by
     :meth:`SetCASPFlag`.
@@ -696,7 +697,7 @@ of the annotation available.
 
   .. attribute:: model_type_details
 
-    Details about how the type of the structure.
+    Details about how the type of the structure was determined.
 
     Also available as :meth:`GetModelTypeDetails`. May also be modified by
     :meth:`SetModelTypeDetails`.
@@ -834,7 +835,7 @@ of the annotation available.
 
   Holds the information of the struct_ref category. The category describes the 
   link of polymers in the mmCIF file to sequences stored in external databases 
-  such as uniprot. The related categories ``struct_ref_seq`` and 
+  such as UniProt. The related categories ``struct_ref_seq`` and 
   ``struct_ref_seq_dif`` also list differences between the sequences of the 
   deposited structure and the sequences in the database. Two prominent examples 
   of such differences are point mutations and/or expression tags.
@@ -842,7 +843,7 @@ of the annotation available.
   .. attribute:: db_name
 
     
-    Name of the external database, for example UNP for uniprot.
+    Name of the external database, for example UNP for UniProt.
 
     :type: :class:`str`
 
@@ -939,7 +940,7 @@ of the annotation available.
    .. attribute:: first_release
 
    Index + 1 of the revision releasing this entry. If the value is 0, was not
-   set, yet.
+   set yet.
 
    :type: :class:`int`
 
@@ -954,8 +955,7 @@ of the annotation available.
 
    Retrieve  database_pdb_rev.date_original.
 
-   :returns: database_pdb_rev.date_original as :class:`str` in format
-   'yyyy-mm-dd'
+   :returns: database_pdb_rev.date_original as :class:`str` in format 'yyyy-mm-dd'
 
    .. method:: AddRevision(int num, String date, String status)
 

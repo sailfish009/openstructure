@@ -175,14 +175,14 @@ class Table(object):
   
   .. code-block:: python
   
-    tab=Table()
+    tab = Table()
     
   If you want to add columns directly when creating the table, column names
   and *column types* can be specified as follows
   
   .. code-block:: python
   
-    tab=Table(['nameX','nameY','nameZ'], 'sfb')
+    tab = Table(['nameX','nameY','nameZ'], 'sfb')
     
   this will create three columns called nameX, nameY and nameZ of type string,
   float and bool, respectively. There will be no data in the table and thus,
@@ -205,9 +205,9 @@ class Table(object):
   
     tab=Table(['nameX','nameY','nameZ'],
               'sfb',
-              nameX=['a','b','c'],
-              nameY=[0.1, 1.2, 3.414],
-              nameZ=[True, False, False])
+              nameX = ['a','b','c'],
+              nameY = [0.1, 1.2, 3.414],
+              nameZ = [True, False, False])
               
   if values for one column is left out, they will be filled with NA, but if
   values are specified, all values must be specified (i.e. same number of
@@ -314,6 +314,7 @@ class Table(object):
   def SetName(self, name):
     '''
     Set name of the table
+
     :param name: name
     :type name: :class:`str`
     '''
@@ -369,7 +370,7 @@ class Table(object):
     '''
     Returns the column index for the column with the given name.
 
-    :raises: ValueError if no column with the name is found
+    :raises: ValueError if no column with the name is found.
     '''
     if col not in self.col_names:
       raise ValueError('Table has no column named "%s"' % col)
@@ -383,7 +384,7 @@ class Table(object):
   
   def SearchColNames(self, regex):
     '''
-    Returns a list of column names matching the regex
+    Returns a list of column names matching the regex.
 
     :param regex: regex pattern
     :type regex: :class:`str`
@@ -423,10 +424,10 @@ class Table(object):
     Convert the table into a string representation.
 
     The output format can be modified for int and float type columns by
-    specifying a formatting string for the parameters 'float_format' and
-    'int_format'.
+    specifying a formatting string for the parameters *float_format* and
+    *int_format*.
 
-    The option 'rows' specify the range of rows to be printed. The parameter
+    The option *rows* specify the range of rows to be printed. The parameter
     must be a type that supports indexing (e.g. a :class:`list`) containing the 
     start and end row *index*, e.g. [start_row_idx, end_row_idx].
 
@@ -564,12 +565,12 @@ Statistics for column %(col)s
   def PairedTTest(self, col_a, col_b):
     """
     Two-sided test for the null-hypothesis that two related samples 
-    have the same average (expected values)
+    have the same average (expected values).
     
     :param col_a: First column
     :param col_b: Second column
 
-    :returns: P-value  between 0 and 1 that the two columns have the 
+    :returns: P-value between 0 and 1 that the two columns have the 
        same average. The smaller the value, the less related the two
        columns are.
     """
@@ -589,7 +590,7 @@ Statistics for column %(col)s
     
     *data* may either be a dictionary or a list-like object:
 
-     - If *data* is a dictionary the keys in the dictionary must match the
+     - If *data* is a dictionary, the keys in the dictionary must match the
        column names. Columns not found in the dict will be initialized to None.
        If the dict contains list-like objects, multiple rows will be added, if
        the number of items in all list-like objects is the same, otherwise a
@@ -684,7 +685,7 @@ Statistics for column %(col)s
 
   def RemoveCol(self, col):
     """
-    Remove column with the given name from the table
+    Remove column with the given name from the table.
 
     :param col: name of column to remove
     :type col: :class:`str`
@@ -706,14 +707,14 @@ Statistics for column %(col)s
                      *string* or short versions: *i*, *f*, *b*, *s*)
     :type col_type: :class:`str`
 
-    :param data: data to add to new column.
+    :param data: data to add to new column
     :type data: scalar or iterable
 
     **Example:**
 
     .. code-block:: python
     
-      tab=Table(['x'], 'f', x=range(5))
+      tab = Table(['x'], 'f', x=range(5))
       tab.AddCol('even', 'bool', itertools.cycle([True, False]))
       print tab
     
@@ -736,7 +737,7 @@ Statistics for column %(col)s
 
     .. code-block:: python
 
-      tab=Table(['x'], 'f', x=range(5))
+      tab = Table(['x'], 'f', x=range(5))
       tab.AddCol('num', 'i', 1)
       print tab
 
@@ -835,7 +836,7 @@ Statistics for column %(col)s
     
     .. code-block:: python
     
-      subtab=tab.Select('col_a>0.5 and (col_b=5 or col_c=5)')
+      subtab = tab.Select('col_a>0.5 and (col_b=5 or col_c=5)')
 
     The selection query should be self explaining. Allowed parenthesis are: (), [], {}, 
     whereas parenthesis mismatches get recognized. Expressions like '3<=col_a>=col_b'
@@ -846,10 +847,10 @@ Statistics for column %(col)s
     .. code-block:: python
 
       #selects rows, where 1.0<=col_a<=1.5
-      subtab=tab.Select('col_a=1.0:1.5')
+      subtab = tab.Select('col_a=1.0:1.5')
 
       #selects rows, where col_a=1 or col_a=2 or col_a=3
-      subtab=tab.Select('col_a=1,2,3')
+      subtab = tab.Select('col_a=1,2,3')
 
     Only consistent types can be compared. If col_a is of type string and col_b is of type int, 
     following expression would throw an error: 'col_a<col_b'
@@ -996,7 +997,7 @@ Statistics for column %(col)s
 
     - pickle
 
-      Deserializes the table from a pickled byte stream
+      Deserializes the table from a pickled byte stream.
 
     - csv
 
@@ -1004,11 +1005,11 @@ Statistics for column %(col)s
       explicit type information in the csv file, the column types are guessed,
       using the following simple rules:
 
-      * if all values are either NA/NULL/NONE the type is set to string
+      * if all values are either NA/NULL/NONE the type is set to string.
       * if all non-null values are convertible to float/int the type is set to
-        float/int
-      * if all non-null values are true/false/yes/no, the value is set to bool
-      * for all other cases, the column type is set to string
+        float/int.
+      * if all non-null values are true/false/yes/no, the value is set to bool.
+      * for all other cases, the column type is set to string.
 
     :returns: A new :class:`Table` instance
     """
@@ -1044,7 +1045,7 @@ Statistics for column %(col)s
     
   def GetUnique(self, col, ignore_nan=True):
     """
-    Extract a list of all unique values from one column
+    Extract a list of all unique values from one column.
 
     :param col: column name
     :type col: :class:`str`
@@ -1069,7 +1070,7 @@ Statistics for column %(col)s
     
     .. code-block:: python
     
-      tab=Table.Load('...')
+      tab = Table.Load('...')
       for col1, col2 in tab.Zip('col1', 'col2'):
         print col1, col2
     
@@ -1077,7 +1078,7 @@ Statistics for column %(col)s
     
     .. code-block:: python
     
-      tab=Table.Load('...')
+      tab = Table.Load('...')
       for col1, col2 in zip(tab['col1'], tab['col2']):
         print col1, col2
     """
@@ -1176,21 +1177,21 @@ Statistics for column %(col)s
 
     .. code-block:: python
 
-      tab=Table(['a','b','c','d'],'iffi', a=range(5,0,-1),
-                                          b=[x/2.0 for x in range(1,6)],
-                                          c=[math.cos(x) for x in range(0,5)],
-                                          d=range(3,8))
+      tab = Table(['a','b','c','d'],'iffi', a=range(5,0,-1),
+                                            b=[x/2.0 for x in range(1,6)],
+                                            c=[math.cos(x) for x in range(0,5)],
+                                            d=range(3,8))
 
       # one dimensional plot of column 'd' vs. index
-      plt=tab.Plot('d')
+      plt = tab.Plot('d')
       plt.show()
 
       # two dimensional plot of 'a' vs. 'c'
-      plt=tab.Plot('a', y='c', style='o-')
+      plt = tab.Plot('a', y='c', style='o-')
       plt.show()
 
       # three dimensional plot of 'a' vs. 'c' with values 'b'
-      plt=tab.Plot('a', y='c', z='b')
+      plt = tab.Plot('a', y='c', z='b')
       # manually save plot to file
       plt.savefig("plot.png")
     """
@@ -1396,10 +1397,10 @@ Statistics for column %(col)s
 
     .. code-block:: python
 
-      tab=Table(['a'],'f', a=[math.cos(x*0.01) for x in range(100)])
+      tab = Table(['a'],'f', a=[math.cos(x*0.01) for x in range(100)])
 
       # one dimensional plot of column 'd' vs. index
-      plt=tab.PlotHistogram('a')
+      plt = tab.PlotHistogram('a')
       plt.show()
 
     """
@@ -1514,7 +1515,7 @@ Statistics for column %(col)s
                   by the exact number of groups. The parameters width is the 
                   fraction of what is actually used. If it would be 1.0 the 
                   bars of the different groups would touch each other.
-                  Value must be in [0;1]
+                  Value must be between [0;1]
     :type width: :class:`float`
 
     :param bottom: Bottom
@@ -1765,7 +1766,7 @@ Statistics for column %(col)s
     """
     Returns the row containing the cell with the maximal value in col. If 
     several rows have the highest value, only the first one is returned.
-    None values are ignored.
+    ''None'' values are ignored.
 
     :param col: column name
     :type col: :class:`str`
@@ -1779,7 +1780,7 @@ Statistics for column %(col)s
   def Max(self, col):
     """
     Returns the maximum value in col. If several rows have the highest value,
-    only the first one is returned. None values are ignored.
+    only the first one is returned. ''None'' values are ignored.
 
     :param col: column name
     :type col: :class:`str`
@@ -1791,7 +1792,7 @@ Statistics for column %(col)s
     """
     Returns the row index of the cell with the maximal value in col. If
     several rows have the highest value, only the first one is returned.
-    None values are ignored.
+    ''None'' values are ignored.
 
     :param col: column name
     :type col: :class:`str`
@@ -1820,7 +1821,7 @@ Statistics for column %(col)s
   def Min(self, col):
     """
     Returns the minimal value in col. If several rows have the lowest value,
-    only the first one is returned. None values are ignored.
+    only the first one is returned. ''None'' values are ignored.
 
     :param col: column name
     :type col: :class:`str`
@@ -1832,7 +1833,7 @@ Statistics for column %(col)s
     """
     Returns the row containing the cell with the minimal value in col. If 
     several rows have the lowest value, only the first one is returned.
-    None values are ignored.
+    ''None'' values are ignored.
 
     :param col: column name
     :type col: :class:`str`
@@ -1847,7 +1848,7 @@ Statistics for column %(col)s
     """
     Returns the row index of the cell with the minimal value in col. If
     several rows have the lowest value, only the first one is returned.
-    None values are ignored.
+    ''None'' values are ignored.
 
     :param col: column name
     :type col: :class:`str`
@@ -1857,7 +1858,7 @@ Statistics for column %(col)s
   
   def Sum(self, col):
     """
-    Returns the sum of the given column. Cells with None are ignored. Returns 
+    Returns the sum of the given column. Cells with ''None'' are ignored. Returns 
     0.0, if the column doesn't contain any elements. Col must be of numeric
     column type ('float', 'int') or boolean column type.
 
@@ -1878,7 +1879,7 @@ Statistics for column %(col)s
 
   def Mean(self, col):
     """
-    Returns the mean of the given column. Cells with None are ignored. Returns 
+    Returns the mean of the given column. Cells with ''None'' are ignored. Returns 
     None, if the column doesn't contain any elements. Col must be of numeric
     ('float', 'int') or boolean column type.
 
@@ -1911,7 +1912,7 @@ Statistics for column %(col)s
     
     Cols are specified by their names and must be of numeric column
     type ('float', 'int') or boolean column type. Cells with None are ignored.
-    Adds None if the row doesn't contain any values.
+    Adds ''None'' if the row doesn't contain any values.
     
     :param mean_col_name: name of new column containing mean values
     :type mean_col_name: :class:`str`
@@ -1979,20 +1980,20 @@ Statistics for column %(col)s
     
   def Percentiles(self, col, nths):
     """
-    returns the percentiles of column *col* given in *nths*.
+    Returns the percentiles of column *col* given in *nths*.
 
-    The percentils are calculated as 
+    The percentiles are calculated as 
     
     .. code-block:: python
 
       values[min(len(values), int(round(len(values)*p/100+0.5)-1))]
 
-    where values are the sorted values of *col* not equal to none
-    :param: nths: list of percentiles to be calculated. Each percentil is a number
+    where values are the sorted values of *col* not equal to ''None''
+    :param: nths: list of percentiles to be calculated. Each percentile is a number
         between 0 and 100.
 
     :raises: :class:`TypeError` if column type is ``string``
-    :returns: List of percentils in the same order as given in *nths*
+    :returns: List of percentiles in the same order as given in *nths*
     """
     idx = self.GetColIndex(col)
     col_type = self.col_types[idx]
@@ -2018,8 +2019,8 @@ Statistics for column %(col)s
 
   def Median(self, col):
     """
-    Returns the median of the given column. Cells with None are ignored. Returns 
-    None, if the column doesn't contain any elements. Col must be of numeric
+    Returns the median of the given column. Cells with ''None'' are ignored. Returns 
+    ''None'', if the column doesn't contain any elements. Col must be of numeric
     column type ('float', 'int') or boolean column type.
 
     :param col: column name
@@ -2044,8 +2045,8 @@ Statistics for column %(col)s
     
   def StdDev(self, col):
     """
-    Returns the standard deviation of the given column. Cells with None are
-    ignored. Returns None, if the column doesn't contain any elements. Col must
+    Returns the standard deviation of the given column. Cells with ''None'' are
+    ignored. Returns ''None'', if the column doesn't contain any elements. Col must
     be of numeric column type ('float', 'int') or boolean column type.
 
     :param col: column name
@@ -2069,7 +2070,7 @@ Statistics for column %(col)s
 
   def Count(self, col, ignore_nan=True):
     """
-    Count the number of cells in column that are not equal to None.
+    Count the number of cells in column that are not equal to ''None''.
 
     :param col: column name
     :type col: :class:`str`
@@ -2298,6 +2299,7 @@ Statistics for column %(col)s
     '''
     Returns a numpy matrix containing the selected columns from the table as 
     columns in the matrix.
+
     Only columns of type *int* or *float* are supported. *NA* values in the
     table will be converted to *None* values.
 
@@ -2330,7 +2332,7 @@ Statistics for column %(col)s
   def GaussianSmooth(self, col, std=1.0, na_value=0.0, padding='reflect', c=0.0):
 
     '''
-    In place gaussian smooth of a column in the table with a given standard deviation.
+    In place Gaussian smooth of a column in the table with a given standard deviation.
     All nan are set to nan_value before smoothing.
 
     :param col: column name
@@ -2721,6 +2723,63 @@ Statistics for column %(col)s
     except ImportError:
       LogError("Function needs numpy, but I could not import it.")
       raise
+    
+  def ComputeLogROCAUC(self, score_col, class_col, score_dir='-',
+                       class_dir='-', class_cutoff=2.0):
+    '''
+    Computes the area under the curve of the log receiver operating 
+    characteristics (logROC) where the x-axis is semilogarithmic
+    using the trapezoidal rule.
+    
+    The logROC is computed with a lambda of 0.001 according to 
+    Rapid Context-Dependent Ligand Desolvation in Molecular Docking
+    Mysinger M. and Shoichet B., Journal of Chemical Information and Modeling
+    2010 50 (9), 1561-1573
+    
+    For more information about parameters of the ROC, see
+    :meth:`ComputeROC`.
+
+    :warning: The function depends on *numpy*
+    '''
+    try:
+      import numpy as np
+
+      roc = self.ComputeROC(score_col, class_col, score_dir,
+                            class_dir, class_cutoff)
+
+      if not roc:
+        return None
+      
+      rocxt, rocyt = roc
+      rocx=[]
+      rocy=[]
+      
+      # define lambda
+      l=0.001
+      
+      # remove all duplicate x-values
+      rocxt = [x if x>0 else l for x in rocxt]
+      for i in range(len(rocxt)-1):
+        if rocxt[i]==rocxt[i+1]:
+          continue
+        rocx.append(rocxt[i])
+        rocy.append(rocyt[i])
+      rocx.append(1.0)
+      rocy.append(1.0)
+      
+      # compute logauc
+      value = 0
+      for i in range(len(rocx)-1):
+        x = rocx[i]
+        if rocx[i]==rocx[i+1]:
+          continue
+        b = rocy[i+1]-rocx[i+1]*((rocy[i+1]-rocy[i])/(rocx[i+1]-rocx[i]))
+        value += ((rocy[i+1]-rocy[i])/math.log(10))+b*(math.log10(rocx[i+1])-math.log10(rocx[i]))
+      return value/math.log10(1.0/l)
+      
+    except ImportError:
+      LogError("Function needs numpy, but I could not import it.")
+      raise
 
   def PlotROC(self, score_col, class_col, score_dir='-',
               class_dir='-', class_cutoff=2.0,
@@ -2772,6 +2831,63 @@ Statistics for column %(col)s
       LogError("Function needs matplotlib, but I could not import it.")
       raise
     
+  def PlotLogROC(self, score_col, class_col, score_dir='-',
+                 class_dir='-', class_cutoff=2.0,
+                 style='-', title=None, x_title=None, y_title=None,
+                 clear=True, save=None):
+    '''
+    Plot an logROC curve where the x-axis is semilogarithmic using matplotlib 
+    
+    For more information about parameters of the ROC, see
+    :meth:`ComputeROC`, and for plotting see :meth:`Plot`.
+
+    :warning: The function depends on *matplotlib*
+    '''
+
+    try:
+      import matplotlib.pyplot as plt
+
+      roc = self.ComputeROC(score_col, class_col, score_dir,
+                                   class_dir, class_cutoff)
+      
+      if not roc:
+        return None
+
+      rocx, rocy = roc
+
+      if not title:
+        title = 'logROC of %s'%score_col
+
+      if not x_title:
+        x_title = 'false positive rate'
+
+      if not y_title:
+        y_title = 'true positive rate'
+
+      if clear:
+        plt.clf()
+     
+      rocx = [x if x>0 else 0.001 for x in rocx]
+      
+      
+      plt.plot(rocx, rocy, style)
+
+      plt.title(title, size='x-large', fontweight='bold')
+      plt.ylabel(y_title, size='x-large')
+      plt.xlabel(x_title, size='x-large')
+      
+      plt.xscale('log', basex=10)
+      plt.xlim(0.001, 1.0)
+      
+
+      if save:
+        plt.savefig(save)
+
+      return plt
+    except ImportError:
+      LogError("Function needs matplotlib, but I could not import it.")
+      raise  
+  
   def ComputeMCC(self, score_col, class_col, score_dir='-',
                  class_dir='-', score_cutoff=2.0, class_cutoff=2.0):
     '''
@@ -2950,6 +3066,8 @@ def Merge(table1, table2, by, only_matching=False):
     4  400
   ==== ====
 
+  when merged by column x, produce the following output:
+
   ===== ===== =====
   x      y     u
   ===== ===== =====
@@ -2959,7 +3077,7 @@ def Merge(table1, table2, by, only_matching=False):
   4      None  400
   ===== ===== =====
   
-  when merged by column x, produce the following output:
+
   """
   def _key(row, indices):
     return tuple([row[i] for i in indices])

@@ -261,7 +261,7 @@ gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename, io::MapIOHandlerPtr
       //FIXME ImageHandle should not be destroyed at the end of method
       //therefore hack with list
       loaded_images_.append(map);
-      GostyApp::Instance()->CreateDataViewer(loaded_images_.last());
+      GostyApp::Instance()->CreateDataViewer(loaded_images_.last(),filename);
       throw io::IOFileAlreadyLoadedException("Loaded in DataViewer");
     }
   }

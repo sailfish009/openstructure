@@ -34,7 +34,7 @@ def _RequireCopy(in_name, out_name):
   return False
 
 
-pattern = re.compile('[a-zA-Z0-9_//]+\.png|[a-zA-Z0-9_//]+\.jpg')
+pattern = re.compile(r'\.\.\s+image\:\:\s+([a-zA-Z0-9_\-//]+\.png|[a-zA-Z0-9_\-//]+\.jpg)')
 def _CheckImage(in_name):
   file = open(in_name, "r")
   text = file.read()

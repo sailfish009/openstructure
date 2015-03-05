@@ -33,7 +33,7 @@ void export_rule_based() {
          arg("unknown_res_treatment")=CONOP_WARN,
          arg("unknown_atom_treatment")=CONOP_WARN,
          arg("check_bond_feasibility")=false,
-         arg("assign_torsions")=false,
+         arg("assign_torsions")=true,
          arg("connect")=true,
          arg("peptide_bonds")=true,
          arg("zero_occ_treatment")=CONOP_WARN)))

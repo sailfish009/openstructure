@@ -5,7 +5,7 @@ FASTA
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 *Recognized File Extensions*
-  fasta, fna, fas, fa, fsa
+  .fasta, .fna, .fas, .fa, .fsa
   
 *Format Name*
   fasta
@@ -14,7 +14,7 @@ ClustalW
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 *Recognized File Extensions*
-  aln
+  .aln
   
 *Format Name*
   clustal
@@ -23,7 +23,7 @@ Promod
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 *Recognized File Extensions*
-  ali
+  .ali
   
 *Format Name*
   promod

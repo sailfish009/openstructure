@@ -11,7 +11,8 @@ from ost.table import *
 import ost
 
 HAS_NUMPY=True
-HAS_SCIPY=True
+HAS_SCIPY_STATS=True
+HAS_SCIPY_NDIMG=True
 HAS_MPL=True
 HAS_PIL=True
 try:
@@ -23,9 +24,16 @@ except ImportError:
 try:
   import scipy.stats.mstats
 except ImportError:
-  HAS_SCIPY=False
+  HAS_SCIPY_STATS=False
   print "Could not find scipy.stats.mstats: ignoring some table class unit tests"
   
+try:
+  import scipy.ndimage
+except ImportError:
+  HAS_SCIPY_NDIMG=False
+  print "Could not find scipy.ndimage: ignoring some table class unit tests"
+  
+
 try:
   import matplotlib
   matplotlib.use('Agg')
@@ -40,6 +48,19 @@ except ImportError:
   HAS_PIL=False
   print "Could not find python imagine library: ignoring some table class unit tests"
 
+# setting up an OST LogSink to capture error messages
+class _FetchLog(ost.LogSink):
+  def __init__(self):
+    ost.LogSink.__init__(self)
+    self.messages = dict()
+
+  def LogMessage(self, message, severity):
+    levels=['ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE']
+    level=levels[severity]
+    if not level in self.messages.keys():
+      self.messages[level] = list()
+    self.messages[level].append(message.strip())
+  
 class TestTable(unittest.TestCase):
 
   def tearDown(self):
@@ -488,9 +509,10 @@ class TestTable(unittest.TestCase):
     tab.AddRow(['x',3, 1.0], overwrite=None)
     tab.AddRow(['foo',6, 2.2], overwrite=None)
     tab.AddRow(['bar',9, 3.3], overwrite=None)
-    self.CompareColCount(tab, 3)
+    tab.AddCol('fourth','bool',itertools.cycle([True,False]))
+    self.CompareColCount(tab, 4)
     self.CompareRowCount(tab, 3)
-    self.CompareDataFromDict(tab, {'second': [3,6,9], 'first': ['x','foo','bar'], 'third': [1,2.2,3.3]})
+    self.CompareDataFromDict(tab, {'second': [3,6,9], 'first': ['x','foo','bar'], 'third': [1,2.2,3.3], 'fourth': [True,False,True]})
 
   def testTableAddMultiColMultiRowFromDict(self):
     '''
@@ -1277,6 +1299,28 @@ class TestTable(unittest.TestCase):
                      save=os.path.join("testfiles","roc-out.png"))
     self.assertEquals(pl, None)
 
+  def testPlotLogROC(self):
+    if not HAS_MPL or not HAS_PIL:
+      return
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, True, False, True, True, True, False, False, True, False, True, False, True, False, False, False, True, False, True, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    pl = tab.PlotLogROC(score_col='score', score_dir='+',
+                        class_col='classific',
+                        save=os.path.join("testfiles","logroc-out.png"))
+    img1 = Image.open(os.path.join("testfiles","logroc-out.png"))
+    #img2 = Image.open(os.path.join("testfiles","roc.png"))
+    #self.CompareImages(img1, img2)
+
+    # no true positives
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    pl = tab.PlotLogROC(score_col='score', score_dir='+',
+                        class_col='classific',
+                        save=os.path.join("testfiles","logroc-out.png"))
+    self.assertEquals(pl, None)
+
   def testPlotROCSameValues(self):
     if not HAS_MPL or not HAS_PIL:
       return
@@ -1325,6 +1369,40 @@ class TestTable(unittest.TestCase):
                 score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
     auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
     self.assertEquals(auc, None)
+    
+  def testLogROCAUCforPerfectCurve(self):
+    if not HAS_NUMPY:
+      return
+    auc_ref = 1.0
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, True, True, True, True, True, False, False, False, False, False, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35])
+    
+    # test logAUC
+    auc = tab.ComputeLogROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+    
+    # test linear AUC
+    auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+      
+  def testCalcLogROCAUCRandomCurve(self):
+    if not HAS_NUMPY:
+      return
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, False, True, False, True, False, True, False, True, False, True, False],
+                score=[0.9, 0.9, 0.7, 0.7, 0.55, 0.55, 0.4, 0.4, 0.3, 0.3, 0.3, 0.3])
+    
+    # test logAUC
+    auc_ref = 0.1440197405305
+    auc = tab.ComputeLogROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+    
+    # test linear AUC    
+    auc_ref = 0.5
+    auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+
 
   def testCalcROCAUCWithCutoff(self):
     if not HAS_NUMPY:
@@ -1358,6 +1436,9 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(auc, auc_ref)
 
   def testCalcMCC(self):
+    log = _FetchLog()
+    ost.PushLogSink(log)
+
     tab = Table(['score', 'rmsd', 'class_rmsd', 'class_score', 'class_wrong'], 'ffbbb',
                 score=      [2.64, 1.11, 2.17, 0.45,0.15,0.85, 1.13, 2.90, 0.50, 1.03, 1.46, 2.83, 1.15, 2.04, 0.67, 1.27, 2.22, 1.90, 0.68, 0.36,1.04, 2.46, 0.91,0.60],
                 rmsd=[9.58,1.61,7.48,0.29,1.68,3.52,3.34,8.17,4.31,2.85,6.28,8.78,0.41,6.29,4.89,7.30,4.26,3.51,3.38,0.04,2.21,0.24,7.58,8.40],
@@ -1377,7 +1458,8 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(mcc, -0.1490711984)
     mcc = tab.ComputeMCC(score_col='class_wrong', class_col='class_rmsd')
     self.assertEquals(mcc,None)
-    
+    self.assertEquals(log.messages['WARNING'][0],
+    'Could not compute MCC: MCC is not defined since factor (tp + fp) is zero')
 
   def testCalcMCCPreclassified(self):
     tab = Table(['reference', 'prediction1', 'prediction2'],'bbb',
@@ -1460,6 +1542,8 @@ class TestTable(unittest.TestCase):
     self.assertRaises(RuntimeError, tab.GetOptimalPrefactors, 'c',weights='d')
 
   def testGaussianSmooth(self):
+    if not HAS_SCIPY_NDIMG:
+      return
     tab = Table(['a','b','c','d','e','f'],'fffffi',
                 a=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
                 b=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
@@ -1573,7 +1657,7 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(tab.Correl('second','third'), -0.4954982578)
     
   def testSpearmanCorrel(self):
-    if not HAS_SCIPY:
+    if not HAS_SCIPY_STATS:
       return
     tab = self.CreateTestTable()
     self.assertEquals(tab.SpearmanCorrel('second','third'), None)

@@ -53,7 +53,7 @@ bool CollectPatches(impl::AlnMat& mat, int min_i, int max_i, int min_j, int max_
     }
   }
   for (int x=0; x<mat.GetWidth(); ++x) {
-    for (int y=j; y<mmax_j; ++y) {
+    for (int y=j; y<=mmax_j; ++y) {
       mat(x, y).score=0;
     }
   }  

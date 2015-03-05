@@ -202,16 +202,29 @@ def _MatchResidueByAln(ent_a, ent_b, atoms, alnmethod):
     seq_b = ost.seq.CreateSequence(chain_b.name, s_b)
     aln_a_b = alnmethod(seq_a, seq_b, ost.seq.alg.BLOSUM62)
     ## evaluate alignment
-    for aln in aln_a_b:
-      ## bind chain to alignment
-      aln.AttachView(0, chain_a.Select('protein=True'))
-      aln.AttachView(1, chain_b.Select('protein=True'))
-      ## select residues (only replacement edges)
+    max_aln_res = 0
+    for a in range(0, len(aln_a_b)):
+      aln = aln_a_b[a]
+      aln_res_len = 0
+      match_list = list()
       for i in range(0, aln.GetLength()):
         if aln.sequences[0][i]!='-' and aln.sequences[1][i]!='-':
-          r_a = aln.GetResidue(0,i)
-          r_b = aln.GetResidue(1,i)
-          result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)
+          aln_res_len += 1
+          match_list.append(i)
+      if aln_res_len > max_aln_res:
+        max_aln_res = aln_res_len
+        max_aln_idx = a
+        max_matches = match_list
+
+    aln = aln_a_b[max_aln_idx]
+    ## bind chain to alignment
+    aln.AttachView(0, chain_a.Select('protein=True'))
+    aln.AttachView(1, chain_b.Select('protein=True'))
+    ## select residues (only replacement edges)
+    for i in max_matches:
+      r_a = aln.GetResidue(0,i)
+      r_b = aln.GetResidue(1,i)
+      result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)
   result_a.AddAllInclusiveBonds()
   result_b.AddAllInclusiveBonds()
   return result_a, result_b
@@ -262,9 +275,9 @@ def MatchResidueByGlobalAln(ent_a, ent_b, atoms='all'):
 def Superpose(ent_a, ent_b, match='number', atoms='all', iterative=False, max_iterations=5, distance_threshold=3.0):
   """
   Superposes the model entity onto the reference. To do so, two views are
-  created, returned with the result. **atoms** describes what goes in to these
+  created, returned with the result. **atoms** describes what goes into these
   views and **match** the selection method. For superposition,
-  :func:`~ost.mol.alg.SuperposeSVD` is called. For matching, following methods
+  :func:`~ost.mol.alg.SuperposeSVD` is called. For matching, the following methods
   are recognised:
 
   * ``number`` - select residues by residue number, includes **atoms**, calls
@@ -279,21 +292,38 @@ def Superpose(ent_a, ent_b, match='number', atoms='all', iterative=False, max_it
   * ``global-aln`` - select residues from a Needleman/Wunsch alignment, includes
     **atoms**, calls :func:`~ost.mol.alg.MatchResidueByGlobalAln`
 
+  There is also an option to use **iterative** matching which allows for an 
+  iterative approach to superposing two structures. **iterative** takes two
+  additional parameters, **max_iteration** and **distance_threshold**.
+
   :param ent_a: The model entity
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+
   :param ent_b: The reference entity
   :type ent_b: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+
   :param match: Method to gather residues/ atoms
   :type match: :class:`str`
-  :param atoms: The subset of atoms to be used in the superposition.
+
+  :param atoms: The subset of atoms to be used in the superposition
   :type atoms: :class:`str`, :class:`list`, :class:`set`
+
+  :param max_iterations: They number of iterations that will be run during 
+                         iterative superposition
+  :type max_iterations: :class:`int`
+
+  :param distance_threshold: The distance threshold between which two atoms
+                             that will be used in the next superposition
+                             iteration
+  :type distance_threshold: :class:`float`
+
   :returns: An instance of :class:`SuperpositionResult`, containing members
 
-            * ``rmsd`` - RMSD of the superposed entities
+  * ``rmsd`` - RMSD of the superposed entities
 
-            * ``view1`` - First :class:`~ost.mol.EntityView` used
+  * ``view1`` - First :class:`~ost.mol.EntityView` used
 
-            * ``view2`` - Second :class:`~ost.mol.EntityView` used
+  * ``view2`` - Second :class:`~ost.mol.EntityView` used
   """
   not_supported="Superpose called with unsupported matching request."
   ## create views to superpose

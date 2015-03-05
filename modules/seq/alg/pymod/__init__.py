@@ -12,7 +12,7 @@ def ValidateSEQRESAlignment(aln, chain=None):
   :param chain: Source of the sequence
   :type chain: :class:`~ost.mol.ChainHandle`
 
-  :returns: True if all residues (beside gaped ones) are connected, False
+  :returns: True if all residues (beside gapped ones) are connected, False
             otherwise.
   """
   from ost import LogWarning

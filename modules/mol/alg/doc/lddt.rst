@@ -1,20 +1,63 @@
+======
+lDDT
+======
 
-===========================
-How to use the lDDT program 
-===========================
+------------
+Where can I find the lDDT executable? 
+------------
 
------------
-Basic Usage
------------
+The lDDT executable can be found at <YOUR-OST-STAGE-DIR>/bin/
 
-To calculate the lDDT for two PDB files (mdl1.pdb and mdl2.pdb) against the reference structure stored in ref.pdb, use the following command:
+------------
+Basic Usage 
+------------
+
+To calculate the lDDT for one PDB file (mdl1.pdb) against the reference structure stored in ref.pdb, use the following command; the local and global lDDT scores for each model are printed to the terminal:
 
 .. code-block:: bash
 
-    lddt mdl1.pdb mdl2.pdb ref.pdb
+    lddt mdl1.pdb ref.pdb
 
-The local and global lDDT scores for each model are printed to the terminal.
-  
+Similarly it is possible to calculate the lDDT for a list of PDB files:
+
+.. code-block:: bash
+
+    lddt mdl1.pdb mdl2.pdb mdl3.pdb ref.pdb
+
+Or for multiple reference structures at the same time (please find at the bottom of the page an example of usage):  
+
+.. code-block:: bash
+
+    lddt mdl1.pdb ref1.pdb,ref2.pdb,ref3.pdb
+
+------------
+All Options 
+------------
+
+The lddt executable supports several other command line options, please find them following:
+
+.. code-block:: bash 
+
+    lddt [options] <mod1> [mod1 [mod2]] <re1>[,ref2,ref3]
+   
+    -s         selection performed on ref
+    -c         use Calphas only
+    -f         perform structural checks and filter input data
+    -t         fault tolerant parsing
+    -p <file>  use specified parmeter file. Mandatory
+    -v <level> verbosity level (0=results only,1=problems reported, 2=full report)
+    -b <value> tolerance in stddevs for bonds
+    -a <value> tolerance in stddevs for angles
+    -r <value> distance inclusion radius
+    -i <value> sequence separation
+    -e         print version
+    -x         ignore residue name consistency checks
+
+
+=================
+lDDT - Use cases 
+=================
+
 --------------------
 Model Quality Checks
 --------------------
@@ -32,7 +75,7 @@ For example:
 
 .. code-block:: bash
 
-    lddt -f -p stereo_chemical_params.txt mdl1.pdb mdl2.pdb ref.pdb
+    lddt -f -p stereo_chemical_params.txt mdl1.pdb ref.pdb
 
 When the model quality checks are performed, the global and local lDDT scores are 
 preceded in the output text by some information on the outcome of the tests. The 
@@ -58,7 +101,7 @@ For example:
 
 .. code-block:: bash
 
-    lddt -r 10.0 mdl1.pdb mdl2.pdb ref.pdb
+    lddt -r 10.0 mdl1.pdb ref.pdb
 
 ------------------
 Consistency Checks
@@ -76,7 +119,7 @@ For example:
 
 .. code-block:: bash
 
-    lddt -x mdl1.pdb mdl2.pdb ref.pdb
+    lddt -x mdl1.pdb ref.pdb
 
 -------------------------
 Custom Quality Parameters
@@ -104,7 +147,6 @@ For example:
     lddt -f -p stereo_chemical_params.txt -b 8 -a 8 -m 1.0 mdl1.pdb ref.pdb
 
 
-
 -----------------------------
 Multiple Reference Structures
 -----------------------------
@@ -117,7 +159,7 @@ For example:
 
 .. code-block:: bash
 
-    lddt mdl1.pdb mdl2.pdb ref1.pdb,ref2.pdb,ref3.pdb
+    lddt mdl1.pdb ref1.pdb,ref2.pdb,ref3.pdb
 
 ----------------
 Output Verbosity
@@ -134,25 +176,7 @@ For example:
 
 .. code-block:: bash
 
-    lddt -v 1 -f -p stereo_chemical_params.txt mdl1.pdb mdl2.pdb ref.pdb
+    lddt -v 1 -f -p stereo_chemical_params.txt mdl1.pdb ref.pdb
 
 WARNING: Verbosity levels 1 and 2 can generate a large amount of output text, 
 especially with large structures and multiple models being evaluated. 
-
-
-
-
--------------
-Other Options
--------------
-
-The lddt executable supports several other command line options. Some can be used 
-to select subsets of atoms in the input structures, others to exclude from the 
-calculation distances between residues that are too close in the amino-acid chain, 
-and many more. In order to see a complete list, just call the program without any 
-input parameters.
-
-.. code-block:: bash
-
-    lddt
-

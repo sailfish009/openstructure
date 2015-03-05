@@ -290,15 +290,6 @@ void Processor::ConnectAtomsOfResidue(mol::ResidueHandle rh,
                                       CompoundPtr compound,
                                       bool strict_hydrogens) const
 {
-
-  //if (!compound) {
-  //  dist_connect(this, rh.GetAtomList());
-  //  return;
-  //}
-  //if (unknown_atoms_) {
-  //  dist_connect(this, rh.GetAtomList());
-  //  return;
-  //}
   mol::XCSEditor e=rh.GetEntity().EditXCS(mol::BUFFERED_EDIT);
   BondSpecList::const_iterator j=compound->GetBondSpecs().begin();
   mol::AtomHandleList atoms=rh.GetAtomList();
@@ -307,18 +298,16 @@ void Processor::ConnectAtomsOfResidue(mol::ResidueHandle rh,
       mol::AtomHandle a1=this->LocateAtom(atoms, bond.atom_one);
       mol::AtomHandle a2=this->LocateAtom(atoms, bond.atom_two);
       if (a1.IsValid() && a2.IsValid()) { 
+        if (!strict_hydrogens && (a1.GetElement()=="H" ||
+                                  a1.GetElement()=="D" ||
+                                  a2.GetElement()=="H" ||
+                                  a2.GetElement()=="D")) {
+          continue;
+        }
         if (!this->GetCheckBondFeasibility()) {
-          if (strict_hydrogens && (a1.GetElement()=="H" || 
-                                   a2.GetElement()=="D")) {
-            continue;
-          }
           e.Connect(a1, a2, bond.order);
         } else { 
           if (IsBondFeasible(a1, a2)) {
-            if (strict_hydrogens && (a1.GetElement()=="H" || 
-                                     a2.GetElement()=="D")) {
-              continue;
-            }
             e.Connect(a1, a2, bond.order);
           }
         }
@@ -405,8 +394,8 @@ void Processor::DistanceBasedConnect(mol::AtomHandle atom) const
        e=alist.end();it!=e;++it) {
     if (*it!=atom) {
       if (IsBondFeasible(atom, *it)) {
-        if (Processor::AreResiduesConsecutive(res_a, it->GetResidue()) || 
-            it->GetResidue()==res_a) {                      
+        if (it->GetResidue()==res_a ||
+            Processor::AreResiduesConsecutive(res_a, it->GetResidue())) {
             editor.Connect(*it, atom);
         }
       }
