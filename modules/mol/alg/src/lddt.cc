@@ -25,26 +25,33 @@
 #include <boost/filesystem/convenience.hpp>
 #include <ost/base.hh>
 #include <ost/boost_filesystem_helper.hh>
+#include <ost/mol/chain_view.hh>
 #include <ost/mol/alg/local_dist_diff_test.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/conop/conop.hh>
+#include <ost/conop/compound_lib.hh>
 #include <ost/string_ref.hh>
 #include <ost/conop/amino_acids.hh>
-#include <ost/mol/iterator.hh>
+#include <ost/conop/rule_based.hh>
 #include <ost/platform.hh>
 #include <ost/log.hh>
 #include <ost/mol/alg/consistency_checks.hh>
 
-#include <ost/conop/rule_based_builder.hh>
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
+#endif
 #include <ost/dyn_cast.hh>
 
 using namespace ost;
 using namespace ost::io;
+using namespace ost::conop;
 using namespace ost::mol;
 using namespace ost::mol::alg;
+
 namespace po=boost::program_options;
+namespace fs=boost::filesystem;
 
 // loads a file
 EntityHandle load(const String& file, const IOProfile& profile)
@@ -54,9 +61,10 @@ EntityHandle load(const String& file, const IOProfile& profile)
     if (reader.HasNext()) {
       EntityHandle ent=CreateEntity();
       reader.Import(ent);
-      conop::Conopology& conop_inst=conop::Conopology::Instance();
-      conop_inst.GetBuilder()->SetBondFeasibilityCheck(profile.bond_feasibility_check);
-      conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+      if (profile.processor) {
+        profile.processor->Process(ent);
+      }
+
       if (ent.GetChainList().size()!=1) {
         std::cout << "WARNING: File " << file << " has more than one chain" << std::endl;
       }    
@@ -97,9 +105,9 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
   int first=0;
   if (v.GetResidueList().size()==0) {
     if (glob_dist_list.size()==0) {
-      return std::make_pair<int,int>(0,-1);
+      return std::make_pair(0,-1);
     } else {    
-      return std::make_pair<int,int>(0,glob_dist_list.size());
+      return std::make_pair(0,glob_dist_list.size());
     }  
   }
   ChainView vchain=v.GetChainList()[0];
@@ -111,9 +119,54 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
       first++;
     }
   }
-  return std::make_pair<int,int>(first,second);
+  return std::make_pair(first,second);
 }
 
+CompoundLibPtr load_compound_lib(const String& custom_path)
+{
+  if (custom_path!="") {
+    if (fs::exists(custom_path)) {  
+      return CompoundLib::Load(custom_path);
+    } else {
+      std::cerr << "Could not find compounds.chemlib at the provided location, trying other options" << std::endl;
+    }
+  } 
+  if (fs::exists("compounds.chemlib")) {
+    return CompoundLib::Load("compounds.chemlib");
+  }
+  char result[ 1024 ]; 
+  CompoundLibPtr lib;
+  String exe_path; 
+  #if defined(__APPLE__)
+  uint32_t size=1023;
+  if (!_NSGetExecutablePath(result, &size)) {
+    exe_path=String(result); 
+  }
+  #else 
+  ssize_t count = readlink( "/proc/self/exe", result, 1024 );
+  exe_path = std::string( result, (count > 0) ? count : 0 );
+  #endif
+  if (exe_path.empty()) { 
+    std::cerr << "Could not determine the path of the molck executable. Will only "
+       "look for compounds.chemlib in the current working directory" << std::endl;
+  } else {
+    fs::path path_and_exe(exe_path);
+    fs::path path_only=path_and_exe.branch_path();
+    fs::path share_path = path_only.branch_path();
+    share_path = share_path / "share" / "openstructure" / "compounds.chemlib";
+
+    String share_path_string=BFPathToString(share_path);
+      
+    if (fs::exists(share_path_string)) {
+      return CompoundLib::Load(share_path_string);
+    }  
+  }
+  if (!lib) {
+    std::cerr << "Could not load compounds.chemlib" << std::endl;
+    exit(-1);
+  }
+  return CompoundLibPtr();
+}
 bool is_resnum_in_globalrdmap(const ResNum& resnum, const GlobalRDMap& glob_dist_list)
 {
   for (GlobalRDMap::const_iterator i=glob_dist_list.begin(), e=glob_dist_list.end(); i!=e; ++i) {
@@ -136,10 +189,9 @@ int main (int argc, char **argv)
 
   // creates the required loading profile
   IOProfile profile;
-  profile.bond_feasibility_check=false;
-
   // parses options
   String sel;
+  String custom_path;
   bool structural_checks=false;
   bool consistency_checks=true;
   po::options_description desc("Options");
@@ -153,6 +205,7 @@ int main (int argc, char **argv)
     ("parameter-file,p", po::value<String>(), "stereo-chemical parameter file")
     ("verbosity,v", po::value<int>(), "verbosity level")
     ("bond_tolerance,b", po::value<Real>(), "tolerance in stddev for bonds")
+    ("complib", po::value<String>(&custom_path)->default_value(""),"location of the compound library file")       
     ("angle_tolerance,a", po::value<Real>(), "tolerance in stddev for angles")
     ("inclusion_radius,r", po::value<Real>(), "distance inclusion radius")
     ("sequence_separation,i", po::value<int>(), "sequence separation")
@@ -171,6 +224,12 @@ int main (int argc, char **argv)
     usage();
     exit(-1);
   }
+  conop::CompoundLibPtr lib = load_compound_lib(custom_path);
+  if (!lib) {
+    exit(0);
+  }
+  profile.processor = conop::RuleBasedProcessorPtr(new conop::RuleBasedProcessor(lib));
+  profile.processor->SetCheckBondFeasibility(false);
   po::notify(vm);
   if (vm.count("version")) {
     std::cout << "Version: " << version << std::endl;
@@ -374,21 +433,42 @@ int main (int argc, char **argv)
         std::cout << "Error reading the Clashing section of the stereo-chemical parameter file." << std::endl;
         exit(-1);
       }
-      // performs structural checks and filters the structure   
+      // performs structural checks and filters the structure
+      StereoChemistryInfo stereo_chemistry_info;
       try { 
-        v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
+        std::pair<EntityView,StereoChemistryInfo> csc_result = alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
+        v = csc_result.first;
+        stereo_chemistry_info = csc_result.second;
       } catch (std::exception& e) {       
         std::cout << "An error occurred during the structure quality checks, stage 1:" << std::endl;    
         std::cout << e.what() << std::endl;
         exit(-1);
       }
+      std::cout << "Average Z-Score for bond lengths: " << std::fixed << std::setprecision(5) << stereo_chemistry_info.GetAvgZscoreBonds() << std::endl;
+      std::cout << "Bonds outside of tolerance range: " << stereo_chemistry_info.GetBadBondCount() << " out of " << stereo_chemistry_info.GetBondCount() << std::endl;
+      std::cout << "Bond\tAvg Length\tAvg zscore\tNum Bonds" << std::endl;
+      std::map<String,BondLengthInfo> avg_bond_length_info = stereo_chemistry_info.GetAvgBondLengthInfo();
+      for (std::map<String,BondLengthInfo>::const_iterator abli_it=avg_bond_length_info.begin();abli_it!=avg_bond_length_info.end();++abli_it) {
+        String key = (*abli_it).first;
+        BondLengthInfo bond_length_info = (*abli_it).second;
+        std::cout << key << "\t" << std::fixed << std::setprecision(5) << std::left << std::setw(10) <<
+                     bond_length_info.GetAvgLength() << "\t" << std::left << std::setw(10) << bond_length_info.GetAvgZscore() << "\t" << bond_length_info.GetCount()  << std::endl;
+      }
+      std::cout << "Average Z-Score angle widths: " << std::fixed << std::setprecision(5) << stereo_chemistry_info.GetAvgZscoreAngles() << std::endl;
+      std::cout << "Angles outside of tolerance range: " << stereo_chemistry_info.GetBadAngleCount() << " out of " << stereo_chemistry_info.GetAngleCount() << std::endl;
+      ClashingInfo clash_info;
       try {
-        v=alg::FilterClashes(v,nonbonded_table);
+        std::pair<EntityView,ClashingInfo> fc_result = alg::FilterClashes(v,nonbonded_table);
+        v = fc_result.first;
+        clash_info = fc_result.second;
       } catch (std::exception& e) {       
         std::cout << "An error occurred during the structure quality checks, stage 2:" << std::endl;    
         std::cout << e.what() << std::endl;
         exit(-1);
       }
+      std::cout << clash_info.GetClashCount() << " non-bonded short-range distances shorter than tolerance distance" << std::endl;
+      std::cout << "Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << clash_info.GetAverageOffset() << std::endl;
+
     }
     if (cov.first==0) {
       std::cout << "Global LDDT score: 0.0" << std::endl;
@@ -417,54 +497,61 @@ int main (int argc, char **argv)
     } else {
       std::cout << "Chain\tResName\tResNum\tAsses.\tScore\t(Conserved/Total, over " << cutoffs.size() << " thresholds)" << std::endl;
     }
-    for (ResidueViewIter rit=outv.ResiduesBegin();rit!=outv.ResiduesEnd();++rit){
-      ResidueView ritv=*rit;
-      ResNum rnum = ritv.GetNumber();
-      bool assessed = false;
-      String assessed_string="No";
-      bool quality_problems = false;
-      String quality_problems_string="No";
-      Real lddt_local = -1;
-      String lddt_local_string="-";
-      int conserved_dist = -1;
-      int total_dist = -1;
-      String dist_string = "-";
-      if (is_resnum_in_globalrdmap(rnum,glob_dist_list)) {
-        assessed = true;
-        assessed_string="Yes";
-      }
-      if (ritv.HasProp("stereo_chemical_violation_sidechain") || ritv.HasProp("steric_clash_sidechain")) {
-        quality_problems = true;
-        quality_problems_string="Yes";
-      }
-      if (ritv.HasProp("stereo_chemical_violation_backbone") || ritv.HasProp("steric_clash_backbone")) {
-        quality_problems = true;
-        quality_problems_string="Yes+";
-      }
-
-      if (assessed==true) {
-        if (ritv.HasProp(label)) {
-          lddt_local=ritv.GetFloatProp(label);
-          std::stringstream stkeylddt;
-          stkeylddt <<  std::fixed << std::setprecision(4) << lddt_local;
-          lddt_local_string=stkeylddt.str();
-          conserved_dist=ritv.GetIntProp(label+"_conserved");
-          total_dist=ritv.GetIntProp(label+"_total");
-          std::stringstream stkeydist;
-          stkeydist << "("<< conserved_dist << "/" << total_dist << ")";
-          dist_string=stkeydist.str();
-        } else {
-          lddt_local = 0;
-          lddt_local_string="0.0000";
-          conserved_dist = 0;
-          total_dist = 0;
-          dist_string="(0/0)";
+    for (ChainViewList::const_iterator ci = outv.GetChainList().begin(),
+         ce = outv.GetChainList().end(); ci != ce; ++ci) {
+      for (ResidueViewList::const_iterator rit = ci->GetResidueList().begin(),
+           re = ci->GetResidueList().end(); rit != re; ++rit) {
+     
+        ResidueView ritv=*rit;
+        ResNum rnum = ritv.GetNumber();
+        bool assessed = false;
+        String assessed_string="No";
+        bool quality_problems = false;
+        String quality_problems_string="No";
+        Real lddt_local = -1;
+        String lddt_local_string="-";
+        int conserved_dist = -1;
+        int total_dist = -1;
+        String dist_string = "-";
+        if (is_resnum_in_globalrdmap(rnum,glob_dist_list)) {
+          assessed = true;
+          assessed_string="Yes";
         }
-      }
-      if (structural_checks) {
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << quality_problems_string << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
-      } else {
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
+        if (ritv.HasProp("stereo_chemical_violation_sidechain") || 
+            ritv.HasProp("steric_clash_sidechain")) {
+          quality_problems = true;
+          quality_problems_string="Yes";
+        }
+        if (ritv.HasProp("stereo_chemical_violation_backbone") || 
+            ritv.HasProp("steric_clash_backbone")) {
+          quality_problems = true;
+          quality_problems_string="Yes+";
+        }
+
+        if (assessed==true) {
+          if (ritv.HasProp(label)) {
+            lddt_local=ritv.GetFloatProp(label);
+            std::stringstream stkeylddt;
+            stkeylddt <<  std::fixed << std::setprecision(4) << lddt_local;
+            lddt_local_string=stkeylddt.str();
+            conserved_dist=ritv.GetIntProp(label+"_conserved");
+            total_dist=ritv.GetIntProp(label+"_total");
+            std::stringstream stkeydist;
+            stkeydist << "("<< conserved_dist << "/" << total_dist << ")";
+            dist_string=stkeydist.str();
+          } else {
+            lddt_local = 0;
+            lddt_local_string="0.0000";
+            conserved_dist = 0;
+            total_dist = 0;
+            dist_string="(0/0)";
+          }
+        }
+        if (structural_checks) {
+          std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << quality_problems_string << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
+        } else {
+          std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
+        }
       }
     }
     std::cout << std::endl;

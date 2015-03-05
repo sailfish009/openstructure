@@ -16,10 +16,9 @@ def Cleanup(entity, strip_water=True, canonicalize=True, remove_ligands=True):
   :return: a cleaned version of the entity
   """
   #setup
-  builder = conop.GetBuilder()
-  if not hasattr(builder, "compound_lib") :
-    raise RuntimeError( "Cannot cleanup structure, since the default builder doesn't use the compound library")
-  compound_lib = builder.compound_lib
+  lib = conop.GetDefaultLib()
+  if not lib:
+    raise RuntimeError("Cleanup requires a compound library.")
   clean_entity = entity.Copy()
   ed = clean_entity.EditXCS()
   #remove water residues
@@ -27,7 +26,7 @@ def Cleanup(entity, strip_water=True, canonicalize=True, remove_ligands=True):
     _StripWater(clean_entity, ed)
   #replace modified residues before removing ligands to avoid removing MSE and others
   if canonicalize:
-    _CanonicalizeResidues(clean_entity, ed, compound_lib)
+    _CanonicalizeResidues(clean_entity, ed, lib)
   #remove all hetatoms that are not water
   if remove_ligands:
     _RemoveLigands(clean_entity, ed)

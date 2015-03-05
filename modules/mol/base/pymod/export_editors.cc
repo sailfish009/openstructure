@@ -22,7 +22,10 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-
+#include <ost/mol/impl/entity_impl.hh>
+#include <ost/mol/impl/chain_impl.hh>
+#include <ost/mol/impl/residue_impl.hh>
+#include <ost/mol/impl/atom_impl.hh>
 using namespace ost;
 using namespace ost::mol;
 
@@ -80,6 +83,8 @@ void (ICSEditor::*rotate_torsion_b)(const AtomHandle&, const AtomHandle&,
                                     const AtomHandle&, const AtomHandle&,
                                     Real, bool)=&ICSEditor::RotateTorsionAngle;
 
+void (EditorBase::*renumber_chain_a)(ChainHandle,const ResNumList&)=&EditorBase::RenumberChain;
+void (EditorBase::*renumber_chain_b)(const ChainHandle&,int, bool)=&EditorBase::RenumberChain;
 #if OST_NUMPY_SUPPORT_ENABLED
 template<typename T, bool O>
 void set_pos2_nc_t(XCSEditor& e, const AtomHandleList& alist, PyArrayObject* na)
@@ -175,9 +180,18 @@ void set_pos(XCSEditor& e, object o1, object o2, bool trans)
   }
 
   std::map<unsigned long,AtomHandle> amap;
-  EntityHandle eh=e.GetEntity();
-  for(AtomHandleIter ait=eh.AtomsBegin(), aite=eh.AtomsEnd(); ait!=aite; ++ait) {
-    amap[(*ait).GetIndex()]=*ait;
+  impl::EntityImplPtr ei=e.GetEntity().Impl();
+  for(impl::ChainImplList::iterator cit=ei->GetChainList().begin();
+      cit!=ei->GetChainList().end();++cit) {
+    for (impl::ResidueImplList::iterator rit = (*cit)->GetResidueList().begin(),
+         ret = (*cit)->GetResidueList().end(); rit != ret; ++rit) {
+           
+      for (impl::AtomImplList::iterator ait = (*rit)->GetAtomList().begin(), 
+           aet = (*rit)->GetAtomList().end(); ait != aet; ++ait) {
+
+        amap[(*ait)->GetIndex()]=*ait;
+      }
+    }
   }
 
   AtomHandleList alist;
@@ -249,7 +263,8 @@ void export_Editors()
     .def("ReorderResidues",&EditorBase::ReorderResidues)
     .def("ReorderAllResidues",&EditorBase::ReorderAllResidues)
     .def("RenumberAllResidues",&EditorBase::RenumberAllResidues)
-    .def("RenumberChain",&EditorBase::RenumberChain)
+    .def("RenumberChain",renumber_chain_a)
+    .def("RenumberChain",renumber_chain_b)
   ;
   
   void (XCSEditor::*apply_transform1)(const geom::Mat4&) = &XCSEditor::ApplyTransform;
@@ -266,7 +281,9 @@ void export_Editors()
     .def("SetTransform", set_transform1)
     .def("SetTransform", set_transform2)
     .def("UpdateICS", &XCSEditor::UpdateICS)
-    .def("__exit__", &XCSEditor::UpdateICS)    
+    .def("ForceUpdate", &XCSEditor::ForceUpdate)
+    .def("__exit__", &XCSEditor::ForceUpdate)    
+    .def("__del__", &XCSEditor::ForceUpdate)    
   ;
   
   class_<ICSEditor, bases<EditorBase> >("ICSEditor", no_init)

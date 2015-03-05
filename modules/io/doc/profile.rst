@@ -18,15 +18,15 @@ parameter can either be the name of a profile or an instance of
 
 .. code-block:: python
 
-  ent=io.LoadPDB('weird.pdb', profile=io.profiles['SLOPPY'])
-  ent=io.LoadPDB('weird.pdb', profile='SLOPPY')
+  ent = io.LoadPDB('weird.pdb', profile=io.profiles['SLOPPY'])
+  ent = io.LoadPDB('weird.pdb', profile='SLOPPY')
 
 Profiles is a dictionary-like object containing all the profiles known to OpenStructure. You can add new ones by inserting them into the dictionary. If you are loading a lot of structures, you may want to set the default profile to avoid having to pass the profile every time you load a structure. This is done by assigning a different profile to ``DEFAULT``:
 
 .. code-block:: python
 
   io.profiles['DEFAULT']='SLOPPY'
-  ent=io.LoadPDB('weird.pdb')
+  ent = io.LoadPDB('weird.pdb')
 
 Again, you can either assign the name of the profile, or the profile itself. If none of the profiles available by default suits your needs, feel free to create one to your liking.
 
@@ -45,7 +45,7 @@ STRICT
 
     IOProfile(dialect='PDB', strict_hydrogens=False, quack_mode=False,
               fault_tolerant=False, join_spread_atom_records=False,
-              no_hetatms=False, bond_feasibility_check=True)
+              no_hetatms=False, bond_feasibility_check=False)
 
 SLOPPY:
 
@@ -82,9 +82,9 @@ The IOProfile Class
 
     Read/write property. When quack_mode is enabled, the chemical class for
     unknown residues is guessed based on its atoms and connectivity. Turn this
-    on, if you are working with non-standard conforming PDB files and are
+    on if you are working with non-standard conforming PDB files and are
     experiencing problems with the rendering of the backbone trace and/or see
-    peptidic residues with unknown chemical class.
+    peptidic residues with unknown chemical classes.
 
   .. attribute:: dialect
 
@@ -100,9 +100,9 @@ The IOProfile Class
 
     :type: bool
 
-    Whether hydrogen names should be strictly checked.  It is very common for
+    Whether hydrogen names should be strictly checked. It is very common for
     PDB files to not follow the correct naming conventions for hydrogen atoms.
-    That's why by default, the names of the hydrogens are not required to be
+    That's why by default the names of the hydrogens are not required to be
     correct. Rather, the connectivity is inferred with distance-based checks. By
     turning this flag on, the names of the hydrogen atoms are checked against
     the names in the database like all other atom types.
@@ -117,7 +117,7 @@ The IOProfile Class
 
     If true, the import will succeed, even if the PDB contains faulty records.
     The faulty records will be ignored and import continues as if the records
-    haven't been present.
+    are not present.
     
   .. attribute::   join_spread_atom_records
   
@@ -126,9 +126,9 @@ The IOProfile Class
 
   .. attribute:: calpha_only
 
-    When set to true, forces the importers to only load atoms named CA. This is
-    most useful in combination with protein-only PDB files to speed up subsequent
-    processing and importing.
+    When set to true, forces the importer to only load atoms named CA. This is
+    most useful in combination with protein-only PDB files to speed up
+    subsequent processing and importing.
 
   .. attribute:: bond_feasibility_check
 

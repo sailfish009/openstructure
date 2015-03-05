@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <cstdlib>
 #include <boost/filesystem/path.hpp>
 #include <ost/platform.hh>
 using boost::filesystem::path;
@@ -29,7 +30,14 @@ void SetPrefixPath(const String& prefix)
 
 String GetPrefixPath()
 {
-  assert(path_prefix!="");
+  //assert(path_prefix!="");
+  if(path_prefix=="") {
+    char* ost_root=getenv("OST_ROOT");
+    if(!ost_root) {
+      throw std::runtime_error("missing PrefixPath, and no fallback OST_ROOT env var");
+    }
+    path_prefix=std::string(ost_root);
+  }
   return path_prefix;
 }
 

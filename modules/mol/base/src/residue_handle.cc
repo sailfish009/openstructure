@@ -24,8 +24,8 @@
 #include <ost/mol/impl/residue_impl.hh>
 #include <ost/mol/impl/chain_impl.hh>
 #include <ost/mol/impl/entity_impl.hh>
-#include <ost/mol/iterator.hh>
 #include <ost/mol/bond_handle.hh>
+
 namespace ost { namespace mol {
 
 ResidueHandle::ResidueHandle()
@@ -162,36 +162,6 @@ bool ResidueHandle::SwitchAtomPos(const String& group)
   return Impl()->SwitchAtomPos(group);
 }
 
-
-AtomHandleIter ResidueHandle::AtomsBegin() const 
-{
-  this->CheckValidity();
-  impl::ResidueImplPtr r=Impl();
-  int index=this->GetIndex();
-  impl::ChainImplPtr c=r->GetChain();
-  impl::pointer_it<impl::ChainImplPtr> cc=r->GetEntity()->GetChainIter(c->GetName());
-  return AtomHandleIter(cc, impl::begin(c->GetResidueList())+index,
-                        impl::begin(r->GetAtomList()), r->GetEntity(), true);
-}
-
-AtomHandleIter ResidueHandle::AtomsEnd() const 
-{
-  this->CheckValidity();
-  impl::ResidueImplPtr r=Impl();
-  int index=this->GetIndex();
-  impl::ChainImplPtr c=r->GetChain();
-  impl::pointer_it<impl::ChainImplPtr> cc=r->GetEntity()->GetChainIter(c->GetName());
-  if (c->GetResidueList().begin()+index+1==c->GetResidueList().end()) {
-    return AtomHandleIter(cc, impl::begin(c->GetResidueList())+index,
-                          impl::begin(r->GetAtomList()), r->GetEntity(), false);
-  } else {
-    impl::pointer_it<impl::ResidueImplPtr> x=(impl::begin(c->GetResidueList())+index+1);
-    return AtomHandleIter(cc, impl::begin(c->GetResidueList())+index+1,
-                          impl::begin((*x)->GetAtomList()), 
-                          r->GetEntity(), false);
-  }
-
-}
 
 bool InSequence(const ResidueHandle& r1, const ResidueHandle& r2) 
 {

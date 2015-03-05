@@ -39,27 +39,44 @@ Manipulator::Manipulator():
 
 void Manipulator::MouseMove(const MouseEvent& event)
 {
-  if (event.GetButtons()==MouseEvent::LeftButton) {
-    if (event.IsShiftPressed()) {
-      SendCommand(gfx::INPUT_COMMAND_TRANSX,
-                  static_cast<Real>(event.GetDelta().x()));
-      SendCommand(gfx::INPUT_COMMAND_TRANSY,
-                  static_cast<Real>(-event.GetDelta().y()));
-    } else {
-      SendCommand(gfx::INPUT_COMMAND_ROTY,
-                  static_cast<Real>(event.GetDelta().x())); // rotation around y
-      SendCommand(gfx::INPUT_COMMAND_ROTX,
-                  static_cast<Real>(event.GetDelta().y())); // rotation around x
-    }
-  } else if (event.GetButtons()==MouseEvent::MiddleButton) {
+  static bool warn=true;
+  // reference is GLCanvas::HandleMouseMoveEvent
+  if (event.GetButtons() & MouseEvent::LeftButton) {
+    if (event.GetButtons() & MouseEvent::MiddleButton) {
       if (event.IsShiftPressed()) {
-        // rotation around z
-        Real d=static_cast<Real>(event.GetDelta().x()+event.GetDelta().y());
-        SendCommand(gfx::INPUT_COMMAND_ROTZ, d);        
+        // slab in view, ignore here
       } else {
-        SendCommand(gfx::INPUT_COMMAND_TRANSZ,
-                    static_cast<Real>(event.GetDelta().y())); // translate along z
+        Real d=static_cast<Real>(event.GetDelta().x()+event.GetDelta().y());
+        SendCommand(gfx::INPUT_COMMAND_ROTZ, -d);
       }
+    } else {
+      if (event.IsShiftPressed()) {
+        SendCommand(gfx::INPUT_COMMAND_TRANSX,
+                    static_cast<Real>(event.GetDelta().x()));
+        SendCommand(gfx::INPUT_COMMAND_TRANSY,
+                    static_cast<Real>(-event.GetDelta().y()));
+      } else {
+        SendCommand(gfx::INPUT_COMMAND_ROTY,
+                    static_cast<Real>(event.GetDelta().x())); // rotation around y
+        SendCommand(gfx::INPUT_COMMAND_ROTX,
+                    static_cast<Real>(event.GetDelta().y())); // rotation around x
+      }
+    }
+  } else if (event.GetButtons() & MouseEvent::MiddleButton) {
+    if (event.IsShiftPressed()) {
+      if(warn) {
+        LOG_WARNING("Manipulation Tool: MMB + Shift for z rotation is deprecated; use LMB+MMB instead");
+        warn=false;
+      }
+      // rotation around z
+      // WHY? this does not match the scene view transformation, which has a slab tf here
+      // will be removed in a next update...
+      Real d=static_cast<Real>(event.GetDelta().x()+event.GetDelta().y());
+      SendCommand(gfx::INPUT_COMMAND_ROTZ, d);        
+    } else {
+      SendCommand(gfx::INPUT_COMMAND_TRANSZ,
+                  static_cast<Real>(event.GetDelta().y())); // translate along z
+    }
   }  
 }
 

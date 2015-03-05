@@ -26,7 +26,6 @@
 #include <ost/conop/conop.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/alg/construct_cbeta.hh>
-#include <ost/conop/rule_based_builder.hh>
 #include <ost/conop/compound_lib.hh>
 #include "nonstandard.hh"
 using namespace ost::mol;
@@ -39,18 +38,19 @@ namespace ost { namespace conop {
 bool CopyResidue(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi)
 {
   // first let's get our hands on the component library
-  conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
-  conop::RuleBasedBuilderPtr rbb=dyn_cast<conop::RuleBasedBuilder>(builder);
-  conop::CompoundLibPtr comp_lib=rbb->GetCompoundLib(); 
+  conop::CompoundLibPtr comp_lib=conop::Conopology::Instance().GetDefaultLib();
   return CopyResidue(src_res, dst_res, edi, comp_lib); 
 }
 
-bool CopyResidue(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi, CompoundLibPtr comp_lib)
+bool CopyResidue(ResidueHandle src_res, ResidueHandle dst_res, 
+                 XCSEditor& edi, CompoundLibPtr comp_lib)
 {
   bool has_cbeta = false;
   bool ret;
-  char parent_src = (comp_lib->FindCompound(src_res.GetName(),Compound::PDB))->GetOneLetterCode ();  
-  char parent_dst = (comp_lib->FindCompound(dst_res.GetName(),Compound::PDB))->GetOneLetterCode ();  
+  char parent_src = (comp_lib->FindCompound(src_res.GetName(),
+                                            Compound::PDB))->GetOneLetterCode ();  
+  char parent_dst = (comp_lib->FindCompound(dst_res.GetName(),
+                                            Compound::PDB))->GetOneLetterCode ();  
   if (parent_src==parent_dst) {
     ret = CopyConserved(src_res, dst_res, edi, has_cbeta, comp_lib);
   } else {
@@ -69,9 +69,7 @@ bool CopyConserved(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi,
                    bool& has_cbeta)
 {
   // first let's get our hands on the component library
-  conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
-  conop::RuleBasedBuilderPtr rbb=dyn_cast<conop::RuleBasedBuilder>(builder);
-  conop::CompoundLibPtr comp_lib=rbb->GetCompoundLib(); 
+  conop::CompoundLibPtr comp_lib=conop::Conopology::Instance().GetDefaultLib();
   return CopyConserved(src_res,dst_res,edi,has_cbeta,comp_lib);
 }
 

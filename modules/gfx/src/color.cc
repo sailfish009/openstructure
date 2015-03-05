@@ -263,7 +263,7 @@ Color& Color::operator/=(float rhs)
 
 void Color::to_rgb() const
 {
-  float hh=fmod(hsv_[0],1.0);
+  float hh=fmod(hsv_[0],1.0f);
   if(hh<0.0) hh+=1.0;
   float ss=std::min(1.0f,std::max(0.0f,hsv_[1]));
   float vv=std::min(1.0f,std::max(0.0f,hsv_[2]));

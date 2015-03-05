@@ -39,6 +39,7 @@ Gradient::Gradient():
 Gradient::Gradient(const String& name)
 {
   Gradient gradient = GradientManager::Instance().GetGradient(name);
+  hsv_mode_ = gradient.hsv_mode_;
   // why doesn't this work:
   //  stops_=gradient.stops_
   // or even better

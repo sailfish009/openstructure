@@ -39,7 +39,7 @@ namespace ost { namespace io {
 using boost::format;
 
 
-bool EntityIOPDBHandler::RequiresBuilder() const
+bool EntityIOPDBHandler::RequiresProcessor() const
 {
   return true;
 }

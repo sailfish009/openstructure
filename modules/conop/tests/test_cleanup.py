@@ -1,3 +1,4 @@
+import sys
 import unittest
 from ost import geom, conop
 from ost.conop import cleanup
@@ -5,7 +6,7 @@ from ost.conop import cleanup
 class TestCleanUp(unittest.TestCase):
 
   def setUp(self):
-    self.comp_lib=conop.GetBuilder().compound_lib
+    self.comp_lib=conop.GetDefaultLib()
     self.ent = io.LoadPDB("sample_test_cleanup.pdb")
     self.ent_no_wat = io.LoadPDB("sample_nowater.pdb")
     self.ent_no_lig = io.LoadPDB("sample_noligands.pdb")
@@ -155,8 +156,8 @@ class TestCleanUp(unittest.TestCase):
     self.assertFalse(self.new_ent.residues[6].IsPeptideLinking()) # here assertFalse instead of assertTrue
     self.assertTrue(self.new_ent.residues[6].atoms[0].is_hetatom)
 
-if not hasattr(conop.GetBuilder(), 'compound_lib'):
-  print 'Default builder without compound lib. Ignoring test_cleanup.py tests'
+if not conop.GetDefaultLib():
+  print 'No compound library available. Ignoring test_cleanup.py tests'
   sys.exit()
 
 if __name__== '__main__':

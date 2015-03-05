@@ -36,13 +36,13 @@ static const float tolerance=1e-4;
 
 namespace {
   bool compare_colors(const Color& c1, const Color& c2, float tol=1e-6) {
-    return std::fabs(c1.GetRed()-c2.GetRed()<tol) &&
-      std::fabs(c1.GetGreen()-c2.GetGreen()<tol) &&
-      std::fabs(c1.GetBlue()-c2.GetBlue()<tol) &&
-      std::fabs(c1.GetAlpha()-c2.GetAlpha()<tol) &&
-      std::fabs(c1.GetHue()-c2.GetHue()<tol) &&
-      std::fabs(c1.GetSat()-c2.GetSat()<tol) &&
-      std::fabs(c1.GetVal()-c2.GetVal()<tol);
+    return std::abs<float>(c1.GetRed()-c2.GetRed()<tol) &&
+      std::abs<float>(c1.GetGreen()-c2.GetGreen()<tol) &&
+      std::abs<float>(c1.GetBlue()-c2.GetBlue()<tol) &&
+      std::abs<float>(c1.GetAlpha()-c2.GetAlpha()<tol) &&
+      std::abs<float>(c1.GetHue()-c2.GetHue()<tol) &&
+      std::abs<float>(c1.GetSat()-c2.GetSat()<tol) &&
+      std::abs<float>(c1.GetVal()-c2.GetVal()<tol);
   }
 }
 

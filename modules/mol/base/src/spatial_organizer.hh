@@ -51,6 +51,23 @@ private:
     }
 
     int u,v,w;
+
+    static Index Max(const Index& a, const Index& b) {
+      Index m;
+      m.u = a.u > b.u ? a.u : b.u;
+      m.v = a.v > b.v ? a.v : b.v;
+      m.w = a.w > b.w ? a.w : b.w;
+      return m;
+    }
+
+    static Index Min(const Index& a, const Index& b) {
+      Index m;
+      m.u = a.u < b.u ? a.u : b.u;
+      m.v = a.v < b.v ? a.v : b.v;
+      m.w = a.w < b.w ? a.w : b.w;
+      return m;
+    }
+
   };
 
   struct Entry {
@@ -73,10 +90,17 @@ public:
   }
 
   void Add(const ITEM& item, const VEC& pos) {
+    bool first = map_.empty();
     Index indx=gen_index(pos);
     map_[indx].push_back(Entry(item,pos));
+    if (!first) {
+      min_ = Index::Min(min_, indx); 
+      max_ = Index::Max(max_, indx); 
+    } else {
+      min_ = indx;
+      max_ = indx;
+    }
   }
-
   void Remove(const ITEM& item) {
     typename ItemMap::iterator i=map_.begin();
     for (; i!=map_.end(); ++i) {
@@ -89,54 +113,38 @@ public:
     }
   }
 
-  ITEM FindClosest(const VEC& pos) {
-
-    // find closest index with non-empty itemlist
-    Real best_dist2=std::numeric_limits<Real>::max();
-    Index i0;
-    bool found_i0=false;
-    for(typename ItemMap::const_iterator map_it = map_.begin();
-        map_it!=map_.end();++map_it) {
-      Real dist2=geom::Length2(pos-gen_middle(map_it->first));
-      if(dist2<best_dist2 && !map_it->second.empty()) {
-        best_dist2=dist2;
-        i0 = map_it->first;
-        found_i0=true;
+  bool HasWithin(const VEC& pos, Real dist) const {
+    Real dist2=dist*dist;
+    Index imin = Index::Max(min_, gen_index(pos-VEC(dist,dist,dist)));
+    Index imax = Index::Min(max_, gen_index(pos+VEC(dist,dist,dist)));
+    if ((imax.u-imin.u+1)*(imax.v-imin.v+1)*(imax.w-imin.w+1)>map_.size()) {
+      return this->has_within_all_buckets(pos, dist2);
+    }
+    for(int wc=imin.w;wc<=imax.w;++wc) {
+      for(int vc=imin.v;vc<=imax.v;++vc) {
+        for(int uc=imin.u;uc<=imax.u;++uc) {
+          typename ItemMap::const_iterator map_it = map_.find(Index(uc,vc,wc));
+          if(map_it!=map_.end()) {
+            for(typename EntryList::const_iterator entry_it = map_it->second.begin();
+                entry_it != map_it->second.end(); ++entry_it) {
+                    /*
+                      speed tests indicate that pre-calculating dx2 or dy2
+                      and pre-checking them with an additional if gives little
+                      speed improvement for very specific circumstances only,
+                      but most of the time the performance is worse.
+                    */
+                Real delta_x = entry_it->pos[0]-pos[0];
+                Real delta_y = entry_it->pos[1]-pos[1];
+                Real delta_z = entry_it->pos[2]-pos[2];
+                if(delta_x*delta_x+delta_y*delta_y+delta_z*delta_z<=dist2) {
+                  return true;
+              }
+            }
+          }
+        }
       }
     }
-
-    if(!found_i0) return ITEM();
-
-    // now find the closest item in the 3x3x3 items centered on i0
-    best_dist2=std::numeric_limits<Real>::max();
-    ITEM* best_item=NULL;
-
-    for(int wc=i0.w-1;wc<=i0.w+1;++wc) {
-      for(int vc=i0.v-1;wc<=i0.v+1;++vc) {
-        for(int uc=i0.u-1;wc<=i0.u+1;++uc) {
-	  typename ItemMap::const_iterator map_it = map_.find(Index(uc,vc,wc));
-
-	  if(map_it!=map_.end()) {
-	    for(typename EntryList::iterator entry_it = map_it->second.begin();
-		entry_it != map_it->second.end(); ++entry_it) {
-	      Real delta_x = entry_it->pos[0]-pos[0];
-              Real delta_y = entry_it->pos[1]-pos[1];
-              Real delta_z = entry_it->pos[2]-pos[2];
-              Real dist2=delta_x*delta_x+delta_y*delta_y+delta_z*delta_z;
-              if(dist2<best_dist2) {
-                best_dist2=dist2;
-                best_item=entry_it;
-	      }
-	    }
-	  }
-	}
-      }
-    }
-    if(best_item) {
-      return &best_item;
-    } else {
-      return ITEM();
-    }
+    return false;
   }
 
   ItemList FindWithin(const VEC& pos, Real dist) const {
@@ -148,27 +156,27 @@ public:
 
     for(int wc=imin.w;wc<=imax.w;++wc) {
       for(int vc=imin.v;vc<=imax.v;++vc) {
-	for(int uc=imin.u;uc<=imax.u;++uc) {
-	  typename ItemMap::const_iterator map_it = map_.find(Index(uc,vc,wc));
+        for(int uc=imin.u;uc<=imax.u;++uc) {
+          typename ItemMap::const_iterator map_it = map_.find(Index(uc,vc,wc));
 
-	  if(map_it!=map_.end()) {
-	    for(typename EntryList::const_iterator entry_it = map_it->second.begin();
-		entry_it != map_it->second.end(); ++entry_it) {
-              /*
-                speed tests indicate that pre-calculating dx2 or dy2
-                and pre-checking them with an additional if gives little
-                speed improvement for very specific circumstances only,
-                but most of the time the performance is worse. 
-              */
-	      Real delta_x = entry_it->pos[0]-pos[0];
-              Real delta_y = entry_it->pos[1]-pos[1];
-              Real delta_z = entry_it->pos[2]-pos[2];
-              if(delta_x*delta_x+delta_y*delta_y+delta_z*delta_z<=dist2) {
-                item_list.push_back(entry_it->item);
-	      }
-	    }
-	  }
-	}
+          if(map_it!=map_.end()) {
+            for(typename EntryList::const_iterator entry_it = map_it->second.begin();
+          entry_it != map_it->second.end(); ++entry_it) {
+                    /*
+                      speed tests indicate that pre-calculating dx2 or dy2
+                      and pre-checking them with an additional if gives little
+                      speed improvement for very specific circumstances only,
+                      but most of the time the performance is worse.
+                    */
+              Real delta_x = entry_it->pos[0]-pos[0];
+                    Real delta_y = entry_it->pos[1]-pos[1];
+                    Real delta_z = entry_it->pos[2]-pos[2];
+                    if(delta_x*delta_x+delta_y*delta_y+delta_z*delta_z<=dist2) {
+                      item_list.push_back(entry_it->item);
+              }
+            }
+          }
+        }
       }
     }
     return item_list;
@@ -180,12 +188,30 @@ public:
   void Swap(SpatialOrganizer& o) {
     map_.swap(o.map_);
     std::swap(delta_,o.delta_);
+    std::swap(min_, o.min_);
+    std::swap(max_, o.max_);
   }
 
 private:
-
+  bool has_within_all_buckets(const VEC& pos, Real dist2) const {
+    for (typename ItemMap::const_iterator 
+         i = map_.begin(), e = map_.end(); i!=e; ++i) {
+      for(typename EntryList::const_iterator j = i->second.begin();
+          j != i->second.end(); ++j) {
+        Real delta_x = j->pos[0]-pos[0];
+        Real delta_y = j->pos[1]-pos[1];
+        Real delta_z = j->pos[2]-pos[2];
+        if(delta_x*delta_x+delta_y*delta_y+delta_z*delta_z<=dist2) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
   ItemMap map_;
   Real delta_;
+  Index min_;
+  Index max_;
 
   Index gen_index(const VEC& pos) const {
     Index nrvo(static_cast<int>(round(pos[0]/delta_)),

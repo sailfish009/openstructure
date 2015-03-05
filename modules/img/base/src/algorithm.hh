@@ -32,7 +32,6 @@
 #include "data.hh"
 #include "data_algorithm.hh"
 #include "image_handle.hh"
-#include "function.hh"
 #include "extent.hh"
 #include "size.hh"
 #include "point.hh"

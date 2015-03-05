@@ -184,6 +184,8 @@ void export_mmcif_io()
   class_<MMCifInfoBioUnit>("MMCifInfoBioUnit", init<>())
     .def("SetDetails", &MMCifInfoBioUnit::SetDetails)
     .def("GetDetails", &MMCifInfoBioUnit::GetDetails)
+    .def("SetMethodDetails", &MMCifInfoBioUnit::SetMethodDetails)
+    .def("GetMethodDetails", &MMCifInfoBioUnit::GetMethodDetails)
     .def("AddChain", &MMCifInfoBioUnit::AddChain)
     .def("SetChainList", &MMCifInfoBioUnit::SetChainList)
     .def("GetChainList", make_function(&MMCifInfoBioUnit::GetChainList,
@@ -201,6 +203,8 @@ void export_mmcif_io()
     .def("GetID", &MMCifInfoBioUnit::GetID)
     .add_property("details", &MMCifInfoBioUnit::GetDetails,
                   &MMCifInfoBioUnit::SetDetails)
+    .add_property("method_details", &MMCifInfoBioUnit::GetMethodDetails,
+                  &MMCifInfoBioUnit::SetMethodDetails)
     .add_property("chains", make_function(&MMCifInfoBioUnit::GetChainList,
                                    return_value_policy<copy_const_reference>()))
     .add_property("chainintervalls", make_function(

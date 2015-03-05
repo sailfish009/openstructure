@@ -55,6 +55,7 @@ private:
   GLXFBConfig* fbconfig_;
   GLXPbuffer  pbuffer_;
   GLXContext  context_;
+  size_t fb_config_id_;
 };
 
 }} // ns

@@ -43,31 +43,31 @@ void test_spatial()
 
   SpatialDomain sd(Extent(Size(5,6)));
   Extent le(Point(0,0),Point(4,5));
-  Extent pe(Point(0,0),Point(4,7));
+  Extent pe(Point(0,0),Point(4,5));
 
   BOOST_CHECK(sd.GetDomain()==SPATIAL);
   mesg.str("");
   mesg << " expected " << le << " but got " << sd.GetExtent();
-  BOOST_CHECK(sd.GetExtent()==le);
+  BOOST_CHECK_MESSAGE(sd.GetExtent()==le,mesg.str());
   mesg.str("");
   mesg << " expected " << le << " but got " << sd.GetLogicalExtent();
-  BOOST_CHECK(sd.GetLogicalExtent()==le);
+  BOOST_CHECK_MESSAGE(sd.GetLogicalExtent()==le,mesg.str());
   mesg.str("");
   mesg << " expected " << pe << " but got " << sd.GetPhysicalExtent();
-  BOOST_CHECK(sd.GetPhysicalExtent()==pe);
+  BOOST_CHECK_MESSAGE(sd.GetPhysicalExtent()==pe,mesg.str());
 
   sd=SpatialDomain(Extent(Size(3,4,5)));
   le=Extent(Point(0,0,0),Point(2,3,4));
-  pe=Extent(Point(0,0,0),Point(2,3,5));
+  pe=Extent(Point(0,0,0),Point(2,3,4));
   mesg.str("");
   mesg << " expected " << le << " but got " << sd.GetExtent();
-  BOOST_CHECK(sd.GetExtent()==le);
+  BOOST_CHECK_MESSAGE(sd.GetExtent()==le,mesg.str());
   mesg.str("");
   mesg << " expected " << le << " but got " << sd.GetLogicalExtent();
-  BOOST_CHECK(sd.GetLogicalExtent()==le);
+  BOOST_CHECK_MESSAGE(sd.GetLogicalExtent()==le,mesg.str());
   mesg.str("");
   mesg << " expected " << pe << " but got " << sd.GetPhysicalExtent();
-  BOOST_CHECK(sd.GetPhysicalExtent()==pe);
+  BOOST_CHECK_MESSAGE(sd.GetPhysicalExtent()==pe,mesg.str());
 }
 
 void test_half_freq()
@@ -89,11 +89,6 @@ void test_half_freq()
   mesg << " expected " << pe << " but got " << hd.GetPhysicalExtent();
   BOOST_CHECK_MESSAGE(hd.GetPhysicalExtent()==pe,mesg.str());
 
-  SpatialDomain sd(Extent(Size(5,6)));
-  mesg.str("");
-  mesg << " expected volume match " << hd.GetPhysicalExtent() << " " << sd.GetPhysicalExtent();
-  BOOST_CHECK_MESSAGE(hd.GetPhysicalExtent().GetVolume()*2==sd.GetPhysicalExtent().GetVolume(),mesg.str());
-
   // 3d
   hd=HalfFrequencyDomain(Extent(Size(3,4,5)));
   le=Extent(Point(-1,-1,-2),Point(1,2,2));
@@ -110,10 +105,6 @@ void test_half_freq()
   mesg << " expected " << pe << " but got " << hd.GetPhysicalExtent();
   BOOST_CHECK_MESSAGE(hd.GetPhysicalExtent()==pe,mesg.str());
 
-  sd=SpatialDomain(Extent(Size(3,4,5)));
-  mesg.str("");
-  mesg << " expected volume match " << hd.GetPhysicalExtent() << " " << sd.GetPhysicalExtent();
-  BOOST_CHECK_MESSAGE(hd.GetPhysicalExtent().GetVolume()*2==sd.GetPhysicalExtent().GetVolume(),mesg.str());
 }
 
 

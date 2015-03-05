@@ -52,7 +52,7 @@
   :param aln: An alignment handle
   :type aln: :class:`~ost.seq.AlignmentHandle`
   :param assign: If true, the conservation scores are assigned to attached 
-      residues. The name of the property can be changed with the prop_name 
+      residues. The name of the property can be changed with the *prop_name* 
       parameter. Useful when coloring entities based on sequence conservation.
   :param prop_name: The property name for assigning the conservation to 
       attached residues. Defaults to 'cons'.
@@ -71,9 +71,9 @@
   
   .. code-block:: python
   
-    seq_a=seq.CreateSequence('A', 'acdefghiklmn')
-    seq_b=seq.CreateSequence('B', 'acdhiklmn')
-    alns=seq.alg.LocalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
+    seq_a = seq.CreateSequence('A', 'acdefghiklmn')
+    seq_b = seq.CreateSequence('B', 'acdhiklmn')
+    alns = seq.alg.LocalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
     print alns[0].ToString(80)
     # >>> A acdefghiklmn
     # >>> B acd---hiklmn
@@ -82,12 +82,11 @@
   :type seq1: :class:`~ost.seq.ConstSequenceHandle`
   :param seq2: A valid sequence  
   :type seq2: :class:`~ost.seq.ConstSequenceHandle`
-  
   :param subst_weigth: The substitution weights matrix
   :type subst_weight: :class:`SubstWeightMatrix`
   :param gap_open: The gap opening penalty. Must be a negative number
   :param gap_ext: The gap extension penalty. Must be a negative number
-  :returns: list of best-scoring, non-overlapping alignments of *seq1* and 
+  :returns: A list of best-scoring, non-overlapping alignments of *seq1* and 
      *seq2*. Since alignments always start with a replacement, the start is
      stored in the sequence offset of the two sequences.
 
@@ -101,9 +100,9 @@
   
   .. code-block:: python
   
-    seq_a=seq.CreateSequence('A', 'acdefghiklmn')
-    seq_b=seq.CreateSequence('B', 'acdhiklmn')
-    alns=seq.alg.GlobalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
+    seq_a = seq.CreateSequence('A', 'acdefghiklmn')
+    seq_b = seq.CreateSequence('B', 'acdhiklmn')
+    alns = seq.alg.GlobalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
     print alns[0].ToString(80)
     # >>> A acdefghiklmn
     # >>> B acd---hiklmn
@@ -112,9 +111,23 @@
   :type seq1: :class:`~ost.seq.ConstSequenceHandle`
   :param seq2: A valid sequence  
   :type seq2: :class:`~ost.seq.ConstSequenceHandle`
-  
   :param subst_weigth: The substitution weights matrix
   :type subst_weight: :class:`SubstWeightMatrix`
   :param gap_open: The gap opening penalty. Must be a negative number
   :param gap_ext: The gap extension penalty. Must be a negative number
-  :returns: best-scoring alignment of *seq1* and *seq2*.
+  :returns: Best-scoring alignment of *seq1* and *seq2*.
+
+.. function:: ShannonEntropy(aln, ignore_gaps=True)
+
+  Returns the per-column Shannon entropies of the alignment. The entropy
+  describes how conserved a certain column in the alignment is. The higher
+  the entropy is, the less conserved the column. For a column with no amino 
+  aids, the entropy value is set to NAN.
+
+  :param aln: Multiple sequence alignment
+  :type aln: :class:`~ost.seq.AlignmentHandle`
+  :param ignore_gaps: Whether to ignore gaps in the column.
+  :type ignore_gaps: bool
+
+  :returns: List of column entropies
+

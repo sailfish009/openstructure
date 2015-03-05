@@ -109,7 +109,7 @@ public:
   
   /// \brief return a filtered coord group, containing only the atoms in the 
   ///     view
-  CoordGroupHandle Filter(const EntityView& selected,int first=0,int last=-1) const;
+  CoordGroupHandle Filter(const EntityView& selected,int first=0,int last=-1,int stride=1) const;
 
   /// \brief apply in-place transform to each coordinate in each frame
   void ApplyTransform(const geom::Transform& tf);

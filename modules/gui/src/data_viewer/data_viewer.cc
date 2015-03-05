@@ -20,7 +20,7 @@
 
 
 /*
-  Authors: Ansgar Philippsen, Andreas Schenk
+  Authors: Ansgar Philippsen, Andreas Schenk, Jeff Lovelace
 */
 
 #include <cassert>
@@ -33,7 +33,10 @@
 #include <ost/message.hh>
 //#include <ost/img/alg/fft.hh>   
 #include <ost/img/alg/norm.hh>   
+#include <ost/gui/gosty_app.hh>
 #include <ost/gui/dock_widget.hh>
+
+#include <ost/gui/perspective.hh>
 
 #include "data_viewer.hh"
 #include "data_viewer_panel.hh"
@@ -60,7 +63,7 @@ int ipow(int base, unsigned int exponent){
 }
 }
 
-DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
+DataViewer::DataViewer(QWidget* p, const ImageHandle& data, const QString& name):
   ost::gui::MainWindow(p,0),
   name_(name),
   panel_(new DataViewerPanel(data,this)),
@@ -74,17 +77,24 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   connect(ov_manager_gui_,SIGNAL(SettingsChanged()),this,SLOT(UpdateView()));
   setWindowTitle("OpenStructure Data Viewer");
   build(data);
+  setFocusProxy(panel_);
 }
 
 DataViewer::~DataViewer()
 {
+  QMenuBar* mainMenu = ost::gui::GostyApp::Instance()->GetPerspective()->GetMenuBar();
+  mainMenu->removeAction(WindowMenu()->menuAction());
 }
 
-void DataViewer::SetData(const Data& d)
+void DataViewer::SetData(const ImageHandle& d)
 {
   panel_->SetData(d);
   fft_->SetData(d);
   info_->SetImageInfo(d);
+}
+
+const ImageHandle& DataViewer::GetData() const{
+  return panel_->GetObservedData();
 }
 
 NormalizerPtr DataViewer::GetNormalizer() const 
@@ -263,7 +273,7 @@ void DataViewer::SetAntialiasing(bool f)
 //////////////////////////
 // private methods
 
-void DataViewer::build(const Data& data) 
+void DataViewer::build(const ImageHandle& data)
 {
   build_menu();
 
@@ -300,8 +310,35 @@ void DataViewer::build(const Data& data)
 
 void DataViewer::build_menu()
 {
-  menuBar()->addMenu(WindowMenu());
+QMenuBar* mainMenu = ost::gui::GostyApp::Instance()->GetPerspective()->GetMenuBar();
+mainMenu->addMenu(WindowMenu());
 }
+
+ void DataViewer::show_current_window_menu(void)
+   {
+   // If the Panel menu for this window is already visible do nothing
+   if (!WindowMenu()->isVisible())
+     {
+     // We need to hide all instances of panels
+     // Get the Main Menu Bar pointer from OST
+     QMenuBar* mainMenu = ost::gui::GostyApp::Instance()->GetPerspective()->GetMenuBar();
+     // Get a list of all the main level menus
+     QList<QAction*> ActionList=mainMenu->actions();
+     // Any menus named panels are hidden
+     for (int i=0;i<ActionList.count();i++)
+       {
+       if (ActionList[i]->text()=="Panels")
+         {
+         if (ActionList[i]->isVisible())
+           {
+           ActionList[i]->setVisible(false);
+           }
+         }
+       }
+     // Show the panel menu for this object
+     WindowMenu()->menuAction()->setVisible(true);
+     }
+   }
 
 bool DataViewer::eventFilter(QObject * object, QEvent *event)
 {
@@ -316,6 +353,19 @@ bool DataViewer::eventFilter(QObject * object, QEvent *event)
         }
       }
       break;
+    case QEvent::FocusIn:
+      {
+        // Show panels menu when data viewer gets focus
+        show_current_window_menu();
+        return true;
+      }
+      break;
+    case QEvent::Show:
+      {
+        // Show panels menu when data viewer gets focus
+        show_current_window_menu();
+        return true;
+      }
     case QEvent::MouseButtonDblClick:
     case QEvent::MouseButtonPress:
     case QEvent::MouseButtonRelease:

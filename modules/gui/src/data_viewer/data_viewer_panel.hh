@@ -28,7 +28,7 @@ namespace ost { namespace img { namespace gui {
 class DLLEXPORT_OST_GUI DataViewerPanel: public DataViewerPanelBase
 {
 public:
-  DataViewerPanel(const Data& d, QWidget* parent);
+  DataViewerPanel(const ImageHandle& d, QWidget* parent);
 };
 
 }}}  //ns

@@ -69,8 +69,27 @@ void (Scene::*scene_set_bg1)(const Color&) = &Scene::SetBackground;
 void (Scene::*scene_set_bg2)(const Gradient&) = &Scene::SetBackground;
 void (Scene::*scene_set_bg3)(const Bitmap&) = &Scene::SetBackground;
 
+tuple scene_get_hemi_p(Scene* s)
+{
+  geom::Vec4 hfp=s->GetHemiParams();
+  return make_tuple(hfp[0],hfp[1],hfp[2],hfp[3]);
+}
+
+void scene_set_hemi_p(Scene* s, tuple p)
+{
+  geom::Vec4 hfp;
+  hfp[0]=extract<float>(p[0]);
+  hfp[1]=extract<float>(p[1]);
+  hfp[2]=extract<float>(p[2]);
+  hfp[3]=extract<float>(p[3]);
+  s->SetHemiParams(hfp);
+}
+
 } // anon ns
 
+void clear_scene() {
+  Scene::Instance().RemoveAll();
+}
 
 void export_Scene()
 {
@@ -82,14 +101,15 @@ void export_Scene()
   void (Scene::* set_light_prop1)(const Color&,const Color&,const Color&) = &Scene::SetLightProp;
   void (Scene::* set_light_prop2)(float,float,float) = &Scene::SetLightProp;
 
-  void (Scene::* export1)(const String&, uint, uint, bool) = &Scene::Export;
-  void (Scene::* export2)(const String&, bool) = &Scene::Export;
-  void (Scene::* export3)(Exporter*) const = &Scene::Export;
+  void (Scene::* export_buffer)(const String&, uint, uint, int, bool) = &Scene::Export;
+  void (Scene::* export_screen)(const String&, bool) = &Scene::Export;
+  void (Scene::* export_via_exporter)(Exporter*) const = &Scene::Export;
   void (Scene::*remove1)(const GfxNodeP&) = &Scene::Remove;
   void (Scene::*remove2)(const String&) = &Scene::Remove;
   void (Scene::*center_on1)(const String&) = &Scene::CenterOn;
   void (Scene::*center_on2)(const GfxObjP&) = &Scene::CenterOn;
-  
+  bool (Scene::*start_offscreen_mode1)(unsigned int, unsigned int) = &Scene::StartOffscreenMode;  
+  bool (Scene::*start_offscreen_mode2)(unsigned int, unsigned int, int) = &Scene::StartOffscreenMode;  
   class_<Viewport>("Viewport", init<>())
     .def_readwrite("x", &Viewport::x)
     .def_readwrite("y", &Viewport::y)
@@ -123,7 +143,7 @@ void export_Scene()
     .def("CenterOn",center_on2)
     .def("UnProject",  &Scene::UnProject, arg("ignore_vp")=false)
     .def("Project",  &Scene::Project, arg("ignore_vp")=false)
-    .def("InitGL", &Scene::InitGL)
+    .def("InitGL", &Scene::InitGL, arg("full")=true)
     .def("RenderGL", &Scene::RenderGL)
     .def("Resize", &Scene::Resize)
     .def("HasNode", &Scene::HasNode)
@@ -134,6 +154,8 @@ void export_Scene()
     .add_property("bg",
                   &Scene::GetBackground, 
                   scene_set_bg1)
+    .add_property("bg_stereo_mode",&Scene::GetBackgroundStereoMode,&Scene::SetBackgroundStereoMode)
+    .add_property("bg_stereo_offset",&Scene::GetBackgroundStereoOffset,&Scene::SetBackgroundStereoOffset)
     .def("GetProjection",&Scene::GetProjection)
     .add_property("projection",&Scene::GetProjection)
     .def("GetInvertedProjection",&Scene::GetInvertedProjection)
@@ -195,9 +217,9 @@ void export_Scene()
     .def("SetLightProp",set_light_prop1)
     .def("SetLightProp",set_light_prop2)
     .def("Apply", apply)
-    .def("Export",export1, arg("transparent")=false)
-    .def("Export",export2, arg("transparent")=false)
-    .def("Export",export3)
+    .def("_export_screen",export_screen)
+    .def("_export_buffer",export_buffer)
+    .def("_export_via_exporter",export_via_exporter)
     .def("ExportPov",&Scene::ExportPov,
          scene_export_pov_overloads())
     .def("PushView",&Scene::PushView)
@@ -227,7 +249,8 @@ void export_Scene()
     .add_property("ao_quality",&Scene::GetAmbientOcclusionQuality,&Scene::SetAmbientOcclusionQuality)
     .add_property("ao_size",&Scene::GetAmbientOcclusionSize,&Scene::SetAmbientOcclusionSize)
     .def("AttachObserver",&Scene::AttachObserver)
-    .def("StartOffscreenMode",&Scene::StartOffscreenMode)
+    .def("StartOffscreenMode",start_offscreen_mode1)
+    .def("StartOffscreenMode",start_offscreen_mode2)
     .def("StopOffscreenMode",&Scene::StopOffscreenMode)
     .def("SetShadingMode",&Scene::SetShadingMode)
     .def("SetBeacon",&Scene::SetBeacon)
@@ -242,5 +265,18 @@ void export_Scene()
     .add_property("bounding_box",scene_get_bb1)
     .add_property("export_aspect",&Scene::GetExportAspect,&Scene::SetExportAspect)
     .add_property("show_export_aspect",&Scene::GetShowExportAspect,&Scene::SetShowExportAspect)
+    .add_property("hemi_params",scene_get_hemi_p,scene_set_hemi_p)
   ;
+
+  // we need to make sure there are no pending references to Python objects
+  // tied to the scene singleton. The destructor of 
+  // scene may be called after Python is shutdown which results
+  // in a segfault.
+  scope().attr("__dict__")["atexit"]=handle<>(PyImport_ImportModule("atexit"));
+
+  def("_clear_scene", &clear_scene);
+  object r=scope().attr("_clear_scene");
+  scope().attr("atexit").attr("register")(r);
+
 }
+

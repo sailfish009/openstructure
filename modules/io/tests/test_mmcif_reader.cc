@@ -17,17 +17,17 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+
 #include <fstream>
 #include <ost/platform.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/io/mol/mmcif_reader.hh>
 #include <ost/conop/conop.hh>
-#include <ost/conop/rule_based_builder.hh>
 
-#define BOOST_AUTO_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
 
 
 using namespace ost;
@@ -142,20 +142,18 @@ BOOST_AUTO_TEST_CASE(mmcif_convert_seqres)
   char * ost_root=getenv("OST_ROOT");
   if(!ost_root){
     std::cout << "WARNING: skipping SEQRES import unit test. " 
-              << "Rule-based builder is required" << std::endl;
+              << "Rule-based processor is required" << std::endl;
     return;
   }
   SetPrefixPath(ost_root);
   String lib_path=GetSharedDataPath()+"/compounds.chemlib";
   conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);  
   if (!compound_lib) {
-    std::cout << "WARNING: skipping SEQRES import unit test. " 
-              << "Rule-based builder is required" << std::endl;
+    std::cout << "WARNING: skipping SEQRES import unit test. Compound " 
+              << "library is required" << std::endl;
     return;    
   }
-  conop::RuleBasedBuilderPtr rbb(new conop::RuleBasedBuilder(compound_lib));
-  conop::Conopology::Instance().RegisterBuilder(rbb, "RBB");
-  conop::Conopology::Instance().SetDefaultBuilder("RBB");
+  conop::Conopology::Instance().SetDefaultLib(compound_lib);
   mol::EntityHandle eh=mol::CreateEntity();
   
   TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
@@ -164,7 +162,6 @@ BOOST_AUTO_TEST_CASE(mmcif_convert_seqres)
   BOOST_CHECK_EQUAL(tmmcif_p.ConvertSEQRES("A(MSE)Y", compound_lib), "AMY");
   BOOST_CHECK_THROW(tmmcif_p.ConvertSEQRES("A(MSEY", compound_lib), 
                     IOException);
-  conop::Conopology::Instance().SetDefaultBuilder("HEURISTIC");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_onbeginloop)
@@ -408,18 +405,18 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
   char * ost_root=getenv("OST_ROOT");
   if(!ost_root){
     std::cout << "WARNING: skipping SEQRES import unit test. " 
-              << "Rule-based builder is required" << std::endl;
+              << "Rule-based processor is required" << std::endl;
     return;
   }
   SetPrefixPath(ost_root);
   String lib_path=GetSharedDataPath()+"/compounds.chemlib";
   conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);
   if (!compound_lib) {
-    std::cout << "WARNING: skipping SEQRES import unit test. "
-              << "Rule-based builder is required" << std::endl;
+    std::cout << "WARNING: skipping SEQRES import unit test. Compound  " 
+              << "lib is required" << std::endl;
     return;
   }
-  conop::Conopology::Instance().SetDefaultBuilder("RBB");
+  conop::Conopology::Instance().SetDefaultLib(compound_lib);
   BOOST_MESSAGE("  Running mmcif_entity_poly_tests...");
   mol::ChainHandle ch;
   IOProfile profile;
@@ -574,7 +571,6 @@ columns.push_back(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
   BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("  done.");
-  conop::Conopology::Instance().SetDefaultBuilder("HEURISTIC");  
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
@@ -1270,6 +1266,7 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   BOOST_CHECK(mmcif_p.GetInfo().GetMethod().str() == "Deep-fry");
   BOOST_CHECK(mmcif_p.GetInfo().GetBioUnits().back().GetDetails() ==
               "author_defined_assembly");
+  BOOST_CHECK(mmcif_p.GetInfo().GetBioUnits().back().GetMethodDetails() == "?");
   BOOST_CHECK(mmcif_p.GetInfo().GetBioUnits().back().GetID() == "2");
   BOOST_CHECK(mmcif_p.GetInfo().GetBioUnits().back().GetChainList().back() ==
               "F");

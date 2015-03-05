@@ -1,44 +1,5 @@
 import math
-from ost import mol
 
-def FloatValueExtract(func):
-  """
-  Decorator to wrap functions that take a list of float values. In addition to 
-  passing in a list of float values directly, it is possible to extract the 
-  values from attributes or generic properties.
-  """
-  def _dec(xs, prop=None, attr=None):
-    if prop!=None:
-      if len(xs)==0:
-        return func([])
-      assert attr==None
-      level=mol.Prop.Level.UNSPECIFIED
-      if isinstance(xs[0], mol.AtomBase):
-        level=mol.Prop.Level.ATOM
-      elif isinstance(xs[0], mol.ResidueBase):
-        level=mol.Prop.Level.RESIDUE
-      elif isinstance(xs[0], mol.ChainBase):
-        level=mol.Prop.Level.CHAIN
-      epm=mol.EntityPropertyMapper(prop, level)
-      vals=[]
-      for x in xs:
-        try:
-          vals.append(epm.Get(x))
-        except:
-          pass
-      return func(vals)
-    if attr!=None:
-      vals=[]
-      for x in xs:
-        try:
-          vals.append(getattr(x, attr))
-        except:
-          pass
-      return func(vals)
-    return func(xs)
-  return _dec
-
-@FloatValueExtract  
 def Mean(xs):
   """
   Calculate mean of dataset
@@ -47,7 +8,6 @@ def Mean(xs):
     raise RuntimeError("Can't calculate mean of empty sequence")
   return float(sum(xs))/len(xs)
 
-@FloatValueExtract
 def Median(xs):
   """
   Calculate median of dataset
@@ -60,7 +20,6 @@ def Median(xs):
   else:
     return sorted_xs[(len(xs)-1)/2]
 
-@FloatValueExtract
 def StdDev(xs):
   """
   Calculate standard-deviation of dataset
@@ -72,11 +31,9 @@ def StdDev(xs):
   mean=Mean(xs)
   return math.sqrt(sum([(x-mean)**2 for x in xs])/len(xs))
 
-@FloatValueExtract
 def Min(xs):
   return min(xs)
 
-@FloatValueExtract
 def Max(xs):
   return max(xs)
 

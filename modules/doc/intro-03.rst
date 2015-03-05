@@ -15,8 +15,8 @@ of data.
 
 .. code-block:: python
   
-  pdb=io.LoadPDB('/path/to/molecule.pdb')
-  go=gfx.Entity('PROTEIN', pdb)
+  pdb = io.LoadPDB('/path/to/molecule.pdb')
+  go = gfx.Entity('PROTEIN', pdb)
   scene.Add(go)
   scene.CenterOn(go)
 
@@ -49,7 +49,7 @@ manipulated:
 .. code-block:: python
 
   # retrieving the previously added protein
-  obj=scene['PROTEIN']
+  obj = scene['PROTEIN']
   # set color of the protein to red
   obj.SetColor(gfx.RED)
 
@@ -90,7 +90,7 @@ protein. Remember from above, that we stored our molecule in the `pdb` variable.
 
 .. code-block:: python
   
-  not_protein=pdb.Select('peptide=false')
+  not_protein = pdb.Select('peptide=false')
   obj.SetRenderMode(gfx.HSC)
   obj.SetRenderMode(gfx.CUSTOM, not_protein)
 
@@ -154,7 +154,7 @@ Coloring the Entity By Property
 
 The most complex but also most powerful coloring method is 
 :meth:`Entity.ColorBy`, which allows to color atoms by a numeric property. This 
-property can either be built-in a property such as atomic b-factor, charge, 
+property can either be a built-in property such as atomic b-factor, charge, 
 residue number or be :doc:`custom properties <../base/generic>` assigned by the 
 user or an algorithm and be defined at any level (chain, residue, atom). The 
 naming of the built-in properties is identical to the properties available in 

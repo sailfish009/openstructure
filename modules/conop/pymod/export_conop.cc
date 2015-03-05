@@ -22,20 +22,29 @@
 using namespace boost::python;
 #include <ost/conop/conop.hh>
 #include <ost/mol/mol.hh>
-#include <ost/conop/builder.hh>
 
 using namespace ost::conop;
 
+void destroy_compound_lib() {
+  Conopology::Instance().SetDefaultLib(CompoundLibPtr());
+}
+
 void export_Conop() {
   class_<Conopology, boost::noncopyable>("Conopology", no_init)
-    .def("Instance", &Conopology::Instance, return_value_policy<reference_existing_object>()).staticmethod("Instance")
-    .def("ConnectAll", &Conopology::ConnectAll)
-    .def("GetBuilder", &Conopology::GetBuilder)
-    .def("ConnectAll", &Conopology::ConnectAll)
-    .def("RegisterBuilder", &Conopology::RegisterBuilder)
-    .def("SetDefaultBuilder", &Conopology::SetDefaultBuilder)
+    .def("Instance", &Conopology::Instance, 
+         return_value_policy<reference_existing_object>()).staticmethod("Instance")
+    .def("SetDefaultLib", &Conopology::SetDefaultLib)
+    .def("GetDefaultLib", &Conopology::GetDefaultLib)
     ;
-    register_ptr_to_python<BuilderP>();
 
+  // we need to make sure there are no pending references to Python objects
+  // tied to the Conopology singleton instance. The destructor of the 
+  // Conopology may be called after Python is shutdown which results  in a 
+  // segfault.
+  scope().attr("__dict__")["atexit"]=handle<>(PyImport_ImportModule("atexit"));
+
+  def("_destroy_compound_lib", &destroy_compound_lib);
+  object r=scope().attr("_destroy_compound_lib");
+  scope().attr("atexit").attr("register")(r);
 
 }

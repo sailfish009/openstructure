@@ -35,15 +35,6 @@ using namespace ost::img::image_state;
 
 namespace value_holder_test {
 
-template <typename V>
-void Construction()
-{
-  ValueHolder<V> v(8,6,10);
-  BOOST_CHECK (v.GetWidth()==8);
-  BOOST_CHECK (v.GetHeight()==6);
-  BOOST_CHECK (v.GetDepth()==10);
-  BOOST_CHECK (v.GetVolume()==8*6*10);
-}
 
 template <typename V>
 void ReadWrite()
@@ -51,7 +42,7 @@ void ReadWrite()
   int wi=4;
   int he=3;
   int de=5;
-  ValueHolder<V> vh(wi,he,de);
+  ValueHolder<V> vh(Size(wi,he,de));
 
   for(int u=0;u<wi;++u) {
     for(int v=0;v<he;++v) {
@@ -60,7 +51,7 @@ void ReadWrite()
 	int indx = w+de*(v+he*u);
 	vh.Value(Index(u,v,w))=val;
 	BOOST_REQUIRE(vh.Value(Index(u,v,w)) == val);
-	BOOST_REQUIRE(vh.Value(indx) == val);
+	BOOST_REQUIRE(vh.GetData()[indx] == val);
       }
     }
   }
@@ -73,7 +64,7 @@ void CopyCtor()
   int he=3;
   int de=5;
 
-  ValueHolder<V> vh1(wi,he,de);
+  ValueHolder<V> vh1(Size(wi,he,de));
 
   for(int u=0;u<wi;++u) {
     for(int v=0;v<he;++v) {
@@ -104,8 +95,6 @@ test_suite* CreateValueHolderTest()
 
   test_suite* ts=BOOST_TEST_SUITE("ValueHolder Test");
 
-  ts->add( BOOST_TEST_CASE(Construction<Real>) );
-  ts->add( BOOST_TEST_CASE(Construction<Complex>) );
   ts->add( BOOST_TEST_CASE(ReadWrite<Real>) );
   ts->add( BOOST_TEST_CASE(ReadWrite<Complex>) );
   ts->add( BOOST_TEST_CASE(CopyCtor<Real>) );

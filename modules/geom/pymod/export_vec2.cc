@@ -24,8 +24,12 @@
 
 using namespace boost::python;
 
-const Real Vec2_getitem(const geom::Vec2& v, int i) {return v[i];}
-void Vec2_setitem(geom::Vec2& v,const  int i,const  Real val) {v[i]=val;}
+const Real Vec2_getitem(const geom::Vec2& v, int i) {
+  return v.At(i);
+}
+void Vec2_setitem(geom::Vec2& v,const  int i,const  Real val) {
+  v.At(i)=val;
+}
 
 
 String vec2_repr(const geom::Vec2& v)

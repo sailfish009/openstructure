@@ -21,8 +21,8 @@
 #include <ost/mol/residue_handle.hh>
 #include <ost/mol/impl/chain_impl.hh>
 #include <ost/mol/impl/residue_impl.hh>
-#include <ost/mol/iterator.hh>
 #include <ost/mol/impl/entity_impl.hh>
+
 namespace ost { namespace mol {
 
 
@@ -96,7 +96,12 @@ AtomHandleList ChainHandle::GetAtomList() const
 {
   this->CheckValidity();
   AtomHandleList atoms;
-  std::copy(AtomsBegin(), AtomsEnd(), std::back_inserter(atoms));
+  atoms.reserve(this->GetAtomCount());
+  for (impl::ResidueImplList::const_iterator i= Impl()->GetResidueList().begin(),
+       e = Impl()->GetResidueList().end(); i !=e; ++i) {
+    std::copy((*i)->GetAtomList().begin(), (*i)->GetAtomList().end(),
+              std::back_inserter(atoms));
+  }
   return atoms;
 }
 
@@ -104,6 +109,7 @@ ResidueHandleList ChainHandle::GetResidueList() const
 {
   ResidueHandleList reslist;
   this->CheckValidity();  
+
   const impl::ResidueImplList& rl = Impl()->GetResidueList();
   reslist.reserve(rl.size());
   for(impl::ResidueImplList::const_iterator it=rl.begin();it!=rl.end();++it) {
@@ -120,66 +126,6 @@ bool ChainHandle::operator==(const ChainHandle& ref) const
 bool ChainHandle::operator!=(const ChainHandle& ref) const
 {
   return Impl()!=ref.Impl();
-}
-
-ResidueHandleIter ChainHandle::ResiduesBegin() const {
-  this->CheckValidity();
-  impl::ChainImplPtr c=Impl();
-  return ResidueHandleIter(c->GetEntity()->GetChainIter(this->GetName()), 
-                           impl::begin(c->GetResidueList()), 
-                           c->GetEntity(), true);
-}
-
-ResidueHandleIter ChainHandle::ResiduesEnd() const {
-  this->CheckValidity();
-  impl::ChainImplPtr c=Impl();
-  impl::pointer_it<impl::ChainImplPtr> cc=c->GetEntity()->GetChainIter(this->GetName());
-  /*impl::pointer_it<impl::ChainImplPtr> nc=cc; ++nc;
-  
-  if (nc!=impl::end(c->GetEntity()->GetChainList())) {
-    return ResidueHandleIter(nc, (*nc)->GetResidueList().begin(), 
-                             c->GetEntity(), true);    
-  } else {
-    return ResidueHandleIter(cc, c->GetResidueList().end(), 
-                             c->GetEntity(), true);    
-  }*/
-  return ResidueHandleIter(cc, impl::end(c->GetResidueList()), 
-                           c->GetEntity(), true);
-}
-
-AtomHandleIter ChainHandle::AtomsBegin() const 
-{
-  this->CheckValidity();
-  impl::ChainImplPtr c=Impl();
-  if (c->GetResidueList().empty()) {
-
-    return AtomHandleIter();
-  }  
-  impl::pointer_it<impl::ChainImplPtr> cc=c->GetEntity()->GetChainIter(this->GetName()); 
-  return AtomHandleIter(cc, impl::begin(c->GetResidueList()),
-                        impl::begin(c->GetResidueList().front()->GetAtomList()),
-                        c->GetEntity(), true);    
-
-}
-
-AtomHandleIter ChainHandle::AtomsEnd() const {
-  this->CheckValidity();
-  impl::ChainImplPtr c=Impl();
-  if (c->GetResidueList().empty()) {
-    return AtomHandleIter();
-  }  
-  impl::pointer_it<impl::ChainImplPtr> cc=c->GetEntity()->GetChainIter(this->GetName());
-  impl::pointer_it<impl::ChainImplPtr> nc=cc; ++nc;
-  impl::ResidueImplList& rc=(*nc)->GetResidueList();
-  if (nc!=impl::end(c->GetEntity()->GetChainList())) {  
-    return AtomHandleIter(nc, impl::begin(rc), 
-                          impl::begin(rc.front()->GetAtomList()),
-                          c->GetEntity(), false);
-  } else {
-    return AtomHandleIter(cc, impl::end(c->GetResidueList()),
-                          impl::end(c->GetResidueList().back()->GetAtomList()),
-                          c->GetEntity(), false);
-  }  
 }
 
 ResidueHandle ChainHandle::GetResidueByIndex(int index) const {

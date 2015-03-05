@@ -3,6 +3,8 @@ set(OST_MOL_ALG_HEADERS
   module_config.hh
   sec_structure_segments.hh
   local_dist_diff_test.hh
+  distance_test_common.hh
+  distance_rmsd_test.hh
   superpose_frames.hh
   filter_clashes.hh
   construct_cbeta.hh
@@ -10,6 +12,7 @@ set(OST_MOL_ALG_HEADERS
   trajectory_analysis.hh
   structure_analysis.hh
   consistency_checks.hh
+  pdbize.hh
 )
 
 set(OST_MOL_ALG_SOURCES
@@ -17,12 +20,15 @@ set(OST_MOL_ALG_SOURCES
   clash_score.cc
   sec_structure_segments.cc
   local_dist_diff_test.cc
+  distance_test_common.cc
+  distance_rmsd_test.cc
   superpose_frames.cc
   filter_clashes.cc
   construct_cbeta.cc
   trajectory_analysis.cc
   structure_analysis.cc
   consistency_checks.cc
+  pdbize.cc
 )
 
 set(MOL_ALG_DEPS ost_mol ost_seq)

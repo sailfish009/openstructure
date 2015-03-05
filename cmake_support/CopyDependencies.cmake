@@ -240,7 +240,9 @@ function(resolve_item context item exepath resolved_item_var)
     string(REPLACE "@loader_path" "${contextpath}" resolved_item "${resolved_item}")
   endif(resolved_item MATCHES "@loader_path")
   
-  get_filename_component(resolved_item "${resolved_item}" REALPATH)
+  if(NOT WIN32)
+    get_filename_component(resolved_item "${resolved_item}" REALPATH)
+  endif(NOT WIN32)
 
   if(IS_ABSOLUTE "${resolved_item}" AND EXISTS "${resolved_item}")
     set(${resolved_item_var} "${resolved_item}" PARENT_SCOPE)
@@ -248,12 +250,14 @@ function(resolve_item context item exepath resolved_item_var)
   endif(IS_ABSOLUTE "${resolved_item}" AND EXISTS "${resolved_item}")
 
   set(ri "ri-NOTFOUND")
-  find_file(ri "${item}" ${exepath}  NO_DEFAULT_PATH)
-  find_file(ri "${item}" ${exepath}  /usr/lib)
-  if(WIN32 AND NOT UNIX)
+  if(UNIX AND NOT WIN32)
+    find_file(ri "${item}" ${exepath}  NO_DEFAULT_PATH)
+    find_file(ri "${item}" ${exepath}  /usr/lib)
+  else(UNIX AND NOT WIN32)
     find_program(ri "${item}" PATHS "${exepath}" NO_DEFAULT_PATH)
+    find_program(ri "${item}" PATHS "${CMAKE_INSTALL_PREFIX}/bin" NO_DEFAULT_PATH)
     find_program(ri "${item}" PATHS "${exepath}")
-  endif(WIN32 AND NOT UNIX)
+  endif(UNIX AND NOT WIN32)
   if(ri)
     set(resolved_item "${ri}")
     set(ri "ri-NOTFOUND")
@@ -277,7 +281,11 @@ function(resolve_embedded_item item resolved_item_var)
   else(${item} MATCHES ${CMAKE_INSTALL_PREFIX})
     # only embed libraries, therefore put into lib dir
     get_filename_component(item_name "${item}" NAME)
-    set(${resolved_item_var} "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/${item_name}" PARENT_SCOPE)
+    if(WIN32 AND NOT UNIX)
+      set(${resolved_item_var} "${CMAKE_INSTALL_PREFIX}/bin/${item_name}" PARENT_SCOPE)
+    else(WIN32 AND NOT UNIX)
+      set(${resolved_item_var} "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/${item_name}" PARENT_SCOPE)
+    endif(WIN32 AND NOT UNIX)
   endif(${item} MATCHES ${CMAKE_INSTALL_PREFIX})
 endfunction(resolve_embedded_item)
 
@@ -333,17 +341,19 @@ endfunction(change_install_names_for_item)
 #=============================================================================
 function(verify keys_var)
   foreach(key ${${keys_var}})
-    get_dependencies_for_item("${${key}_RESOLVED_EMBEDDED_ITEM}" dependencies)
-    get_filename_component(exepath ${${key}_RESOLVED_EMBEDDED_ITEM} PATH)
-    foreach(dep ${dependencies})
-      resolve_item( ${${key}_RESOLVED_EMBEDDED_ITEM} ${dep} exepath resolved_dep)
-      is_system_lib(${resolved_dep} system_flag)
-      if(NOT ${system_flag})
-        if(NOT ${resolved_dep} MATCHES ${CMAKE_INSTALL_PREFIX})
-          MESSAGE("Warning: item:'${${key}_RESOLVED_EMBEDDED_ITEM}' contains external dependency:'${resolved_dep}'")
-        endif(NOT ${resolved_dep} MATCHES ${CMAKE_INSTALL_PREFIX})
-      endif(NOT ${system_flag})
-    endforeach(dep)
+    if(NOT ${${key}_SYSTEMFLAG})
+      get_dependencies_for_item("${${key}_RESOLVED_EMBEDDED_ITEM}" dependencies)
+      get_filename_component(exepath ${${key}_RESOLVED_EMBEDDED_ITEM} PATH)
+      foreach(dep ${dependencies})
+        resolve_item( ${${key}_RESOLVED_EMBEDDED_ITEM} ${dep} exepath resolved_dep)
+        is_system_lib(${resolved_dep} system_flag)
+        if(NOT ${system_flag})
+          if(NOT ${resolved_dep} MATCHES ${CMAKE_INSTALL_PREFIX})
+            MESSAGE("Warning: item:'${${key}_RESOLVED_EMBEDDED_ITEM}' contains external dependency:'${resolved_dep}'")
+          endif(NOT ${resolved_dep} MATCHES ${CMAKE_INSTALL_PREFIX})
+        endif(NOT ${system_flag})
+      endforeach(dep)
+    endif(NOT ${${key}_SYSTEMFLAG})
   endforeach(key)
 endfunction(verify)
 
@@ -440,7 +450,7 @@ endfunction(copy_python)
 # function read_config
 #=============================================================================
 function(read_config ost_config_var)
-  file(READ "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/ost_config" ost_config)
+  file(READ "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/ost_config" ost_config)
   set(${ost_config_var} "${ost_config}" PARENT_SCOPE)
 endfunction(read_config)
 
@@ -448,7 +458,7 @@ endfunction(read_config)
 # function write_config
 #=============================================================================
 function(write_config ost_config)
-  file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/ost_config" "${ost_config}")
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/ost_config" "${ost_config}")
 endfunction(write_config)
 
 #=============================================================================
@@ -616,13 +626,13 @@ endfunction(get_rpath)
 #=============================================================================
 function(copy_qt library_dir plugin_dir plugins)
   file(COPY "${library_dir}/Resources/qt_menu.nib"
-       DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/"
+       DESTINATION "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/"
        FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
   file(COPY ${plugin_dir}
-       DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/openstructure) 
-  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/*.dylib")
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}) 
+  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/*.dylib")
   set(${plugins} ${QT_PLUGINS} PARENT_SCOPE)
-  file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/qt.conf" "[Paths]\nPlugins=../plugins\n")
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/qt.conf" "[Paths]\nPlugins=../plugins\n")
 endfunction(copy_qt)
 
 #=============================================================================
@@ -648,6 +658,28 @@ function(copy_resolved_item resolved_item resolved_embedded_item)
   endif()
 
 endfunction(copy_resolved_item)
+
+#=============================================================================
+# function copy_python (OSX)
+#=============================================================================
+function(copy_python include_path version new_binary_path)
+
+
+  get_filename_component(real_python_include_path ${include_path} REALPATH)
+  get_filename_component(python_root_dir ${real_python_include_path}/../.. REALPATH) 
+  file(COPY ${python_root_dir}/${LIB_DIR}/python${version}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version})
+  file(GLOB  py_config_files "${include_path}/pyconfig*.h")
+  file(COPY ${py_config_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/python${version})
+  file(GLOB_RECURSE python_so_files "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version}/*.so")
+  foreach(so_file ${python_so_files})
+    file(RPATH_REMOVE FILE "${so_file}")
+  endforeach(so_file)
+  read_config(ost_config)
+  file(COPY ${python_root_dir}/Resources/Python.app/Contents/MacOS/Python DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+  set(${new_binary_path} "${CMAKE_INSTALL_PREFIX}/bin/Python" PARENT_SCOPE)
+  string(REGEX REPLACE "pyexec=\"[^\n\$]*\"" "pyexec=\"\$DNG_BINDIR/Python\"\nexport PYTHONHOME=\$DNG_ROOT" ost_config "${ost_config}")
+  write_config("${ost_config}")
+endfunction(copy_python)
 
 
 elseif(WIN32 AND NOT UNIX)
@@ -675,8 +707,19 @@ function(get_dependencies_for_item  item list_var)
   endif(NOT dumpbin_cmd)
 
   set(ENV{VS_UNICODE_OUTPUT} "") # Block extra output from inside VS IDE.
-  execute_process( COMMAND ${dumpbin_cmd}  /dependents ${item} OUTPUT_VARIABLE dumpbin_cmd_ov RESULT_VARIABLE retcode)
+  execute_process( COMMAND ${dumpbin_cmd}  /dependents ${item} OUTPUT_VARIABLE dumpbin_cmd_ov  ERROR_VARIABLE dumpbin_cmd_ev RESULT_VARIABLE retcode)
   if(retcode)
+    if(${item} MATCHES "System32")
+      # 32 bit cmake might run within WOW64, which automatically mangles the path to System32
+      # dumpbin, which is x86_64 in this case will run with the unmangled path and therefore has to look for
+      # the 32 bit libraries in SysWOW64 instead of System32
+      string(REPLACE "System32" "SysWOW64" item ${item})
+      execute_process( COMMAND ${dumpbin_cmd}  /dependents ${item} OUTPUT_VARIABLE dumpbin_cmd_ov  ERROR_VARIABLE dumpbin_cmd_ev RESULT_VARIABLE retcode)
+    endif(${item} MATCHES "System32")
+  endif(retcode)
+  if(retcode)
+    MESSAGE( "dumpbin output: '${dumpbin_cmd_ov}'")
+    MESSAGE( "dumpbin error output: '${dumpbin_cmd_ev}'")
     MESSAGE(FATAL_ERROR "dumpbin stopped with return code: '${retcode}'")
   endif(retcode)
   # Convert to a list of lines:
@@ -693,6 +736,7 @@ function(get_dependencies_for_item  item list_var)
       string(REGEX REPLACE "${dumpbin_regex}" "\\1" dep "${candidate}")
       list(APPEND dep_list ${dep})
     endif("${candidate}" MATCHES "${dumpbin_regex}")
+  endforeach(candidate)
   set(${list_var} ${dep_list} PARENT_SCOPE)
 endfunction(get_dependencies_for_item)
 
@@ -712,7 +756,7 @@ function(is_system_lib item system_var)
   string(REGEX REPLACE "\\\\" "/" sysroot "${sysroot}")
   string(TOLOWER "$ENV{windir}" windir)
   string(REGEX REPLACE "\\\\" "/" windir "${windir}")
-  if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)")
+  if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)" AND NOT lower MATCHES "python.*dll")
     set(${system_var}  1 PARENT_SCOPE)
   else()
     set(${system_var}  0 PARENT_SCOPE)
@@ -735,6 +779,52 @@ function(copy_resolved_item resolved_item resolved_embedded_item)
   endif()
 
 endfunction(copy_resolved_item)
+
+#=============================================================================
+# function copy_python (Windows)
+#=============================================================================
+function(copy_python include_path version new_binary_path)
+  get_filename_component(real_python_include_path ${include_path} REALPATH)
+  get_filename_component(python_root_dir ${real_python_include_path}/.. REALPATH) 
+  file(GLOB  lib_files "${python_root_dir}/Lib/*")
+  file(COPY ${lib_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version})
+  file(GLOB  dll_files "${python_root_dir}/DLLs/*")
+  file(COPY ${dll_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version})
+  file(GLOB  py_config_files "${include_path}/pyconfig*.h")
+  file(COPY ${py_config_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/python${version})
+  file(COPY ${python_root_dir}/python.exe DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+  set(${new_binary_path} "${CMAKE_INSTALL_PREFIX}/bin/python.exe" PARENT_SCOPE)
+  
+  # copy msvc90 CRT for python
+  get_filename_component(msvc90_dir "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0;InstallDir]" ABSOLUTE)
+  get_filename_component(msvc90_express_dir "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\9.0;InstallDir]" ABSOLUTE)
+  find_path(msvc_redist_dir NAMES x86/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest
+            PATHS
+            "${msvc90_dir}/../../VC/redist"
+            "${msvc90_express_dir}/../../VC/redist"
+            "C:/Program Files/Microsoft Visual Studio 9.0/VC/redist"
+            "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist"
+    )
+  set(msvc90_crt_dir "${msvc_redist_dir}/x86/Microsoft.VC90.CRT")
+  file(COPY "${msvc90_crt_dir}/Microsoft.VC90.CRT.manifest"
+            "${msvc90_crt_dir}/msvcm90.dll"
+            "${msvc90_crt_dir}/msvcp90.dll"
+            "${msvc90_crt_dir}/msvcr90.dll"
+       DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+
+endfunction(copy_python)
+
+#=============================================================================
+# function copy_qt (Windows)
+#=============================================================================
+function(copy_qt library_dir plugin_dir plugins)
+  file(COPY ${plugin_dir}
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}) 
+  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}-/*.dll")
+  set(${plugins} ${QT_PLUGINS} PARENT_SCOPE)
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/qt.conf" "[Paths]\nPlugins=../plugins\n")
+endfunction(copy_qt)
+
 
 elseif(UNIX)
 
@@ -826,13 +916,13 @@ endfunction(get_rpath)
 #=============================================================================
 function(copy_qt library_dir plugin_dir plugins)
   file(COPY ${plugin_dir}
-       DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/openstructure) 
-  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/*.so")
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}) 
+  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/*.so")
   foreach(plugin ${QT_PLUGINS})
     remove_rpath("${plugin}")
   endforeach(plugin)
   set(${plugins} ${QT_PLUGINS} PARENT_SCOPE)
-  file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/qt.conf" "[Paths]\nPlugins=../plugins\n")
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/${LIBEXEC_PATH}/qt.conf" "[Paths]\nPlugins=../plugins\n")
 endfunction(copy_qt)
 
 #=============================================================================
@@ -877,8 +967,48 @@ function(copy_resolved_item resolved_item resolved_embedded_item)
 
 endfunction(copy_resolved_item)
 
-
-
+#=============================================================================
+# function copy_python (Linux)
+#=============================================================================
+function(copy_python include_path version new_binary_path)
+  if (_UBUNTU_LAYOUT)
+    if ("${ARCH}" MATCHES "64")
+      set(UBUNTU_ARCH_STRING "x86_64")
+    else()  
+      set(UBUNTU_ARCH_STRING "i386")
+    endif()
+  endif()
+  get_filename_component(real_python_include_path ${include_path} REALPATH)
+  get_filename_component(python_root_dir ${real_python_include_path}/../.. REALPATH) 
+  if (_UBUNTU_LAYOUT)
+    file (GLOB_RECURSE python_lib_files RELATIVE ${python_root_dir}/${LIB_DIR}/python${version}/ FOLLOW_SYMLINKS ${python_root_dir}/${LIB_DIR}/python${version}/*)
+    foreach(python_lib_file ${python_lib_files})
+      if(NOT ${python_lib_file} MATCHES "pyc$") 
+        get_filename_component(real_python_lib_file ${python_root_dir}/${LIB_DIR}/python${version}/${python_lib_file} REALPATH)
+        execute_process(COMMAND cmake -E copy ${real_python_lib_file} ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version}/${python_lib_file})
+      endif()
+    endforeach()
+  else()
+    file(COPY ${python_root_dir}/${LIB_DIR}/python${version}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version} PATTERN "*.pyc" EXCLUDE)
+  endif()
+  file(GLOB  py_config_files "${include_path}/pyconfig*.h")
+  file(COPY ${py_config_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/python${version})
+  file(GLOB_RECURSE python_so_files "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version}/*.so")
+  foreach(so_file ${python_so_files})
+    file(RPATH_REMOVE FILE "${so_file}")
+  endforeach(so_file)
+  read_config(ost_config)
+  if (_UBUNTU_LAYOUT)
+    file(GLOB python_libs "${python_root_dir}/${LIB_DIR}/python${version}/config-${UBUNTU_ARCH_STRING}-linux-gnu/libpython${version}.so.*" FOLLOW_SYMLINKS)
+  else()
+    file(GLOB python_libs "${python_root_dir}/${LIB_DIR}/libpython${version}.so*")
+  endif()
+  file(COPY ${python_libs} DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR})
+  file(COPY ${python_root_dir}/bin/python${version} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+  set(${new_binary_path} "${CMAKE_INSTALL_PREFIX}/bin/python${version}" PARENT_SCOPE)
+  string(REGEX REPLACE "pyexec=\"[^\n\$]*\"" "pyexec=\"\$DNG_BINDIR/python${version}\"\nexport PYTHONHOME=\$DNG_ROOT" ost_config "${ost_config}")
+  write_config("${ost_config}")
+endfunction(copy_python)
 
 
 #=============================================================================

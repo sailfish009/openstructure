@@ -49,8 +49,7 @@ namespace ost { namespace img { namespace image_state {
 class DLLEXPORT_OST_IMG_BASE SpatialDomain {
 public:
   SpatialDomain(const Extent& e):
-    extent_(e),
-    physical_extent_(ExtractPhysicalExtent(e))
+    extent_(e)
   {}
 
   // interface for ImageStateImpl
@@ -73,7 +72,7 @@ public:
   }
 
   Extent GetPhysicalExtent() const {
-    return physical_extent_;
+    return extent_;
   }
 
   template <typename V>
@@ -109,30 +108,15 @@ public:
   }
 
   Index Point2Index(const Point& p) const {
-    return Index(p[0]-extent_.GetStart()[0],
-		 p[1]-extent_.GetStart()[1],
-		 p[2]-extent_.GetStart()[2]);
+    Point start=extent_.GetStart();
+    return Index(p[0]-start[0],
+                 p[1]-start[1],
+                 p[2]-start[2]);
   }
   
 private:
   Extent extent_;
-  Extent physical_extent_;
-  
-  Extent ExtractPhysicalExtent(const Extent& e) const {
-#if 1
-    Point pad;
-    if(e.GetDim()==1) {
-      pad=Point( (e.GetSize()[0]&0x1) ? 1 : 2,0,0);
-    } else if(e.GetDim()==2) {
-      pad=Point(0,(e.GetSize()[1]&0x1) ? 1 : 2,0);
-    } else {
-      pad=Point(0,0,(e.GetSize()[2]&0x1) ? 1 : 2);
-    }
-    return Extent(e.GetStart(),e.GetEnd()+pad);
-#else
-    return Extent(e.GetStart(),e.GetEnd());
-#endif
-  }
+
 };
 
 }}} // ns

@@ -216,7 +216,7 @@ public:
   void RenameResidue(ResidueHandle res, const String& new_name);
   
   void SetResidueNumber(ResidueHandle res, const ResNum& num);
-  
+   
   void RenameChain(ChainHandle chain, const String& new_name);
 
   /// \brief Assign type of chain according to ChainType.
@@ -244,6 +244,10 @@ public:
   ///         is the atom to remove. If no such atom exists, this method will
   ///         have no effect
   void DeleteAtom(const AtomHandle& atom);
+  /// \ brief Delete a set of atoms
+  ///
+  /// All associated torsions and bonds will be removed as well
+  void DeleteAtoms(const AtomHandleList& atoms);
   
   /// \brief Add named torsion to entity
   TorsionHandle AddTorsion(const String& name, const AtomHandle& a1,
@@ -279,6 +283,7 @@ public:
   void RenumberAllResidues(int start, bool keep_spacing);
 
 
+  void RenumberChain(ChainHandle chain, const ResNumList& new_numbers);
 
   /// \brief renumber residues of one chain
   ///

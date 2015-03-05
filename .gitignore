@@ -43,6 +43,7 @@ components.cif
 compounds.chemlib
 /deployment/macos/openstructure.dmg
 /scripts/dng
+/modules/gui/src/module_config.hh
 *.vcproj
 /scripts/ost_config
 *.user
@@ -57,10 +58,16 @@ Debug
 /deployment/win/create_archive.bat
 /install_manifest.txt
 /modules/gui/src/module_config.hh
+/modules/base/pymod/__init__.py
 /modules/gui/src/dngr.qrc.depends
+/scripts/ost_startup.py
 *_out.csv
 *_out.tab
 *_out.pickle
 /modules/io/tests/temp_img.tmp
 PYTEST-*.xml
 ost_*_tests_log.xml
+rules.ninja
+build.ninja
+modules/gui/src/dngr.qrc.depends
+/modules/bindings/tests/formatdb.log

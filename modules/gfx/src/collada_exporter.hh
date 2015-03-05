@@ -35,7 +35,7 @@ namespace ost { namespace gfx {
 class DLLEXPORT_OST_GFX ColladaExporter: public Exporter
 {
 public:
-  ColladaExporter(const std::string& collada_file, float scale=1.0);
+  ColladaExporter(const std::string& collada_file);
   virtual ~ColladaExporter();
 
   // exporter interface
@@ -53,7 +53,6 @@ public:
 private:
   std::string file_;
   std::ofstream out_;
-  float scale_;
   std::vector<std::string> obj_;
 };
 

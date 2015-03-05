@@ -19,8 +19,10 @@
 #ifndef GEOM_MAT4_HH
 #define GEOM_MAT4_HH
 
+#include <cassert>
 #include <cstddef> // for size_t
 #include <ostream>
+#include <vector>
 
 #include <boost/operators.hpp>
 
@@ -77,10 +79,33 @@ public:
   //! comparable
   bool operator==(const Mat4& rhs) const;
 
-  //! element access
-  Real& operator()(std::size_t r, std::size_t c);
-  //! const element access
-  const Real& operator()(std::size_t r, std::size_t c) const;
+  const Real& At(std::size_t r, std::size_t c) const
+  {
+    if (r>3 || c>3) {
+      throw std::out_of_range("indices must be smaller than 4");
+    }
+    return data_[r][c];
+  }
+
+  Real& At(std::size_t r, std::size_t c)
+  {
+    if (r>3 || c>3) {
+      throw std::out_of_range("indices must be smaller than 4");
+    }
+    return data_[r][c];
+  }
+
+  Real& operator()(std::size_t r, std::size_t c)
+  {
+    assert(r<4 && c < 4);
+    return data_[r][c];
+  }
+
+  const Real& operator()(std::size_t r, std::size_t c) const
+  {
+    assert(r<4 && c < 4);
+    return data_[r][c];
+  }
 
   //! addable op
   Mat4& operator+=(const Mat4& rhs);
@@ -111,6 +136,8 @@ i12, double i13, double i20, double i21, double i22, double i23, double i30, dou
 double i32, double i33);
 
 };
+
+typedef std::vector<Mat4> Mat4List;
 
 DLLEXPORT_OST_GEOM std::ostream& operator<<(std::ostream& os, const Mat4& m);
 

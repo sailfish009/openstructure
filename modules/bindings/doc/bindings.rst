@@ -18,3 +18,8 @@ So far, the binding module includes:
   msms
   tmtools
   clustalw
+  hbplus
+  kclust
+  naccess
+  lga
+  cadscore

@@ -1,7 +1,7 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-
+from ost import table
 __all__=('Table', )
 
 class TableModel(QAbstractTableModel):
@@ -40,10 +40,20 @@ class Table(QTableView):
      self.setFrameShape(QFrame.NoFrame)    
      self.setAttribute(Qt.WA_MacSmallSize)
      self.setShowGrid(False)
-     #self.horizontalHeader().setStretchLastSection(True)
+     self.double_click = None
+     self.horizontalHeader().setStretchLastSection(True)
      self.setContextMenuPolicy(Qt.CustomContextMenu)
      self.setSelectionBehavior(QAbstractItemView.SelectRows)
      self.setSizePolicy(QSizePolicy.MinimumExpanding, 
                         QSizePolicy.MinimumExpanding)
      self.setSortingEnabled(True)
      self.setModel(self._model)
+     QObject.connect(self, SIGNAL('doubleClicked(QModelIndex)'), 
+                     self.OnDoubleClick)
+  def OnDoubleClick(self, model_index):
+    print 'DOUBLE'
+    if not self.double_click:
+      return
+    row = table.TableRow(self._model.table.rows[model_index.row()],
+                         self._model.table)
+    self.double_click(row)

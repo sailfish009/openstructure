@@ -408,7 +408,7 @@ void Test_DFT(DataType TYPE)
     Real absdiff=std::abs(ri3.GetReal(it)-ri1.GetReal(it));
     msg.str("");
     msg << "@" << Point(it) << ": abs(" << ri3.GetReal(it) << "-" <<ri1.GetReal(it) << ")="<<absdiff;
-    BOOST_REQUIRE(absdiff<1e-5);
+    BOOST_REQUIRE_MESSAGE(absdiff<1e-5,msg.str());
   }
 }
 

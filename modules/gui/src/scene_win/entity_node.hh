@@ -19,6 +19,8 @@
 #ifndef OST_GUI_SCENE_WIN_ENTITY_NODE_HH
 #define OST_GUI_SCENE_WIN_ENTITY_NODE_HH
 
+#ifndef Q_MOC_RUN
+
 #include <ost/gfx/gfx_node_fw.hh>
 #include <ost/gfx/gfx_node.hh>
 
@@ -27,6 +29,7 @@
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/scene_win/gfx_scene_node.hh>
+#endif
 
 /*
   Author: Stefan Scheuber

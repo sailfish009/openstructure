@@ -33,36 +33,41 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(load_PDB_ov, LoadPDB, 1, 2)
 void (PDBWriter::*write_a)(const mol::EntityHandle&)=&PDBWriter::Write;
 void (PDBWriter::*write_b)(const mol::EntityView&)=&PDBWriter::Write;
 
+void remove_profiles() {
+  IOProfileRegistry::RemoveProfiles();
+}
+
 void export_pdb_io()
 {
   class_<IOProfile>("IOProfile",
-         init<String,bool,bool,bool,bool,bool,bool,bool>((arg("dialect")="PDB",
-                                                          arg("strict_hydrogens")=false,
-                                                          arg("quack_mode")=false,
-                                                          arg("fault_tolerant")=false,
-                                                          arg("join_spread_atom_records")=false,
-                                                          arg("no_hetatms")=false,
-                                                          arg("calpha_only")=false,
-						          arg("bond_feasibility_check")=true)))
+         init<String,bool,bool,bool,bool,bool,
+              conop::ProcessorPtr>((arg("dialect")="PDB",
+                                    arg("quack_mode")=false,
+                                    arg("fault_tolerant")=false,
+                                    arg("join_spread_atom_records")=false,
+                                    arg("no_hetatms")=false,
+                                    arg("calpha_only")=false,
+                                    arg("processor")=conop::ProcessorPtr())))
+    .def(init<const IOProfile&>())
     .def_readwrite("dialect", &IOProfile::dialect)
     .def_readwrite("fault_tolerant", &IOProfile::fault_tolerant)
     .def_readwrite("quack_mode", &IOProfile::quack_mode)
-    .def_readwrite("strict_hydrogens", &IOProfile::strict_hydrogens)
     .def_readwrite("no_hetatms", &IOProfile::no_hetatms)
     .def_readwrite("calpha_only", &IOProfile::calpha_only)
     .def_readwrite("join_spread_atom_records", &IOProfile::join_spread_atom_records)
-    .def_readwrite("bond_feasibility_check", &IOProfile::bond_feasibility_check)
+    .def_readwrite("processor", &IOProfile::processor)
     .def("Copy", &IOProfile::Copy)
     .def(self_ns::str(self))
   ;
   class_<IOProfileRegistry>("IOProfileRegistry", no_init)
     .def("Get", &IOProfileRegistry::Get,  
-         return_value_policy<reference_existing_object>())
+         return_internal_reference<>())
     .def("Set", &IOProfileRegistry::Set)
     .def("Instance", &IOProfileRegistry::Instance,
+         //return_internal_reference).staticmethod("Instance")
          return_value_policy<reference_existing_object>()).staticmethod("Instance")
     .def("GetDefault", &IOProfileRegistry::GetDefault,
-         return_value_policy<reference_existing_object>())
+         return_internal_reference<>())
   ;
   class_<PDBReader, boost::noncopyable>("PDBReader", init<String, const IOProfile&>())
     .def("HasNext", &PDBReader::HasNext)
@@ -83,4 +88,14 @@ void export_pdb_io()
                   &PDBWriter::SetWriteMultiModel)
     .def("Write", write_b)    
   ;
+
+  // we need to make sure there are no pending references to Python objects
+  // tied to the IOProfileRegistry singleton. The destructor of 
+  // IOProfileRegistry may be called after Python is shutdown which results
+  // in a segfault.
+  scope().attr("__dict__")["atexit"]=handle<>(PyImport_ImportModule("atexit"));
+
+  def("_remove_profiles", &remove_profiles);
+  object r=scope().attr("_remove_profiles");
+  scope().attr("atexit").attr("register")(r);
 }

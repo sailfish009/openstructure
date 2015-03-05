@@ -19,81 +19,12 @@
 #ifndef OST_MOL_ALG_LOCAL_DIST_TEST_HH
 #define OST_MOL_ALG_LOCAL_DIST_TEST_HH
 
-#include <ost/mol/entity_view.hh>
 #include <ost/mol/alg/module_config.hh>
 #include <ost/seq/alignment_handle.hh>
+#include <ost/mol/alg/distance_test_common.hh>
 
 namespace ost { namespace mol { namespace alg {
   
-/// \brief Contains the infomation needed to uniquely identify an atom in a structure
-///
-/// Used by the the Local Distance Difference Test classes and functions
-class DLLEXPORT_OST_MOL_ALG UniqueAtomIdentifier
-{
-  
-public:
-  /// \brief Constructor with all the relevant information  
-  UniqueAtomIdentifier(const String& chain,const ResNum& residue,const String& residue_name, const String& atom): chain_(chain),residue_(residue),residue_name_(residue_name),atom_(atom) {}  
-
-  // to make the compiler happy (boost python map suite)
-  UniqueAtomIdentifier(): chain_(""),residue_(ResNum(1)),residue_name_(""),atom_("") {}  
-
-  /// \brief Returns the name of the chain to which the atom belongs, as a String  
-  String GetChainName() const { return chain_; } 
-
-  /// \brief Returns the ResNum of the residue to which the atom belongs
-  ResNum GetResNum() const { return residue_; }  
-
-  /// \brief Returns the name of the residue to which the atom belongs, as a String
-  String GetResidueName() const { return residue_name_; }
-
-  /// \brief Returns the name of the atom, as a String
-  String GetAtomName() const { return atom_; }
-
-  // required because UniqueAtomIdentifier is used as a key for a std::map  
-  bool operator==(const UniqueAtomIdentifier& rhs) const {
-    return chain_==rhs.chain_ && residue_==rhs.residue_ && atom_==rhs.atom_;
-  }
-
-  // required because UniqueAtomIdentifier is used as a key for a std::map  
-  bool operator<(const UniqueAtomIdentifier& rhs) const {
-    int cc=chain_.compare(rhs.chain_);
-    if (cc) {
-      return cc<0;
-    }
-    if (residue_<rhs.residue_) {
-      return true;
-    } else if (residue_>rhs.residue_) {
-     return false;
-    }
-    return atom_.compare(rhs.atom_)<0;
-  }   
-private:
-
-  String chain_;
-  ResNum residue_;
-  String residue_name_;
-  String atom_;    
-};
-
-// typedef used to make the code cleaner
-typedef std::pair<UniqueAtomIdentifier,UniqueAtomIdentifier> UAtomIdentifiers;
-
-/// \brief Residue distance list. 
-///
-/// Container for all the interatomic distances that are checked in a Local Distance Difference Test 
-/// and are originating from a single specific residue 
-typedef std::map<std::pair<UniqueAtomIdentifier,UniqueAtomIdentifier>,std::pair<Real,Real> > ResidueRDMap;
-
-/// \brief Global distance list. 
-///
-/// Container for all the residue-based interatomic distance lists that are checked in a Local Distance Difference Test
-/// and  belong to the same structure
-typedef std::map<ost::mol::ResNum,ResidueRDMap> GlobalRDMap;
-
-// used by the multi-reference distance-list generator function
-typedef std::map<UniqueAtomIdentifier,int> ExistenceMap;
-
 /// \brief Calculates number of distances conserved in a model, given a list of distances to check and a model
 ///
 /// Calculates the two values needed to determine the Local Distance Difference Test for a given model, i.e.
@@ -115,11 +46,10 @@ typedef std::map<UniqueAtomIdentifier,int> ExistenceMap;
 /// residue properties. Specifically, the local residue-based lddt score is stored in a float property named
 /// as the provided string, while the residue-based number of conserved and total distances are saved in two 
 /// int properties named <string>_conserved and <string>_total.
-std::pair<long int,long int> DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
-                                         const GlobalRDMap& dist_list,
-                                         std::vector<Real> cutoff_list,
-                                         int sequence_separation = 0, 
-                                         const String& local_ldt_property_string="");
+std::pair<long int,long int> DLLEXPORT_OST_MOL_ALG 
+LocalDistDiffTest(const EntityView& mdl, const GlobalRDMap& dist_list,
+                  std::vector<Real> cutoff_list, int sequence_separation = 0, 
+                  const String& local_ldt_property_string="");
 
 /// \brief Calculates the Local Distance Difference Score for a given model with respect to a given target
 ///

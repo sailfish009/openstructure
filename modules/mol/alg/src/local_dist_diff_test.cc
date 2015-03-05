@@ -8,55 +8,6 @@ namespace ost { namespace mol { namespace alg {
 namespace {
 
 // helper function
-String swapped_name(const String& name)
-{
-  if (name=="OE1") return "OE2";
-  if (name=="OE2") return "OE1";
-
-  if (name=="OD1") return "OD2";
-  if (name=="OD2") return "OD1";
-
-  if (name=="CG1") return "CG2";
-  if (name=="CG2") return "CG1";
-
-  if (name=="CE1") return "CE2";
-  if (name=="CE2") return "CE1";  
-
-  if (name=="CD1") return "CD2";
-  if (name=="CD2") return "CD1";
-
-  if (name=="NH1") return "NH2";
-  if (name=="NH2") return "NH1";
-
-  return name;
-}
-
-// helper function
-bool swappable(const String& rname, const String& aname)
-{
-  if (rname=="GLU") {
-    return (aname=="OE1" || aname=="OE2");
-  }
-  if (rname=="ASP") {
-    return (aname=="OD1" || aname=="OD2");
-  }
-  if (rname=="VAL") {     
-
-    return (aname=="CG1" || aname=="CG2");
-  }
-  if (rname=="TYR" || rname=="PHE") {
-    return (aname=="CD1" || aname=="CD2" || aname=="CE1" || aname=="CE2");
-  }
-  if (rname=="LEU") {
-    return (aname=="CD1" || aname=="CD2");
-  }
-  if (rname=="ARG") {
-    return (aname=="NH1" || aname=="NH2");
-  }  
-  return false;
-}
-
-// helper function
 bool within_tolerance(Real mdl_dist, const std::pair<Real,Real>& values, Real tol)
 {
 
@@ -76,14 +27,14 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
     const std::pair <Real,Real>& values = ai->second;
     const UniqueAtomIdentifier& first_atom=uais.first;
     const UniqueAtomIdentifier& second_atom=uais.second;
-    String name=swap ? swapped_name(first_atom.GetAtomName()) : first_atom.GetAtomName();
+    String name=swap ? SwappedName(first_atom.GetAtomName()) : first_atom.GetAtomName();
     AtomView av1=mdl_res ? mdl_res.FindAtom(name) : AtomView();
  
     if (only_fixed) {
        if (std::abs(first_atom.GetResNum().GetNum()-second_atom.GetResNum().GetNum())<=sequence_separation) {
           continue;
         }
-      if (swappable(second_atom.GetResidueName(), second_atom.GetAtomName())) {
+      if (Swappable(second_atom.GetResidueName(), second_atom.GetAtomName())) {
           continue;
       }
     }
@@ -157,7 +108,7 @@ std::pair<Real, Real> calc_overlap2(const seq::ConstSequenceHandle& ref_seq,
   for (AtomViewList::iterator ai=ref_atoms.begin(),
        ae=ref_atoms.end(); ai!=ae; ++ai) {
     if (ai->GetElement()=="H") { continue; }
-    String name=swap ? swapped_name(ai->GetName()) : ai->GetName();
+    String name=swap ? SwappedName(ai->GetName()) : ai->GetName();
     AtomView av1=mdl_res ? mdl_res.FindAtom(name) : AtomView();
     if (max_dist>=0){ 
       within=ref.FindWithin(ai->GetPos(), max_dist);
@@ -172,7 +123,7 @@ std::pair<Real, Real> calc_overlap2(const seq::ConstSequenceHandle& ref_seq,
         if (aj->GetResidue().GetNumber()==ref_res.GetNumber()) {
           continue;
         }
-        if (swappable(aj->GetResidue().GetName(), aj->GetName())) {
+        if (Swappable(aj->GetResidue().GetName(), aj->GetName())) {
           continue;
         }
         overlap.second+=1.0;
@@ -254,8 +205,8 @@ void check_and_swap(const GlobalRDMap& glob_dist_list, const EntityView& mdl, st
         static_cast<Real>(ov2.first)/ov2.second) {
       AtomViewList atoms=mdl_res.GetAtomList();
       for (AtomViewList::iterator j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
-        if (swappable(rname, j->GetName())) {
-          edi.RenameAtom(j->GetHandle(), swapped_name(j->GetName()));
+        if (Swappable(rname, j->GetName())) {
+          edi.RenameAtom(j->GetHandle(), SwappedName(j->GetName()));
         }
       }
     } 
@@ -416,8 +367,8 @@ GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist)
              continue;
          }
          Real dist=geom::Length(ai->GetPos()-aj->GetPos());
-         UAtomIdentifiers atoms = std::make_pair<UniqueAtomIdentifier,UniqueAtomIdentifier>(first_atom,second_atom); 
-         std::pair<Real,Real> values = std::make_pair<Real,Real>(dist,dist);  
+         UAtomIdentifiers atoms = std::make_pair(first_atom,second_atom); 
+         std::pair<Real,Real> values = std::make_pair(dist,dist);  
          res_dist_list[atoms]=values;
        }
      }   
@@ -473,11 +424,11 @@ std::pair<long int,long int> LocalDistDiffTest(const EntityView& mdl, const Glob
 {
   if (!mdl.GetResidueCount()) {
     LOG_WARNING("model structures doesn't contain any residues");
-    return std::make_pair<long int,long int>(0,0);
+    return std::make_pair(0,0);
   }
   if (glob_dist_list.size()==0) {
     LOG_WARNING("global reference list is empty");
-    return std::make_pair<long int,long int>(0,0);
+    return std::make_pair(0,0);
   }
   std::vector<std::pair<long int, long int> > overlap_list(mdl.GetResidueCount(), std::pair<long int, long int>(0, 0));
   check_and_swap(glob_dist_list,mdl,cutoff_list,sequence_separation,overlap_list);
@@ -509,7 +460,7 @@ std::pair<long int,long int> LocalDistDiffTest(const EntityView& mdl, const Glob
     }
   }
   overlap_list.clear();
-  return std::make_pair<long int,long int>(total_ov.first,total_ov.second);
+  return std::make_pair(total_ov.first,total_ov.second);
 }
 
 Real LocalDistDiffTest(const EntityView& mdl, const EntityView& target, Real cutoff, Real max_dist, const String& local_lddt_property_string)
@@ -557,8 +508,8 @@ Real LocalDistDiffTest(const ost::seq::AlignmentHandle& aln,
      AtomViewList atoms=mdl_res.GetAtomList();
      for (AtomViewList::iterator j=atoms.begin(), 
           e2=atoms.end(); j!=e2; ++j) {
-       if (swappable(rname, j->GetName())) {
-         edi.RenameAtom(j->GetHandle(), swapped_name(j->GetName()));
+       if (Swappable(rname, j->GetName())) {
+         edi.RenameAtom(j->GetHandle(), SwappedName(j->GetName()));
        }
      }
     }

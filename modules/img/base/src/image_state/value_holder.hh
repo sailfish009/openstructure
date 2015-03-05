@@ -21,7 +21,7 @@
 /*
   value holder for image state
 
-  Author: Ansgar Philippsen
+  Authors: Ansgar Philippsen, Andreas Schenk
 */
 
 #ifndef VALUE_HOLDER_H
@@ -32,6 +32,7 @@
 #include <ost/img/data_types.hh>
 #include <ost/img/size.hh>
 
+#include "index.hh"
 #include "type_fw.hh"
 
 namespace value_holder_test {
@@ -40,6 +41,10 @@ template <typename V>
 void ReleaseAndReconstruct();
 
 }
+
+#define USE_ROW_ORDER 1
+
+
 
 namespace ost { namespace img { namespace image_state {
 
@@ -57,14 +62,12 @@ template <typename V>
 class TEMPLATE_EXPORT ValueHolder {
 public:
   typedef V* VPtr;
+  typedef const V* ConstVPtr;
   typedef VPtr* VPtrPtr;
 
   /*! @name Construction, Release, etc
    */
   //@{
-  //! initialization with explicit width, height, and depth
-  ValueHolder(unsigned int wi, unsigned int he, unsigned int de);
-
   //! initialization with size
   ValueHolder(const Size& s);
 
@@ -73,25 +76,6 @@ public:
 
   //! copy ctor provides full copy!
   ValueHolder(const ValueHolder<V>& h);
-
-  //! initialize with a size and an existing value holder, grabbing the memory
-  template <typename U>
-  ValueHolder(const Size& s, ValueHolder<U>& v):
-    width_(s[0]),
-    height_(s[1]),
-    depth_(s[2]),
-    volume_(width_*height_*depth_),
-    volume2_(v.GetPhysicalSize()*sizeof(U)/sizeof(V)),
-    data_(reinterpret_cast<V*>(v.ReleaseData())),
-    row_(0),
-    slice_(0)
-  {
-    try {
-      setup();
-    } catch(...) {
-      delete []data_;
-    }
-  }
 
 
   //! assignement provides full copy!
@@ -105,125 +89,70 @@ public:
   //! free allocated memory upon destruction
   ~ValueHolder();
 
-  //! release the held data, invalidates holder!
-  /*!
-    the data area is returned, but no longer belongs
-    to the value holder. it now belongs to the caller, who 
-    must eiter free it explicitely, or use it in a
-    constructor argument to a new value holder.
-   */
-  VPtr ReleaseData();
 
   //! swap data with another value holder
   void Swap(ValueHolder& vh);
   //@}
 
-  //! @name Property access
-  //@{
-
-  // retrieve width, at least 1
-  unsigned int GetWidth() const {return width_;}
-  // retrieve height, at least 1
-  unsigned int GetHeight() const {return height_;}
-  // retrieve depth, at least 1
-  unsigned int GetDepth() const {return depth_;}
-  // retrieve overall size (width*height*depth), at least 1
-  unsigned int GetVolume() const {return volume_;}
-  // retrieve dimensions as Size object
-  Size GetSize() const;
-
   static DataType GetDataType();
 
-  unsigned int GetPhysicalSize() const {return volume2_;}
+  std::size_t  MemSize() const;
 
-  long MemSize() const;
 
-  //@}
-
-  /*! @name Data Access
-    access is either via interface that uses the internal 
-    row and slice pointers, or these pointers may be
-    retrieved directly.
-  */
 
   //! return direct r/w access to the value without boundary check
   /*!
     The lookup is based on an integer triplet encapsulated within
-    Index. Efficient lookup using helper tables.
+    Index.
   */
-  V& Value(const Index& i);
+  V& Value(const Index& i)
+  {
+  #ifdef USE_ROW_ORDER
+    assert(i.w<depth_);
+    return data_[i.u*height_depth_ + i.v*depth_ +i.w];
+  #else
+    assert(i.v<height_);
+    return data_[i.w*width_height_ + i.v*height_ +i.u];
+  #endif
+  }
 
   //! return direct ro access to the value without boundary check
   /*!
     The lookup is based on an integer triplet encapsulated within
-    Index. Efficient lookup using helper tables.
+    Index.
   */
-  const V& Value(const Index& i) const;
-
-  //! return direct r/w access to the value without boundary check
-  /*!
-    DEPRECATED! Use GetData()[i]
-  */
-  V& Value(unsigned int i);
-
-  //! return direct ro access to the value without boundary check
-  /*!
-    DEPRECATED! Use GetData()[i]
-  */
-  const V& Value(unsigned int i) const;
-
+  const V& Value(const Index& i) const
+  {
+  #ifdef USE_ROW_ORDER
+    assert(i.w<depth_);
+    return data_[i.u*height_depth_ + i.v*depth_ +i.w];
+  #else
+    assert(i.v<height_);
+    return data_[i.w*width_height_ + i.v*height_ +i.u];
+  #endif
+  }
 
   //! return pointer to raw data
-  VPtr GetData() {return data_;}
+  VPtr GetData() {return &data_[0];}
   //! const version of GetData()
-  const VPtr GetData() const {return data_;}
+  ConstVPtr GetData() const {return &data_[0];}
 
-  //! return number of data items DEPRECATED
-  int DataCount() const {return volume_;}
 
-  //! return number of data items
-  /*!
-    this is the volume: width*height*depth
-  */
-  int GetDataCount() const {return volume_;}
+  ConstVPtr GetEnd() const {return &data_[0]+data_.size();}
 
-  const VPtr GetEnd() const {return &data_[volume_];}
 
-  //! return pointer to row pointers
-  VPtr* GetRows() {return row_;}
-  //! const version of GetRows()
-  const VPtr* GetRows() const {return row_;}
-  //! return number of row pointers
-  /*!
-    this is width*height
-  */
-  int GetRowCount() const {return width_*height_;}
-
-  //! return pointer to slice pointers
-  VPtrPtr* GetSlices() {return slice_;}
-  //! const version of GetSlices()
-  const VPtrPtr* GetSlices() const {return slice_;}
-  //! return number of slices
-  /*!
-    equals the width
-  */
-  int GetSliceCount() const {return width_;}
-
-  //@}
 private:
-  unsigned int width_, height_, depth_, volume_;
-  // this is a hack to get padding for fftw to work...
-  unsigned int volume2_;
+#ifdef USE_ROW_ORDER
+  std::size_t depth_;
+  std::size_t height_depth_;
+#else
+  std::size_t height_;
+  std::size_t width_height_;
+#endif
 
   // actual data storage
-  V* data_;
-  // optimization 
-  V** row_;
-  // optimization
-  V*** slice_;
+  std::vector<V> data_;
 
-  void setup();
-  void clear();
 };
 
 }}} // namespaces

@@ -192,25 +192,20 @@ macro(module)
   # create library  
   #-----------------------------------------------------------------------------
   file(MAKE_DIRECTORY ${LIB_STAGE_PATH})
-  file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
+  file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
   file(MAKE_DIRECTORY ${LIBEXEC_STAGE_PATH})
   file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
   if (NOT TARGET create_stage)
     add_custom_target(create_stage COMMAND ${CMAKE_COMMAND} -E make_directory ${LIB_STAGE_PATH}
-                                   COMMAND ${CMAKE_COMMAND} -E make_directory ${EXECUTABLE_OUTPUT_PATH}
+                                   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
                                    COMMAND ${CMAKE_COMMAND} -E make_directory ${LIBEXEC_STAGE_PATH}
                                    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/tests")
-  endif()
-  if (WIN32)
-    set(_ABS_FILE_PATTERN "^[A-Z]:/")
-  else()
-    set(_ABS_FILE_PATTERN "^/")
   endif()
   if (_ARG_SOURCES)
     # when there is at least one source file, we build a library
     set(_ABS_SOURCE_NAMES)
     foreach(_SOURCE ${_ARG_SOURCES})
-      if (_SOURCE MATCHES ${_ABS_FILE_PATTERN})
+      if (IS_ABSOLUTE ${_SOURCE})
         list(APPEND _ABS_SOURCE_NAMES "${_SOURCE}")
       else()
         list(APPEND _ABS_SOURCE_NAMES "${CMAKE_CURRENT_SOURCE_DIR}/${_SOURCE}")
@@ -243,8 +238,7 @@ macro(module)
                             INSTALL_NAME_DIR "@rpath")
     endif()
     if (WIN32)
-      #set_target_properties(${_LIB_NAME} PROPERTIES PREFIX "../")
-      install(TARGETS ${_LIB_NAME} ARCHIVE DESTINATION "${LIB_DIR}")
+      install(TARGETS ${_LIB_NAME} RUNTIME DESTINATION bin)
     else()
       if (ENABLE_STATIC)
         install(TARGETS ${_LIB_NAME} ARCHIVE DESTINATION "${LIB_DIR}")
@@ -293,7 +287,9 @@ macro(stage_and_install_headers HEADERLIST HEADER_OUTPUT_DIR TARGET)
     set(_HDR_STAGE_DIR "${HEADER_OUTPUT_DIR}/${_DIR}")
     set(_FULL_HEADER_DIR "${HEADER_STAGE_PATH}/${_HDR_STAGE_DIR}")
     copy_if_different("" "${_FULL_HEADER_DIR}" "${_ABS_HEADER_NAMES}" "" "${TARGET}_headers")
-    install(FILES ${_ABS_HEADER_NAMES} DESTINATION "include/${_HDR_STAGE_DIR}")
+    if(NOT WIN32)
+      install(FILES ${_ABS_HEADER_NAMES} DESTINATION "include/${_HDR_STAGE_DIR}")
+    endif(NOT WIN32)
   endforeach()
 endmacro()
 
@@ -356,6 +352,12 @@ macro(executable_libexec)
   add_executable(${_ARG_NAME} ${_ARG_SOURCES})
   set_target_properties(${_ARG_NAME}
                         PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                       "${LIBEXEC_STAGE_PATH}")  
+  set_target_properties(${_ARG_NAME}
+                        PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE
+                       "${LIBEXEC_STAGE_PATH}")  
+  set_target_properties(${_ARG_NAME}
+                        PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG
                        "${LIBEXEC_STAGE_PATH}")  
   if (NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
     if (APPLE)
@@ -423,6 +425,7 @@ macro(script)
     if (NOT _ARG_INPUT)
       message(FATAL_ERROR "script() can only substitute when INPUT is present.")    
     endif()
+
     substitute(IN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${_INPUT}" OUT_FILE ${_ARG_NAME} 
                DICT ${_ARG_SUBSTITUTE})
   endif()
@@ -446,7 +449,7 @@ macro(ui_to_python LIBNAME PYMODDIR STAGEDIR)
   add_custom_target("${LIBNAME}_ui" ALL)
   add_dependencies("_${LIBNAME}" "${LIBNAME}_ui")
   find_program(_PYUIC_EXECUTABLE
-    NAMES pyuic4-${PYTHON_VERSION} pyuic4 pyuic
+    NAMES pyuic4-${PYTHON_VERSION} pyuic4 pyuic pyuic4.bat
     PATHS  ENV PATH 
   )  
   if(NOT _PYUIC_EXECUTABLE)
@@ -464,23 +467,26 @@ macro(ui_to_python LIBNAME PYMODDIR STAGEDIR)
                        )
     list(APPEND out_files ${_abs_out_file})
   endforeach()
-  compile_py_files(_${LIBNAME} ${STAGEDIR} ${out_files})
+  compile_py_files(_${LIBNAME} ${STAGEDIR} compiled_files ${out_files})
   install(FILES ${out_files} DESTINATION "${LIB_DIR}/${PYMODDIR}")
+  install(FILES ${compiled_files} DESTINATION "${LIB_DIR}/${PYMODDIR}")
 endmacro()
 
 #-------------------------------------------------------------------------------
 # Synopsis:
-#   compile_py_files(module out_files [input_file1 ...])
+#   compile_py_files(module out_dir compiled_files [input_file1 ...])
 # Description:
 #   Calls pyuic on every input file. The resulting python files are stored in
-#   the variable with name out_files.
+#   the variable with name compiled_files.
 #-------------------------------------------------------------------------------
-macro(compile_py_files module out_dir)
+macro(compile_py_files module out_dir compiled_files_name)
   set(_input_files ${ARGN})
+  set(${compiled_files_name})
   foreach(input_file ${_input_files})
     get_filename_component(_out_file ${input_file} NAME_WE)
     get_filename_component(_in_file ${input_file} ABSOLUTE)
     set(_out_file ${out_dir}/${_out_file}.pyc)
+    list(APPEND ${compiled_files_name} ${_out_file})
     get_filename_component(_in_name ${input_file} NAME)
     file(MAKE_DIRECTORY  ${out_dir})
     add_custom_command(TARGET ${module}
@@ -544,7 +550,11 @@ macro(pymod)
 
     set_target_properties("_${_LIB_NAME}"
                           PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR})
- 
+    set_target_properties("_${_LIB_NAME}"
+                          PROPERTIES LIBRARY_OUTPUT_DIRECTORY_RELEASE ${PYMOD_STAGE_DIR})
+    set_target_properties("_${_LIB_NAME}"
+                          PROPERTIES LIBRARY_OUTPUT_DIRECTORY_DEBUG ${PYMOD_STAGE_DIR})
+
     if (NOT ENABLE_STATIC)
       if (_USE_RPATH)
         string(REGEX REPLACE "/[^/]*" "/.." inv_pymod_path "/${PYMOD_DIR}")
@@ -566,11 +576,7 @@ macro(pymod)
                           PROPERTIES PREFIX "")
     else ()
       set_target_properties("_${_LIB_NAME}"
-                          PROPERTIES PREFIX "../")
-
-      set_target_properties("_${_LIB_NAME}"
                           PROPERTIES SUFFIX ".pyd")
-
     endif()
     install(TARGETS "_${_LIB_NAME}" LIBRARY DESTINATION
             "${LIB_DIR}/${PYMOD_DIR}")
@@ -604,7 +610,8 @@ macro(pymod)
       copy_if_different("./" "${PYMOD_STAGE_DIR}/${_DIR}"
                         "${_ABS_PY_FILES}" "TARGETS"
                         "${_PYMOD_TARGET}")
-      compile_py_files(_${_LIB_NAME} ${PYMOD_STAGE_DIR}/${_DIR} ${_ABS_PY_FILES})
+      compile_py_files(_${_LIB_NAME} ${PYMOD_STAGE_DIR}/${_DIR} compiled_files ${_ABS_PY_FILES})
+      install(FILES ${compiled_files} DESTINATION "${LIB_DIR}/${PYMOD_DIR}/${_DIR}")
     endforeach()
   endif()  
   get_target_property(_MOD_DEPS "${_PARENT_NAME}" MODULE_DEPS)
@@ -650,14 +657,20 @@ macro(ost_unittest)
       else()
         add_executable(${_test_name} EXCLUDE_FROM_ALL ${_SOURCES})
       endif()
+      set_target_properties(${_test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"  )
+      set_target_properties(${_test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/tests"  )
+      set_target_properties(${_test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/tests"  )
+
       if (WIN32)
-        target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "${_ARG_PREFIX}_${_ARG_MODULE}")  
+        target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "${_ARG_PREFIX}_${_ARG_MODULE}")
         add_custom_target("${_test_name}_run":
-                        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe || echo
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/..
+                        COMMAND set PATH=${STAGE_DIR}/bin\;%PATH% & ${CMAKE_CURRENT_BINARY_DIR}/${_test_name}.exe || echo
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "running checks for module ${_ARG_MODULE}"
                         DEPENDS ${_test_name})
-        add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe)
+        add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${_test_name}.exe)
+        set_target_properties("${_test_name}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
+        add_dependencies(check "${_test_name}_run")
       else()
         target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES}
                             "${_ARG_PREFIX}_${_ARG_MODULE}")
@@ -672,30 +685,37 @@ macro(ost_unittest)
                         COMMENT "running checks for module ${_ARG_MODULE}"
                         DEPENDS ${_test_name})
         add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} )
+        add_dependencies(check_xml "${_test_name}_run_xml")
+        add_dependencies(check "${_test_name}_run")
       endif()
       
       if (_ARG_LINK)
         target_link_libraries("${_test_name}" ${_ARG_LINK})
       endif()
 
-      add_dependencies(check "${_test_name}_run")
-      add_dependencies(check_xml "${_test_name}_run_xml")
       set_target_properties(${_test_name}
                             PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                             "${CMAKE_CURRENT_BINARY_DIR}")
-      if (WIN32)
-        set_target_properties("${_test_name}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
-      endif()
     endif()
+
     foreach(py_test ${PY_TESTS})
       if(WIN32)
-        set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost.bat")
-        add_custom_target("${py_test}_run"
-                  CALL "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                  COMMENT "running checks ${py_test}" VERBATIM)
+        # todo fix python unit test running for Windows
+        #set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost.bat")
+        #add_custom_target("${py_test}_run"
+        #          CALL "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
+        #          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        #          COMMENT "running checks ${py_test}" VERBATIM)
+        #set_target_properties("${py_test}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
+        #add_dependencies("${py_test}_run" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
+        #add_dependencies(check "${py_test}_run")
       else()
-        set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost")
+        set(python_path $ENV{PYTHONPATH})
+        if(python_path)
+          set(python_path "${python_path}:")
+        endif(python_path)
+        set(python_path "${python_path}${LIB_STAGE_PATH}/python${PYTHON_VERSION}/site-packages")
+        set (PY_TESTS_CMD "PYTHONPATH=${python_path}  ${PYTHON_BINARY}")
         add_custom_target("${py_test}_run"
                   sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -704,13 +724,10 @@ macro(ost_unittest)
                   sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} xml || echo"
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   COMMENT "running checks ${py_test}" VERBATIM)
-      endif()
-      add_dependencies("${py_test}_run" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
-      add_dependencies("${py_test}_run_xml" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
-      add_dependencies(check "${py_test}_run")
-      add_dependencies(check_xml "${py_test}_run_xml")
-      if (WIN32)
-        set_target_properties("${py_test}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
+        add_dependencies("${py_test}_run_xml" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
+        add_dependencies("${py_test}_run" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
+        add_dependencies(check "${py_test}_run")
+        add_dependencies(check_xml "${py_test}_run_xml")
       endif()
       
     endforeach()
@@ -727,6 +744,7 @@ endmacro()
 #-------------------------------------------------------------------------------
 macro(ost_find_python_module MODULE)
   if (NOT PYTHON_MODULE_${MODULE})
+    message(STATUS "Searching for python module ${MODULE} for ${PYTHON_BINARY}")
     execute_process(COMMAND ${PYTHON_BINARY} -c "import ${MODULE}"
                     OUTPUT_QUIET ERROR_QUIET
                     RESULT_VARIABLE _IMPORT_ERROR)
@@ -801,7 +819,9 @@ endmacro()
 #-------------------------------------------------------------------------------
 macro(setup_stage)
   set(STAGE_DIR "${CMAKE_BINARY_DIR}/stage")
-  set(EXECUTABLE_OUTPUT_PATH ${STAGE_DIR}/bin  )
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin  )
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${STAGE_DIR}/bin  )
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${STAGE_DIR}/bin  )
   set(HEADER_STAGE_PATH ${STAGE_DIR}/include )
   set(SHARED_DATA_PATH ${STAGE_DIR}/share/openstructure  )
 
@@ -809,24 +829,21 @@ macro(setup_stage)
     check_architecture()
   endif()
   set (ARCH ${CMAKE_NATIVE_ARCH})
-  if ("${ARCH}" MATCHES "64")
+  if ("${ARCH}" MATCHES "64" AND NOT _UBUNTU_LAYOUT)
     set(LIB_DIR lib64  )
     set(LIB_STAGE_PATH "${STAGE_DIR}/lib64"  )
   else()
     set(LIB_DIR lib  )
     set(LIB_STAGE_PATH "${STAGE_DIR}/lib"  )
   endif()
-  if (_DEBIAN_STYLE_LIBEXEC)
+  if (_UBUNTU_LAYOUT)
     set(LIBEXEC_PATH ${LIB_DIR}/openstructure/libexec  )
-  else()
-    set(LIBEXEC_PATH libexec/openstructure  )
-  endif()
-  if (_DEBIAN_STYLE_LIBEXEC)
     set(LIBEXEC_STAGE_PATH ${LIB_STAGE_PATH}/openstructure/libexec  )
   else()
+    set(LIBEXEC_PATH libexec/openstructure  )
     set(LIBEXEC_STAGE_PATH ${STAGE_DIR}/libexec/openstructure  )
   endif()
-
+ 
   include_directories("${HEADER_STAGE_PATH}")
   link_directories(${LIB_STAGE_PATH})
 
@@ -854,12 +871,12 @@ macro(setup_compiler_flags)
 
      add_definitions(-D_USE_MATH_DEFINES -D_CRT_SECURE_NO_DEPRECATE
                      -D_SCL_SECURE_NO_DEPRECATE -DNOMINMAX)
-     add_definitions(-Zc:wchar_t-)   #
+     #add_definitions(-Zc:wchar_t-)   #
     # add_definitions(-MDd -vmg -EHsc -GR)
     #GR:Uses the __fastcall calling convention (x86 only).
     #-EHsc to specify the synchronous exception handling mode/
     #-vmg Uses full generality for pointers to members.
-    add_definitions(-DBOOST_ZLIB_BINARY=zdll)
+    #add_definitions(-DBOOST_ZLIB_BINARY=zdll)
     #add_definitions(-NODEFAULTLIB:LIBCMTD.lib)
   endif()
 

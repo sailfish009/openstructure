@@ -74,18 +74,18 @@ struct CylinderPrim {
     calc_rotmat();
   }
 
-  CylinderPrim(const geom::Vec3& st, const geom::Vec3& en, float rad1, float rad2, const Color& col):
+  CylinderPrim(const geom::Vec3& st, const geom::Vec3& en, float radius_1, float radius_2, const Color& col):
     start(st), end(en),
-    radius1(rad1), radius2(rad2),
+    radius1(radius_1), radius2(radius_2),
     color1(col), color2(col),
     length(geom::Length(end-start)), rotmat(), rotmat_t() 
   {
     calc_rotmat();
   }
 
-  CylinderPrim(const geom::Vec3& st, const geom::Vec3& en, float rad1, float rad2, const Color& col1, const Color& col2):
+  CylinderPrim(const geom::Vec3& st, const geom::Vec3& en, float radius_1, float radius_2, const Color& col1, const Color& col2):
     start(st), end(en),
-    radius1(rad1), radius2(rad2),
+    radius1(radius_1), radius2(radius_2),
     color1(col1), color2(col2),
     length(geom::Length(end-start)), rotmat(), rotmat_t() 
   {

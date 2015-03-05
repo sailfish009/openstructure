@@ -88,20 +88,20 @@ class TMAlignResult:
     self.ref_sequence =ref_sequence
     self.alignment=alignment
 
-def _ParseTmAlign(lines):
-  info_line=lines[11].split(',')
+def _ParseTmAlign(lines,lines_matrix):
+  info_line=lines[12].split(',')
   aln_length=float(info_line[0].split('=')[1].strip())
   rmsd=float(info_line[1].split('=')[1].strip())  
-  tm_score=float(info_line[2].split('=')[1].strip())
-  tf1=[float(i.strip()) for i in lines[15].split()]
-  tf2=[float(i.strip()) for i in lines[16].split()]
-  tf3=[float(i.strip()) for i in lines[17].split()]
+  tm_score=float(lines[14].split('=')[1].split('(')[0].strip())
+  tf1=[float(i.strip()) for i in lines_matrix[2].split()]
+  tf2=[float(i.strip()) for i in lines_matrix[3].split()]
+  tf3=[float(i.strip()) for i in lines_matrix[4].split()]
   rot=geom.Mat3(tf1[2], tf1[3], tf1[4], tf2[2], tf2[3],
                 tf2[4], tf3[2], tf3[3], tf3[4])
   tf=geom.Mat4(rot)
   tf.PasteTranslation(geom.Vec3(tf1[1], tf2[1], tf3[1]))
-  seq1 = seq.CreateSequence("1",lines[26].strip())
-  seq2 = seq.CreateSequence("2",lines[28].strip())
+  seq1 = seq.CreateSequence("1",lines[18].strip())
+  seq2 = seq.CreateSequence("2",lines[20].strip())
   alignment = seq.CreateAlignment()
   alignment.AddSequence(seq2)
   alignment.AddSequence(seq1)
@@ -112,25 +112,27 @@ def _RunTmAlign(tmalign, tmp_dir):
   model2_filename=os.path.join(tmp_dir, 'model02.pdb')
   if platform.system() == "Windows":
     tmalign_path=settings.Locate('tmalign.exe', explicit_file_name=tmalign)
-    command="\"%s\" %s %s" %(os.path.normpath(tmalign_path), model1_filename, model2_filename)
+    command="\"%s\" %s %s -m %s" %(os.path.normpath(tmalign_path), model1_filename, model2_filename, os.path.join(tmp_dir,'matrix.txt'))
   else:
     tmalign_path=settings.Locate('tmalign', explicit_file_name=tmalign)  
-    command="\"%s\" \"%s\" \"%s\"" %(tmalign_path, model1_filename, model2_filename)
+    command="\"%s\" \"%s\" \"%s\" -m \"%s\"" %(tmalign_path, model1_filename, model2_filename, os.path.join(tmp_dir,'matrix.txt'))
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   ps.wait()
   lines=ps.stdout.readlines()
   if (len(lines))<22:
     _CleanupFiles(tmp_dir)
     raise RuntimeError("tmalign superposition failed")
-  return _ParseTmAlign(lines)
+  matrix_file=open(os.path.join(tmp_dir,'matrix.txt'))
+  lines_matrix=matrix_file.readlines()
+  matrix_file.close() 
+  return _ParseTmAlign(lines,lines_matrix)
 
 class MMAlignResult:
-  def __init__(self, rmsd, tm_score, aligned_length, transform, ref_sequence, alignment):
+  def __init__(self, rmsd, aligned_length, tm_score, transform, alignment):
     self.rmsd=rmsd
     self.tm_score=tm_score    
     self.aligned_length=aligned_length
     self.transform=transform
-    self.ref_sequence =ref_sequence
     self.alignment=alignment
 
 def _ParseMmAlign(lines):
@@ -150,7 +152,7 @@ def _ParseMmAlign(lines):
   alignment = seq.CreateAlignment()
   alignment.AddSequence(seq2)
   alignment.AddSequence(seq1)
-  return MMAlignResult(rmsd, aln_length, tm_score, tf, seq2, alignment)
+  return MMAlignResult(rmsd, aln_length, tm_score, tf, alignment)
 
 def _RunMmAlign(mmalign, tmp_dir):
   model1_filename=os.path.join(tmp_dir, 'model01.pdb')

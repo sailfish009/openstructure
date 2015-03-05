@@ -64,20 +64,35 @@ public:
   //! comparable
   bool operator==(const Mat2& rhs) const;
 
+
+  //! const element access
+  const Real& At(std::size_t r, std::size_t c) const
+  {
+    if (r>1 || c>1) {
+      throw std::out_of_range("indices must be smaller than 2");
+    }
+    return data_[r][c];
+  }
+
+  //! element access
+  Real& At(std::size_t r, std::size_t c)
+  {
+    if (r>1 || c>1) {
+      throw std::out_of_range("indices must be smaller than 2");
+    }
+    return data_[r][c];
+  }
+
   //! element access
   Real& operator()(std::size_t r, std::size_t c)
   {
-    if (r>1 || c >1) {
-      throw std::out_of_range("row and column must be in the range [0-1]");
-    }
+    assert(r<2 && c<2);
     return data_[r][c];
   }
   //! const element access
   const Real& operator()(std::size_t r, std::size_t c) const
   {
-    if (r>1 || c >1) {
-      throw std::out_of_range("row and column must be in the range [0-1]");
-    }
+    assert(r<2 && c<2);
     return data_[r][c];
   }
 

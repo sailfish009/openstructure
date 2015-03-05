@@ -36,7 +36,7 @@ public:
   PrincipalAxisCalc(const EntityHandle& ent): 
     natoms_(ent.GetAtomCount())
   {
-    mean_=ent.GetBounds().GetCenter();
+    mean_=ent.GetCenterOfAtoms();
     cov_.setZero();
   }
   PrincipalAxisCalc(const AtomHandleList& atoms):
@@ -55,7 +55,7 @@ public:
   PrincipalAxisCalc(const EntityView& ent): 
     natoms_(ent.GetAtomCount())
   {
-    mean_=ent.GetBounds().GetCenter();
+    mean_=ent.GetCenterOfAtoms();
     cov_.setZero();
   }  
   virtual bool VisitAtom(const AtomHandle& atom)

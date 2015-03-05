@@ -29,7 +29,6 @@
 #include "entity_view.hh"
 #include "chain_handle.hh"
 #include "handle_type_fw.hh"
-#include "iterator_fw.hh"
 
 
 #include "editor_type_fw.hh"
@@ -124,38 +123,6 @@ public:
 
   /// \brief  Get list of chains
   ChainHandleList GetChainList() const;
-
-  /// \brief Iterator pointing to the beginning of the residues.
-  ///
-  /// The residues are first ordered by chain and then ascending residue number.
-  /// \note The residue range is not fail-safe. If residues are removed or
-  ///      the iterators become invalid and the behaviour undefined.
-  ResidueHandleIter ResiduesBegin() const;
-
-  /// \brief Iterator pointing to the end of th residues
-  ///
-  /// The two iterators returned by ResiduesBegin() and ResiduesEnd() form a
-  /// half-closed range. It is cheaper to cache the iterator returned by
-  /// ResiduesEnd() than to call ResiduesEnd() after every loop, i.e. like
-  /// \code
-  /// // e is an instance of EntityHandle
-  /// for (ResidueHandleIter i=e.ResiduesBegin(), x=e.ResiduesEnd(); i!=x; ++i) {
-  ///  . . .
-  /// }
-  /// \endcode
-  ResidueHandleIter ResiduesEnd() const;
-
-  /// \brief Iterator pointing to the beginning of the chains
-  ChainHandleIter ChainsBegin() const;
-
-  /// \brief Iterator pointing to the end of the chains
-  ChainHandleIter ChainsEnd() const;
-
-  /// \brief Iterator pointing to the beginning of atoms
-  AtomHandleIter AtomsBegin() const;
-
-  /// \brief Iterator pointing to the end of atoms
-  AtomHandleIter AtomsEnd() const;
 
   ///\name Single item addressing
   //@{
@@ -279,6 +246,8 @@ public:
   bool HasTransform() const;
   /// \brief remove transform
   void ClearTransform();
+  /// \brief write transformed pos to orig, and the clear tf
+  void FixTransform();
 
   /// \brief get complete list of residues
   /// \sa #ResiduesBegin, #ResiduesEnd

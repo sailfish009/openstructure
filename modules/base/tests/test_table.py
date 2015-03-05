@@ -11,7 +11,8 @@ from ost.table import *
 import ost
 
 HAS_NUMPY=True
-HAS_SCIPY=True
+HAS_SCIPY_STATS=True
+HAS_SCIPY_NDIMG=True
 HAS_MPL=True
 HAS_PIL=True
 try:
@@ -23,9 +24,16 @@ except ImportError:
 try:
   import scipy.stats.mstats
 except ImportError:
-  HAS_SCIPY=False
+  HAS_SCIPY_STATS=False
   print "Could not find scipy.stats.mstats: ignoring some table class unit tests"
   
+try:
+  import scipy.ndimage
+except ImportError:
+  HAS_SCIPY_NDIMG=False
+  print "Could not find scipy.ndimage: ignoring some table class unit tests"
+  
+
 try:
   import matplotlib
   matplotlib.use('Agg')
@@ -40,6 +48,19 @@ except ImportError:
   HAS_PIL=False
   print "Could not find python imagine library: ignoring some table class unit tests"
 
+# setting up an OST LogSink to capture error messages
+class _FetchLog(ost.LogSink):
+  def __init__(self):
+    ost.LogSink.__init__(self)
+    self.messages = dict()
+
+  def LogMessage(self, message, severity):
+    levels=['ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE']
+    level=levels[severity]
+    if not level in self.messages.keys():
+      self.messages[level] = list()
+    self.messages[level].append(message.strip())
+  
 class TestTable(unittest.TestCase):
 
   def tearDown(self):
@@ -218,7 +239,11 @@ class TestTable(unittest.TestCase):
     self.CompareColCount(tab, 0)
     self.CompareRowCount(tab, 0)
     self.assertRaises(ValueError, tab.GetColIndex, 'a')
-    
+  def testTableInitFromOldTable(self):
+    old_tab = Table(['a','b'],'ff')
+    new_tab = Table(old_tab.col_names,old_tab.col_types)
+    new_tab.AddCol('c','f')
+    self.assertEqual(old_tab.col_names, ['a','b'])
   def testGuessColumnType(self):
     self.assertEqual(GuessColumnType(['1', '1.3', '2']), 'float')
     self.assertEqual(GuessColumnType(['1', '1', '2']), 'int')
@@ -484,9 +509,10 @@ class TestTable(unittest.TestCase):
     tab.AddRow(['x',3, 1.0], overwrite=None)
     tab.AddRow(['foo',6, 2.2], overwrite=None)
     tab.AddRow(['bar',9, 3.3], overwrite=None)
-    self.CompareColCount(tab, 3)
+    tab.AddCol('fourth','bool',itertools.cycle([True,False]))
+    self.CompareColCount(tab, 4)
     self.CompareRowCount(tab, 3)
-    self.CompareDataFromDict(tab, {'second': [3,6,9], 'first': ['x','foo','bar'], 'third': [1,2.2,3.3]})
+    self.CompareDataFromDict(tab, {'second': [3,6,9], 'first': ['x','foo','bar'], 'third': [1,2.2,3.3], 'fourth': [True,False,True]})
 
   def testTableAddMultiColMultiRowFromDict(self):
     '''
@@ -1273,6 +1299,28 @@ class TestTable(unittest.TestCase):
                      save=os.path.join("testfiles","roc-out.png"))
     self.assertEquals(pl, None)
 
+  def testPlotLogROC(self):
+    if not HAS_MPL or not HAS_PIL:
+      return
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, True, False, True, True, True, False, False, True, False, True, False, True, False, False, False, True, False, True, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    pl = tab.PlotLogROC(score_col='score', score_dir='+',
+                        class_col='classific',
+                        save=os.path.join("testfiles","logroc-out.png"))
+    img1 = Image.open(os.path.join("testfiles","logroc-out.png"))
+    #img2 = Image.open(os.path.join("testfiles","roc.png"))
+    #self.CompareImages(img1, img2)
+
+    # no true positives
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    pl = tab.PlotLogROC(score_col='score', score_dir='+',
+                        class_col='classific',
+                        save=os.path.join("testfiles","logroc-out.png"))
+    self.assertEquals(pl, None)
+
   def testPlotROCSameValues(self):
     if not HAS_MPL or not HAS_PIL:
       return
@@ -1321,6 +1369,40 @@ class TestTable(unittest.TestCase):
                 score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
     auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
     self.assertEquals(auc, None)
+    
+  def testLogROCAUCforPerfectCurve(self):
+    if not HAS_NUMPY:
+      return
+    auc_ref = 1.0
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, True, True, True, True, True, False, False, False, False, False, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35])
+    
+    # test logAUC
+    auc = tab.ComputeLogROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+    
+    # test linear AUC
+    auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+      
+  def testCalcLogROCAUCRandomCurve(self):
+    if not HAS_NUMPY:
+      return
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, False, True, False, True, False, True, False, True, False, True, False],
+                score=[0.9, 0.9, 0.7, 0.7, 0.55, 0.55, 0.4, 0.4, 0.3, 0.3, 0.3, 0.3])
+    
+    # test logAUC
+    auc_ref = 0.1440197405305
+    auc = tab.ComputeLogROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+    
+    # test linear AUC    
+    auc_ref = 0.5
+    auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+
 
   def testCalcROCAUCWithCutoff(self):
     if not HAS_NUMPY:
@@ -1354,6 +1436,9 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(auc, auc_ref)
 
   def testCalcMCC(self):
+    log = _FetchLog()
+    ost.PushLogSink(log)
+
     tab = Table(['score', 'rmsd', 'class_rmsd', 'class_score', 'class_wrong'], 'ffbbb',
                 score=      [2.64, 1.11, 2.17, 0.45,0.15,0.85, 1.13, 2.90, 0.50, 1.03, 1.46, 2.83, 1.15, 2.04, 0.67, 1.27, 2.22, 1.90, 0.68, 0.36,1.04, 2.46, 0.91,0.60],
                 rmsd=[9.58,1.61,7.48,0.29,1.68,3.52,3.34,8.17,4.31,2.85,6.28,8.78,0.41,6.29,4.89,7.30,4.26,3.51,3.38,0.04,2.21,0.24,7.58,8.40],
@@ -1373,7 +1458,8 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(mcc, -0.1490711984)
     mcc = tab.ComputeMCC(score_col='class_wrong', class_col='class_rmsd')
     self.assertEquals(mcc,None)
-    
+    self.assertEquals(log.messages['WARNING'][0],
+    'Could not compute MCC: MCC is not defined since factor (tp + fp) is zero')
 
   def testCalcMCCPreclassified(self):
     tab = Table(['reference', 'prediction1', 'prediction2'],'bbb',
@@ -1456,6 +1542,8 @@ class TestTable(unittest.TestCase):
     self.assertRaises(RuntimeError, tab.GetOptimalPrefactors, 'c',weights='d')
 
   def testGaussianSmooth(self):
+    if not HAS_SCIPY_NDIMG:
+      return
     tab = Table(['a','b','c','d','e','f'],'fffffi',
                 a=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
                 b=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
@@ -1569,7 +1657,7 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(tab.Correl('second','third'), -0.4954982578)
     
   def testSpearmanCorrel(self):
-    if not HAS_SCIPY:
+    if not HAS_SCIPY_STATS:
       return
     tab = self.CreateTestTable()
     self.assertEquals(tab.SpearmanCorrel('second','third'), None)
@@ -1672,6 +1760,115 @@ class TestTable(unittest.TestCase):
     tab = Table('aaa','s',a=['a','b'])
     tab2 = Table('aaa','i',a=[1,2])
     self.assertRaises(TypeError, tab.Extend, tab2)
+
+  def testSelection(self):
+
+    #create table with some data
+    tab = Table(['a','b','c','d'],'ifbs',
+                a=[0,1,2,3,4,5,6,7,8,9],
+                b=[0.5,1.0,1.1,1.2,1.3,1.4,1.5,2.3,2.5,3.0],
+                c=[True,True,True,True,False,False,False,False,None,None],
+                d=['a','b','c','d','e','f','g','h','i','j'])
+
+
+    #check wether error gets raised in problematic cases like: a=1=b
+    self.assertRaises(ValueError, tab.Select, 'a=1=b and c=True')
+
+    #check wether errors get raised in stupid cases like: =1,2 and b=1.0
+    self.assertRaises(ValueError, tab.Select, '=1,2 and c=True')
+    self.assertRaises(ValueError, tab.Select, '1,2=')
+    self.assertRaises(ValueError, tab.Select, '=1:2 and c=True')
+    self.assertRaises(ValueError, tab.Select, '1:2=')
+
+    #check wether errors get raised in parenthesis mismatches
+    self.assertRaises(ValueError,tab.Select,'a=1,2 and ((b=1.0 or c=True)')
+    self.assertRaises(ValueError,tab.Select,'a=1,2 and (b=1.0 or c=True))')
+
+    #check wether error gets raised when two operands are not separated by an operator
+    self.assertRaises(ValueError,tab.Select,'a=1 b=1.0')
+
+    #check whether error gets raised when inconsistent types are compared
+    self.assertRaises(ValueError,tab.Select,'c>d')
+    self.assertRaises(ValueError,tab.Select,'c+d=5')
+
+    from ost.table_selector import TableSelector
+
+    selector=TableSelector(tab.col_types,tab.col_names,'')
+
+    #check some examples for dijkstras shunting yard algorithm
+    query_one='a=1:4 and ((b>5.0 or b<2.0) and c=True)'
+    split_exp_one=selector._ExpressionLexer(query_one)
+    parsed_exp_one=selector._ParseExpression(split_exp_one)
+    rpn_one=[1, 'a', '<=', 'a', 4, '<=', 'and', 'b', 5.0, '>', 'b', 2.0, '<', 'or', 'c', True, '=', 'and', 'and']
+    query_two='(a=1,2) or (b>5.0+a or b<2.0)'
+    split_exp_two=selector._ExpressionLexer(query_two)
+    parsed_exp_two=selector._ParseExpression(split_exp_two)
+    rpn_two=['a', 1, '=', 'a', 2, '=', 'or', 'b', 5.0, 'a', '+', '>', 'b', 2.0, '<', 'or', 'or']
+    self.assertEquals(selector._ShuntingYard(parsed_exp_one),rpn_one)
+    self.assertEquals(selector._ShuntingYard(parsed_exp_two),rpn_two)
+
+    #check operator evaluations
+    self.assertTrue(selector._EvaluateOperator('=',False,False))
+    self.assertFalse(selector._EvaluateOperator('=',False,True))
+    self.assertTrue(selector._EvaluateOperator('and',True,True))
+    self.assertFalse(selector._EvaluateOperator('and',True,False))
+    self.assertTrue(selector._EvaluateOperator('or',True,False))
+    self.assertTrue(selector._EvaluateOperator('or',False,True))
+    self.assertFalse(selector._EvaluateOperator('or',False,False))
+    self.assertTrue(selector._EvaluateOperator('!=',False,True))
+    self.assertFalse(selector._EvaluateOperator('!=',True,True))
+    self.assertTrue(selector._EvaluateOperator('<=',1.0,2.0))
+    self.assertTrue(selector._EvaluateOperator('<=',1.0,1.0))
+    self.assertFalse(selector._EvaluateOperator('<=',2.0,1.0))
+    self.assertFalse(selector._EvaluateOperator('>=',1.0,2.0))
+    self.assertTrue(selector._EvaluateOperator('>=',2.0,1.0))
+    self.assertTrue(selector._EvaluateOperator('>=',1.0,1.0))
+    self.assertTrue(selector._EvaluateOperator('<',1.0,2.0))
+    self.assertFalse(selector._EvaluateOperator('<',2.0,1.0))
+    self.assertFalse(selector._EvaluateOperator('<',1.0,1.0))
+    self.assertFalse(selector._EvaluateOperator('>',1.0,2.0))
+    self.assertTrue(selector._EvaluateOperator('>',2.0,1.0))
+    self.assertFalse(selector._EvaluateOperator('>',1.0,1.0))
+    self.assertEqual(selector._EvaluateOperator('+',1,1),2)
+    self.assertEqual(selector._EvaluateOperator('-',1,1),0)
+    self.assertEqual(selector._EvaluateOperator('*',2,2),4)
+    self.assertEqual(selector._EvaluateOperator('/',2,2),1)
+    self.assertEqual(selector._EvaluateOperator('+',None,5),None)
+    self.assertEqual(selector._EvaluateOperator('-',2,None),None)
+    self.assertEqual(selector._EvaluateOperator('/',2,None),None)
+    self.assertEqual(selector._EvaluateOperator('*',None,3),None)
+
+    #check a few rpn evaluation examples
+
+    rpn_one=[1, 2, '<=', 2, 4, '<=', 'and', 6.0, 5.0, '>', 2.0, 2.0, '<', 'or', True, True, '=', 'and', 'and']
+    rpn_two=[1, 0, '<=', 2, 4, '<=', 'and', 6.0, 5.0, '>', 2.0, 2.0, '<', 'or', True, True, '=', 'and', 'and']
+    rpn_three=[1, 0, '<=', 2, 4, '<=', 'or', 6.0, 5.0, '>', 2.0, 2.0, '<', 'or', True, True, '=', 'and', 'and']
+
+    self.assertTrue(selector._EvaluateRPN(rpn_one))
+    self.assertFalse(selector._EvaluateRPN(rpn_two))
+    self.assertTrue(selector._EvaluateRPN(rpn_three))
+
+    #check a few selection examples
+
+    query_one='c'
+    query_two='a=2:9 and c'
+    query_three='d=e,f,j and a!=4'
+    query_four='(b=2.0:3.0 and c=False) or (b<1.0 and c)'
+    query_five='b=0.0:1.2,2.5:8.0'
+    query_six='c=None'
+    query_seven='c!=None'
+    query_eight='b/0.5=2'
+
+    self.assertEqual([0,1,2,3], list(r[0] for r in tab.Select(query_one).rows))
+    self.assertEqual([2,3], list(r[0] for r in tab.Select(query_two).rows))
+    self.assertEqual([5,9], list(r[0] for r in tab.Select(query_three).rows))
+    self.assertEqual([0,7], list(r[0] for r in tab.Select(query_four).rows))
+    self.assertEqual([0,1,2,3,8,9], list(r[0] for r in tab.Select(query_five).rows))
+    self.assertEqual([8,9], list(r[0] for r in tab.Select(query_six).rows))
+    self.assertEqual([0,1,2,3,4,5,6,7], list(r[0] for r in tab.Select(query_seven).rows))
+    self.assertEqual([1], list(r[0] for r in tab.Select(query_eight).rows))
+
+
     
 if __name__ == "__main__":
   from ost import testutils

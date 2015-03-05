@@ -19,12 +19,13 @@
 
 #include <ost/geom/geom.hh>
 
-#include "helper.hh"
-using namespace geom;
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
+
+#include "helper.hh"
+using namespace geom;
 
 BOOST_AUTO_TEST_SUITE( geom );
 
@@ -60,18 +61,6 @@ BOOST_AUTO_TEST_CASE(init_vec4)
   BOOST_CHECK(match(v6,0.4,1.2,4.0,1.0));
 }
 
-
-BOOST_AUTO_TEST_CASE(access_vec4)
-{
-  Vec4 v;
-  v[0]=1.1;
-  v[1]=2.3;
-  v[2]=5.6;
-  v[3]=2.0;
-  BOOST_CHECK(match(v,1.1,2.3,5.6,2.0));
-
-  BOOST_CHECK_THROW( v[4]=1.0, std::out_of_range);
-}
 
 BOOST_AUTO_TEST_CASE(operators_vec4)
 {

@@ -1,4 +1,5 @@
 import unittest
+import ost
 from ost import *
 
 class TestMMCifInfo(unittest.TestCase):
@@ -67,7 +68,11 @@ class TestMMCifInfo(unittest.TestCase):
   def test_mmcifinfo_biounit(self):
     b = io.MMCifInfoBioUnit()
     b.SetDetails('Details')
+    b.SetMethodDetails('MethodDetails')
     self.assertEquals(b.GetDetails(), 'Details')
+    self.assertEquals(b.GetMethodDetails(), 'MethodDetails')
+    b.method_details = 'AttrMethodDetails'
+    self.assertEquals(b.method_details, 'AttrMethodDetails')
     b.AddChain('A')
     b.AddChain('B')
     cl = b.GetChainList()
@@ -131,6 +136,19 @@ class TestMMCifInfo(unittest.TestCase):
     self.assertEquals(tr_ol[0][0], 0)
     self.assertEquals(tr_ol[0][1], 1)
 
+  def test_mmcifinfo_biounit_pdbize_with_multiple_transforms(self):
+    ent, seqres, info = io.LoadMMCIF("testfiles/mmcif/multiple_transforms.cif.gz",
+                                     seqres=True,
+                                     info=True)
+    pdb_ent = info.GetBioUnits()[0].PDBize(ent)
+    chains = pdb_ent.chains
+    self.assertEquals(''.join([c.name for c in chains]), 
+                      'A_-BCD')
+    ligand_chain = chains[1]
+    ligand_residues = ligand_chain.residues
+    self.assertEquals([r.number for r in ligand_residues],
+                      [mol.ResNum(1), mol.ResNum(2), mol.ResNum(3), mol.ResNum(4)])
+
   def test_mmcifinfo_biounit_pdbize(self):
     ent, seqres, info = io.LoadMMCIF("testfiles/mmcif/3T6C.cif.gz",
                                      seqres=True,
@@ -138,69 +156,25 @@ class TestMMCifInfo(unittest.TestCase):
     pdb_ent = info.GetBioUnits()[0].PDBize(ent)
     pdb_seqres_ent = info.GetBioUnits()[0].PDBize(ent, seqres)
 
-    # chains
-    self.assertEquals(str(pdb_ent.GetChainList()[0]), 'A')
-    self.assertEquals(str(pdb_ent.GetChainList()[1]), 'B')
-    self.assertEquals(str(pdb_ent.GetChainList()[2]), '_')
-    self.assertEquals(str(pdb_ent.GetChainList()[3]), '-')
-    self.assertEquals(str(pdb_ent.GetChainList()[4]), 'C')
-    self.assertEquals(str(pdb_ent.GetChainList()[5]), 'D')
-    self.assertEquals(str(pdb_ent.GetChainList()[6]), 'E')
-    self.assertEquals(str(pdb_ent.GetChainList()[7]), 'F')
-    self.assertEquals(str(pdb_ent.GetChainList()[8]), 'G')
-    self.assertEquals(str(pdb_ent.GetChainList()[9]), 'H')
-    # size of chains
-    self.assertEquals(len(pdb_ent.GetChainList()[0].GetResidueList()),  415)
-    self.assertEquals(len(pdb_ent.GetChainList()[1].GetResidueList()),  414)
-    self.assertEquals(len(pdb_ent.GetChainList()[2].GetResidueList()),   64)
-    self.assertEquals(len(pdb_ent.GetChainList()[3].GetResidueList()), 3816)
-    self.assertEquals(len(pdb_ent.GetChainList()[4].GetResidueList()),  415)
-    self.assertEquals(len(pdb_ent.GetChainList()[5].GetResidueList()),  414)
-    self.assertEquals(len(pdb_ent.GetChainList()[6].GetResidueList()),  415)
-    self.assertEquals(len(pdb_ent.GetChainList()[7].GetResidueList()),  414)
-    self.assertEquals(len(pdb_ent.GetChainList()[8].GetResidueList()),  415)
-    self.assertEquals(len(pdb_ent.GetChainList()[9].GetResidueList()),  414)
+    self.assertEquals(''.join([c.name for c in pdb_ent.chains]),
+                      'AB_-CDEFGH')
+                      
+    self.assertEquals([c.residue_count for c in pdb_ent.chains],
+                      [415, 414, 64, 3816, 415,414,415,414,415,414])
 
-    self.assertEquals(str(pdb_seqres_ent.GetChainList()[0]), 'A')
-    self.assertEquals(str(pdb_seqres_ent.GetChainList()[1]), 'B')
-    self.assertEquals(str(pdb_seqres_ent.GetChainList()[2]), '_')
-    self.assertEquals(str(pdb_seqres_ent.GetChainList()[3]), '-')
-    self.assertEquals(str(pdb_seqres_ent.GetChainList()[4]), 'C')
-    self.assertEquals(str(pdb_seqres_ent.GetChainList()[5]), 'D')
-    self.assertEquals(str(pdb_seqres_ent.GetChainList()[6]), 'E')
-    self.assertEquals(str(pdb_seqres_ent.GetChainList()[7]), 'F')
-    self.assertEquals(str(pdb_seqres_ent.GetChainList()[8]), 'G')
-    self.assertEquals(str(pdb_seqres_ent.GetChainList()[9]), 'H')
-
-    self.assertEquals(len(pdb_seqres_ent.GetChainList()[0].GetResidueList()),
-                      415)
-    self.assertEquals(len(pdb_seqres_ent.GetChainList()[1].GetResidueList()),
-                      414)
-    self.assertEquals(len(pdb_seqres_ent.GetChainList()[2].GetResidueList()),
-                      64)
-    self.assertEquals(len(pdb_seqres_ent.GetChainList()[3].GetResidueList()),
-                      3816)
-    self.assertEquals(len(pdb_seqres_ent.GetChainList()[4].GetResidueList()),
-                      415)
-    self.assertEquals(len(pdb_seqres_ent.GetChainList()[5].GetResidueList()),
-                      414)
-    self.assertEquals(len(pdb_seqres_ent.GetChainList()[6].GetResidueList()),
-                      415)
-    self.assertEquals(len(pdb_seqres_ent.GetChainList()[7].GetResidueList()),
-                      414)
-    self.assertEquals(len(pdb_seqres_ent.GetChainList()[8].GetResidueList()),
-                      415)
-    self.assertEquals(len(pdb_seqres_ent.GetChainList()[9].GetResidueList()),
-                      414)
+    self.assertEquals(''.join([c.name for c in pdb_seqres_ent.chains]),
+                      'AB_-CDEFGH')
+    self.assertEquals([c.residue_count for c in pdb_seqres_ent.chains],
+                      [415, 414, 64, 3816, 415,414,415,414,415,414])
 
   def test_mmcifinfo_biounit_pdbize_transformation(self):
     ent, seqres, info = io.LoadMMCIF("testfiles/mmcif/3hqv.cif.gz",
                                      seqres=True,
                                      info=True)
     pdb_ent, t = info.GetBioUnits()[0].PDBize(ent, transformation=True)
-    self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[0], -915.8, 1)
-    self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[1], -952.345, 2)
-    self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[2], 3221.75, 2)
+    self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[0], -915.759, 1)
+    self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[1], -952.345, 1)
+    self.assertAlmostEquals(pdb_ent.GetCenterOfAtoms()[2], 3221.75, 1)
     self.assertEquals(geom.Equal(t,
                                  geom.Mat4(1,0,0,-920.462,
                                            0,1,0,-966.654,

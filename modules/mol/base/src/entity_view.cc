@@ -34,7 +34,6 @@
 #include "residue_view.hh"
 #include "atom_view.hh"
 #include "bond_table.hh"
-#include "iterator.hh"
 #include "query_state.hh"
 #include "entity_property_mapper.hh"
 
@@ -161,29 +160,44 @@ int EntityView::GetResidueCount() const
 geom::Vec3 EntityView::GetCenterOfAtoms() const 
 {
   geom::Vec3 center;
-  if (this->GetAtomCount()>0) {
-    unsigned int counter=0;
-    AtomViewIter it=this->AtomsBegin();
-    for(; it!=this->AtomsEnd(); ++it, ++counter) {
-      center+=(*it).GetPos();
-    }
-    center/=static_cast<Real>(counter);
+  
+  if (!this->HasAtoms()) {
+    return center;
   }
-  return center;
+  unsigned int counter = 0;
+  for (ChainViewList::const_iterator ci = this->GetChainList().begin(),
+       ce = this->GetChainList().end(); ci != ce; ++ci) {
+    for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
+         re = ci->GetResidueList().end(); ri != re; ++ri) {
+      for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
+           ae = ri->GetAtomList().end(); ai != ae; ++ai) {
+        center += ai->GetPos();
+        counter += 1;
+      }
+    }
+  }
+  return center/static_cast<Real>(counter);
 }
 
 geom::Vec3 EntityView::GetCenterOfMass() const 
 {
   geom::Vec3 center;
   Real mass = this->GetMass();
-  if (this->GetAtomCount()>0 && mass>0) {
-    AtomViewIter it=this->AtomsBegin();
-    for(; it!=this->AtomsEnd(); ++it) {
-      center+=(*it).GetPos()*(*it).GetMass();
-    }
-    center/=mass;
+  if (mass==0) {
+    return center;
   }
-  return center;
+
+  for (ChainViewList::const_iterator ci = this->GetChainList().begin(),
+       ce = this->GetChainList().end(); ci != ce; ++ci) {
+    for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
+         re = ci->GetResidueList().end(); ri != re; ++ri) {
+      for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
+           ae = ri->GetAtomList().end(); ai != ae; ++ai) {
+        center += ai->GetPos()*ai->GetMass();
+      }
+    }
+  }
+  return center / mass;
 }
 
 Real EntityView::GetMass() const 
@@ -252,7 +266,7 @@ ChainView EntityView::FindChain(const String& chain_name) const{
   this->CheckValidity();
   ChainViewList::const_iterator i;
   i=std::find_if(data_->chains.begin(), data_->chains.end(),
-                 bind(&ChainView::GetName, _1)==chain_name);
+                 boost::bind(&ChainView::GetName, _1)==chain_name);
   return (i!=data_->chains.end()) ? *i : ChainView();
 }
 
@@ -457,57 +471,6 @@ const ChainViewList& EntityView::GetChainList() const
   return data_->chains;
 }
 
-AtomViewIter EntityView::AtomsBegin() const 
-{
-  this->CheckValidity();
-  if (data_->chains.empty()) {
-    return AtomViewIter();
-  }
-  const ResidueViewList& rvl=data_->chains.front().GetResidueList();
-  if (rvl.empty()) {
-    return AtomViewIter();
-  }
-  return AtomViewIter(impl::begin(data_->chains), impl::begin(rvl),
-                      impl::begin(rvl.front().GetAtomList()), 
-                      *this, true);
-}
-
-AtomViewIter EntityView::AtomsEnd() const {
-  this->CheckValidity();
-  if (data_->chains.empty()) {
-    return AtomViewIter();
-  }
-  const ResidueViewList& rvl=data_->chains.back().GetResidueList();
-  if (rvl.empty()) {
-    return AtomViewIter();
-  }
-  return AtomViewIter(impl::end(data_->chains), impl::end(rvl),
-                      impl::end(rvl.back().GetAtomList()), *this, false);
-}
-
-ResidueViewIter EntityView::ResiduesBegin() const 
-{
-  this->CheckValidity();
-  if (data_->chains.empty()) {
-    return ResidueViewIter();
-  }
-  const ResidueViewList& rvl=data_->chains.front().GetResidueList();
-  return ResidueViewIter(impl::begin(data_->chains), 
-                         impl::begin(rvl), *this, true);
-}
-
-ResidueViewIter EntityView::ResiduesEnd() const 
-{
-    this->CheckValidity();
-    if (data_->chains.empty()) {
-      return ResidueViewIter();
-    }
-    const ResidueViewList& rvl=data_->chains.back().GetResidueList();
-    return ResidueViewIter(impl::end(data_->chains), 
-                           impl::end(rvl), *this, false);
-}
-
-
 void EntityView::RemoveAtom(AtomView view) {
   this->CheckValidity();
   if (!view.IsValid())
@@ -606,7 +569,12 @@ ResidueViewList EntityView::GetResidueList() const
 {
   this->CheckValidity();
   ResidueViewList residues;
-  std::copy(ResiduesBegin(), ResiduesEnd(), std::back_inserter(residues));
+  residues.reserve(this->GetResidueCount());
+  ChainViewList::const_iterator i;
+  for (i=data_->chains.begin(); i!=data_->chains.end(); ++i) {
+    std::copy(i->GetResidueList().begin(), i->GetResidueList().end(), 
+              std::back_inserter(residues));
+  }
   return residues;
 }
 
@@ -615,7 +583,15 @@ AtomViewList EntityView::GetAtomList() const
 {
   this->CheckValidity();
   AtomViewList atoms;
-  std::copy(AtomsBegin(), AtomsEnd(), std::back_inserter(atoms));
+  atoms.reserve(this->GetAtomCount());
+  ChainViewList::const_iterator i;
+  for (i=data_->chains.begin(); i!=data_->chains.end(); ++i) {
+    for (ResidueViewList::const_iterator j = (*i).GetResidueList().begin(), 
+         e = (*i).GetResidueList().end(); j!=e; ++j) {
+      std::copy(j->GetAtomList().begin(), j->GetAtomList().end(), 
+                std::back_inserter(atoms));
+    }
+  }
   return atoms;
 }
 
@@ -687,16 +663,25 @@ std::pair<Real,Real> EntityView::GetMinMax(const String& prop,
                                            Prop::Level hint) const
 {
   EntityPropertyMapper epm(prop, hint);
+
   Real min_v=std::numeric_limits<Real>::max();
   Real max_v=-std::numeric_limits<Real>::max();  
-  for(AtomViewIter it=AtomsBegin(); it!=this->AtomsEnd(); ++it) {
-    try {
-      Real v=epm.Get(*it);
-      max_v=std::max(v, max_v);
-      min_v=std::min(v, min_v);      
-    } catch(...) {
-      // do nothing in case of missing property
-      continue;
+
+  for (ChainViewList::const_iterator ci = this->GetChainList().begin(),
+       ce = this->GetChainList().end(); ci != ce; ++ci) {
+    for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
+         re = ci->GetResidueList().end(); ri != re; ++ri) {
+      for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
+           ae = ri->GetAtomList().end(); ai != ae; ++ai) {
+        try {
+          Real v=epm.Get(*ai);
+          max_v=std::max(v, max_v);
+          min_v=std::min(v, min_v);      
+        } catch(...) {
+          // do nothing in case of missing property
+          continue;
+        }
+      }
     }
   }
   return std::make_pair(min_v,max_v);
@@ -755,15 +740,23 @@ geom::AlignedCuboid EntityView::GetBounds() const
   this->CheckValidity();
   geom::Vec3 mmin( std::numeric_limits<Real>::max());
   geom::Vec3 mmax(-std::numeric_limits<Real>::max());
-  if (this->GetAtomCount()) {
-    for(AtomViewIter it=AtomsBegin(); it!=this->AtomsEnd(); ++it) {
-      mmax=geom::Max(mmax, (*it).GetPos());
-      mmin=geom::Min(mmin, (*it).GetPos());
-    }    
+
+  if (!this->HasAtoms()) {
     return geom::AlignedCuboid(mmin, mmax);
-  } else {
-    return geom::AlignedCuboid(geom::Vec3(), geom::Vec3());
   }
+
+  for (ChainViewList::const_iterator ci = this->GetChainList().begin(),
+       ce = this->GetChainList().end(); ci != ce; ++ci) {
+    for (ResidueViewList::const_iterator ri = ci->GetResidueList().begin(),
+         re = ci->GetResidueList().end(); ri != re; ++ri) {
+      for (AtomViewList::const_iterator ai = ri->GetAtomList().begin(),
+           ae = ri->GetAtomList().end(); ai != ae; ++ai) {
+        mmax=geom::Max(mmax, ai->GetPos());
+        mmin=geom::Min(mmin, ai->GetPos());
+      }
+    }
+  }
+  return geom::AlignedCuboid(mmin, mmax);
 }
 
 
@@ -910,6 +903,19 @@ AtomView EntityView::FindAtom(const AtomHandle& atom) const
   LOG_WARNING("EntityView::FindAtom(handle) is deprecated. "
               "Use EntityView::ViewForHandle instead");
   return this->ViewForHandle(atom);
+}
+
+bool EntityView::HasAtoms() const 
+{
+  this->CheckValidity();
+  for (ChainViewList::const_iterator it=data_->chains.begin(), 
+       e=data_->chains.end();
+       it!=e; ++it) {
+    if ((*it).HasAtoms()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 }} // ns

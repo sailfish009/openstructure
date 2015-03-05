@@ -104,8 +104,15 @@ public:
   void SetTransform(const geom::Mat4& transform);
   void SetTransform(const geom::Transform& transform);
 
+  /// \brief set transformed pos to new original pos
+  void FixTransform();
+
   /// \brief immediately update internal coordinate system
   void UpdateICS();  
+
+  /// \brief force spatial organizer and ics update
+  /// workaround for delayed dtor call from Python garbage collection
+  void ForceUpdate();
 
 protected:
    XCSEditor(const EntityHandle& ent, EditMode mode);

@@ -78,39 +78,12 @@ template <>
 ImageStateBasePtr FFTFnc::VisitState<Real,SpatialDomain>(const RealSpatialImageState& in_state) const
 {
   int rank,n[3]; // for actual fftw call
-  size_t block_count,src_size,dst_size; // padding parameters
 
   Size in_size = in_state.GetExtent().GetSize();
-
-  switch (in_size.GetDim()) {
-  case 1: 
-    rank = 1; 
-    n[0] = in_size.GetWidth();
-    block_count=1;
-    src_size=n[0]; // real values
-    dst_size=half_plus_one(n[0]); // complex values
-    break;
-  case 2: 
-    rank = 2; 
-    n[0] = in_size.GetWidth();
-    n[1] = in_size.GetHeight();
-    block_count=n[0];
-    src_size=n[1]; // real values
-    dst_size=half_plus_one(n[1]); // complex values
-    break;
-  case 3:
-    rank = 3; 
-    n[0] = in_size.GetWidth();
-    n[1] = in_size.GetHeight();
-    n[2] = in_size.GetDepth();
-    block_count=n[0]*n[1];
-    src_size=n[2]; // real values
-    dst_size=half_plus_one(n[2]); // complex values
-    break;
-  default:
-    throw(FFTException("unexpected dimension in FFT R2C"));
-  }
-
+  n[0] = in_size.GetWidth();
+  n[1] = in_size.GetHeight();
+  n[2] = in_size.GetDepth();
+  rank=in_size.GetDim();
 
   PixelSampling ps=in_state.GetSampling();
   ps.SetDomain(FREQUENCY);
@@ -121,25 +94,10 @@ ImageStateBasePtr FFTFnc::VisitState<Real,SpatialDomain>(const RealSpatialImageS
   out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
 
   assert(sizeof(OST_FFTW_fftw_complex)==sizeof(Complex));
-  OST_FFTW_fftw_complex* fftw_out =
-reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
-
-  /*
-    Since the input array is not preserved in fftw3, a copy is made, and
-    then an in-place transform is performed. The real array must be padded
-    correctly for this to work. 
-  */
-  Real* fftw_in = reinterpret_cast<Real*>(fftw_out);
-  Real* in_ptr = reinterpret_cast<Real*>(in_state.Data().GetData());
-
-  for(size_t i=0;i<block_count;i++) {
-    std::copy(&in_ptr[i*src_size],&in_ptr[(i+1)*src_size],&fftw_in[i*2*dst_size]);
-  }
+  OST_FFTW_fftw_complex* fftw_out = reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
+  Real* fftw_in = const_cast<Real*>(in_state.Data().GetData());
   OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
-  OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft_r2c(rank,n,
-				     fftw_in,fftw_out,
-				     FFTW_ESTIMATE);
-
+  OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft_r2c(rank,n,fftw_in,fftw_out,FFTW_ESTIMATE|FFTW_PRESERVE_INPUT);
   OST_FFTW_fftw_execute(plan);
   OST_FFTW_fftw_destroy_plan(plan);
 
@@ -153,9 +111,11 @@ template <>
 ImageStateBasePtr FFTFnc::VisitState<Complex,HalfFrequencyDomain>(const ComplexHalfFrequencyImageState& in_state) const
 {
   int rank,n[3]; // for actual fftw call
-  size_t block_count,src_size,dst_size; // padding parameters
 
   Size in_size=in_state.GetLogicalExtent().GetSize();
+  n[0]=in_size.GetWidth();
+  n[1]=in_size.GetHeight();
+  n[2]=in_size.GetDepth();
   // copy
   ComplexHalfFrequencyImageState tmp_state(in_state);
   // correct phase origin
@@ -164,31 +124,16 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,HalfFrequencyDomain>(const ComplexH
   switch (in_size.GetDim()) {
   case 1: 
     rank=1; 
-    n[0]=in_size.GetWidth();
-    block_count=0; // no un-padding for 1D necessary
-    src_size=half_plus_one(n[0]); // complex values
-    dst_size=n[0]; // real values
     break;
   case 2: 
     rank=2; 
-    n[0]=in_size.GetWidth();
-    n[1]=in_size.GetHeight();
-    block_count=n[0]; 
-    src_size=half_plus_one(n[1]); // complex values
-    dst_size=n[1]; // real values
     // complete zero line
     for(int i=1;i<half_plus_one(n[0]);++i){
         tmp_state.Data().Value(Index(n[0]-i,0,0))=conj(tmp_state.Data().Value(Index(i,0,0)));
     }
     break;
   case 3:
-    rank=3; 
-    n[0]=in_size.GetWidth();
-    n[1]=in_size.GetHeight();
-    n[2]=in_size.GetDepth();
-    block_count=n[0]*n[1];
-    src_size=half_plus_one(n[2]); // complex values
-    dst_size=n[2]; // real values
+    rank=3;
     // complete zero line
     for(int i=1;i<half_plus_one(n[0]);++i){
         tmp_state.Data().Value(Index(n[0]-i,0,0))=conj(tmp_state.Data().Value(Index(i,0,0)));
@@ -208,9 +153,8 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,HalfFrequencyDomain>(const ComplexH
   PixelSampling ps=in_state.GetSampling();
   ps.SetDomain(SPATIAL);
 
-  // convert (!) to real spatial image state
   Size out_size = in_state.GetLogicalExtent().GetSize();
-  boost::shared_ptr<RealSpatialImageState> out_state(new RealSpatialImageState(out_size,tmp_state.Data(),ps ));
+  boost::shared_ptr<RealSpatialImageState> out_state(new RealSpatialImageState(out_size,ps ));
   out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
   out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
 
@@ -220,21 +164,14 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,HalfFrequencyDomain>(const ComplexH
   
   assert(sizeof(OST_FFTW_fftw_complex)==sizeof(Complex));
   OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
-  OST_FFTW_fftw_complex* fftw_in =
-reinterpret_cast<OST_FFTW_fftw_complex*>(out_ptr);
+  Complex* in_ptr = tmp_state.Data().GetData();
+  OST_FFTW_fftw_complex* fftw_in =reinterpret_cast<OST_FFTW_fftw_complex*>(in_ptr);
 
-  OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft_c2r(rank,n,
-				     fftw_in,fftw_out,
-				     FFTW_ESTIMATE);
+  OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft_c2r(rank,n,fftw_in,fftw_out,FFTW_ESTIMATE | FFTW_DESTROY_INPUT);
 
   OST_FFTW_fftw_execute(plan);
   OST_FFTW_fftw_destroy_plan(plan);
 
-  // un-pad (leftover from in-place transform)
-  Real* dout_ptr = reinterpret_cast<Real*>(out_ptr);
-  for(size_t i=1;i<block_count;++i) {
-    std::copy(&dout_ptr[i*2*src_size],&dout_ptr[i*2*src_size+dst_size],&dout_ptr[i*dst_size]);
-  }
 
   Real fac = 1.0/static_cast<Real>(out_state->GetSize().GetVolume());
   for(Real* ptr = out_state->Data().GetData(); ptr<out_state->Data().GetEnd(); ++ptr) {
@@ -249,29 +186,24 @@ reinterpret_cast<OST_FFTW_fftw_complex*>(out_ptr);
 template <>
 ImageStateBasePtr FFTFnc::VisitState<Complex,SpatialDomain>(const ComplexSpatialImageState& in_state) const
 {
+  assert(sizeof(OST_FFTW_fftw_complex)==sizeof(Complex));
+
   Size size=in_state.GetExtent().GetSize();
   PixelSampling ps=in_state.GetSampling();
   ps.SetDomain(FREQUENCY);
-  boost::shared_ptr<ComplexFrequencyImageState> out_state(new ComplexFrequencyImageState(size,ps));
-  out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
-  out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
-
-  out_state->Data()=in_state.Data(); // use assignement op to copy data area to new state
   int rank = size.GetDim();
   int n[3] = {static_cast<int>(size[0]),static_cast<int>(size[1]),static_cast<int>(size[2])};
   int dir = FFTW_FORWARD;
+  OST_FFTW_fftw_complex* fftw_in = const_cast<OST_FFTW_fftw_complex*>(reinterpret_cast<const OST_FFTW_fftw_complex*>(in_state.Data().GetData()));
 
-  assert(sizeof(OST_FFTW_fftw_complex)==sizeof(Complex));
-  OST_FFTW_fftw_complex* fftw_out =
-reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
+  boost::shared_ptr<ComplexFrequencyImageState> out_state(new ComplexFrequencyImageState(size,ps));
+  out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
+  out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
+  OST_FFTW_fftw_complex* fftw_out = reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
 
-  // in place transform
+  // out of place transform
   OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
-  OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft(rank,n,
-				 fftw_out, fftw_out, 
-				 dir, 
-				 FFTW_ESTIMATE);
-
+  OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft(rank,n,fftw_in, fftw_out,dir,FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
   OST_FFTW_fftw_execute(plan);
   OST_FFTW_fftw_destroy_plan(plan);
 
@@ -284,35 +216,39 @@ reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
 template <>
 ImageStateBasePtr FFTFnc::VisitState<Complex,FrequencyDomain>(const ComplexFrequencyImageState& in_state) const
 {
-  // copy in state
-  ComplexFrequencyImageState tmp(in_state);
-  if(ori_flag_) tmp.AdjustPhaseOrigin(-in_state.GetSpatialOrigin());
+  assert(sizeof(OST_FFTW_fftw_complex)==sizeof(Complex));
 
   Size size=in_state.GetExtent().GetSize();
   PixelSampling ps=in_state.GetSampling();
   ps.SetDomain(SPATIAL);
-  // use memory located for tmp
-  boost::shared_ptr<ComplexSpatialImageState> out_state(new ComplexSpatialImageState(size,tmp.Data(),ps));
-  out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
-  out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
-
   int rank = size.GetDim();
   int n[3] = {static_cast<int>(size[0]),static_cast<int>(size[1]),static_cast<int>(size[2])};
   int dir = FFTW_BACKWARD;
 
-  assert(sizeof(OST_FFTW_fftw_complex)==sizeof(Complex));
-  OST_FFTW_fftw_complex* fftw_out =
-reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
+  boost::shared_ptr<ComplexSpatialImageState> out_state(new ComplexSpatialImageState(size,ps));
+  out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
+  out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
+  OST_FFTW_fftw_complex* fftw_out = reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
 
-  // in place transform
-  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
-  OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft(rank,n,
-				 fftw_out, fftw_out, 
-				 dir, 
-				 FFTW_ESTIMATE);
-
-  OST_FFTW_fftw_execute(plan);
-  OST_FFTW_fftw_destroy_plan(plan);
+  if(ori_flag_){
+    // copy in state
+    ComplexFrequencyImageState tmp_state(in_state);
+    tmp_state.AdjustPhaseOrigin(-in_state.GetSpatialOrigin());
+    OST_FFTW_fftw_complex* fftw_in = reinterpret_cast<OST_FFTW_fftw_complex*>(tmp_state.Data().GetData());
+    // out of place transform
+    OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
+    OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft(rank,n, fftw_in, fftw_out,dir,FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
+    OST_FFTW_fftw_execute(plan);
+    OST_FFTW_fftw_destroy_plan(plan);
+  }else{
+    // use in state
+    OST_FFTW_fftw_complex* fftw_in = const_cast<OST_FFTW_fftw_complex*>(reinterpret_cast<const OST_FFTW_fftw_complex*>(in_state.Data().GetData()));
+    // out of place transform
+    OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
+    OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft(rank,n, fftw_in, fftw_out,dir,FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
+    OST_FFTW_fftw_execute(plan);
+    OST_FFTW_fftw_destroy_plan(plan);
+  }
 
   Real fac = 1.0/static_cast<Real>(size.GetVolume());
   for(Complex* ptr = out_state->Data().GetData(); ptr<out_state->Data().GetEnd(); ++ptr) {

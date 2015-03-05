@@ -248,7 +248,7 @@ private:
    - setting the spatial origin
    - modifying the pixel sampling
 
-  It servers mainly as the base class for ImageHandle and Function.
+  It servers mainly as the base class for ImageHandle.
 */
 class DLLEXPORT_OST_IMG_BASE Data: public ConstData {
 public:

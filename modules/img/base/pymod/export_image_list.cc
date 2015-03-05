@@ -29,7 +29,6 @@ using namespace boost::python;
 #include <ost/img/algorithm.hh>
 #include <ost/img/image.hh>
 #include <ost/img/image_list.hh>
-#include <ost/img/function.hh>
 
 using namespace ost::img;
 using namespace ost;
@@ -86,10 +85,6 @@ void export_ImageList()
     .def(self -= Real())
     .def(self *= Real())
     .def(self /= Real())
-    .def(self += other<Function>())
-    .def(self -= other<Function>())
-    .def(self *= other<Function>())
-    .def(self /= other<Function>())
     ;
 }
 

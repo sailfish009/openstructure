@@ -75,7 +75,7 @@ void export_CoordGroup()
     .add_property("start_time",&CoordGroupHandle::GetStartTime,&CoordGroupHandle::SetStartTime)
     .def("__getitem__",cg_getitem)
     .def("__setitem__",cg_setitem)
-    .def("Filter", &CoordGroupHandle::Filter, (arg("selected"),arg("first")=0,arg("last")=-1))
+    .def("Filter", &CoordGroupHandle::Filter, (arg("selected"),arg("first")=0,arg("last")=-1,arg("stride")=1))
   ;
 
   def("CreateCoordGroup",CreateCoordGroup);

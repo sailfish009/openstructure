@@ -6,9 +6,10 @@
                connectivity information of molecules.
 
 
-The main task of the :mod:`~ost.conop` module is to connect atoms with bonds. 
-While the bond class is also part of the base module, the conop module deals 
-with setting up the correct bonds between atoms.
+
+The main task of the conop module is to interpret the topology and connectivity of 
+proteins, polynucleotides and small molecules, e.g. after importing a structure 
+from a PDB file. In addition, it provides an infrastructure for consistency checks. 
 
 
 In this module
@@ -21,3 +22,4 @@ In this module
  connectivity
  compoundlib
  cleanup
+ functions

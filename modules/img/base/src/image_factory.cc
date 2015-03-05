@@ -46,6 +46,11 @@ ImageHandle CreateImage(const Extent& ext, DataType type, DataDomain dom)
   return DoCreateImage(ext,type,dom);
 }
 
+ImageHandle CreateImage(const Size& s, DataType type, DataDomain dom)
+{
+  return DoCreateImage(Extent(s),type,dom);
+}
+
 ImageHandle CreateImage(const Size& s, const Point& o,DataType type,DataDomain dom)
 {
   return CreateImage(Extent(s,o),type,dom);

@@ -13,7 +13,7 @@
 .. module:: ost.io
   :synopsis: Input and output of sequences, alignments, structures, images and density maps.
 
-The io module deals with input and output of :class:`entities 
+The io module deals with the input and output of :class:`entities 
 <ost.mol.EntityHandle>`, :class:`alignments <ost.seq.AlignmentHandle>`, 
 :class:`sequences <ost.seq.SequenceHandle>`, :class:`images 
 <ost.img.ImageHandle>`. Importers for common file formats containing molecules 
@@ -29,7 +29,7 @@ Molecular Structures
 Loading Molecular Structures
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :mod:`~ost.io` modules offers several ways to load molecular structures 
+The :mod:`~ost.io` modules offer several ways to load molecular structures 
 depending on your requirements. The most general way is offered by 
 :func:`~ost.io.LoadEntity`, which will automatically detect the file format based 
 on the file extension.
@@ -37,33 +37,32 @@ on the file extension.
 .. function:: LoadEntity(filename, format='auto')
 
   Load entity from disk. If format is set to 'auto', the function guesses the 
-  filetype based on the extension of the file. Files ending in '.pdb', '.ent', 
-  '.ent.gz', '.pdb.gz' will automatically be loaded as PDB files, for example. 
-  For files without or exotic extensions, the format can be set explicitly as 
-  the second parameter. 
+  filetype based on the extension of the file e.g. files ending in '.pdb', '.ent', 
+  '.ent.gz' and '.pdb.gz' will automatically be loaded as PDB files. For files 
+  without or exotic extensions, the format can be set explicitly as the second 
+  parameter. 
   
   .. code-block:: python
 
-    # recognizes SDF file by file extension
-    ent=io.LoadEntity('file.sdf')
+    # Recognizes SDF file by file extension
+    ent = io.LoadEntity('file.sdf')
 
     # In this case, there is no file extensions, so you have to say it's a 
     # SDF file explicitly
-    ent=io.LoadEntity('file', 'sdf')
+    ent = io.LoadEntity('file', 'sdf')
 
   For a list of file formats supported by :func:`LoadEntity`, see :doc:`structure_formats`.
   
   :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
       is not recognized or the file format can not be detected based on the 
-      file extension
+      file extension.
       
       :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
-      inexistent file
+      inexistent file.
 
 Some of the formats have a dedicated function that allows you to tweak many 
 parameters that affect the import. PDB files can be loaded with 
-:func:`~ost.io.LoadPDB`. It offers a tighter control over the exact loading 
-behaviour.
+:func:`~ost.io.LoadPDB`. It offers tighter control over the exact loading behaviour.
 
 
 :doc:`profile`
@@ -80,7 +79,7 @@ Saving a complete entity or a view is a matter of calling
 
 .. code-block:: python
   
-  ent=io.LoadEntity('protein.pdb')
+  ent = io.LoadEntity('protein.pdb')
   # save full entity
   io.SaveEntity(ent, 'full.pdb')
   # only save C-alpha atoms
@@ -92,7 +91,7 @@ file:
 
 .. code-block:: python
   
-  ent=io.LoadEntity('protein.pdb')
+  ent = io.LoadEntity('protein.pdb')
   # Save complete entity
   io.SavePDB(ent, 'full.pdb')
   # Save chain A and chain B separately
@@ -114,7 +113,7 @@ file:
   
   :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
       is not recognized or the file format can not be detected based on the 
-      file extension
+      file extension.
       
 .. autofunction:: ost.io.SavePDB
 
@@ -140,21 +139,21 @@ Loading sequence or alignment files
   .. code-block:: python
 
     # recognizes FASTA file by file extension
-    myseq=io.LoadSequence('seq.fasta')
+    myseq = io.LoadSequence('seq.fasta')
     # for obtaining a SequenceList
-    seqlist=io.LoadSequenceList('seqs.fasta')
+    seqlist = io.LoadSequenceList('seqs.fasta')
     # or for multiple aligned fasta files use
-    aln=io.LoadAlignment('algnm.aln',format="clustal")
+    aln = io.LoadAlignment('algnm.aln',format="clustal")
     
   For a list of file formats supported by :func:`LoadSequence` see
   :doc:`sequence_formats`.
   
   :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
       is not recognized or the file format can not be detected based on the 
-      file extension
+      file extension.
       
       :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
-      inexistent file
+      inexistent file.
 
 .. function:: LoadSequenceList(filename, format='auto')
 
@@ -191,10 +190,10 @@ Saving Sequence Data
   
   :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
       is not recognized or the file format can not be detected based on the 
-      file extension
+      file extension.
       
       :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
-      inexistent file
+      inexistent file.
 
 .. function:: SaveSequenceList(seq_list, filename, format='auto')
 
@@ -220,6 +219,12 @@ Loading Density Maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. function:: LoadImage(filename)
+
+  Load density map from disk with the extension being guessed by the function.
+
+  :param filename: The filename
+  :type  filename: string
+
 .. function:: LoadImage(filename, format)
 
   Load density map from disk. If no format is given, the function guesses the 
@@ -232,19 +237,19 @@ Loading Density Maps
 
   :raises: :exc:`~ost.io.IOUnknownFormatException` if the format supplied 
       is not recognized or the file format can not be detected based on the 
-      file extension and content
+      file extension and content.
       
       :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
-      inexistent file
+      inexistent file.
 
   .. code-block:: python
 
     # recognizes mrc file by file extension
-    ent=io.LoadImage('file.mrc')
+    ent = io.LoadImage('file.mrc')
 
-    # It is always possible to explicitely set the image format
+    # it is always possible to explicitely set the image format
     # DAT file explicitly
-    ent=io.LoadImage('file', Dat())
+    ent = io.LoadImage('file', Dat())
 
   For a list of file formats supported by :func:`LoadImage`, see :doc:`image_formats`.
   
@@ -255,8 +260,11 @@ Saving Density Maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. function:: SaveImage(image,filename)
-.. function:: SaveImage(image,filename, format)
 
+  Save density map to disk with the function guessing the 
+  filetype based on the file extension.
+
+.. function:: SaveImage(image,filename, format)
 
   Save density map to disk. If no format is set, the function guesses the 
   filetype based on the file extension.
@@ -275,7 +283,7 @@ Saving Density Maps
   .. code-block:: python
 
     # load density map
-    image=io.LoadImage('density_map.ccp4')
+    image = io.LoadImage('density_map.ccp4')
     # save density map
     io.SaveImage(image, 'new_map.map', CCP4())
 
@@ -290,9 +298,9 @@ Saving Density Maps
   :hide:
 
   from ost import io,seq
-  ent=io.LoadPDB('./examples/entity/fragment.pdb')
+  ent = io.LoadPDB('./examples/entity/fragment.pdb')
   print ent.atom_count 
-  myseq=seq.SequenceFromChain('t',ent.chains[0])
+  myseq = seq.SequenceFromChain('t',ent.chains[0])
   print myseq.GetLength()
 
 .. testoutput:: io

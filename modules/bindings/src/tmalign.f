@@ -1,3 +1,4 @@
+
 **************************************************************************
 *     This program is to identify the best alignment of two protein 
 *     structures that gives the highest TM-score. Input structures must 
@@ -16,7 +17,7 @@
 *     the Software. It is provided "as is" without express or implied 
 *     warranty.
 ************************ updating history ********************************
-*     2005/06/01: A small bug of two-point superposition was fixed.
+*     2005/06/01: A bug of two-point superposition was fixed.
 *     2005/10/19: the program was reformed so that the alignment
 *                 results are not dependent on the specific compilers.
 *     2006/06/20: select 'A' if there is altLoc when reading PDB file.
@@ -25,7 +26,8 @@
 *                 length, shorter length, or longer length of two 
 *                 structures.
 *     2007/05/23: added additional output file 'TM.sup_all' for showing
-*                 all atoms while 'TM.sup' is only for aligned atoms
+*                 full-chain C-alpha traces while 'TM.sup' is only for 
+*                 aligned regions.
 *     2007/09/19: added a new feature alignment to deal with the problem
 *                 of aligning fractional structures (e.g. protein
 *                 interfaces).
@@ -36,14 +38,41 @@
 *     2009/08/20: A bug for asymmetry alignment result was fixed.
 *     2010/08/02: A new RMSD matrix was used to remove obsolete statements.
 *                 Staled subroutines were deleted.
-*     2011/01/03: The length of pdb file names were extended to 500
-*     2011/01/24: Fixed a bug on output file name created on 2011/01/03
-*     2011/01/30: An open source license is attached to the program
+*     2011/01/03: The length of pdb file names were extended to 500.
+*     2011/01/24: Fixed a bug on output file name created on 2011/01/03.
+*     2011/01/30: An open source license is attached to the program.
+*     2011/09/03: A new option "-d" is added to allow users to change
+*                 TM-score normalization scale. A version number is attached 
+*                 to the program from now on.
+*     2011/10/11: A new scale (d0) was introduced for alignment search. This
+*                 is to mainly improve alignment selection for small proteins 
+*                 (e.g. L<50 residues) but also increase alignment coverage
+*                 of larger proteins. Second, TM-align output format is changed
+*                 and two TM-scores normalized by both chains are reported.
+*     2011/10/12: Distance cutoff for gap is increased from 3.85A to 4.25A.
+*                 Added 'TMalign -v' to allow user to check version number.
+*     2012/01/24: Fix a bug for secondary structure definition
+*     2012/04/16: Add an option to allow user to specify seed alignments, e.g.
+*                 '-i align.txt'. This is used together with other inherent
+*                 TM-align seeds. An example of the fasta file can be seen at
+*                 http://zhanglab.ccmb.med.umich.edu/TM-align/align.txt.
+*     2012/04/17: Add an option '-m matrix.txt' to output the rotation matrix
+*                 in separate file, drop-off secondary-structure smooth 
+*                 procedure, and add one iteration in initial5. This change 
+*                 increases the alignment accuracy (TM-score) by 2%.
+*     2012/04/19: Add additional output file 'TM.sup_atm' 'TM.sup_all_atm' for 
+*                 showing all-atom superposition while 'TM.sup' and 'TM.sup_all' 
+*                 are only for C-alpha traces.
+*     2012/05/07: Improved RMSD calculation subroutine which speeds up TM-algin
+*                 program by 10%.
+*     2012/07/07: Add an option '-I align.txt' to allow user to STICK TO the
+*                 inital alignment. This is different from '-i align.txt' where
+*                 initial alignment can be optimized.
 **************************************************************************
       
       program TMalign
-      PARAMETER(nmax=5000)
-      PARAMETER(nmax2=10000)
+      PARAMETER(nmax=5000)      !maximum length of the sequence
+      PARAMETER(nmax2=10000)    !for alignment output
       
       COMMON/BACKBONE/XA(3,nmax,0:1)
       common/dpc/score(nmax,nmax),gap_open,invmap(nmax)
@@ -53,12 +82,20 @@
       common/d0min/d0_min
       common/d00/d00,d002
       
-      character*500 fnam,pdb(100),outname
+      common/alignment/m_alignment,sequence(10),TM_ali,L_ali,rmsd_ali
+      common/alignment1/m_alignment_stick
+      character*10000 sequence
+      
+      common/sequence/seq1(0:nmax),seq2(0:nmax)
+      character seq1,seq2
+      
+      character*500 fnam,pdb(100),outname,falign,fmatrix
       character*3 aa(-1:20),aanam,ss1(nmax),ss2(nmax)
       character*500 s,du
       character*504 outnameall_tmp,outnameall
-      character seq1(0:nmax),seq2(0:nmax)
       character aseq1(nmax2),aseq2(nmax2),aseq3(nmax2)
+      character*8 version
+      character*5000 s1         !maximum length of protein is 5000
       
       dimension m1(nmax),m2(nmax)
       dimension xtm1(nmax),ytm1(nmax),ztm1(nmax)
@@ -68,6 +105,15 @@
       common/TM/TM,TMmax
       common/d8/d8
       common/initial4/mm1(nmax),mm2(nmax)
+      
+      character*10 aa1,ra1,aa2,ra2
+      dimension ia1(90000),aa1(90000),ra1(90000),ir1(90000)
+      dimension xa1(90000),ya1(90000),za1(90000)
+      dimension ia2(90000),aa2(90000),ra2(90000),ir2(90000)
+      dimension xa2(90000),ya2(90000),za2(90000)
+      
+      dimension ma1(nmax),ma2(nmax)
+      dimension nc1(nmax),nc2(nmax)
 
 ccc   RMSD:
       double precision r_1(3,nmax),r_2(3,nmax),w(nmax)
@@ -94,37 +140,54 @@ ccc
          write(*,*)'(For detail: Zhang & Skolnick, Nucl. Acid. Res.',
      &     ' 33, 2303, 2005)'
          write(*,*)
-         write(*,*)'1. Align ''structure.pdb'' to ''target.pdb'''
-         write(*,*)'  (By default, TM-score is normalized by the ',
-     &        'length of ''target.pdb'')'
-         write(*,*)'  >TMalign structure.pdb target.pdb'
+         write(*,*)'1. Align ''chain_1.pdb'' and ''chain_2.pdb'':'
+         write(*,*)'   >TMalign chain_1.pdb chain_2.pdb'
          write(*,*)
-         write(*,*)'2. Run TM-align and output the superposition ',
-     &        'to ''TM.sup'' and ''TM.sup_all'':'
-         write(*,*)'  >TMalign structure.pdb target.pdb -o TM.sup'
-         write(*,*)'      To view the superimposed structures of the',
+         write(*,*)'2. Ask TM-align to start with an alignment',
+     &        ' specified in fasta file ''align.txt'':'
+         write(*,*)'   >TMalign chain_1.pdb chain_2.pdb -i align.txt'
+         write(*,*)'   or to stick the alignment to ''align.txt'':'
+         write(*,*)'   >TMalign chain_1.pdb chain_2.pdb -I align.txt'
+         write(*,*)
+         write(*,*)'3. Output the superposition to ''TM.sup'', ',
+     &        '''TM.sup_all'' and ''TM.sup_atm'':'
+         write(*,*)'   >TMalign chain_1.pdb chain_2.pdb -o TM.sup'
+         write(*,*)'      To view superimposed C-alpha traces of',
      &        ' aligned regions by rasmol:'
          write(*,*)'        >rasmol -script TM.sup'
-         write(*,*)'      To view the superimposed structures of all',
-     &        ' regions by rasmol:'
+         write(*,*)'      To view superimposed C-alpha traces of',
+     &        ' all regions:'
          write(*,*)'        >rasmol -script TM.sup_all'
+         write(*,*)'      To view superimposed full-atom structures of',
+     &        ' aligned regions:'
+         write(*,*)'        >rasmol -script TM.sup_atm'
+         write(*,*)'      To view superimposed full-atom structures of',
+     &        ' all regions:'
+         write(*,*)'        >rasmol -script TM.sup_all_atm'
          write(*,*)
-         write(*,*)'3. If you want output TM-score normalized by ',
-     &        'an assigned length, e.g. 100 aa:'
-         write(*,*)'  >TMalign structure.pdb target.pdb -L 100'
+         write(*,*)'4. There are two TM-scores reported. You ',
+     &        'should use the one normalized by'
+         write(*,*)'   the length of the protein you ',
+     &        'are interested in.'
          write(*,*)'   If you want TM-score normalized by the ',
-     &        'average length of two structures:'
-         write(*,*)'  >TMalign structure.pdb target.pdb -a'
-         write(*,*)'   If you want TM-score normalized by the ',
-     &        'shorter length of two structures:'
-         write(*,*)'  >TMalign structure.pdb target.pdb -b'
-         write(*,*)'   If you want TM-score normalized by the ',
-     &        'longer length of two structures:'
-         write(*,*)'  >TMalign structure.pdb target.pdb -c'
+     &        'average length of two proteins:'
+         write(*,*)'      >TMalign chain_1.pdb chain_2.pdb -a'
+         write(*,*)'   or TM-score normalized by an ',
+     &        'assigned length (>L_min), e.g. 100 AA:'
+         write(*,*)'      >TMalign chain_1.pdb chain_2.pdb -L 100'
+         write(*,*)'   If you want TM-score scaled by an assigned d0,',
+     &        ' e.g. 5 A:'
+         write(*,*)'      >TMalign chain_1.pdb chain_2.pdb -d 5'
          write(*,*)
-         write(*,*)'(All above options do not change the ',
-     &         'final structure alignment results)'
+         write(*,*)'5. Output TM-align rotation matrix:'
+         write(*,*)'   >TMalign chain_1.pdb chain_2.pdb -m matrix.txt'
          write(*,*)
+         goto 9999
+      endif
+      
+      version='20120707'
+      if(fnam.eq.'-v')then
+         write(*,*)'TM-align Version ',version
          goto 9999
       endif
       
@@ -133,7 +196,10 @@ ccc
       m_fix=-1                  !fixed length-scale only for output
       m_ave=-1                  !using average length
       m_d0_min=-1               !diminum d0 for search
-      m_d0=-1                   !given d0 for both search and output
+      m_d0=-1                   !given d0 for output
+      m_alignment=-1            !without initial alignment
+      m_alignment_stick=-1      !without initial alignment
+      m_matrix=-1               !no output of matrix
       narg=iargc()
       i=0
       j=0
@@ -144,30 +210,34 @@ ccc
          m_out=1
          i=i+1
          call getarg(i,outname)
+      elseif(fnam.eq.'-a')then  !change superposed output but not the alignment
+         m_ave=1
+         i=i+1
       elseif(fnam.eq.'-L')then  !change both L_all and d0
          m_fix=1
          i=i+1
          call getarg(i,fnam)
          read(fnam,*)L_fix
-      elseif(fnam.eq.'-dmin')then
-         m_d0_min=1
-         i=i+1
-         call getarg(i,fnam)
-         read(fnam,*)d0_min_input
-      elseif(fnam.eq.'-d0')then
+      elseif(fnam.eq.'-d')then
          m_d0=1
          i=i+1
          call getarg(i,fnam)
          read(fnam,*)d0_fix
-      elseif(fnam.eq.'-a')then  !change superposed output but not the alignment
-         m_ave=1
+      elseif(fnam.eq.'-i')then
+         m_alignment=1
          i=i+1
-      elseif(fnam.eq.'-b')then
-        m_ave=2
+         call getarg(i,fnam)
+         falign=fnam
+      elseif(fnam.eq.'-I')then
+         m_alignment_stick=1
          i=i+1
-      elseif(fnam.eq.'-c')then
-        m_ave=3
+         call getarg(i,fnam)
+         falign=fnam
+      elseif(fnam.eq.'-m')then
+         m_matrix=1
          i=i+1
+         call getarg(i,fnam)
+         fmatrix=fnam
       else
          j=j+1
          pdb(j)=fnam
@@ -177,15 +247,20 @@ ccc
 ccccccccc read data from first CA file:
       open(unit=10,file=pdb(1),status='old')
       i=0
+      na1=0
       do while (.true.)
          read(10,9001,end=1010) s
          if(i.gt.0.and.s(1:3).eq.'TER')goto 1010
          if(s(1:3).eq.'ATO')then
+            na1=na1+1
+            if(na1.ge.90000)goto 1010
+            read(s,8999)du,ia1(na1),du,aa1(na1),du,ra1(na1),du,
+     &           ir1(na1),du,xa1(na1),ya1(na1),za1(na1)
             if(s(13:16).eq.'CA  '.or.s(13:16).eq.' CA '.or
      &           .s(13:16).eq.'  CA')then
                if(s(17:17).eq.' '.or.s(17:17).eq.'A')then
                   i=i+1
-                  read(s,9000)du,aanam,du,mm1(i),du,
+                  read(s,9000)du,ma1(i),du,aanam,du,mm1(i),du,
      $                 xa(1,i,0),xa(2,i,0),xa(3,i,0)
                   do j=-1,20
                      if(aanam.eq.aa(j))then
@@ -202,7 +277,8 @@ ccccccccc read data from first CA file:
          endif
       enddo
  1010 continue
- 9000 format(A17,A3,A2,i4,A4,3F8.3)
+ 8999 format(a6,I5,a1,A4,a1,A3,a2,I4,a4,3F8.3)
+ 9000 format(a6,I5,a6,A3,A2,i4,A4,3F8.3)
  9001 format(A100)
       close(10)
       nseq1=i
@@ -211,15 +287,20 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ccccccccc read data from the second CA file:
       open(unit=10,file=pdb(2),status='old')
       i=0
+      na2=0
       do while (.true.)
          read(10,9001,end=1011) s
          if(i.gt.0.and.s(1:3).eq.'TER')goto 1011
          if(s(1:3).eq.'ATO')then
+            na2=na2+1
+            if(na2.ge.90000)goto 1011
+            read(s,8999)du,ia2(na2),du,aa2(na2),du,ra2(na2),du,
+     &           ir2(na2),du,xa2(na2),ya2(na2),za2(na2)
             if(s(13:16).eq.'CA  '.or.s(13:16).eq.' CA '.or.
      &           s(13:16).eq.'  CA')then
                if(s(17:17).eq.' '.or.s(17:17).eq.'A')then
                   i=i+1
-                  read(s,9000)du,aanam,du,mm2(i),du,
+                  read(s,9000)du,ma2(i),du,aanam,du,mm2(i),du,
      $                 xa(1,i,1),xa(2,i,1),xa(3,i,1)
                   do j=-1,20
                      if(aanam.eq.aa(j))then
@@ -240,21 +321,54 @@ ccccccccc read data from the second CA file:
       nseq2=i
 c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       
-*     Scale of TM-score in search is based on the smaller protein --------->
-      d0_min=0.5
-      if(m_d0_min.eq.1)then
-         d0_min=d0_min_input    !for search
+ccccccccc read initial alignment file from 'alignment.txt':
+      if(m_alignment.eq.1.or.m_alignment_stick.eq.1)then
+         open(unit=10,file=falign,status='old')
+         n_p=0
+         do while (.true.)
+            read(10,9002,end=1012)s1
+c            write(*,*)'s1=',trim(s1)
+            if(s1(1:1).eq.">")then
+               n_p=n_p+1
+               sequence(n_p)=''
+               if(n_p.gt.2)goto 1012
+            else
+               if(n_p.gt.0)then
+                  sequence(n_p)=trim(sequence(n_p))//trim(s1)
+c                  write(*,*)n_p,trim(sequence(n_p))
+               endif
+            endif
+         enddo
+ 1012    continue
+         close(10)
+c         write(*,*)trim(sequence(1))
+c         write(*,*)trim(sequence(2))
+         if(n_p.lt.2)then
+            write(*,*)'ERROR: FASTA format is wrong, two proteins',
+     &           ' should be included'
+            stop
+         endif
+         if(len_trim(sequence(1)).ne.len_trim(sequence(2)))then
+            write(*,*)'Warning: FASTA format may be wrong, the',
+     &           ' length in alignment should be equal. But we',
+     &           ' run it anyway'
+         endif
       endif
-      anseq_min=min(nseq1,nseq2)
+ 9002 format(A5000)
+c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      
+*     Scale of TM-score in search based on length of smaller protein --------->
+      anseq_min=min(nseq1,nseq2) !both search and d8_cut use nseq_min
       anseq=anseq_min           !length for defining TMscore in search
       d8=1.5*anseq_min**0.3+3.5 !remove pairs with dis>d8 during search & final
-      if(anseq.gt.15)then
+      if(anseq.gt.19)then       !L=19, d0=0.168
          d0=1.24*(anseq-15)**(1.0/3.0)-1.8 !scale for defining TM-score
       else
-         d0=d0_min
+         d0=0.168
       endif
-      if(d0.lt.d0_min)d0=d0_min
-      if(m_d0.eq.1)d0=d0_fix
+      d0_min=d0+0.8             !best for search, this should be changed when calculate real TM-score
+      if(d0.lt.d0_min)d0=d0_min !min d0 in search=0.968, min d0 in output=0.5
+c     write(*,*)'d0 in search=',d0 
       d00=d0                    !for quickly calculate TM-score in searching
       if(d00.gt.8)d00=8
       if(d00.lt.4.5)d00=4.5
@@ -262,10 +376,10 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       nseq=max(nseq1,nseq2)
       
 ***** do alignment **************************
-      CALL TM_align          !to find invmap(j)
+      CALL TM_align             !to find invmap(j)
       
 ************************************************************
-***   resuperpose to find residues of dis<d8 ------------------------>
+***   Refine alignment by cutting dis>d8 ------------------------>
       n_al=0
       do j=1,nseq2
          if(invmap0(j).gt.0)then
@@ -281,33 +395,15 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             m2(n_al)=j
          endif
       enddo
-      d0_input=d0
+      d0_input=d0               !scaled by seq_min
       call TMscore8(d0_input,n_al,xtm1,ytm1,ztm1,n_al,
      &     xtm2,ytm2,ztm2,TM,Rcomm,Lcomm) !TM-score with dis<d8 only
-
-*     Output TM-score is based on the second protein------------------>
-      d0_min=0.5                !for output
-      anseq=nseq2               !length for defining final TMscore
-      if(m_ave.eq.1)anseq=(nseq1+nseq2)/2.0 !<L>
-      if(m_ave.eq.2)anseq=min(nseq1,nseq2)
-      if(m_ave.eq.3)anseq=max(nseq1,nseq2)
-      if(anseq.lt.anseq_min)anseq=anseq_min
-      if(m_fix.eq.1)anseq=L_fix !input length
-      if(anseq.gt.15)then
-         d0=1.24*(anseq-15)**(1.0/3.0)-1.8 !scale for defining TM-score
-      else
-         d0=d0_min
-      endif
-      if(d0.lt.d0_min)d0=d0_min
-      if(m_d0.eq.1)d0=d0_fix
-      
-***   remove dis>d8 in normal TM-score calculation for final report----->
       j=0
       n_eq=0
       do i=1,n_al
          dis2=sqrt((xtm1(i)-xtm2(i))**2+(ytm1(i)-ytm2(i))**2+
      &        (ztm1(i)-ztm2(i))**2)
-         if(dis2.le.d8)then
+         if(dis2.le.d8.or.m_alignment_stick.eq.1)then
             j=j+1
             xtm1(j)=xtm1(i)
             ytm1(j)=ytm1(i)
@@ -315,119 +411,238 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             xtm2(j)=xtm2(i)
             ytm2(j)=ytm2(i)
             ztm2(j)=ztm2(i)
-            m1(j)=m1(i)
+
+            r_1(1,j)=xtm1(i)
+            r_1(2,j)=ytm1(i)
+            r_1(3,j)=ztm1(i)
+            r_2(1,j)=xtm2(i)
+            r_2(2,j)=ytm2(i)
+            r_2(3,j)=ztm2(i)
+            
+            m1(j)=m1(i)         !record alignment
             m2(j)=m2(i)
             if(ss1(m1(i)).eq.ss2(m2(i)))then
                n_eq=n_eq+1
             endif
          endif
       enddo
-      seq_id=float(n_eq)/(n_al+0.00000001)
       n8_al=j
+      seq_id=float(n_eq)/(n8_al+0.00000001)
+      call u3b(w,r_1,r_2,n8_al,0,rms,u,t,ier)
+      rmsd=dsqrt(rms/n8_al)
+c      write(*,*)'---------',rms,n8_al,RMSD,u(1,1),t(1)
+      
+*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+*^^^^^^^ alignment is done, all cutoffs were based on shorter chain^^^^^^^^
+*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+************************************************************
+***   Output TM-score -------------------------->
+      d0_out=5                  !only for showing residue-pair distance
+      d0_min=0.5                !for TM-score output, consistent stdrd TM-score
+*     Based on Chain_1===>
+      anseq=nseq1
+      if(anseq.gt.21)then
+         d0=1.24*(anseq-15)**(1.0/3.0)-1.8 !scale for defining TM-score
+      else
+         d0=d0_min
+      endif
+      if(d0.lt.d0_min)d0=d0_min
       d0_input=d0
       call TMscore(d0_input,n8_al,xtm1,ytm1,ztm1,n8_al,
      &     xtm2,ytm2,ztm2,TM8,Rcomm,Lcomm) !normal TMscore
-      rmsd8_al=Rcomm
-      TM8=TM8*n8_al/anseq       !TM-score after cutoff
-
-      
+      TM1=TM8*n8_al/anseq
+*     Based on Chain_2===>
+      anseq=nseq2
+      if(anseq.gt.21)then
+         d0=1.24*(anseq-15)**(1.0/3.0)-1.8 !scale for defining TM-score
+      else
+         d0=d0_min
+      endif
+      if(d0.lt.d0_min)d0=d0_min
+      d0_input=d0
+      call TMscore(d0_input,n8_al,xtm1,ytm1,ztm1,n8_al,
+     &     xtm2,ytm2,ztm2,TM8,Rcomm,Lcomm) !normal TMscore
+      TM2=TM8*n8_al/anseq
+*     Based on Average length===>
+      if(m_ave.eq.1)then
+         anseq=(nseq1+nseq2)/2.0
+         if(anseq.gt.21)then
+            d0=1.24*(anseq-15)**(1.0/3.0)-1.8 !scale for defining TM-score
+         else
+            d0=d0_min
+         endif
+         if(d0.lt.d0_min)d0=d0_min
+         d0_input=d0
+         call TMscore(d0_input,n8_al,xtm1,ytm1,ztm1,n8_al,
+     &        xtm2,ytm2,ztm2,TM8,Rcomm,Lcomm) !normal TMscore
+         TM12=TM8*n8_al/anseq
+      endif
+*     Based on assigned length===>
+      if(m_fix.eq.1)then
+         anseq=L_fix            !input length
+         if(anseq.gt.21)then
+            d0=1.24*(anseq-15)**(1.0/3.0)-1.8 !scale for defining TM-score
+         else
+            d0=d0_min
+         endif
+         if(d0.lt.d0_min)d0=d0_min
+         d0_input=d0
+         call TMscore(d0_input,n8_al,xtm1,ytm1,ztm1,n8_al,
+     &        xtm2,ytm2,ztm2,TM8,Rcomm,Lcomm) !normal TMscore
+         TML=TM8*n8_al/anseq
+      endif
+*     Based on user-specified d0===>
+      if(m_d0.eq.1)then
+         d0=d0_fix
+         d0_out=d0_fix
+         d0_input=d0
+         call TMscore(d0_input,n8_al,xtm1,ytm1,ztm1,n8_al,
+     &        xtm2,ytm2,ztm2,TM8,Rcomm,Lcomm) !normal TMscore
+         TMfix=TM8*n8_al/nseq2
+      endif
       
 ********* for output summary ******************************
       write(*,*)
       write(*,*)'*****************************************************',
      &     '*********************'
-      write(*,*)'*                               TM-align             ',
-     &     '                    *'
-      write(*,*)'* A protein structural alignment algorithm based on T',
-     &     'M-score             *'
-      write(*,*)'* Reference: Y. Zhang and J. Skolnick, Nucl. Acids Re',
-     &     's. 2005 33, 2302-9  *'
-      write(*,*)'* Comments on the program, please email to: zhng@umic',
-     &     'h.edu               *'
+      write(*,*)'* TM-align (Version ',version,
+     &     '): A protein structural a',
+     &     'lignment algorithm  *'
+      write(*,*)'* Reference: Y Zhang and J Skolnick, Nucl Acids Res 3',
+     &     '3, 2302-9 (2005)    *'
+      write(*,*)'* Please email your comments and suggestions to: zhng',
+     &     '@umich.edu          *'
       write(*,*)'*****************************************************',
      &     '*********************'
       write(*,*)
-      write(*,101)pdb(1),nseq1
- 101  format('Chain 1:',A10,'  Size=',I4)
-      write(*,102)pdb(2),nseq2,int(anseq)
- 102  format('Chain 2:',A10,'  Size=',I4,
-     &     ' (TM-score is normalized by ',I4,')')
+      write(*,101)pdb(1)
+ 101  format('Name of Chain_1: ',A50)
+      write(*,102)pdb(2)
+ 102  format('Name of Chain_2: ',A50)
+      write(*,103)nseq1
+ 103  format('Length of Chain_1: ',I4,' residues')
+      write(*,201)nseq2
+ 201  format('Length of Chain_2: ',I4,' residues')
+      
+      if(m_alignment.eq.1.or.m_alignment_stick.eq.1)then
+         write(*,72)TM_ali,L_ali,rmsd_ali
+ 72      format('User-specified initial alignment: TM/Lali/rmsd= ',
+     &        f7.5,', ',I4,', ',f6.3)
+      endif
+      
       write(*,*)
-      write(*,103)n8_al,rmsd8_al,TM8,seq_id
- 103  format('Aligned length=',I4,', RMSD=',f6.2,
-     &     ', TM-score=',f7.5,', ID=',f5.3)
+      write(*,203)n8_al,rmsd,seq_id
+ 203  format('Aligned length= ',I4,', RMSD= ',f6.2,
+     &     ', Seq_ID=n_identical/n_aligned= ',f5.3)
+      write(*,204)TM1
+ 204  format('TM-score= ',f7.5,' (if normalized by length of Chain_1)')
+      write(*,205)TM2
+ 205  format('TM-score= ',f7.5,' (if normalized by length of Chain_2)')
+      if(m_ave.eq.1)then
+         write(*,206)TM12,(nseq1+nseq2)/2.0
+ 206     format('TM-score= ',f7.5,
+     &        ' (if normalized by average length of chains =',f6.1,')')
+      endif
+      if(m_fix.eq.1)then
+         write(*,207)TML,L_fix
+ 207     format('TM-score= ',f7.5,
+     &        ' (if scaled by user-specified L=',I4,')')
+      endif
+      if(m_d0.eq.1)then
+         write(*,208)TMfix,d0_fix
+ 208     format('TM-score= ',f7.5,
+     &        ' (if scaled by user-specified d0=',f4.1,')')
+      endif
+      write(*,210)
+ 210  format('(You should use TM-score normalized by length',
+     &     ' of the reference protein)')
       write(*,*)
 
-********* extract rotation matrix ------------>
-      L=0
-      do i=1,n8_al
-         k=m1(i)
-         L=L+1
-         r_1(1,L)=xa(1,k,0)
-         r_1(2,L)=xa(2,k,0)
-         r_1(3,L)=xa(3,k,0)
-         r_2(1,L)=xtm1(i)
-         r_2(2,L)=ytm1(i)
-         r_2(3,L)=ztm1(i)
-       enddo
-       if(L.gt.3)then
-         call u3b(w,r_1,r_2,L,1,rms,u,t,ier) !u rotate r_1 to r_2
-         write(*,*)'-------- Rotation matrix to rotate Chain-1 to ',
-     &        'Chain-2 ------'
-         write(*,*)'m          t(m)         u(m,1)         u(m,2) ',
+********* extract rotation matrix based on TMscore8 ------------>
+      if(m_matrix.eq.1.or.m_out.eq.1)then !we need to extract rotation matrix
+         L=0
+         do i=1,n8_al
+            k=m1(i)
+            L=L+1
+            r_1(1,L)=xa(1,k,0)
+            r_1(2,L)=xa(2,k,0)
+            r_1(3,L)=xa(3,k,0)
+            r_2(1,L)=xtm1(i)
+            r_2(2,L)=ytm1(i)
+            r_2(3,L)=ztm1(i)
+         enddo
+         if(L.le.3)then
+            write(*,*)'Aligned length is too short,',
+     &           ' no matrix outout'
+            goto 211
+         endif
+         call u3b(w,r_1,r_2,L,1,rms,u,t,ier) !u rotate r_1 to r_2, this will be used by whole-chain
+ 211     continue
+      endif
+
+********* output rotation matrix -------------------------->
+      if(m_matrix.eq.1)then
+         open(unit=1,file=fmatrix,status='unknown')
+         write(1,*)'-------- Rotation matrix to rotate Chain_1 to ',
+     &        'Chain_2 ------'
+         write(1,*)'m          t(m)         u(m,1)         u(m,2) ',
      &        '        u(m,3)'
          do i=1,3
-            write(*,204)i,t(i),u(i,1),u(i,2),u(i,3)
+            write(1,209)i,t(i),u(i,1),u(i,2),u(i,3)
          enddo
-         write(*,*)'Code for rotating Chain-1 from (x,y,z) to (X,Y,Z):'
-         write(*,*)'  do i=1,L'
-         write(*,*)'    X(i)=t(1)+u(1,1)*x(i)+u(1,2)*y(i)+u(1,3)*z(i)'
-         write(*,*)'    Y(i)=t(2)+u(2,1)*x(i)+u(2,2)*y(i)+u(2,3)*z(i)'
-         write(*,*)'    Z(i)=t(3)+u(3,1)*x(i)+u(3,2)*y(i)+u(3,3)*z(i)'
-         write(*,*)'  enddo'
-         write(*,*)
+         write(1,*)'Code for rotating Chain_1 from (x,y,z) to (X,Y,Z):'
+         write(1,*)'   do i=1,L'
+         write(1,*)'     X(i)=t(1)+u(1,1)*x(i)+u(1,2)*y(i)+u(1,3)*z(i)'
+         write(1,*)'     Y(i)=t(2)+u(2,1)*x(i)+u(2,2)*y(i)+u(2,3)*z(i)'
+         write(1,*)'     Z(i)=t(3)+u(3,1)*x(i)+u(3,2)*y(i)+u(3,3)*z(i)'
+         write(1,*)'   enddo'
+         write(1,*)
+         close(1)
+ 209     format(I2,f18.10,f15.10,f15.10,f15.10)
       endif
- 204  format(I2,f18.10,f15.10,f15.10,f15.10)
       
-********* for output superposition ******************************
+********* output superposition ******************************
       if(m_out.eq.1)then
- 1237    format('ATOM  ',i5,'  CA  ',A3,I6,4X,3F8.3)
+c     11, output superimpostion in the aligned regions ------------->
+ 1236    format('ATOM  ',i5,'  CA  ',A3,' A',I4,4X,3F8.3)
+ 1237    format('ATOM  ',i5,'  CA  ',A3,' B',I4,4X,3F8.3)
  1238    format('TER')
  1239    format('CONECT',I5,I5)
  900     format(A)
- 901     format('select atomno=',I4)
+ 902     format('select ',I4,':A,',I4,':B')
+ 903     format('REMARK TM-align Version ',A8,'')
  104     format('REMARK Chain 1:',A10,'  Size=',I4)
  105     format('REMARK Chain 2:',A10,'  Size=',I4,
-     &        ' (TM-score is normalized by ',I4,')')
+     &        ' (TM-score is normalized by ',I4,', d0=',f6.2,')')
  106     format('REMARK Aligned length=',I4,', RMSD=',f6.2,
      &        ', TM-score=',f7.5,', ID=',f5.3)
-         OPEN(unit=7,file=outname,status='unknown') !pdb1.aln + pdb2.aln
+         OPEN(unit=7,file=outname,status='unknown') !TM.sup=pdb1.aln + pdb2.aln
 ***   script:
          write(7,900)'load inline'
-         write(7,900)'select atomno<2000'
+         write(7,900)'select *A'
          write(7,900)'wireframe .45'
-         write(7,900)'select none'
-         write(7,900)'select atomno>2000'
+         write(7,900)'select *B'
          write(7,900)'wireframe .20'
+         write(7,900)'select all'
          write(7,900)'color white'
          do i=1,n8_al
             dis2=sqrt((xtm1(i)-xtm2(i))**2+
      &           (ytm1(i)-ytm2(i))**2+(ztm1(i)-ztm2(i))**2)
-            if(dis2.le.5)then
-               write(7,901)m1(i)
-               write(7,900)'color red'
-               write(7,901)2000+m2(i)
+            if(dis2.le.d0_out)then
+               write(7,902)mm1(m1(i)),mm2(m2(i))
                write(7,900)'color red'
             endif
          enddo
          write(7,900)'select all'
          write(7,900)'exit'
+         write(7,903)version
          write(7,104)pdb(1),nseq1
-         write(7,105)pdb(2),nseq2,int(anseq)
-         write(7,106)n8_al,rmsd8_al,TM8,seq_id
+         write(7,105)pdb(2),nseq2,int(anseq),d0
+         write(7,106)n8_al,rmsd,TM2,seq_id
 ***   chain1:
          do i=1,n8_al
-            write(7,1237)m1(i),ss1(m1(i)),mm1(m1(i)),
+            write(7,1236)m1(i),ss1(m1(i)),mm1(m1(i)),
      &           xtm1(i),ytm1(i),ztm1(i)
          enddo
          write(7,1238)          !TER
@@ -436,69 +651,132 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
          enddo
 ***   chain2:
          do i=1,n8_al
-            write(7,1237)2000+m2(i),ss2(m2(i)),mm2(m2(i)),
+            write(7,1237)5000+m2(i),ss2(m2(i)),mm2(m2(i)),
      $           xtm2(i),ytm2(i),ztm2(i)
          enddo
          write(7,1238)
          do i=2,n8_al
-            write(7,1239)2000+m2(i-1),2000+m2(i)
+            write(7,1239)5000+m2(i-1),5000+m2(i)
          enddo
          close(7)
-ccc   
-         k=0
-         outnameall_tmp=outname//'_all'
-         outnameall=''
-         do i=1,504
-            if(outnameall_tmp(i:i).ne.' ')then
-               k=k+1
-               outnameall(k:k)=outnameall_tmp(i:i)
-            endif
-         enddo
+c     22, output CA-trace of whole chain in 'TM.sup_all' -------->
+         outnameall=trim(outname)//'_all'
          OPEN(unit=8,file=outnameall,status='unknown') !pdb1.aln + pdb2.aln
 ***   script:
          write(8,900)'load inline'
-         write(8,900)'select atomno<2000'
+         write(8,900)'select *A'
          write(8,900)'wireframe .45'
          write(8,900)'select none'
-         write(8,900)'select atomno>2000'
+         write(8,900)'select *B'
          write(8,900)'wireframe .20'
          write(8,900)'color white'
          do i=1,n8_al
             dis2=sqrt((xtm1(i)-xtm2(i))**2+
      &           (ytm1(i)-ytm2(i))**2+(ztm1(i)-ztm2(i))**2)
-            if(dis2.le.5)then
-               write(8,901)m1(i)
-               write(8,900)'color red'
-               write(8,901)2000+m2(i)
+            if(dis2.le.d0_out)then
+               write(8,902)mm1(m1(i)),mm2(m2(i)) !select residue
                write(8,900)'color red'
             endif
          enddo
          write(8,900)'select all'
          write(8,900)'exit'
+         write(8,903)version
          write(8,104)pdb(1),nseq1
-         write(8,105)pdb(2),nseq2,int(anseq)
-         write(8,106)n8_al,rmsd8_al,TM8,seq_id
+         write(8,105)pdb(2),nseq2,int(anseq),d0
+         write(8,106)n8_al,rmsd,TM2,seq_id
 ***   chain1:
          do i=1,nseq1
             ax=t(1)+u(1,1)*xa(1,i,0)+u(1,2)*xa(2,i,0)+u(1,3)*xa(3,i,0)
             ay=t(2)+u(2,1)*xa(1,i,0)+u(2,2)*xa(2,i,0)+u(2,3)*xa(3,i,0)
             az=t(3)+u(3,1)*xa(1,i,0)+u(3,2)*xa(2,i,0)+u(3,3)*xa(3,i,0)
-            write(8,1237)i,ss1(i),mm1(i),ax,ay,az
+            write(8,1236)i,ss1(i),mm1(i),ax,ay,az
          enddo
          write(8,1238)          !TER
          do i=2,nseq1
-            write(8,1239)i-1,i
+            write(8,1239)i-1,i !CONECT atom numbers
          enddo
 ***   chain2:
          do i=1,nseq2
-            write(8,1237)2000+i,ss2(i),mm2(i),
+            write(8,1237)5000+i,ss2(i),mm2(i),
      $           xa(1,i,1),xa(2,i,1),xa(3,i,1)
          enddo
          write(8,1238)
          do i=2,nseq2
-            write(8,1239)2000+i-1,2000+i
+            write(8,1239)5000+i-1,5000+i
          enddo
          close(8)
+c     33, output full-atomic structure of whole chain in 'TM.sup_atm' -------->
+         outnameall=trim(outname)//'_atm'
+         OPEN(unit=8,file=outnameall,status='unknown') !pdb1.aln + pdb2.aln
+***   script:
+         write(8,900)'load inline'
+         write(8,900)'select *A'
+         write(8,900)'color blue'
+         write(8,900)'select *B'
+         write(8,900)'color red'
+         write(8,900)'select all'
+         write(8,900)'cartoon'
+         write(8,900)'exit'
+         write(8,903)version
+         write(8,104)pdb(1),nseq1
+         write(8,105)pdb(2),nseq2,int(anseq),d0
+         write(8,106)n8_al,rmsd,TM2,seq_id
+***   chain1:
+         do i=1,na1
+            do j=1,n8_al
+               if(ir1(i).eq.mm1(m1(j)))then !aligned residues
+                  ax=t(1)+u(1,1)*xa1(i)+u(1,2)*ya1(i)+u(1,3)*za1(i)
+                  ay=t(2)+u(2,1)*xa1(i)+u(2,2)*ya1(i)+u(2,3)*za1(i)
+                  az=t(3)+u(3,1)*xa1(i)+u(3,2)*ya1(i)+u(3,3)*za1(i)
+                  write(8,8888)ia1(i),aa1(i),ra1(i),ir1(i),ax,ay,az
+               endif
+            enddo
+         enddo
+         write(8,1238)          !TER
+***   chain2:
+         do i=1,na2
+            do j=1,n8_al
+               if(ir2(i).eq.mm2(m2(j)))then !aligned residues
+                  write(8,8889)ia2(i),aa2(i),ra2(i),ir2(i),
+     &                 xa2(i),ya2(i),za2(i)
+               endif
+            enddo
+         enddo
+         write(8,1238)          !TER
+         close(8)
+c     44, output full-atomic structure of whole chain in 'TM.sup_all_atm' -------->
+         outnameall=trim(outname)//'_all_atm'
+         OPEN(unit=8,file=outnameall,status='unknown') !pdb1.aln + pdb2.aln
+***   script:
+         write(8,900)'load inline'
+         write(8,900)'select *A'
+         write(8,900)'color blue'
+         write(8,900)'select *B'
+         write(8,900)'color red'
+         write(8,900)'select all'
+         write(8,900)'cartoon'
+         write(8,900)'exit'
+         write(8,903)version
+         write(8,104)pdb(1),nseq1
+         write(8,105)pdb(2),nseq2,int(anseq),d0
+         write(8,106)n8_al,rmsd,TM2,seq_id
+***   chain1:
+         do i=1,na1
+            ax=t(1)+u(1,1)*xa1(i)+u(1,2)*ya1(i)+u(1,3)*za1(i)
+            ay=t(2)+u(2,1)*xa1(i)+u(2,2)*ya1(i)+u(2,3)*za1(i)
+            az=t(3)+u(3,1)*xa1(i)+u(3,2)*ya1(i)+u(3,3)*za1(i)
+            write(8,8888)ia1(i),aa1(i),ra1(i),ir1(i),ax,ay,az
+         enddo
+         write(8,1238)          !TER
+***   chain2:
+         do i=1,na2
+            write(8,8889)ia2(i),aa2(i),ra2(i),ir2(i),
+     &           xa2(i),ya2(i),za2(i)
+         enddo
+         write(8,1238)          !TER
+         close(8)
+ 8888    format('ATOM  ',I5,1x,A4,1x,A3,' A',I4,4x,3F8.3)
+ 8889    format('ATOM  ',I5,1x,A4,1x,A3,' B',I4,4x,3F8.3)
       endif
 *^^^^^^^^^^^^^^^^^^ output finished ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -524,7 +802,7 @@ ccc
          aseq2(ii)=seq2(m2(i))
          dis2=sqrt((xtm1(i)-xtm2(i))**2+
      &     (ytm1(i)-ytm2(i))**2+(ztm1(i)-ztm2(i))**2)
-         if(dis2.le.5)then
+         if(dis2.le.d0_out)then
            aseq3(ii)=':'
          else
            aseq3(ii)='.'
@@ -544,9 +822,9 @@ ccc
          aseq2(ii)=seq2(i)
          aseq3(ii)=' '
       enddo
-      write(*,50)
- 50   format('(":" denotes residue pairs of d < 5 Angstrom,',
-     &     ' "." denotes other aligned residues)')
+      write(*,50)d0_out
+ 50   format('(":" denotes aligned residue pairs of d < ',f3.1,
+     &     ' A, "." denotes other aligned residues)')
       write(*,10)(aseq1(i),i=1,ii)
       write(*,10)(aseq3(i),i=1,ii)
       write(*,10)(aseq2(i),i=1,ii)
@@ -572,17 +850,62 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       common/zscore/zrms,n_al,rmsd_al
       common/TM/TM,TMmax
       common/init/invmap_i(nmax)
+      common/d0/d0,anseq
       dimension gapp(100)
+      
+      common/alignment/m_alignment,sequence(10),TM_ali,L_ali,rmsd_ali
+      common/alignment1/m_alignment_stick
+      character*10000 sequence
       
       TMmax=0
       n_gapp=2
       gapp(1)=-0.6
       gapp(2)=0
       
+      ddcc=0.4
+      if(anseq.le.40)then
+         ddcc=0.1
+      endif
+      
+ccc   stick to the initial alignment -------------->
+      if(m_alignment_stick.eq.1)then
+         do j=1,nseq2
+            invmap(j)=-1
+         enddo
+         i1=0
+         i2=0
+         L1=LEN_TRIM(sequence(1))
+         L2=LEN_TRIM(sequence(2))
+         L=L1
+         if(L2.lt.L)L=L2
+         do 6661 i=1,L
+            if(sequence(1)(i:i).ne.'-')i1=i1+1
+            if(sequence(2)(i:i).ne.'-')then
+               i2=i2+1
+               if(i2.gt.nseq2)then
+                  goto 6661
+               endif
+               if(sequence(1)(i:i).ne.'-')then
+                  invmap(i2)=i1
+               endif
+            endif
+ 6661    enddo
+         call standard_TMscore(TM_ali,L_ali,rmsd_ali) !calc TM-score from invmap, nmlzd by nseq2
+ccc   
+         call get_score         !TM, matrix score(i,j)
+         if(TM.gt.TMmax)then
+            TMmax=TM
+            do j=1,nseq2
+               invmap0(j)=invmap(j)
+            enddo
+         endif
+         return
+      endif
+      
 *11111111111111111111111111111111111111111111111111111111
 *     get initial alignment from gapless threading
 **********************************************************
-      call get_initial          !gapless threading
+      call get_initial1          !gapless threading
       do i=1,nseq2
          invmap(i)=invmap_i(i)  !with highest zcore
       enddo
@@ -681,7 +1004,7 @@ c     record the best alignment in whole search ---------->
             invmap0(j)=invmap(j)
          enddo
       endif
-      if(TM.le.TMmax*0.8)goto 5555
+      if(TM.le.TMmax*ddcc)goto 5555
 *****************************************************************
 *     initerative alignment, for different gap_open:
 *****************************************************************
@@ -724,7 +1047,7 @@ c     record the best alignment in whole search ---------->
             invmap0(j)=invmap(j)
          enddo
       endif
-      if(TM.le.TMmax*0.2)goto 3333
+      if(TM.le.TMmax*ddcc)goto 3333
 *****************************************************************
 *     initerative alignment, for different gap_open:
 *****************************************************************
@@ -768,7 +1091,7 @@ c     record the best alignment in whole search ---------->
             invmap0(j)=invmap(j)
          enddo
       endif
-      if(TM.le.TMmax*0.3)goto 4444
+      if(TM.le.TMmax*ddcc)goto 4444
 *****************************************************************
 *     initerative alignment, for different gap_open:
 *****************************************************************
@@ -790,7 +1113,76 @@ c     record the best alignment in whole search ---------->
  44      continue
  4    continue
  4444 continue
-
+      
+*666666666666666666666666666666666666666666666666666666666666
+*     get initial alignment from user's input:
+*************************************************************
+      if(m_alignment.ne.1)goto 6666
+      do j=1,nseq2
+         invmap(j)=-1
+      enddo
+      i1=0
+      i2=0
+      L1=LEN_TRIM(sequence(1))
+      L2=LEN_TRIM(sequence(2))
+c     write(*,*)'seq1= ',trim(sequence(1))
+c     write(*,*)'seq2= ',trim(sequence(2))
+      L=L1
+      if(L2.lt.L)L=L2
+      do 666 i=1,L
+c         write(*,*)i,sequence(1)(i:i),sequence(2)(i:i)
+         if(sequence(1)(i:i).ne.'-')i1=i1+1
+         if(sequence(2)(i:i).ne.'-')then
+            i2=i2+1
+            if(i2.gt.nseq2)then
+               goto 666
+            endif
+            if(sequence(1)(i:i).ne.'-')then
+               invmap(i2)=i1
+c               write(*,*)i2,i1
+            endif
+         endif
+ 666  enddo
+ccc   
+c      L_ali=0
+c      do j=1,nseq2
+c     write(*,*)j,invmap(j)
+c         if(invmap(j).gt.0)then
+c            L_ali=L_ali+1
+c         endif
+c      enddo
+c     write(*,*)'L_ali=',L_ali
+      call standard_TMscore(TM_ali,L_ali,rmsd_ali) !calc TM-score from invmap, nmlzd by nseq2
+ccc   
+      call get_score            !TM, matrix score(i,j)
+      if(TM.gt.TMmax)then
+         TMmax=TM
+         do j=1,nseq2
+            invmap0(j)=invmap(j)
+         enddo
+      endif
+*****************************************************************
+*     initerative alignment, for different gap_open:
+*****************************************************************
+      DO 6 i_gapp=1,n_gapp	!different gap panalties
+         GAP_OPEN=gapp(i_gapp)  !gap panalty
+         do 66 id=1,30          !maximum interation is 200
+            call DP(NSEQ1,NSEQ2) !produce alignment invmap(j)
+*     Input: score(i,j), and gap_open
+*     Output: invmap(j)
+            
+            call get_score      !calculate TM-score, score(i,j)
+c     record the best alignment in whole search ---------->
+            if(TM.gt.TMmax)then
+               TMmax=TM
+               do j=1,nseq2
+                  invmap0(j)=invmap(j)
+               enddo
+            endif
+ 66      continue
+ 6    continue
+ 6666 continue
+      
 c^^^^^^^^^^^^^^^ best alignment invmap0(j) found ^^^^^^^^^^^^^^^^^^
       RETURN
       END
@@ -798,7 +1190,7 @@ c^^^^^^^^^^^^^^^ best alignment invmap0(j) found ^^^^^^^^^^^^^^^^^^
 **************************************************************
 *     get initial alignment invmap0(i) from gapless threading
 **************************************************************
-      subroutine get_initial
+      subroutine get_initial1
       PARAMETER(nmax=5000)
       COMMON/BACKBONE/XA(3,nmax,0:1)
       common/length/nseq1,nseq2
@@ -889,8 +1281,7 @@ c     1->coil, 2->helix, 3->turn, 4->strand
             jsec(i)=make_sec(dis13,dis14,dis15,dis24,dis25,dis35)
          endif
       enddo
-      call smooth               !smooth the assignment
-
+      
 ********** score matrix **************************
       do i=1,nseq1
          do j=1,nseq2
@@ -901,7 +1292,7 @@ c     1->coil, 2->helix, 3->turn, 4->strand
             endif
          enddo
       enddo
-
+      
 ********** find initial alignment: invmap(j) ************
       gap_open=-1.0             !should be -1
       call DP(NSEQ1,NSEQ2)      !produce alignment invmap(j)
@@ -975,7 +1366,7 @@ c     1->coil, 2->helix, 3->turn, 4->strand
       
       fra_min=4                 !>=4,minimum fragment for search
       fra_min1=fra_min-1        !cutoff for shift, save time
-      dcu0=3.85
+      dcu0=4.25
       
 ccc   Find the smallest continuous fragments -------->
       do i=1,nseq1
@@ -1030,7 +1421,7 @@ ccc   Find the smallest continuous fragments -------->
             endif
          enddo
          if(Lfr_max.lt.r_min)then
-            dcu=1.1*dcu
+            dcu=dcu+0.01
             goto 20
          endif
       enddo
@@ -1160,217 +1551,95 @@ ccc   get initial ------------->
       data w /nmax*1.0/
       common/inv/invmap_a(nmax)
       integer aL,m1,m2,n_frag
+      dimension n_frag(10)
       
 ***** setting parameters ************************************
       d01=d0+1.5
       if(d01.lt.d0_min)d01=d0_min
       d02=d01*d01
       GLmaxA=0
-      
       aL=min(nseq1,nseq2)
-      if(aL.gt.250)then
-         n_frag=50
-      elseif(aL.gt.200)then
-         n_frag=40
-      elseif(aL.gt.150)then
-         n_frag=30
-      else
-         n_frag=20              !length of fragment for superposition
-      endif
-      if(n_frag.gt.aL/2)n_frag=aL/2
-      ns=20                     !tail length to discard
-      if(ns.gt.aL/2)ns=aL/2
       
-      m1=nseq1-n_frag-ns
-      m2=nseq2-n_frag-ns
-      do ii=ns,m1,n_frag
-         do jj=ns,m2,n_frag
-            do k=1,n_frag
-               iii=ii+k-1
-               jjj=jj+k-1
-               r_1(1,k)=xa(1,iii,0)
-               r_1(2,k)=xa(2,iii,0)
-               r_1(3,k)=xa(3,iii,0)
-               r_2(1,k)=xa(1,jjj,1)
-               r_2(2,k)=xa(2,jjj,1)
-               r_2(3,k)=xa(3,jjj,1)
-            enddo
-            
+c     jump on sequence1 -------------->
+      if(nseq1.gt.250)then
+         n_jump1=45
+      elseif(nseq1.gt.200)then
+         n_jump1=35
+      elseif(nseq1.gt.150)then
+         n_jump1=25
+      else
+         n_jump1=15
+      endif
+      if(n_jump1.gt.nseq1/3)n_jump1=nseq1/3
+      
+c     jump on sequence2 -------------->
+      if(nseq2.gt.250)then
+         n_jump2=45
+      elseif(nseq2.gt.200)then
+         n_jump2=35
+      elseif(nseq2.gt.150)then
+         n_jump2=25
+      else
+         n_jump2=15
+      endif
+      if(n_jump2.gt.nseq2/3)n_jump2=nseq2/3
+      
+c     fragment to superimpose -------------->
+      n_frag(1)=20
+      n_frag(2)=100
+      if(n_frag(1).gt.aL/3)n_frag(1)=aL/3
+      if(n_frag(2).gt.aL/2)n_frag(2)=aL/2
+
+c     start superimpose search -------------->
+      do i_frag=1,2
+         m1=nseq1-n_frag(i_frag)+1
+         m2=nseq2-n_frag(i_frag)+1
+         do ii=1,m1,n_jump1
+            do jj=1,m2,n_jump2
+               do k=1,n_frag(i_frag)
+                  iii=ii+k-1
+                  jjj=jj+k-1
+                  r_1(1,k)=xa(1,iii,0)
+                  r_1(2,k)=xa(2,iii,0)
+                  r_1(3,k)=xa(3,iii,0)
+                  r_2(1,k)=xa(1,jjj,1)
+                  r_2(2,k)=xa(2,jjj,1)
+                  r_2(3,k)=xa(3,jjj,1)
+               enddo
+               
 *********superpose the two structures and rotate it *****************
-            call u3b(w,r_1,r_2,n_frag,1,rms,u,t,ier) !u rotate r_1 to r_2
-            do i1=1,nseq1
-               xx=t(1)+u(1,1)*xa(1,i1,0)+u(1,2)*xa(2,i1,0)+u(1,3)
-     &              *xa(3,i1,0)  
-               yy=t(2)+u(2,1)*xa(1,i1,0)+u(2,2)*xa(2,i1,0)+u(2,3)
-     &              *xa(3,i1,0)
-               zz=t(3)+u(3,1)*xa(1,i1,0)+u(3,2)*xa(2,i1,0)+u(3,3)
-     &              *xa(3,i1,0)
-               do j1=1,nseq2
-                  dd=(xx-xa(1,j1,1))**2+(yy-xa(2,j1,1))**2+
-     &                 (zz-xa(3,j1,1))**2
-                  score(i1,j1)=1/(1+dd/d02) ! changing
+               call u3b(w,r_1,r_2,n_frag(i_frag),1,rms,u,t,ier) !u rotate r_1 to r_2
+               do i1=1,nseq1
+                  xx=t(1)+u(1,1)*xa(1,i1,0)+u(1,2)*xa(2,i1,0)+u(1,3)
+     &                 *xa(3,i1,0)  
+                  yy=t(2)+u(2,1)*xa(1,i1,0)+u(2,2)*xa(2,i1,0)+u(2,3)
+     &                 *xa(3,i1,0)
+                  zz=t(3)+u(3,1)*xa(1,i1,0)+u(3,2)*xa(2,i1,0)+u(3,3)
+     &                 *xa(3,i1,0)
+                  do j1=1,nseq2
+                     dd=(xx-xa(1,j1,1))**2+(yy-xa(2,j1,1))**2+
+     &                    (zz-xa(3,j1,1))**2
+                     score(i1,j1)=1/(1+dd/d02) ! changing
+                  enddo
                enddo
-            enddo
-            
+               
 *********extract alignement with score(i,j) *****************
-            call DP(NSEQ1,NSEQ2)
-            call get_GL(GL)
-            if(GL.gt.GLmaxA)then
-               GLmaxA=GL
-               do j1=1,nseq2
-                  invmap_i(j1)=invmap(j1)
-               enddo
-            endif
+               call DP(NSEQ1,NSEQ2)
+               call get_GL(GL)
+               if(GL.gt.GLmaxA)then
+                  GLmaxA=GL
+                  do j1=1,nseq2
+                     invmap_i(j1)=invmap(j1)
+                  enddo
+               endif
+
+            enddo
          enddo
       enddo
       
       return
       end
-
-**************************************************************
-*     smooth the secondary structure assignment
-**************************************************************
-      subroutine smooth
-      PARAMETER(nmax=5000)
-      common/sec/isec(nmax),jsec(nmax)
-      common/length/nseq1,nseq2
-
-***   smooth single -------------->
-***   --x-- => -----
-      do i=1,nseq1
-         if(isec(i).eq.2.or.isec(i).eq.4)then
-            j=isec(i)
-            if(isec(i-2).ne.j)then
-               if(isec(i-1).ne.j)then
-                  if(isec(i+1).ne.j)then
-                     if(isec(i+1).ne.j)then
-                        isec(i)=1
-                     endif
-                  endif
-               endif
-            endif
-         endif
-      enddo
-      do i=1,nseq2
-         if(jsec(i).eq.2.or.jsec(i).eq.4)then
-            j=jsec(i)
-            if(jsec(i-2).ne.j)then
-               if(jsec(i-1).ne.j)then
-                  if(jsec(i+1).ne.j)then
-                     if(jsec(i+1).ne.j)then
-                        jsec(i)=1
-                     endif
-                  endif
-               endif
-            endif
-         endif
-      enddo
-
-***   smooth double -------------->
-***   --xx-- => ------
-      do i=1,nseq1
-         if(isec(i).ne.2)then
-         if(isec(i+1).ne.2)then
-         if(isec(i+2).eq.2)then
-         if(isec(i+3).eq.2)then
-         if(isec(i+4).ne.2)then
-         if(isec(i+5).ne.2)then
-            isec(i+2)=1
-            isec(i+3)=1
-         endif
-         endif
-         endif
-         endif
-         endif
-         endif
-
-         if(isec(i).ne.4)then
-         if(isec(i+1).ne.4)then
-         if(isec(i+2).eq.4)then
-         if(isec(i+3).eq.4)then
-         if(isec(i+4).ne.4)then
-         if(isec(i+5).ne.4)then
-            isec(i+2)=1
-            isec(i+3)=1
-         endif
-         endif
-         endif
-         endif
-         endif
-         endif
-      enddo
-      do i=1,nseq2
-         if(jsec(i).ne.2)then
-         if(jsec(i+1).ne.2)then
-         if(jsec(i+2).eq.2)then
-         if(jsec(i+3).eq.2)then
-         if(jsec(i+4).ne.2)then
-         if(jsec(i+5).ne.2)then
-            jsec(i+2)=1
-            jsec(i+3)=1
-         endif
-         endif
-         endif
-         endif
-         endif
-         endif
-
-         if(jsec(i).ne.4)then
-         if(jsec(i+1).ne.4)then
-         if(jsec(i+2).eq.4)then
-         if(jsec(i+3).eq.4)then
-         if(jsec(i+4).ne.4)then
-         if(jsec(i+5).ne.4)then
-            jsec(i+2)=1
-            jsec(i+3)=1
-         endif
-         endif
-         endif
-         endif
-         endif
-         endif
-      enddo
-
-***   connect -------------->
-***   x-x => xxx
-      do i=1,nseq1
-         if(isec(i).eq.2)then
-         if(isec(i+1).ne.2)then
-         if(isec(i+2).eq.2)then
-            isec(i+1)=2
-         endif
-         endif
-         endif
-
-         if(isec(i).eq.4)then
-         if(isec(i+1).ne.4)then
-         if(isec(i+2).eq.4)then
-            isec(i+1)=4
-         endif
-         endif
-         endif
-      enddo
-      do i=1,nseq2
-         if(jsec(i).eq.2)then
-         if(jsec(i+1).ne.2)then
-         if(jsec(i+2).eq.2)then
-            jsec(i+1)=2
-         endif
-         endif
-         endif
-
-         if(jsec(i).eq.4)then
-         if(jsec(i+1).ne.4)then
-         if(jsec(i+2).eq.4)then
-            jsec(i+1)=4
-         endif
-         endif
-         endif
-      enddo
-
-      return
-      end
-
+      
 *************************************************************
 *     assign secondary structure:
 *************************************************************
@@ -1553,7 +1822,8 @@ c^^^^^^^^^^^^^^^^ GL done ^^^^^^^^^^^^^^^^^^^^^^^^^^^
       dimension xtm1(nmax),ytm1(nmax),ztm1(nmax)
       dimension xtm2(nmax),ytm2(nmax),ztm2(nmax)
       common/TM/TM,TMmax
-      
+      common/ut/u,t
+
 ccc   RMSD:
       double precision r_1(3,nmax),r_2(3,nmax),w(nmax)
       double precision u(3,3),t(3),rms !armsd is real
@@ -1585,12 +1855,6 @@ ccc   for rotation matrix:
      &     n_al,xtm2,ytm2,ztm2,TM,Rcomm,Lcomm) !simplified search engine
       TM=TM*n_al/anseq          !TM-score
 ***   calculate score matrix score(i,j)------------------>
-      do i=1,n_al
-         r_2(1,i)=xtm1(i)
-         r_2(2,i)=ytm1(i)
-         r_2(3,i)=ztm1(i)
-      enddo
-      call u3b(w,r_1,r_2,n_al,1,rms,u,t,ier) !u rotate r_1 to r_2
       do i=1,nseq1
          xx=t(1)+u(1,1)*xa(1,i,0)+u(1,2)*xa(2,i,0)+u(1,3)*xa(3,i,0)
          yy=t(2)+u(2,1)*xa(1,i,0)+u(2,2)*xa(2,i,0)+u(2,3)*xa(3,i,0)
@@ -1657,8 +1921,69 @@ ccc   for rotation matrix:
 c^^^^^^^^^^^^^^^^ score(i,j) done ^^^^^^^^^^^^^^^^^^^^^^^^^^^
       return
       end
+      
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c     calculate TM-score for a given alignment specified by invmap (Based on Chain_2)
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+      subroutine standard_TMscore(TM2,L_ali,RMSD)
+      PARAMETER(nmax=5000)      !maximum length of the sequence
+      common/length/nseq1,nseq2
+      common/dpc/score(nmax,nmax),gap_open,invmap(nmax)
+      COMMON/BACKBONE/XA(3,nmax,0:1)
+      dimension xtm1(nmax),ytm1(nmax),ztm1(nmax)
+      dimension xtm2(nmax),ytm2(nmax),ztm2(nmax)
+      common/d0min/d0_min
+      
+ccc   RMSD:
+      double precision r_1(3,nmax),r_2(3,nmax),w(nmax)
+      double precision u(3,3),t(3),rms !armsd is real
+      data w /nmax*1.0/
+ccc   
 
+      d0_min=0.5                !for TM-score output, consistent stdrd TM-score
+      anseq=nseq2
+      if(anseq.gt.21)then
+         d0=1.24*(anseq-15)**(1.0/3.0)-1.8 !scale for defining TM-score
+      else
+         d0=d0_min
+      endif
+      if(d0.lt.d0_min)d0=d0_min
+      d0_input=d0               !scaled by seq_min
+      
+cccc  collect aligned residues from invmap ------->
+      n_al=0
+      do j=1,nseq2
+         if(invmap(j).gt.0)then
+            i=invmap(j)
+            n_al=n_al+1
+            xtm1(n_al)=xa(1,i,0)
+            ytm1(n_al)=xa(2,i,0)
+            ztm1(n_al)=xa(3,i,0)
+            xtm2(n_al)=xa(1,j,1)
+            ytm2(n_al)=xa(2,j,1)
+            ztm2(n_al)=xa(3,j,1)
 
+            r_1(1,n_al)=xa(1,i,0)
+            r_1(2,n_al)=xa(2,i,0)
+            r_1(3,n_al)=xa(3,i,0)
+            r_2(1,n_al)=xa(1,j,1)
+            r_2(2,n_al)=xa(2,j,1)
+            r_2(3,n_al)=xa(3,j,1)
+         endif
+      enddo
+      call u3b(w,r_1,r_2,n_al,0,rms,u,t,ier)
+      L_ali=n_al
+      RMSD=dsqrt(rms/n_al)
+c      write(*,*)'---------',rms,n_al,RMSD,u(1,1),t(1)
+      
+      call TMscore(d0_input,n_al,xtm1,ytm1,ztm1,n_al,
+     &     xtm2,ytm2,ztm2,TM8,Rcomm,Lcomm) !normal TMscore
+      TM2=TM8*n_al/anseq
+      
+c^^^^^^^^^^ TM-score calculation is done ^^^^^^^^^^^^^^^^^^^^^^^^
+      return
+      end
+      
 *************************************************************************
 *************************************************************************
 *     This is a subroutine to compare two structures and find the 
@@ -1695,6 +2020,7 @@ c^^^^^^^^^^^^^^^^ score(i,j) done ^^^^^^^^^^^^^^^^^^^^^^^^^^^
       double precision score,score_max
       dimension xa(nmax),ya(nmax),za(nmax)
       dimension iL0(nmax)
+      common/ut/u,t
 
       dimension x1(nmax),y1(nmax),z1(nmax)
       dimension x2(nmax),y2(nmax),z2(nmax)
@@ -1786,10 +2112,7 @@ ccc
               k_ali(ka)=k
            enddo
            call u3b(w,r_1,r_2,LL,1,rms,u,t,ier) !u rotate r_1 to r_2
-           if(i_init.eq.1)then  !global superposition
-              armsd=dsqrt(rms/LL)
-              Rcomm=armsd
-           endif
+           Rcomm=0              !not used
            do j=1,nseqA
               xt(j)=t(1)+u(1,1)*xa(j)+u(1,2)*ya(j)+u(1,3)*za(j)
               yt(j)=t(2)+u(2,1)*xa(j)+u(2,2)*ya(j)+u(2,3)*za(j)
@@ -1847,7 +2170,7 @@ ccc
  302       continue
  300    continue                !for shift
  333  continue                  !for initial length, L_ali/M
-
+      
 ******** return the final rotation ****************
       LL=0
       do i=1,ka0
@@ -1867,7 +2190,7 @@ ccc
          z1(j)=t(3)+u(3,1)*xa(j)+u(3,2)*ya(j)+u(3,3)*za(j)
       enddo
       TM=score_max
-
+      
 c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       return
       END
@@ -1985,10 +2308,6 @@ ccc
               k_ali(ka)=k
            enddo
            call u3b(w,r_1,r_2,LL,1,rms,u,t,ier) !u rotate r_1 to r_2
-           if(i_init.eq.1)then  !global superposition
-              armsd=dsqrt(rms/LL)
-              Rcomm=armsd
-           endif
            do j=1,nseqA
               xt(j)=t(1)+u(1,1)*xa(j)+u(1,2)*ya(j)+u(1,3)*za(j)
               yt(j)=t(2)+u(2,1)*xa(j)+u(2,2)*ya(j)+u(2,3)*za(j)
@@ -2225,10 +2544,6 @@ c      d0=1.24*(nseqB-15)**(1.0/3.0)-1.8
               k_ali(ka)=k
            enddo
            call u3b(w,r_1,r_2,LL,1,rms,u,t,ier) !u rotate r_1 to r_2
-           if(i_init.eq.1)then  !global superposition
-              armsd=dsqrt(rms/LL)
-              Rcomm=armsd
-           endif
            do j=1,nseqA
               xt(j)=t(1)+u(1,1)*xa(j)+u(1,2)*ya(j)+u(1,3)*za(j)
               yt(j)=t(2)+u(2,1)*xa(j)+u(2,2)*ya(j)+u(2,3)*za(j)
@@ -2286,25 +2601,7 @@ c      d0=1.24*(nseqB-15)**(1.0/3.0)-1.8
  302       continue
  300    continue                !for shift
  333  continue                  !for initial length, L_ali/M
-
-******** return the final rotation ****************
-      LL=0
-      do i=1,ka0
-         m=k_ali0(i)            !record of the best alignment
-         r_1(1,i)=xa(iA(m))
-         r_1(2,i)=ya(iA(m))
-         r_1(3,i)=za(iA(m))
-         r_2(1,i)=xb(iB(m))
-         r_2(2,i)=yb(iB(m))
-         r_2(3,i)=zb(iB(m))
-         LL=LL+1
-      enddo
-      call u3b(w,r_1,r_2,LL,1,rms,u,t,ier) !u rotate r_1 to r_2
-      do j=1,nseqA
-         x1(j)=t(1)+u(1,1)*xa(j)+u(1,2)*ya(j)+u(1,3)*za(j)
-         y1(j)=t(2)+u(2,1)*xa(j)+u(2,2)*ya(j)+u(2,3)*za(j)
-         z1(j)=t(3)+u(3,1)*xa(j)+u(3,2)*ya(j)+u(3,3)*za(j)
-      enddo
+      
       TM=score_max
 
 c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2325,7 +2622,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       common/nscore/i_ali(nmax),n_cut ![1,n_ali],align residues for the score
       common/scores/score
       double precision score
-
+      
       d_tmp=d
  21   n_cut=0                   !number of residue-pairs dis<d, for iteration
       score_sum=0               !TMscore
@@ -2424,15 +2721,16 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c^^^^^^^^^^^^^^^Dynamical programming done ^^^^^^^^^^^^^^^^^^^
       return
       END
-
+      
 cccccccccccccccc Calculate sum of (r_d-r_m)^2 cccccccccccccccccccccccccc
-c  w    - w(m) is weight for atom pair  c m                 (given)
-c  x    - x(i,m) are coordinates of atom c m in set x       (given)
-c  y    - y(i,m) are coordinates of atom c m in set y       (given)
-c  n    - n is number of atom pairs                         (given)
-c  mode  - 0:calculate rms only                             (given)
-c          1:calculate rms,u,t                              (takes longer)
-c  rms   - sum of w*(ux+t-y)**2 over all atom pairs         (result)
+c  w    - w(m) is weight for atom pair  c m                    (given)
+c  x    - x(i,m) are coordinates of atom c m in set x          (given)
+c  y    - y(i,m) are coordinates of atom c m in set y          (given)
+c  n    - n is number of atom pairs                            (given)
+c  mode  - 0:calculate rms     only                            (given,short)
+c          1:calculate     u,t only                            (given,medium)
+c          2:calculate rms,u,t                                 (given,longer)
+c  rms   - sum of w*(ux+t-y)**2 over all atom pairs            (result)
 c  u    - u(i,j) is   rotation  matrix for best superposition  (result)
 c  t    - t(i)   is translation vector for best superposition  (result)
 c  ier  - 0: a unique optimal superposition has been determined(result)
@@ -2453,6 +2751,9 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       double precision a(3,3), b(3,3), e(3), rr(6), ss(6)
       double precision e0, d, spur, det, cof, h, g
       double precision cth, sth, sqrth, p, sigma
+      double precision c1x, c1y, c1z, c2x, c2y, c2z
+      double precision s1x, s1y, s1z, s2x, s2y, s2z
+      double precision sxx, sxy, sxz, syx, syy, syz, szx, szy, szz
       
       double precision sqrt3, tol, zero
       
@@ -2462,9 +2763,24 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       data ip / 1, 2, 4, 2, 3, 5, 4, 5, 6 /
       data ip2312 / 2, 3, 1, 2 /
       
-      wc = zero
+      wc  = zero
       rms = zero
-      e0 = zero
+      e0  = zero
+      s1x = zero
+      s1y = zero
+      s1z = zero
+      s2x = zero
+      s2y = zero
+      s2z = zero
+      sxx = zero
+      sxy = zero
+      sxz = zero
+      syx = zero
+      syy = zero
+      syz = zero
+      szx = zero 
+      szy = zero
+      szz = zero
       
       do i=1, 3
          xc(i) = zero
@@ -2484,29 +2800,61 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       ier = -1
       if( n .lt. 1 ) return
       ier = -2
-      do m=1, n
-         if( w(m) .lt. 0.0 ) return
-         wc = wc + w(m)
-         do i=1, 3
-            xc(i) = xc(i) + w(m)*x(i,m)
-            yc(i) = yc(i) + w(m)*y(i,m)
-         end do
-      end do
-      if( wc .le. zero ) return
-      do i=1, 3
-         xc(i) = xc(i) / wc
-         yc(i) = yc(i) / wc
-      end do
       
       do m=1, n
-         do i=1, 3
-            e0=e0+w(m)*((x(i,m)-xc(i))**2+(y(i,m)-yc(i))**2)
-            d = w(m) * ( y(i,m) - yc(i) )
-            do j=1, 3
-               r(i,j) = r(i,j) + d*( x(j,m) - xc(j) )
-            end do
-         end do
+         c1x=x(1, m)
+         c1y=x(2, m)
+         c1z=x(3, m)
+         
+         c2x=y(1, m)
+         c2y=y(2, m)
+         c2z=y(3, m)
+         
+         s1x = s1x + c1x
+         s1y = s1y + c1y;
+         s1z = s1z + c1z;
+         
+         s2x = s2x + c2x;
+         s2y = s2y + c2y;
+         s2z = s2z + c2z;
+         
+         sxx = sxx + c1x*c2x; 
+         sxy = sxy + c1x*c2y; 
+         sxz = sxz + c1x*c2z; 
+         
+         syx = syx + c1y*c2x; 
+         syy = syy + c1y*c2y; 
+         syz = syz + c1y*c2z;
+         
+         szx = szx + c1z*c2x; 
+         szy = szy + c1z*c2y; 
+         szz = szz + c1z*c2z;
       end do
+      
+      xc(1) = s1x/n;
+      xc(2) = s1y/n; 	
+      xc(3) = s1z/n;
+      
+      yc(1) = s2x/n;
+      yc(2) = s2y/n; 	
+      yc(3) = s2z/n;
+      if(mode.eq.2.or.mode.eq.0) then ! need rmsd                     		
+         do m=1, n		
+            do i=1, 3
+               e0 = e0+ (x(i, m)-xc(i))**2 + (y(i, m)-yc(i))**2			
+            end do				
+         end do
+      endif
+      
+      r(1, 1) = sxx-s1x*s2x/n;
+      r(2, 1) = sxy-s1x*s2y/n;
+      r(3, 1) = sxz-s1x*s2z/n;
+      r(1, 2) = syx-s1y*s2x/n;
+      r(2, 2) = syy-s1y*s2y/n;
+      r(3, 2) = syz-s1y*s2z/n;
+      r(1, 3) = szx-s1z*s2x/n;
+      r(2, 3) = szy-s1z*s2y/n;
+      r(3, 3) = szz-s1z*s2z/n;
       
       det = r(1,1) * ( (r(2,2)*r(3,3)) - (r(2,3)*r(3,2)) )
      &     - r(1,2) * ( (r(2,1)*r(3,3)) - (r(2,3)*r(3,1)) )
@@ -2550,7 +2898,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       e(1) = (spur + cth) + cth
       e(2) = (spur - cth) + sth
       e(3) = (spur - cth) - sth
-	
+      
       if( mode .eq. 0 ) then
          goto 50
       end if
@@ -2693,8 +3041,11 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       end if
       d = (d + e(2)) + e(1)
       
-      rms = (e0 - d) - d
-      if( rms .lt. 0.0 ) rms = 0.0
+      if(mode .eq. 2.or.mode.eq.0) then ! need rmsd                     		
+         rms = (e0 - d) - d
+         if( rms .lt. 0.0 ) rms = 0.0
+      endif
       
       return
       end
+      

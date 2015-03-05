@@ -31,7 +31,7 @@
 #include <QResizeEvent>
 namespace ost { namespace img { namespace gui {
 
-Argand::Argand(const Data& data, QWidget* p):
+Argand::Argand(const ImageHandle& data, QWidget* p):
   QWidget(p),
   DataObserver(data),
   extent_(),

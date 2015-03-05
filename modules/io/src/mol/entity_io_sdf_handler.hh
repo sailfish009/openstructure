@@ -40,7 +40,7 @@ public:
   static bool ProvidesExport(const boost::filesystem::path& loc, 
                              const String& format="auto");
                              
-  virtual bool RequiresBuilder() const;
+  virtual bool RequiresProcessor() const;
 
   static String GetFormatName() { return String("Sdf"); }
   static String GetFormatDescription() { return String("Structure-data format from Molecular Design Limited"); }

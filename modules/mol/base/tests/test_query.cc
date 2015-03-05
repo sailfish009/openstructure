@@ -231,6 +231,8 @@ BOOST_AUTO_TEST_CASE(test_query_eval)
   ensure_counts(e, "gctestprop_c:0=1", 1, 3, 27);
   ensure_counts(e, "gctestprop_c:1.0=1", 1, 3, 27);
   ensure_counts(e, "gctestprop_c:2.0=2", 0, 0, 0);
+  ensure_counts(e, "ganotthere:false=true", 0, 0, 0);
+  ensure_counts(e, "ganotthere:false=false", 1, 3, 27);
 }
 
 BOOST_AUTO_TEST_CASE(test_query_eval_on_view) 

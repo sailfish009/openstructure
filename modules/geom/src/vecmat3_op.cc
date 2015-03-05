@@ -228,6 +228,29 @@ Real MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& basis_vec)
   return std::sqrt(min);
 }  
 
+std::vector<unsigned int> MinDistanceIndices(const Vec3List& l1, const Vec3List& l2)
+{ 
+  // returns the indices index1, index2 corresponding to the points in
+  // the Vec3List l1 and l2 having the minimal distance.
+  if (l1.size()==0 || l2.size()==0){throw GeomException("cannot calculate minimal distance: empty Vec3List");}
+  Real min=Length2(*l1.begin()-*l2.begin());
+  Real d;
+  std::vector<unsigned int> il;
+  il.push_back(0);
+  il.push_back(0);
+  for (unsigned int i=0;i!=l1.size();i++){
+    for (unsigned int j=0;j!=l2.size();j++){
+      d=Length2(l1[i]-l2[j]);
+      if (d<min){
+        min=d;
+        il[0]=i;
+        il[1]=j;
+      }
+    }
+  }
+  return il;
+}
+  
 Vec3 WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& basis_vec){
   Vec3 v;
   Real r;

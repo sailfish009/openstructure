@@ -1,7 +1,10 @@
 """
-Some functions for analyzing trajectories
+**This Module requires numpy**
 
-Author: Niklaus Johner
+This module contains functions to analyze trajectories, mainly 
+similiraty measures baed on RMSDS and pairwise distances.
+
+Author: Niklaus Johner (niklaus.johner@unibas.ch)
 """
 
 import ost.mol.alg
@@ -55,14 +58,20 @@ From here on the module needs numpy
 def RMSD_Matrix_From_Traj(t,sele,first=0,last=-1):
   """
   This function calculates a matrix M such that M[i,j] is the
-  RMSD of the EntityView sele between frames i and j of the trajectory t
+  RMSD (calculated on **sele**) between frames i and j of the trajectory **t**
   aligned on sele.
-  Its inputs are:
-    t       : the trajectory (CoordGroupHandle)
-    sele    : the EntityView used for alignment and RMSD calculation
-    first=0 : the first frame of t to be used
-    last=-1 : the last frame of t to be used
-  Returns a numpy NxN matrix, where n is the number of frames.
+
+  :param t: the trajectory
+  :param sele: the selection used for alignment and RMSD calculation
+  :param first: the first frame of t to be used
+  :param last: the last frame of t to be used
+  :type t: :class:`~ost.mol.CoordGroupHandle`
+  :type sele: :class:`~ost.mol.EntityView`
+  :type first: :class:`int`
+  :type last: :class:`int`
+
+  :return: Returns a numpy N\ :subscript:`frames`\ xN\ :subscript:`frames` matrix, 
+   where N\ :subscript:`frames` is the number of frames.
   """
   try:
     import numpy as npy
@@ -85,17 +94,23 @@ def RMSD_Matrix_From_Traj(t,sele,first=0,last=-1):
 
 def PairwiseDistancesFromTraj(t,sele,first=0,last=-1,seq_sep=1):
   """
-  This function calculates the distances between any pair of atoms in the
-  EntityView sele  with sequence separation larger than seq_sep from a trajectory t.
-  It return a matrix containing one line for each atom pair and N columns, where
-  N is the length of the trajectory.
-  Its inputs are:
-    t       : the trajectory (CoordGroupHandle)
-    sele    : the EntityView used to determine the atom pairs
-    first=0 : the first frame of t to be used
-    last=-1 : the last frame of t to be used
-    seq_sep=1 : The minimal sequence separation between
-  Returns a numpy NpairsxNframes matrix.
+  This function calculates the distances between any pair of atoms in **sele**  
+  with sequence separation larger than **seq_sep** from a trajectory **t**.
+  It return a matrix containing one line for each atom pair and N\ :subscript:`frames` columns, where
+  N\ :subscript:`frames` is the number of frames in the trajectory.
+  
+  :param t: the trajectory
+  :param sele: the selection used to determine the atom pairs
+  :param first: the first frame of t to be used
+  :param last: the last frame of t to be used
+  :param seq_sep: The minimal sequence separation between atom pairs
+  :type t: :class:`~ost.mol.CoordGroupHandle`
+  :type sele: :class:`~ost.mol.EntityView`
+  :type first: :class:`int`
+  :type last: :class:`int`
+  :type seq_sep: :class:`int`
+
+  :return: a numpy N\ :subscript:`pairs`\ xN\ :subscript:`frames` matrix.
   """
   try:
     import numpy as npy
@@ -122,15 +137,20 @@ def PairwiseDistancesFromTraj(t,sele,first=0,last=-1,seq_sep=1):
     
 def DistanceMatrixFromPairwiseDistances(distances,p=2):
   """
-  This function calculates an distance matrix M(NxN) from
-  the pairwise distances matrix D(MxN), where N is the number
-  of frames in the trajectory and M the number of atom pairs.
+  This function calculates an distance matrix M(N\ :subscript:`frames`\ xN\ :subscript:`frames`\ ) from
+  the pairwise distances matrix D(N\ :subscript:`pairs`\ xN\ :subscript:`frames`\ ), where 
+  N\ :subscript:`frames` is the number of frames in the trajectory
+  and N\ :subscript:`pairs` the number of atom pairs.
   M[i,j] is the distance between frame i and frame j
   calculated as a p-norm of the differences in distances
   from the two frames (distance-RMSD for p=2).
-  Inputs:
-    distances : a pairwise distance matrix as obtained from PairwiseDistancesFromTraj()
-  Returns a numpy NxN matrix, where N is the number of frames.
+
+  :param distances: a pairwise distance matrix as obtained from 
+   :py:func:`~mol.alg.trajectory_analysis.PairwiseDistancesFromTraj`
+  :param p: exponent used for the p-norm.
+
+  :return: a numpy N\ :subscript:`frames`\ xN\ :subscript:`frames` matrix, where N\ :subscript:`frames`
+   is the number of frames.
   """
   try:
     import numpy as npy
@@ -152,18 +172,29 @@ def DistRMSDFromTraj(t,sele,ref_sele,radius=7.0,average=False,seq_sep=4,first=0,
   """
   This function calculates the distance RMSD from a trajectory.
   The distances selected for the calculation are all the distances
-  between pair of atoms that from residues that are at least seq_sep apart
-  in the sequence and that are smaller than radius in ref_sel.
-  The number and order of atoms in ref_sele and sele should be the same.
-  Its inputs are:
-    t       : the trajectory (CoordGroupHandle)
-    sele    : the EntityView used to determine the distances from t
-    radius=7  : the upper limit of distances in ref_sele considered for the calculation
-    seq_sep=4 : The minimal sequence separation between atom pairs considered for the calculation 
-    average=false : use the average distance in the trajectory as reference instead of the distance obtained from ref_sele
-    first=0 : the first frame of t to be used
-    last=-1 : the last frame of t to be used
-  Returns a numpy vecor dist_rmsd(Nframes).  
+  between pair of atoms from residues that are at least **seq_sep** apart
+  in the sequence and that are smaller than **radius** in **ref_sel**.
+  The number and order of atoms in **ref_sele** and **sele** should be the same.
+
+  :param t: the trajectory
+  :param sele: the selection used to calculate the distance RMSD
+  :param ref_sele: the reference selection used to determine the atom pairs and reference distances
+  :param radius: the upper limit of distances in ref_sele considered for the calculation
+  :param seq_sep: the minimal sequence separation between atom pairs considered for the calculation 
+  :param average: use the average distance in the trajectory as reference instead of the distance obtained from ref_sele
+  :param first: the first frame of t to be used
+  :param last: the last frame of t to be used
+  
+  :type t: :class:`~ost.mol.CoordGroupHandle`
+  :type sele: :class:`~ost.mol.EntityView`
+  :type ref_sele: :class:`~ost.mol.EntityView`
+  :type radius: :class:`float`
+  :type average: :class:`bool`
+  :type first: :class:`int`
+  :type last: :class:`int`
+  :type seq_sep: :class:`int`
+
+  :return: a numpy vecor dist_rmsd(N\ :subscript:`frames`).  
   """
   if not sele.GetAtomCount()==ref_sele.GetAtomCount():
     print 'Not same number of atoms in the two views'
@@ -196,4 +227,36 @@ def DistRMSDFromTraj(t,sele,ref_sele,radius=7.0,average=False,seq_sep=4,first=0,
     LogError("Function needs numpy, but I could not import it.")
     raise
     
+def AverageDistanceMatrixFromTraj(t,sele,first=0,last=-1):
+  """
+  This function calcultes the distance between each pair of atoms
+  in **sele**, averaged over the trajectory **t**.
+
+  :param t: the trajectory
+  :param sele: the selection used to determine the atom pairs
+  :param first: the first frame of t to be used
+  :param last: the last frame of t to be used
+  :type t: :class:`~ost.mol.CoordGroupHandle`
+  :type sele: :class:`~ost.mol.EntityView`
+  :type first: :class:`int`
+  :type last: :class:`int`
+
+  :return: a numpy N\ :subscript:`pairs`\ xN\ :subscript:`pairs` matrix, where N\ :subscript:`pairs`
+   is the number of atom pairs in **sele**.
+  """
+  try:
+    import numpy as npy
+  except ImportError:
+    LogError("Function needs numpy, but I could not import it.")
+    raise
+  n_atoms=sele.GetAtomCount()
+  M=npy.zeros([n_atoms,n_atoms])
+  for i,a1 in enumerate(sele.atoms):
+    for j,a2 in enumerate(sele.atoms):
+      d=ost.mol.alg.AnalyzeDistanceBetwAtoms(t,a1.GetHandle(),a2.GetHandle())[first:last]
+      M[i,j]=npy.mean(d)
+      M[j,i]=npy.mean(d)
+  return M
+
+
     

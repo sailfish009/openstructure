@@ -16,11 +16,6 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <ost/test_utils/compare_files.hh>
-#include <ost/mol/mol.hh>
-#include <ost/io/mol/entity_io_sdf_handler.hh>
-#include <ost/io/save_entity.hh>
-#include <ost/io/io_exception.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
@@ -28,6 +23,12 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 using boost::unit_test_framework::test_suite;
+
+#include <ost/test_utils/compare_files.hh>
+#include <ost/mol/mol.hh>
+#include <ost/io/mol/entity_io_sdf_handler.hh>
+#include <ost/io/save_entity.hh>
+#include <ost/io/io_exception.hh>
 
 using namespace ost;
 using namespace ost::io;

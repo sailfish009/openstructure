@@ -82,19 +82,31 @@ public:
     this->set(x, 0.0, 0.0, 0.0, y, 0.0, 0.0, 0.0, z);
   }
   //! element access
+  Real& At(std::size_t r, std::size_t c)
+  {
+    if (r>2 || c>2) {
+      throw std::out_of_range("indices must be smaller than 3");
+    }
+    return data_[r][c];
+  }
+  //! element access
+  const Real& At(std::size_t r, std::size_t c) const
+  {
+    if (r>2 || c>2) {
+      throw std::out_of_range("indices must be smaller than 3");
+    }
+    return data_[r][c];
+  }
+  //! element access
   Real& operator()(std::size_t r, std::size_t c)
   {
-    if (r>2 || c >2) {
-      throw std::out_of_range("row and column must be in the range [0-2]");
-    }
+    assert(r<3 && c<3);
     return data_[r][c];
   }
   //! const element access
   const Real& operator()(std::size_t r, std::size_t c) const
   {
-    if (r>2 || c >2) {
-      throw std::out_of_range("row and column must be in the range [0-2]");
-    }
+    assert(r<3 && c<3);
     return data_[r][c];
   }
 

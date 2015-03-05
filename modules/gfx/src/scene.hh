@@ -143,7 +143,10 @@ class DLLEXPORT_OST_GFX Scene {
   void SetAmbientOcclusionSize(float f);
   /// experimental feature
   float GetAmbientOcclusionSize() const;
-  
+ 
+  void SetHemiParams(const geom::Vec4&);
+  geom::Vec4 GetHemiParams() const {return hemi_param_;}
+
   /// \brief select shading mode
   /// one of fallback, basic, default, hf, toon1, toon2
   void SetShadingMode(const std::string& smode);
@@ -294,6 +297,10 @@ class DLLEXPORT_OST_GFX Scene {
   /// dimensions here are ignored
   void Export(const String& fname, unsigned int w,
               unsigned int h, bool transparent=false);
+  /// \brief export into bitmap, using multisample anti-aliasing
+  /// \ref Scene::StartOfffscreenMode(unsigned int, unsigned int, int) for more detail
+  void Export(const String& fname, unsigned int w,
+              unsigned int h, int max_samples, bool transparent=false);
 
   /// \brief export snapshot of current scene
   void Export(const String& fname, bool transparent=false);
@@ -345,6 +352,15 @@ class DLLEXPORT_OST_GFX Scene {
 
   /// \brief get background color
   Color GetBackground() const;
+
+  /// \brief use bg bitmap for stereo mode
+  /// this tiles the background bitmap at the far plane
+  void SetBackgroundStereoMode(bool);
+  bool GetBackgroundStereoMode() const {return bg_stereo_mode_;}
+
+  /// background tile left/right offset
+  void SetBackgroundStereoOffset(float);
+  float GetBackgroundStereoOffset() const {return bg_stereo_offset_;}
 
   /// \brief center rotation on the given point
   void SetCenter(const geom::Vec3& cen);
@@ -465,9 +481,18 @@ class DLLEXPORT_OST_GFX Scene {
     During batch mode, this is the only way to get meaningful
     functionality with the gfx module
 
-    returns true upon success and false upon failure
+    Returns true upon success and false upon failure
+
+    You can ask for multisampling to be enabled by giving the
+    max_samples a value larger than zero; in this case, the framebuffer
+    with at most this many samplebuffers will be used. The recommended
+    value here is 4; going to 8 or 16 may give you higher export times
+    with usually no marked increase in quality.
+
   */
+  bool StartOffscreenMode(unsigned int w, unsigned int h, int max_samples);
   bool StartOffscreenMode(unsigned int w, unsigned int h);
+
   /// \brief stops offline rendering in interactive mode
   void StopOffscreenMode();
 
@@ -500,6 +525,7 @@ class DLLEXPORT_OST_GFX Scene {
   void SetShowExportAspect(bool f);
   bool GetShowExportAspect() const {return show_export_aspect_;}
 
+  bool HasMultisample() const {return ms_flag_;}
 protected:
   friend class GfxObj; 
   friend class GfxNode;
@@ -551,6 +577,7 @@ private:
   Color light_amb_;
   Color light_diff_;
   Color light_spec_;
+  geom::Vec4 hemi_param_;
 
   bool cor_flag_;
   bool fix_cor_flag_;
@@ -580,16 +607,20 @@ private:
   unsigned int stereo_mode_;
   unsigned int stereo_alg_;
   bool stereo_inverted_;
-  unsigned int stereo_eye_;
+  int stereo_eye_;
   Real stereo_iod_,stereo_distance_;
   unsigned int scene_left_tex_;
   unsigned int scene_right_tex_;
   unsigned int bg_mode_;
   bool update_bg_;
+  bool bg_stereo_mode_;
+  float bg_stereo_offset_;
   Gradient bg_grad_;
   Bitmap bg_bm_;
   unsigned int bg_tex_;
   
+  bool ms_flag_; // multisample flag
+
   float export_aspect_; 
   bool show_export_aspect_;
 

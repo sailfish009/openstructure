@@ -27,9 +27,8 @@
 #ifndef IMG_DATA_OBSERVER
 #define IMG_DATA_OBSERVER
 
-#include <boost/ref.hpp>
 
-#include "data.hh"
+#include "image_handle.hh"
 
 namespace ost { namespace img {
 
@@ -63,7 +62,7 @@ class DLLEXPORT_OST_IMG_BASE DataObserver {
   /*!
     requires reference to data, then attaches itself to data
   */
-  DataObserver(const Data& d);
+  DataObserver(const ImageHandle& d);
 
   DataObserver(const DataObserver& o);
 
@@ -92,7 +91,7 @@ class DLLEXPORT_OST_IMG_BASE DataObserver {
   void ObserverInvalidate();
   
   //! Returns data that is observed
-  virtual const Data& GetObservedData() const;
+  virtual const ImageHandle& GetObservedData() const;
 
   bool IsDataValid() const {return is_valid();}
 
@@ -102,12 +101,12 @@ class DLLEXPORT_OST_IMG_BASE DataObserver {
   /*!
     Automatically unregister previously observed data
   */
-  void SetObservedData(const Data& d);
+  void SetObservedData(const ImageHandle& d);
 
   bool is_valid() const;
 
 private:
-  boost::reference_wrapper<const Data> data_;
+  ImageHandle data_;
 
 };
 

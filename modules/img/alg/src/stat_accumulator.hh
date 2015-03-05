@@ -27,7 +27,7 @@
 namespace ost { namespace img { namespace alg {
 
 template<unsigned int MAX_MOMENT=4>
-class DLLEXPORT_IMG_ALG StatAccumulator
+class  StatAccumulator
 {
 public:
   StatAccumulator():
@@ -70,14 +70,14 @@ public:
     sum2_+=val*val;
   }
 
-  StatAccumulator operator+(const StatAccumulator& acc2) const
+  StatAccumulator<MAX_MOMENT> operator+(const StatAccumulator<MAX_MOMENT>& acc2) const
   {
-    StatAccumulator acc(acc2);
+    StatAccumulator<MAX_MOMENT> acc(acc2);
     acc+=*this;
     return acc;
   }
 
-  StatAccumulator& operator+=(const StatAccumulator& acc)
+  StatAccumulator<MAX_MOMENT>& operator+=(const StatAccumulator<MAX_MOMENT>& acc)
   {
     if(acc.n_==1){
       return *this;

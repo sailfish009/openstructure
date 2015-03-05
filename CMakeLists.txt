@@ -5,8 +5,8 @@
 cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 project(OpenStructure CXX C)
 set (OST_VERSION_MAJOR 1)
-set (OST_VERSION_MINOR 3)
-set (OST_VERSION_PATCH 3)
+set (OST_VERSION_MINOR 4)
+set (OST_VERSION_PATCH 0)
 set (OST_VERSION_STRING ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR}.${OST_VERSION_PATCH} )
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
 include(OST)
@@ -48,7 +48,7 @@ option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
 option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some boost/boost_python combinations" OFF)
 option(COMPILE_TESTS "whether unit tests should be compiled by default" OFF)
 option(ENABLE_STATIC "whether static libraries should be compiled" OFF)
-option(DEBIAN_STYLE_LIBEXEC "whether 'libexec' should be put under 'lib/openstructure" OFF)
+option(UBUNTU_LAYOUT "whether Debian/Ubuntu's lib and libexec directory layout should be used" OFF)
 option(HIDDEN_VISIBILITY "on gcc, use -fvisibility=hidden" OFF)
 
 if (CXX)
@@ -140,10 +140,10 @@ else()
   set(_PROFILE OFF)
 endif()
 
-if (DEBIAN_STYLE_LIBEXEC)
-  set(_DEBIAN_STYLE_LIBEXEC ON)
+if (UBUNTU_LAYOUT)
+  set(_UBUNTU_LAYOUT ON)
 else()
-  set(_DEBIAN_STYLE_LIBEXEC OFF)
+  set(_UBUNTU_LAYOUT OFF)
 endif()
 
 add_definitions(-DEIGEN2_SUPPORT)
@@ -182,12 +182,34 @@ if (ENABLE_STATIC AND UNIX AND NOT APPLE)
   set (CMAKE_FIND_LIBRARY_SUFFIXES .a)
 endif()
 
+if(BOOST_VERSION)
+  message(STATUS "forcing boost to version ${BOOST_VERSION}")
+  set(_BOOST_MIN_VERSION ${BOOST_VERSION})
+endif()
 setup_boost()
+if (WIN32)
+   ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
+endif()
 
 if (ENABLE_INFO)        
   find_package(Qt4 4.5.0 REQUIRED)
 endif()
 
+if (OPTIMIZE)
+  if (CXX_FLAGS)
+    set (CMAKE_CXX_FLAGS_RELEASE ${CXX_FLAGS})
+  endif()
+  if (C_FLAGS)
+    set (CMAKE_C_FLAGS_RELEASE ${C_FLAGS})
+  endif()
+else()
+  if (CXX_FLAGS)
+    set(CMAKE_CXX_FLAGS_DEBUG ${CXX_FLAGS})
+  endif()
+  if (C_FLAGS)
+    set(CMAKE_C_FLAGS_DEBUG ${C_FLAGS})
+  endif()
+endif()
 if (ENABLE_GFX)
   if(USE_MESA)
     find_package(Mesa REQUIRED)
@@ -250,8 +272,11 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   # with multiple -fno-strict-aliasing flags, triggering a complete rebuild whenever
   # cmake is run
   set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-strict-aliasing")
+  if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER "4.6")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes")
+  endif("${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER "4.6")
   if(HIDDEN_VISIBILITY) 
-    set (CMAKE_CXX_FLAGS "-fvisibility=hidden")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
     set (_HIDDEN_VIS ON)
   else(HIDDEN_VISIBILITY)
     set (_HIDDEN_VIS OFF)
@@ -295,34 +320,35 @@ add_subdirectory(tools)
 # magic is done
 add_subdirectory(deployment)
 
-set(FILES_TO_BE_REMOVED ${CMAKE_SOURCE_DIR}/stage tests)
+set(FILES_TO_BE_REMOVED ${PROJECT_BINARY_DIR}/stage tests)
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
                              "${FILES_TO_BE_REMOVED}")
 
 
 #ost_match_boost_python_version(${PYTHON_LIBRARIES})
 
+if (CMAKE_COMPILER_IS_GNUCXX)
+   set(HIDDEN_VIS_MSG 
+       "\n   Hidden object visibility  (-DHIDDEN_VISIBILITY) : ${_HIDDEN_VIS}")
+endif()
 message(STATUS 
         "OpenStructure will be built with the following options:\n"
-        "   Install Prefix                       (-DPREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
-        "   RPath in install                  (-DUSE_RPATH) : ${_USE_RPATH}\n"
-        "   Info support                    (-DENABLE_INFO) : ${_INFO}\n"
-        "   Graphical interface              (-DENABLE_GUI) : ${_UI}\n"
-        "   OpenGL support                   (-DENABLE_GFX) : ${_OPENGL}\n"
-        "   OpenGL via Mesa                    (-DUSE_MESA) : ${_USE_MESA}\n"
-        "   Image Processing support         (-DENABLE_IMG) : ${_IMG}\n"
-        "   Shader support                   (-DUSE_SHADER) : ${_SHADER}\n"
-        "   Numpy support                     (-DUSE_NUMPY) : ${_NUMPY}\n"
-        "   SpaceNav Device support        (-DENABLE_SPNAV) : ${_SPNAV}\n"
-        "   Optimize                           (-DOPTIMIZE) : ${_OPT}\n"
-        "   Profiling support                   (-DPROFILE) : ${_PROFILE}\n"
-        "   Double Precision       (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
-        "   Compound Lib                   (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
-        "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
-        "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
-        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}")
-if (CMAKE_COMPILER_IS_GNUCXX)
-   message(STATUS
-        "   Hidden object visibility  (-DHIDDEN_VISIBILITY) :        ${_HIDDEN_VIS}")
-endif()
+        "   Install Prefix                        (-DPREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
+        "   RPath in install                   (-DUSE_RPATH) : ${_USE_RPATH}\n"
+        "   Info support                     (-DENABLE_INFO) : ${_INFO}\n"
+        "   Graphical interface               (-DENABLE_GUI) : ${_UI}\n"
+        "   OpenGL support                    (-DENABLE_GFX) : ${_OPENGL}\n"
+        "   OpenGL via Mesa                     (-DUSE_MESA) : ${_USE_MESA}\n"
+        "   Image Processing support          (-DENABLE_IMG) : ${_IMG}\n"
+        "   Shader support                    (-DUSE_SHADER) : ${_SHADER}\n"
+        "   Numpy support                      (-DUSE_NUMPY) : ${_NUMPY}\n"
+        "   SpaceNav Device support         (-DENABLE_SPNAV) : ${_SPNAV}\n"
+        "   Optimize                            (-DOPTIMIZE) : ${_OPT}\n"
+        "   Profiling support                    (-DPROFILE) : ${_PROFILE}\n"
+        "   Double Precision        (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
+        "   Compound Lib                    (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
+        "   TMAlign and TMScore          (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
+        "   Static Libraries               (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
+        "   Debian/Ubuntu directory layout (-DUBUNTU_LAYOUT) : ${_UBUNTU_LAYOUT}"
+        ${HIDDEN_VIS_MSG})
 

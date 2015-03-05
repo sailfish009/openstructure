@@ -17,13 +17,13 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <ost/io/io_exception.hh>
-#include <ost/io/mol/mmcif_info.hh>
-
-#define BOOST_AUTO_TEST_DYN_LINK
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+
+#include <ost/io/io_exception.hh>
+#include <ost/io/mol/mmcif_info.hh>
 
 using namespace ost;
 using namespace ost::io;
@@ -109,11 +109,13 @@ BOOST_AUTO_TEST_CASE(mmcif_info_biounit)
   MMCifInfoBioUnit bu = MMCifInfoBioUnit();
 
   bu.SetDetails("author_defined_assembly");
+  bu.SetMethodDetails("PISA");
   bu.SetID("1");
   bu.AddChain("B");
   bu.AddChain("A");
 
   BOOST_CHECK(bu.GetDetails() == "author_defined_assembly");
+  BOOST_CHECK(bu.GetMethodDetails() == "PISA");
   BOOST_CHECK(bu.GetChainList().back() == "A");
   std::vector<std::pair<int, int> > tr = bu.GetChainIntervalList();
   BOOST_CHECK(tr[0].first == 0);

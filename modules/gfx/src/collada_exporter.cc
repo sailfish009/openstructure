@@ -29,10 +29,10 @@
 
 namespace ost { namespace gfx {
 
-ColladaExporter::ColladaExporter(const std::string& file, float scale):
+ColladaExporter::ColladaExporter(const std::string& file):
+  Exporter(),
   file_(file),
   out_(file_.c_str()),
-  scale_(scale),
   obj_()
 {
   out_ << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
@@ -75,13 +75,23 @@ void ColladaExporter::SceneEnd(const Scene* scene)
   out_ << "   </node>\n";
 
   out_ << "   <node id=\"Root\" name=\"Root\">\n";
-  out_ << "    <matrix>\n";
-  geom::Mat4 tm=scene->GetTransform().GetMatrix();
-  out_ << "    " << tm(0,0) << " " << tm(0,1) << " " << tm(0,2) << " " << tm(0,3) << "\n";
-  out_ << "    " << tm(1,0) << " " << tm(1,1) << " " << tm(1,2) << " " << tm(1,3) << "\n";
-  out_ << "    " << tm(2,0) << " " << tm(2,1) << " " << tm(2,2) << " " << tm(2,3) << "\n";
-  out_ << "    " << tm(3,0) << " " << tm(3,1) << " " << tm(3,2) << " " << tm(3,3) << "\n";
-  out_ << "    </matrix>\n";
+  if(GetToOrigin()) {
+    out_ << "    <matrix>\n";
+    geom::Vec3 cen=scene->GetTransform().GetCenter();
+    out_ << "    1 0 0 " << -cen[0] << "\n";
+    out_ << "    0 1 0 " << -cen[1] << "\n";
+    out_ << "    0 0 1 " << -cen[2] << "\n";
+    out_ << "    0 0 0 1\n";
+    out_ << "    </matrix>\n";
+  } else {
+    out_ << "    <matrix>\n";
+    geom::Mat4 tm=scene->GetTransform().GetMatrix();
+    out_ << "    " << tm(0,0) << " " << tm(0,1) << " " << tm(0,2) << " " << tm(0,3) << "\n";
+    out_ << "    " << tm(1,0) << " " << tm(1,1) << " " << tm(1,2) << " " << tm(1,3) << "\n";
+    out_ << "    " << tm(2,0) << " " << tm(2,1) << " " << tm(2,2) << " " << tm(2,3) << "\n";
+    out_ << "    " << tm(3,0) << " " << tm(3,1) << " " << tm(3,2) << " " << tm(3,3) << "\n";
+    out_ << "    </matrix>\n";
+  }
   for(std::vector<std::string>::const_iterator oit=obj_.begin();oit!=obj_.end();++oit) {
     out_ << "    <node id=\"" << *oit << "\" name=\"" << *oit <<"\">\n";
     out_ << "     <instance_geometry url=\"#" << *oit << "\"/>\n";
@@ -126,10 +136,13 @@ void ColladaExporter::WriteVertexData(const float* vdata,
   out_ << "   <float_array count=\"" << count*3 << "\" id=\"" << name+"-Positions-array" << "\">\n";
   if(vdata) {
     const float* src=vdata;
+    float tmpv[3];
     for(unsigned int i=0;i<count;++i) {
-      out_ << scale_*src[0] << " ";
-      out_ << scale_*src[1] << " ";
-      out_ << scale_*src[2] << " ";
+      tmpv[0]=src[0]; tmpv[1]=src[1]; tmpv[2]=src[2];
+      TransformPosition(tmpv);
+      out_ << tmpv[0] << " ";
+      out_ << tmpv[1] << " ";
+      out_ << tmpv[2] << " ";
       src+=stride;
     }
   } else {
@@ -152,10 +165,13 @@ void ColladaExporter::WriteVertexData(const float* vdata,
   out_ << "   <float_array count=\"" << count*3 << "\" id=\"" << name+"-Normals-array" << "\">\n";
   if(ndata) {
     const float* src=ndata;
+    float tmpn[3];
     for(unsigned int i=0;i<count;++i) {
-      out_ << src[0] << " ";
-      out_ << src[1] << " ";
-      out_ << src[2] << " ";
+      tmpn[0]=src[0]; tmpn[1]=src[1]; tmpn[2]=src[2];
+      TransformNormal(tmpn);
+      out_ << tmpn[0] << " ";
+      out_ << tmpn[1] << " ";
+      out_ << tmpn[2] << " ";
       src+=stride;
     }
   } else {

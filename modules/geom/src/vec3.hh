@@ -20,6 +20,7 @@
 #define GEOM_VEC3_H
 
 #include <stdexcept>
+#include <cassert>
 #include <cstddef> // for size_t
 #include <ostream>
 #include <vector>
@@ -90,17 +91,27 @@ public:
   //! element access
   Real& operator[](std::size_t indx)
   {
-    if (indx>2) {
-      throw std::out_of_range("Index must be in the range [0-2]");
-    }
+    assert(indx<3);
     return (&x)[indx];
   }
   
   //! const element access
   const Real& operator[](std::size_t indx) const
   {
+    assert(indx<3);
+    return (&x)[indx];
+  }
+
+  Real& At(size_t indx) {
     if (indx>2) {
-      throw std::out_of_range("Index must be in the range [0-2]");
+      throw std::out_of_range("index must be smaller than 3");
+    }
+    return (&x)[indx];
+  }
+
+  const Real& At(size_t indx) const {
+    if (indx>2) {
+      throw std::out_of_range("index must be smaller than 3");
     }
     return (&x)[indx];
   }
@@ -196,7 +207,13 @@ namespace geom {
   // TODO: move to separate file
   class Mat3;
 
-class DLLEXPORT_OST_GEOM Vec3List : public std::vector<Vec3> {
+class DLLEXPORT_OST_GEOM Vec3List : 
+  public std::vector<Vec3>,
+  private boost::equality_comparable<Vec3List>,
+  private boost::additive<Vec3List>,
+  private boost::additive<Vec3List, Real>,
+  private boost::multiplicative<Vec3List, Real>
+  {
 public:
   typedef std::vector<Vec3> base_type;
   Vec3List() : base_type() {}
@@ -211,7 +228,86 @@ public:
     base_type::operator=(rhs);
     return *this;
   }
-
+  //! comparable
+  bool operator==(const Vec3List& rhs) const
+  {
+    if (this->size()!=rhs.size()){
+    throw std::length_error("Vec3List must have the same size");
+    }
+    for (unsigned int i=0;i!=this->size();++i) {
+      if (((*this)[i])!=((rhs)[i])){
+        return false;
+      }
+    }
+    return true;
+  }
+  //! addable op
+  Vec3List& operator+=(const Vec3List& rhs)
+  { 
+    if (this->size()!=rhs.size()){
+      throw std::length_error("Vec3List must have the same size");
+    }
+    for (unsigned int i=0;i!=this->size();++i) {
+      (*this)[i]+=(rhs)[i];
+    }
+    return *this;
+  }
+  Vec3List& operator+=(Real d)
+  {
+    for (unsigned int i=0;i!=this->size();++i) {
+      (*this)[i]+=d;
+    }
+    return *this;
+  }
+  
+  //! subtractable op
+  Vec3List& operator-=(const Vec3List& rhs)
+  { 
+    if (this->size()!=rhs.size()){
+      throw std::length_error("Vec3List must have the same size");
+    }
+    for (unsigned int i=0;i!=this->size();++i) {
+      (*this)[i]-=(rhs)[i];
+    }
+    return *this;
+  }
+  
+  Vec3List& operator-=(Real d)
+  {
+    for (unsigned int i=0;i!=this->size();++i) {
+      (*this)[i]-=d;
+    }
+    return *this;
+  }
+  //! negateable
+  //Vec3List3 operator-() const
+  //{
+  //  geom::Vec3List vl;
+  //  for (unsigned int i=0;i!=this->size();++i) {
+  //    geom::Vec3 v=(*this)[i];
+  //    vl.push_back(-v);
+  //  }
+  //  return vl;
+  //}
+  
+  //! multipliable
+  Vec3List& operator*=(Real d)
+  {
+    for (unsigned int i=0;i!=this->size();++i) {
+      (*this)[i]*=d;
+    }
+    return *this;
+  }
+  
+  //! dividable
+  Vec3List& operator/=(Real d)
+  {
+    for (unsigned int i=0;i!=this->size();++i) {
+      (*this)[i]/=d;
+    }
+    return *this;
+  }
+  
   // TODO: move some or all of these to stand-alone functions
   Mat3 GetInertia() const;
   Vec3 GetCenter() const;

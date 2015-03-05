@@ -75,6 +75,13 @@ CompoundPtr find_compound(CompoundLibPtr comp_lib,
   return comp_lib->FindCompound(tlc, tr_dialect(dialect));
 }
 
+bool is_residue_complete(CompoundLibPtr comp_lib,
+                         const ost::mol::ResidueHandle& res,
+                         bool check_hydrogens, const String& dialect)
+{
+  return comp_lib->IsResidueComplete(res, check_hydrogens, tr_dialect(dialect));
+}
+
 String get_creation_date(CompoundLibPtr comp_lib)
 {
   return comp_lib->GetCreationDate().ToString();
@@ -127,7 +134,7 @@ void export_Compound() {
   class_<BondSpec>("BondSpec", no_init)
     .def_readonly("atom_one", &BondSpec::atom_one)
     .def_readonly("atom_two", &BondSpec::atom_two)    
-    .def_readonly("border", &BondSpec::order)
+    .def_readonly("order", &BondSpec::order)
 
   ;  
 
@@ -135,6 +142,9 @@ void export_Compound() {
     .def("Load", &CompoundLib::Load, arg("readonly")=true).staticmethod("Load")
     .def("FindCompound", &find_compound, 
          (arg("tlc"), arg("dialect")="PDB"))
+    .def("IsResidueComplete", &is_residue_complete, (arg("residue"), 
+                                                     arg("check_hydrogens")=false,
+                                                     arg("dialect")="PDB"))
     .def("ClearCache", &CompoundLib::ClearCache)
     .def("GetOSTVersionUsed", &CompoundLib::GetOSTVersionUsed)
     .def("GetCreationDate", &get_creation_date, (arg("comp_lib")))

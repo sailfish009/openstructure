@@ -19,7 +19,6 @@ entity_property_mapper.cc
 entity_view.cc
 entity_visitor.cc
 ics_editor.cc
-iterator.cc
 not_connected_error.cc
 property_id.cc
 query.cc
@@ -30,6 +29,7 @@ residue_handle.cc
 residue_view.cc
 surface_builder.cc
 surface_handle.cc
+transfer_connectivity.cc
 torsion_handle.cc
 query_view_wrapper.cc
 view_op.cc
@@ -68,8 +68,6 @@ entity_visitor.hh
 entity_visitor_fw.hh
 handle_type_fw.hh
 ics_editor.hh
-iterator.hh
-iterator_fw.hh
 not_connected_error.hh
 property_id.hh
 query.hh
@@ -83,9 +81,11 @@ sec_structure.hh
 spatial_organizer.hh
 surface.hh
 surface_builder.hh
+builder.hh
 surface_handle.hh
 surface_prop.hh
 torsion_handle.hh
+transfer_connectivity.hh
 query_view_wrapper.hh
 view_op.hh
 view_type_fw.hh

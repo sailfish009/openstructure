@@ -21,10 +21,14 @@
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include <ost/config.hh>
 #include <ost/mol/alg/local_dist_diff_test.hh>
+#include <ost/mol/alg/distance_test_common.hh>
+#include <ost/mol/alg/distance_rmsd_test.hh>
 #include <ost/mol/alg/superpose_frames.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/mol/alg/consistency_checks.hh>
+#include <ost/mol/alg/pdbize.hh>
 #include <ost/export_helper/pair_to_tuple_conv.hh>
+#include <ost/export_helper/vec_to_list_conv.hh>
 
 using namespace boost::python;
 using namespace ost;
@@ -42,10 +46,10 @@ namespace {
 std::pair<long int,long int> (*lddt_a)(const mol::EntityView&, const mol::alg::GlobalRDMap& , std::vector<Real>, int, const String&)=&mol::alg::LocalDistDiffTest;
 Real (*lddt_c)(const mol::EntityView&, const mol::EntityView& , Real, Real, const String&)=&mol::alg::LocalDistDiffTest;
 Real (*lddt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistDiffTest;
-mol::EntityView (*fc_a)(const mol::EntityView&, const mol::alg::ClashingDistances&,bool)=&mol::alg::FilterClashes;
-mol::EntityView (*fc_b)(const mol::EntityHandle&, const mol::alg::ClashingDistances&, bool)=&mol::alg::FilterClashes;
-mol::EntityView (*csc_a)(const mol::EntityView&, const mol::alg::StereoChemicalParams&, const mol::alg::StereoChemicalParams&, Real, Real, bool)=&mol::alg::CheckStereoChemistry;
-mol::EntityView (*csc_b)(const mol::EntityHandle&, const mol::alg::StereoChemicalParams&, const mol::alg::StereoChemicalParams&, Real, Real, bool)=&mol::alg::CheckStereoChemistry;
+std::pair<mol::EntityView,mol::alg::ClashingInfo> (*fc_a)(const mol::EntityView&, const mol::alg::ClashingDistances&,bool)=&mol::alg::FilterClashes;
+std::pair<mol::EntityView,mol::alg::ClashingInfo> (*fc_b)(const mol::EntityHandle&, const mol::alg::ClashingDistances&, bool)=&mol::alg::FilterClashes;
+std::pair<mol::EntityView,mol::alg::StereoChemistryInfo> (*csc_a)(const mol::EntityView&, const mol::alg::StereoChemicalParams&, const mol::alg::StereoChemicalParams&, Real, Real, bool)=&mol::alg::CheckStereoChemistry;
+std::pair<mol::EntityView,mol::alg::StereoChemistryInfo> (*csc_b)(const mol::EntityHandle&, const mol::alg::StereoChemicalParams&, const mol::alg::StereoChemicalParams&, Real, Real, bool)=&mol::alg::CheckStereoChemistry;
 mol::CoordGroupHandle (*superpose_frames1)(mol::CoordGroupHandle&, mol::EntityView&, int, int, int)=&mol::alg::SuperposeFrames;
 mol::CoordGroupHandle (*superpose_frames2)(mol::CoordGroupHandle&,  mol::EntityView&, mol::EntityView&, int, int)=&mol::alg::SuperposeFrames;
 
@@ -91,6 +95,7 @@ ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const l
   return ost::mol::alg::CreateDistanceListFromMultipleReferences(ref_list_vector, cutoff_list_vector, sequence_separation, max_dist);  	
 }
 
+
 }
 
 
@@ -104,9 +109,6 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   export_entity_to_density();
   #endif
   
-  to_python_converter<std::pair<Real,Real>,
-                      PairToTupleConverter<Real, Real> >();
-
   def("LocalDistDiffTest", lddt_a, (arg("sequence_separation")=0,arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_c, (arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_b, (arg("ref_index")=0, arg("mdl_index")=1));
@@ -117,7 +119,9 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("LDDTHA",&mol::alg::LDDTHA, (arg("sequence_separation")=0));
   def("CreateDistanceList",&mol::alg::CreateDistanceList);
   def("CreateDistanceListFromMultipleReferences",&create_distance_list_from_multiple_references);
-    
+
+  def("DistanceRMSDTest", &mol::alg::DistanceRMSDTest, (arg("sequence_separation")=0,arg("local_lddt_property_string")=""));
+
   def("SuperposeFrames", superpose_frames1, 
       (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
        arg("end")=-1, arg("ref")=-1));
@@ -150,16 +154,8 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
     .def("GetResNum",&mol::alg::UniqueAtomIdentifier::GetResNum)
     .def("GetResidueName",&mol::alg::UniqueAtomIdentifier::GetResidueName)
     .def("GetAtomName",&mol::alg::UniqueAtomIdentifier::GetAtomName)
+    .def("GetQualifiedAtomName",&mol::alg::UniqueAtomIdentifier::GetQualifiedAtomName)
   ;    
-   
-  
-  class_<mol::alg::ResidueRDMap>("ResidueRDMap")
-    .def(map_indexing_suite<mol::alg::ResidueRDMap>())
-  ;
-  
-  class_<mol::alg::GlobalRDMap>("GlobalRDMap")
-    .def(map_indexing_suite<mol::alg::GlobalRDMap>())
-  ;
   
   def("FillClashingDistances",&fill_clashing_distances_wrapper);
   def("FillStereoChemicalParams",&fill_stereochemical_params_wrapper);
@@ -167,8 +163,104 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("PrintGlobalRDMap",&mol::alg::PrintGlobalRDMap);
   def("PrintResidueRDMap",&mol::alg::PrintResidueRDMap);
  
+  class_<mol::alg::PDBize>("PDBize",
+                           init<int>(arg("min_polymer_size")=10))
+    .def("Add", &mol::alg::PDBize::Add, 
+         (arg("asu"), arg("transformations"), arg("seqres")))
+    .def("Finish", &mol::alg::PDBize::Finish, arg("shift_to_fit")=true)
+  ;
+
   def("ResidueNamesMatch",&mol::alg::ResidueNamesMatch,
       (arg("probe"), arg("reference"), arg("log_as_error")=false));
 
- 
+  class_<mol::alg::BondLengthInfo> ("BondLengthInfo" ,init <>())
+    .def(init<Real,Real,int>())
+    .def("GetAvgLength",&mol::alg::BondLengthInfo::GetAvgLength)
+    .def("GetAvgZscore",&mol::alg::BondLengthInfo::GetAvgZscore)
+    .def("GetCount",&mol::alg::BondLengthInfo::GetCount)
+  ;
+
+  class_<mol::alg::ClashEvent> ("ClashEvent" ,init <>())
+      .def(init<const mol::alg::UniqueAtomIdentifier&,const mol::alg::UniqueAtomIdentifier&, Real, Real>())
+      .def("GetFirstAtom",&mol::alg::ClashEvent::GetFirstAtom)
+      .def("GetSecondAtom",&mol::alg::ClashEvent::GetSecondAtom)
+      .def("GetModelDistance",&mol::alg::ClashEvent::GetModelDistance)
+      .def("GetAdjustedReferenceDistance",&mol::alg::ClashEvent::GetAdjustedReferenceDistance)
+  ;
+
+  class_<mol::alg::StereoChemicalBondViolation> ("StereoChemicalBondViolation" ,init <>())
+      .def(init<const mol::alg::UniqueAtomIdentifier&,const mol::alg::UniqueAtomIdentifier&,
+           Real, const std::pair<Real, Real>& >())
+      .def("GetFirstAtom",&mol::alg::StereoChemicalBondViolation::GetFirstAtom)
+      .def("GetSecondAtom",&mol::alg::StereoChemicalBondViolation::GetSecondAtom)
+      .def("GetBondLength",&mol::alg::StereoChemicalBondViolation::GetBondLength)
+      .def("GetAllowedRange",&mol::alg::StereoChemicalBondViolation::GetAllowedRange)
+  ;
+
+  class_<mol::alg::StereoChemicalAngleViolation> ("StereoChemicalAngleViolation" ,init <>())
+      .def(init<const mol::alg::UniqueAtomIdentifier&,const mol::alg::UniqueAtomIdentifier&,
+          const mol::alg::UniqueAtomIdentifier&, Real, const std::pair<Real, Real>& >())
+      .def("GetFirstAtom",&mol::alg::StereoChemicalAngleViolation::GetFirstAtom)
+      .def("GetSecondAtom",&mol::alg::StereoChemicalAngleViolation::GetSecondAtom)
+      .def("GetThirdAtom",&mol::alg::StereoChemicalAngleViolation::GetThirdAtom)
+      .def("GetAngleWidth",&mol::alg::StereoChemicalAngleViolation::GetAngleWidth)
+      .def("GetAllowedRange",&mol::alg::StereoChemicalAngleViolation::GetAllowedRange)
+  ;
+
+  class_<mol::alg::ClashingInfo> ("ClashingInfo" ,init <>())
+    .def(init<int,Real,const std::vector<mol::alg::ClashEvent> >())
+    .def("GetClashCount",&mol::alg::ClashingInfo::GetClashCount)
+    .def("GetAverageOffset",&mol::alg::ClashingInfo::GetAverageOffset)
+    .def("GetClashList",&mol::alg::ClashingInfo::GetClashList)
+  ;
+
+  class_<mol::alg::StereoChemistryInfo> ("StereoChemistryInfo" ,init <>())
+      .def(init<Real,int,int,Real,int,int, const std::map<String,mol::alg::BondLengthInfo>&,
+               const std::vector<mol::alg::StereoChemicalBondViolation>&,
+               const std::vector<mol::alg::StereoChemicalAngleViolation>& >())
+      .def("GetAvgZscoreBonds",&mol::alg::StereoChemistryInfo::GetAvgZscoreBonds)
+      .def("GetBadBondCount",&mol::alg::StereoChemistryInfo::GetBadBondCount)
+      .def("GetBondCount",&mol::alg::StereoChemistryInfo::GetBondCount)
+      .def("GetAvgZscoreAngles",&mol::alg::StereoChemistryInfo::GetAvgZscoreAngles)
+      .def("GetBadAngleCount",&mol::alg::StereoChemistryInfo::GetBadAngleCount)
+      .def("GetAngleCount",&mol::alg::StereoChemistryInfo::GetAngleCount)
+      .def("GetAvgBondLengthInfo",&mol::alg::StereoChemistryInfo::GetAvgBondLengthInfo)
+      .def("GetBondViolationList",&mol::alg::StereoChemistryInfo::GetBondViolationList)
+      .def("GetAngleViolationList",&mol::alg::StereoChemistryInfo::GetAngleViolationList)
+    ;
+
+  to_python_converter<std::pair<ost::mol::alg::UniqueAtomIdentifier,ost::mol::alg::UniqueAtomIdentifier>,
+                      PairToTupleConverter<ost::mol::alg::UniqueAtomIdentifier, ost::mol::alg::UniqueAtomIdentifier> >();
+
+  to_python_converter<std::pair<Real,Real>,
+                      PairToTupleConverter<Real, Real> >();
+
+  to_python_converter<std::pair<Real,long int>,
+                      PairToTupleConverter<Real, long int> >();
+
+  to_python_converter<std::pair<mol::EntityView,mol::alg::StereoChemistryInfo>,
+                      PairToTupleConverter<mol::EntityView, mol::alg::StereoChemistryInfo> >();
+
+  to_python_converter<std::pair<mol::EntityView,mol::alg::ClashingInfo>,
+                      PairToTupleConverter<mol::EntityView, mol::alg::ClashingInfo> >();
+
+  to_python_converter<std::vector<mol::alg::ClashEvent>,
+                      VectorToListConverter<mol::alg::ClashEvent> >();
+
+  to_python_converter<std::vector<mol::alg::StereoChemicalBondViolation>,
+                      VectorToListConverter<mol::alg::StereoChemicalBondViolation> >();
+
+  to_python_converter<std::vector<mol::alg::StereoChemicalAngleViolation>,
+                      VectorToListConverter<mol::alg::StereoChemicalAngleViolation> >();
+
+  class_<mol::alg::ResidueRDMap>("ResidueRDMap")
+    .def(map_indexing_suite<mol::alg::ResidueRDMap,true>())
+  ;
+
+  class_<mol::alg::GlobalRDMap>("GlobalRDMap")
+    .def(map_indexing_suite<mol::alg::GlobalRDMap,true>())
+  ;
+
+  def("DRMSD",&mol::alg::DRMSD);
+
 }

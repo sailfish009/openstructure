@@ -31,9 +31,6 @@ namespace ost { namespace img { namespace image_state {
 
 // Index
 
-Index::Index(unsigned int uu,unsigned int vv, unsigned int ww):
-  u(uu),v(vv),w(ww)
-{}
 
 bool Index::equal(const Index& i) const {
   return u==i.u && v==i.v && w==i.w;

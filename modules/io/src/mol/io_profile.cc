@@ -2,14 +2,17 @@
 
 namespace ost { namespace io {
 
+bool IOProfileRegistry::alive = false;
 IOProfileRegistry& IOProfileRegistry::Instance()
 {
   static IOProfileRegistry reg;
   return reg;
 }
 
-IOProfileRegistry::IOProfileRegistry()
+IOProfileRegistry::IOProfileRegistry():
+  profiles_()
 {
+  IOProfileRegistry::alive = true;
   profiles_["DEFAULT"]=IOProfile();
 }
 

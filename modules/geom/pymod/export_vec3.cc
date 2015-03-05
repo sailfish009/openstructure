@@ -24,8 +24,12 @@
 
 using namespace boost::python;
 
-const Real Vec3_getitem(const geom::Vec3& v, int i) {return v[i];}
-void Vec3_setitem(geom::Vec3& v,const  int i,const  Real val) {v[i]=val;}
+const Real Vec3_getitem(const geom::Vec3& v, int i) {
+  return v.At(i);
+}
+void Vec3_setitem(geom::Vec3& v,const  int i,const  Real val) {
+  v.At(i)=val;
+}
 
 geom::Vec3 NormalizeV3(const geom::Vec3& v) {
   return geom::Normalize(v);
@@ -91,6 +95,21 @@ void export_Vec3()
   class_<Vec3List>("Vec3List", init<>())
     .def(vector_indexing_suite<Vec3List>())
     .def(geom::VectorAdditions<Vec3List>())
+    .def(self *= Real())
+    .def(self /= Real())
+    .def(self += Real())
+    .def(self += self)
+    .def(self -= self)
+    //.def(-self)
+    .def(self * Real())
+    .def(Real() * self)
+    .def(self / Real())
+    .def(self + self)
+    .def(self + Real())
+    .def(Real() + self)
+    .def(self - self)
+    .def(self == self)
+    .def(self != self)
     .add_property("center", &Vec3List::GetCenter)
     .add_property("inertia", &Vec3List::GetInertia)
     .add_property("principal_axes", &Vec3List::GetPrincipalAxes)

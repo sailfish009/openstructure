@@ -32,7 +32,7 @@
 
 namespace ost { namespace gfx {
 
-class Bitmap;
+struct Bitmap;
 
 class Texture
 {

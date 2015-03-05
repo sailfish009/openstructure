@@ -61,22 +61,37 @@ Real CalculateAverageAgreementWithDensityMap(const geom::Vec3List& vl, img::MapH
 }
 
 #endif
-void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 basis_vec){
+void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 basis_vec, bool group_residues){
   mol::XCSEditor edi=eh.EditXCS(mol::BUFFERED_EDIT);
-  geom::Vec3 cm,wrapped_cm,shift;
-  edi=eh.EditXCS();
-  ResidueHandleList residues=eh.GetResidueList();
-  unsigned int n_residues=eh.GetResidueCount();
-  for (unsigned int i=0; i<n_residues; ++i) {
-    ResidueHandle r=residues[i];
-    cm=r.GetCenterOfMass();
-    wrapped_cm=geom::WrapVec3(cm,cell_center,basis_vec);
-    if (wrapped_cm==cm) continue;
-    AtomHandleList atoms=r.GetAtomList();
-    unsigned int n_atoms=r.GetAtomCount();
-    shift=wrapped_cm-cm;
-    for (unsigned int j=0; j<n_atoms; ++j) {
-      edi.SetAtomPos(atoms[j],atoms[j].GetPos()+shift);
+  if (group_residues) {
+    geom::Vec3 cm,wrapped_cm,shift;
+    ResidueHandleList residues=eh.GetResidueList();
+    unsigned int n_residues=eh.GetResidueCount();
+    for (unsigned int i=0; i<n_residues; ++i) {
+      ResidueHandle r=residues[i];
+      AtomHandleList atoms=r.GetAtomList();
+      geom::Vec3 ref_pos=atoms[0].GetPos();
+      for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
+        edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),ref_pos,basis_vec));
+      }
+    }
+    for (unsigned int i=0; i<n_residues; ++i) {
+      ResidueHandle r=residues[i];
+      cm=r.GetCenterOfMass();
+      wrapped_cm=geom::WrapVec3(cm,cell_center,basis_vec);
+      if (wrapped_cm==cm) continue;
+      AtomHandleList atoms=r.GetAtomList();
+      unsigned int n_atoms=r.GetAtomCount();
+      shift=wrapped_cm-cm;
+      for (unsigned int j=0; j<n_atoms; ++j) {
+        edi.SetAtomPos(atoms[j],atoms[j].GetPos()+shift);
+      }
+    }
+  }
+  else {
+    AtomHandleList atoms=eh.GetAtomList();
+    for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
+      edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),cell_center,basis_vec));
     }
   }
 }

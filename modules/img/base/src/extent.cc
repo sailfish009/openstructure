@@ -33,26 +33,37 @@
 
 namespace ost { namespace img {
 
-Extent::Extent() {set(Point(),Point());}
+Extent::Extent():
+  start_(),
+  end_()
+{}
 
-Extent::Extent(const Extent &r) {set(r.start_,r.end_);}
+Extent::Extent(const Extent &r):
+  start_(r.start_),
+  end_(r.end_)
+{}
 
-Extent::Extent(const Point& p1, const Point& p2) {set(p1,p2);}
+Extent::Extent(const Point& p1, const Point& p2):
+  start_(std::min(p1[0],p2[0]),std::min(p1[1],p2[1]),std::min(p1[2],p2[2])),
+  end_(std::max(p1[0],p2[0]),std::max(p1[1],p2[1]),std::max(p1[2],p2[2]))
+{}
 
-Extent::Extent(const Size& size)
+Extent::Extent(const Size& size):
+  start_(),
+  end_(size - Point(1,1,1))
 {
-  set(Point(0,0,0), size - Point(1,1,1));
 }
 
-Extent::Extent(const Size& size, const Point& cen)
+Extent::Extent(const Size& size, const Point& cen):
+  start_(-size.GetHalf() + cen),
+  end_(size + start_ - Point(1,1,1))
 {
-  Point st = -size.GetHalf() + cen;
-  set(st, size + st - Point(1,1,1));
 }
 
-Extent::Extent(const Point& start, const Size& size)
+Extent::Extent(const Point& start, const Size& size):
+  start_(start),
+  end_(size + start_ - Point(1,1,1))
 {
-  set(start, size + start - Point(1,1,1));
 }
 
 const Point& Extent::GetStart() const {return start_;}
@@ -72,8 +83,8 @@ const Point& Extent::GetEnd() const {return end_;}
 bool Extent::Contains(const Point& p) const
 {
   return (p[0]>=start_[0] && p[0]<=end_[0] &&
-	  p[1]>=start_[1] && p[1]<=end_[1] &&
-	  p[2]>=start_[2] && p[2]<=end_[2]);
+          p[1]>=start_[1] && p[1]<=end_[1] &&
+          p[2]>=start_[2] && p[2]<=end_[2]);
 }
 
 bool Extent::Contains(const Extent& e) const
@@ -83,27 +94,28 @@ bool Extent::Contains(const Extent& e) const
 
 Point Extent::GetCenter() const 
 {
-  return size_.GetHalf()+start_;
+  return Size(start_,end_).GetHalf()+start_;
 }
 
-const Size& Extent::GetSize() const {return size_;}
+Size Extent::GetSize() const {return Size(start_,end_);}
 
-int Extent::GetWidth() const {return size_.GetWidth();}
+int Extent::GetWidth() const {return end_[0]-start_[0]+1;}
 
-int Extent::GetHeight() const {return size_.GetHeight();}
+int Extent::GetHeight() const {return end_[1]-start_[1]+1;}
 
-int Extent::GetDepth() const {return size_.GetDepth();}
+int Extent::GetDepth() const {return end_[2]-start_[2]+1;}
 
-int Extent::GetVolume() const {return size_.GetVolume();}
+int Extent::GetVolume() const {return Size(start_,end_).GetVolume();}
 
-int Extent::GetDim() const {return dim_;}
+int Extent::GetDim() const {return Size(start_,end_).GetDim();}
 
 
 Point Extent::WrapAround(const Point& p)
 {
   Point r(p-start_);
+  Size size=GetSize();
   for(int i=0;i<3;i++) {
-    r[i] = start_[i] + (r[i]<0 ? size_[i]+std::div(r[i],size_[i]).rem : std::div(r[i],size_[i]).rem);
+    r[i] = start_[i] + (r[i]<0 ? size[i]+std::div(r[i],size[i]).rem : std::div(r[i],size[i]).rem);
   }
   return r;
 }
@@ -112,16 +124,16 @@ Point Extent::WrapAround(const Point& p)
 Extent Extent::Mirror(int planes)
 {
   Point new_start(planes & Plane::YZ ? -end_[0] : start_[0],
-		  planes & Plane::XZ ? -end_[1] : start_[1],
-		  planes & Plane::XY ? -end_[2] : start_[2]);
-  return Extent(new_start,size_);
+                  planes & Plane::XZ ? -end_[1] : start_[1],
+                  planes & Plane::XY ? -end_[2] : start_[2]);
+  return Extent(new_start,GetSize());
 }
 
 unsigned int Extent::Point2Offset(const Point& p)
 {
   if(this->Contains(p)) {
     Point d(p-start_);
-    return d[0]+size_[0]*(d[1]+d[2]*size_[1]);
+    return d[0]+GetWidth()*(d[1]+d[2]*GetHeight());
   } else {
     return 0;
   }
@@ -146,8 +158,6 @@ void Extent::set(const Point& p1, const Point& p2)
       end_[i]=p1[i];
     }
   }
-  size_ = Size(start_,end_);
-  dim_ = size_.GetDim();
 }
 
 bool Extent::equal(const Extent& b) const 

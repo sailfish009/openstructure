@@ -21,254 +21,117 @@
 /*
   point
 
-  Author: Ansgar Philippsen
+  Authors: Ansgar Philippsen, Andreas Schenk
 */
 
 #include <ost/message.hh>
 #include <iostream>
 #include <sstream>
 
-#include <ost/img/peak.hh>
 #include "point.hh"
 #include "size.hh"
 #include "vecmat.hh"
 
 namespace ost { namespace img {
 
-Point::Point():
-  data_()
+Point::Point(const Size& size):
+  x(size[0]),
+  y(size[1]),
+  z(size[2])
 {
-  data_[0]=0;
-  data_[1]=0;
-  data_[2]=0;
-} 
-
-Point::Point(int a):
-  data_()
-{
-  data_[0]=a;
-  data_[1]=0;
-  data_[2]=0;
-} 
-
-Point::Point(int a, int b):
-  data_()
-{
-  data_[0]=a;
-  data_[1]=b;
-  data_[2]=0;
-} 
-
-Point::Point(int a, int b, int c):
-  data_()
-{
-  data_[0]=a;
-  data_[1]=b;
-  data_[2]=c;
-} 
-
-Point::Point(const Vec2& v):
-  data_()
-{
-  data_[0]=static_cast<int>(round(v[0]));
-  data_[1]=static_cast<int>(round(v[1]));
-  data_[2]=0;
-} 
-
-Point::Point(const Vec3& v):
-  data_()
-{
-  data_[0]=static_cast<int>(round(v[0]));
-  data_[1]=static_cast<int>(round(v[1]));
-  data_[2]=static_cast<int>(round(v[2]));
-} 
-
-Point::Point(const Vec4& v):
-  data_()
-{
-  if(std::abs(v[3])<1e-100) {
-    throw geom::OutOfRangeException("4th element of Vec4 is too close to zero for normalization");
-  } else {
-    Real sf = 1.0/v[3];
-    data_[0]=static_cast<int>(round(v[0]*sf));
-    data_[1]=static_cast<int>(round(v[1]*sf));
-    data_[2]=static_cast<int>(round(v[2]*sf));
-  }
 }
-
-Point::Point(const Size& s):
-  data_()
-{
-  data_[0]=s[0];
-  data_[1]=s[1];
-  data_[2]=s[2];
-}
-
-Point::Point(const Point &p):
-  data_()
-{
-  data_[0]=p.data_[0];
-  data_[1]=p.data_[1];
-  data_[2]=p.data_[2];
-} 
 
 Point Point::Mirror(int planes)
 {
-  return Point(planes & Plane::YZ ? -data_[0] : data_[0],
-               planes & Plane::XZ ? -data_[1] : data_[1],
-               planes & Plane::XY ? -data_[2] : data_[2]);
-}
-
-
-bool Point::equal(const Point &p) const 
-{
-  return  (data_[0]==p.data_[0] && 
-           data_[1]==p.data_[1] && 
-           data_[2]==p.data_[2]);
-};
-
-bool Point::less(const Point &p) const 
-{
-  return ( data_[2]!=p.data_[2] ? data_[2]<p.data_[2] : (data_[1]!=p.data_[1] ?  data_[1]<p.data_[1] : data_[0]<p.data_[0]) ); 
-}
-
-Point Point::absolute() const 
-{
-  return Point(std::abs(data_[0]),std::abs(data_[1]),std::abs(data_[2]));
+  return Point(planes & Plane::YZ ? -x : x,
+               planes & Plane::XZ ? -y : y,
+               planes & Plane::XY ? -z : z);
 }
 
 Point& Point::operator+=(const Point& p) 
 {
-  data_[0]+=p.data_[0];   
-  data_[1]+=p.data_[1];
-  data_[2]+=p.data_[2];
+  x+=p.x;   
+  y+=p.y;
+  z+=p.z;
   return *this;
 }
 
 Point& Point::operator-=(const Point& p) 
 {
-  data_[0]-=p.data_[0];   
-  data_[1]-=p.data_[1];
-  data_[2]-=p.data_[2];
+  x-=p.x;   
+  y-=p.y;
+  z-=p.z;
   return *this;
 }
 
 Point Point::operator-() const 
 {
-  return Point(-data_[0],-data_[1],-data_[2]);
+  return Point(-x,-y,-z);
 }
 
 Point& Point::operator=(const Point& p) 
 {
-  data_[0]=p.data_[0];
-  data_[1]=p.data_[1];
-  data_[2]=p.data_[2];
+  x=p.x;
+  y=p.y;
+  z=p.z;
   return *this;
 }
 
 
 bool Point::operator==(const Point &p) const 
 {
-  return equal(p);
-}
-
-bool Point::operator!=(const Point &p) const
-{
-  return !equal(p);
+  return  (x==p.x && 
+           y==p.y && 
+           z==p.z);
 }
 
 bool Point::operator<(const Point &p) const 
 {
-  return less(p);
+  return ( z!=p.z ? z<p.z : (y!=p.y ?  y<p.y : x<p.x) ); 
 }
 
-bool Point::operator<=(const Point &p) const 
-{
-  return (equal(p) || less(p));
-}
-
-bool Point::operator>(const Point &p) const
-{
-  return p.less((*this));
-}
-
-bool Point::operator>=(const Point &p) const 
-{
-  return (equal(p) || p.less((*this)));
-}
 
 Point& Point::operator+=(const Size& s) 
 {
-  data_[0]+=s[0];   
-  data_[1]+=s[1];
-  data_[2]+=s[2];
+  x+=s[0];   
+  y+=s[1];
+  z+=s[2];
   return *this;
 }
 
 Point& Point::operator-=(const Size& s) 
 {
-  data_[0]-=s[0];   
-  data_[1]-=s[1];
-  data_[2]-=s[2];
+  x-=s[0];   
+  y-=s[1];
+  z-=s[2];
   return *this;
 }
 
 Vec2 Point::ToVec2() const 
 {
-  Vec2 nrvo(static_cast<Real>(data_[0]),
-            static_cast<Real>(data_[1]));
+  Vec2 nrvo(static_cast<Real>(x),
+            static_cast<Real>(y));
   return nrvo;
 }
 
 Vec3 Point::ToVec3() const 
 {
-  Vec3 nrvo(static_cast<Real>(data_[0]),
-      static_cast<Real>(data_[1]),
-      static_cast<Real>(data_[2]));
+  Vec3 nrvo(static_cast<Real>(x),
+      static_cast<Real>(y),
+      static_cast<Real>(z));
   return nrvo;
 }
 
 Vec4 Point::ToVec4() const 
 {
-  Vec4 nrvo(static_cast<Real>(data_[0]),
-      static_cast<Real>(data_[1]),
-      static_cast<Real>(data_[2]),
+  Vec4 nrvo(static_cast<Real>(x),
+      static_cast<Real>(y),
+      static_cast<Real>(z),
       1.0);
   return nrvo;
 }
 
-int& Point::operator[](unsigned int index) 
-{
-  if(index>2) throw std::range_error("Point index out of range");
-  return data_[index];
-}
-
-int Point::operator[](unsigned int index) const 
-{
-  if(index>2) throw geom::OutOfRangeException("Point index out of range");
-  return data_[index];
-}
-
 // global funcs
-
-Point operator+(const Point& p1, const Point& p2) 
-{
-  Point r(p1);
-  r+=(p2);
-  return r;
-}
-
-Point operator-(const Point& p1, const Point& p2) {
-  Point r(p1);
-  r-=(p2);
-  return r;
-}
-
-
-
-Point absolute(const Point& p) {
-  return p.absolute();
-}
 
 std::ostream& operator<<(std::ostream& os, const Point &p) 
 {

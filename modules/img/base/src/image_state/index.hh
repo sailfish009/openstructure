@@ -39,7 +39,9 @@ namespace ost { namespace img { namespace image_state {
   provides a compact mean to adress values in a ValueHolder
 */
 struct DLLEXPORT_OST_IMG_BASE Index {
-  Index(unsigned int uu,unsigned int vv, unsigned int ww);
+  Index(unsigned int uu,unsigned int vv, unsigned int ww):
+    u(uu),v(vv),w(ww)
+  {}
 
   bool equal(const Index& i) const;
 

@@ -121,17 +121,6 @@ bool Mat4::operator==(const Mat4& rhs) const
     data_[3][3] ==  rhs.data_[3][3];
 }
 
-Real& Mat4::operator()(std::size_t r, std::size_t c)
-{
-  if(r>3 || c>3) throw std::out_of_range("row and column must be in range [0-3]");
-  return data_[r][c];
-}
-
-const Real& Mat4::operator()(std::size_t r, std::size_t c) const
-{
-  if(r>3 || c>3) throw std::out_of_range("row and column must be in range [0-3]");
-  return data_[r][c];
-}
 
 
 Mat4& Mat4::operator+=(const Mat4& rhs)

@@ -121,7 +121,9 @@ class SuperpositionDialog(QDialog):
 
   def __init__(self, ent_one, ent_two, parent=None):
     # class variables
+    self.rmsd_superposed_atoms = None
     self.rmsd = None
+    self.fraction_superposed = None
     self._mmethod_dict = {'number': 'number',
                           'index': 'index',
                           'local alignment': 'local-aln',
@@ -189,6 +191,11 @@ class SuperpositionDialog(QDialog):
     layout.addWidget(QLabel('match residues by'), grow, 0)
     grow += 1
     layout.addWidget(self._methods)
+
+    # iterative
+    self._iterative=None
+    self._it_box, self._it_in, self._dist_in = self._ItBox()
+    layout.addWidget(self._it_box, grow, 0)
     # atoms
     self._atoms = self._FetchAtoms(self._methods.size(),
                                    self.ent_one,
@@ -222,8 +229,12 @@ class SuperpositionDialog(QDialog):
     atoms = self._GetAtomSelection()
     sp = Superpose(view_two, view_one,
                    self._mmethod_dict[str(self._methods.currentText())],
-                   atoms)
+                   atoms, iterative=self._iterative, 
+                   max_iterations=self._it_in.value(), distance_threshold=self._dist_in.value())
     self.rmsd = sp.rmsd
+    if self._iterative:
+      self.rmsd_superposed_atoms = sp.rmsd_superposed_atoms
+      self.fraction_superposed = sp.fraction_superposed
 
   def _toggle_atoms(self, checked):
     if checked:
@@ -295,6 +306,44 @@ class SuperpositionDialog(QDialog):
     if cbox.count() > 0:
       cbox.setCurrentIndex(0)
     return cbox
+
+  def _toggle_iterative(self, checked):
+    if checked:
+      self._it_in.setEnabled(True)
+      self._dist_in.setEnabled(True)
+      self._iterative=True
+    else:
+      self._it_in.setEnabled(False)
+      self._dist_in.setEnabled(False)
+      self._iterative=False
+
+  def _ItBox(self):
+    bt1 = QRadioButton("On")
+    iteration_label=QLabel("Max Iterations: ")
+    distance_label=QLabel("Dist Thresh: ")
+    iteration_in=QSpinBox()
+    iteration_in.setRange(1,30)
+    iteration_in.setValue(8)
+    distance_in=QDoubleSpinBox()
+    distance_in.setRange(1.0,10.0)
+    distance_in.setValue(3.0)
+    distance_in.setDecimals(1)
+    distance_in.setSingleStep(0.5)
+    iteration_in.setEnabled(False)
+    distance_in.setEnabled(False)
+    bt1.setChecked(False)
+    self._iterative=False
+    vbox_layout = QVBoxLayout()
+    vbox_layout.addWidget(bt1)
+    vbox_layout.addWidget(iteration_label)
+    vbox_layout.addWidget(iteration_in)
+    vbox_layout.addWidget(distance_label)
+    vbox_layout.addWidget(distance_in)
+    vbox_layout.addSpacing(50)
+    QObject.connect(bt1, SIGNAL('toggled(bool)'), self._toggle_iterative)
+    box = QGroupBox("Iterative")
+    box.setLayout(vbox_layout)
+    return box,iteration_in, distance_in
 
   def _ChangeChainSelection(self, index):
     if index == 0:

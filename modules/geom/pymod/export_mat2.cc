@@ -23,8 +23,17 @@ using namespace boost::python;
 
 
 
-const Real Mat2_getitem(const geom::Mat2& m, tuple i) {return m(extract<int> (i[0]),extract<int> (i[1]));}
-void Mat2_setitem(geom::Mat2& m,const  tuple i,const  Real val) {m(extract<int> (i[0]),extract<int> (i[1]))=val;}
+const Real Mat2_getitem(const geom::Mat2& m, tuple i) {
+  int a = extract<int> (i[0]);
+  int b = extract<int> (i[1]);
+  return m.At(a, b);
+}
+
+void Mat2_setitem(geom::Mat2& m,const  tuple i,const  Real val) {
+  int a = extract<int> (i[0]);
+  int b = extract<int> (i[1]);
+  m.At(a, b) = val;
+}
 
 String mat2_repr(const geom::Mat2& m) {
   std::stringstream ss;

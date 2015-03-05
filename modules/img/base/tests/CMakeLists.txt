@@ -1,9 +1,7 @@
 set(OST_IMG_BASE_UNIT_TESTS
 test_data.cc
 test_extent.cc
-test_function.cc
 test_image.cc
-test_image_factory.cc
 test_image_state.cc
 test_image_state_visitor.cc
 test_index.cc

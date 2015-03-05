@@ -47,7 +47,7 @@ macro(_find_python PYTHON_ROOT VERSION)
     find_library(PYTHON_LIBRARIES
       NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}"
       HINTS "${PYTHON_ROOT}"
-      PATH_SUFFIXES lib
+      PATH_SUFFIXES lib libs
       NO_SYSTEM_ENVIRONMENT_PATH NO_DEFAULT_PATH
     )
     find_path(PYTHON_INCLUDE_PATH
@@ -72,7 +72,7 @@ macro(_find_python_bin PYTHON_ROOT VERSION)
   string(REPLACE "." "" _VERSION_NO_DOTS "${VERSION}")
   if(PYTHON_ROOT)
     find_program(PYTHON_BINARY
-      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}"
+      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}" python.exe
       HINTS "${PYTHON_ROOT}"
       PATH_SUFFIXES bin
       NO_SYSTEM_ENVIRONMENT_PATH NO_DEFAULT_PATH
@@ -96,7 +96,8 @@ macro(check_for_python_lib)
     _find_python("${PYTHON_ROOT}" "${PYTHON_VERSION}")
   else()
     foreach(_VERSION ${PYTHON_VERSIONS})
-     if(${PYTHON_MIN_VERSION} VERSION_LESS ${_VERSION})
+     if((${PYTHON_MIN_VERSION} VERSION_LESS ${_VERSION}) OR
+        (${PYTHON_MIN_VERSION} VERSION_EQUAL ${_VERSION}))
         _find_python("${PYTHON_ROOT}" "${_VERSION}")
         if(PYTHON_LIBRARIES)
           set(PYTHON_VERSION "${_VERSION}")
@@ -116,7 +117,8 @@ macro(check_for_python_binary)
     _find_python_bin("${PYTHON_ROOT}" "${PYTHON_VERSION}")
   else()
     foreach(_VERSION ${PYTHON_VERSIONS})
-      if(${PYTHON_MIN_VERSION} VERSION_LESS ${_VERSION})
+      if((${PYTHON_MIN_VERSION} VERSION_LESS ${_VERSION}) OR
+         (${PYTHON_MIN_VERSION} VERSION_EQUAL ${_VERSION}))
         _find_python_bin("${PYTHON_ROOT}" "${_VERSION}")
         if(PYTHON_BINARY)
           set(PYTHON_VERSION "${_VERSION}")

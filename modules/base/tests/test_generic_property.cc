@@ -62,6 +62,15 @@ BOOST_AUTO_TEST_CASE( test_generic_property )
   BOOST_CHECK(chv.GetFloatProp("b")==1.5);
   BOOST_CHECK(resv.GetIntProp("c")==123);
   BOOST_CHECK(atomv.GetBoolProp("d")==true);
+
+  atom.SetFloatProp("xx", 1.00);
+  BOOST_CHECK(atom.GetFloatProp("xx")==1.00);
+  atom.SetIntProp("xx", 1);
+  BOOST_CHECK(atom.GetFloatProp("xx")==1.00);
+  BOOST_CHECK(atom.GetIntProp("xx")==1);
+  atom.SetBoolProp("xx", true);
+  BOOST_CHECK(atom.GetFloatProp("xx")==1.00);
+  BOOST_CHECK(atom.GetIntProp("xx")==1);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

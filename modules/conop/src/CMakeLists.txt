@@ -1,37 +1,45 @@
 set(OST_CONOP_HEADERS
-builder.hh
-builder_fw.hh
 conop.hh
-heuristic_builder.hh
+processor.hh
 amino_acids.hh
 diag.hh
 model_check.hh
+heuristic.hh
 compound.hh
 compound_lib.hh
 module_config.hh
+rule_based.hh
 nonstandard.hh
-rule_based_builder.hh
+minimal_compound_lib.hh
+compound_lib_base.hh
 ring_finder.hh
 )
 
 set(OST_CONOP_SOURCES
-builder.cc
+processor.cc
 amino_acids.cc
 conop.cc
+minimal_compound_lib.cc
+compound_lib_base.cc
+heuristic.cc
 diag.cc
+rule_based.cc
 model_check.cc
-heuristic_builder.cc
 compound.cc
 compound_lib.cc
 nonstandard.cc
-rule_based_builder.cc
 ring_finder.cc
 )
 
 module(NAME conop SOURCES ${OST_CONOP_SOURCES}
        HEADERS ${OST_CONOP_HEADERS} DEPENDS_ON ost_mol ost_mol_alg ost_geom ost_db)
 
-executable(NAME chemdict_tool SOURCES chemdict_tool.cc DEPENDS_ON ost_io STATIC)
+
+if (WIN32)
+  executable(NAME chemdict_tool SOURCES chemdict_tool.cc ../../io/src/zlib.cpp ../../io/src/gzip.cpp DEPENDS_ON ost_io STATIC)
+else(WIN32)
+  executable(NAME chemdict_tool SOURCES chemdict_tool.cc DEPENDS_ON ost_io STATIC)
+endif(WIN32)
 
 if (COMPOUND_LIB)
   if (EXISTS "${COMPOUND_LIB}")

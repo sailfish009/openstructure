@@ -34,8 +34,6 @@ public:
   template<typename V, class D>
   void VisitState(const image_state::ImageStateImpl<V,D>& isi);
   
-  void VisitFunction(const Function& f);
-
   static String GetAlgorithmName() {return "Paste";}
 
 private:

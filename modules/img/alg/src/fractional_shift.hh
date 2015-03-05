@@ -29,7 +29,7 @@
 
 namespace ost { namespace img { namespace alg {
 
-class DLLEXPORT_IMG_ALG FractionalShift: public ModIPAlgorithm
+class DLLEXPORT_IMG_ALG FractionalShift: public ConstModIPAlgorithm
 {
 public:
   FractionalShift(Real sx=0.0, Real sy=0.0, Real sz=0.0);
@@ -38,7 +38,7 @@ public:
   void SetShift(Real sx=0.0, Real sy=0.0, Real sz=0.0);
   void SetShift(const Vec3& v);
   Vec3 GetShift() const;
-  virtual void Visit(ImageHandle& ih);
+  virtual void Visit(ImageHandle& ih) const;
 private:
   Vec3 shift_;
   

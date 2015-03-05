@@ -33,14 +33,14 @@ class CustomWidget(RenderModeWidget):
     
     #Defaults
     min_sphere_detail = 1
-    max_sphere_detail = 20
+    max_sphere_detail = 12
     
     min_arc_detail = 1
-    max_arc_detail = 20
+    max_arc_detail = 12
     
     min_rad = 0.05
-    max_bond_rad = 1.0
-    max_sphere_rad = 1.0
+    max_bond_rad = 5.0
+    max_sphere_rad = 5.0
     
     
     

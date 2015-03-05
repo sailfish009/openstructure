@@ -4,17 +4,17 @@ The Scene
 .. currentmodule:: ost.gfx
 
 The scene is the central registry for graphical objects and manages rendering 
-parameters. Among other parameters, it is used to setup the lighting, fog, 
+parameters. Among other parameters, it is used to set up the lighting, fog, 
 background color and the position and viewing direction of the user. The scene
 is a singleton, meaning that there is only one scene available. The instance can
 be accessed via :func:`gfx.Scene`. Because the scene is so important and
 commonly used, the scene is also available as the `scene` variable in the 
-interactive python shell as well as from scripts.
+interactive Python shell as well as from scripts.
 
 Manipulating the Camera
 --------------------------------------------------------------------------------
 
-The users position and orientation in the scene is specified by the camera. The camera is represented by a center, a rotation and an offset from the center. These 3 attributes can be set independently. Manipulation of the camera is done by assigning a new :class:`~ost.mol.Transform` to the :attr:`Scene.transform` attribute. 
+The users' position and orientation in the scene is specified by the camera. The camera is represented by a center, a rotation and an offset from the center. These 3 attributes can be set independently. Manipulation of the camera is done by assigning a new :class:`~ost.mol.Transform` to the :attr:`Scene.transform` attribute. 
 
 .. _camera-orbit:
 
@@ -29,20 +29,20 @@ The following code example will let the camera orbit around the center of the ca
   #  - axis of rotation
   #  - angular step size. Making it bigger speeds up the rotation
   #  - number of frames
-  axis=geom.Vec3(0, 1, 0)
-  step_size=0.01
-  num_frames=100
+  axis = geom.Vec3(0, 1, 0)
+  step_size = 0.01
+  num_frames = 100
   
-  angle=0.0
+  angle = 0.0
   for i in range(num_frames):
-    angle+=step_size
-    if angle>math.pi*2:
-      angle-=math.pi*2
-    camera=scene.transform
-    rot=geom.AxisRotation(axis, angle)
+    angle += step_size
+    if angle > math.pi*2:
+      angle -= math.pi*2
+    camera = scene.transform
+    rot = geom.AxisRotation(axis, angle)
     camera.SetRot(rot)
     camera.SetTrans(geom.Vec3(25.0, 0.0, -50))
-    scene.transform=camera
+    scene.transform = camera
     scene.Export('frame-%03d.png' % i, 500, 500)
 
 It is interesting to note that the offset from center (`trans`) is given in rotated coordinates. Transforming along z shifts the camera along the viewing direction. Setting x and y to non-zero causes the center of the camera not to be projected onto the center of the screen any longer. For example, setting the value `trans` to `geom.Vec3(50, 0, 0)` gives a viewing direction perpendicular to the vector from the camera position to the center.
@@ -157,7 +157,7 @@ It is interesting to note that the offset from center (`trans`) is given in rota
     :param filename: The output filename
     :type  filename: str
     :param width: The width of the image. Defaults to the width of the 
-      OpenGL window
+      OpenGL window.
     :type  width: int
     :param height: The height of the image. Defaults to the height of the OpenGL
         window.
@@ -217,7 +217,7 @@ It is interesting to note that the offset from center (`trans`) is given in rota
   
   .. method:: RemoveAll()
   
-    Remove all objects from the scene
+    Remove all objects from the scene.
     
     
   .. method:: RenderGL()
@@ -241,9 +241,6 @@ It is interesting to note that the offset from center (`trans`) is given in rota
   .. method:: SetBackground(color)
 
     See :attr:`background`
-    
-    :param color:
-    :type  color: :class:`Color`
 
   .. method:: SetBlur(arg2)
 
@@ -254,9 +251,6 @@ It is interesting to note that the offset from center (`trans`) is given in rota
 
     See :attr:`fov`.
     
-    :param angle:
-    :type  angle: float
-
   .. method:: SetFog(arg2)
 
     :param arg2:

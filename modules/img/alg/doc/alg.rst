@@ -14,8 +14,8 @@ methods are used to handle the algorithm parameters. Applying an algorithm to an
 image is then conceptually a two-step process. First, an instance of an 
 algorithm class is created, yielding an algorithm object. In a second step, the 
 algorithm object is applied to an image. An algorithm can be applied in-place 
-(using the :meth:`~ost.img.ImageHandle.Apply` method), modifying the image, or 
-out-of-place, (using :meth:`~ost.img.ImageHandle.ApplyIP` ), leaving the original image 
+(using the :meth:`~ost.img.ImageHandle.ApplyIP` method), modifying the image, or 
+out-of-place, (using :meth:`~ost.img.ImageHandle.Apply` ), leaving the original image 
 untouched, and returning the result as a new image. 
 
 Here is an example. All the algorithms used in the following are described in the :ref:`algorithms` section.

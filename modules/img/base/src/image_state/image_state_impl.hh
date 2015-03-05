@@ -74,19 +74,6 @@ public:
   // also takes absolute center, requires logical extent, not physical one!
   ImageStateImpl(const Extent& e, const PixelSampling& s, const Vec3& c);
 
-  /* 
-     special ctor to utilize pre-allocated memory: the data area allocated
-     by ValueHolder will be transfered to this image state
-  */
-  template <typename U>
-  ImageStateImpl(const Extent& e, ValueHolder<U>& d, const PixelSampling& s):
-    domain_(e),
-    data_(domain_.GetExtent().GetSize(),d),
-    sampling_(s)
-  {
-    assert(d.GetPhysicalSize()*sizeof(U)==data_.GetPhysicalSize()*sizeof(T));
-  }
-
   virtual ~ImageStateImpl();
 
   SharedPtrType CloneState(bool cc=true) const;
@@ -94,7 +81,7 @@ public:
   // image state base interface
   virtual ImageStateBasePtr Clone(bool cc=true) const;
   
-  virtual long MemSize() const;
+  virtual std::size_t MemSize() const;
 
   virtual DataType GetType() const;
 
@@ -155,10 +142,18 @@ public:
     retrieve actual value. No boundary check is performed
     here, this is the responsibility of the caller!
   */
-  T& Value(const Point& p);
+  T& Value(const Point& p)
+  {
+    assert(domain_.GetExtent().Contains(p));
+    return data_.Value(domain_.Point2Index(p));
+  }
 
   // retrieve ro value at specified point
-  const T& Value(const Point& p) const;
+  const T& Value(const Point& p) const
+  {
+    assert(domain_.GetExtent().Contains(p));
+    return data_.Value(domain_.Point2Index(p));
+  }
 
   //! retrieve boundary checked value
   T GetCheckedValue(const Point& p) const;
@@ -181,10 +176,10 @@ public:
   const T& Value(const Index& i) const;
 
   // pass-through to value holder
-  T& Value(unsigned int i);
+  T& Value(std::size_t i);
 
   // pass-through to value holder
-  const T& Value(unsigned int i) const;
+  const T& Value(std::size_t i) const;
 
   //! direct access to value holder
   ValueHolder<T>& Data();
@@ -223,11 +218,6 @@ public:
   virtual ImageStateBase& operator*=(const Complex& v);
   virtual ImageStateBase& operator/=(Real v);
   virtual ImageStateBase& operator/=(const Complex& v);
-
-  virtual void operator+=(const Function& b);
-  virtual void operator-=(const Function& b);
-  virtual void operator*=(const Function& b);
-  virtual void operator/=(const Function& b);
 
 protected:
   // helper methods for operators above
