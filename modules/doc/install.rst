@@ -29,9 +29,9 @@ OpenStructure uses a bunch of OpenSource libraries. If you haven't already insta
 
  * `CMake <http://cmake.org>`_ (2.6.4)
  * `Eigen2 <http://eigen.tuxfamily.org>`_ (2.0.6)
- * `Boost <http://boost.org>`_ (1.37)
+ * `Boost <http://boost.org>`_ (1.47)
  * `libpng <http://www.libpng.org>`_ 
- * `Python <http://python.org>`_ (2.4)
+ * `Python <http://python.org>`_ (2.7)
  * `Qt <http://qt-project.org/>`_ (4.5)
 
 When you enable support for image processing, you will need:
