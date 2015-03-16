@@ -655,6 +655,7 @@ function(copy_python include_path version new_binary_path)
 
   get_filename_component(real_python_include_path ${include_path} REALPATH)
   get_filename_component(python_root_dir ${real_python_include_path}/../.. REALPATH) 
+  file(COPY ${python_root_dir}/Resources/Python.app/Contents/MacOS/Python DESTINATION ${CMAKE_INSTALL_PREFIX})
   file(COPY ${python_root_dir}/${LIB_DIR}/python${version}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version})
   file(GLOB  py_config_files "${include_path}/pyconfig*.h")
   file(COPY ${py_config_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/python${version})
