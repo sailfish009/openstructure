@@ -1,5 +1,6 @@
 set(OST_SEQ_ALG_HEADERS
 sequence_identity.hh
+sequence_similarity.hh
 module_config.hh
 ins_del.hh
 subst_weight_matrix.hh
@@ -19,6 +20,7 @@ global_align.cc
 semiglobal_align.cc
 entropy.cc
 sequence_identity.cc
+sequence_similarity.cc
 ins_del.cc
 conservation.cc
 )
