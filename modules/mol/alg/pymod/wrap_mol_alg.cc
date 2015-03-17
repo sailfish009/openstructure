@@ -124,8 +124,6 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("CreateDistanceList",&mol::alg::CreateDistanceList);
   def("CreateDistanceListFromMultipleReferences",&create_distance_list_from_multiple_references);
 
-  def("DistanceRMSDTest", &mol::alg::DistanceRMSDTest, (arg("sequence_separation")=0,arg("local_lddt_property_string")=""));
-
   def("SuperposeFrames", superpose_frames1, 
       (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
        arg("end")=-1, arg("ref")=-1));
@@ -265,6 +263,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
     .def(map_indexing_suite<mol::alg::GlobalRDMap,true>())
   ;
 
-  def("DRMSD",&mol::alg::DRMSD);
+  def("DRMSD",&mol::alg::DRMSD,(arg("view"),arg("distance_list"),
+                                arg("cap_distance")=5.0,arg("sequence_separation")=0));
 
 }
