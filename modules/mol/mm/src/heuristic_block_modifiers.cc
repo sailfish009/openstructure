@@ -10,125 +10,159 @@ void HeuristicHydrogenConstructor::ApplyOnBuildingBlock(BuildingBlockPtr p){
   //we assume, that the hydrogens are already correct in the building block...
 }
 
-void HeuristicHydrogenConstructor::ApplyOnResidue(ost::mol::ResidueHandle& res, ost::mol::XCSEditor& edi){
-  if(!res.IsValid()) return;
-  std::vector<String> atoms=building_block_->GetAtoms();
-  std::vector<Real> masses=building_block_->GetMasses();
-  std::vector<MMInteractionPtr>  bonds=building_block_->GetBonds();
-  //int natoms=atoms.size();
-  std::vector<Real>::iterator mass;
-  std::vector<String>::iterator aname;
-  //We loop through all atoms and for each one seek which atoms it's bonded to
-  //If there are hydrogens with missing positions, we reconstruct them
-  for( aname=atoms.begin(), mass=masses.begin(); aname!=atoms.end(); aname++ , mass++){
-    AtomHandle a=res.FindAtom(*aname);
-    if(!a.IsValid() || *mass<1.9) continue;// if mass is smaller than 1.9 then it is a hydrogen
-    std::cout<< "checking " << *aname << "\n";
-    //Find all the bonds containing atom a
-    std::vector<MMInteractionPtr> bond_list;
-    std::vector<String> antecedent_names,hydrogen_names;
-    AtomHandleList antecedents;
-    String aname_new;
-    for (std::vector<MMInteractionPtr>::iterator bond=bonds.begin() ; bond!=bonds.end() ; bond++){
-      std::vector<String> names=(*bond)->GetNames();
-      if (*aname!=names[0] && *aname!=names[1]) continue;
-      if (*aname==names[0]) aname_new=names[1];
-      else aname_new=names[0];
-      int aindex=std::distance(atoms.begin(),std::find(atoms.begin(),atoms.end(),aname_new));
-      AtomHandle anew=res.FindAtom(aname_new);
+HeuristicHydrogenConstructor::HeuristicHydrogenConstructor(BuildingBlockPtr block){
+  std::vector<String> atom_names = block->GetAtoms();
+  std::vector<MMInteractionPtr> bonds = block->GetBonds();
+
+  for(std::vector<String>::iterator aname = atom_names.begin(); 
+      aname != atom_names.end(); ++aname){
+    if((*aname)[0] == 'H') continue; //it's a hydrogen
+
+    std::vector<String> antecedent_names, hydrogen_names;
+    String aname_other;
+
+    for (std::vector<MMInteractionPtr>::iterator i = bonds.begin() ; 
+         i != bonds.end(); ++i){
+
+      std::vector<String> bond_names=(*i)->GetNames();
+
+      if (*aname!=bond_names[0] && *aname!=bond_names[1]) continue;//bond has nothing to do
+                                                                   //with current atom
+      if (*aname==bond_names[0]) aname_other=bond_names[1];
+      else aname_other=bond_names[0]; 
+
       //check whether it's a hydrogen
-      if (masses[aindex]>1.9) {
-        if (!anew.IsValid()){
-          std::cout << "invalid heavy atom" << aname_new << "stopping reconstruction" << std::endl;
-          return;
-        }
-        antecedents.push_back(anew);
-        antecedent_names.push_back(aname_new);
+      if (aname_other[0] == 'H') {
+        hydrogen_names.push_back(aname_other);
       }
-      else if (anew.IsValid()){
-        antecedents.push_back(anew);
-        antecedent_names.push_back(aname_new);        
+      else{
+        antecedent_names.push_back(aname_other);
       }
-      else {
-        hydrogen_names.push_back(aname_new);
-        bond_list.push_back(*bond);
-        }
-      }
-    if (hydrogen_names.size()==0){
-      std::cout << "Nothing to reconstruct around " << *aname << std::endl;
-      continue;
     }
-    //Now we treat the different cases
-    std::cout<< "number of antecedents is " << antecedents.size() << " and number of hydrogens "<< hydrogen_names.size() << std::endl;
+    if(!hydrogen_names.empty()){
+      if(antecedent_names.empty()){
+        std::stringstream ss;
+        ss << "Can only reconstruct hydrogens when at least one ";
+        ss << "antecedent atom is present!";
+        throw ost::Error(ss.str());
+      }
+      if(antecedent_names.size() + hydrogen_names.size() > 4){
+        std::stringstream ss;
+        ss << "Antecedent and hydrogen atoms sum up to more than four ";
+        ss << "around anchor atom "<<*aname<<". This is not possible with ";
+        ss << "the used block modifier implementation!";
+        throw ost::Error(ss.str());
+      }
+      anchor_atom_names_.push_back(*aname);
+      antecedent_names_.push_back(antecedent_names);
+      hydrogen_names_.push_back(hydrogen_names);
+    }
+  } 
+}
+
+void HeuristicHydrogenConstructor::ApplyOnResidue(ost::mol::ResidueHandle& res, ost::mol::XCSEditor& edi){
+
+  if(!res.IsValid()) return;
+
+  for(uint i = 0; i < anchor_atom_names_.size(); ++i){
+
+    ost::mol::AtomHandle anchor_atom = res.FindAtom(anchor_atom_names_[i]);
+    if(!anchor_atom.IsValid()){
+      std::stringstream ss;
+      ss << "Anchor atom of name " << anchor_atom_names_[i];
+      ss << " cannot be found in residue "<<res.GetQualifiedName()<<"!";
+      throw ost::Error(ss.str());
+    }
+
+    geom::Vec3List antecedent_positions;
+    for(std::vector<String>::iterator j = antecedent_names_[i].begin();
+        j != antecedent_names_[i].end(); ++j){
+      ost::mol::AtomHandle at = res.FindAtom(*j);
+      if(!at.IsValid()){
+        std::stringstream ss;
+        ss << "Cannot find required antecedent atom of name "<<*j;
+        ss << " in residue "<<res.GetQualifiedName()<<"!";
+        throw ost::Error(ss.str());
+      }
+      antecedent_positions.push_back(at.GetPos());
+    }
+
     Real bond_length=1.08;
     String ele(1,'H');
-    geom::Vec3List vl=geom::Vec3List();
-    for (AtomHandleList::iterator aa=antecedents.begin(),e=antecedents.end();aa!=e;aa++) vl.push_back((*aa).GetPos());
-    geom::Vec3 antecedents_cm=vl.GetCenter();
-    geom::Vec3 pa=a.GetPos();
+    geom::Vec3 antecedents_cm=antecedent_positions.GetCenter();
+    geom::Vec3 pa=anchor_atom.GetPos();
     geom::Vec3 v=geom::Normalize(pa-antecedents_cm);
     geom::Vec3 n=geom::OrthogonalVector(v),direction=geom::Vec3(),hpos=geom::Vec3();
     geom::Mat3 R=geom::Mat3();
     Real bond_angle;
     AtomHandle ha=mol::AtomHandle();
-    if (antecedents.size()==0) continue; // We do not reconstruc water hydrogens
-    switch (hydrogen_names.size()){
+
+    switch (hydrogen_names_[i].size()){
       case 1:{  
-        if (antecedents.size()==1){
+        if (antecedent_names_[i].size()==1){
           bond_angle=0.4*M_PI;
-          }
+        }
         else {
           bond_angle=0.0;
-          }
-        //AtomHandle aa=res.FindAtom(antecedents[0]);
-        R=geom::AxisRotation(n,bond_angle);
-        direction=R*v;
-        hpos=pa+bond_length*direction;
-        ha=edi.InsertAtom(res,hydrogen_names[0],hpos,ele);
-        edi.Connect(a,ha);
-        break;
         }
-      case 2:{
-        if (antecedents.size()==1){
-          bond_angle=M_PI/3.;
-          }
-        else {
-          bond_angle=0.4*M_PI;
-          n=geom::Normalize(antecedents[0].GetPos()-antecedents[1].GetPos());
-          }
         R=geom::AxisRotation(n,bond_angle);
         direction=R*v;
         hpos=pa+bond_length*direction;
-        ha=edi.InsertAtom(res,hydrogen_names[0],hpos,ele);
-        edi.Connect(a,ha);
+        ha = res.FindAtom(hydrogen_names_[i][0]);
+        if(!ha.IsValid()) ha=edi.InsertAtom(res,hydrogen_names_[i][0],hpos,ele);
+        else edi.SetAtomPos(ha,hpos);
+        break;
+      }
+      case 2:{
+        if (antecedent_names_[i].size()==1){
+          bond_angle=M_PI/3.;
+        }
+        else {
+          bond_angle = 0.4*M_PI;
+          n=geom::Normalize(antecedent_positions[0]-antecedent_positions[1]);
+        }
+
+        R=geom::AxisRotation(n,bond_angle);
+        direction=R*v;
+        hpos=pa+bond_length*direction;
+        ha = res.FindAtom(hydrogen_names_[i][0]);
+        if(!ha.IsValid()) ha=edi.InsertAtom(res,hydrogen_names_[i][0],hpos,ele);
+        else edi.SetAtomPos(ha,hpos);
+
         R=geom::AxisRotation(v,M_PI);
         direction=R*direction;
         hpos=pa+bond_length*direction;
-        ha=edi.InsertAtom(res,hydrogen_names[1],hpos,ele);
-        edi.Connect(a,ha);
+        ha = res.FindAtom(hydrogen_names_[i][1]);
+        if(!ha.IsValid()) ha=edi.InsertAtom(res,hydrogen_names_[i][1],hpos,ele);
+        else edi.SetAtomPos(ha,hpos);
+
         break;
-        }
+      }
       case 3:{
         bond_angle=0.4*M_PI;
+
         R=geom::AxisRotation(n,bond_angle);
         direction=R*v;
         hpos=pa+bond_length*direction;
-        edi.InsertAtom(res,hydrogen_names[0],hpos,ele);
+        ha = res.FindAtom(hydrogen_names_[i][0]);
+        if(!ha.IsValid()) ha=edi.InsertAtom(res,hydrogen_names_[i][0],hpos,ele);
+        else edi.SetAtomPos(ha,hpos);
+
         R=geom::AxisRotation(v,2.*M_PI/3.);
         direction=R*direction;
         hpos=pa+bond_length*direction;
-        ha=edi.InsertAtom(res,hydrogen_names[1],hpos,ele);
-        edi.Connect(a,ha);
+        ha = res.FindAtom(hydrogen_names_[i][1]);
+        if(!ha.IsValid()) ha=edi.InsertAtom(res,hydrogen_names_[i][1],hpos,ele);
+        else edi.SetAtomPos(ha,hpos);
+
         direction=R*direction;
         hpos=pa+bond_length*direction;
-        ha=edi.InsertAtom(res,hydrogen_names[2],hpos,ele);
-        edi.Connect(a,ha);
+        ha = res.FindAtom(hydrogen_names_[i][2]);
+        if(!ha.IsValid()) ha=edi.InsertAtom(res,hydrogen_names_[i][2],hpos,ele);
+        else edi.SetAtomPos(ha,hpos);
         break;
-        }
-      default :{
-        std::cout << "number of hydrogens is " << hydrogen_names.size() << " for "<< *aname <<" not reconstructing them." <<std::endl;
-        }
       }
+    }
   }
 }
 
