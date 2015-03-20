@@ -442,6 +442,11 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     }
   }
 
+  std::set<String> water_res_names;
+  water_res_names.insert("SOL");
+  water_res_names.insert("HOH");
+  water_res_names.insert("TIP3");
+
   //add distance constrains given the corresponding settings
   if(settings->constrain_bonds || settings->constrain_hbonds || settings->rigid_water){
     for(std::set<Index<2> >::iterator i = bonds.begin();
@@ -475,7 +480,8 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
         }
       }
       if(settings->rigid_water){
-        if(residue_names_of_atoms[(*i)[0]] == "SOL" && residue_names_of_atoms[(*i)[1]] == "SOL"){
+        if(water_res_names.find(residue_names_of_atoms[(*i)[0]]) != water_res_names.end() && 
+           water_res_names.find(residue_names_of_atoms[(*i)[1]]) != water_res_names.end()){
           if(distance_constraints.find(*i) != distance_constraints.end()) continue;
           distance_constraints.insert(*i);
           Real distance;
@@ -493,8 +499,9 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
   if(settings->rigid_water){
     for(std::set<Index<3> >::iterator i = angles.begin();
         i != angles.end(); ++i){
-      if(residue_names_of_atoms[(*i)[0]] == "SOL" && residue_names_of_atoms[(*i)[0]] == "SOL" &&
-         residue_names_of_atoms[(*i)[2]] == "SOL"){
+      if(water_res_names.find(residue_names_of_atoms[(*i)[0]]) != water_res_names.end() && 
+         water_res_names.find(residue_names_of_atoms[(*i)[1]]) != water_res_names.end() &&
+         water_res_names.find(residue_names_of_atoms[(*i)[2]]) != water_res_names.end()){
         //we only have to add the H-H distance constant, the O-H distance is already
         //constrained above
         Real distance;
