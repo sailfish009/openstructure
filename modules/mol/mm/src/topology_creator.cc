@@ -194,9 +194,6 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
 
   TopologyPtr top = TopologyPtr(new Topology(initial_masses));
 
-  //note, that we have to get the residue list again, since there is a new entity handle
-  //created when initializing the topology
-  res_list = ent.GetResidueList();
   ost::mol::AtomHandleList atom_list = ent.GetAtomList();
 
   std::map<long,int> atom_indices;
