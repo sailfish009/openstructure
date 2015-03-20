@@ -130,18 +130,23 @@ void TrajWriter::Notify(){
 
   // ucell
   int32_t bsize=48; // ucell block size, 6 doubles
-  //context_->getSystem().getDefaultPeriodicBoxVectors(ucell_a,ucell_b,ucell_c);
 
-  // a,alpha,b,beta,gamma,c (don't ask)
-  // OpenMM only supports rectangular boxes, since we have to add
-  // the cosines of the angles, we can directly set the values to 0.0
+  double a_length = 10 * sqrt(ucell_a.dot(ucell_a)); //directly transform
+  double b_length = 10 * sqrt(ucell_b.dot(ucell_b)); //stuff to Angstrom
+  double c_length = 10 * sqrt(ucell_c.dot(ucell_c));
 
-  double ucell[]={10 * sqrt(ucell_a.dot(ucell_a)),
-                  0.0,
-                  10 * sqrt(ucell_b.dot(ucell_b)),
-                  0.0,
-                  0.0,
-                  10 * sqrt(ucell_c.dot(ucell_c))};
+  //note, that following angles have a compatibility issue
+  //CHARMM seems to write out the cosines of the actual 
+  //unit cell angles, while NAMD seems to write the angles itself...
+  //we stick with the CHARMM way of doing things
+
+  double alpha = ucell_b.dot(ucell_c)/(b_length*c_length);
+  double beta = ucell_c.dot(ucell_a)/(c_length*a_length);
+  double gamma = ucell_a.dot(ucell_b)/(a_length*b_length);
+
+  double ucell[]={a_length, alpha, b_length,
+                  beta, gamma, c_length};
+
   stream_.write(reinterpret_cast<char*>(&bsize),4);
   stream_.write(reinterpret_cast<char*>(ucell),bsize);
   stream_.write(reinterpret_cast<char*>(&bsize),4);
