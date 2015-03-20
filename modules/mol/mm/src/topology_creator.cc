@@ -224,7 +224,6 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
   std::vector<Real> atom_charges;
   std::vector<String> atom_names;
   std::vector<Real> atom_masses;
-  std::vector<String> atom_elements;
   std::vector<String> residue_names_of_atoms;
   ost::mol::AtomHandleList bonded_atoms;
   std::vector<uint> temp;
@@ -236,7 +235,6 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
       i!=atom_list.end();++i){
     residue_index = residue_indices[i->GetResidue().GetHashCode()];
     residue_names_of_atoms.push_back(i->GetResidue().GetName());
-    atom_elements.push_back(i->GetElement());
     atom_types.push_back(building_blocks[residue_index]->GetType(i->GetName()));
     atom_charges.push_back(building_blocks[residue_index]->GetCharge(i->GetName()));
     atom_masses.push_back(ff->GetMass(atom_types.back()));
@@ -462,8 +460,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
         continue;
       }
       if(settings->constrain_hbonds){
-        //if(atom_elements[(*i)[0]] == "H" || atom_elements[(*i)[1]] == "H"){
-        if(atom_masses[(*i)[0]] < 1.1 || atom_masses[(*i)[1]] < 1.1){
+        if(atom_names[(*i)[0]][0] == 'H' || atom_names[(*i)[1]][0] == 'H'){
           if(distance_constraints.find(*i) != distance_constraints.end()) continue;
           distance_constraints.insert(*i);
           Real distance;
