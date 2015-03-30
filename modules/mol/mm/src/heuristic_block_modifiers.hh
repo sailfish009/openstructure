@@ -60,13 +60,13 @@ public:
         anchor_atom_names_.push_back(loaded_string);
 
         antecedent_names_.push_back(std::vector<String>());
-        for(uint j = 0; j < num_antecendents; ++j){
+        for(int j = 0; j < num_antecendents; ++j){
           ds & loaded_string;
           antecedent_names_[i].push_back(loaded_string);
         }
 
         hydrogen_names_.push_back(std::vector<String>());
-        for(uint j = 0; j < num_hydrogens; ++j){
+        for(int j = 0; j < num_hydrogens; ++j){
           ds & loaded_string;
           hydrogen_names_[i].push_back(loaded_string);
         }
@@ -79,7 +79,7 @@ public:
 
       ds & num_anchor_atoms;
 
-      for(uint i = 0; i < num_anchor_atoms; ++i){
+      for(int i = 0; i < num_anchor_atoms; ++i){
 
         num_antecendents = antecedent_names_[i].size();
         num_hydrogens = hydrogen_names_[i].size();
