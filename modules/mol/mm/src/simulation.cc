@@ -378,7 +378,7 @@ void Simulation::UpdatePositions(bool enforce_periodic_box){
     throw ost::Error("Num particles in topology and num atoms in entity are not consistent!");
   }
   geom::Vec3List positions = this->GetPositions(enforce_periodic_box, true);
-  ost::mol::XCSEditor ed = ent_.EditXCS();
+  ost::mol::XCSEditor ed = ent_.EditXCS(ost::mol::BUFFERED_EDIT);
   ost::mol::AtomHandleList atom_list = ent_.GetAtomList();
   ost::mol::AtomHandleList::iterator a = atom_list.begin();
   ost::mol::AtomHandleList::iterator ae = atom_list.end();
