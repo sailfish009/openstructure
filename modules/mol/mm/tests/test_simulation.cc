@@ -11,6 +11,7 @@
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/mol/mm/simulation.hh>
 #include <ost/mol/mm/topology.hh>
+#include <OpenMM.h>
 
 
 using namespace ost::mol::mm;
@@ -136,79 +137,7 @@ BOOST_AUTO_TEST_CASE(test_simulation_energy_calculations){
 
   Simulation sim(top, test_ent,settings);
 
-  sim.MinimizeEnergy("steep",1.0,200);
-  sim.UpdatePositions();
-
-  ost::mol::EntityHandle minimized_ent = sim.GetEntity();
-
-  MMSettingsPtr harmonic_bond_settings(new MMSettings);
-  harmonic_bond_settings->add_angles = false;
-  harmonic_bond_settings->add_dihedrals = false;
-  harmonic_bond_settings->add_impropers = false;
-  harmonic_bond_settings->add_nonbonded = false;
-  harmonic_bond_settings->add_cmaps = false;
-  harmonic_bond_settings->integrator = IntegratorPtr(new OpenMM::VerletIntegrator(0.002));
-  harmonic_bond_settings->forcefield = forcefield;
-
-  MMSettingsPtr urey_bradley_angle_settings(new MMSettings);
-  urey_bradley_angle_settings->add_bonds = false;
-  urey_bradley_angle_settings->add_dihedrals = false;
-  urey_bradley_angle_settings->add_impropers = false;
-  urey_bradley_angle_settings->add_nonbonded = false;
-  urey_bradley_angle_settings->add_cmaps = false;
-  urey_bradley_angle_settings->integrator = IntegratorPtr(new OpenMM::VerletIntegrator(0.002));
-  urey_bradley_angle_settings->forcefield = forcefield;
-
-  MMSettingsPtr periodic_dihedral_settings(new MMSettings);
-  periodic_dihedral_settings->add_bonds = false;
-  periodic_dihedral_settings->add_angles = false;
-  periodic_dihedral_settings->add_impropers = false;
-  periodic_dihedral_settings->add_nonbonded = false;
-  periodic_dihedral_settings->add_cmaps = false;
-  periodic_dihedral_settings->integrator = IntegratorPtr(new OpenMM::VerletIntegrator(0.002));
-  periodic_dihedral_settings->forcefield = forcefield;
-
-  MMSettingsPtr harmonic_improper_settings(new MMSettings);
-  harmonic_improper_settings->add_bonds = false;
-  harmonic_improper_settings->add_angles = false;
-  harmonic_improper_settings->add_dihedrals = false;
-  harmonic_improper_settings->add_nonbonded = false;
-  harmonic_improper_settings->add_cmaps = false;
-  harmonic_improper_settings->integrator = IntegratorPtr(new OpenMM::VerletIntegrator(0.002));
-  harmonic_improper_settings->forcefield = forcefield;
-
-  MMSettingsPtr cmap_settings(new MMSettings);
-  cmap_settings->add_bonds = false;
-  cmap_settings->add_angles = false;
-  cmap_settings->add_dihedrals = false;
-  cmap_settings->add_nonbonded = false;
-  cmap_settings->add_impropers = false;
-  cmap_settings->integrator = IntegratorPtr(new OpenMM::VerletIntegrator(0.002));
-  cmap_settings->forcefield = forcefield;
-
-  MMSettingsPtr nonbonded_settings(new MMSettings);
-  nonbonded_settings->add_bonds = false;
-  nonbonded_settings->add_angles = false;
-  nonbonded_settings->add_dihedrals = false;
-  nonbonded_settings->add_cmaps = false;
-  nonbonded_settings->add_impropers = false;
-  nonbonded_settings->integrator = IntegratorPtr(new OpenMM::VerletIntegrator(0.002));
-  nonbonded_settings->forcefield = forcefield;
-
-  Simulation sim_harmonic_bond(minimized_ent,harmonic_bond_settings);
-  Simulation sim_urey_bradley_angle(minimized_ent,urey_bradley_angle_settings);
-  Simulation sim_periodic_dihedral(minimized_ent,periodic_dihedral_settings);
-  Simulation sim_harmonic_improper(minimized_ent,harmonic_improper_settings);
-  Simulation sim_cmap(minimized_ent,cmap_settings);
-  Simulation sim_nonbonded(minimized_ent, nonbonded_settings);
-
-  Real e_harmonic_bond = sim_harmonic_bond.GetPotentialEnergy();
-  Real e_urey_bradley_angle = sim_urey_bradley_angle.GetPotentialEnergy();
-  Real e_periodic_dihedral = sim_periodic_dihedral.GetPotentialEnergy();
-  Real e_harmonic_improper = sim_harmonic_improper.GetPotentialEnergy();
-  Real e_cmap = sim_cmap.GetPotentialEnergy();
-  Real e_nonbonded = sim_nonbonded.GetPotentialEnergy();
-
+  sim.ApplySD(1.0, 200);
 
   //the energy values have been compared with the results from the
   //CHARMM27 forcefield in gromacs
@@ -229,12 +158,7 @@ BOOST_AUTO_TEST_CASE(test_simulation_energy_calculations){
   //Gromacs writes down the positions using nm instead of A, but
   //also has a precision of 3 digits.
 
-  BOOST_CHECK_CLOSE(e_harmonic_bond, 150.238, Real(1e-3));
-  BOOST_CHECK_CLOSE(e_urey_bradley_angle, 499.690, Real(1e-3));
-  BOOST_CHECK_CLOSE(e_periodic_dihedral, 879.744, Real(1e-3));
-  BOOST_CHECK_CLOSE(e_harmonic_improper, 15.7698, Real(1e-3));
-  BOOST_CHECK_CLOSE(e_cmap, -303.904, Real(1e-3));
-  BOOST_CHECK_CLOSE(e_nonbonded, -3626.539, Real(1e-3));
+  BOOST_CHECK_CLOSE(sim.GetPotentialEnergy(), -2381.24, Real(1e-3));
 }
 
 
