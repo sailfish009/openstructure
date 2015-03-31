@@ -35,9 +35,9 @@ using namespace ost::mol::alg;
 void export_svdSuperPose()
 {
   SuperpositionResult (*sup1)(const mol::EntityView&,const mol::EntityView&,bool) = SuperposeSVD;
-  SuperpositionResult (*sup2)(const std::vector<geom::Vec3>&,const std::vector<geom::Vec3>& ) = SuperposeSVD;
+  SuperpositionResult (*sup2)(const geom::Vec3List&,const geom::Vec3List& ) = SuperposeSVD;
   SuperpositionResult (*sup3)(const mol::EntityView&,const mol::EntityView&, int, Real, bool) = IterativeSuperposeSVD;
-  SuperpositionResult (*sup4)(const std::vector<geom::Vec3>&,const std::vector<geom::Vec3>&, int, Real) = IterativeSuperposeSVD;
+  SuperpositionResult (*sup4)(const geom::Vec3List&,const geom::Vec3List&, int, Real) = IterativeSuperposeSVD;
   class_<SuperpositionResult>("SuperpositionResult", init<>())
     .def_readwrite("ncycles", &SuperpositionResult::ncycles)
     .def_readwrite("rmsd", &SuperpositionResult::rmsd)

@@ -469,8 +469,8 @@ SuperpositionResult SuperposeSVD(const mol::EntityView& ev1,
   return result;
 }
 
-SuperpositionResult SuperposeSVD(const std::vector<geom::Vec3>& pl1,
-                                 const std::vector<geom::Vec3>& pl2)
+SuperpositionResult SuperposeSVD(const geom::Vec3List& pl1,
+                                 const geom::Vec3List& pl2)
 {
   MeanSquareMinimizer msm = MeanSquareMinimizer::FromPointLists(pl1, pl2);
   SuperpositionResult result = msm.MinimizeOnce();
@@ -505,8 +505,8 @@ SuperpositionResult IterativeSuperposeSVD(const mol::EntityView& ev,
   return result;
 }
 
-SuperpositionResult IterativeSuperposeSVD(const std::vector<geom::Vec3>& pl1,
-                                          const std::vector<geom::Vec3>& pl2,
+SuperpositionResult IterativeSuperposeSVD(const geom::Vec3List& pl1,
+                                          const geom::Vec3List& pl2,
                                           int max_cycles,
                                           Real distance_threshold){
 

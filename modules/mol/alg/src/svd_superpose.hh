@@ -92,8 +92,8 @@ SuperpositionResult DLLEXPORT_OST_MOL_ALG SuperposeSVD(const mol::EntityView& ev
                                                     bool apply_transform);
 
 /// \brief superposes two pointlists
-SuperpositionResult DLLEXPORT_OST_MOL_ALG SuperposeSVD(const std::vector<geom::Vec3>& pl1,
-                                                       const std::vector<geom::Vec3>& pl2);
+SuperpositionResult DLLEXPORT_OST_MOL_ALG SuperposeSVD(const geom::Vec3List& pl1,
+                                                       const geom::Vec3List& pl2);
 
 /// \brief iterative superposition
 SuperpositionResult DLLEXPORT_OST_MOL_ALG IterativeSuperposeSVD(const mol::EntityView& ev1,
@@ -103,8 +103,8 @@ SuperpositionResult DLLEXPORT_OST_MOL_ALG IterativeSuperposeSVD(const mol::Entit
                                                                 bool apply_transform);
 
 /// \brief iterative superposition of two point lists
-SuperpositionResult DLLEXPORT_OST_MOL_ALG IterativeSuperposeSVD(const std::vector<geom::Vec3>& pl1,
-                                                                const std::vector<geom::Vec3>& pl2,
+SuperpositionResult DLLEXPORT_OST_MOL_ALG IterativeSuperposeSVD(const geom::Vec3List& pl1,
+                                                                const geom::Vec3List& pl2,
                                                                 int max_cycles,
                                                                 Real distance_threshold);
 
