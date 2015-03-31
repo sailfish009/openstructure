@@ -64,7 +64,9 @@ public:
 
   void UpdatePositions(bool enforce_periodic_box = false);
 
-  void MinimizeEnergy(const String& type = "steep", Real tolerance = 1.0, int max_iterations = 1000);
+  bool ApplySD(Real tolerance = 100, int max_iterations = 1000);
+
+  void ApplyLBFGS(Real tolerance = 1, int max_iterations = 1000);
 
   Real GetEnergy();
 

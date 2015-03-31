@@ -39,7 +39,7 @@ settings.platform = mm.Platform.CPU
 settings.nonbonded_method = mm.NonbondedMethod.CutoffNonPeriodic
 
 sim = mm.Simulation(prot,settings)
-sim.MinimizeEnergy(type = "lbfgs",tolerance = 1.0, max_iterations = 200)
+sim.ApplyLBFGS(tolerance = 1.0, max_iterations = 200)
 sim.UpdatePositions()
 
 ent = sim.GetEntity()

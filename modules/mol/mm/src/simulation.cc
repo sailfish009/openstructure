@@ -388,14 +388,12 @@ void Simulation::UpdatePositions(bool enforce_periodic_box){
   }
 }
 
-void Simulation::MinimizeEnergy(const String& type, Real tolerance, int max_iterations){
-  if(type == "lbfgs") OpenMM::LocalEnergyMinimizer::minimize(*context_, tolerance, max_iterations);
-  else if(type == "steep") Steep::Minimize(*context_,tolerance, max_iterations);
-  else{
-    std::stringstream ss;
-    ss << "Unknown minimization function type \""<< type <<"\" observed";
-    throw ost::Error(ss.str());
-  }
+bool Simulation::ApplySD(Real tolerance, int max_iterations){
+  return Steep::Minimize(*context_,tolerance, max_iterations);
+}
+
+void Simulation::ApplyLBFGS(Real tolerance, int max_iterations){
+  OpenMM::LocalEnergyMinimizer::minimize(*context_, tolerance, max_iterations);
 }
 
 void Simulation::Steps(int steps){

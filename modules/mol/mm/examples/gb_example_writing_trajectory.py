@@ -14,7 +14,7 @@ settings.platform = Platform.CPU
 sim = Simulation(prot,settings)
 
 #minimize it
-sim.MinimizeEnergy(type = "steep",tolerance = 1.0, max_iterations = 200)
+sim.ApplySD(tolerance = 1.0, max_iterations = 200)
 
 #create a trajectory observer and register it to the simulation
 observer = TrajWriter(10,"gb_example_traj.pdb","gb_example_traj.dcd")
