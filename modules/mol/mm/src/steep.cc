@@ -3,14 +3,17 @@
 
 namespace ost{ namespace mol{ namespace mm{
 
-void Steep::Minimize(OpenMM::Context& context, double tolerance, uint max_iterations) {
+bool Steep::Minimize(OpenMM::Context& context, double tolerance, uint max_iterations) {
   const OpenMM::System& system = context.getSystem();
   if(system.getNumConstraints() > 0){
     throw ost::Error("Cannot handle constraints in steepest descent, use lbgfs instead!");
   }
-  if( tolerance < 0.0 ){
+  if( tolerance <= 0.0 ){
     throw ost::Error("tolerance value must be greater 0.0!"); //also important to avoid zero division error when calculating normalization factor for forces
   }
+
+  bool converged = false;
+
   OpenMM::State state = context.getState(OpenMM::State::Energy | OpenMM::State::Forces | OpenMM::State::Positions);
   std::vector<OpenMM::Vec3> positions = state.getPositions();
   std::vector<OpenMM::Vec3> new_positions = positions;
@@ -35,7 +38,10 @@ void Steep::Minimize(OpenMM::Context& context, double tolerance, uint max_iterat
         max_length = std::max(max_length,forces[*j].dot(forces[*j]));
       }
       max_length = sqrt(max_length);
-      if(max_length <= tolerance) break;
+      if(max_length <= tolerance){
+        converged = true;
+        break;
+      }
       factor = 1.0/max_length;
       for(std::vector<uint>::iterator j = non_zero_mass_particles.begin(); 
           j != non_zero_mass_particles.end(); ++j){
@@ -62,5 +68,6 @@ void Steep::Minimize(OpenMM::Context& context, double tolerance, uint max_iterat
     }  
   }
   context.setPositions(positions);
+  return converged;
 }
 }}}//ns

@@ -22,7 +22,7 @@ namespace ost { namespace mol { namespace mm{
 
 class Steep {
 public:
-  static void Minimize(OpenMM::Context& context, double tolerance = 100, uint maxIterations = 1000);
+  static bool Minimize(OpenMM::Context& context, double tolerance = 100, uint maxIterations = 1000);
 };
 
 }}}
