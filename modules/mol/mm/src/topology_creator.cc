@@ -244,7 +244,6 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     bound_to.push_back(temp);
   }
 
-
   //let's set the proper masses
   top->SetMasses(atom_masses);
 
@@ -943,6 +942,16 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
 
   top->SetFudgeQQ(ff->GetFudgeQQ());
   top->SetFudgeLJ(ff->GetFudgeLJ());
+
+  if(!settings->keep_ff_specific_naming){
+    //let's rename to the pdb standard!
+    //first, we rename to the gromacs standars...
+    ff->AssignFFSpecificNames(ent,true);
+    //still call the assign gromacs names function...
+    MMModeller::AssignGromacsNaming(ent);
+    //let's finally do the renaming to PDB standard
+    MMModeller::AssignPDBNaming(ent);
+  }
 
 
   return top;

@@ -104,6 +104,7 @@ struct MMSettings{
                 solute_dielectric(1.0), //this is for GBSA
                 reaction_field_dielectric(78.3),
                 use_dispersion_correction(true),
+                keep_ff_specific_naming(true),
                 openmm_plugin_directory("/usr/local/openmm/lib/plugins"),
                 custom_plugin_directory("/usr/local/openmm/lib/plugins")
 
@@ -153,6 +154,7 @@ struct MMSettings{
   Real solute_dielectric;
   Real reaction_field_dielectric;
   bool use_dispersion_correction;
+  bool keep_ff_specific_naming;
   String openmm_plugin_directory;
   String custom_plugin_directory;
 };

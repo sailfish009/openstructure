@@ -87,6 +87,7 @@ void export_MMSettings()
     .def_readwrite("solute_dielectric",&ost::mol::mm::MMSettings::solute_dielectric)
     .def_readwrite("reaction_field_dielectric",&ost::mol::mm::MMSettings::reaction_field_dielectric)
     .def_readwrite("use_dispersion_correction",&ost::mol::mm::MMSettings::use_dispersion_correction)
+    .def_readwrite("keep_ff_specific_naming",&ost::mol::mm::MMSettings::keep_ff_specific_naming)
     .def_readwrite("openmm_plugin_directory",&ost::mol::mm::MMSettings::openmm_plugin_directory)
     .def_readwrite("custom_plugin_directory",&ost::mol::mm::MMSettings::custom_plugin_directory)
 
