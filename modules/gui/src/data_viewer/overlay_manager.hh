@@ -110,6 +110,8 @@ public:
 
   void DeleteAllOverlays();
 
+  void DeleteActiveOverlay();
+
   void OnDraw(QPainter& pnt,  DataViewerPanel* dvp) const;
 
   bool OnMouseEvent(QMouseEvent* e,  DataViewerPanel* dvp, const QPoint& lastmouse) const;
@@ -138,6 +140,7 @@ private:
 
   OverlayList::iterator find_ov(int id);
   OverlayList::iterator find_ov(const String& name);
+  OverlayList::iterator find_ov(OverlayPtr anoverlay);
 };
 
 

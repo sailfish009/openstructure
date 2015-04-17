@@ -54,8 +54,11 @@ DataViewerProxyPtr app_create_data_viewer2(GostyApp* app, const ost::img::ImageH
 {
   return DataViewerProxyPtr(new DataViewerProxy(app->CreateDataViewer(d)));
 }
+DataViewerProxyPtr app_create_data_viewer3(GostyApp* app, const ost::img::ImageHandle& d, const QString& name, int noparent)
+{
+  return DataViewerProxyPtr(new DataViewerProxy(app->CreateDataViewer(d,name,noparent)));
+}
 #endif
-
 }
 
 void app_add_widget_to_app_a(GostyApp* app, const QString& ident,
@@ -115,6 +118,7 @@ void export_Gosty()
      #if OST_IMG_ENABLED
     .def("CreateDataViewer", &app_create_data_viewer1)
     .def("CreateDataViewer", &app_create_data_viewer2)
+    .def("CreateDataViewer", &app_create_data_viewer3)
     #endif
     .def("ProcessEvents", &GostyApp::ProcessEvents)           
     .add_property("perspective", 

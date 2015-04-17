@@ -120,6 +120,8 @@ public:
   void OnEventMenuPopup(QAction* e);
   void OnEventMenu(QAction* e);
 
+  QButtonGroup* GetButtonGroup(void);
+
 public slots:
   void SetInfoText(const QString& t);
 
