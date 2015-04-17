@@ -54,7 +54,7 @@ if (ENABLE_IMG)
     entity_to_density.cc
   )
 
-  set(MOL_ALG_DEPS ${MOL_ALG_DEPS} ost_img ost_img_alg)
+  set(MOL_ALG_DEPS ${MOL_ALG_DEPS} ost_img ost_img_alg ost_seq_alg)
 endif()
 
 executable(NAME lddt SOURCES lddt.cc 
