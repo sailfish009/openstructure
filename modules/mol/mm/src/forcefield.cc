@@ -657,10 +657,7 @@ MMInteractionPtr Forcefield::GetLJ(const String& type1,
   temp1 = this->GetLJ(type1);
   temp2 = this->GetLJ(type2);
   if(temp1 && temp2){
-    MMInteraction* interaction_ptr;
-    if(pair) interaction_ptr = new MMInteraction(LJPair);
-    else interaction_ptr = new MMInteraction(LJ);
-    MMInteractionPtr return_ptr(interaction_ptr);
+    MMInteractionPtr return_ptr(new MMInteraction(LJPair));
     std::vector<Real> param1, param2, param;
     param1 = temp1->GetParam();
     param2 = temp2->GetParam();
