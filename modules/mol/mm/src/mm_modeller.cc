@@ -13,10 +13,12 @@ void MMModeller::GenerateDisulfidBonds(ost::mol::EntityHandle& handle){
     if(i->GetName() == "CYS" || i->GetName() == "CYX" || i->GetName() == "CYS2" || i->GetName() == "CYM"){
       ost::mol::AtomHandle s = i->FindAtom("SG");
       if(s.IsValid()){
+        if(s.GetBondCount() >= 2) continue;
         ost::mol::AtomHandleList in_reach = handle.FindWithin(s.GetPos(),2.5);
         for(ost::mol::AtomHandleList::iterator j = in_reach.begin();
             j != in_reach.end(); ++j){
           if(j->GetName() == "SG" && j->GetResidue() != *i){
+            if(j->GetBondCount() >= 2) continue;
             if(!ost::mol::BondExists(s,*j)){
               ed.Connect(s,*j);
             }
