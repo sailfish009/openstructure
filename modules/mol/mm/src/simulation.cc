@@ -253,10 +253,13 @@ void Simulation::Init(const TopologyPtr top,
 
 
   top_ = top;
-  integrator_ = settings->integrator;
-  if(!integrator_){
-    throw ost::Error("Settings must have a valid integrator attached to set up a simulation!");
+
+  if(!settings->integrator){
+    //user did not specify an integrator, so let's just use a standard integrator
+    settings->integrator = IntegratorPtr(new OpenMM::VerletIntegrator(0.001));
   }
+  integrator_ = settings->integrator;
+
   system_ = SystemCreator::Create(top_,settings,system_force_mapper_); 
 
   //setting up the context, which combines the system with an integrator

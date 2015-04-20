@@ -42,9 +42,6 @@ BOOST_AUTO_TEST_CASE(test_simulation_basics){
   top->AddHarmonicPositionRestraint(1,geom::Vec3(0.0,0.0,0.0),10.0);
   top->AddHarmonicDistanceRestraint(1,2,10.0,10.0);
 
-  //try to set up simulation without an integrator
-  BOOST_CHECK_THROW(Simulation sim(test_ent,settings),ost::Error);
-
   settings->integrator = IntegratorPtr(new OpenMM::VerletIntegrator(0.002));
 
   Simulation sim(top, test_ent, settings);
