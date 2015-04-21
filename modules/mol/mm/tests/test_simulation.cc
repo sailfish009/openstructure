@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
-#include <ost/mol/mm/mm_settings.hh>
+#include <ost/mol/mm/settings.hh>
 #include <ost/mol/mm/forcefield.hh>
-#include <ost/mol/mm/mm_interaction.hh>
+#include <ost/mol/mm/interaction.hh>
 #include <ost/mol/mm/buildingblock.hh>
 #include <ost/mol/mm/gromacs_block_modifiers.hh>
 #include <ost/message.hh>
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(test_simulation_basics){
   ost::conop::ProcessorPtr processor(new ost::conop::HeuristicProcessor);
   processor->Process(test_ent);
 
-  MMSettingsPtr settings(new MMSettings);
+  SettingsPtr settings(new Settings);
   ForcefieldPtr forcefield = Forcefield::Load("CHARMM27.dat");
   settings->forcefield = forcefield;
   settings->add_gbsa = true;
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(test_simulation_energy_calculations){
   ost::conop::ProcessorPtr processor(new ost::conop::HeuristicProcessor);
   processor->Process(test_ent);
 
-  MMSettingsPtr settings(new MMSettings);
+  SettingsPtr settings(new Settings);
   ForcefieldPtr forcefield = Forcefield::Load("CHARMM27.dat");
   settings->forcefield = forcefield;
 

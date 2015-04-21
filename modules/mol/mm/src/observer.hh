@@ -21,15 +21,15 @@ namespace OpenMM{
 
 namespace ost { namespace mol{ namespace mm{
 
-class MMObserver;
+class Observer;
 class TrajObserver;
 class TrajWriter;
-typedef boost::shared_ptr<MMObserver> MMObserverPtr;
+typedef boost::shared_ptr<Observer> ObserverPtr;
 typedef boost::shared_ptr<TrajObserver> TrajObserverPtr;
 typedef boost::shared_ptr<TrajWriter> TrajWriterPtr;
 
 
-class MMObserver{
+class Observer{
 public:
 
   virtual void Notify() = 0;
@@ -43,7 +43,7 @@ public:
 };
 
 
-class TrajObserver : public MMObserver{
+class TrajObserver : public Observer{
 
 public:  
 
@@ -67,7 +67,7 @@ private:
   bool registered_;
 };
 
-class TrajWriter : public MMObserver{
+class TrajWriter : public Observer{
 
 //Note, that this code is highly redundant to the code in io/mol/dcd_io.hh!!!
 

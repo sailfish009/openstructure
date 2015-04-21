@@ -17,13 +17,13 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
-#include <ost/mol/mm/mm_settings.hh>
+#include <ost/mol/mm/settings.hh>
 #include <OpenMM.h> //for definition of Integrator
 
 using namespace boost::python;
 
 
-void export_MMSettings()
+void export_Settings()
 {
 
   enum_<ost::mol::mm::Platform>("Platform")
@@ -50,50 +50,50 @@ void export_MMSettings()
 
   //export the settings
 
-  class_<ost::mol::mm::MMSettings>("MMSettings",init<>())
-    .def_readwrite("add_bonds",&ost::mol::mm::MMSettings::add_bonds)
-    .def_readwrite("add_angles",&ost::mol::mm::MMSettings::add_angles)
-    .def_readwrite("add_dihedrals",&ost::mol::mm::MMSettings::add_dihedrals)
-    .def_readwrite("add_impropers",&ost::mol::mm::MMSettings::add_impropers)
-    .def_readwrite("add_cmaps",&ost::mol::mm::MMSettings::add_cmaps)
-    .def_readwrite("add_exclusions",&ost::mol::mm::MMSettings::add_exclusions)
-    .def_readwrite("add_nonbonded",&ost::mol::mm::MMSettings::add_nonbonded)
-    .def_readwrite("add_gbsa",&ost::mol::mm::MMSettings::add_gbsa)
-    .def_readwrite("constrain_hbonds",&ost::mol::mm::MMSettings::constrain_hbonds)
-    .def_readwrite("constrain_bonds",&ost::mol::mm::MMSettings::constrain_bonds)
-    .def_readwrite("rigid_water",&ost::mol::mm::MMSettings::rigid_water)
-    .def_readwrite("strict_interactions",&ost::mol::mm::MMSettings::strict_interactions)
-    .def_readwrite("ideal_bond_length_constraints",&ost::mol::mm::MMSettings::ideal_bond_length_constraints)
-    .def_readwrite("fix_heavy_atoms",&ost::mol::mm::MMSettings::fix_heavy_atoms)
-    .def_readwrite("kill_electrostatics",&ost::mol::mm::MMSettings::kill_electrostatics)
-    .def_readwrite("generate_disulfid_bonds",&ost::mol::mm::MMSettings::generate_disulfid_bonds)
-    .def_readwrite("nonbonded_method",&ost::mol::mm::MMSettings::nonbonded_method)
-    .def_readwrite("nonbonded_cutoff",&ost::mol::mm::MMSettings::nonbonded_cutoff)
-    .def_readwrite("remove_cmm_motion",&ost::mol::mm::MMSettings::remove_cmm_motion)
-    .def_readwrite("periodic_box_extents",&ost::mol::mm::MMSettings::periodic_box_extents)
-    .def_readwrite("init_temperature",&ost::mol::mm::MMSettings::init_temperature)
-    .def_readwrite("forcefield",&ost::mol::mm::MMSettings::forcefield)
-    .def_readwrite("termini_exceptions",&ost::mol::mm::MMSettings::termini_exceptions)
-    .def_readwrite("platform",&ost::mol::mm::MMSettings::platform)
-    .def_readwrite("add_thermostat",&ost::mol::mm::MMSettings::add_thermostat)
-    .def_readwrite("thermostat_temperature",&ost::mol::mm::MMSettings::thermostat_temperature)
-    .def_readwrite("thermostat_collision_frequency",&ost::mol::mm::MMSettings::thermostat_collision_frequency)
-    .def_readwrite("add_barostat",&ost::mol::mm::MMSettings::add_barostat)
-    .def_readwrite("barostat_temperature",&ost::mol::mm::MMSettings::barostat_temperature)
-    .def_readwrite("barostat_pressure",&ost::mol::mm::MMSettings::barostat_pressure)
-    .def_readwrite("barostat_frequency",&ost::mol::mm::MMSettings::barostat_frequency)
-    .def_readwrite("integrator",&ost::mol::mm::MMSettings::integrator)
-    .def_readwrite("solvent_dielectric",&ost::mol::mm::MMSettings::solvent_dielectric)
-    .def_readwrite("solute_dielectric",&ost::mol::mm::MMSettings::solute_dielectric)
-    .def_readwrite("reaction_field_dielectric",&ost::mol::mm::MMSettings::reaction_field_dielectric)
-    .def_readwrite("use_dispersion_correction",&ost::mol::mm::MMSettings::use_dispersion_correction)
-    .def_readwrite("keep_ff_specific_naming",&ost::mol::mm::MMSettings::keep_ff_specific_naming)
-    .def_readwrite("openmm_plugin_directory",&ost::mol::mm::MMSettings::openmm_plugin_directory)
-    .def_readwrite("custom_plugin_directory",&ost::mol::mm::MMSettings::custom_plugin_directory)
+  class_<ost::mol::mm::Settings>("Settings",init<>())
+    .def_readwrite("add_bonds",&ost::mol::mm::Settings::add_bonds)
+    .def_readwrite("add_angles",&ost::mol::mm::Settings::add_angles)
+    .def_readwrite("add_dihedrals",&ost::mol::mm::Settings::add_dihedrals)
+    .def_readwrite("add_impropers",&ost::mol::mm::Settings::add_impropers)
+    .def_readwrite("add_cmaps",&ost::mol::mm::Settings::add_cmaps)
+    .def_readwrite("add_exclusions",&ost::mol::mm::Settings::add_exclusions)
+    .def_readwrite("add_nonbonded",&ost::mol::mm::Settings::add_nonbonded)
+    .def_readwrite("add_gbsa",&ost::mol::mm::Settings::add_gbsa)
+    .def_readwrite("constrain_hbonds",&ost::mol::mm::Settings::constrain_hbonds)
+    .def_readwrite("constrain_bonds",&ost::mol::mm::Settings::constrain_bonds)
+    .def_readwrite("rigid_water",&ost::mol::mm::Settings::rigid_water)
+    .def_readwrite("strict_interactions",&ost::mol::mm::Settings::strict_interactions)
+    .def_readwrite("ideal_bond_length_constraints",&ost::mol::mm::Settings::ideal_bond_length_constraints)
+    .def_readwrite("fix_heavy_atoms",&ost::mol::mm::Settings::fix_heavy_atoms)
+    .def_readwrite("kill_electrostatics",&ost::mol::mm::Settings::kill_electrostatics)
+    .def_readwrite("generate_disulfid_bonds",&ost::mol::mm::Settings::generate_disulfid_bonds)
+    .def_readwrite("nonbonded_method",&ost::mol::mm::Settings::nonbonded_method)
+    .def_readwrite("nonbonded_cutoff",&ost::mol::mm::Settings::nonbonded_cutoff)
+    .def_readwrite("remove_cmm_motion",&ost::mol::mm::Settings::remove_cmm_motion)
+    .def_readwrite("periodic_box_extents",&ost::mol::mm::Settings::periodic_box_extents)
+    .def_readwrite("init_temperature",&ost::mol::mm::Settings::init_temperature)
+    .def_readwrite("forcefield",&ost::mol::mm::Settings::forcefield)
+    .def_readwrite("termini_exceptions",&ost::mol::mm::Settings::termini_exceptions)
+    .def_readwrite("platform",&ost::mol::mm::Settings::platform)
+    .def_readwrite("add_thermostat",&ost::mol::mm::Settings::add_thermostat)
+    .def_readwrite("thermostat_temperature",&ost::mol::mm::Settings::thermostat_temperature)
+    .def_readwrite("thermostat_collision_frequency",&ost::mol::mm::Settings::thermostat_collision_frequency)
+    .def_readwrite("add_barostat",&ost::mol::mm::Settings::add_barostat)
+    .def_readwrite("barostat_temperature",&ost::mol::mm::Settings::barostat_temperature)
+    .def_readwrite("barostat_pressure",&ost::mol::mm::Settings::barostat_pressure)
+    .def_readwrite("barostat_frequency",&ost::mol::mm::Settings::barostat_frequency)
+    .def_readwrite("integrator",&ost::mol::mm::Settings::integrator)
+    .def_readwrite("solvent_dielectric",&ost::mol::mm::Settings::solvent_dielectric)
+    .def_readwrite("solute_dielectric",&ost::mol::mm::Settings::solute_dielectric)
+    .def_readwrite("reaction_field_dielectric",&ost::mol::mm::Settings::reaction_field_dielectric)
+    .def_readwrite("use_dispersion_correction",&ost::mol::mm::Settings::use_dispersion_correction)
+    .def_readwrite("keep_ff_specific_naming",&ost::mol::mm::Settings::keep_ff_specific_naming)
+    .def_readwrite("openmm_plugin_directory",&ost::mol::mm::Settings::openmm_plugin_directory)
+    .def_readwrite("custom_plugin_directory",&ost::mol::mm::Settings::custom_plugin_directory)
 
   ;
 
-  boost::python::register_ptr_to_python<ost::mol::mm::MMSettingsPtr>();
+  boost::python::register_ptr_to_python<ost::mol::mm::SettingsPtr>();
   boost::python::register_ptr_to_python<ost::mol::mm::TerminiExceptionsPtr>();
 
 }

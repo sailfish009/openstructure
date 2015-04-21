@@ -48,8 +48,8 @@ void export_Simulation()
 {
 
   class_<ost::mol::mm::Simulation>("Simulation",no_init)
-    .def(init<const ost::mol::EntityHandle, const ost::mol::mm::MMSettingsPtr>())
-    .def(init<const ost::mol::mm::TopologyPtr,const ost::mol::EntityHandle&,const ost::mol::mm::MMSettingsPtr>())
+    .def(init<const ost::mol::EntityHandle, const ost::mol::mm::SettingsPtr>())
+    .def(init<const ost::mol::mm::TopologyPtr,const ost::mol::EntityHandle&,const ost::mol::mm::SettingsPtr>())
     .def("Save",&ost::mol::mm::Simulation::Save)
     .def("Load",&ost::mol::mm::Simulation::Load).staticmethod("Load")
     .def("Steps",&ost::mol::mm::Simulation::Steps)

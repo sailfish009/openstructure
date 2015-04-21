@@ -11,7 +11,7 @@
 #include <ost/base.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/mol/mm/forcefield.hh>
-#include <ost/mol/mm/mm_interaction.hh>
+#include <ost/mol/mm/interaction.hh>
 #include <ost/mol/mm/gromacs_block_modifiers.hh>
 
 
@@ -103,39 +103,39 @@ public:
 
 private:
 
-  MMInteractionPtr ParseBond(const std::vector<String>& data, 
+  InteractionPtr ParseBond(const std::vector<String>& data, 
                              bool type_definition, 
                              FuncType functype = Invalid);
 
-  MMInteractionPtr ParseAngle(const std::vector<String>& data, 
+  InteractionPtr ParseAngle(const std::vector<String>& data, 
                               bool type_definition, 
                               FuncType functype = Invalid);
 
-  MMInteractionPtr ParseDihedral(const std::vector<String>& data, 
+  InteractionPtr ParseDihedral(const std::vector<String>& data, 
                                  bool type_definition, 
                                  FuncType functype = Invalid);
 
-  MMInteractionPtr ParseCMap(const std::vector<String>& data, 
+  InteractionPtr ParseCMap(const std::vector<String>& data, 
                              bool type_definition, 
                              FuncType functype = Invalid);
 
-  MMInteractionPtr ParseLJ(const std::vector<String>& data, 
+  InteractionPtr ParseLJ(const std::vector<String>& data, 
                            bool type_definition, 
                            FuncType functype = Invalid);
 
-  MMInteractionPtr ParseLJPair(const std::vector<String>& data, 
+  InteractionPtr ParseLJPair(const std::vector<String>& data, 
                                bool type_definition, 
                                FuncType functype = Invalid);
 
-  MMInteractionPtr ParseConstraint(const std::vector<String>& data, 
+  InteractionPtr ParseConstraint(const std::vector<String>& data, 
                                    bool type_definition, 
                                    FuncType functype = Invalid);
 
-  MMInteractionPtr ParseGenborn(const std::vector<String>& data, 
+  InteractionPtr ParseGenborn(const std::vector<String>& data, 
                                 bool type_definition, 
                                 FuncType functype = Invalid);
 
-  MMInteractionPtr ParseExclusion(const std::vector<String>& data,
+  InteractionPtr ParseExclusion(const std::vector<String>& data,
                                   bool type_definition,
                                   FuncType functype = Invalid);
 

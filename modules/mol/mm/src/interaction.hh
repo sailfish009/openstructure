@@ -17,8 +17,8 @@
 
 namespace ost { namespace mol{ namespace mm{
 
-class MMInteraction;
-typedef boost::shared_ptr<MMInteraction> MMInteractionPtr;
+class Interaction;
+typedef boost::shared_ptr<Interaction> InteractionPtr;
 
 enum FuncType{
   Invalid,
@@ -38,10 +38,10 @@ enum FuncType{
   HarmonicDistanceRestraint
 };
 
-class MMInteraction{
+class Interaction{
 
 public:
-  MMInteraction(FuncType func_type);
+  Interaction(FuncType func_type);
 
   void SetTypes(std::vector<String> types);
 
@@ -140,7 +140,6 @@ private:
   std::vector<String> atom_types_;
   std::vector<String> atom_names_;
 };
-
 
 }}} //ns
 

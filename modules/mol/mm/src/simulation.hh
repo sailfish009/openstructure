@@ -8,14 +8,12 @@
 #include <ost/mol/mm/system_creator.hh>
 #include <ost/mol/mm/topology.hh>
 #include <ost/mol/mm/topology_creator.hh>
-#include <ost/mol/mm/mm_settings.hh>
-#include <ost/mol/mm/mm_modeller.hh>
+#include <ost/mol/mm/settings.hh>
+#include <ost/mol/mm/modeller.hh>
 #include <ost/geom/vec3.hh>
-#include <ost/mol/mm/mm_observer.hh>
+#include <ost/mol/mm/observer.hh>
 #include <ost/mol/mm/state_extractor.hh>
 #include <ost/mol/mm/steep.hh>
-#include <ost/mol/mm/mm_interaction.hh>
-
 
 #include <time.h>
 
@@ -40,15 +38,15 @@ class Simulation {
 public:
 
   Simulation(const ost::mol::EntityHandle& handle, 
-             const MMSettingsPtr settings);
+             const SettingsPtr settings);
 
   Simulation(const ost::mol::mm::TopologyPtr top,
              const ost::mol::EntityHandle& handle,
-             const MMSettingsPtr settings);
+             const SettingsPtr settings);
 
   void Save(const String& filename);
 
-  static SimulationPtr Load(const String& filename, MMSettingsPtr settings);
+  static SimulationPtr Load(const String& filename, SettingsPtr settings);
 
   ost::mol::EntityHandle GetEntity() { return ent_; }
 
@@ -78,7 +76,7 @@ public:
 
   void Steps(int steps);
 
-  void Register(MMObserverPtr o);
+  void Register(ObserverPtr o);
 
   void ResetHarmonicBond(uint index, Real bond_length, Real force_constant);
 
@@ -124,7 +122,7 @@ private:
   Simulation() { } //hidden constructor... 
 
   void Init(const ost::mol::mm::TopologyPtr top, 
-            const MMSettingsPtr settings);
+            const SettingsPtr settings);
 
   int TimeToNextNotification();
 
@@ -132,7 +130,7 @@ private:
   IntegratorPtr integrator_;
   ContextPtr context_;
   TopologyPtr top_;
-  std::vector<MMObserverPtr> observers_;
+  std::vector<ObserverPtr> observers_;
   std::vector<int> time_to_notify_;
   std::map<FuncType,uint> system_force_mapper_;
   ost::mol::EntityHandle ent_;

@@ -2,7 +2,7 @@
 #include <boost/test/auto_unit_test.hpp>
 #include <ost/mol/mm/topology.hh>
 #include <ost/mol/mm/topology_creator.hh>
-#include <ost/mol/mm/mm_settings.hh>
+#include <ost/mol/mm/settings.hh>
 #include <ost/mol/mm/forcefield.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/conop/heuristic.hh>
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   reader.Import(test_ent);
 
   ForcefieldPtr ff = Forcefield::Load("CHARMM27.dat");
-  MMSettingsPtr settings = MMSettingsPtr(new MMSettings);
+  SettingsPtr settings = SettingsPtr(new Settings);
   settings->add_gbsa = true;
   settings->forcefield = ff;
 

@@ -12,7 +12,7 @@ void HeuristicHydrogenConstructor::ApplyOnBuildingBlock(BuildingBlockPtr p){
 
 HeuristicHydrogenConstructor::HeuristicHydrogenConstructor(BuildingBlockPtr block){
   std::vector<String> atom_names = block->GetAtoms();
-  std::vector<MMInteractionPtr> bonds = block->GetBonds();
+  std::vector<InteractionPtr> bonds = block->GetBonds();
 
   for(std::vector<String>::iterator aname = atom_names.begin(); 
       aname != atom_names.end(); ++aname){
@@ -21,7 +21,7 @@ HeuristicHydrogenConstructor::HeuristicHydrogenConstructor(BuildingBlockPtr bloc
     std::vector<String> antecedent_names, hydrogen_names;
     String aname_other;
 
-    for (std::vector<MMInteractionPtr>::iterator i = bonds.begin() ; 
+    for (std::vector<InteractionPtr>::iterator i = bonds.begin() ; 
          i != bonds.end(); ++i){
 
       std::vector<String> bond_names=(*i)->GetNames();

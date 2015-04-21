@@ -136,7 +136,7 @@ top.AddLJPair(6,8,0.5*(sigmas[6]+sigmas[8]),sqrt(epsilons[6]*epsilons[8]))
 top.AddLJPair(7,8,0.5*(sigmas[7]+sigmas[8]),sqrt(epsilons[7]*epsilons[8]))
 top.AddLJPair(0,8,0.5*(sigmas[0]+sigmas[8]),sqrt(epsilons[0]*epsilons[8])) 
 
-settings = MMSettings()
+settings = Settings()
 settings.init_temperature =  310
 settings.integrator = VerletIntegrator(0.0001)
 

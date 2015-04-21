@@ -54,7 +54,7 @@ building_block.AddAtom("OH","OH",0.418)
 
 bonds = list()
 for i in range(8):
-  bonds.append(MMInteraction(FuncType.HarmonicBond))
+  bonds.append(Interaction(FuncType.HarmonicBond))
 
 bonds[0].SetNames(["H11","C1"])
 bonds[1].SetNames(["H12","C1"])
@@ -77,10 +77,10 @@ ff.AddMass("H",1.008)
 ff.AddMass("OH",1.008)
 
 #generate bonds and add them to the forcefield
-h_c_bond = MMInteraction(FuncType.HarmonicBond)
-c_c_bond = MMInteraction(FuncType.HarmonicBond)
-c_o_bond = MMInteraction(FuncType.HarmonicBond)
-o_h_bond = MMInteraction(FuncType.HarmonicBond)
+h_c_bond = Interaction(FuncType.HarmonicBond)
+c_c_bond = Interaction(FuncType.HarmonicBond)
+c_o_bond = Interaction(FuncType.HarmonicBond)
+o_h_bond = Interaction(FuncType.HarmonicBond)
 
 h_c_bond.SetTypes(["H","C"])
 c_c_bond.SetTypes(["C","C"])
@@ -98,11 +98,11 @@ ff.AddBond(c_o_bond)
 ff.AddBond(o_h_bond)
 
 #generate angles and add them to the forcefield
-h_c_h_angle = MMInteraction(FuncType.UreyBradleyAngle)
-h_c_c_angle = MMInteraction(FuncType.UreyBradleyAngle)
-h_c_o_angle = MMInteraction(FuncType.UreyBradleyAngle)
-c_c_o_angle = MMInteraction(FuncType.UreyBradleyAngle)
-c_o_h_angle = MMInteraction(FuncType.UreyBradleyAngle)
+h_c_h_angle = Interaction(FuncType.UreyBradleyAngle)
+h_c_c_angle = Interaction(FuncType.UreyBradleyAngle)
+h_c_o_angle = Interaction(FuncType.UreyBradleyAngle)
+c_c_o_angle = Interaction(FuncType.UreyBradleyAngle)
+c_o_h_angle = Interaction(FuncType.UreyBradleyAngle)
 
 h_c_h_angle.SetTypes(["H","C","H"])
 h_c_c_angle.SetTypes(["H","C","C"])
@@ -123,11 +123,11 @@ ff.AddAngle(c_c_o_angle)
 ff.AddAngle(c_o_h_angle)
 
 #generate dihedrals and add them to the forcefield
-x_c_c_x_dihedral = MMInteraction(FuncType.PeriodicDihedral)
-c_c_o_h_dihedral_one = MMInteraction(FuncType.PeriodicDihedral)
-c_c_o_h_dihedral_two = MMInteraction(FuncType.PeriodicDihedral)
-c_c_o_h_dihedral_three = MMInteraction(FuncType.PeriodicDihedral)
-x_c_o_x_dihedral = MMInteraction(FuncType.PeriodicDihedral)
+x_c_c_x_dihedral = Interaction(FuncType.PeriodicDihedral)
+c_c_o_h_dihedral_one = Interaction(FuncType.PeriodicDihedral)
+c_c_o_h_dihedral_two = Interaction(FuncType.PeriodicDihedral)
+c_c_o_h_dihedral_three = Interaction(FuncType.PeriodicDihedral)
+x_c_o_x_dihedral = Interaction(FuncType.PeriodicDihedral)
 
 x_c_c_x_dihedral.SetTypes(["X","C","C","X"])
 c_c_o_h_dihedral_one.SetTypes(["C","C","O","OH"])
@@ -148,10 +148,10 @@ ff.AddDihedral(c_c_o_h_dihedral_three)
 ff.AddDihedral(x_c_o_x_dihedral)
 
 #add lj parameters
-c_lj = MMInteraction(FuncType.LJ)
-o_lj = MMInteraction(FuncType.LJ)
-h_lj = MMInteraction(FuncType.LJ)
-oh_lj = MMInteraction(FuncType.LJ)
+c_lj = Interaction(FuncType.LJ)
+o_lj = Interaction(FuncType.LJ)
+h_lj = Interaction(FuncType.LJ)
+oh_lj = Interaction(FuncType.LJ)
 
 c_lj.SetTypes(["C"])
 o_lj.SetTypes(["O"])
@@ -174,7 +174,7 @@ ff.SetFudgeLJ(0.5)
 ff.SetFudgeQQ(0.5)
 
 #construct settings
-settings = MMSettings()
+settings = Settings()
 settings.init_temperature =  310
 settings.forcefield = ff
 

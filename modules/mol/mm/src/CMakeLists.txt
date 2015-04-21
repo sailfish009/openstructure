@@ -5,11 +5,11 @@ set(OST_MOL_MM_HEADERS
   block_modifiers.hh
   gromacs_block_modifiers.hh
   heuristic_block_modifiers.hh
-  mm_interaction.hh
-  mm_settings.hh
+  interaction.hh
+  settings.hh
   simulation.hh 
-  mm_modeller.hh
-  mm_observer.hh
+  modeller.hh
+  observer.hh
   state_extractor.hh
   system_creator.hh
   topology_creator.hh
@@ -25,11 +25,11 @@ set(OST_MOL_MM_SOURCES
   buildingblock.cc
   gromacs_block_modifiers.cc
   heuristic_block_modifiers.cc
-  mm_interaction.cc
+  interaction.cc
   simulation.cc
-  mm_modeller.cc
+  modeller.cc
   state_extractor.cc
-  mm_observer.cc
+  observer.cc
   system_creator.cc
   topology_creator.cc
   topology.cc

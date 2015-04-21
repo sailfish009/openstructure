@@ -53,7 +53,7 @@ ForcefieldPtr Forcefield::Load(const String& filename){
   ds & num_bonds;
   for(int i = 0; i < num_bonds; ++i){
     ds & func_type;
-    MMInteractionPtr p(new MMInteraction(FuncType(func_type)));
+    InteractionPtr p(new Interaction(FuncType(func_type)));
     ds & *p;
     ff_p->AddBond(p);
   }
@@ -62,7 +62,7 @@ ForcefieldPtr Forcefield::Load(const String& filename){
   ds & num_angles;
   for(int i = 0; i < num_angles; ++i){
     ds & func_type;
-    MMInteractionPtr p(new MMInteraction(FuncType(func_type)));
+    InteractionPtr p(new Interaction(FuncType(func_type)));
     ds & *p;
     ff_p->AddAngle(p);
   }
@@ -71,7 +71,7 @@ ForcefieldPtr Forcefield::Load(const String& filename){
   ds & num_lj_pairs;
   for(int i = 0; i < num_lj_pairs; ++i){
     ds & func_type;
-    MMInteractionPtr p(new MMInteraction(FuncType(func_type)));
+    InteractionPtr p(new Interaction(FuncType(func_type)));
     ds & *p;
     ff_p->AddLJPair(p);
   }
@@ -80,7 +80,7 @@ ForcefieldPtr Forcefield::Load(const String& filename){
   ds & num_constraints;
   for(int i = 0; i < num_constraints; ++i){
     ds & func_type;
-    MMInteractionPtr p(new MMInteraction(FuncType(func_type)));
+    InteractionPtr p(new Interaction(FuncType(func_type)));
     ds & *p;
     ff_p->AddConstraint(p);
   }
@@ -89,7 +89,7 @@ ForcefieldPtr Forcefield::Load(const String& filename){
   ds & num_cmaps;
   for(int i = 0; i < num_cmaps; ++i){
     ds & func_type;
-    MMInteractionPtr p(new MMInteraction(FuncType(func_type)));
+    InteractionPtr p(new Interaction(FuncType(func_type)));
     ds & *p;
     ff_p->AddCMap(p);
   }
@@ -98,7 +98,7 @@ ForcefieldPtr Forcefield::Load(const String& filename){
   ds & num_genborn;
   for(int i = 0; i < num_genborn; ++i){
     ds & func_type;
-    MMInteractionPtr p(new MMInteraction(FuncType(func_type)));
+    InteractionPtr p(new Interaction(FuncType(func_type)));
     ds & *p;
     ff_p->AddImplicitGenborn(p);
   }
@@ -107,7 +107,7 @@ ForcefieldPtr Forcefield::Load(const String& filename){
   ds & num_ljs;
   for(int i = 0; i < num_ljs; ++i){
     ds & func_type;
-    MMInteractionPtr p(new MMInteraction(FuncType(func_type)));
+    InteractionPtr p(new Interaction(FuncType(func_type)));
     ds & *p;
     ff_p->AddLJ(p);
   }
@@ -120,7 +120,7 @@ ForcefieldPtr Forcefield::Load(const String& filename){
     ds & temp_num;
     for(int j = 0; j < temp_num; ++j){
       ds & func_type;
-      MMInteractionPtr p(new MMInteraction(FuncType(func_type)));
+      InteractionPtr p(new Interaction(FuncType(func_type)));
       ds & *p;
       ff_p->AddDihedral(p);
     }
@@ -132,7 +132,7 @@ ForcefieldPtr Forcefield::Load(const String& filename){
     ds & temp_num;
     for(int j = 0; j < temp_num; ++j){
       ds & func_type;
-      MMInteractionPtr p(new MMInteraction(FuncType(func_type)));
+      InteractionPtr p(new Interaction(FuncType(func_type)));
       ds & *p;
       ff_p->AddImproper(p);
     }
@@ -252,7 +252,7 @@ void Forcefield::Save(const String& filename){
   int func_type;
   int num_bonds = bonds_.size();
   ds & num_bonds;
-  for(boost::unordered_map<String,MMInteractionPtr>::iterator i = bonds_.begin();
+  for(boost::unordered_map<String,InteractionPtr>::iterator i = bonds_.begin();
       i != bonds_.end(); ++i){
     func_type = int(i->second->GetFuncType());
     ds & func_type;
@@ -261,7 +261,7 @@ void Forcefield::Save(const String& filename){
   
   int num_angles = angles_.size();
   ds & num_angles;
-  for(boost::unordered_map<String,MMInteractionPtr>::iterator i = angles_.begin();
+  for(boost::unordered_map<String,InteractionPtr>::iterator i = angles_.begin();
       i != angles_.end(); ++i){
     func_type = int(i->second->GetFuncType());
     ds & func_type;
@@ -270,7 +270,7 @@ void Forcefield::Save(const String& filename){
 
   int num_lj_pairs = lj_14_pairs_.size();
   ds & num_lj_pairs;
-  for(boost::unordered_map<String,MMInteractionPtr>::iterator i = lj_14_pairs_.begin();
+  for(boost::unordered_map<String,InteractionPtr>::iterator i = lj_14_pairs_.begin();
       i != lj_14_pairs_.end(); ++i){
     func_type = int(i->second->GetFuncType());
     ds & func_type;
@@ -279,7 +279,7 @@ void Forcefield::Save(const String& filename){
   
   int num_constraints = constraints_.size();
   ds & num_constraints;
-  for(boost::unordered_map<String,MMInteractionPtr>::iterator i = constraints_.begin();
+  for(boost::unordered_map<String,InteractionPtr>::iterator i = constraints_.begin();
       i != constraints_.end(); ++i){
     func_type = int(i->second->GetFuncType());
     ds & func_type;
@@ -288,7 +288,7 @@ void Forcefield::Save(const String& filename){
 
   int num_cmaps = cmaps_.size();
   ds & num_cmaps;
-  for(boost::unordered_map<String,MMInteractionPtr>::iterator i = cmaps_.begin();
+  for(boost::unordered_map<String,InteractionPtr>::iterator i = cmaps_.begin();
       i != cmaps_.end(); ++i){
     func_type = int(i->second->GetFuncType());
     ds & func_type;
@@ -297,7 +297,7 @@ void Forcefield::Save(const String& filename){
   
   int num_genborn = implicit_genborn_.size();
   ds & num_genborn;
-  for(boost::unordered_map<String,MMInteractionPtr>::iterator i = implicit_genborn_.begin();
+  for(boost::unordered_map<String,InteractionPtr>::iterator i = implicit_genborn_.begin();
       i != implicit_genborn_.end(); ++i){
     func_type = int(i->second->GetFuncType());
     ds & func_type;
@@ -306,7 +306,7 @@ void Forcefield::Save(const String& filename){
   
   int num_ljs = ljs_.size();
   ds & num_ljs;
-  for(boost::unordered_map<String,MMInteractionPtr>::iterator i = ljs_.begin();
+  for(boost::unordered_map<String,InteractionPtr>::iterator i = ljs_.begin();
       i != ljs_.end(); ++i){
     func_type = int(i->second->GetFuncType());
     ds & func_type;
@@ -316,11 +316,11 @@ void Forcefield::Save(const String& filename){
   int num_dihedrals = dihedrals_.size();
   int vector_size;
   ds & num_dihedrals;
-  for(boost::unordered_map<String,std::vector<MMInteractionPtr> >::iterator i = dihedrals_.begin();
+  for(boost::unordered_map<String,std::vector<InteractionPtr> >::iterator i = dihedrals_.begin();
       i != dihedrals_.end(); ++i){
     vector_size = i->second.size();
     ds & vector_size;
-    for(std::vector<MMInteractionPtr>::iterator j = i->second.begin();
+    for(std::vector<InteractionPtr>::iterator j = i->second.begin();
         j != i->second.end(); ++j){
       func_type = int((*j)->GetFuncType());
       ds & func_type;
@@ -330,11 +330,11 @@ void Forcefield::Save(const String& filename){
 
   int num_impropers = improper_dihedrals_.size();
   ds & num_impropers;
-  for(boost::unordered_map<String,std::vector<MMInteractionPtr> >::iterator i = improper_dihedrals_.begin();
+  for(boost::unordered_map<String,std::vector<InteractionPtr> >::iterator i = improper_dihedrals_.begin();
       i != improper_dihedrals_.end(); ++i){
     vector_size = i->second.size();
     ds & vector_size;
-    for(std::vector<MMInteractionPtr>::iterator j = i->second.begin();
+    for(std::vector<InteractionPtr>::iterator j = i->second.begin();
         j != i->second.end(); ++j){
       func_type = int((*j)->GetFuncType());
       ds & func_type;
@@ -456,29 +456,29 @@ BlockModifierPtr Forcefield::GetCTerModifier(const String& res_name, const Strin
   return this->GetBlockModifier(temp);
 }
 
-MMInteractionPtr Forcefield::GetBond(const String& type1, const String& type2) const{
+InteractionPtr Forcefield::GetBond(const String& type1, const String& type2) const{
   std::vector<String> types;
   types.push_back(type1);
   types.push_back(type2);
-  boost::unordered_map<String,MMInteractionPtr>::const_iterator i = 
+  boost::unordered_map<String,InteractionPtr>::const_iterator i = 
     bonds_.find(this->AtomTypesToKeyword(types));
   if(i != bonds_.end()) return i->second;
   throw ost::Error("Forcefield does not contain bond for requested atom types!");
 }
 
-MMInteractionPtr Forcefield::GetAngle(const String& type1, const String& type2,
+InteractionPtr Forcefield::GetAngle(const String& type1, const String& type2,
                                       const String& type3) const{
   std::vector<String> types;
   types.push_back(type1);
   types.push_back(type2);
   types.push_back(type3);
-  boost::unordered_map<String,MMInteractionPtr>::const_iterator i = 
+  boost::unordered_map<String,InteractionPtr>::const_iterator i = 
     angles_.find(this->AtomTypesToKeyword(types));
   if(i != angles_.end()) return i->second;
   throw ost::Error("Forcefield does not contain angle for requested atom types!");
 }
 
-std::vector<MMInteractionPtr> Forcefield::GetDihedrals(const String& type1,
+std::vector<InteractionPtr> Forcefield::GetDihedrals(const String& type1,
                                                        const String& type2,
                                                        const String& type3,
                                                        const String& type4) const{
@@ -488,20 +488,20 @@ std::vector<MMInteractionPtr> Forcefield::GetDihedrals(const String& type1,
   types.push_back(type3);
   types.push_back(type4);
 
-  boost::unordered_map<String,std::vector<MMInteractionPtr> >::const_iterator i = 
+  boost::unordered_map<String,std::vector<InteractionPtr> >::const_iterator i = 
     dihedrals_.find(this->AtomTypesToKeyword(types));
 
   if(i != dihedrals_.end()) return i->second;
 
   //if we reach this point, we have to look for all dihedrals with wildcards...
-  std::vector<MMInteractionPtr> dihedrals;
+  std::vector<InteractionPtr> dihedrals;
   std::vector<String> types_with_wildcards;
   
   //lets first check single wildcards
   for(int i = 0; i < 4; ++i){
     types_with_wildcards = types;
     types_with_wildcards[i] = "X";
-    boost::unordered_map<String,std::vector<MMInteractionPtr> >::const_iterator j = 
+    boost::unordered_map<String,std::vector<InteractionPtr> >::const_iterator j = 
       dihedrals_.find(this->AtomTypesToKeyword(types_with_wildcards));
     if(j != dihedrals_.end()) dihedrals.insert(dihedrals.end(),j->second.begin(),j->second.end());
   }
@@ -512,7 +512,7 @@ std::vector<MMInteractionPtr> Forcefield::GetDihedrals(const String& type1,
       types_with_wildcards = types;
       types_with_wildcards[i] = "X";
       types_with_wildcards[j] = "X";
-      boost::unordered_map<String,std::vector<MMInteractionPtr> >::const_iterator k = 
+      boost::unordered_map<String,std::vector<InteractionPtr> >::const_iterator k = 
         dihedrals_.find(this->AtomTypesToKeyword(types_with_wildcards));
       if(k != dihedrals_.end()) dihedrals.insert(dihedrals.end(),k->second.begin(),k->second.end());
     }
@@ -526,7 +526,7 @@ std::vector<MMInteractionPtr> Forcefield::GetDihedrals(const String& type1,
   for(int i = 0; i < 4; ++i){
     types_with_wildcards = all_wildcards;
     types_with_wildcards[i] = types[i];
-    boost::unordered_map<String,std::vector<MMInteractionPtr> >::const_iterator j = 
+    boost::unordered_map<String,std::vector<InteractionPtr> >::const_iterator j = 
       dihedrals_.find(this->AtomTypesToKeyword(types_with_wildcards));
     if(j != dihedrals_.end()) dihedrals.insert(dihedrals.end(),j->second.begin(),j->second.end());
   }  
@@ -535,7 +535,7 @@ std::vector<MMInteractionPtr> Forcefield::GetDihedrals(const String& type1,
   throw ost::Error("Forcefield does not contain any dihedrals for requested atom types!");
 }
 
-std::vector<MMInteractionPtr> Forcefield::GetImpropers(const String& type1,
+std::vector<InteractionPtr> Forcefield::GetImpropers(const String& type1,
                                                        const String& type2,
                                                        const String& type3,
                                                        const String& type4) const{
@@ -545,20 +545,20 @@ std::vector<MMInteractionPtr> Forcefield::GetImpropers(const String& type1,
   types.push_back(type3);
   types.push_back(type4);
 
-  boost::unordered_map<String,std::vector<MMInteractionPtr> >::const_iterator i = 
+  boost::unordered_map<String,std::vector<InteractionPtr> >::const_iterator i = 
     improper_dihedrals_.find(this->AtomTypesToKeyword(types));
 
   if(i != improper_dihedrals_.end()) return i->second;
 
   //if we reach this point, we have to look for all dihedrals with wildcards...
-  std::vector<MMInteractionPtr> impropers;
+  std::vector<InteractionPtr> impropers;
   std::vector<String> types_with_wildcards;
   
   //lets first check single wildcards
   for(int i = 0; i < 4; ++i){
     types_with_wildcards = types;
     types_with_wildcards[i] = "X";
-    boost::unordered_map<String,std::vector<MMInteractionPtr> >::const_iterator j = 
+    boost::unordered_map<String,std::vector<InteractionPtr> >::const_iterator j = 
       improper_dihedrals_.find(this->AtomTypesToKeyword(types_with_wildcards));
     if(j != improper_dihedrals_.end()) impropers.insert(impropers.end(),j->second.begin(),j->second.end());
   }
@@ -569,7 +569,7 @@ std::vector<MMInteractionPtr> Forcefield::GetImpropers(const String& type1,
       types_with_wildcards = types;
       types_with_wildcards[i] = "X";
       types_with_wildcards[j] = "X";
-      boost::unordered_map<String,std::vector<MMInteractionPtr> >::const_iterator k = 
+      boost::unordered_map<String,std::vector<InteractionPtr> >::const_iterator k = 
         improper_dihedrals_.find(this->AtomTypesToKeyword(types_with_wildcards));
       if(k != improper_dihedrals_.end()) impropers.insert(impropers.end(),k->second.begin(),k->second.end());
     }
@@ -583,7 +583,7 @@ std::vector<MMInteractionPtr> Forcefield::GetImpropers(const String& type1,
   for(int i = 0; i < 4; ++i){
     types_with_wildcards = all_wildcards;
     types_with_wildcards[i] = types[i];
-    boost::unordered_map<String,std::vector<MMInteractionPtr> >::const_iterator j = 
+    boost::unordered_map<String,std::vector<InteractionPtr> >::const_iterator j = 
       improper_dihedrals_.find(this->AtomTypesToKeyword(types_with_wildcards));
     if(j != improper_dihedrals_.end()) impropers.insert(impropers.end(),j->second.begin(),j->second.end());
   }  
@@ -593,7 +593,7 @@ std::vector<MMInteractionPtr> Forcefield::GetImpropers(const String& type1,
   throw ost::Error("Forcefield does not contain any impropers for requested atom types!");
 }
 
-MMInteractionPtr Forcefield::GetCMap(const String& type1, const String& type2,
+InteractionPtr Forcefield::GetCMap(const String& type1, const String& type2,
                                      const String& type3, const String& type4, 
                                      const String& type5) const{
 
@@ -603,24 +603,24 @@ MMInteractionPtr Forcefield::GetCMap(const String& type1, const String& type2,
   types.push_back(type3);
   types.push_back(type4);
   types.push_back(type5);
-  boost::unordered_map<String,MMInteractionPtr>::const_iterator i = 
+  boost::unordered_map<String,InteractionPtr>::const_iterator i = 
     cmaps_.find(this->AtomTypesToKeyword(types,false));
   if(i != cmaps_.end()) return i->second;
 
   throw ost::Error("Forcefield does not contain cmap for requested atom types!");
 }
 
-MMInteractionPtr Forcefield::GetImplicitGenborn(const String& type) const{
+InteractionPtr Forcefield::GetImplicitGenborn(const String& type) const{
 
-  boost::unordered_map<String,MMInteractionPtr>::const_iterator i = 
+  boost::unordered_map<String,InteractionPtr>::const_iterator i = 
     implicit_genborn_.find(type);
   if(i != implicit_genborn_.end()) return i->second;
   throw ost::Error("Forcefield does not contain implicit genborn parameters for requested atom type!");
 }
 
-MMInteractionPtr Forcefield::GetLJ(const String& type) const{
+InteractionPtr Forcefield::GetLJ(const String& type) const{
 
-  boost::unordered_map<String,MMInteractionPtr>::const_iterator i = 
+  boost::unordered_map<String,InteractionPtr>::const_iterator i = 
     ljs_.find(type);
 
   if(i != ljs_.end()){
@@ -629,7 +629,7 @@ MMInteractionPtr Forcefield::GetLJ(const String& type) const{
   throw ost::Error("Forcefield does not contain lennard jones parameters for requested atom types!");
 }
 
-MMInteractionPtr Forcefield::GetLJ(const String& type1, 
+InteractionPtr Forcefield::GetLJ(const String& type1, 
                                        const String& type2,
                                        bool pair) const{
   std::vector<String> types;
@@ -637,7 +637,7 @@ MMInteractionPtr Forcefield::GetLJ(const String& type1,
   types.push_back(type2);
 
   if(pair){
-    boost::unordered_map<String,MMInteractionPtr>::const_iterator i = 
+    boost::unordered_map<String,InteractionPtr>::const_iterator i = 
       lj_14_pairs_.find(this->AtomTypesToKeyword(types));
     if(i == lj_14_pairs_.end()){
       if(!gen_pairs_){
@@ -653,11 +653,11 @@ MMInteractionPtr Forcefield::GetLJ(const String& type1,
     }
   }
   
-  MMInteractionPtr temp1, temp2;
+  InteractionPtr temp1, temp2;
   temp1 = this->GetLJ(type1);
   temp2 = this->GetLJ(type2);
   if(temp1 && temp2){
-    MMInteractionPtr return_ptr(new MMInteraction(LJPair));
+    InteractionPtr return_ptr(new Interaction(LJPair));
     std::vector<Real> param1, param2, param;
     param1 = temp1->GetParam();
     param2 = temp2->GetParam();
@@ -672,12 +672,12 @@ MMInteractionPtr Forcefield::GetLJ(const String& type1,
 
 }
 
-MMInteractionPtr Forcefield::GetConstraint(const String& type1,
+InteractionPtr Forcefield::GetConstraint(const String& type1,
                                            const String& type2){
   std::vector<String> types;
   types.push_back(type1);
   types.push_back(type2);
-  boost::unordered_map<String,MMInteractionPtr>::const_iterator i = 
+  boost::unordered_map<String,InteractionPtr>::const_iterator i = 
     constraints_.find(this->AtomTypesToKeyword(types));
   if(i != constraints_.end()) return i->second;
   throw ost::Error("Forcefield does not contain constraint for requested atom types!");
@@ -693,63 +693,63 @@ Real Forcefield::GetMass(const String& atom_type) const{
   return it->second;
 }
 
-void Forcefield::AddBond(MMInteractionPtr p){
+void Forcefield::AddBond(InteractionPtr p){
   this->CheckInteractionToAdd(p,"BOND");
   std::vector<String> types = p->GetTypes();
   bonds_[this->AtomTypesToKeyword(types)] = p;
 }
 
-void Forcefield::AddAngle(MMInteractionPtr p){
+void Forcefield::AddAngle(InteractionPtr p){
   this->CheckInteractionToAdd(p,"ANGLE");
   std::vector<String> types = p->GetTypes();
   angles_[this->AtomTypesToKeyword(types)] = p;
 }
 
-void Forcefield::AddDihedral(MMInteractionPtr p){
+void Forcefield::AddDihedral(InteractionPtr p){
   this->CheckInteractionToAdd(p,"DIHEDRAL");
   std::vector<String> types = p->GetTypes();
   String keyword = this->AtomTypesToKeyword(types);
   if(dihedrals_.find(keyword) == dihedrals_.end()){
-    dihedrals_[keyword] = std::vector<MMInteractionPtr>();
+    dihedrals_[keyword] = std::vector<InteractionPtr>();
   }
   dihedrals_[keyword].push_back(p);
 }
 
-void Forcefield::AddImproper(MMInteractionPtr p){
+void Forcefield::AddImproper(InteractionPtr p){
   this->CheckInteractionToAdd(p,"IMPROPER");
   std::vector<String> types = p->GetTypes();
   String keyword = this->AtomTypesToKeyword(types);
   if(improper_dihedrals_.find(keyword) == improper_dihedrals_.end()){
-    improper_dihedrals_[keyword] = std::vector<MMInteractionPtr>();
+    improper_dihedrals_[keyword] = std::vector<InteractionPtr>();
   }
   improper_dihedrals_[keyword].push_back(p);
 }
 
-void Forcefield::AddCMap(MMInteractionPtr p){
+void Forcefield::AddCMap(InteractionPtr p){
   this->CheckInteractionToAdd(p,"CMAP");
   std::vector<String> types = p->GetTypes();
   cmaps_[this->AtomTypesToKeyword(types,false)] = p;
 }
 
-void Forcefield::AddImplicitGenborn(MMInteractionPtr p){
+void Forcefield::AddImplicitGenborn(InteractionPtr p){
   this->CheckInteractionToAdd(p,"IMPLICIT_GENBORN");
   std::vector<String> types = p->GetTypes();
   implicit_genborn_[this->AtomTypesToKeyword(types)] = p;
 }
 
-void Forcefield::AddLJ(MMInteractionPtr p){
+void Forcefield::AddLJ(InteractionPtr p){
   this->CheckInteractionToAdd(p,"LJ");
   std::vector<String> types = p->GetTypes();
   ljs_[types[0]] = p;
 }
 
-void Forcefield::AddLJPair(MMInteractionPtr p){
+void Forcefield::AddLJPair(InteractionPtr p){
   this->CheckInteractionToAdd(p,"LJ_PAIR");
   std::vector<String> types = p->GetTypes();
   lj_14_pairs_[this->AtomTypesToKeyword(types)] = p;
 }
 
-void Forcefield::AddConstraint(MMInteractionPtr p){
+void Forcefield::AddConstraint(InteractionPtr p){
   this->CheckInteractionToAdd(p,"CONSTRAINT");
   std::vector<String> types = p->GetTypes();
   constraints_[this->AtomTypesToKeyword(types)] = p;
@@ -955,7 +955,7 @@ String Forcefield::AtomTypesToKeyword(std::vector<String>& types, bool allow_reo
   return ss.str();
 }
 
-void Forcefield::CheckInteractionToAdd(MMInteractionPtr p, const String& interaction_type) const{
+void Forcefield::CheckInteractionToAdd(InteractionPtr p, const String& interaction_type) const{
   bool valid = true;
   if(p->GetTypes().empty()) valid = false;
   if(!p->IsParametrized()) valid = false;

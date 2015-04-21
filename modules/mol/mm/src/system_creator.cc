@@ -4,7 +4,7 @@
 namespace ost{ namespace mol{ namespace mm{
 
 SystemPtr SystemCreator::Create(const TopologyPtr top, 
-                                const MMSettingsPtr settings,
+                                const SettingsPtr settings,
                                 std::map<FuncType,uint>& mapper){
 
   uint mapper_index = 0;

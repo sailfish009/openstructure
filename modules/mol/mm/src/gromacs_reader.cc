@@ -437,25 +437,25 @@ void GromacsReader::ParseForcefield(std::vector<std::vector<String> >& content){
 
     switch(keyword_id){
       case 11:{
-        MMInteractionPtr bond = this->ParseBond(current_line,true);
+        InteractionPtr bond = this->ParseBond(current_line,true);
         ff_->AddBond(bond);
         ff_bonded_types_[0] = bond->GetFuncType();
         break;
       }
       case 12:{
-        MMInteractionPtr constraint = this->ParseConstraint(current_line,true);
+        InteractionPtr constraint = this->ParseConstraint(current_line,true);
         ff_->AddConstraint(constraint);
         break;
       }
       case 13:{
-        MMInteractionPtr angle = this->ParseAngle(current_line,true);
+        InteractionPtr angle = this->ParseAngle(current_line,true);
         ff_->AddAngle(angle);
         ff_bonded_types_[1] = angle->GetFuncType();
         break;
       }
       case 14:{
 
-        MMInteractionPtr p = this->ParseDihedral(current_line,true);
+        InteractionPtr p = this->ParseDihedral(current_line,true);
         FuncType functype = p->GetFuncType();
 
         if(functype == PeriodicDihedral){
@@ -469,17 +469,17 @@ void GromacsReader::ParseForcefield(std::vector<std::vector<String> >& content){
         break;
       }
       case 15:{
-        MMInteractionPtr lj = this->ParseLJ(current_line,true);
+        InteractionPtr lj = this->ParseLJ(current_line,true);
         ff_->AddLJ(lj);
         break;
       }
       case 16:{
-        MMInteractionPtr genborn = this->ParseGenborn(current_line,true);
+        InteractionPtr genborn = this->ParseGenborn(current_line,true);
         ff_->AddImplicitGenborn(genborn);
         break;
       }
       case 17:{
-        MMInteractionPtr lj_pair = this->ParseLJPair(current_line,true);
+        InteractionPtr lj_pair = this->ParseLJPair(current_line,true);
         ff_->AddLJPair(lj_pair);
         break;
       }
@@ -506,7 +506,7 @@ void GromacsReader::ParseForcefield(std::vector<std::vector<String> >& content){
         break;
       }
       case 20:{
-        MMInteractionPtr cmap = this->ParseCMap(current_line,true);
+        InteractionPtr cmap = this->ParseCMap(current_line,true);
         ff_->AddCMap(cmap);
         break;
       }
@@ -1103,7 +1103,7 @@ BuildingBlockPtr GromacsReader::BlockFromITP(const std::vector<std::vector<Strin
         current_line[2] = index_name_mapper[boost::lexical_cast<int>(current_line[2])];
         current_line[3] = index_name_mapper[boost::lexical_cast<int>(current_line[3])];
 
-        MMInteractionPtr int_ptr = this->ParseDihedral(current_line,false);
+        InteractionPtr int_ptr = this->ParseDihedral(current_line,false);
         FuncType functype = int_ptr->GetFuncType();
 
         if(functype == PeriodicDihedral){
@@ -1117,7 +1117,7 @@ BuildingBlockPtr GromacsReader::BlockFromITP(const std::vector<std::vector<Strin
       case 5:{
         //current_line[0] = index_name_mapper[boost::lexical_cast<int>(current_line[0])];
         //current_line[1] = index_name_mapper[boost::lexical_cast<int>(current_line[1])];
-        //p->exclusions_.push_back(MMInteraction::ParseExclusion(current_line,false)); 
+        //p->exclusions_.push_back(Interaction::ParseExclusion(current_line,false)); 
         break;
       }
       case 6:{
@@ -1142,9 +1142,9 @@ BuildingBlockPtr GromacsReader::BlockFromITP(const std::vector<std::vector<Strin
         std::vector<String> names;
 
 
-        MMInteractionPtr p1(new MMInteraction(DistanceConstraint));
-        MMInteractionPtr p2(new MMInteraction(DistanceConstraint));
-        MMInteractionPtr p3(new MMInteraction(DistanceConstraint));
+        InteractionPtr p1(new Interaction(DistanceConstraint));
+        InteractionPtr p2(new Interaction(DistanceConstraint));
+        InteractionPtr p3(new Interaction(DistanceConstraint));
 
         //first constraint dist => O - H
         parameters.push_back(boost::lexical_cast<Real>(current_line[2]));
@@ -1249,7 +1249,7 @@ BlockModifierPtr GromacsReader::ParseBlockModifier(const std::vector<std::vector
 }
 
 
-MMInteractionPtr GromacsReader::ParseBond(const std::vector<String>& data, 
+InteractionPtr GromacsReader::ParseBond(const std::vector<String>& data, 
                                                  bool type_definition,
                                                  FuncType functype){
 
@@ -1280,7 +1280,7 @@ MMInteractionPtr GromacsReader::ParseBond(const std::vector<String>& data,
   atom_definition.push_back(data[0]);
   atom_definition.push_back(data[1]);
 
-  MMInteractionPtr p(new MMInteraction(functype));
+  InteractionPtr p(new Interaction(functype));
 
   if(type_definition) p->SetTypes(atom_definition);
   else p->SetNames(atom_definition);
@@ -1299,7 +1299,7 @@ MMInteractionPtr GromacsReader::ParseBond(const std::vector<String>& data,
   return p;
 }
 
-MMInteractionPtr GromacsReader::ParseAngle(const std::vector<String>& data, 
+InteractionPtr GromacsReader::ParseAngle(const std::vector<String>& data, 
                                            bool type_definition,
                                            FuncType functype){
 
@@ -1330,7 +1330,7 @@ MMInteractionPtr GromacsReader::ParseAngle(const std::vector<String>& data,
   atom_definition.push_back(data[1]);
   atom_definition.push_back(data[2]);
 
-  MMInteractionPtr p(new MMInteraction(functype));
+  InteractionPtr p(new Interaction(functype));
 
   if(type_definition) p->SetTypes(atom_definition);
   else p->SetNames(atom_definition);
@@ -1357,7 +1357,7 @@ MMInteractionPtr GromacsReader::ParseAngle(const std::vector<String>& data,
   return p;
 }
 
-MMInteractionPtr GromacsReader::ParseDihedral(const std::vector<String>& data, 
+InteractionPtr GromacsReader::ParseDihedral(const std::vector<String>& data, 
                                               bool type_definition,
                                               FuncType functype){
   if(data.size() < 4){
@@ -1389,7 +1389,7 @@ MMInteractionPtr GromacsReader::ParseDihedral(const std::vector<String>& data,
   atom_definition.push_back(data[2]);
   atom_definition.push_back(data[3]);
 
-  MMInteractionPtr p(new MMInteraction(functype));
+  InteractionPtr p(new Interaction(functype));
 
   if(type_definition) p->SetTypes(atom_definition);
   else p->SetNames(atom_definition);
@@ -1414,7 +1414,7 @@ MMInteractionPtr GromacsReader::ParseDihedral(const std::vector<String>& data,
   return p;
 }
 
-MMInteractionPtr GromacsReader::ParseCMap(const std::vector<String>& data, 
+InteractionPtr GromacsReader::ParseCMap(const std::vector<String>& data, 
                                                    bool type_definition,
                                                    FuncType functype){
   if(data.size() < 5){
@@ -1432,7 +1432,7 @@ MMInteractionPtr GromacsReader::ParseCMap(const std::vector<String>& data,
   atom_definition.push_back(data[3]);
   atom_definition.push_back(data[4]);
 
-  MMInteractionPtr p(new MMInteraction(functype));
+  InteractionPtr p(new Interaction(functype));
 
   if(type_definition) p->SetTypes(atom_definition);
   else p->SetNames(atom_definition);
@@ -1467,7 +1467,7 @@ MMInteractionPtr GromacsReader::ParseCMap(const std::vector<String>& data,
 }
 
 
-MMInteractionPtr GromacsReader::ParseLJ(const std::vector<String>& data, 
+InteractionPtr GromacsReader::ParseLJ(const std::vector<String>& data, 
                                         bool type_definition,
                                         FuncType functype){
 
@@ -1482,7 +1482,7 @@ MMInteractionPtr GromacsReader::ParseLJ(const std::vector<String>& data,
   std::vector<String> atom_definition;
   atom_definition.push_back(data[0]);
 
-  MMInteractionPtr p(new MMInteraction(functype));
+  InteractionPtr p(new Interaction(functype));
 
   if(type_definition) p->SetTypes(atom_definition);
   else p->SetNames(atom_definition);
@@ -1501,7 +1501,7 @@ MMInteractionPtr GromacsReader::ParseLJ(const std::vector<String>& data,
 }
 
 
-MMInteractionPtr GromacsReader::ParseLJPair(const std::vector<String>& data, 
+InteractionPtr GromacsReader::ParseLJPair(const std::vector<String>& data, 
                                             bool type_definition,
                                             FuncType functype){
 
@@ -1532,7 +1532,7 @@ MMInteractionPtr GromacsReader::ParseLJPair(const std::vector<String>& data,
   atom_definition.push_back(data[0]);
   atom_definition.push_back(data[1]);
 
-  MMInteractionPtr p(new MMInteraction(functype));
+  InteractionPtr p(new Interaction(functype));
 
   if(type_definition) p->SetTypes(atom_definition);
   else p->SetNames(atom_definition);
@@ -1550,7 +1550,7 @@ MMInteractionPtr GromacsReader::ParseLJPair(const std::vector<String>& data,
   return p;
 }
 
-MMInteractionPtr GromacsReader::ParseConstraint(const std::vector<String>& data, 
+InteractionPtr GromacsReader::ParseConstraint(const std::vector<String>& data, 
                                                 bool type_definition,
                                                 FuncType functype){
 
@@ -1581,7 +1581,7 @@ MMInteractionPtr GromacsReader::ParseConstraint(const std::vector<String>& data,
   atom_definition.push_back(data[0]);
   atom_definition.push_back(data[1]);
 
-  MMInteractionPtr p(new MMInteraction(functype));
+  InteractionPtr p(new Interaction(functype));
 
   if(type_definition) p->SetTypes(atom_definition);
   else p->SetNames(atom_definition);
@@ -1598,7 +1598,7 @@ MMInteractionPtr GromacsReader::ParseConstraint(const std::vector<String>& data,
   return p;
 }
 
-MMInteractionPtr GromacsReader::ParseGenborn(const std::vector<String>& data,
+InteractionPtr GromacsReader::ParseGenborn(const std::vector<String>& data,
                                              bool type_definition,
                                              FuncType functype){
 
@@ -1612,7 +1612,7 @@ MMInteractionPtr GromacsReader::ParseGenborn(const std::vector<String>& data,
 
   functype = GBSA; //bit hacky, I know, but there is only one type for gbsa anyway....
 
-  MMInteractionPtr p(new MMInteraction(functype));
+  InteractionPtr p(new Interaction(functype));
 
   if(type_definition) p->SetTypes(atom_definition);
   else p->SetNames(atom_definition);
@@ -1631,7 +1631,7 @@ MMInteractionPtr GromacsReader::ParseGenborn(const std::vector<String>& data,
 }
 
 
-MMInteractionPtr GromacsReader::ParseExclusion(const std::vector<String>& data,
+InteractionPtr GromacsReader::ParseExclusion(const std::vector<String>& data,
                                                bool type_definition,
                                                FuncType functype){
 
@@ -1645,7 +1645,7 @@ MMInteractionPtr GromacsReader::ParseExclusion(const std::vector<String>& data,
   atom_definition.push_back(data[0]);
   atom_definition.push_back(data[1]);
 
-  MMInteractionPtr p(new MMInteraction(functype));
+  InteractionPtr p(new Interaction(functype));
 
   if(type_definition) p->SetTypes(atom_definition);
   else p->SetNames(atom_definition);
@@ -1682,7 +1682,7 @@ void GromacsReader::ParseCHARMMPRM(std::vector<std::vector<String> >& content){
         break;
       }
       case 1:{ //bonds
-        MMInteractionPtr p(new MMInteraction(HarmonicBond));
+        InteractionPtr p(new Interaction(HarmonicBond));
         std::vector<String> types;
         std::vector<Real> parameters;
         types.push_back(current_line[0]);
@@ -1699,7 +1699,7 @@ void GromacsReader::ParseCHARMMPRM(std::vector<std::vector<String> >& content){
         break;
       }
       case 2:{ //angles
-        MMInteractionPtr p(new MMInteraction(UreyBradleyAngle));
+        InteractionPtr p(new Interaction(UreyBradleyAngle));
         std::vector<String> types;
         std::vector<Real> parameters;
         types.push_back(current_line[0]);
@@ -1725,7 +1725,7 @@ void GromacsReader::ParseCHARMMPRM(std::vector<std::vector<String> >& content){
         break;
       }
       case 3:{ //diherals
-        MMInteractionPtr p(new MMInteraction(PeriodicDihedral));
+        InteractionPtr p(new Interaction(PeriodicDihedral));
         std::vector<String> types;
         std::vector<Real> parameters;
         types.push_back(current_line[0]);
@@ -1745,7 +1745,7 @@ void GromacsReader::ParseCHARMMPRM(std::vector<std::vector<String> >& content){
         break;
       }
       case 4:{ //improper
-        MMInteractionPtr p(new MMInteraction(HarmonicImproper));
+        InteractionPtr p(new Interaction(HarmonicImproper));
         std::vector<String> types;
         std::vector<Real> parameters;
         types.push_back(current_line[0]);
@@ -1787,7 +1787,7 @@ void GromacsReader::ParseCHARMMPRM(std::vector<std::vector<String> >& content){
             throw ost::io::IOException(ss.str());
           }
           if(parameters.size() == dim*dim+1){
-            MMInteractionPtr p(new MMInteraction(CMap));
+            InteractionPtr p(new Interaction(CMap));
             p->SetTypes(types);
             p->SetParam(parameters);
             ff_->AddCMap(p);
@@ -1815,7 +1815,7 @@ void GromacsReader::ParseCHARMMPRM(std::vector<std::vector<String> >& content){
         }catch(std::exception& e){ 
           throw ost::io::IOException("Could not cast LJ parameters into real type!");
         }
-        MMInteractionPtr p(new MMInteraction(LJ));
+        InteractionPtr p(new Interaction(LJ));
         p->SetTypes(types);
         p->SetParam(parameters);
         ff_->AddLJ(p);
@@ -1846,7 +1846,7 @@ void GromacsReader::ParseCHARMMPRM(std::vector<std::vector<String> >& content){
   //have explicitely defined 1,4 interactions
   for(uint i = 0; i < lj_14_types.size(); ++i){
     for(uint j = i; j < lj_14_types.size(); ++j){
-      MMInteractionPtr p(new MMInteraction(LJPair));
+      InteractionPtr p(new Interaction(LJPair));
       std::vector<String> types;
       std::vector<Real> parameters;
       types.push_back(lj_14_types[i]);
@@ -1861,7 +1861,7 @@ void GromacsReader::ParseCHARMMPRM(std::vector<std::vector<String> >& content){
   //let's add all pairwise 1,4 interactions, where only one partner has explicitely defined 1,4 interactions
   for(uint i = 0; i < lj_14_types.size(); ++i){
     for(uint j = 0; j < lj_types.size(); ++j){
-      MMInteractionPtr p(new MMInteraction(LJPair));
+      InteractionPtr p(new Interaction(LJPair));
       std::vector<String> types;
       std::vector<Real> parameters;
       types.push_back(lj_14_types[i]);
@@ -1914,7 +1914,7 @@ void GromacsReader::ParseCHARMMRTF(std::vector<std::vector<String> >& content){
         case 17:{//bond
           int num_bonds = (current_line.size()-1) / 2;
           for(int i = 0; i < num_bonds; ++i){
-            MMInteractionPtr p(new MMInteraction(HarmonicBond));
+            InteractionPtr p(new Interaction(HarmonicBond));
             std::vector<String> names;
             names.push_back(current_line[i*2+1]);
             names.push_back(current_line[i*2+2]);
@@ -1927,7 +1927,7 @@ void GromacsReader::ParseCHARMMRTF(std::vector<std::vector<String> >& content){
         case 18:{//angle
           int num_angles = (current_line.size()-1) / 3;
           for(int i = 0; i < num_angles; ++i){
-            MMInteractionPtr p(new MMInteraction(UreyBradleyAngle));
+            InteractionPtr p(new Interaction(UreyBradleyAngle));
             std::vector<String> names;
             names.push_back(current_line[i*3+1]);
             names.push_back(current_line[i*3+2]);
@@ -1941,7 +1941,7 @@ void GromacsReader::ParseCHARMMRTF(std::vector<std::vector<String> >& content){
         case 19:{//dihedral
           int num_dihedrals = (current_line.size()-1) / 4;
           for(int i = 0; i < num_dihedrals; ++i){
-            MMInteractionPtr p(new MMInteraction(PeriodicDihedral));
+            InteractionPtr p(new Interaction(PeriodicDihedral));
             std::vector<String> names;
             names.push_back(current_line[i*4+1]);
             names.push_back(current_line[i*4+2]);
@@ -1956,7 +1956,7 @@ void GromacsReader::ParseCHARMMRTF(std::vector<std::vector<String> >& content){
         case 20:{//improper
           int num_impropers = (current_line.size()-1) / 4;
           for(int i = 0; i < num_impropers; ++i){
-            MMInteractionPtr p(new MMInteraction(HarmonicImproper));
+            InteractionPtr p(new Interaction(HarmonicImproper));
             std::vector<String> names;
             names.push_back(current_line[i*4+1]);
             names.push_back(current_line[i*4+2]);
@@ -1971,7 +1971,7 @@ void GromacsReader::ParseCHARMMRTF(std::vector<std::vector<String> >& content){
         case 5:{//cmap
           int num_cmaps = (current_line.size()-1) / 8;
           for(int i = 0; i < num_cmaps; ++i){
-            MMInteractionPtr p(new MMInteraction(CMap));
+            InteractionPtr p(new Interaction(CMap));
             std::vector<String> names;
             names.push_back(current_line[i*4+1]);
             names.push_back(current_line[i*4+2]);
@@ -2007,7 +2007,7 @@ void GromacsReader::ParseCHARMMRTF(std::vector<std::vector<String> >& content){
         case 26:{ //double =>basically a bond
           int num_bonds = (current_line.size()-1) / 2;
           for(int i = 0; i < num_bonds; ++i){
-            MMInteractionPtr p(new MMInteraction(HarmonicBond));
+            InteractionPtr p(new Interaction(HarmonicBond));
             std::vector<String> names;
             names.push_back(current_line[i*2+1]);
             names.push_back(current_line[i*2+2]);

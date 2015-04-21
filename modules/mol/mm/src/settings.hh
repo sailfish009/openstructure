@@ -16,9 +16,9 @@ namespace OpenMM{
 
 namespace ost { namespace mol{ namespace mm{
 
-struct MMSettings;
+struct Settings;
 class TerminiExceptions;
-typedef boost::shared_ptr<MMSettings> MMSettingsPtr;
+typedef boost::shared_ptr<Settings> SettingsPtr;
 typedef boost::shared_ptr<TerminiExceptions> TerminiExceptionsPtr;
 
 enum Platform{
@@ -64,9 +64,9 @@ private:
 
 };
 
-struct MMSettings{
+struct Settings{
 
-  MMSettings(): add_bonds(true),
+  Settings(): add_bonds(true),
                 add_angles(true),
                 add_dihedrals(true),
                 add_impropers(true),

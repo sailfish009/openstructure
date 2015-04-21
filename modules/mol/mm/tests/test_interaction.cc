@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
-#include <ost/mol/mm/mm_interaction.hh>
+#include <ost/mol/mm/interaction.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/builder.hh>
 
@@ -14,20 +14,20 @@ BOOST_AUTO_TEST_SUITE( mol_mm );
 
 BOOST_AUTO_TEST_CASE(test_set_stuff) 
 {
-  MMInteraction harmonic_bond = MMInteraction(HarmonicBond);
-  MMInteraction harmonic_angle = MMInteraction(HarmonicAngle);
-  MMInteraction urey_bradley = MMInteraction(UreyBradleyAngle);
-  MMInteraction periodic_dihedral = MMInteraction(PeriodicDihedral);
-  MMInteraction periodic_improper = MMInteraction(PeriodicImproper);
-  MMInteraction harmonic_improper = MMInteraction(HarmonicImproper);
-  MMInteraction cmap = MMInteraction(CMap);
-  MMInteraction lj = MMInteraction(LJ);
-  MMInteraction lj_pair = MMInteraction(LJPair);
-  MMInteraction gbsa = MMInteraction(GBSA);
-  MMInteraction distance_constraint = MMInteraction(DistanceConstraint);
-  MMInteraction exclusion = MMInteraction(Exclusion);
-  MMInteraction harmonic_distance_restraint = MMInteraction(HarmonicDistanceRestraint);
-  MMInteraction harmonic_position_restraint = MMInteraction(HarmonicPositionRestraint);
+  Interaction harmonic_bond = Interaction(HarmonicBond);
+  Interaction harmonic_angle = Interaction(HarmonicAngle);
+  Interaction urey_bradley = Interaction(UreyBradleyAngle);
+  Interaction periodic_dihedral = Interaction(PeriodicDihedral);
+  Interaction periodic_improper = Interaction(PeriodicImproper);
+  Interaction harmonic_improper = Interaction(HarmonicImproper);
+  Interaction cmap = Interaction(CMap);
+  Interaction lj = Interaction(LJ);
+  Interaction lj_pair = Interaction(LJPair);
+  Interaction gbsa = Interaction(GBSA);
+  Interaction distance_constraint = Interaction(DistanceConstraint);
+  Interaction exclusion = Interaction(Exclusion);
+  Interaction harmonic_distance_restraint = Interaction(HarmonicDistanceRestraint);
+  Interaction harmonic_position_restraint = Interaction(HarmonicPositionRestraint);
 
   //std::vector<String> one_string, two_string, three_string, four_string, five_string;
   //std::vector<Real> one_real, two_real, three_real, four_real, five_real, zero_real;
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(test_set_stuff)
   BOOST_CHECK_NO_THROW(cmap.SetParam(valid_cmap_parameters));
   BOOST_CHECK(harmonic_bond.IsParametrized());
 
-  MMInteraction new_bond = MMInteraction(HarmonicBond);
+  Interaction new_bond = Interaction(HarmonicBond);
   std::vector<String> with_wildcard, without_wildcard;
   with_wildcard.push_back("A");
   without_wildcard.push_back("A");
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(test_set_stuff)
 
 BOOST_AUTO_TEST_CASE(test_match_stuff) 
 {
-  MMInteraction dihedral = MMInteraction(PeriodicDihedral);
+  Interaction dihedral = Interaction(PeriodicDihedral);
 
   std::vector<String> with_wildcard, without_wildcard;
   with_wildcard.push_back("X");
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(test_match_stuff)
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_atom){
-  MMInteraction bond = MMInteraction(HarmonicBond);
+  Interaction bond = Interaction(HarmonicBond);
   std::vector<String> strings;
   strings.push_back("A");
   strings.push_back("B");
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(test_getatoms){
   ost::mol::AtomHandleList atom_list_two  = res_list[1].GetAtomList();
   ost::mol::AtomHandleList atom_list_three  = res_list[2].GetAtomList();
 
-  MMInteraction bond = MMInteraction(HarmonicBond);
+  Interaction bond = Interaction(HarmonicBond);
   std::vector<String> strings;
   strings.push_back("A");
   strings.push_back("B");

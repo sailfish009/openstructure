@@ -53,14 +53,14 @@ int GetAtomIndex(uint residue_index,
 namespace ost{ namespace mol{ namespace mm{
 
 TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent, 
-                                    const MMSettingsPtr settings){
+                                    const SettingsPtr settings){
 
 
   ost::mol::ResidueHandleList res_list = ent.GetResidueList();
   ost::mol::XCSEditor ed = ent.EditXCS(ost::mol::BUFFERED_EDIT);
 
   //rename all the stuff to the gromacs naming...
-  MMModeller::AssignGromacsNaming(ent);
+  Modeller::AssignGromacsNaming(ent);
 
   //even if not reconnected yet, it gets assumed, that
   //peptide or nucleotide bonds are correctly set in the input entity
@@ -130,7 +130,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
   ed.UpdateICS();
 
   if(settings->generate_disulfid_bonds){
-    MMModeller::GenerateDisulfidBonds(ent);
+    Modeller::GenerateDisulfidBonds(ent);
   }
 
   ff->AssignFFSpecificNames(ent);
@@ -268,8 +268,8 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
   std::set<Index<2> > pairs_14;
   std::set<Index<2> > distance_constraints;
   //per atom parameters
-  std::vector<MMInteractionPtr> ljs;
-  std::vector<MMInteractionPtr> gbsa;
+  std::vector<InteractionPtr> ljs;
+  std::vector<InteractionPtr> gbsa;
   //extract all bonded interactions directly from the structure itself,
   //except the impropers, cmaps and exclusions. Those two get read from the building
   //blocks.
@@ -336,13 +336,13 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     }
   }
   //impropers exclusions and cmaps get read from residuetemplates!
-  std::vector<MMInteractionPtr> interaction_list;
+  std::vector<InteractionPtr> interaction_list;
   std::vector<String> interaction_atom_names;
 
   if(settings->add_impropers){
     for(uint i = 0; i < building_blocks.size(); ++i){
       interaction_list = building_blocks[i]->GetImpropers();
-      for(std::vector<MMInteractionPtr>::iterator j = interaction_list.begin();
+      for(std::vector<InteractionPtr>::iterator j = interaction_list.begin();
           j != interaction_list.end(); ++j){
         interaction_atom_names = (*j)->GetNames();
         Index<4> improper_index;
@@ -357,7 +357,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
   if(settings->add_cmaps){
     for(uint  i = 0; i < building_blocks.size(); ++i){
       interaction_list = building_blocks[i]->GetCMaps();
-      for(std::vector<MMInteractionPtr>::iterator j = interaction_list.begin();
+      for(std::vector<InteractionPtr>::iterator j = interaction_list.begin();
           j != interaction_list.end(); ++j){
         interaction_atom_names = (*j)->GetNames();
         Index<5> cmap_index;
@@ -372,7 +372,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
   if(settings->add_nonbonded && settings->add_exclusions){
     for(uint i = 0; i < building_blocks.size(); ++i){
       interaction_list = building_blocks[i]->GetExclusions();
-      for(std::vector<MMInteractionPtr>::iterator j = interaction_list.begin();
+      for(std::vector<InteractionPtr>::iterator j = interaction_list.begin();
           j != interaction_list.end(); ++j){
         interaction_atom_names = (*j)->GetNames();
         uint one = GetAtomIndex(i,res_list,atom_indices,interaction_atom_names[0]);
@@ -419,7 +419,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
   //only the first is added to avoid contradicting constraints
   for(uint i = 0; i < building_blocks.size(); ++i){
     interaction_list = building_blocks[i]->GetConstraints();
-    for(std::vector<MMInteractionPtr>::iterator j = interaction_list.begin();
+    for(std::vector<InteractionPtr>::iterator j = interaction_list.begin();
         j != interaction_list.end(); ++j){
       interaction_atom_names = (*j)->GetNames();
       uint one = GetAtomIndex(i,res_list,atom_indices,interaction_atom_names[0]);
@@ -452,7 +452,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
         distance_constraints.insert(*i);
         Real distance;
         if(settings->ideal_bond_length_constraints){
-          MMInteractionPtr bond_ptr = ff->GetBond(atom_types[(*i)[0]],atom_types[(*i)[1]]);
+          InteractionPtr bond_ptr = ff->GetBond(atom_types[(*i)[0]],atom_types[(*i)[1]]);
           parameters = bond_ptr->GetParam();
           distance = parameters[0];
         }
@@ -466,7 +466,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
           distance_constraints.insert(*i);
           Real distance;
           if(settings->ideal_bond_length_constraints){
-            MMInteractionPtr bond_ptr = ff->GetBond(atom_types[(*i)[0]],atom_types[(*i)[1]]);
+            InteractionPtr bond_ptr = ff->GetBond(atom_types[(*i)[0]],atom_types[(*i)[1]]);
             parameters = bond_ptr->GetParam();
             distance = parameters[0];            
           }
@@ -530,7 +530,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     //handle bonds
     for(uint i = 0; i < res_list.size(); ++i){
       interaction_list = building_blocks[i]->GetBonds();
-      for(std::vector<MMInteractionPtr>::iterator j = interaction_list.begin();
+      for(std::vector<InteractionPtr>::iterator j = interaction_list.begin();
           j != interaction_list.end(); ++j){
         if((*j)->IsParametrized()){
           interaction_atom_names = (*j)->GetNames();
@@ -549,7 +549,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     for(std::set<Index<2> >::iterator i = bonds.begin();
         i!=bonds.end(); ++i){    
 
-      MMInteractionPtr bond_ptr;
+      InteractionPtr bond_ptr;
       try{
         bond_ptr = ff->GetBond(atom_types[(*i)[0]],atom_types[(*i)[1]]);
       } catch(ost::Error& e){
@@ -573,7 +573,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     //handle angles
     for(uint i = 0; i < res_list.size(); ++i){
       interaction_list = building_blocks[i]->GetAngles();
-      for(std::vector<MMInteractionPtr>::iterator j = interaction_list.begin();
+      for(std::vector<InteractionPtr>::iterator j = interaction_list.begin();
           j != interaction_list.end(); ++j){
         if((*j)->IsParametrized()){
           interaction_atom_names = (*j)->GetNames();
@@ -613,7 +613,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     for(std::set<Index<3> >::iterator i = angles.begin();
         i!=angles.end(); ++i){
 
-      MMInteractionPtr angle_ptr;
+      InteractionPtr angle_ptr;
       try{
         angle_ptr = ff->GetAngle(atom_types[(*i)[0]],
                                  atom_types[(*i)[1]],
@@ -655,7 +655,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     std::set<Index<4> > dihedrals_to_delete;
     for(uint i = 0; i < res_list.size(); ++i){
       interaction_list = building_blocks[i]->GetDihedrals();
-      for(std::vector<MMInteractionPtr>::iterator j = interaction_list.begin();
+      for(std::vector<InteractionPtr>::iterator j = interaction_list.begin();
           j != interaction_list.end(); ++j){
         if((*j)->IsParametrized()){
           interaction_atom_names = (*j)->GetNames();
@@ -702,7 +702,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     for(std::set<Index<4> >::iterator i = dihedrals.begin();
         i!=dihedrals.end(); ++i){
 
-      std::vector<MMInteractionPtr> dihedral_ptr;
+      std::vector<InteractionPtr> dihedral_ptr;
 
       try{
         dihedral_ptr = ff->GetDihedrals(atom_types[(*i)[0]],
@@ -722,7 +722,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
         continue;  // ignore it and continue with next interaction
       }
 
-      for(std::vector<MMInteractionPtr>::iterator j = dihedral_ptr.begin();
+      for(std::vector<InteractionPtr>::iterator j = dihedral_ptr.begin();
           j != dihedral_ptr.end(); ++j){
         parameters = (*j)->GetParam();
         top->AddPeriodicDihedral((*i)[0],(*i)[1],(*i)[2],(*i)[3],
@@ -736,7 +736,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     std::set<Index<4> > impropers_to_delete;
     for(uint i = 0; i < building_blocks.size(); ++i){
       interaction_list = building_blocks[i]->GetImpropers();
-      for(std::vector<MMInteractionPtr>::iterator j = interaction_list.begin();
+      for(std::vector<InteractionPtr>::iterator j = interaction_list.begin();
           j != interaction_list.end(); ++j){
         if((*j)->IsParametrized()){
           //we do not have to care about the ordering, since we extracted the
@@ -780,7 +780,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     for(std::set<Index<4> >::iterator i = impropers.begin();
         i!=impropers.end(); ++i){
 
-      std::vector<MMInteractionPtr> improper_ptr;
+      std::vector<InteractionPtr> improper_ptr;
 
       try{
         improper_ptr = ff->GetImpropers(atom_types[(*i)[0]],
@@ -800,7 +800,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
         continue;  // ignore it and continue with next interaction
       }
 
-      for(std::vector<MMInteractionPtr>::iterator j = improper_ptr.begin();
+      for(std::vector<InteractionPtr>::iterator j = improper_ptr.begin();
           j != improper_ptr.end(); ++j){
         parameters = (*j)->GetParam();
         switch((*j)->GetFuncType()){
@@ -826,7 +826,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     //handle cmaps
     for(uint i = 0; i < res_list.size(); ++i){
       interaction_list = building_blocks[i]->GetCMaps();
-      for(std::vector<MMInteractionPtr>::iterator j = interaction_list.begin();
+      for(std::vector<InteractionPtr>::iterator j = interaction_list.begin();
           j != interaction_list.end(); ++j){
         if((*j)->IsParametrized()){
           //we do not have to care about the ordering, since we extracted the
@@ -854,7 +854,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     for(std::set<Index<5> >::iterator i = cmaps.begin();
         i!=cmaps.end(); ++i){
 
-      MMInteractionPtr cmap_ptr;
+      InteractionPtr cmap_ptr;
 
       try{
         cmap_ptr = ff->GetCMap(atom_types[(*i)[0]],
@@ -883,7 +883,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
 
   if(settings->add_nonbonded){
 
-    MMInteractionPtr lj_interaction;
+    InteractionPtr lj_interaction;
     std::vector<Real> sigmas;
     std::vector<Real> epsilons;
 
@@ -925,7 +925,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     std::vector<Real> radii;
     std::vector<Real> scaling;
     for(uint i = 0; i < atom_list.size(); ++i){
-      MMInteractionPtr gbsa_ptr = ff->GetImplicitGenborn(atom_types[i]);
+      InteractionPtr gbsa_ptr = ff->GetImplicitGenborn(atom_types[i]);
       if(!gbsa_ptr){
         std::stringstream ss;
         ss << "Structure contains atom of type " << types[i] << " which is not";
@@ -948,9 +948,9 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     //first, we rename to the gromacs standars...
     ff->AssignFFSpecificNames(ent,true);
     //still call the assign gromacs names function...
-    MMModeller::AssignGromacsNaming(ent);
+    Modeller::AssignGromacsNaming(ent);
     //let's finally do the renaming to PDB standard
-    MMModeller::AssignPDBNaming(ent);
+    Modeller::AssignPDBNaming(ent);
   }
 
 

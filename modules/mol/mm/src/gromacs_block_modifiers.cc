@@ -325,7 +325,7 @@ void GromacsBlockModifier::ApplyOnBuildingBlock(BuildingBlockPtr p){
       //the bond, that connects the newly added atom to its anchor is not necessarily
       //defined. Let's add it here. Note, that nothing happens, if this specific bond
       //is already part of the building block.
-      MMInteractionPtr b_p(new MMInteraction(p->GetBonds()[0]->GetFuncType()));
+      InteractionPtr b_p(new Interaction(p->GetBonds()[0]->GetFuncType()));
       std::vector<String> bond_names;
       std::vector<String> bond_types;
       bond_names.push_back(anchor_atoms[0]);
@@ -345,27 +345,27 @@ void GromacsBlockModifier::ApplyOnBuildingBlock(BuildingBlockPtr p){
   }
  
   //we simply add the new interactions to the building block
-  for(std::vector<MMInteractionPtr>::iterator i = bonds_.begin();
+  for(std::vector<InteractionPtr>::iterator i = bonds_.begin();
       i != bonds_.end(); ++i){
     p->AddBond(*i, true);
   }
 
-  for(std::vector<MMInteractionPtr>::iterator i = angles_.begin();
+  for(std::vector<InteractionPtr>::iterator i = angles_.begin();
       i != angles_.end(); ++i){
     p->AddAngle(*i, true);
   }
 
-  for(std::vector<MMInteractionPtr>::iterator i = dihedrals_.begin();
+  for(std::vector<InteractionPtr>::iterator i = dihedrals_.begin();
       i != dihedrals_.end(); ++i){
     p->AddDihedral(*i, true);
   }
 
-  for(std::vector<MMInteractionPtr>::iterator i = impropers_.begin();
+  for(std::vector<InteractionPtr>::iterator i = impropers_.begin();
       i != impropers_.end(); ++i){
     p->AddImproper(*i, true);
   }
 
-  for(std::vector<MMInteractionPtr>::iterator i = cmaps_.begin();
+  for(std::vector<InteractionPtr>::iterator i = cmaps_.begin();
       i != cmaps_.end(); ++i){
     p->AddCMap(*i, true);
   } 
@@ -430,7 +430,7 @@ void GromacsBlockModifier::ApplyOnResidue(ost::mol::ResidueHandle& res, ost::mol
 }
 
 
-void GromacsBlockModifier::CheckInteractionToAdd(MMInteractionPtr p, const String& interaction_type) const{
+void GromacsBlockModifier::CheckInteractionToAdd(InteractionPtr p, const String& interaction_type) const{
   if(p->GetNames().empty()) throw ost::Error("Expect interaction to have names properly set!");
 
   if(interaction_type == "BOND"){

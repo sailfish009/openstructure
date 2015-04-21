@@ -1,14 +1,14 @@
-#include <ost/mol/mm/mm_interaction.hh>
+#include <ost/mol/mm/interaction.hh>
 
 namespace ost { namespace mol{ namespace mm{
 
-MMInteraction::MMInteraction(FuncType func_type): func_type_(func_type), 
-                                             set_parameters_(false), 
-                                             has_type_wildcard_(false),
-                                             has_name_wildcard_(false){ }
+Interaction::Interaction(FuncType func_type): func_type_(func_type), 
+                                              set_parameters_(false), 
+                                              has_type_wildcard_(false),
+                                              has_name_wildcard_(false){ }
 
 
-void MMInteraction::SetTypes(std::vector<String> types){
+void Interaction::SetTypes(std::vector<String> types){
   if(!this->CheckSetNamesTypes(types)){
     throw ost::Error("Tried to set invalid number of types to interaction!");
   }
@@ -19,7 +19,7 @@ void MMInteraction::SetTypes(std::vector<String> types){
   else has_type_wildcard_ = false;
 }
 
-void MMInteraction::SetNames(std::vector<String> names){
+void Interaction::SetNames(std::vector<String> names){
   if(!this->CheckSetNamesTypes(names)){
     throw ost::Error("Tried to set invalid number of names to interaction!");
   }
@@ -30,7 +30,7 @@ void MMInteraction::SetNames(std::vector<String> names){
   else has_name_wildcard_ = false;
 }
 
-void MMInteraction::SetParam(std::vector<Real>& parameters){
+void Interaction::SetParam(std::vector<Real>& parameters){
   if(!this->CheckSetParam(parameters)){
     throw ost::Error("Tried to set invalid number of parameters to interaction!");
   }  
@@ -38,7 +38,7 @@ void MMInteraction::SetParam(std::vector<Real>& parameters){
   set_parameters_ = true;
 }
 
-ost::mol::AtomHandleList MMInteraction::GetAtoms(const ost::mol::ResidueHandle& res) const{
+ost::mol::AtomHandleList Interaction::GetAtoms(const ost::mol::ResidueHandle& res) const{
 
   ost::mol::AtomHandleList return_list;
   ost::mol::ResidueHandle prev = res.GetPrev();
@@ -84,7 +84,7 @@ ost::mol::AtomHandleList MMInteraction::GetAtoms(const ost::mol::ResidueHandle& 
   return return_list;
 }
 
-bool MMInteraction::MatchTypes(const std::vector<String>& atom_types) const {
+bool Interaction::MatchTypes(const std::vector<String>& atom_types) const {
 
   if(atom_types_.size() == 0) return false;
   if(atom_types.size() != atom_types_.size()) return false;
@@ -102,7 +102,7 @@ bool MMInteraction::MatchTypes(const std::vector<String>& atom_types) const {
   return match || reverse_match;
 }
 
-bool MMInteraction::MatchNames(const std::vector<String>& atom_names) const {
+bool Interaction::MatchNames(const std::vector<String>& atom_names) const {
 
   if(atom_names_.size() == 0) return false;
   if(atom_names.size() != atom_names_.size()) return false;
@@ -120,7 +120,7 @@ bool MMInteraction::MatchNames(const std::vector<String>& atom_names) const {
   return match || r_match;
 }
 
-bool MMInteraction::ReplaceAtom(const String& name, const String& new_name, const String& new_type){
+bool Interaction::ReplaceAtom(const String& name, const String& new_name, const String& new_type){
 
   for(uint i = 0; i < atom_names_.size(); ++i){
     if(atom_names_[i] == name){
@@ -135,15 +135,15 @@ bool MMInteraction::ReplaceAtom(const String& name, const String& new_name, cons
   return false;
 }
 
-bool MMInteraction::HasName(const String& name) const{
+bool Interaction::HasName(const String& name) const{
   return std::find(atom_names_.begin(),atom_names_.end(),name) != atom_names_.end();
 }
 
-bool MMInteraction::HasType(const String& type) const{
+bool Interaction::HasType(const String& type) const{
   return std::find(atom_types_.begin(),atom_types_.end(),type) != atom_types_.end();
 }
 
-bool MMInteraction::CheckSetNamesTypes(std::vector<String>& types){
+bool Interaction::CheckSetNamesTypes(std::vector<String>& types){
 
   switch(func_type_){
     case HarmonicBond: return types.size() == 2;
@@ -164,7 +164,7 @@ bool MMInteraction::CheckSetNamesTypes(std::vector<String>& types){
   }
 }
 
-bool MMInteraction::CheckSetParam(std::vector<Real>& param){
+bool Interaction::CheckSetParam(std::vector<Real>& param){
 
   switch(func_type_){
     case HarmonicBond: return param.size() == 2;

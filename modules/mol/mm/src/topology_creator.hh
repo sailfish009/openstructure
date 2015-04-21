@@ -13,9 +13,9 @@
 #include <ost/mol/mm/forcefield.hh>
 #include <ost/mol/mm/buildingblock.hh>
 #include <ost/mol/mm/block_modifiers.hh>
-#include <ost/mol/mm/mm_interaction.hh>
-#include <ost/mol/mm/mm_settings.hh>
-#include <ost/mol/mm/mm_modeller.hh>
+#include <ost/mol/mm/interaction.hh>
+#include <ost/mol/mm/settings.hh>
+#include <ost/mol/mm/modeller.hh>
 #include <ost/mol/mm/index.hh>
 #include <ost/mol/mm/topology.hh>
 
@@ -28,7 +28,7 @@ typedef boost::shared_ptr<TopologyCreator> TopologyCreatorPtr;
 class TopologyCreator {
 public:
   static TopologyPtr Create(ost::mol::EntityHandle& ent, 
-                            const MMSettingsPtr settings);
+                            const SettingsPtr settings);
 
 };
 

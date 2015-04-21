@@ -10,7 +10,7 @@
 
 #include <ost/message.hh>
 #include <ost/mol/mm/buildingblock.hh>
-#include <ost/mol/mm/mm_interaction.hh>
+#include <ost/mol/mm/interaction.hh>
 #include <ost/mol/mm/block_modifiers.hh>
 #include <ost/mol/mm/gromacs_block_modifiers.hh>
 
@@ -71,38 +71,38 @@ public:
 
   BlockModifierPtr GetCTerModifier(const String& res_name, const String& ter_name = "") const;
 
-  MMInteractionPtr GetBond(const String& type1, 
+  InteractionPtr GetBond(const String& type1, 
                            const String& type2) const;
 
-  MMInteractionPtr GetAngle(const String& type1, 
+  InteractionPtr GetAngle(const String& type1, 
                             const String& type2,
                             const String& type3) const;
 
-  std::vector<MMInteractionPtr> GetDihedrals(const String& type1,
+  std::vector<InteractionPtr> GetDihedrals(const String& type1,
                                              const String& type2,
                                              const String& type3,
                                              const String& type4) const;
 
-  std::vector<MMInteractionPtr> GetImpropers(const String& type1,
+  std::vector<InteractionPtr> GetImpropers(const String& type1,
                                              const String& type2,
                                              const String& type3,
                                              const String& type4) const;
 
-  MMInteractionPtr GetCMap(const String& type1,
+  InteractionPtr GetCMap(const String& type1,
                            const String& type2,
                            const String& type3,
                            const String& type4,
                            const String& type5) const;
 
-  MMInteractionPtr GetImplicitGenborn(const String& type1) const;
+  InteractionPtr GetImplicitGenborn(const String& type1) const;
 
-  MMInteractionPtr GetLJ(const String& type1, 
+  InteractionPtr GetLJ(const String& type1, 
                              const String& type2, 
                              bool pair=false) const;
 
-  MMInteractionPtr GetLJ(const String& type) const;
+  InteractionPtr GetLJ(const String& type) const;
 
-  MMInteractionPtr GetConstraint(const String& type1,
+  InteractionPtr GetConstraint(const String& type1,
                                  const String& type2);
 
   Real GetMass(const String& type) const;
@@ -115,23 +115,23 @@ public:
 
   void AddBuildingBlock(const String& name, BuildingBlockPtr p) { building_blocks_[name] = p; }
 
-  void AddBond(MMInteractionPtr p);
+  void AddBond(InteractionPtr p);
 
-  void AddAngle(MMInteractionPtr p);
+  void AddAngle(InteractionPtr p);
 
-  void AddDihedral(MMInteractionPtr p);
+  void AddDihedral(InteractionPtr p);
 
-  void AddImproper(MMInteractionPtr p);
+  void AddImproper(InteractionPtr p);
 
-  void AddCMap(MMInteractionPtr p);
+  void AddCMap(InteractionPtr p);
 
-  void AddImplicitGenborn(MMInteractionPtr p);
+  void AddImplicitGenborn(InteractionPtr p);
 
-  void AddLJ(MMInteractionPtr p);
+  void AddLJ(InteractionPtr p);
 
-  void AddLJPair(MMInteractionPtr p);
+  void AddLJPair(InteractionPtr p);
 
-  void AddConstraint(MMInteractionPtr p);
+  void AddConstraint(InteractionPtr p);
 
   void AddMass(const String& type, Real mass) { atom_masses_[type] = mass; }
 
@@ -179,7 +179,7 @@ public:
 private:
 
   String AtomTypesToKeyword(std::vector<String>& types, bool allow_reordering = true) const;
-  void CheckInteractionToAdd(MMInteractionPtr p, const String& interaction_type) const;
+  void CheckInteractionToAdd(InteractionPtr p, const String& interaction_type) const;
 
   //this is all nonbonded stuff
   bool gen_pairs_;
@@ -191,15 +191,15 @@ private:
   boost::unordered_map<String, BlockModifierPtr> block_modifiers_;
 
   //the standard interactions
-  boost::unordered_map<String,MMInteractionPtr> bonds_;
-  boost::unordered_map<String,MMInteractionPtr> angles_;
-  boost::unordered_map<String,MMInteractionPtr> lj_14_pairs_; 
-  boost::unordered_map<String,MMInteractionPtr> constraints_;
-  boost::unordered_map<String,MMInteractionPtr> cmaps_;
-  boost::unordered_map<String,MMInteractionPtr> implicit_genborn_;
-  boost::unordered_map<String,MMInteractionPtr> ljs_; 
-  boost::unordered_map<String,std::vector<MMInteractionPtr> > dihedrals_;
-  boost::unordered_map<String,std::vector<MMInteractionPtr> > improper_dihedrals_;
+  boost::unordered_map<String,InteractionPtr> bonds_;
+  boost::unordered_map<String,InteractionPtr> angles_;
+  boost::unordered_map<String,InteractionPtr> lj_14_pairs_; 
+  boost::unordered_map<String,InteractionPtr> constraints_;
+  boost::unordered_map<String,InteractionPtr> cmaps_;
+  boost::unordered_map<String,InteractionPtr> implicit_genborn_;
+  boost::unordered_map<String,InteractionPtr> ljs_; 
+  boost::unordered_map<String,std::vector<InteractionPtr> > dihedrals_;
+  boost::unordered_map<String,std::vector<InteractionPtr> > improper_dihedrals_;
 
   boost::unordered_map<String, std::vector<std::pair<String,String> > > atom_renaming_ff_specific_;
   boost::unordered_map<String, ResidueNamesPtr> res_renaming_ff_specific_;

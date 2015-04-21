@@ -1,4 +1,4 @@
-#include <ost/mol/mm/mm_observer.hh>
+#include <ost/mol/mm/observer.hh>
 #include <OpenMM.h>
 
 namespace ost { namespace mol{ namespace mm{

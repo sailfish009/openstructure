@@ -13,41 +13,41 @@ BuildingBlock::BuildingBlock(const BuildingBlock& block){
   //There would be to danger to mess around with an interaction,
   //that is associated with another building block.
 
-  std::vector<MMInteractionPtr> bonds = block.GetBonds();
-  std::vector<MMInteractionPtr> angles = block.GetAngles();
-  std::vector<MMInteractionPtr> dihedrals = block.GetDihedrals();
-  std::vector<MMInteractionPtr> impropers = block.GetImpropers();
-  std::vector<MMInteractionPtr> exclusions = block.GetExclusions();
-  std::vector<MMInteractionPtr> cmaps = block.GetCMaps();
-  std::vector<MMInteractionPtr> constraints = block.GetConstraints();
+  std::vector<InteractionPtr> bonds = block.GetBonds();
+  std::vector<InteractionPtr> angles = block.GetAngles();
+  std::vector<InteractionPtr> dihedrals = block.GetDihedrals();
+  std::vector<InteractionPtr> impropers = block.GetImpropers();
+  std::vector<InteractionPtr> exclusions = block.GetExclusions();
+  std::vector<InteractionPtr> cmaps = block.GetCMaps();
+  std::vector<InteractionPtr> constraints = block.GetConstraints();
 
-  for(std::vector<MMInteractionPtr>::iterator i = bonds.begin();
+  for(std::vector<InteractionPtr>::iterator i = bonds.begin();
       i != bonds.end(); ++i){
-    bonds_.push_back(MMInteractionPtr(new MMInteraction(**i)));
+    bonds_.push_back(InteractionPtr(new Interaction(**i)));
   }
-  for(std::vector<MMInteractionPtr>::iterator i = angles.begin();
+  for(std::vector<InteractionPtr>::iterator i = angles.begin();
       i != angles.end(); ++i){
-    angles_.push_back(MMInteractionPtr(new MMInteraction(**i)));
+    angles_.push_back(InteractionPtr(new Interaction(**i)));
   }
-  for(std::vector<MMInteractionPtr>::iterator i = dihedrals.begin();
+  for(std::vector<InteractionPtr>::iterator i = dihedrals.begin();
       i != dihedrals.end(); ++i){
-    dihedrals_.push_back(MMInteractionPtr(new MMInteraction(**i)));
+    dihedrals_.push_back(InteractionPtr(new Interaction(**i)));
   }
-  for(std::vector<MMInteractionPtr>::iterator i = impropers.begin();
+  for(std::vector<InteractionPtr>::iterator i = impropers.begin();
       i != impropers.end(); ++i){
-    impropers_.push_back(MMInteractionPtr(new MMInteraction(**i)));
+    impropers_.push_back(InteractionPtr(new Interaction(**i)));
   }
-  for(std::vector<MMInteractionPtr>::iterator i = exclusions.begin();
+  for(std::vector<InteractionPtr>::iterator i = exclusions.begin();
       i != exclusions.end(); ++i){
-    exclusions_.push_back(MMInteractionPtr(new MMInteraction(**i)));
+    exclusions_.push_back(InteractionPtr(new Interaction(**i)));
   }
-  for(std::vector<MMInteractionPtr>::iterator i = cmaps.begin();
+  for(std::vector<InteractionPtr>::iterator i = cmaps.begin();
       i != cmaps.end(); ++i){
-    cmaps_.push_back(MMInteractionPtr(new MMInteraction(**i)));
+    cmaps_.push_back(InteractionPtr(new Interaction(**i)));
   }
-  for(std::vector<MMInteractionPtr>::iterator i = constraints.begin();
+  for(std::vector<InteractionPtr>::iterator i = constraints.begin();
       i != constraints.end(); ++i){
-    constraints_.push_back(MMInteractionPtr(new MMInteraction(**i)));
+    constraints_.push_back(InteractionPtr(new Interaction(**i)));
   }
 }
 
@@ -87,7 +87,7 @@ bool BuildingBlock::Match(const ost::mol::ResidueHandle& handle, bool match_conn
   //check connectivity by extracting all unique bonds from handle,
   //also bonds to other residues.
   std::set<std::pair<String,String> > raw_bonds_handle;
-  std::vector<MMInteractionPtr> bonds_handle;
+  std::vector<InteractionPtr> bonds_handle;
   ost::mol::AtomHandleList atom_list = handle.GetAtomList();
   ost::mol::ResidueHandle prev = handle.GetPrev();
   ost::mol::ResidueHandle next = handle.GetNext();
@@ -130,7 +130,7 @@ bool BuildingBlock::Match(const ost::mol::ResidueHandle& handle, bool match_conn
 
   for(std::set<std::pair<String,String> >::iterator i = raw_bonds_handle.begin();
       i != raw_bonds_handle.end(); ++i){
-    MMInteractionPtr p(new MMInteraction(HarmonicBond));
+    InteractionPtr p(new Interaction(HarmonicBond));
     names[0] = i->first;
     names[1] = i->second;
     p->SetNames(names);
@@ -139,10 +139,10 @@ bool BuildingBlock::Match(const ost::mol::ResidueHandle& handle, bool match_conn
 
   bool found;
   //let's first check for bonds
-  for(std::vector<MMInteractionPtr>::const_iterator i = bonds_.begin();
+  for(std::vector<InteractionPtr>::const_iterator i = bonds_.begin();
       i!=bonds_.end(); ++i){
     found = false;
-    for(std::vector<MMInteractionPtr>::iterator j = bonds_handle.begin();
+    for(std::vector<InteractionPtr>::iterator j = bonds_handle.begin();
         j != bonds_handle.end(); ++j){
       if((*j)->MatchNames((*i)->GetNames())){
         found = true;
@@ -162,9 +162,9 @@ bool BuildingBlock::Match(const ost::mol::ResidueHandle& handle, bool match_conn
   }
   //If there is a distance constraint matching a remaining raw bond, we also
   //remove it from raw bonds
-  for(std::vector<MMInteractionPtr>::const_iterator i = constraints_.begin();
+  for(std::vector<InteractionPtr>::const_iterator i = constraints_.begin();
       i != constraints_.end(); ++i){
-    for(std::vector<MMInteractionPtr>::iterator j = bonds_handle.begin();
+    for(std::vector<InteractionPtr>::iterator j = bonds_handle.begin();
         j != bonds_handle.end(); ++j){
       if((*j)->MatchNames((*i)->GetNames())){
         std::vector<String> names = (*j)->GetNames();
@@ -202,7 +202,7 @@ void BuildingBlock::Connect(ost::mol::ResidueHandle& handle, ost::mol::XCSEditor
   String name1, name2;
 
 
-  for(std::vector<MMInteractionPtr>::iterator i = bonds_.begin();
+  for(std::vector<InteractionPtr>::iterator i = bonds_.begin();
       i != bonds_.end(); ++i){
 
     names = (*i)->GetNames();
@@ -267,7 +267,7 @@ Real BuildingBlock::GetMass(const String& name) const{
 }
 
 
-void BuildingBlock::AddBond(MMInteractionPtr p, bool replace_existing){
+void BuildingBlock::AddBond(InteractionPtr p, bool replace_existing){
   this->CheckInteractionToAdd(p);
   if(replace_existing){
     std::vector<String> names = p->GetNames();
@@ -281,7 +281,7 @@ void BuildingBlock::AddBond(MMInteractionPtr p, bool replace_existing){
   bonds_.push_back(p);
 }
 
-void BuildingBlock::AddAngle(MMInteractionPtr p, bool replace_existing){
+void BuildingBlock::AddAngle(InteractionPtr p, bool replace_existing){
   this->CheckInteractionToAdd(p);
   if(replace_existing){
     std::vector<String> names = p->GetNames();
@@ -295,7 +295,7 @@ void BuildingBlock::AddAngle(MMInteractionPtr p, bool replace_existing){
   angles_.push_back(p);
 }
 
-void BuildingBlock::AddDihedral(MMInteractionPtr p, bool replace_existing){
+void BuildingBlock::AddDihedral(InteractionPtr p, bool replace_existing){
   this->CheckInteractionToAdd(p);
   if(replace_existing){
     std::vector<String> names = p->GetNames();
@@ -309,7 +309,7 @@ void BuildingBlock::AddDihedral(MMInteractionPtr p, bool replace_existing){
   dihedrals_.push_back(p);
 }
 
-void BuildingBlock::AddImproper(MMInteractionPtr p, bool replace_existing){
+void BuildingBlock::AddImproper(InteractionPtr p, bool replace_existing){
   this->CheckInteractionToAdd(p);
   if(replace_existing){
     std::vector<String> names = p->GetNames();
@@ -323,7 +323,7 @@ void BuildingBlock::AddImproper(MMInteractionPtr p, bool replace_existing){
   impropers_.push_back(p);
 }
 
-void BuildingBlock::AddExclusion(MMInteractionPtr p, bool replace_existing){
+void BuildingBlock::AddExclusion(InteractionPtr p, bool replace_existing){
   this->CheckInteractionToAdd(p);
   if(replace_existing){
     std::vector<String> names = p->GetNames();
@@ -337,7 +337,7 @@ void BuildingBlock::AddExclusion(MMInteractionPtr p, bool replace_existing){
   exclusions_.push_back(p);
 }
 
-void BuildingBlock::AddCMap(MMInteractionPtr p, bool replace_existing){
+void BuildingBlock::AddCMap(InteractionPtr p, bool replace_existing){
   this->CheckInteractionToAdd(p);
   if(replace_existing){
     std::vector<String> names = p->GetNames();
@@ -351,7 +351,7 @@ void BuildingBlock::AddCMap(MMInteractionPtr p, bool replace_existing){
   cmaps_.push_back(p);
 }
 
-void BuildingBlock::AddConstraint(MMInteractionPtr p, bool replace_existing){
+void BuildingBlock::AddConstraint(InteractionPtr p, bool replace_existing){
   this->CheckInteractionToAdd(p);
   if(replace_existing){
     std::vector<String> names = p->GetNames();
@@ -436,32 +436,32 @@ void BuildingBlock::ReplaceAtom(const String& name,const String& new_name,
     //nothing will happen, if the atom of interest is not part of
     //that interaction.
 
-    for(std::vector<MMInteractionPtr>::iterator i = bonds_.begin();
+    for(std::vector<InteractionPtr>::iterator i = bonds_.begin();
         i!=bonds_.end(); ++i){
       (*i)->ReplaceAtom(name, new_name, new_type);
     }
 
-    for(std::vector<MMInteractionPtr>::iterator i = angles_.begin();
+    for(std::vector<InteractionPtr>::iterator i = angles_.begin();
         i!=angles_.end(); ++i){
       (*i)->ReplaceAtom(name, new_name, new_type);
     }
 
-    for(std::vector<MMInteractionPtr>::iterator i = dihedrals_.begin();
+    for(std::vector<InteractionPtr>::iterator i = dihedrals_.begin();
         i!=dihedrals_.end(); ++i){
       (*i)->ReplaceAtom(name, new_name, new_type);
     }
 
-    for(std::vector<MMInteractionPtr>::iterator i = impropers_.begin();
+    for(std::vector<InteractionPtr>::iterator i = impropers_.begin();
         i!=impropers_.end(); ++i){
       (*i)->ReplaceAtom(name, new_name, new_type);
     }
 
-    for(std::vector<MMInteractionPtr>::iterator i = exclusions_.begin();
+    for(std::vector<InteractionPtr>::iterator i = exclusions_.begin();
         i!=exclusions_.end(); ++i){
       (*i)->ReplaceAtom(name, new_name, new_type);
     }
 
-    for(std::vector<MMInteractionPtr>::iterator i = cmaps_.begin();
+    for(std::vector<InteractionPtr>::iterator i = cmaps_.begin();
         i!=cmaps_.end(); ++i){
       (*i)->ReplaceAtom(name, new_name, new_type);
     }
@@ -678,7 +678,7 @@ void BuildingBlock::RemoveInteractionsToNext(){
   }
 }
 
-void BuildingBlock::CheckInteractionToAdd(MMInteractionPtr p) const{
+void BuildingBlock::CheckInteractionToAdd(InteractionPtr p) const{
   if(p->GetNames().empty()){
     throw ost::Error("Expect interaction to have names properly set!");
   }

@@ -22,7 +22,7 @@ class Anim(QtCore.QTimer):
 
 prot=ost.mol.CreateEntityFromView(io.LoadPDB('1CRN.pdb').Select('peptide=true'),True)
 
-settings = mm.MMSettings()
+settings = mm.Settings()
 
 settings.integrator = mm.LangevinIntegrator(310,1,0.002)
 settings.constrain_bonds = True

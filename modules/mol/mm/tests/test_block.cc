@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
-#include <ost/mol/mm/mm_interaction.hh>
+#include <ost/mol/mm/interaction.hh>
 #include <ost/mol/mm/buildingblock.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/builder.hh>
@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE(test_block_basics)
   BuildingBlock block = BuildingBlock();
   block.AddAtom("A","a",0.5);
   block.AddAtom("B","b",1.0);
-  MMInteractionPtr bond(new MMInteraction(HarmonicBond));
+  InteractionPtr bond(new Interaction(HarmonicBond));
   std::vector<String> names;
   names.push_back("A");
   names.push_back("B");
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(test_block_basics)
   BOOST_CHECK(block.GetType("X") == "x");
   BOOST_CHECK(block.GetCharge("X")==42.0);
   BOOST_CHECK(block.GetAtoms().size() == 2);
-  std::vector<MMInteractionPtr> bonds = block.GetBonds();
+  std::vector<InteractionPtr> bonds = block.GetBonds();
   BOOST_CHECK(bonds[0]->HasName("X"));
   block.RemoveAtom("X");
   BOOST_CHECK_THROW(block.GetType("X"),ost::Error);
@@ -45,8 +45,8 @@ BOOST_AUTO_TEST_CASE(test_block_basics)
   param_one.push_back(1.0);
   param_two.push_back(2.0);
   param_two.push_back(2.0);
-  MMInteractionPtr bond_one(new MMInteraction(HarmonicBond));
-  MMInteractionPtr bond_two(new MMInteraction(HarmonicBond));
+  InteractionPtr bond_one(new Interaction(HarmonicBond));
+  InteractionPtr bond_two(new Interaction(HarmonicBond));
   bond_one->SetNames(names);
   bond_one->SetParam(param_one);
   bond_two->SetNames(names);
@@ -93,9 +93,9 @@ BOOST_AUTO_TEST_CASE(test_connect)
   block.AddAtom("A","a",0.0);
   block.AddAtom("B","b",0.0);
 
-  MMInteractionPtr bond_one(new MMInteraction(HarmonicBond));
-  MMInteractionPtr bond_two(new MMInteraction(HarmonicBond));
-  MMInteractionPtr bond_three(new MMInteraction(HarmonicBond));
+  InteractionPtr bond_one(new Interaction(HarmonicBond));
+  InteractionPtr bond_two(new Interaction(HarmonicBond));
+  InteractionPtr bond_three(new Interaction(HarmonicBond));
   std::vector<String> two_string;
   two_string.push_back("A");
   two_string.push_back("B");
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(test_connect)
   BOOST_CHECK_THROW(block.Connect(res_list[0],ed),ost::Error);
   BOOST_CHECK_THROW(block.Connect(res_list[2],ed),ost::Error);
 
-  MMInteractionPtr bond_four(new MMInteraction(HarmonicBond));
+  InteractionPtr bond_four(new Interaction(HarmonicBond));
   two_string[1] = "X";
   bond_four->SetNames(two_string);
   block.AddBond(bond_four);
@@ -170,9 +170,9 @@ BOOST_AUTO_TEST_CASE(test_match)
 
   BOOST_CHECK(!block.Match(res_list[1],true,info_string));
 
-  MMInteractionPtr bond_one(new MMInteraction(HarmonicBond));
-  MMInteractionPtr bond_two(new MMInteraction(HarmonicBond));
-  MMInteractionPtr bond_three(new MMInteraction(HarmonicBond));
+  InteractionPtr bond_one(new Interaction(HarmonicBond));
+  InteractionPtr bond_two(new Interaction(HarmonicBond));
+  InteractionPtr bond_three(new Interaction(HarmonicBond));
 
   std::vector<String> names_one;
   names_one.push_back("A");
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(test_match)
 
   block.RemoveAtom("A");
   block.AddAtom("A","a",0.0);
-  MMInteractionPtr constraint(new MMInteraction(DistanceConstraint));
+  InteractionPtr constraint(new Interaction(DistanceConstraint));
   constraint->SetNames(names_one);
   BOOST_CHECK(!block.Match(res_list[1],true,info_string));
   block.AddConstraint(constraint);

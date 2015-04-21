@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
-#include <ost/mol/mm/mm_interaction.hh>
+#include <ost/mol/mm/interaction.hh>
 #include <ost/mol/mm/buildingblock.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/builder.hh>
@@ -19,13 +19,13 @@ BOOST_AUTO_TEST_CASE(test_gromacs_block_modifier_basics){
   GromacsBlockModifier mod;
 
   //let's create some interactions
-  MMInteractionPtr harmonic_bond(new MMInteraction(HarmonicBond));
-  MMInteractionPtr urey_bradley_angle(new MMInteraction(UreyBradleyAngle));
-  MMInteractionPtr harmonic_angle(new MMInteraction(HarmonicAngle));
-  MMInteractionPtr periodic_dihedral(new MMInteraction(PeriodicDihedral));
-  MMInteractionPtr periodic_improper(new MMInteraction(PeriodicImproper));
-  MMInteractionPtr harmonic_improper(new MMInteraction(HarmonicImproper));
-  MMInteractionPtr cmap(new MMInteraction(CMap));
+  InteractionPtr harmonic_bond(new Interaction(HarmonicBond));
+  InteractionPtr urey_bradley_angle(new Interaction(UreyBradleyAngle));
+  InteractionPtr harmonic_angle(new Interaction(HarmonicAngle));
+  InteractionPtr periodic_dihedral(new Interaction(PeriodicDihedral));
+  InteractionPtr periodic_improper(new Interaction(PeriodicImproper));
+  InteractionPtr harmonic_improper(new Interaction(HarmonicImproper));
+  InteractionPtr cmap(new Interaction(CMap));
 
   //check whether error gets thrown, when names of interactions are not set
   BOOST_CHECK_THROW(mod.AddBond(harmonic_bond),ost::Error);
@@ -78,20 +78,7 @@ BOOST_AUTO_TEST_CASE(test_gromacs_block_modifier_basics){
   BOOST_CHECK_THROW(mod.AddDihedral(harmonic_bond),ost::Error);
   BOOST_CHECK_THROW(mod.AddImproper(periodic_dihedral),ost::Error);
   BOOST_CHECK_THROW(mod.AddCMap(periodic_improper),ost::Error);
-
-
-
-
-
-
-
-
-
-
   
 }
-
-
-
 
 BOOST_AUTO_TEST_SUITE_END();

@@ -25,11 +25,11 @@ using namespace boost::python;
 namespace{
 
 
-  ost::mol::mm::MMInteractionPtr GetLJOneType(ost::mol::mm::ForcefieldPtr p, String type){
+  ost::mol::mm::InteractionPtr GetLJOneType(ost::mol::mm::ForcefieldPtr p, String type){
     return p->GetLJ(type);
   }
 
-  ost::mol::mm::MMInteractionPtr GetLJTwoTypes(ost::mol::mm::ForcefieldPtr p, String type1, String type2, bool pair){
+  ost::mol::mm::InteractionPtr GetLJTwoTypes(ost::mol::mm::ForcefieldPtr p, String type1, String type2, bool pair){
     return p->GetLJ(type1,type2,pair);
   }
 

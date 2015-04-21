@@ -4,7 +4,7 @@
 namespace ost{ namespace mol{ namespace mm{
 
 Simulation::Simulation(const ost::mol::EntityHandle& handle, 
-                       const MMSettingsPtr settings){
+                       const SettingsPtr settings){
 
   //note, that ent_ will be "completed" inside this function!
   //(hydrogens and shit)
@@ -16,7 +16,7 @@ Simulation::Simulation(const ost::mol::EntityHandle& handle,
 
 Simulation::Simulation(const TopologyPtr top,
                        const ost::mol::EntityHandle& handle,
-                       const MMSettingsPtr settings){
+                       const SettingsPtr settings){
 
   if(static_cast<uint>(handle.GetAtomCount()) != top->GetNumParticles()){
     throw ost::Error("Number of atoms in entity must be consistent with number of particles in topology!");
@@ -119,7 +119,7 @@ void Simulation::Save(const String& filename){
   context_->createCheckpoint(stream);  
 }
 
-SimulationPtr Simulation::Load(const String& filename, MMSettingsPtr settings){
+SimulationPtr Simulation::Load(const String& filename, SettingsPtr settings){
   if (!boost::filesystem::exists(filename)) {
     std::stringstream ss;
     ss << "Could not open simulation File '"
@@ -249,7 +249,7 @@ SimulationPtr Simulation::Load(const String& filename, MMSettingsPtr settings){
 
 
 void Simulation::Init(const TopologyPtr top,
-                      const MMSettingsPtr settings){
+                      const SettingsPtr settings){
 
 
   top_ = top;
@@ -449,7 +449,7 @@ Real Simulation::GetPotentialEnergy(){
   return energy;
 }
 
-void Simulation::Register(MMObserverPtr o){
+void Simulation::Register(ObserverPtr o){
   observers_.push_back(o);
   time_to_notify_.push_back(o->Rythm());
   o->Init(context_,top_,ent_);

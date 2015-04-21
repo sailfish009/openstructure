@@ -1,9 +1,9 @@
-#include <ost/mol/mm/mm_modeller.hh>
+#include <ost/mol/mm/modeller.hh>
 
 
 namespace ost{ namespace mol{ namespace mm{
 
-void MMModeller::GenerateDisulfidBonds(ost::mol::EntityHandle& handle){
+void Modeller::GenerateDisulfidBonds(ost::mol::EntityHandle& handle){
 
   ost::mol::ResidueHandleList res_list = handle.GetResidueList();
   ost::mol::XCSEditor ed = handle.EditXCS();
@@ -31,7 +31,7 @@ void MMModeller::GenerateDisulfidBonds(ost::mol::EntityHandle& handle){
   }
 }
 
-void MMModeller::GenerateCYSHEMEBonds(ost::mol::EntityHandle& handle){
+void Modeller::GenerateCYSHEMEBonds(ost::mol::EntityHandle& handle){
   
   ost::mol::ResidueHandleList res_list = handle.GetResidueList();
   ost::mol::XCSEditor ed = handle.EditXCS();
@@ -85,7 +85,7 @@ void MMModeller::GenerateCYSHEMEBonds(ost::mol::EntityHandle& handle){
   }
 }
 
-void MMModeller::GenerateHISHEMEBonds(ost::mol::EntityHandle& handle){
+void Modeller::GenerateHISHEMEBonds(ost::mol::EntityHandle& handle){
 
   ost::mol::ResidueHandleList res_list = handle.GetResidueList();
   ost::mol::XCSEditor ed = handle.EditXCS();
@@ -111,7 +111,7 @@ void MMModeller::GenerateHISHEMEBonds(ost::mol::EntityHandle& handle){
   }
 }
 
-void MMModeller::GenerateMETHEMEBonds(ost::mol::EntityHandle& handle){
+void Modeller::GenerateMETHEMEBonds(ost::mol::EntityHandle& handle){
 
   ost::mol::ResidueHandleList res_list = handle.GetResidueList();
   ost::mol::XCSEditor ed = handle.EditXCS();
@@ -136,7 +136,7 @@ void MMModeller::GenerateMETHEMEBonds(ost::mol::EntityHandle& handle){
   }
 }
 
-void MMModeller::LowerPrecision(ost::mol::EntityHandle& handle){
+void Modeller::LowerPrecision(ost::mol::EntityHandle& handle){
 
   ost::mol::AtomHandleList atom_list = handle.GetAtomList();
   ost::mol::XCSEditor ed = handle.EditXCS(ost::mol::BUFFERED_EDIT);
@@ -154,7 +154,7 @@ void MMModeller::LowerPrecision(ost::mol::EntityHandle& handle){
   ed.UpdateICS();
 }
 
-void MMModeller::AssignPDBNaming(ost::mol::EntityHandle& handle){
+void Modeller::AssignPDBNaming(ost::mol::EntityHandle& handle){
 
   std::map<String,String> gromacs_to_pdb;
   gromacs_to_pdb["ARGN"] = "ARG";
@@ -206,7 +206,7 @@ void MMModeller::AssignPDBNaming(ost::mol::EntityHandle& handle){
   }
 }
 
-void MMModeller::AssignGromacsNaming(ost::mol::EntityHandle& handle){
+void Modeller::AssignGromacsNaming(ost::mol::EntityHandle& handle){
 
   ost::mol::XCSEditor ed = handle.EditXCS();
 

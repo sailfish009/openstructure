@@ -109,19 +109,19 @@ public:
                   const std::vector<String>& anchors,
                   const String& type, Real charge);
 
-  void AddBond(MMInteractionPtr p) { this->CheckInteractionToAdd(p,"BOND");
+  void AddBond(InteractionPtr p) { this->CheckInteractionToAdd(p,"BOND");
                                      bonds_.push_back(p); }
 
-  void AddAngle(MMInteractionPtr p) { this->CheckInteractionToAdd(p,"ANGLE");
+  void AddAngle(InteractionPtr p) { this->CheckInteractionToAdd(p,"ANGLE");
                                       angles_.push_back(p); }
 
-  void AddDihedral(MMInteractionPtr p) { this->CheckInteractionToAdd(p,"DIHEDRAL");
+  void AddDihedral(InteractionPtr p) { this->CheckInteractionToAdd(p,"DIHEDRAL");
                                          dihedrals_.push_back(p); }
 
-  void AddImproper(MMInteractionPtr p) { this->CheckInteractionToAdd(p,"IMPROPER");
+  void AddImproper(InteractionPtr p) { this->CheckInteractionToAdd(p,"IMPROPER");
                                          impropers_.push_back(p); }
 
-  void AddCMap(MMInteractionPtr p) { this->CheckInteractionToAdd(p,"CMAP");
+  void AddCMap(InteractionPtr p) { this->CheckInteractionToAdd(p,"CMAP");
                                      cmaps_.push_back(p); }
 
   void AddDeleteAtom(const String& atom_name) { delete_atom_names_.push_back(atom_name); }
@@ -149,7 +149,7 @@ public:
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
-        bonds_.push_back(MMInteractionPtr(new MMInteraction(FuncType(func_type))));
+        bonds_.push_back(InteractionPtr(new Interaction(FuncType(func_type))));
       }
       else{
         func_type = bonds_[i]->GetFuncType();
@@ -162,7 +162,7 @@ public:
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
-        angles_.push_back(MMInteractionPtr(new MMInteraction(FuncType(func_type))));
+        angles_.push_back(InteractionPtr(new Interaction(FuncType(func_type))));
       }
       else{
         func_type = angles_[i]->GetFuncType();
@@ -175,7 +175,7 @@ public:
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
-        dihedrals_.push_back(MMInteractionPtr(new MMInteraction(FuncType(func_type))));
+        dihedrals_.push_back(InteractionPtr(new Interaction(FuncType(func_type))));
       }
       else{
         func_type = dihedrals_[i]->GetFuncType();
@@ -188,7 +188,7 @@ public:
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
-        impropers_.push_back(MMInteractionPtr(new MMInteraction(FuncType(func_type))));
+        impropers_.push_back(InteractionPtr(new Interaction(FuncType(func_type))));
       }
       else{
         func_type = impropers_[i]->GetFuncType();
@@ -201,7 +201,7 @@ public:
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
-        cmaps_.push_back(MMInteractionPtr(new MMInteraction(FuncType(func_type))));
+        cmaps_.push_back(InteractionPtr(new Interaction(FuncType(func_type))));
       }
       else{
         func_type = cmaps_[i]->GetFuncType();
@@ -272,16 +272,16 @@ public:
 
 private:
 
-  void CheckInteractionToAdd(MMInteractionPtr p, const String& interaction_type) const;
+  void CheckInteractionToAdd(InteractionPtr p, const String& interaction_type) const;
 
   //Atoms, that will be added to the building block
 
   //Interactions, that will be added to the building block
-  std::vector<MMInteractionPtr> bonds_;
-  std::vector<MMInteractionPtr> angles_;
-  std::vector<MMInteractionPtr> dihedrals_;
-  std::vector<MMInteractionPtr> impropers_;
-  std::vector<MMInteractionPtr> cmaps_;
+  std::vector<InteractionPtr> bonds_;
+  std::vector<InteractionPtr> angles_;
+  std::vector<InteractionPtr> dihedrals_;
+  std::vector<InteractionPtr> impropers_;
+  std::vector<InteractionPtr> cmaps_;
 
   //paramters we need for the replace statement
   std::vector<String> replace_old_atom_name_;

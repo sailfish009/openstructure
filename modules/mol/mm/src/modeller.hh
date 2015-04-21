@@ -29,7 +29,7 @@
 
 namespace ost { namespace mol{ namespace mm{
 
-class MMModeller{
+class Modeller{
 public:
 
   static void GenerateDisulfidBonds(ost::mol::EntityHandle& handle);

@@ -15,9 +15,7 @@
 #include <ost/mol/mm/buildingblock.hh>
 #include <ost/mol/mm/block_modifiers.hh>
 #include <ost/mol/mm/forcefield.hh>
-#include <ost/mol/mm/mm_settings.hh>
 #include <ost/mol/mm/index.hh>
-#include <ost/mol/mm/mm_interaction.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/bond_handle.hh>
 #include <ost/mol/residue_prop.hh>

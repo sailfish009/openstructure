@@ -7,7 +7,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <ost/mol/mm/mm_interaction.hh>
+#include <ost/mol/mm/interaction.hh>
 #include <ost/message.hh>
 #include <ost/mol/bond_handle.hh>
 #include <ost/mol/residue_handle.hh>
@@ -49,37 +49,37 @@ public:
 
   Real GetMass(const String& name) const;
 
-  std::vector<MMInteractionPtr> GetBonds() const { return bonds_; }
+  std::vector<InteractionPtr> GetBonds() const { return bonds_; }
 
-  std::vector<MMInteractionPtr> GetAngles() const { return angles_; }
+  std::vector<InteractionPtr> GetAngles() const { return angles_; }
 
-  std::vector<MMInteractionPtr> GetDihedrals() const { return dihedrals_; }
+  std::vector<InteractionPtr> GetDihedrals() const { return dihedrals_; }
 
-  std::vector<MMInteractionPtr> GetImpropers() const { return impropers_; }
+  std::vector<InteractionPtr> GetImpropers() const { return impropers_; }
 
-  std::vector<MMInteractionPtr> GetCMaps() const { return cmaps_; }
+  std::vector<InteractionPtr> GetCMaps() const { return cmaps_; }
 
-  std::vector<MMInteractionPtr> GetExclusions() const { return exclusions_; }
+  std::vector<InteractionPtr> GetExclusions() const { return exclusions_; }
 
-  std::vector<MMInteractionPtr> GetConstraints() const { return constraints_;}
+  std::vector<InteractionPtr> GetConstraints() const { return constraints_;}
 
   //Add data to building block
 
   void AddAtom(const String& name, const String& type, Real charge, Real mass = std::numeric_limits<Real>::quiet_NaN());
 
-  void AddBond(MMInteractionPtr p, bool replace_existing = false);
+  void AddBond(InteractionPtr p, bool replace_existing = false);
 
-  void AddAngle(MMInteractionPtr p, bool replace_existing = false);
+  void AddAngle(InteractionPtr p, bool replace_existing = false);
 
-  void AddDihedral(MMInteractionPtr p, bool replace_existing = false);
+  void AddDihedral(InteractionPtr p, bool replace_existing = false);
 
-  void AddImproper(MMInteractionPtr p, bool replace_existing = false);
+  void AddImproper(InteractionPtr p, bool replace_existing = false);
 
-  void AddExclusion(MMInteractionPtr p, bool replace_existing = false);
+  void AddExclusion(InteractionPtr p, bool replace_existing = false);
 
-  void AddCMap(MMInteractionPtr p, bool replace_existing = false);
+  void AddCMap(InteractionPtr p, bool replace_existing = false);
 
-  void AddConstraint(MMInteractionPtr p, bool replace_existing = false);
+  void AddConstraint(InteractionPtr p, bool replace_existing = false);
 
   //modifiers
 
@@ -136,7 +136,7 @@ public:
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
-        bonds_.push_back(MMInteractionPtr(new MMInteraction(FuncType(func_type))));
+        bonds_.push_back(InteractionPtr(new Interaction(FuncType(func_type))));
       }
       else{
         func_type = bonds_[i]->GetFuncType();
@@ -149,7 +149,7 @@ public:
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
-        angles_.push_back(MMInteractionPtr(new MMInteraction(FuncType(func_type))));
+        angles_.push_back(InteractionPtr(new Interaction(FuncType(func_type))));
       }
       else{
         func_type = angles_[i]->GetFuncType();
@@ -162,7 +162,7 @@ public:
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
-        dihedrals_.push_back(MMInteractionPtr(new MMInteraction(FuncType(func_type))));
+        dihedrals_.push_back(InteractionPtr(new Interaction(FuncType(func_type))));
       }
       else{
         func_type = dihedrals_[i]->GetFuncType();
@@ -175,7 +175,7 @@ public:
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
-        impropers_.push_back(MMInteractionPtr(new MMInteraction(FuncType(func_type))));
+        impropers_.push_back(InteractionPtr(new Interaction(FuncType(func_type))));
       }
       else{
         func_type = impropers_[i]->GetFuncType();
@@ -188,7 +188,7 @@ public:
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
-        exclusions_.push_back(MMInteractionPtr(new MMInteraction(FuncType(func_type))));
+        exclusions_.push_back(InteractionPtr(new Interaction(FuncType(func_type))));
       }
       else{
         func_type = exclusions_[i]->GetFuncType();
@@ -201,7 +201,7 @@ public:
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
-        cmaps_.push_back(MMInteractionPtr(new MMInteraction(FuncType(func_type))));
+        cmaps_.push_back(InteractionPtr(new Interaction(FuncType(func_type))));
       }
       else{
         func_type = cmaps_[i]->GetFuncType();
@@ -214,7 +214,7 @@ public:
       int func_type;
       if(ds.IsSource()){
         ds & func_type;
-        constraints_.push_back(MMInteractionPtr(new MMInteraction(FuncType(func_type))));
+        constraints_.push_back(InteractionPtr(new Interaction(FuncType(func_type))));
       }
       else{
         func_type = constraints_[i]->GetFuncType();
@@ -228,19 +228,19 @@ public:
 private:
 
   int GetAtomIndex(const String& atom_name) const;
-  void CheckInteractionToAdd(MMInteractionPtr p) const;
+  void CheckInteractionToAdd(InteractionPtr p) const;
 
   std::vector<String> atoms_;
   std::vector<String> types_;
   std::vector<Real> charges_;
   std::vector<Real> masses_;
-  std::vector<MMInteractionPtr> bonds_;
-  std::vector<MMInteractionPtr> angles_;
-  std::vector<MMInteractionPtr> dihedrals_;
-  std::vector<MMInteractionPtr> impropers_;
-  std::vector<MMInteractionPtr> exclusions_;
-  std::vector<MMInteractionPtr> cmaps_;
-  std::vector<MMInteractionPtr> constraints_;
+  std::vector<InteractionPtr> bonds_;
+  std::vector<InteractionPtr> angles_;
+  std::vector<InteractionPtr> dihedrals_;
+  std::vector<InteractionPtr> impropers_;
+  std::vector<InteractionPtr> exclusions_;
+  std::vector<InteractionPtr> cmaps_;
+  std::vector<InteractionPtr> constraints_;
 };
 
 }}}

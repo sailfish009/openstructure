@@ -1,7 +1,7 @@
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-#include <ost/mol/mm/mm_interaction.hh>
+#include <ost/mol/mm/interaction.hh>
 
 #include <vector>
 
@@ -27,39 +27,39 @@ std::vector<T> ListToVec(boost::python::list& l){
   return vec;
 }
 
-boost::python::list WrapGetNames(ost::mol::mm::MMInteractionPtr p){
+boost::python::list WrapGetNames(ost::mol::mm::InteractionPtr p){
   std::vector<String> names = p->GetNames();
   return VecToList<String>(names);
 }
 
-boost::python::list WrapGetTypes(ost::mol::mm::MMInteractionPtr p){
+boost::python::list WrapGetTypes(ost::mol::mm::InteractionPtr p){
     std::vector<String> types = p->GetTypes();
   return VecToList<String>(types);
 }
 
-boost::python::list WrapGetParam(ost::mol::mm::MMInteractionPtr p){
+boost::python::list WrapGetParam(ost::mol::mm::InteractionPtr p){
   std::vector<Real> param = p->GetParam();
   return VecToList<Real>(param);
 }
 
-void WrapSetNames(ost::mol::mm::MMInteractionPtr p, boost::python::list l){
+void WrapSetNames(ost::mol::mm::InteractionPtr p, boost::python::list l){
   std::vector<String> names = ListToVec<String>(l);
   p->SetNames(names); 
 }
 
-void WrapSetTypes(ost::mol::mm::MMInteractionPtr p, boost::python::list l){
+void WrapSetTypes(ost::mol::mm::InteractionPtr p, boost::python::list l){
   std::vector<String> types = ListToVec<String>(l);
   p->SetTypes(types); 
 }
 
-void WrapSetParam(ost::mol::mm::MMInteractionPtr p, boost::python::list l){
+void WrapSetParam(ost::mol::mm::InteractionPtr p, boost::python::list l){
   std::vector<Real> param = ListToVec<Real>(l);
   p->SetParam(param); 
 }
 
 }
 
-void export_MMInteraction()
+void export_Interaction()
 {
 
   enum_<ost::mol::mm::FuncType>("FuncType")
@@ -80,29 +80,29 @@ void export_MMInteraction()
     .value("HarmonicDistanceRestraint", ost::mol::mm::HarmonicDistanceRestraint)
   ;
 
-  class_<ost::mol::mm::MMInteraction>("MMInteraction",init<ost::mol::mm::FuncType>())
+  class_<ost::mol::mm::Interaction>("Interaction",init<ost::mol::mm::FuncType>())
     .def("SetTypes",&WrapSetTypes)
     .def("SetNames",&WrapSetNames)
     .def("SetParam",&WrapSetParam)
     .def("GetTypes",&WrapGetTypes)
     .def("GetNames",&WrapGetNames)
     .def("GetParam",&WrapGetParam)
-    .def("GetAtoms",&ost::mol::mm::MMInteraction::GetAtoms)
-    .def("GetFuncType",&ost::mol::mm::MMInteraction::GetFuncType)
-    .def("ReplaceAtom",&ost::mol::mm::MMInteraction::ReplaceAtom)
-    .def("MatchTypes",&ost::mol::mm::MMInteraction::MatchTypes)
-    .def("MatchNames",&ost::mol::mm::MMInteraction::MatchNames)
-    .def("HasName",&ost::mol::mm::MMInteraction::HasName)
-    .def("HasType",&ost::mol::mm::MMInteraction::HasType)
-    .def("IsParametrized",&ost::mol::mm::MMInteraction::IsParametrized)
-    .def("HasTypeWildcard",&ost::mol::mm::MMInteraction::HasTypeWildcard)
-    .def("HasNameWildcard",&ost::mol::mm::MMInteraction::HasNameWildcard)    
+    .def("GetAtoms",&ost::mol::mm::Interaction::GetAtoms)
+    .def("GetFuncType",&ost::mol::mm::Interaction::GetFuncType)
+    .def("ReplaceAtom",&ost::mol::mm::Interaction::ReplaceAtom)
+    .def("MatchTypes",&ost::mol::mm::Interaction::MatchTypes)
+    .def("MatchNames",&ost::mol::mm::Interaction::MatchNames)
+    .def("HasName",&ost::mol::mm::Interaction::HasName)
+    .def("HasType",&ost::mol::mm::Interaction::HasType)
+    .def("IsParametrized",&ost::mol::mm::Interaction::IsParametrized)
+    .def("HasTypeWildcard",&ost::mol::mm::Interaction::HasTypeWildcard)
+    .def("HasNameWildcard",&ost::mol::mm::Interaction::HasNameWildcard)    
   ;
 
-  boost::python::register_ptr_to_python<ost::mol::mm::MMInteractionPtr>();
+  boost::python::register_ptr_to_python<ost::mol::mm::InteractionPtr>();
 
-  class_<std::vector<ost::mol::mm::MMInteractionPtr> >("MMInteractionList", init<>())
-    .def(vector_indexing_suite<std::vector<ost::mol::mm::MMInteractionPtr>, true>())
+  class_<std::vector<ost::mol::mm::InteractionPtr> >("InteractionList", init<>())
+    .def(vector_indexing_suite<std::vector<ost::mol::mm::InteractionPtr>, true>())
   ;
 
 }

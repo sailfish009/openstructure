@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
-#include <ost/mol/mm/mm_settings.hh>
+#include <ost/mol/mm/settings.hh>
 #include <ost/mol/mm/forcefield.hh>
-#include <ost/mol/mm/mm_interaction.hh>
+#include <ost/mol/mm/interaction.hh>
 #include <ost/mol/mm/buildingblock.hh>
 #include <ost/mol/mm/gromacs_block_modifiers.hh>
 #include <ost/message.hh>
@@ -85,17 +85,17 @@ BOOST_AUTO_TEST_CASE(test_forcefield_basics){
   five_real.push_back(5.0);
 
 
-  MMInteractionPtr harmonic_bond(new MMInteraction(HarmonicBond));
-  MMInteractionPtr urey_bradley_angle(new MMInteraction(UreyBradleyAngle));
-  MMInteractionPtr harmonic_angle(new MMInteraction(HarmonicAngle));
-  MMInteractionPtr periodic_dihedral(new MMInteraction(PeriodicDihedral));
-  MMInteractionPtr periodic_improper(new MMInteraction(PeriodicImproper));
-  MMInteractionPtr harmonic_improper(new MMInteraction(HarmonicImproper));
-  MMInteractionPtr cmap(new MMInteraction(CMap));
-  MMInteractionPtr lj(new MMInteraction(LJ));
-  MMInteractionPtr lj_pair(new MMInteraction(LJPair));
-  MMInteractionPtr gbsa(new MMInteraction(GBSA));
-  MMInteractionPtr distance_constraint(new MMInteraction(DistanceConstraint));
+  InteractionPtr harmonic_bond(new Interaction(HarmonicBond));
+  InteractionPtr urey_bradley_angle(new Interaction(UreyBradleyAngle));
+  InteractionPtr harmonic_angle(new Interaction(HarmonicAngle));
+  InteractionPtr periodic_dihedral(new Interaction(PeriodicDihedral));
+  InteractionPtr periodic_improper(new Interaction(PeriodicImproper));
+  InteractionPtr harmonic_improper(new Interaction(HarmonicImproper));
+  InteractionPtr cmap(new Interaction(CMap));
+  InteractionPtr lj(new Interaction(LJ));
+  InteractionPtr lj_pair(new Interaction(LJPair));
+  InteractionPtr gbsa(new Interaction(GBSA));
+  InteractionPtr distance_constraint(new Interaction(DistanceConstraint));
 
 
   //check whether errors get thrown when incorrectly parametrized interactions are added

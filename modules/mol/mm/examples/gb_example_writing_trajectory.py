@@ -3,7 +3,7 @@ from ost.mol.mm import *
 prot=io.LoadPDB('1CRN.pdb')
 
 #set up the simulation
-settings = MMSettings()
+settings = Settings()
 settings.integrator = LangevinIntegrator(310,1,0.002)
 settings.add_gbsa = True
 settings.forcefield = LoadCHARMMForcefield()

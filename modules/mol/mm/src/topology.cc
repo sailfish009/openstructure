@@ -1,5 +1,4 @@
 #include <ost/mol/mm/topology.hh>
-#include <ost/mol/mm/mm_modeller.hh>
 
 
 namespace ost{ namespace mol{ namespace mm{
