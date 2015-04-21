@@ -19,9 +19,9 @@ namespace ost { namespace mol{ namespace mm{
 
 class GromacsData;
 class CHARMMData;
-class GromacsReader;
+class FFReader;
 typedef boost::shared_ptr<GromacsData> GromacsDataPtr;
-typedef boost::shared_ptr<GromacsReader> GromacsReaderPtr;
+typedef boost::shared_ptr<FFReader> FFReaderPtr;
 typedef boost::shared_ptr<CHARMMData> CHARMMDataPtr;
 
 class GromacsData{
@@ -80,10 +80,10 @@ private:
 };
 
 
-class GromacsReader {
+class FFReader {
 public:
 
-  GromacsReader(const String& base_dir);
+  FFReader(const String& base_dir);
 
   void SetPreprocessorDefinition(const String& def) { preprocessor_.SetDefinition(def); }
 

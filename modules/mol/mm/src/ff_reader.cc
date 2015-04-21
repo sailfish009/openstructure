@@ -1,4 +1,4 @@
-#include <ost/mol/mm/gromacs_reader.hh>
+#include <ost/mol/mm/ff_reader.hh>
 
 
 namespace ost { namespace mol{ namespace mm {
@@ -146,10 +146,6 @@ CHARMMDataPtr CHARMMData::Instance(){
 }
 
 CHARMMDataPtr CHARMMData::instance_ = CHARMMDataPtr();
-
-
-
-
 
 std::vector<std::vector<String> > MMPreprocessor::Process(const String& filename){
 
@@ -348,7 +344,7 @@ std::vector<std::vector<String> > MMPreprocessor::ReadFile(const String& filenam
   return split_file_content;
 }
 
-GromacsReader::GromacsReader(const String& base_dir): preprocessor_(base_dir),
+FFReader::FFReader(const String& base_dir): preprocessor_(base_dir),
                                                       ff_(new Forcefield)
 { 
   for(int i = 0; i < 4; ++i){
@@ -357,7 +353,7 @@ GromacsReader::GromacsReader(const String& base_dir): preprocessor_(base_dir),
   }
 }
 
-void GromacsReader::ReadGromacsForcefield(){
+void FFReader::ReadGromacsForcefield(){
 
   //read in the forcefield
   if(!boost::filesystem::exists(preprocessor_.GetBasedir() / "forcefield.itp")){
@@ -372,7 +368,7 @@ void GromacsReader::ReadGromacsForcefield(){
   this->ParseAtomTypes(content);
 }
 
-void GromacsReader::ReadResidueDatabase(const String& basename){
+void FFReader::ReadResidueDatabase(const String& basename){
   std::vector<std::vector<String> > data = preprocessor_.Process(basename+".rtp");
   this->ParseRTP(data);
 
@@ -407,17 +403,17 @@ void GromacsReader::ReadResidueDatabase(const String& basename){
   }catch(ost::io::IOException e) { }
 }
 
-void GromacsReader::ReadCHARMMPRM(const String& filename){
+void FFReader::ReadCHARMMPRM(const String& filename){
   std::vector<std::vector<String> > data = preprocessor_.Process(filename);
   this->ParseCHARMMPRM(data);
 }
 
-void GromacsReader::ReadCHARMMRTF(const String& filename){
+void FFReader::ReadCHARMMRTF(const String& filename){
   std::vector<std::vector<String> > data = preprocessor_.Process(filename);
   this->ParseCHARMMRTF(data);
 }
 
-void GromacsReader::ParseForcefield(std::vector<std::vector<String> >& content){
+void FFReader::ParseForcefield(std::vector<std::vector<String> >& content){
 
   int keyword_id = -1;
   std::vector<String> current_line;
@@ -515,14 +511,14 @@ void GromacsReader::ParseForcefield(std::vector<std::vector<String> >& content){
   }
 }
 
-void GromacsReader::ParseAtomTypes(std::vector<std::vector<String> >& content){
+void FFReader::ParseAtomTypes(std::vector<std::vector<String> >& content){
   for(std::vector<std::vector<String> >::iterator i = content.begin();
       i!=content.end(); ++i){
     ff_->AddMass((*i)[0],boost::lexical_cast<Real>((*i)[1]));
   }
 }
 
-void GromacsReader::ParseRTP(std::vector<std::vector<String> >& content){
+void FFReader::ParseRTP(std::vector<std::vector<String> >& content){
  
   read_residues_.clear();
 
@@ -622,7 +618,7 @@ void GromacsReader::ParseRTP(std::vector<std::vector<String> >& content){
 
 }
 
-void GromacsReader::ParseARN(std::vector<std::vector<String> >& content){
+void FFReader::ParseARN(std::vector<std::vector<String> >& content){
   String res_name, a_one, a_two;
 
   for(std::vector<std::vector<String> >::iterator i = content.begin();
@@ -643,7 +639,7 @@ void GromacsReader::ParseARN(std::vector<std::vector<String> >& content){
   }
 }
 
-void GromacsReader::ParseHDB(std::vector<std::vector<String> >& content){
+void FFReader::ParseHDB(std::vector<std::vector<String> >& content){
 
   std::vector<std::vector<String> > residue_data;
   String residue_name;
@@ -674,7 +670,7 @@ void GromacsReader::ParseHDB(std::vector<std::vector<String> >& content){
   }
 }
 
-void GromacsReader::ParseHydrogenRule(const std::vector<String>& data, 
+void FFReader::ParseHydrogenRule(const std::vector<String>& data, 
                                       GromacsHydrogenConstructor& constructor){
 
   if(data.size() < 4){
@@ -716,7 +712,7 @@ void GromacsReader::ParseHydrogenRule(const std::vector<String>& data,
 }
 
 
-void GromacsReader::ParseTerminiReplaceRule(const std::vector<String>& data, 
+void FFReader::ParseTerminiReplaceRule(const std::vector<String>& data, 
                                             GromacsBlockModifier& modifier){
 
   String name;
@@ -740,7 +736,7 @@ void GromacsReader::ParseTerminiReplaceRule(const std::vector<String>& data,
   //we neglect the mass! This will be read from the forcefield itself!
 }
 
-void GromacsReader::ParseTerminiAddRule(const std::vector<String>& data1, 
+void FFReader::ParseTerminiAddRule(const std::vector<String>& data1, 
                                         const std::vector<String>& data2,
                                         GromacsBlockModifier& modifier){
 
@@ -788,7 +784,7 @@ void GromacsReader::ParseTerminiAddRule(const std::vector<String>& data1,
 }
 
 
-void GromacsReader::ParseNTDB(std::vector<std::vector<String> >& content){
+void FFReader::ParseNTDB(std::vector<std::vector<String> >& content){
 
   //Besided general termini constructors, there are also residue 
   //specific constructors => custom constructors
@@ -853,7 +849,7 @@ void GromacsReader::ParseNTDB(std::vector<std::vector<String> >& content){
   }
 }
 
-void GromacsReader::ParseCTDB(std::vector<std::vector<String> >& content){
+void FFReader::ParseCTDB(std::vector<std::vector<String> >& content){
 
   //Besided general termini constructors, there are also residue 
   //specific constructors => custom constructors
@@ -918,11 +914,11 @@ void GromacsReader::ParseCTDB(std::vector<std::vector<String> >& content){
   }
 }
 
-void GromacsReader::ParseVSD(std::vector<std::vector<String> >& content){
+void FFReader::ParseVSD(std::vector<std::vector<String> >& content){
 
 }
 
-void GromacsReader::ParseRtoB(std::vector<std::vector<String> >& content){
+void FFReader::ParseRtoB(std::vector<std::vector<String> >& content){
 
   //there are two versions of this file, either with two or five
   //columns further instructions can be found in the gromacs manual
@@ -953,12 +949,12 @@ void GromacsReader::ParseRtoB(std::vector<std::vector<String> >& content){
   }
 }
 
-void GromacsReader::ReadITP(const String& basename){
+void FFReader::ReadITP(const String& basename){
   std::vector<std::vector<String> > content = preprocessor_.Process(basename + ".itp");
   this->ParseITP(content);
 }
 
-void GromacsReader::ParseITP(std::vector<std::vector<String> >& content){
+void FFReader::ParseITP(std::vector<std::vector<String> >& content){
 
   std::vector<std::vector<String> > residue_data;
   String residue_name;
@@ -984,7 +980,7 @@ void GromacsReader::ParseITP(std::vector<std::vector<String> >& content){
   }
 }
 
-BuildingBlockPtr GromacsReader::BlockFromRTP(const std::vector<std::vector<String> >& data){  
+BuildingBlockPtr FFReader::BlockFromRTP(const std::vector<std::vector<String> >& data){  
 
   if(bonded_types_.size()<4){
     std::stringstream ss;
@@ -1051,7 +1047,7 @@ BuildingBlockPtr GromacsReader::BlockFromRTP(const std::vector<std::vector<Strin
   return p;
 }
 
-BuildingBlockPtr GromacsReader::BlockFromITP(const std::vector<std::vector<String> >& data){
+BuildingBlockPtr FFReader::BlockFromITP(const std::vector<std::vector<String> >& data){
 
   int keyword_index;
 
@@ -1180,7 +1176,7 @@ BuildingBlockPtr GromacsReader::BlockFromITP(const std::vector<std::vector<Strin
 }
 
 
-BlockModifierPtr GromacsReader::ParseBlockModifier(const std::vector<std::vector<String> >& data){
+BlockModifierPtr FFReader::ParseBlockModifier(const std::vector<std::vector<String> >& data){
 
 
   int keyword_index = -1;
@@ -1249,7 +1245,7 @@ BlockModifierPtr GromacsReader::ParseBlockModifier(const std::vector<std::vector
 }
 
 
-InteractionPtr GromacsReader::ParseBond(const std::vector<String>& data, 
+InteractionPtr FFReader::ParseBond(const std::vector<String>& data, 
                                                  bool type_definition,
                                                  FuncType functype){
 
@@ -1299,7 +1295,7 @@ InteractionPtr GromacsReader::ParseBond(const std::vector<String>& data,
   return p;
 }
 
-InteractionPtr GromacsReader::ParseAngle(const std::vector<String>& data, 
+InteractionPtr FFReader::ParseAngle(const std::vector<String>& data, 
                                            bool type_definition,
                                            FuncType functype){
 
@@ -1357,7 +1353,7 @@ InteractionPtr GromacsReader::ParseAngle(const std::vector<String>& data,
   return p;
 }
 
-InteractionPtr GromacsReader::ParseDihedral(const std::vector<String>& data, 
+InteractionPtr FFReader::ParseDihedral(const std::vector<String>& data, 
                                               bool type_definition,
                                               FuncType functype){
   if(data.size() < 4){
@@ -1414,7 +1410,7 @@ InteractionPtr GromacsReader::ParseDihedral(const std::vector<String>& data,
   return p;
 }
 
-InteractionPtr GromacsReader::ParseCMap(const std::vector<String>& data, 
+InteractionPtr FFReader::ParseCMap(const std::vector<String>& data, 
                                                    bool type_definition,
                                                    FuncType functype){
   if(data.size() < 5){
@@ -1467,7 +1463,7 @@ InteractionPtr GromacsReader::ParseCMap(const std::vector<String>& data,
 }
 
 
-InteractionPtr GromacsReader::ParseLJ(const std::vector<String>& data, 
+InteractionPtr FFReader::ParseLJ(const std::vector<String>& data, 
                                         bool type_definition,
                                         FuncType functype){
 
@@ -1501,7 +1497,7 @@ InteractionPtr GromacsReader::ParseLJ(const std::vector<String>& data,
 }
 
 
-InteractionPtr GromacsReader::ParseLJPair(const std::vector<String>& data, 
+InteractionPtr FFReader::ParseLJPair(const std::vector<String>& data, 
                                             bool type_definition,
                                             FuncType functype){
 
@@ -1550,7 +1546,7 @@ InteractionPtr GromacsReader::ParseLJPair(const std::vector<String>& data,
   return p;
 }
 
-InteractionPtr GromacsReader::ParseConstraint(const std::vector<String>& data, 
+InteractionPtr FFReader::ParseConstraint(const std::vector<String>& data, 
                                                 bool type_definition,
                                                 FuncType functype){
 
@@ -1598,7 +1594,7 @@ InteractionPtr GromacsReader::ParseConstraint(const std::vector<String>& data,
   return p;
 }
 
-InteractionPtr GromacsReader::ParseGenborn(const std::vector<String>& data,
+InteractionPtr FFReader::ParseGenborn(const std::vector<String>& data,
                                              bool type_definition,
                                              FuncType functype){
 
@@ -1631,7 +1627,7 @@ InteractionPtr GromacsReader::ParseGenborn(const std::vector<String>& data,
 }
 
 
-InteractionPtr GromacsReader::ParseExclusion(const std::vector<String>& data,
+InteractionPtr FFReader::ParseExclusion(const std::vector<String>& data,
                                                bool type_definition,
                                                FuncType functype){
 
@@ -1653,7 +1649,7 @@ InteractionPtr GromacsReader::ParseExclusion(const std::vector<String>& data,
   return p;
 }
 
-void GromacsReader::ParseCHARMMPRM(std::vector<std::vector<String> >& content){
+void FFReader::ParseCHARMMPRM(std::vector<std::vector<String> >& content){
 
 
   int keyword_id = -1;
@@ -1877,7 +1873,7 @@ void GromacsReader::ParseCHARMMPRM(std::vector<std::vector<String> >& content){
 
 }
 
-void GromacsReader::ParseCHARMMRTF(std::vector<std::vector<String> >& content){
+void FFReader::ParseCHARMMRTF(std::vector<std::vector<String> >& content){
 
   bool in_block = false;
 

@@ -4,7 +4,7 @@ set(OST_MOL_MM_PYMOD_SOURCES
   export_simulation.cc
   export_openmm.cc
   export_observers.cc
-  export_gromacs_reader.cc
+  export_ff_reader.cc
   export_interaction.cc
   export_buildingblock.cc
   export_block_modifiers.cc

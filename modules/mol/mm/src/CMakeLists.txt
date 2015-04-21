@@ -1,6 +1,6 @@
 set(OST_MOL_MM_HEADERS
   forcefield.hh
-  gromacs_reader.hh
+  ff_reader.hh
   buildingblock.hh
   block_modifiers.hh
   gromacs_block_modifiers.hh
@@ -21,7 +21,7 @@ set(OST_MOL_MM_HEADERS
 
 set(OST_MOL_MM_SOURCES
   forcefield.cc
-  gromacs_reader.cc
+  ff_reader.cc
   buildingblock.cc
   gromacs_block_modifiers.cc
   heuristic_block_modifiers.cc

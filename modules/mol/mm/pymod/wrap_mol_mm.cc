@@ -8,7 +8,7 @@ void export_Settings();
 void export_Simulation();
 void export_OpenMM();
 void export_Observers();
-void export_GromacsReader();
+void export_FFReader();
 void export_Interaction();
 void export_Buildingblock();
 void export_Forcefield();
@@ -24,7 +24,7 @@ BOOST_PYTHON_MODULE(_ost_mol_mm)
   export_Simulation();
   export_OpenMM();
   export_Observers();
-  export_GromacsReader();
+  export_FFReader();
   export_Interaction();
   export_Buildingblock();
   export_BlockModifiers();
