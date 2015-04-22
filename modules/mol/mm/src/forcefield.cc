@@ -427,6 +427,12 @@ BlockModifierPtr Forcefield::GetBlockModifier(const String& modifier_name) const
 
 String Forcefield::GetAtomType(const String& res_name, const String& atom_name) const{
   BuildingBlockPtr block = this->GetBuildingBlock(res_name);
+  if(!block){
+    std::stringstream ss;
+    ss << "There is no building block for " << res_name;
+    ss << "in the forcefield!";
+    throw ost::Error(ss.str());
+  }
   return block->GetType(atom_name);
 }
 
