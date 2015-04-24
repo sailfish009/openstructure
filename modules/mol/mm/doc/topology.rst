@@ -23,8 +23,25 @@ that should suffice most needs.
     based on the information given by the :class:`Settings`/:class:`Forcefield`.
 
     :param entity:      :class:`EntityHandle`
+
     :param settings:    :class:`Settings`
 
+    :raises:            :class:`RuntimeError` if settings has no 
+                        :class:`Forcefield` assigned
+
+    :raises:            :class:`RuntimeError` if there is a residue with no
+                        appropriate :class:`BuildingBlock` in the 
+                        :class:`Forcefield`
+
+    :raises:            :class:`RuntimeError` if there is a 
+                        :class:`ResidueHandle` not matching the
+                        :class:`BuildingBlock` definition in the
+                        :class:`Forcefield`
+
+    :raises:            :class:`RuntimeError` if there is an interaction,
+                        that has no parameters in the forcefield. This 
+                        :class:`RuntimeError` can be supressed by the 
+                        according flag in the :class:`Settings` object.
 
 .. class:: Topology
 
