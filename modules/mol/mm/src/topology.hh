@@ -225,9 +225,9 @@ public:
  
   const std::vector<std::pair<Index<2>, std::vector<Real> > >& GetDistanceConstraints() const { return distance_constraints_; }
 
-  const std::vector<std::pair<Index<1>, std::vector<Real> > >&GetHarmonicPositionRestraints() const { return harmonic_position_restraints_; }
+  const std::vector<std::pair<Index<1>, std::vector<Real> > >& GetHarmonicPositionRestraints() const { return harmonic_position_restraints_; }
  
-  const std::vector<std::pair<Index<2>, std::vector<Real> > >&GetHarmonicDistanceRestraints() const{ return harmonic_distance_restraints_; }
+  const std::vector<std::pair<Index<2>, std::vector<Real> > >& GetHarmonicDistanceRestraints() const{ return harmonic_distance_restraints_; }
 
   const std::vector<Index<2> >& GetExclusions() const { return exclusions_; }
  
