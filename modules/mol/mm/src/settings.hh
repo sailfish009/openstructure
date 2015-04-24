@@ -43,11 +43,11 @@ public:
   TerminiExceptions(){ }
 
   void SetException(const ost::mol::ResidueHandle& res, const String& exception_name){
-    exceptions_[res.GetQualifiedName()] =  exception_name;
+    exceptions_[res.GetHashCode()] =  exception_name;
   }
 
   bool HasException(const ost::mol::ResidueHandle& res) const{
-    return exceptions_.find(res.GetQualifiedName()) != exceptions_.end();
+    return exceptions_.find(res.GetHashCode()) != exceptions_.end();
   }
 
   String GetException(const ost::mol::ResidueHandle& res) const {
@@ -56,11 +56,11 @@ public:
       ss<<"Tried to get termini exceptions of res "<<res<<" without defined exception!";
       throw ost::Error(ss.str());
     }
-    std::map<String, String>::const_iterator i = exceptions_.find(res.GetQualifiedName());
+    std::map<unsigned long, String>::const_iterator i = exceptions_.find(res.GetHashCode());
     return i->second;
   }
 private:
-  std::map<String, String> exceptions_;
+  std::map<unsigned long, String> exceptions_;
 
 };
 
