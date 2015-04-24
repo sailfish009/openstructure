@@ -513,7 +513,7 @@ void Topology::GetHarmonicDistanceRestraintParameters(uint index, uint& atom_one
 }
 
 
-void Topology::SetHarmonicBondParameters(uint index, const Real& bond_length, const Real& force_constant){
+void Topology::SetHarmonicBondParameters(uint index, const Real bond_length, const Real force_constant){
   if(index >= harmonic_bonds_.size()){
     throw ost::Error("Provided index exceeds number of harmonic bonds present in topology!");
   }
@@ -521,7 +521,7 @@ void Topology::SetHarmonicBondParameters(uint index, const Real& bond_length, co
   harmonic_bonds_[index].second[1] = force_constant;
 }
 
-void Topology::SetHarmonicAngleParameters(uint index, const Real& angle, const Real& force_constant){
+void Topology::SetHarmonicAngleParameters(uint index, const Real angle, const Real force_constant){
   if(index >= harmonic_angles_.size()){
     throw ost::Error("Provided index exceeds number of harmonic angles present in topology!");
   }
@@ -529,7 +529,7 @@ void Topology::SetHarmonicAngleParameters(uint index, const Real& angle, const R
   harmonic_angles_[index].second[1] = force_constant;
 }
 
-void Topology::SetUreyBradleyAngleParameters(uint index, const Real& angle, const Real& angle_force_constant, const Real& bond_length, const Real& bond_force_constant){
+void Topology::SetUreyBradleyAngleParameters(uint index, const Real angle, const Real angle_force_constant, const Real bond_length, const Real bond_force_constant){
   if(index >= urey_bradley_angles_.size()){
     throw ost::Error("Provided index exceeds number of urey_bradley angles present in topology!");
   }
@@ -539,7 +539,7 @@ void Topology::SetUreyBradleyAngleParameters(uint index, const Real& angle, cons
   urey_bradley_angles_[index].second[3] = bond_force_constant;
 }
 
-void Topology::SetPeriodicDihedralParameters(uint index, const int& multiplicity, const Real& phase, const Real& force_constant){
+void Topology::SetPeriodicDihedralParameters(uint index, const int multiplicity, const Real phase, const Real force_constant){
   if(index >= periodic_dihedrals_.size()){
     throw ost::Error("Provided index exceeds number of periodic dihedrals present in topology!");
   }
@@ -548,7 +548,7 @@ void Topology::SetPeriodicDihedralParameters(uint index, const int& multiplicity
   periodic_dihedrals_[index].second[2] = force_constant;
 }
 
-void Topology::SetPeriodicImproperParameters(uint index, const int& multiplicity, const Real& phase, const Real& force_constant){
+void Topology::SetPeriodicImproperParameters(uint index, const int multiplicity, const Real phase, const Real force_constant){
   if(index >= periodic_impropers_.size()){
     throw ost::Error("Provided index exceeds number of periodic impropers present in topology!");
   }
@@ -557,7 +557,7 @@ void Topology::SetPeriodicImproperParameters(uint index, const int& multiplicity
   periodic_impropers_[index].second[2] = force_constant;
 }
 
-void Topology::SetHarmonicImproperParameters(uint index, const Real& angle, const Real& force_constant){
+void Topology::SetHarmonicImproperParameters(uint index, const Real angle, const Real force_constant){
   if(index >= harmonic_impropers_.size()){
     throw ost::Error("Provided index exceeds number of harmonic impropers present in topology!");
   }
@@ -565,7 +565,7 @@ void Topology::SetHarmonicImproperParameters(uint index, const Real& angle, cons
   harmonic_impropers_[index].second[1] = force_constant;
 }
 
-void Topology::SetCMapParameters(uint index, const int& dimension, const std::vector<Real>& map){
+void Topology::SetCMapParameters(uint index, const int dimension, const std::vector<Real>& map){
   if(index >= cmaps_.size()){
     throw ost::Error("Provided index exceeds number of cmaps present in topology!");
   }
@@ -575,7 +575,7 @@ void Topology::SetCMapParameters(uint index, const int& dimension, const std::ve
   cmaps_[index].second = map;
 }
 
-void Topology::SetLJPairParameters(uint index, const Real& sigma, const Real& epsilon){
+void Topology::SetLJPairParameters(uint index, const Real sigma, const Real epsilon){
   if(index >= lj_pairs_.size()){
     throw ost::Error("Provided index exceeds number of lj pairs present in topology!");
   }
@@ -583,7 +583,7 @@ void Topology::SetLJPairParameters(uint index, const Real& sigma, const Real& ep
   lj_pairs_[index].second[1] = epsilon;
 }
 
-void Topology::SetDistanceConstraintParameters(uint index, const Real& distance){
+void Topology::SetDistanceConstraintParameters(uint index, const Real distance){
   if(index >= distance_constraints_.size()){
     throw ost::Error("Provided index exceeds number of distance_constraints present in topology!");
   }

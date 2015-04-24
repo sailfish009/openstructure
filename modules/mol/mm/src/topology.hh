@@ -181,23 +181,26 @@ public:
   void GetHarmonicDistanceRestraintParameters(uint index, uint& atom_one, uint& atom_two, Real& length,
                                                Real& force_constant) const;
 
-  void SetHarmonicBondParameters(uint index, const Real& bond_length, const Real& force_constant);
+  void SetHarmonicBondParameters(uint index, const Real bond_length, const Real force_constant);
 
-  void SetHarmonicAngleParameters(uint index, const Real& angle, const Real& force_constant);
+  void SetHarmonicAngleParameters(uint index, const Real angle, const Real force_constant);
 
-  void SetUreyBradleyAngleParameters(uint index, const Real& angle, const Real& angle_force_constant, const Real& bond_length, const Real& bond_force_constant);
+  void SetUreyBradleyAngleParameters(uint index, const Real angle, const Real angle_force_constant, 
+                                     const Real bond_length, const Real bond_force_constant);
 
-  void SetPeriodicDihedralParameters(uint index, const int& multiplicity, const Real& phase, const Real& force_constant);
+  void SetPeriodicDihedralParameters(uint index, const int multiplicity, 
+                                     const Real phase, const Real force_constant);
 
-  void SetPeriodicImproperParameters(uint index, const int& multiplicity, const Real& phase, const Real& force_constant);
+  void SetPeriodicImproperParameters(uint index, const int multiplicity, const Real phase, 
+                                     const Real force_constant);
 
-  void SetHarmonicImproperParameters(uint index, const Real& angle, const Real& force_constant);
+  void SetHarmonicImproperParameters(uint index, const Real angle, const Real force_constant);
 
-  void SetCMapParameters(uint index, const int& dimension, const std::vector<Real>& map);
+  void SetCMapParameters(uint index, const int dimension, const std::vector<Real>& map);
 
-  void SetLJPairParameters(uint index, const Real& sigma, const Real& epsilon);
+  void SetLJPairParameters(uint index, const Real sigma, const Real epsilon);
 
-  void SetDistanceConstraintParameters(uint index, const Real& distance);
+  void SetDistanceConstraintParameters(uint index, const Real distance);
 
   void SetHarmonicPositionRestraintParameters(uint index, const geom::Vec3& ref_position, Real k, 
                                                Real x_scale = 1.0, Real y_scale = 1.0, Real z_scale = 1.0);
