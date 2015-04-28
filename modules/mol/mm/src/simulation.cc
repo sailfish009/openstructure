@@ -272,8 +272,8 @@ void Simulation::Init(const TopologyPtr top,
   switch(settings->platform){
     case Reference:{
       platform = &OpenMM::Platform::getPlatformByName("Reference");
-      for(PropertyMap::iterator i = settings->opencl_properties.begin();
-          i != settings->opencl_properties.end(); ++i){
+      for(PropertyMap::iterator i = settings->reference_properties.begin();
+          i != settings->reference_properties.end(); ++i){
         context_properties[i->first] = i->second;
       }
       break;
