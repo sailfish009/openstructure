@@ -267,22 +267,39 @@ void Simulation::Init(const TopologyPtr top,
 
   OpenMM::Platform::loadPluginsFromDirectory (settings->openmm_plugin_directory);
   OpenMM::Platform* platform;
+  std::map<String,String> context_properties;
 
   switch(settings->platform){
     case Reference:{
       platform = &OpenMM::Platform::getPlatformByName("Reference");
+      for(PropertyMap::iterator i = settings->opencl_properties.begin();
+          i != settings->opencl_properties.end(); ++i){
+        context_properties[i->first] = i->second;
+      }
       break;
     }
     case OpenCL:{
       platform = &OpenMM::Platform::getPlatformByName("OpenCL");
+      for(PropertyMap::iterator i = settings->opencl_properties.begin();
+          i != settings->opencl_properties.end(); ++i){
+        context_properties[i->first] = i->second;
+      }
       break;
     }
     case CUDA:{
       platform = &OpenMM::Platform::getPlatformByName("CUDA");
+      for(PropertyMap::iterator i = settings->cuda_properties.begin();
+          i != settings->cuda_properties.end(); ++i){
+        context_properties[i->first] = i->second;
+      }
       break;
     }
     case CPU:{
       platform = &OpenMM::Platform::getPlatformByName("CPU");
+      for(PropertyMap::iterator i = settings->cpu_properties.begin();
+          i != settings->cpu_properties.end(); ++i){
+        context_properties[i->first] = i->second;
+      }
       break;
     }
     default:{
@@ -290,7 +307,7 @@ void Simulation::Init(const TopologyPtr top,
     }
   }
 
-  context_ = ContextPtr(new OpenMM::Context(*system_,*integrator_,*platform));
+  context_ = ContextPtr(new OpenMM::Context(*system_,*integrator_,*platform,context_properties));
 
   ost::mol::AtomHandleList atom_list = ent_.GetAtomList();
   std::vector<OpenMM::Vec3> positions;

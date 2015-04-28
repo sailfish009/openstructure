@@ -64,6 +64,8 @@ private:
 
 };
 
+typedef std::map<String,String> PropertyMap;
+
 struct Settings{
 
   Settings(): add_bonds(true),
@@ -92,6 +94,10 @@ struct Settings{
                               //to assign a forcefield
                 termini_exceptions(new TerminiExceptions),
                 platform(Reference),
+                reference_properties(),
+                cpu_properties(),
+                opencl_properties(),
+                cuda_properties(),
                 add_thermostat(false),
                 thermostat_temperature(std::numeric_limits<Real>::quiet_NaN()),
                 thermostat_collision_frequency(std::numeric_limits<Real>::quiet_NaN()),
@@ -142,6 +148,10 @@ struct Settings{
   ForcefieldPtr forcefield;
   TerminiExceptionsPtr termini_exceptions;
   Platform platform;
+  PropertyMap reference_properties;
+  PropertyMap cpu_properties;
+  PropertyMap opencl_properties;
+  PropertyMap cuda_properties;
   bool add_thermostat;
   Real thermostat_temperature;
   Real thermostat_collision_frequency;

@@ -10,6 +10,7 @@ settings.forcefield = LoadCHARMMForcefield()
 settings.nonbonded_cutoff = 8.0
 settings.nonbonded_method = NonbondedMethod.CutoffNonPeriodic
 settings.platform = Platform.CPU
+settings.cpu_properties["CpuThreads"] = "2"
 
 sim = Simulation(prot,settings)
 

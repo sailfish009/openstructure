@@ -19,6 +19,7 @@
 #include <boost/python.hpp>
 #include <ost/mol/mm/settings.hh>
 #include <OpenMM.h> //for definition of Integrator
+#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 
 using namespace boost::python;
 
@@ -75,6 +76,10 @@ void export_Settings()
     .def_readwrite("forcefield",&ost::mol::mm::Settings::forcefield)
     .def_readwrite("termini_exceptions",&ost::mol::mm::Settings::termini_exceptions)
     .def_readwrite("platform",&ost::mol::mm::Settings::platform)
+    .def_readwrite("reference_properties",&ost::mol::mm::Settings::reference_properties)
+    .def_readwrite("cpu_properties",&ost::mol::mm::Settings::cpu_properties)
+    .def_readwrite("cuda_properties",&ost::mol::mm::Settings::cuda_properties)
+    .def_readwrite("opencl_properties",&ost::mol::mm::Settings::opencl_properties)
     .def_readwrite("add_thermostat",&ost::mol::mm::Settings::add_thermostat)
     .def_readwrite("thermostat_temperature",&ost::mol::mm::Settings::thermostat_temperature)
     .def_readwrite("thermostat_collision_frequency",&ost::mol::mm::Settings::thermostat_collision_frequency)
@@ -91,6 +96,10 @@ void export_Settings()
     .def_readwrite("openmm_plugin_directory",&ost::mol::mm::Settings::openmm_plugin_directory)
     .def_readwrite("custom_plugin_directory",&ost::mol::mm::Settings::custom_plugin_directory)
 
+  ;
+
+  class_<ost::mol::mm::PropertyMap>("PropertyMap", no_init)
+    .def(map_indexing_suite<ost::mol::mm::PropertyMap>()) 
   ;
 
   boost::python::register_ptr_to_python<ost::mol::mm::SettingsPtr>();
