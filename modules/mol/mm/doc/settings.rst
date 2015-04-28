@@ -143,6 +143,26 @@ of the :class:`Simulation` object.
     is used, the attribute openmm_plugin_directory has to be set accordingly.
     default: mm.Reference
 
+  .. attribute::        reference_properties
+
+    :class:`dict` of OpenMM specific properties, that can be set for the 
+    reference platform.
+       
+  .. attribute::        cpu_properties
+
+    :class:`dict` of OpenMM specific properties, that can be set for the 
+    cpu platform.
+
+  .. attribute::        opencl_properties
+
+    :class:`dict` of OpenMM specific properties, that can be set for the 
+    opencl platform.
+
+  .. attribute::        cuda_properties
+
+    :class:`dict` of OpenMM specific properties, that can be set for the 
+    cuda platform.
+
   .. attribute::        add_thermostat
 
     Flag, whether an Andersen thermostat should be attached when settings up
