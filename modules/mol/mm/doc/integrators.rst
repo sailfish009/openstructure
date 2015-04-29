@@ -7,15 +7,24 @@ The Integrators are a wrapper around the integrators provided by OpenMM and
 have to be attached to the :class:`Settings` when setting up a simulation
 to provide a way of making the thing shake.
 
-.. class:: VerletIntegrator
+.. class:: VerletIntegrator(step_size)
 
   Implementation of Verlet dynamics
 
+  :param step_size:     :class:`float` defining timestep in ps.
 
 
-.. class:: BrownianIntegrator
+
+.. class:: BrownianIntegrator(temperature, friction_coeff, step_size)
 
   Implementation of Brownian dynamics
+
+  :param temperature:   :class:`float` temperature of heat bath in K
+
+  :param friction_coeff: :class:`float` friction coefficient coupling the
+                         system to the heat bath in 1/ps
+
+  :param step_size:     :class:`float` defining timestep in ps.
 
   .. method:: GetTemperature()
 
@@ -44,9 +53,16 @@ to provide a way of making the thing shake.
 
 
 
-.. class:: LangevinIntegrator
+.. class:: LangevinIntegrator(temperature, friction_coeff, step_size)
 
   Implementation of the Langevin dynamics
+
+  :param temperature:   :class:`float` temperature of heat bath in K
+
+  :param friction_coeff: :class:`float` friction coefficient coupling the
+                         system to the heat bath in 1/ps
+
+  :param step_size:     :class:`float` defining timestep in ps.
 
   .. method:: GetTemperature()
 
@@ -74,9 +90,11 @@ to provide a way of making the thing shake.
 
 
 
-.. class:: VariableVerletIntegrator
+.. class:: VariableVerletIntegrator(error_tol)
 
   Implementation of Verlet dynamics with variable time steps
+
+  :param error_tol:     :class:`float` error tolerance
 
   .. method:: GetErrorTolerance()
 
@@ -88,9 +106,16 @@ to provide a way of making the thing shake.
 
 
 
-.. class:: VariableLangevinIntegrator
+.. class:: VariableLangevinIntegrator(temperature, friction_coeff, error_tol)
 
   Implementation of Langevin dynamics with variable time steps
+
+  :param temperature:   :class:`float` temperature of heat bath in K
+
+  :param friction_coeff: :class:`float` friction coefficient coupling the
+                         system to the heat bath in 1/ps
+
+  :param error_tol:     :class:`float` error_tolerance.
 
   .. method:: GetTemperature()
 

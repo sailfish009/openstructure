@@ -29,7 +29,9 @@ a harmonic angle)
 --------------------------------------------------------------------------------
 
 
-.. class:: Interaction
+.. class:: Interaction(func_type)
+
+  :param func_type:     :class:`FuncType` defining a particular interaction
 
   ..method:: SetTypes(types)
 

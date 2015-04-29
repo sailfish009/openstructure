@@ -43,8 +43,9 @@ that should suffice most needs.
                         :class:`RuntimeError` can be supressed by the 
                         according flag in the :class:`Settings` object.
 
-.. class:: Topology
+.. class:: Topology(masses)
 
+  :param masses:        :class:`list` of the particles masses
 
   .. method:: Save(filename)
 

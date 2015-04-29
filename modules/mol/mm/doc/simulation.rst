@@ -3,11 +3,45 @@ Simulation
 
 .. currentmodule:: ost.mol
 
+The simulation finally connects a :class:`Topology` with an 
+:class:`ost.mol.EntityHandle`. While applying minimization or
+MD tasks, the current positions of the simulation object can be
+mapped back to the attached structure at any time.
 
 
-.. class:: Simulation
 
-  The :class:`mm.Simulation` class is used to run a simulation. 
+.. class:: Simulation(entity, settings)
+
+  first constructor, that takes an :class:`ost.mol.EntityHandle` as an input
+  and automatically constructs an internal :class:`Topology` according
+  to the provided **settings**. Be aware, that the **entity** will be altered
+  depending on hydrogen/termini definitions in the :class:`Forcefield` attached
+  to the **settings**
+
+  :param entity:        :class:`ost.mol.EntityHandle` from which a default
+                        :class:`Topology` will be created according to the
+                        **settings**
+
+  :param settings:      :class:`Settings` to control the parametrization of
+                        the :class:`Simulation` and the buildup of the
+                        internal :class:`Topology` 
+
+  :raises:              :class:`RuntimeError` when construction of 
+                        :class:`Topology` fails
+
+.. class:: Simulation(topology,entity,settings)
+
+  second constructor, that takes a :class:`Topology` and a consistent
+  :class:`ost.mol.EntityHandle` as an input.
+
+  :param topology:      :class:`Topology` to initialize the :class:`Simulation`
+
+  :param entity:        :class:`ost.mol.EntityHandle` that is consistent with
+                      the provided **topology**
+
+  :param settings:      :class:`Settings` to control the parametrization of
+                      the :class:`Simulation` 
+
 
   .. method:: Save(filename)
 
