@@ -34,12 +34,6 @@ public:
 
   static void GenerateDisulfidBonds(ost::mol::EntityHandle& handle);
 
-  static void GenerateCYSHEMEBonds(ost::mol::EntityHandle& handle);
-
-  static void GenerateHISHEMEBonds(ost::mol::EntityHandle& handle);
-
-  static void GenerateMETHEMEBonds(ost::mol::EntityHandle& handle);
-
   //may sound pretty stupid...
   //But this is necessary if we want to compare our energies with
   //the energies calculated by gromacs. When ost writes and entity
