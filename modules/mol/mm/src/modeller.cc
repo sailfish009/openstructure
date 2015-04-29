@@ -13,7 +13,22 @@ void Modeller::GenerateDisulfidBonds(ost::mol::EntityHandle& handle){
     if(i->GetName() == "CYS" || i->GetName() == "CYX" || i->GetName() == "CYS2" || i->GetName() == "CYM"){
       ost::mol::AtomHandle s = i->FindAtom("SG");
       if(s.IsValid()){
+        //quick check, whether max bond partners is already reached
         if(s.GetBondCount() >= 2) continue;
+        //check, whether SG is already bound to a SG
+        ost::mol::AtomHandleList bonded_atoms = s.GetBondPartners();
+        bool already_bound = false;
+        for(ost::mol::AtomHandleList::iterator bound_it = bonded_atoms.begin();
+            bound_it != bonded_atoms.end(); ++bound_it){
+          if(bound_it->GetName() == "SG"){
+            if(bound_it->GetResidue().GetName() == "CYS" || bound_it->GetResidue().GetName() == "CYX" ||
+               bound_it->GetResidue().GetName() == "CYS2" || bound_it->GetResidue().GetName() == "CYM"){
+              already_bound = true;
+              break;
+            }
+          }
+        }
+        if(already_bound) continue;
         ost::mol::AtomHandleList in_reach = handle.FindWithin(s.GetPos(),2.5);
         for(ost::mol::AtomHandleList::iterator j = in_reach.begin();
             j != in_reach.end(); ++j){
