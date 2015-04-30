@@ -19,8 +19,32 @@ that should suffice most needs.
 
     Creates a topology given an :class:`EntityHandle` and a :class:`Settings`
     object. Note, that the :class:`EntityHandle` is passed by reference
-    and gets altered by adding hydrogens and modification of terminal residues
-    based on the information given by the :class:`Settings`/:class:`Forcefield`.
+    and gets altered by rebuilding bonds, adding hydrogens and modification of 
+    terminal residues based on the information given by the 
+    :class:`Settings`/:class:`Forcefield`.
+    The Topology Creation process consists of:
+
+    #. Rename to the gromacs standard
+    
+    #. Kill all bonds
+    
+    #. Build difulfid bonds if flag is set in **settings**
+    
+    #. Rename to the standard defined in the forcefield
+    
+    #. Extract the building blocks from the forcefield for every residue
+    
+    #. Apply BlockModifiers on termini and reconstruct hydrogens with HydrogenConstructors
+    
+    #. Reconnect based on the connectivity definitions in the building blocks
+    
+    #. Check, whether the residues match with the building blocks
+    
+    #. Extract bonds/angles etc. based on the flags in the **settings**
+    
+    #. Add Parametrization from forcefield to the Topology
+    
+    #. Rename entity back to PDB naming if according flag is set in **settings**
 
     :param entity:      :class:`EntityHandle`
 

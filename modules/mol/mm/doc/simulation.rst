@@ -42,6 +42,10 @@ mapped back to the attached structure at any time.
   :param settings:      :class:`Settings` to control the parametrization of
                       the :class:`Simulation` 
 
+  :raises:              :class:`RuntimeException` when number of atoms in 
+                        **entity** is not equal the number of particles
+                        in **topology**
+
 
   .. method:: Save(filename)
 
@@ -154,58 +158,104 @@ mapped back to the attached structure at any time.
 
   .. method:: ResetHarmonicBond(index,bond_length, force_constant)
 
+    Update of the harmonic bond parameters in the simulation **and**
+    in the attached :class:`Topology`
+
     :param index: :class:`int`
     :param bond_length: :class:`float`
     :param force_constant: :class:`float`
+
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of harmonic bonds
 
   .. method:: ResetHarmonicAngle()
 
+    Update of the harmonic angle parameters in the simulation **and**
+    in the attached :class:`Topology`
+
     :param index: :class:`int`
     :param angle: :class:`float`
     :param force_constant: :class:`float`
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of harmonic angles
 
   .. method:: ResetUreyBradleyAngle(index, angle, angle_force_constant, bond_length, bond_force_constant)
+
+    Update of the urey-bradley angle parameters in the simulation **and**
+    in the attached :class:`Topology`
 
     :param index: :class:`int`
     :param angle: :class:`float`
     :param force_constant: :class:`float`
     :param bond_length: :class:`float`
     :param force_constant: :class:`float`
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of urey-bradley angles
 
   .. method:: ResetPeriodicDihedral(index, multiplicity, phase, force_constant)
+
+    Update of the periodic dihedral parameters in the simulation **and**
+    in the attached :class:`Topology`
 
     :param index: :class:`int`
     :param multiplicity: :class:`int`
     :param phase: :class:`float`
     :param force_constant: :class:`float`
+
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of periodic dihedrals
 
 
   .. method:: ResetPeriodicImproper(index, multiplicity, phase, force_constant)
 
+    Update of the periodic improper parameters in the simulation **and**
+    in the attached :class:`Topology`
+
     :param index: :class:`int`
     :param multiplicity: :class:`int`
     :param phase: :class:`float`
     :param force_constant: :class:`float`
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of periodic impropers
 
   .. method:: ResetHarmonicImproper(index, phase, force_constant)
+
+    Update of the harmonic improper parameters in the simulation **and**
+    in the attached :class:`Topology`
 
     :param index: :class:`int`
     :param phase: :class:`float`
     :param force_constant: :class:`float`
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of harmonic impropers
 
   .. method:: ResetLJPair(index,sigma,epsilon)
+
+    Update of the harmonic improper parameters in the simulation **and**
+    in the attached :class:`Topology`
 
     :param index: :class:`int`
     :param sigma: :class:`float`
     :param epsilon: :class:`float`
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of lj-pairs
 
 
   .. method:: ResetDistanceConstraint(index, constraint_length)
+
+    Update of the distance constraint parameters in the simulation **and**
+    in the attached :class:`Topology`
     
     :param index: :class:`int`
-    :param constraint_length: :class:`float`  
+    :param constraint_length: :class:`float` 
+
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of distance constraints
 
   .. method:: ResetHarmonicPositionRestraint(index,ref_position, force_constant,x_scale,y_scale,z_scale)
+
+    Update of the harmonic position restraint parameters in the simulation **and**
+    in the attached :class:`Topology`
 
     :param index: :class:`int`
     :param ref_position: :class:`~ost.geom.Vec3`
@@ -213,36 +263,63 @@ mapped back to the attached structure at any time.
     :param x_scale: :class:`float`
     :param y_scale: :class:`float`
     :param z_scale: :class:`float`
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of harmonic position restraints
 
   .. method:: ResetHarmonicDistanceRestraint(index,bond_length, force_constant)
+
+    Update of the harmonic distance restraint parameters in the simulation **and**
+    in the attached :class:`Topology`
 
     :param index: :class:`int`
     :param bond_length: :class:`float`
     :param force_constant: :class:`float`
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of harmonic distance restraints
 
   .. method:: ResetLJ(index,sigma,epsilon)
+
+    Update of the lj parameters in the simulation **and**
+    in the attached :class:`Topology`
 
     :param index: :class:`int`
     :param sigma: :class:`float`
     :param epsilon: :class:`float`
 
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of particles
+
   .. method:: ResetGBSA(index,radius,scaling)
+
+    Update of the GBSA parameters in the simulation **and**
+    in the attached :class:`Topology`
 
     :param index: :class:`int`
     :param radius: :class:`float`
     :param scaling: :class:`float`
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of particles
 
   .. method:: ResetCharge(index,charge)
 
+    Update of the charge in the simulation **and**
+    in the attached :class:`Topology`
+
     :param index: :class:`int`
     :param charge: :class:`float`
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of particles
 
 
   .. method:: ResetMass(index,mass)
 
+    Update of the mass in the simulation **and**
+    in the attached :class:`Topology`
+
     :param index: :class:`int`
     :param mass: :class:`float`
-
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of particles
 
 
 

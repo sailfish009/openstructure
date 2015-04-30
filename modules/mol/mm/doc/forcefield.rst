@@ -40,7 +40,17 @@ gromacs format. The reader is capable of resolving the preprocessor statements
 as they are used in GROMACS.
 
 
-.. class:: FFReader
+.. class:: FFReader(base_dir)
+
+  :param base_dir:      :class:`str` defining the base_path of the reader.
+                        All loaded files must be defined relative to this base 
+                        path.
+
+  The :class:`FFReader` builds up a :class:`Forcefield`, that gets updated with
+  every call to the read functions. If the read files contain preprocessor 
+  statements as they are used in Gromacs, they will be applied to all
+  subsequent lines read in. Parsed preprocessor statements are:
+  #include, #define, #ifdef, #ifndef, #else and #endif
 
   .. method:: ReadGromacsForcefield()
 
@@ -67,7 +77,8 @@ as they are used in GROMACS.
 
   .. method:: SetForcefield(forcefield)
 
-    Resets reader internal forcefield. Everything read so far is lost.
+    Resets reader internal forcefield. Everything read so far is lost,
+    except the already read preprocessor statements.
 
     :param forcefield:  :class:`Forcefield`
 
@@ -238,8 +249,7 @@ as they are used in GROMACS.
                                       used otherwise. 
 
 
-  .. method:: AddResidueRenamingRule(name, ff_main_name, ff_n_ter_name, 
-                                     ff_c_ter_name, ff_two_ter_name)
+  .. method:: AddResidueRenamingRule(name, ff_main_name, ff_n_ter_name, ff_c_ter_name, ff_two_ter_name)
 
     :param name:        :class:`str` original name or the residue 
                                      (e.g. pdb/gromacs standard)
@@ -319,7 +329,7 @@ as they are used in GROMACS.
                                      modifier for this residue
 
 
-  .. method:: AssignFFSpecificNames(ent, reverse = False)
+  .. method:: AssignFFSpecificNames(ent,[,reverse = False])
 
     This function does the forcefield specific renaming magic. It takes
     the given :class:`EntityHandle` and applies the rules set in
@@ -444,7 +454,7 @@ as they are used in GROMACS.
                                               matching given type can be found
 
 
-  .. method:: GetLJ(type1, type2, pair=False)
+  .. method:: GetLJ(type1, type2,[,pair=False])
 
     :param type1:        :class:`str`
 
@@ -538,7 +548,7 @@ as they are used in GROMACS.
               be found
 
 
-  .. method:: GetNTerModifier(res_name, ter_name="")
+  .. method:: GetNTerModifier(res_name,[,ter_name=""])
 
     :param res_name:    :class:`str`
 
@@ -549,7 +559,7 @@ as they are used in GROMACS.
               be found
 
 
-  .. method:: GetCTerModifier(name, ter_name="")
+  .. method:: GetCTerModifier(name,[,ter_name=""])
 
     :param res_name:    :class:`str`
 
