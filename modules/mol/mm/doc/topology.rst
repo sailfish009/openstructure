@@ -13,6 +13,9 @@ as soon as a :class:`Simulation` is set up. To make setting up a
 to create a :class:`Topology` based on an mm :class:`Settings` object, 
 that should suffice most needs.
 
+Automatically Create Topologies
+--------------------------------------------------------------------------------
+
 .. class:: TopologyCreator
 
   .. method:: Create(entity, settings)
@@ -41,8 +44,10 @@ that should suffice most needs.
     #. Check, whether the residues match with the building blocks
     
     #. Extract bonds/angles etc. based on the flags in the **settings**
+
+    #. Impropers and CMaps get only extracted when they are defined in the :class:`BuildingBlock`
     
-    #. Add Parametrization from forcefield to the Topology
+    #. Add Parametrization from :class:`Forcefield` to the :class:`Topology`. Note, that you can override the :class:`Forcefield` parametrization if you add this particular :class:`Interaction` in a parametrized form in the :class:`Buildingblock`!!!
     
     #. Rename entity back to PDB naming if according flag is set in **settings**
 
@@ -66,6 +71,10 @@ that should suffice most needs.
                         that has no parameters in the forcefield. This 
                         :class:`RuntimeError` can be supressed by the 
                         according flag in the :class:`Settings` object.
+
+
+The Topology Class
+--------------------------------------------------------------------------------
 
 .. class:: Topology(masses)
 

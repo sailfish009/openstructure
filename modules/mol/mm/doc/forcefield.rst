@@ -127,6 +127,8 @@ as they are used in GROMACS.
     ff = new_reader.GetForcefield()
     ff.Save("charmm_forcefield.dat")
 
+The Forcefield Class
+--------------------------------------------------------------------------------
 
 .. class:: Forcefield
 
