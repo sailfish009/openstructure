@@ -18,6 +18,11 @@ one interaction after the other or fully automatically using the
 :class:`TopologyCreator`. The whole process of :class:`Topology` building
 and setting up a :class:`Simulation` gets controlled with the :class:`Settings`.
 
+Latest Publication of `OpenMM <http://openmm.org>`_:
+P. Eastman, M. S. Friedrichs, J. D. Chodera, R. J. Radmer, C. M. Bruns, J. P. Ku, K. A. Beauchamp, T. J. Lane, L.-P. Wang, D. Shukla, T. Tye, M. Houston, T. Stich, C. Klein, M. R. Shirts, and V. S. Pande. "OpenMM 4: A Reusable, Extensible, Hardware Independent Library for High Performance Molecular Simulation." J. Chem. Theor. Comput. 9(1):461-469. (2013)
+
+
+
 
 Installation
 --------------------------------------------------------------------------------
