@@ -55,6 +55,7 @@ Setting up a simple simulation
     sim.ApplySD(tolerance = 1.0, max_iterations = 200)
 
     #create a trajectory observer and register it to the simulation
+    #every 10 steps, the actual positions will be written down to disk
     observer = mm.TrajWriter(10,"example_traj.pdb","example_traj.dcd")
     sim.Register(observer)
 
@@ -70,5 +71,5 @@ Doing more sophisticated stuff
 
 You want to create your own :class:`BuildingBlock` to parametrize custom 
 residues? Or even generate your custom :class:`Forcefield`? 
-Check out the mm section in the example script directory. 
+Check out the mm dir in the examples/code_fragments directory. 
 
