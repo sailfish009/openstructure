@@ -17,8 +17,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#ifndef OST_STEEP_H_
-#define OST_STEEP_H_
+#ifndef OST_MM_STEEP_HH
+#define OST_MM_STEEP_HH
 
 #include <ost/base.hh>
 #include <cmath>

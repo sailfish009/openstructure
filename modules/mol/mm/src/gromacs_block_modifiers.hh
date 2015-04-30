@@ -17,8 +17,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#ifndef GROMCACS_BLOCK_MODIFIERS
-#define GROMCACS_BLOCK_MODIFIERS
+#ifndef OST_MM_GROMCACS_BLOCK_MODIFIERS_HH
+#define OST_MM_GROMCACS_BLOCK_MODIFIERS_HH
 
 
 #include <boost/shared_ptr.hpp>

@@ -17,8 +17,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#ifndef OST_TOPOLOGY_CREATOR_HH
-#define OST_TOPOLOGY_CREATOR_HH
+#ifndef OST_MM_TOPOLOGY_CREATOR_HH
+#define OST_MM_TOPOLOGY_CREATOR_HH
 
 #include <vector>
 #include <map>

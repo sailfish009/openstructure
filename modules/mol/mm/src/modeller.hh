@@ -17,8 +17,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#ifndef OST_MMMODELLER_HH
-#define OST_MMMODELLER_HH
+#ifndef OST_MM_MODELLER_HH
+#define OST_MM_MODELLER_HH
 
 
 #include <vector>

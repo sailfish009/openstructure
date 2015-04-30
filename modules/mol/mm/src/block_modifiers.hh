@@ -17,8 +17,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#ifndef BLOCK_MODIFIERS
-#define BLOCK_MODIFIERS
+#ifndef OST_MM_BLOCK_MODIFIERS
+#define OST_MM_BLOCK_MODIFIERS
 
 #include <ost/mol/residue_handle.hh>
 #include <ost/mol/mm/buildingblock.hh>

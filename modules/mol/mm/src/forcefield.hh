@@ -17,8 +17,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#ifndef OST_FORCE_FIELD_HH
-#define OST_FORCE_FIELD_HH
+#ifndef OST_MM_FORCE_FIELD_HH
+#define OST_MM_FORCE_FIELD_HH
 
 #include <vector>
 #include <algorithm>

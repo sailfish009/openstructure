@@ -17,8 +17,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#ifndef OST_STATE_EXTRACTOR_HH
-#define OST_STATE_EXTRACTOR_HH
+#ifndef OST_MM_STATE_EXTRACTOR_HH
+#define OST_MM_STATE_EXTRACTOR_HH
 
 #include <vector>
 
