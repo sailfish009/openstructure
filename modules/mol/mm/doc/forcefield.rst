@@ -5,6 +5,8 @@ Forcefields
 
 The forcefields are a dump for interactions with their parameters, but also
 for atom specific information or residue definitions in form of a :class:`BuildingBlock`.
+Objects for modifying residues can be set in form of :class:`BlockModifier` or
+:class:`HydrogenConstructor`.
 They're also involved in the naming mess we're observing in the molecular mechanics
 community and contain definable renaming rules, that can be applied on an
 :class:`EntityHandle` for renaming from e.g. PDB standard to the forcefield
@@ -475,7 +477,8 @@ The Forcefield Class
     :raises:            :class:`RuntimeError` when no :class:`Interaction`
                                               matching given types can be found
                                               or when pair is true and no 
-                                              appropriate lj_pair is set.
+                                              appropriate lj_pair is set 
+                                              despite gen_pair flag being false.
 
 
   .. method:: GetConstraint(type1, type2)
@@ -496,8 +499,8 @@ The Forcefield Class
 
     :returns: the mass
 
-    :raises:            :class:`RuntimeError` no mass has been set for this 
-                        atom type has been set
+    :raises:            :class:`RuntimeError` if no mass has been set for this 
+                        atom type
 
 
   .. method:: GetFudgeLJ()

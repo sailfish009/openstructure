@@ -27,7 +27,7 @@ using namespace boost::python;
 namespace{
 
 template<typename T>
-std::vector<T> ListToVec(boost::python::list& l){
+std::vector<T> ListToVec(const boost::python::list& l){
   std::vector<T> vec;
   for (int i = 0; i < boost::python::len(l); ++i){
     vec.push_back(boost::python::extract<T>(l[i]));
@@ -35,9 +35,21 @@ std::vector<T> ListToVec(boost::python::list& l){
   return vec;
 }
 
+void WrapAddAddRule(ost::mol::mm::GromacsBlockModifierPtr p,
+                    int number, int method, 
+                    const boost::python::list& atom_names,
+                    const boost::python::list& anchors, 
+                    const String& type, Real new_charge){
+  std::vector<String> v_atom_names = ListToVec<String>(atom_names);
+  std::vector<String> v_anchors = ListToVec<String>(anchors);
+
+  p->AddAddRule(number,method,v_atom_names,v_anchors,type,new_charge);
+
+}
 
 void WrapAddHydrogenRule(ost::mol::mm::GromacsHydrogenConstructorPtr p, int number, int method, 
-                         boost::python::list hydrogen_names, boost::python::list anchors){
+                         const boost::python::list& hydrogen_names, 
+                         const boost::python::list& anchors){
   std::vector<String> v_hydrogen_names = ListToVec<String>(hydrogen_names);
   std::vector<String> v_anchors = ListToVec<String>(anchors);
   p->AddHydrogenRule(number,method,v_hydrogen_names,v_anchors);
@@ -63,21 +75,21 @@ void export_BlockModifiers()
   ;
 
   class_<ost::mol::mm::GromacsBlockModifier, bases<ost::mol::mm::BlockModifier> >("GromacsBlockModifier", init<>())
-    .def("ApplyOnBuildingBlock",&ost::mol::mm::GromacsBlockModifier::ApplyOnBuildingBlock)
-    .def("ApplyOnResidue",&ost::mol::mm::GromacsBlockModifier::ApplyOnResidue)
-    .def("AddReplaceRule",&ost::mol::mm::GromacsBlockModifier::AddReplaceRule)
-    .def("AddAddRule",&ost::mol::mm::GromacsBlockModifier::AddAddRule)
-    .def("AddBond",&ost::mol::mm::GromacsBlockModifier::AddBond)
-    .def("AddAngle",&ost::mol::mm::GromacsBlockModifier::AddAngle)
-    .def("AddDihedral",&ost::mol::mm::GromacsBlockModifier::AddDihedral)
-    .def("AddImproper",&ost::mol::mm::GromacsBlockModifier::AddImproper)
-    .def("AddCMap",&ost::mol::mm::GromacsBlockModifier::AddDeleteAtom)
-    .def("AddDeleteAtom",&ost::mol::mm::GromacsBlockModifier::AddDeleteAtom)
+    .def("ApplyOnBuildingBlock",&ost::mol::mm::GromacsBlockModifier::ApplyOnBuildingBlock,(arg("block")))
+    .def("ApplyOnResidue",&ost::mol::mm::GromacsBlockModifier::ApplyOnResidue,(arg("residue")))
+    .def("AddReplaceRule",&ost::mol::mm::GromacsBlockModifier::AddReplaceRule,(arg("name"),arg("new_name"),arg("new_type"),arg("new_charge")))
+    .def("AddAddRule",&ost::mol::mm::GromacsBlockModifier::AddAddRule,(arg("number"),arg("method"),arg("atom_names"),arg("anchors"),arg("type"),arg("charge")))
+    .def("AddBond",&ost::mol::mm::GromacsBlockModifier::AddBond,(arg("bond")))
+    .def("AddAngle",&ost::mol::mm::GromacsBlockModifier::AddAngle,(arg("angle")))
+    .def("AddDihedral",&ost::mol::mm::GromacsBlockModifier::AddDihedral,(arg("dihedral")))
+    .def("AddImproper",&ost::mol::mm::GromacsBlockModifier::AddImproper,(arg("improper")))
+    .def("AddCMap",&ost::mol::mm::GromacsBlockModifier::AddDeleteAtom,(arg("cmap")))
+    .def("AddDeleteAtom",&ost::mol::mm::GromacsBlockModifier::AddDeleteAtom,(arg("name")))
   ;
  
   class_<ost::mol::mm::HeuristicHydrogenConstructor, bases<ost::mol::mm::HydrogenConstructor> >("HeuristicHydrogenConstructor", init<ost::mol::mm::BuildingBlockPtr>())
-  .def("ApplyOnBuildingBlock",&ost::mol::mm::HeuristicHydrogenConstructor::ApplyOnBuildingBlock)
-  .def("ApplyOnResidue",&ost::mol::mm::HeuristicHydrogenConstructor::ApplyOnResidue)
+  .def("ApplyOnBuildingBlock",&ost::mol::mm::HeuristicHydrogenConstructor::ApplyOnBuildingBlock,(arg("block")))
+  .def("ApplyOnResidue",&ost::mol::mm::HeuristicHydrogenConstructor::ApplyOnResidue,(arg("residue")))
   ;
 
   boost::python::register_ptr_to_python<ost::mol::mm::GromacsHydrogenConstructorPtr>();

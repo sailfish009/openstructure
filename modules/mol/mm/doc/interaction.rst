@@ -106,7 +106,7 @@ a harmonic angle)
 
     Returns the functype enum of the interaction
 
-    :returns:      :enum:`~mol.mm.FuncType`  
+    :returns:      :enum:`mol.mm.FuncType`  
 
 
   ..method:: ReplaceAtom(name, new_name, new_type)

@@ -16,7 +16,7 @@ implementation. As a special case there also exist HydrogenConstructors.
 
 .. class:: BuildingBlock
 
-  .. method:: Match(residue, match_connectivity)
+  .. method:: Match(residue, [,match_connectivity=True])
 
     Checks, wether the given residue matches the atom names in the 
     BuildingBlock. The Connectivity gets optionally checked.
@@ -44,7 +44,7 @@ implementation. As a special case there also exist HydrogenConstructors.
                         residue
 
 
-  .. method:: AddAtom(name, type, charge, mass = None)
+  .. method:: AddAtom(name, type, charge,[,mass = None])
 
     :param name:        name of atom
     :param type:        its corresponding forcefield type
@@ -60,7 +60,7 @@ implementation. As a special case there also exist HydrogenConstructors.
     :param name:        name of atom to be removed
 
 
-  .. method:: ReplaceAtom(name, new_name, new_type, new_charge, new_mass = None)
+  .. method:: ReplaceAtom(name, new_name, new_type, new_charge, [,new_mass = None])
 
     Replace given atom with and resets type, charge and mass. All interactions
     containing that atom get adapted as well
@@ -84,7 +84,7 @@ implementation. As a special case there also exist HydrogenConstructors.
     This gets indicated by an atom name prefixed by a *+*
 
 
-  .. method:: AddBond(bond, replace_existing = False)
+  .. method:: AddBond(bond, [,replace_existing = False])
 
     :param bond:        Bond to be added
     :param replace_existing: Whether potentially already existing bond for the
@@ -94,7 +94,7 @@ implementation. As a special case there also exist HydrogenConstructors.
     :type replace_exisiting: bool
 
 
-  .. method:: AddAngle(angle, replace_existing = False)
+  .. method:: AddAngle(angle, [,replace_existing = False])
 
     :param angle:        Angle to be added
     :param replace_existing: Whether potentially already existing angle for the
@@ -104,7 +104,7 @@ implementation. As a special case there also exist HydrogenConstructors.
     :type replace_exisiting: bool
 
 
-  .. method:: AddDihedral(dihedral, replace_existing = False)
+  .. method:: AddDihedral(dihedral, [,replace_existing = False])
 
     :param dihedral:    Dihedral to be added
     :param replace_existing: Whether potentially already existing dihedral for the
@@ -114,7 +114,7 @@ implementation. As a special case there also exist HydrogenConstructors.
     :type replace_exisiting: bool
 
 
-  .. method:: AddImproper(improper, replace_existing = False)
+  .. method:: AddImproper(improper, [,replace_existing = False])
 
     :param improper:    Improper to be added
     :param replace_existing: Whether potentially already existing improper for the
@@ -124,7 +124,7 @@ implementation. As a special case there also exist HydrogenConstructors.
     :type replace_exisiting: bool
 
 
-  .. method:: AddExclusion(exclusion, replace_existing = False)
+  .. method:: AddExclusion(exclusion, [,replace_existing = False])
 
     :param exclusion:        Exclusion to be added
     :param replace_existing: Whether potentially already existing Exclusion for the
@@ -134,7 +134,7 @@ implementation. As a special case there also exist HydrogenConstructors.
     :type replace_exisiting: bool
 
 
-  .. method:: AddCMap(cmap, replace_existing = False)
+  .. method:: AddCMap(cmap, [,replace_existing = False])
 
     :param cmap:        CMap to be added
     :param replace_existing: Whether potentially already existing cmap for the
@@ -144,7 +144,7 @@ implementation. As a special case there also exist HydrogenConstructors.
     :type replace_exisiting: bool
 
 
-  .. method:: AddConstraint(constraint, replace_existing = False)
+  .. method:: AddConstraint(constraint, [,replace_existing = False])
 
     :param constraint:  Constraint to be added
     :param replace_existing: Whether potentially already existing constraint for the
@@ -188,33 +188,44 @@ implementation. As a special case there also exist HydrogenConstructors.
     :raises: :class:`RuntimeError` when atom can not be found in 
                                    BuildingBlock 
 
+  .. method:: GetAtoms()
+    :returns: :class:`list` of all atom names
+
+  .. method:: GetTypes()
+    :returns: :class:`list` of all atom types
+
+  .. method:: GetCharges()
+    :returns: :class:`list` of all charges
+
+  .. method:: GetMasses()
+    :returns: :class:`list` of all masses
 
   .. method:: GetBonds()
-    :returns: list of all bonds
+    :returns: :class:`list` of all bonds
 
 
   .. method:: GetAngles()
-    :returns: list of all angles
+    :returns: :class:`list` of all angles
 
 
   .. method:: GetDihedrals()
-    :returns: list of all dihedrals
+    :returns: :class:`list` of all dihedrals
 
 
   .. method:: GetImpropers()
-    :returns: list of all impropers
+    :returns: :class:`list` of all impropers
 
 
   .. method:: GetCMaps()
-    :returns: list of all cmaps
+    :returns: :class:`list` of all cmaps
 
 
   .. method:: GetExclusions()
-    :returns: list of all exlusions
+    :returns: :class:`list` of all exlusions
 
 
   .. method:: GetConstraints()
-    :returns: list of all constraints
+    :returns: :class:`list` of all constraints
 
 Automated modification of :class:`BuildingBlock` and :class:`ResidueHandle`
 --------------------------------------------------------------------------------
@@ -272,35 +283,40 @@ Automated modification of :class:`BuildingBlock` and :class:`ResidueHandle`
   .. method:: AddBond(bond)
 
     Adds a bond, this only has effect on :class:`BuildingBlock`, not
-    on :class:`ResidueHandle`
+    on :class:`ResidueHandle` when the corresponding Apply function gets 
+    called
 
     :param bond:        :class:`Interaction` bond to be added
 
   .. method:: AddAngle(angle)
 
     Adds an angle, this only has effect on :class:`BuildingBlock`, not
-    on :class:`ResidueHandle`
+    on :class:`ResidueHandle` when the corresponding Apply function gets 
+    called
 
     :param angle:        :class:`Interaction` angle to be added
 
   .. method:: AddDihedral(dihedral)
 
     Adds a dihedral, this only has effect on :class:`BuildingBlock`, not
-    on :class:`ResidueHandle`
+    on :class:`ResidueHandle` when the corresponding Apply function gets 
+    called
 
     :param dihedral:        :class:`Interaction` dihedral to be added
 
   .. method:: AddImproper(improper)
 
     Adds an improper, this only has effect on :class:`BuildingBlock`, not
-    on :class:`ResidueHandle`
+    on :class:`ResidueHandle` when the corresponding Apply function gets 
+    called
 
     :param improper:        :class:`Interaction` improper to be added
 
   .. method:: AddCMap(cmap)
 
     Adds a cmap, this only has effect on :class:`BuildingBlock`, not
-    on :class:`ResidueHandle`
+    on :class:`ResidueHandle` when the corresponding Apply function gets 
+    called
 
     :param cmap:        :class:`Interaction` cmap to be added
 
@@ -334,13 +350,16 @@ Automated modification of :class:`BuildingBlock` and :class:`ResidueHandle`
     :param anchors:     :class:`list` of strings containing atom names used as anchor
 
 
-.. class:: HeuristicHydrogenConstructor
+.. class:: HeuristicHydrogenConstructor(block)
 
   As soon as we leave the well defined world of gromacs residue definitions,
   we have to find new ways for constructing hydrogens. The 
   :class:`HeuristicHydrogenConstructor` takes a :class:`BuildingBlock` at
   initialization and builds heuristic rules to build hydrogens based on 
   the connecticity defined in the given block.
+
+  :param block:         :class:`BuildingBlock` from which the connectivity
+                        information for hydrogen construction is extracted
 
   .. method:: ApplyOnBuildingBlock(block)
 

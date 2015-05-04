@@ -30,42 +30,42 @@ void export_OpenMM()
   //we have to tell boost, that the Integrator class is around...
   class_<OpenMM::Integrator, boost::noncopyable>("Integrator",no_init)
     .def("GetConstraintTolerance",&OpenMM::Integrator::getConstraintTolerance)
-    .def("SetConstraintTolerance",&OpenMM::Integrator::setConstraintTolerance)
+    .def("SetConstraintTolerance",&OpenMM::Integrator::setConstraintTolerance,(arg("tolerance")))
   ;
 
   class_<OpenMM::VerletIntegrator, bases<OpenMM::Integrator> >("VerletIntegrator", init<double>());
 
   class_<OpenMM::BrownianIntegrator, bases<OpenMM::Integrator> >("BrownianIntegrator", init<double,double,double>())
     .def("GetTemperature",&OpenMM::BrownianIntegrator::getTemperature)
-    .def("SetTemperature",&OpenMM::BrownianIntegrator::setTemperature)
+    .def("SetTemperature",&OpenMM::BrownianIntegrator::setTemperature,(arg("temperature")))
     .def("GetFriction",&OpenMM::BrownianIntegrator::getFriction)
-    .def("SetFriction",&OpenMM::BrownianIntegrator::setFriction)
+    .def("SetFriction",&OpenMM::BrownianIntegrator::setFriction,(arg("friction")))
     .def("GetRandomNumberSeed",&OpenMM::BrownianIntegrator::getRandomNumberSeed)
-    .def("SetRandomNumberSeed",&OpenMM::BrownianIntegrator::setRandomNumberSeed)
+    .def("SetRandomNumberSeed",&OpenMM::BrownianIntegrator::setRandomNumberSeed,(arg("seed")))
   ;
 
   class_<OpenMM::LangevinIntegrator, bases<OpenMM::Integrator> >("LangevinIntegrator", init<double,double,double>())
     .def("GetTemperature",&OpenMM::LangevinIntegrator::getTemperature)
-    .def("SetTemperature",&OpenMM::LangevinIntegrator::setTemperature)
+    .def("SetTemperature",&OpenMM::LangevinIntegrator::setTemperature,(arg("temperature")))
     .def("GetFriction",&OpenMM::LangevinIntegrator::getFriction)
-    .def("SetFriction",&OpenMM::LangevinIntegrator::setFriction)
+    .def("SetFriction",&OpenMM::LangevinIntegrator::setFriction,(arg("friction")))
     .def("GetRandomNumberSeed",&OpenMM::LangevinIntegrator::getRandomNumberSeed)
-    .def("SetRandomNumberSeed",&OpenMM::LangevinIntegrator::setRandomNumberSeed)
+    .def("SetRandomNumberSeed",&OpenMM::LangevinIntegrator::setRandomNumberSeed,(arg("seed")))
   ;
 
   class_<OpenMM::VariableVerletIntegrator, bases<OpenMM::Integrator> >("VariableVerletIntegrator",init<double>())
     .def("GetErrorTolerance", &OpenMM::VariableVerletIntegrator::getErrorTolerance)
-    .def("SetErrorTolerance", &OpenMM::VariableVerletIntegrator::setErrorTolerance)
+    .def("SetErrorTolerance", &OpenMM::VariableVerletIntegrator::setErrorTolerance,(arg("tolerance")))
   ;
 
   class_<OpenMM::VariableLangevinIntegrator, bases<OpenMM::Integrator> >("VaribaleLangevinIntegrator", init<double,double,double>())
     .def("GetTemperature",&OpenMM::VariableLangevinIntegrator::getTemperature)
-    .def("SetTemperature",&OpenMM::VariableLangevinIntegrator::setTemperature)
+    .def("SetTemperature",&OpenMM::VariableLangevinIntegrator::setTemperature,(arg("temperature")))
     .def("GetFriction",&OpenMM::VariableLangevinIntegrator::getFriction)
-    .def("SetFriction",&OpenMM::VariableLangevinIntegrator::setFriction)
+    .def("SetFriction",&OpenMM::VariableLangevinIntegrator::setFriction,(arg("friction")))
     .def("GetRandomNumberSeed",&OpenMM::VariableLangevinIntegrator::getRandomNumberSeed)
-    .def("SetRandomNumberSeed",&OpenMM::VariableLangevinIntegrator::setRandomNumberSeed)
+    .def("SetRandomNumberSeed",&OpenMM::VariableLangevinIntegrator::setRandomNumberSeed,(arg("seed")))
     .def("GetErrorTolerance",&OpenMM::VariableLangevinIntegrator::getErrorTolerance)
-    .def("SetErrorTolerance",&OpenMM::VariableLangevinIntegrator::setErrorTolerance)
+    .def("SetErrorTolerance",&OpenMM::VariableLangevinIntegrator::setErrorTolerance,(arg("tolerance")))
   ;
 }

@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
+#include <limits>
 #include <boost/python.hpp>
 #include <ost/mol/mm/buildingblock.hh>
 #include <ost/log.hh>
@@ -74,14 +75,14 @@ void export_Buildingblock()
 {
   class_<ost::mol::mm::BuildingBlock>("BuildingBlock",init<>())
     .def("Match",&WrapMatch,(arg("res"),arg("match_connectivity")=true))
-    .def("Connect",&ost::mol::mm::BuildingBlock::Connect)
+    .def("Connect",&ost::mol::mm::BuildingBlock::Connect,(arg("residue"),arg("xcs_editor")))
     .def("GetAtoms",&WrapGetAtoms)
     .def("GetTypes",&WrapGetTypes)
     .def("GetCharges",&WrapGetCharges)
     .def("GetMasses",&WrapGetMasses)
-    .def("GetType",&ost::mol::mm::BuildingBlock::GetType)
-    .def("GetCharge",&ost::mol::mm::BuildingBlock::GetCharge)
-    .def("GetMass",&ost::mol::mm::BuildingBlock::GetMass)
+    .def("GetType",&ost::mol::mm::BuildingBlock::GetType,(arg("name")))
+    .def("GetCharge",&ost::mol::mm::BuildingBlock::GetCharge,(arg("name")))
+    .def("GetMass",&ost::mol::mm::BuildingBlock::GetMass,(arg("name")))
     .def("GetBonds",&ost::mol::mm::BuildingBlock::GetBonds)
     .def("GetAngles",&ost::mol::mm::BuildingBlock::GetAngles)
     .def("GetDihedrals",&ost::mol::mm::BuildingBlock::GetDihedrals)
@@ -97,8 +98,8 @@ void export_Buildingblock()
     .def("AddExclusion",&ost::mol::mm::BuildingBlock::AddExclusion,(arg("exclusion"),arg("replace_existing")=false))
     .def("AddCMap",&ost::mol::mm::BuildingBlock::AddBond,(arg("cmap"),arg("replace_existing")=false))
     .def("AddConstraint",&ost::mol::mm::BuildingBlock::AddConstraint,(arg("constraint"),arg("replace_existing")=false))
-    .def("RemoveAtom",&ost::mol::mm::BuildingBlock::RemoveAtom)
-    .def("ReplaceAtom",&ost::mol::mm::BuildingBlock::ReplaceAtom)
+    .def("RemoveAtom",&ost::mol::mm::BuildingBlock::RemoveAtom,(arg("name")))
+    .def("ReplaceAtom",&ost::mol::mm::BuildingBlock::ReplaceAtom,(arg("name"),arg("new_name"),arg("new_type"),arg("new_charge"),arg("new_charge"),arg("new_mass")=std::numeric_limits<Real>::quiet_NaN()))
     .def("RemoveInteractionsToNext",&ost::mol::mm::BuildingBlock::RemoveInteractionsToNext)
     .def("RemoveInteractionsToPrev",&ost::mol::mm::BuildingBlock::RemoveInteractionsToPrev)
   ;

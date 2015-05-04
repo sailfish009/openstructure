@@ -29,13 +29,13 @@ void export_FFReader()
 {
   class_<ost::mol::mm::FFReader>("FFReader",init<String>())
     .def("ReadGromacsForcefield",&ost::mol::mm::FFReader::ReadGromacsForcefield)
-    .def("SetPreprocessorDefinition",&ost::mol::mm::FFReader::SetPreprocessorDefinition)
+    .def("SetPreprocessorDefinition",&ost::mol::mm::FFReader::SetPreprocessorDefinition,(arg("definition")))
     .def("GetForcefield",&ost::mol::mm::FFReader::GetForcefield)
-    .def("SetForcefield",&ost::mol::mm::FFReader::SetForcefield)
-    .def("ReadResidueDatabase",&ost::mol::mm::FFReader::ReadResidueDatabase)
-    .def("ReadITP",&ost::mol::mm::FFReader::ReadITP)   
-    .def("ReadCHARMMPRM",&ost::mol::mm::FFReader::ReadCHARMMPRM) 
-    .def("ReadCHARMMRTF",&ost::mol::mm::FFReader::ReadCHARMMRTF)                                                                      
+    .def("SetForcefield",&ost::mol::mm::FFReader::SetForcefield,(arg("forcefield")))
+    .def("ReadResidueDatabase",&ost::mol::mm::FFReader::ReadResidueDatabase,(arg("basename")))
+    .def("ReadITP",&ost::mol::mm::FFReader::ReadITP,(arg("basename")))   
+    .def("ReadCHARMMPRM",&ost::mol::mm::FFReader::ReadCHARMMPRM,(arg("basename"))) 
+    .def("ReadCHARMMRTF",&ost::mol::mm::FFReader::ReadCHARMMRTF,(arg("basename")))                                                                      
   ;
 
   boost::python::register_ptr_to_python<ost::mol::mm::FFReaderPtr>();
