@@ -20,49 +20,125 @@ Invalid defining an unknown interaction:
   HarmonicBond, HarmonicAngle, UreyBradleyAngle, PeriodicDihedral, 
   PeriodicImproper, HarmonicImproper, CMap, LJ, LJPair, GBSA, 
   DistanceConstraint, Exclusion, HarmonicPositionRestraint,
-  HarmonicPositionRestraint, Invalid
+  HarmonicDistanceRestraint, Invalid
 
 The implementation guarantees, that the parameter related to atom types,
-names, parameters are checked regarding their dimension (e.g. 3 atoms for
-a harmonic angle) 
+names, parameters are checked regarding their dimension (e.g. 3 atoms and 2 
+parameters for a harmonic angle) 
 
+
+Interaction Parametrization
 --------------------------------------------------------------------------------
+
+* HarmonicBond, Interacting Particles: 2, Num Parameters: 2
+
+  #. :class:`float` bond length in nm
+  #. :class:`float` force constant in kJ/mol/nm^2
+
+* HarmonicAngle, Interacting Particles: 3, Num Parameters: 2 
+
+  #. :class:`float` angle in radians
+  #. :class:`float` force constant in kJ/mol/radian^2 
+
+* UreyBradleyAngle, Interacting Particles: 3, Num Parameters: 4
+
+  #. :class:`float` angle in radians
+  #. :class:`float` angle force constant in kJ/mol/radian^2
+  #. :class:`float` bond length in nm
+  #. :class:`float` bond force constant in kJ/mol/nm^2 
+
+* PeriodicDihedral, Interacting Particles: 4, Num Parameters: 3
+
+  #. :class:`int` multiplicity
+  #. :class:`float` phase in radians
+  #. :class:`float` force constant in kJ/mol/radian^2
+
+* PeriodicImproper, Interacting Particles: 4, Num Parameters: 3
+
+  #. :class:`int` multiplicity
+  #. :class:`float` phase in radians
+  #. :class:`float` force constant in kJ/mol/radian^2
+
+* HarmonicImproper, Interacting Particles: 4, Num Parameters: 2
+
+  #. :class:`float` angle in radians
+  #. :class:`float` force constant in 
+  #. :class:`float` force constant in kJ/mol/radian^2
+
+* CMap, Interacting Particles: 5, Num Parameters: n*n+1 
+
+  #. :class:`list` of :class:`float` of size n*n+1, first value describes the dimension n of the cmap, the other n*n values describe the correction map in kJ/mol in the ordering (phi1,psi1),(phi1,psi2)... and torsion angles in [-pi,pi] (will be converted to the format OpenMM prefers)
+
+* LJ, Interacting Particles: 1, Num Parameters: 2
+
+  #. :class:`float` sigma in nm
+  #. :class:`float` epsilon in kJ/mol
+
+* LJPair, Interacting Particles: 2, Num Parameters: 2
+
+  #. :class:`float` sigma in nm
+  #. :class:`float` epsilon in kJ/mol
+
+* GBSA, Interacting Particles: 1, Num Parameters: 2
+
+  #. :class:`float` GBSA radius in nm
+  #. :class:`float` OBC scaling factor
+
+* DistanceConstraint, Interacting Particles: 2, Num Parameters: 1
+
+  #. :class:`float` constraint distance
+
+* Exclusion, Interacting Particles: 2, Num Parameters: 0
+
+* HarmonicPositionRestraint, Interacting Particles: 1, Num Parameters: 7
+
+  #. :class:`float` ref pos x
+  #. :class:`float` ref pos y
+  #. :class:`float` ref pos z
+  #. :class:`float` force constant
+  #. :class:`float` x_scale
+  #. :class:`float` y_scale
+  #. :class:`float` z_scale
+
+
+* HarmonicDistanceRestraint, Interacting Particles: 2, Num Parameters: 2
+
+  #. :class:`float` restraint length
+  #. :class:`float` force constant
+
 
 
 .. class:: Interaction(func_type)
 
   :param func_type:     :class:`FuncType` defining a particular interaction
 
-  ..method:: SetTypes(types)
+
+  .. method:: SetTypes(types)
 
     Sets the forcefield specific atom types.
 
-    :param types:   A list of strings describing the force field specific atom
-                    types.
+    :param types:       :class:`list` of :class:`str` A list of strings 
+                        describing the force field specific atom types.
 
-    :type types:    :class:`list`
-
-    :raises: :exc:` RuntimeError` when size of input is not consistent with
+    :raises:            :class:`RuntimeError` when size of input is not consistent with
                                   the interactions functype
 
 
-  ..method:: SetNames(names)
+  .. method:: SetNames(names)
 
     Sets atom names.
 
-    :param types:   A list of strings describing the atom names.
+    :param types:       :class:`list` of :class:`str` describing the atom names.
 
-    :type names:    :class:`list`
-
-    :raises: :exc:` RuntimeError` when size of input is not consistent with
-                                  the interactions functype
+    :raises:            :class:`RuntimeError` when size of input is not 
+                        consistent with the interactions functype
 
 
-  ..method:: SetParam(names)
+  .. method:: SetParam(names)
 
     Sets interaction specific parameters.
 
-    :param types:  A list of real values .
+    :param types:  A :class:`list` of :class:`float` values .
 
     :type names:   :class:`list`
 
@@ -70,7 +146,7 @@ a harmonic angle)
                                   the interactions functype
 
 
-  ..method:: GetTypes()
+  .. method:: GetTypes()
 
     Get Previously set types
 
@@ -78,99 +154,101 @@ a harmonic angle)
 
 
 
-  ..method:: GetNames()
+  .. method:: GetNames()
 
     Get Previously set names
 
     :returns:      :class:`list`
 
 
-  ..method:: GetParam()
+  .. method:: GetParam()
 
     Get Previously set parameters
 
-    :returns:      :wtf:`bool`
+    :returns:      :class:`bool`
 
 
-  ..method:: GetAtoms(residue)
+  .. method:: GetAtoms(residue)
 
     Returns an AtomHandleList containing the atoms in residue matching
-    the atom names
+    the atom names of the interaction
 
-    :param residue :class:`~mol.ResidueHandle`
-    :returns:      :class:`~mol.AtomHandleList`
-    :raises: :exc:`RuntimeError` when atom cannot be found in residue
+    :param residue:     :class:`mol.ResidueHandle`
 
+    :returns:           :class:`mol.AtomHandleList`
 
-  ..method:: GetFuncType()
+    :raises:            :class:`RuntimeError` when atom cannot be found in 
+                        residue
+
+  .. method:: GetFuncType()
 
     Returns the functype enum of the interaction
 
-    :returns:      :enum:`mol.mm.FuncType`  
+    :returns:      :class:`FuncType`  
 
 
-  ..method:: ReplaceAtom(name, new_name, new_type)
+  .. method:: ReplaceAtom(name, new_name, new_type)
 
     Searches for given atom name. If found, this particular atom name
     gets changed to new_name. If the atom types are set as well, the
     associated atom type gets also reset to new_type.
 
-    :param name    :class:`string`
-    :param new_name:class:`string`
-    :param new_type:class:`string`
-    :returns:      :wtf:`bool` whether replacement was successful or not
+    :param name:        class:`str`
+    :param new_name:    class:`str`
+    :param new_type:    class:`str`
+    :returns:           :class:`bool` whether replacement was successful or not
 
 
-  ..method::MatchTypes(atom_types)
+  .. method:: MatchTypes(atom_types)
 
     Checks, whether the given types match the internal types. The match
     can be "as is" or in reversed order
 
-    :param atom_types    :class:`list`
-    :returns:     `:wtf:`bool`
+    :param atom_types:  :class:`list` of :class:`str`
+    :returns:           :class:`bool`
 
 
-  ..method::MatchNames(atom_names)
+  .. method:: MatchNames(atom_names)
 
     Checks, whether the given names match the internal names. The match
     can be "as is" or in reversed order
 
-    :param atom_names    :class:`list`
-    :returns:     `:wtf:`bool`
+    :param atom_names:  :class:`list` of :class:`str`
+    :returns:           :class:`bool`
 
 
-  ..method::HasName(name)
+  .. method:: HasName(name)
 
     Checks, whether the given name is present in the internal names
 
-    :param name    :class:`string`
-    :returns:      :wtf:`bool`
+    :param name:        :class:`string`
+    :returns:           :class:`bool`
 
 
-  ..method::HasType(type)
+  .. method:: HasType(type)
 
     Checks, whether the given type is present in the internal types
 
-    :param type    :class:`string`
-    :returns:      :wtf:`bool`
+    :param type:        :class:`string`
+    :returns:           :class:`bool`
 
 
-  ..IsParametrized()
+  .. method:: IsParametrized()
 
     Checks, whether the parameters have been set
 
-    :returns:      :wtf:`bool`
+    :returns:           :class:`bool`
 
 
-  ..HasTypeWildcard()
+  .. method:: HasTypeWildcard()
 
-    Checks, whether one of the types is a wildcard (X)
+    Checks, whether one of the types is a wildcard ('X')
 
-    :returns:      :wtf:`bool`
+    :returns:           :class:`bool`
 
 
-  ..HasNameWildcard()
+  .. method:: HasNameWildcard()
 
-    Checks, whether one of the names is a wildcard (X)
+    Checks, whether one of the names is a wildcard ('X')
 
-    :returns:      :wtf:`bool`
+    :returns:           :class:`bool`
