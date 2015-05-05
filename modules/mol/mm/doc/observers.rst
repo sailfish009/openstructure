@@ -7,6 +7,9 @@ Observers can be registered to a :class:`Simulation` and get called at a
 defined interval.
 
 
+Trajectory Observers
+--------------------------------------------------------------------------------
+
 .. class:: TrajObserver(rythm) 
 
   Stores and updates the MD trajectory produced by a :class:`Simulation`

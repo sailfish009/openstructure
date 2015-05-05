@@ -108,6 +108,9 @@ Interaction Parametrization
 
 
 
+The Interaction Class
+--------------------------------------------------------------------------------
+
 .. class:: Interaction(func_type)
 
   :param func_type:     :class:`FuncType` defining a particular interaction

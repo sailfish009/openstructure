@@ -14,6 +14,9 @@ Blockmodifiers come in, with the GromacsBlockModifier as a specific
 implementation. As a special case there also exist HydrogenConstructors.
 
 
+The BuildingBlock Class
+--------------------------------------------------------------------------------
+
 .. class:: BuildingBlock
 
   .. method:: Match(residue, [,match_connectivity=True])
@@ -227,7 +230,7 @@ implementation. As a special case there also exist HydrogenConstructors.
   .. method:: GetConstraints()
     :returns: :class:`list` of all constraints
 
-Automated modification of :class:`BuildingBlock` and :class:`ResidueHandle`
+Block Modifiers
 --------------------------------------------------------------------------------
 
 .. class:: GromacsBlockModifier
@@ -320,6 +323,9 @@ Automated modification of :class:`BuildingBlock` and :class:`ResidueHandle`
 
     :param cmap:        :class:`Interaction` cmap to be added
 
+
+Hydrogen Constructors
+--------------------------------------------------------------------------------
 
 .. class:: GromacsHydrogenConstructor
 

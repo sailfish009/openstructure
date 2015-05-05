@@ -47,13 +47,22 @@ mapped back to the attached structure at any time.
                         in **topology**
 
 
-  .. method:: Save(filename)
+  .. method:: Save(filename, settings)
+
+    Dumps current status of the simulation with its connected **entity** onto 
+    disk. All informations from the **entity** except plain chains, residues, 
+    atoms and bonds are lost.
 
     :param filename: :class:`str`
 
   .. method:: Load(filename)
 
+    Loads dumped simulation from disk. You have to make sure, that the provided 
+    settings are consistent with those from the saved simualtion. Undefined 
+    behaviour must be expected otherwise. 
+
     :param filename: :class:`str`
+    :param settings: :class:`ost.mm.Settings`
 
   .. method:: ApplyLBFGS([tolerance=1.0,max_iterations=1000])
 
