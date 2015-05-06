@@ -1,4 +1,4 @@
-The Molecular Mechanis Settings
+The Molecular Mechanics Settings
 ================================================================================
 
 .. currentmodule:: ost.mol
@@ -56,28 +56,28 @@ of the :class:`Simulation` object.
 
   .. attribute::        constrain_bonds
 
-    Flag, whether all bonds should be constraint in 
+    Flag, whether all bonds should be constrained in 
     :class:`TopologyCreator`. default: False
 
   .. attribute::        rigid_water
 
     Flag, whether water molecules should be made rigid in
     :class:`TopologyCreator`. This is achieved by adding
-    a distance constraint on the the O-H bonds and an additional
+    a distance constraint on the O-H bonds and an additional
     one between the two hydrogens. default: False
 
   .. attribute::        strict_interactions
 
-    Makes sure, that an error is thrown when a particular interaction cannot
+    Makes sure that an error is thrown when a particular interaction cannot
     be parametrized with the given forcefield in the :class:`TopologyCreator`. 
-    By setting it to False, these cases get just ignored. default: True
+    By setting it to False, these cases just get ignored. default: True
 
   .. attribute::        ideal_bond_length_constraints
 
     Flag, whether the ideal bond length from the :class:`Forcefield` should be
     taken for distance constraints in the :class:`TopologyCreator`. 
-    :class:`Forcefield` should be taken. The actual distances from the 
-    :class:`EntityHandle` get taken otherwise. default: True
+    The actual distances from the :class:`EntityHandle` get taken otherwise. 
+    default: True
 
   .. attribute::        fix_heavy_atoms
 
@@ -98,7 +98,7 @@ of the :class:`Simulation` object.
   .. attribute::        nonbonded_method
 
     Nonbonded method set up at the creation of the :class:`Simulation`.
-    must be one of mm.NoCutoff, mm.CutoffNonPeriodic, mm.CutoffPeriodic
+    Must be one of mm.NoCutoff, mm.CutoffNonPeriodic, mm.CutoffPeriodic
     mm.Ewald or mm.PME. default: mm.NoCutoff
 
   .. attribute::        nonbonded_cutoff
@@ -112,7 +112,7 @@ of the :class:`Simulation` object.
 
   .. attribute::        cmm_frequency
 
-    Frequency regarding simulationsteps when the cmm remover should be applied.
+    Frequency regarding simulation steps when the cmm remover should be applied.
     default: 1
 
   .. attribute::        periodic_box_extent
@@ -145,22 +145,22 @@ of the :class:`Simulation` object.
 
   .. attribute::        reference_properties
 
-    :class:`dict` of OpenMM specific properties, that can be set for the 
+    :class:`dict` of OpenMM specific properties that can be set for the 
     reference platform.
        
   .. attribute::        cpu_properties
 
-    :class:`dict` of OpenMM specific properties, that can be set for the 
+    :class:`dict` of OpenMM specific properties that can be set for the 
     cpu platform.
 
   .. attribute::        opencl_properties
 
-    :class:`dict` of OpenMM specific properties, that can be set for the 
+    :class:`dict` of OpenMM specific properties that can be set for the 
     opencl platform.
 
   .. attribute::        cuda_properties
 
-    :class:`dict` of OpenMM specific properties, that can be set for the 
+    :class:`dict` of OpenMM specific properties that can be set for the 
     cuda platform.
 
   .. attribute::        add_thermostat
@@ -170,11 +170,11 @@ of the :class:`Simulation` object.
 
   .. attribute::        thermostat_temperature
 
-    Temperature for the Andersen thermostat. default: NaN
+    Temperature for the Andersen thermostat in K. default: NaN
 
   .. attribute::        thermostat_collision_frequency
 
-    Collision frequency of the Andersen thermostat. default: NaN
+    Collision frequency of the Andersen thermostat in 1/ps. default: NaN
 
   .. attribute::        add_barostat
 
@@ -183,11 +183,11 @@ of the :class:`Simulation` object.
 
   .. attribute::        barostat_temperature
 
-    Temperature for the MonteCarlo Barostat. default: NaN
+    Temperature for the MonteCarlo Barostat in K. default: NaN
 
   .. attribute::        barostat_pressure
 
-    Pressure for the MonteCarlo Barostat. default: NaN
+    Pressure for the MonteCarlo Barostat in bar. default: NaN
 
   .. attribute::        barostat_frequency
 
@@ -222,20 +222,20 @@ of the :class:`Simulation` object.
 
   .. attribute::        keep_ff_specific_naming
 
-    When running through the :class:`TopologyCreator`, the given ent gets 
+    When running through the :class:`TopologyCreator`, the given entity gets 
     renamed to the forcefield specific naming. If set to true, the naming
     stays like that, if not the entity gets renamed to PDB standard.
     default: True
 
   .. attribute::        openmm_plugin_directory
 
-    Path, where OpenMM specific plugins are searched. Especially if you want
-    to use other platforms than reference, this has to be set.
+    Path where OpenMM specific plugins are searched. If you want
+    to use other platforms than Reference, this has to be set.
     default: "/usr/local/openmm/lib/plugins"
 
   .. attribute::        custom_plugin_directory
 
-    Path, where custom plugins are searched. 
+    Path where custom plugins are searched for. 
     default: "/usr/local/openmm/lib/plugins"
 
 
@@ -246,28 +246,32 @@ of the :class:`Simulation` object.
   Can be used to define exceptions from the standard assignments
   assigned in the :class:`Forcefield`. 
 
-  .. method::           SetException(res, exception_name)
+  .. method::           SetException(residue, exception_name)
 
-    :param res:         :class:`ResidueHandle` for which the exception
+    :param residue:     Residue for which the exception
                         should be set.
-
-    :param exception_name:    :class:`str` describing the name of the
+    :param exception_name: Name of the
                         Blockmodifier in the forcefield that should be
                         applied in case of a termini
 
-  .. method::           HasException(res)
+    :type residue:      :class:`ResidueHandle`
+    :type exception_name: :class:`str`
 
-    :param res:         :class:`ResidueHandle` that should be checked for 
+  .. method::           HasException(residue)
+
+    :param residue:     Residue that should be checked for 
                         exceptions
+    :type residue:      :class:`ResidueHandle`
 
-    :returns:           :class:`bool` True if res has an exception
+    :returns:           :class:`bool` True if **residue** has an exception
 
-  .. method::           GetException(res)
+  .. method::           GetException(residue)
 
-    :param res:         :class:`ResidueHandle` containing the exception
+    :param residue:     Residue containing the exception
+    :type residue:      :class:`ResidueHandle`
 
-    :raises:            :class:`RuntimeError` if res has no associated exception
+    :raises:            :class:`RuntimeError` if **residue** has no associated exception
 
-    :returns:           :class:`str` describint the name of the Blockmodifier in
-                        the forcefield, that should be applied in case of a 
-                        termini
+    :returns:           :class:`str` describing the name of the Blockmodifier in
+                        the forcefield that should be applied in case of a 
+                        terminal residue

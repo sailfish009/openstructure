@@ -7,16 +7,17 @@ Observers can be registered to a :class:`Simulation` and get called at a
 defined interval.
 
 
-Trajectory Observers
+Trajectory observers
 --------------------------------------------------------------------------------
 
-.. class:: TrajObserver(rythm) 
+.. class:: TrajObserver(rhythm) 
 
-  Stores and updates the MD trajectory produced by a :class:`Simulation`
-  in memory.
+  Stores and updates the md trajectory produced by a :class:`Simulation`
+  in memory
 
-  :param rythm:         :class:`int` rythm, at which the observer gets
+  :param rhythm:        Frequency, at which the observer gets
                         notified by the simulation
+  :type rhythm:         :class:`int`
 
   .. method:: GetTraj()
 
@@ -24,7 +25,7 @@ Trajectory Observers
 
     :returns:           :class:`ost.mol.CoordGroupHandle`
 
-  .. method:: Rythm()
+  .. method:: Rhythm()
 
     :returns:           :class:`int` calling rythm
 
@@ -32,21 +33,23 @@ Trajectory Observers
 .. class:: TrajWriter(rythm, pdb_filename, dcd_filename)
 
   Writes the MD trajectory produced by a :class:`Simulation` directly to
-  disk in dcd format. 
+  disk in dcd format 
 
-  :param rythm:         :class:`int` rythm, at which the observer gets
+  :param rythm:         Frequency, at which the observer gets
                         notified by the simulation
+  :param pdb_filename:  Name of produced pdb file
+  :param dcd_filename:  Name of produced dcd file
 
-  :param pdb_filename:  :class:`str` with name of produced pdb file
+  :type rythm:          :class:`int`
+  :type pdb_filename:   :class:`str`
+  :type dcd_filename:   :class:`str`
 
-  :param dcd_filename:  :class:`str` with name of produced dcd file
+  .. method:: Rhythm()
 
-  .. method:: Rythm()
-
-    :returns:           :class:`int` calling rythm
+    :returns:           :class:`int` calling rhythm
 
   .. method:: Finalize()
 
     Obligatory function to be called after the last simulation step to
-    write missing information into the dcd header.
+    write missing information into the dcd header
 

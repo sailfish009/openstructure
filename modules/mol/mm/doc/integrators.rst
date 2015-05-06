@@ -4,8 +4,8 @@ Integrators
 .. currentmodule:: ost.mol
 
 The Integrators are a wrapper around the integrators provided by OpenMM and
-have to be attached to the :class:`Settings` when setting up a simulation
-to provide a way of making the thing shake.
+have to be attached to the :class:`Settings` when setting up a simulation.
+It provides a way of making the thing shake.
 
 
 
@@ -16,15 +16,16 @@ Verlet Dynamics
 
   Implementation of Verlet dynamics
 
-  :param step_size:     :class:`float` defining timestep in ps.
-
+  :param step_size:     Defining timestep in ps
+  :type step_size:      :class:`float`
 
 
 .. class:: VariableVerletIntegrator(error_tol)
 
   Implementation of Verlet dynamics with variable time steps
 
-  :param error_tol:     :class:`float` error tolerance
+  :param error_tol:     Error tolerance
+  :type error_tol:      :class:`float`
 
   .. method:: GetErrorTolerance()
 
@@ -32,7 +33,8 @@ Verlet Dynamics
 
   .. method:: SetErrorTolerance(tol)
 
-    :param tol:         :class:`float`
+    :param tol:         Error tolerance
+    :type tol:          :class:`float`
 
 
 Langevin Dynamics
@@ -42,12 +44,14 @@ Langevin Dynamics
 
   Implementation of the Langevin dynamics
 
-  :param temperature:   :class:`float` temperature of heat bath in K
-
-  :param friction_coeff: :class:`float` friction coefficient coupling the
+  :param temperature:   Temperature of heat bath in K
+  :param friction_coeff: Friction coefficient coupling the
                          system to the heat bath in 1/ps
+  :param step_size:     Defining timestep in ps
 
-  :param step_size:     :class:`float` defining timestep in ps.
+  :type temperature:    :class:`float`
+  :type friction_coeff: :class:`float`
+  :type step_size:      :class:`float`
 
   .. method:: GetTemperature()
 
@@ -55,7 +59,8 @@ Langevin Dynamics
 
   .. method:: SetTemperature(temperature)
 
-    :param temperature: :class:`float`
+    :param temperature: Temperature in K
+    :type temperature:  :class:`float` 
 
   .. method:: GetFriction()
 
@@ -63,7 +68,8 @@ Langevin Dynamics
 
   .. method:: SetFriction(friction)
 
-    :param friction:    :class:`float`
+    :param friction:    Friction in 1/ps
+    :type friction:     :class:`float`
 
   .. method:: GetRandomNumberSeed()
 
@@ -71,7 +77,8 @@ Langevin Dynamics
 
   .. method:: SetRandomNumberSeed(seed)
 
-    :param seed:        :class:`int`
+    :param seed:        Random number seed
+    :type seed:         :class:`int`
 
 
 
@@ -80,12 +87,14 @@ Langevin Dynamics
 
   Implementation of Langevin dynamics with variable time steps
 
-  :param temperature:   :class:`float` temperature of heat bath in K
-
-  :param friction_coeff: :class:`float` friction coefficient coupling the
+  :param temperature:   Temperature of heat bath in K
+  :param friction_coeff: Friction coefficient coupling the
                          system to the heat bath in 1/ps
+  :param error_tol:     Error tolerance
 
-  :param error_tol:     :class:`float` error_tolerance.
+  :type temperature:    :class:`float`
+  :type friction_coeff: :class:`float`
+  :type error_tolerance: :class:`float`
 
   .. method:: GetTemperature()
 
@@ -93,7 +102,8 @@ Langevin Dynamics
 
   .. method:: SetTemperature(temperature)
 
-    :param temperature: :class:`float`
+    :param temperature: Temperature in K
+    :type temperature:  :class:`float`
 
   .. method:: GetFriction()
 
@@ -101,7 +111,8 @@ Langevin Dynamics
 
   .. method:: SetFriction(friction)
 
-    :param friction:    :class:`float`
+    :param friction:    Friction in 1/ps
+    :type friction:     :class:`float`
 
   .. method:: GetRandomNumberSeed()
 
@@ -109,15 +120,17 @@ Langevin Dynamics
 
   .. method:: SetRandomNumberSeed(seed)
 
-    :param seed:        :class:`int`
+    :param seed:        Random number seed
+    :type seed:         :class:`int`
 
   .. method:: GetErrorTolerance()
 
     :returns:           :class:`float`
 
-  .. method:: SetErrorTolerance()
+  .. method:: SetErrorTolerance(tol)
 
-    :param tol:         :class:`float`
+    :param tol:         Error tolerance
+    :type tol:          :class:`float`
 
 
 Brownian Dynamics
@@ -127,12 +140,14 @@ Brownian Dynamics
 
   Implementation of Brownian dynamics
 
-  :param temperature:   :class:`float` temperature of heat bath in K
-
-  :param friction_coeff: :class:`float` friction coefficient coupling the
+  :param temperature:   Temperature of heat bath in K
+  :param friction_coeff: Friction coefficient coupling the
                          system to the heat bath in 1/ps
+  :param step_size:     Defining timestep in ps.
 
-  :param step_size:     :class:`float` defining timestep in ps.
+  :type temperature:    :class:`float`
+  :type friction_coeff:    :class:`float`
+  :type step_size:    :class:`float`
 
   .. method:: GetTemperature()
 
@@ -140,7 +155,8 @@ Brownian Dynamics
 
   .. method:: SetTemperature(temperature)
 
-    :param temperature: :class:`float`
+    :param temperature: Temperature in K
+    :type temperature:  :class:`float`
 
   .. method:: GetFriction()
 
@@ -148,7 +164,8 @@ Brownian Dynamics
 
   .. method:: SetFriction(friction)
 
-    :param friction:    :class:`float`
+    :param friction:    Friction in 1/ps
+    :type friction:     :class:`float`
 
   .. method:: GetRandomNumberSeed()
 
@@ -156,4 +173,5 @@ Brownian Dynamics
 
   .. method:: SetRandomNumberSeed(seed)
 
-    :param seed:        :class:`int`
+    :param seed:        Random number seed
+    :type seed:         :class:`int`

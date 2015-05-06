@@ -11,11 +11,11 @@ The mol.mm module provides a wrapper around the
 basic md capabilities fully embedded into the OpenStructure universe.
 The heart of every simulation is the :class:`Topology` describing how the 
 particles of an :class:`EntityHandle` interact. The :class:`Simulation` finally 
-connects the two and allows to perform energy minimizations or move the simulation
-through time using an :class:`Integrator`. 
+connects the two and allows one to perform energy minimizations or move the 
+simulation through time using an :class:`Integrator`. 
 A :class:`Topology` can either be built from scratch by adding
-one interaction after the other or fully automatically using the
-:class:`TopologyCreator`. The whole process of :class:`Topology` building
+one interaction after the other or automatically using the
+:class:`TopologyCreator`. The process of :class:`Topology` building
 and setting up a :class:`Simulation` gets controlled with the :class:`Settings`.
 
 Latest Publication of `OpenMM <http://openmm.org>`_:
@@ -27,9 +27,9 @@ P. Eastman, M. S. Friedrichs, J. D. Chodera, R. J. Radmer, C. M. Bruns, J. P. Ku
 Installation
 --------------------------------------------------------------------------------
 
-Openstructure does not come by default with 
+OpenStructure does not come by default with 
 `OpenMM <http://openmm.org>`_ support.
-You have to install it by yourself as an additional dependency and
+You have to install it as an additional dependency and
 recompile OpenStructure to dive into the amazing world of GPU accelerated
 molecular mechanics. Once installed, you have to pass cmake additional
 flags to allow compilation with OpenMM support. e.g.:
@@ -74,8 +74,8 @@ Setting up a simple simulation
 Doing more sophisticated stuff
 --------------------------------------------------------------------------------
 
-You want to create your own :class:`BuildingBlock` to parametrize custom 
-residues? Or even generate your custom :class:`Forcefield`? 
+You want to create your own :class:`BuildingBlock` to parameterize custom 
+residues? Or even generate your own custom :class:`Forcefield`? 
 Check out the mm dir in the examples/code_fragments directory. 
 
 Documentation

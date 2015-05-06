@@ -4,43 +4,47 @@ Simulation
 .. currentmodule:: ost.mol
 
 The simulation finally connects a :class:`Topology` with an 
-:class:`ost.mol.EntityHandle`. While applying minimization or
-MD tasks, the current positions of the simulation object can be
+:class:`EntityHandle`. While applying minimization or
+md tasks, the current positions of the simulation object can be
 mapped back to the attached structure at any time.
 
 
 
 .. class:: Simulation(entity, settings)
 
-  first constructor, that takes an :class:`ost.mol.EntityHandle` as an input
+  First constructor that takes an :class:`ost.mol.EntityHandle` as an input
   and automatically constructs an internal :class:`Topology` according
   to the provided **settings**. Be aware, that the **entity** will be altered
   depending on hydrogen/termini definitions in the :class:`Forcefield` attached
   to the **settings**
 
-  :param entity:        :class:`ost.mol.EntityHandle` from which a default
+  :param entity:        Entity from which a default
                         :class:`Topology` will be created according to the
                         **settings**
-
-  :param settings:      :class:`Settings` to control the parametrization of
+  :param settings:      Controls the parametrization of
                         the :class:`Simulation` and the buildup of the
-                        internal :class:`Topology` 
+                        internal :class:`Topology`
+
+  :type entity:         :class:`EntityHandle` 
+  :type settings:       :class:`Settings` 
 
   :raises:              :class:`RuntimeError` when construction of 
                         :class:`Topology` fails
 
 .. class:: Simulation(topology,entity,settings)
 
-  second constructor, that takes a :class:`Topology` and a consistent
+  Second constructor that takes a :class:`Topology` and a consistent
   :class:`ost.mol.EntityHandle` as an input.
 
-  :param topology:      :class:`Topology` to initialize the :class:`Simulation`
+  :param topology:      Topology to initialize the :class:`Simulation`
+  :param entity:        Entity that is consistent with
+                        the provided **topology**
+  :param settings:      Controls the parametrization of
+                        the :class:`Simulation`
 
-  :param entity:        :class:`ost.mol.EntityHandle` that is consistent with
-                      the provided **topology**
-
-  :param settings:      :class:`Settings` to control the parametrization of
-                      the :class:`Simulation` 
+  :type topology:       :class:`Topology`
+  :type entity:         :class:`EntityHandle`
+  :type settings:       :class:`Settings` 
 
   :raises:              :class:`RuntimeException` when number of atoms in 
                         **entity** is not equal the number of particles
@@ -53,55 +57,75 @@ mapped back to the attached structure at any time.
     disk. All informations from the **entity** except plain chains, residues, 
     atoms and bonds are lost.
 
-    :param filename: :class:`str`
+    :param filename:    Filename
+    :type filename:     :class:`str`
 
   .. method:: Load(filename)
 
-    Loads dumped simulation from disk. You have to make sure, that the provided 
+    Loads a dumped simulation from disk. You have to make sure, that the provided 
     settings are consistent with those from the saved simualtion. Undefined 
     behaviour must be expected otherwise. 
 
-    :param filename: :class:`str`
-    :param settings: :class:`ost.mm.Settings`
+    :param filename: Filename
+    :param settings: Settings to reparametrize loaded simulation
+
+    :type filename:     :class:`str`
+    :type settings:     :class:`Settings`
 
   .. method:: ApplyLBFGS([tolerance=1.0,max_iterations=1000])
 
     Run minimization using the Limited-memory Broyden–Fletcher–Goldfarb–Shanno (L-BFGS) method.
    
-    :param tolerance:  :class:`float`
-    :param max_iterations:  :class:`int`
+    :param tolerance:  Tolerance descrining abort criteria of minimization
+    :param max_iterations:  Maximum number of minimization iterations
+
+    :type tolerance:    :class:`float`
+    :type max_iterations: :class:`int`
   
 
   .. method:: ApplySD(tolerance,max_iterations)
 
-    Run minimization using the Steepes-Descend method.
+    Run minimization using the Steepest-Descend method.
    
-    :param tolerance:  :class:`float`
-    :param max_iterations:  :class:`int`
+    :param tolerance:  Tolerance descrining abort criteria of minimization
+    :param max_iterations:  Maximum number of minimization iterations
+
+    :type tolerance:    :class:`float`
+    :type max_iterations: :class:`int`
 
   .. method:: Steps(steps)
 
     Runs the simulation for **steps** number of steps.
    
-    :param steps:  :class:`int`
+    :param steps:  Number of steps
+    :types:             :class:`int`
 
   .. method:: GetPositions([enforce_periodic_box = false, in_angstrom = true])
 
-    :param enforce_periodic_box: :class:`bool`
-    :param in_angstrom: :class:`bool`
+    :param enforce_periodic_box: True if periodic box has to be enforced
+    :param in_angstrom: True if positions should be in Angstrom, they're in nm
+                        otherwise
 
-    :returns: A :class:`~ost.geom.Vec3List` of all the positions of the atoms in the Entity.
+    :type enforce_periodic_box: :class:`bool`
+    :type in_angstrom: :class:`bool`
+
+    :returns: A :class:`ost.geom.Vec3List` of all the positions of the atoms in the Entity.
 
   .. method:: SetPositions(positions,[,in_angstrom = true])
 
-    :param positions: :class:`~ost.geom.Vec3List`
-    :param in_angstrom: :class:`bool`
+    :param positions: Positions to be set
+    :param in_angstrom: True if **positions** are in Angstrom, they're expected
+                        to be in nm otherwise
+
+    :type positions:    :class:`ost.geom.Vec3List`
+    :type in_angstrom:  :class:`bool`
 
   .. method:: UpdatePositions([enforce_periodic_box=false])
 
     Sets the positions of the atoms in the :class:`EntityHandle` to the current positions of the simulation.
 
-    :param enforce_periodic_box: :class:`bool`
+    :param enforce_periodic_box: True if periodic box should be enforced
+    :type enforce_periodic_box:  :class:`bool`
 
   .. method:: GetVelocities()
 
@@ -113,66 +137,84 @@ mapped back to the attached structure at any time.
 
   .. method:: SetVelocities(velocities)
 
-    :param velocities: :class:`~ost.geom.Vec3List`
+    :param velocities:  Velocities to be set
+    :type velocities:   :class:`ost.geom.Vec3List`
 
   .. method:: GetEntity()
 
-    :returns: :class:`EntityHandle`
+    :returns: :class:`EntityHandle` attached to the simulation
 
   .. method:: GetEnergy()
 
-    :returns: :class:`float`
+    :returns: :class:`float` Potential + Kinetic energy min kJ/mol of current 
+              simulation state
 
   .. method:: GetPotentialEnergy()
 
-    :returns: :class:`float`
+    :returns: :class:`float` Potential energy in kJ/mol of current simulation 
+              state
 
   .. method:: GetKineticEnergy()
 
-    :returns: :class:`float`
+    :returns: :class:`float` Kinetic energy in kJ/mol of current simulation 
+              state
 
   .. method:: GetTopology()
 
-    :returns: :class:`Topology`
+    :returns: :class:`Topology` attached to the simulation
 
   .. method:: GetPeriodicBoxExtents()
 
-    :returns: :class:`~ost.geom.Vec3List`
+    :returns: :class:`~ost.geom.Vec3List` Extents of the periodic box
 
   .. method:: SetPeriodicBoxExtents(vec)
 
-    :param vec: :class:`~ost.geom.Vec3List`
+    :param vec:         Periodic box extents in A
+    :type vec:          :class:`ost.geom.Vec3`
 
   .. method:: Register(observer)
 
     Adds an observer to the simulation object. This can be used for example to write out the trajectory during the simulation.
 
-    :param observer: :class:`Observer`
+    :param observer:    Observer to be attached
+    :type observer:     :class:`Observer`
 
   .. method:: AddPositionConstraint(index)
 
-    Fixes the position of the atom with index given in the argument.
+    Fixes the position of the particle with index given in the argument.
 
-    :param index: :class:`int`
+    :param index:       Particle to be fixed
+    :type index:        :class:`int`
+
+    :raises:            :class:`RuntimeError` when **index** exceeds
+                        number of particles
 
   .. method:: AddPositionConstraints(indices)
 
-    Fixes the position of the atoms with indices given in in the argument.
+    Fixes the position of the atoms with the indices given in in the argument.
 
-    :param indices: :class:`~ost.IntList`
+    :param indices:     Particles to be fixed
+    :type indices:      :class:`list`
+
+    :raises:            :class:`RuntimeError` when an index in **indices** 
+                        exceeds number of particles
 
   .. method:: ResetPositionConstraints()
 
     Removes all position constraints.
 
-  .. method:: ResetHarmonicBond(index,bond_length, force_constant)
+  .. method:: ResetHarmonicBond(index, bond_length, force_constant)
 
     Update of the harmonic bond parameters in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param bond_length: :class:`float`
-    :param force_constant: :class:`float`
+    :param index:       Harmonic Bond to be reset
+    :param bond_length: New bond length in nm
+    :param force_constant: New force constant in kJ/mol/nm^2
+
+    :type index:        :class:`int`
+    :type bond_length:  :class:`float`
+    :type force_constant: :class:`float`
 
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of harmonic bonds
@@ -182,22 +224,34 @@ mapped back to the attached structure at any time.
     Update of the harmonic angle parameters in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param angle: :class:`float`
-    :param force_constant: :class:`float`
+    :param index: Harmonic Angle to be reset
+    :param angle: New Angle in radians
+    :param force_constant: New force constant in kJ/mol/radian^2 
+
+    :type index:        :class:`int`
+    :type angle:        :class:`float`
+    :type force_constant: :class:`float`
+
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of harmonic angles
 
   .. method:: ResetUreyBradleyAngle(index, angle, angle_force_constant, bond_length, bond_force_constant)
 
-    Update of the urey-bradley angle parameters in the simulation **and**
+    Update of the Urey-Bradley angle parameters in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param angle: :class:`float`
-    :param force_constant: :class:`float`
-    :param bond_length: :class:`float`
-    :param force_constant: :class:`float`
+    :param index: Urey-Bradley angle that has to be reset
+    :param angle: New angle in radians
+    :param angle_force_constant: New angle force constant kJ/mol/radian^2 
+    :param bond_length: New bond length in nm
+    :param bond_force_constant: New bond force constant in kJ/mol/nm^2 
+
+    :type index:        :class:`int`
+    :type angle:        :class:`float`
+    :type angle_force_constant: :class:`float`
+    :type bond_length:  :class:`float`
+    :type bond_force_constant: :class:`float`
+
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of urey-bradley angles
 
@@ -206,10 +260,15 @@ mapped back to the attached structure at any time.
     Update of the periodic dihedral parameters in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param multiplicity: :class:`int`
-    :param phase: :class:`float`
-    :param force_constant: :class:`float`
+    :param index:       Periodic dihedral to be reset
+    :param multiplicity: New Multiplicity
+    :param phase:       New phase in radians
+    :param force_constant: New force constant in kJ/mol/radian^2 
+
+    :type index:        :class:`int`
+    :type multiplicity: :class:`int`
+    :type phase:        :class:`float`
+    :type force_constant: :class:`float`
 
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of periodic dihedrals
@@ -220,10 +279,16 @@ mapped back to the attached structure at any time.
     Update of the periodic improper parameters in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param multiplicity: :class:`int`
-    :param phase: :class:`float`
-    :param force_constant: :class:`float`
+    :param index:       Periodic improper to be reset
+    :param multiplicity: New multiplicity
+    :param phase:       New phase in radians
+    :param force_constant: New force constant kJ/mol/radian^2 
+
+    :type index:        :class:`int`
+    :type multiplicity: :class:`int`
+    :type phase:        :class:`float`
+    :type force_constant: :class:`float`
+
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of periodic impropers
 
@@ -232,22 +297,32 @@ mapped back to the attached structure at any time.
     Update of the harmonic improper parameters in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param phase: :class:`float`
-    :param force_constant: :class:`float`
+    :param index: Harmonic improper to be reset
+    :param phase: New phase in radians
+    :param force_constant: New force constant kJ/mol/radian^2 
+
+    :type index:        :class:`int`
+    :type phase:        :class:`float`
+    :type force_constant: :class:`float`
+
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of harmonic impropers
 
   .. method:: ResetLJPair(index,sigma,epsilon)
 
-    Update of the harmonic improper parameters in the simulation **and**
+    Update of the LJ pair parameters in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param sigma: :class:`float`
-    :param epsilon: :class:`float`
+    :param index:       LJ pair to be reset
+    :param sigma:       New sigma in nm
+    :param epsilon:     New epsilon in kJ/mol
+
+    :type index:        :class:`int`
+    :type sigma:        :class:`float`
+    :type epsilon:      :class:`float`
+
     :raises:            :class:`RuntimeError` when **index** exceeds
-                        number of lj-pairs
+                        number of LJ pairs
 
 
   .. method:: ResetDistanceConstraint(index, constraint_length)
@@ -255,8 +330,11 @@ mapped back to the attached structure at any time.
     Update of the distance constraint parameters in the simulation **and**
     in the attached :class:`Topology`
     
-    :param index: :class:`int`
-    :param constraint_length: :class:`float` 
+    :param index:       Distance constraint to be reset
+    :param constraint_length: New constraint length in nm
+
+    :type index:        :class:`int`
+    :type constraint_length: :class:`float` 
 
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of distance constraints
@@ -266,23 +344,36 @@ mapped back to the attached structure at any time.
     Update of the harmonic position restraint parameters in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param ref_position: :class:`~ost.geom.Vec3`
-    :param force_constant: :class:`float`
-    :param x_scale: :class:`float`
-    :param y_scale: :class:`float`
-    :param z_scale: :class:`float`
+    :param index: Harmonic position restraint to be reset
+    :param ref_position: New reference position in nm
+    :param force_constant: New force constant in kJ/mol/nm^2 
+    :param x_scale:     New x-scale
+    :param y_scale:     New y-scale
+    :param z_scale:     New z-scale
+
+    :type index:        :class:`int`
+    :type ref_position  :class:`ost.geom.Vec3`
+    :type force_constant: :class:`float`
+    :type x_scale:      :class:`float`
+    :type y_scale:      :class:`float`
+    :type z_scale:      :class:`float`
+
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of harmonic position restraints
 
-  .. method:: ResetHarmonicDistanceRestraint(index,bond_length, force_constant)
+  .. method:: ResetHarmonicDistanceRestraint(index, length, force_constant)
 
     Update of the harmonic distance restraint parameters in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param bond_length: :class:`float`
-    :param force_constant: :class:`float`
+    :param index:       Harmonic distance restraint to be reset
+    :param length:      New restraint length in nm
+    :param force_constant: New force constant kJ/mol/nm^2 
+
+    :type index:        :class:`int`
+    :type length:       :class:`float`
+    :type force_constant: :class:`float`
+
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of harmonic distance restraints
 
@@ -291,9 +382,13 @@ mapped back to the attached structure at any time.
     Update of the lj parameters in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param sigma: :class:`float`
-    :param epsilon: :class:`float`
+    :param index:       LJ to be reset
+    :param sigma:       New sigma in nm
+    :param epsilon:     New epsilon in kJ/mol
+
+    :type index:        :class:`int`
+    :type sigma:        :class:`float`
+    :type epsilon:        :class:`float`
 
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of particles
@@ -303,9 +398,13 @@ mapped back to the attached structure at any time.
     Update of the GBSA parameters in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param radius: :class:`float`
-    :param scaling: :class:`float`
+    :param index: :     GB to be reset
+    :param radius:      New radius in nm
+    :param scaling:     New OBC scaling
+
+    :type index:        :class:`int`
+    :type radius:       :class:`float`
+    :type scaling:      :class:`float`
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of particles
 
@@ -314,8 +413,11 @@ mapped back to the attached structure at any time.
     Update of the charge in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param charge: :class:`float`
+    :param index:       Charge to be reset
+    :param charge:      New Charge
+
+    :type index:        :class:`int`
+    :type charge:       :class:`float`
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of particles
 
@@ -325,8 +427,12 @@ mapped back to the attached structure at any time.
     Update of the mass in the simulation **and**
     in the attached :class:`Topology`
 
-    :param index: :class:`int`
-    :param mass: :class:`float`
+    :param index:       Mass to be reset
+    :param mass:        New mass
+
+    :type index:        :class:`int`
+    :type mass:         :class:`float`
+
     :raises:            :class:`RuntimeError` when **index** exceeds
                         number of particles
 

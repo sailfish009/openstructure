@@ -11,9 +11,9 @@ the topology allows to define arbitrary forces between these particles. The
 as soon as a :class:`Simulation` is set up. To make setting up a 
 :class:`Topology` more convenient, the :class:`TopologyCreator` class allows 
 to create a :class:`Topology` based on an mm :class:`Settings` object, 
-that should suffice most needs.
+that should suffice for most needs.
 
-Automatically Create Topologies
+Automatically create topologies
 --------------------------------------------------------------------------------
 
 .. class:: TopologyCreator
@@ -27,13 +27,13 @@ Automatically Create Topologies
     :class:`Settings`/:class:`Forcefield`.
     The Topology Creation process consists of:
 
-    #. Rename to the gromacs standard
+    #. Rename to the Gromacs standard
     
     #. Kill all bonds
     
-    #. Build difulfid bonds if flag is set in **settings**
+    #. Build difulfide bonds if flag is set in **settings**
     
-    #. Rename to the standard defined in the forcefield
+    #. Rename residues/atoms to the standard defined in the forcefield
     
     #. Extract the building blocks from the forcefield for every residue
     
@@ -47,13 +47,16 @@ Automatically Create Topologies
 
     #. Impropers and CMaps get only extracted when they are defined in the :class:`BuildingBlock`
     
-    #. Add Parametrization from :class:`Forcefield` to the :class:`Topology`. Note, that you can override the :class:`Forcefield` parametrization if you add this particular :class:`Interaction` in a parametrized form in the :class:`Buildingblock`!!!
+    #. Add Parametrization from :class:`Forcefield` to the :class:`Topology`. Note, that you can override the :class:`Forcefield` parametrization if you add this particular :class:`Interaction` in a parameterized form in the :class:`BuildingBlock`
     
-    #. Rename entity back to PDB naming if according flag is set in **settings**
+    #. Rename entity back to PDB naming if flag is set accordingly in **settings**
 
-    :param entity:      :class:`EntityHandle`
+    :param entity:      Entity to create :class:`Topology`
+    :param settings:    Settings to control :class:`Topology` buildup
 
-    :param settings:    :class:`Settings`
+    :type entity:       :class:`ost.mol.EntityHandle`
+    :type settings:     :class:`Settings`
+
 
     :raises:            :class:`RuntimeError` if settings has no 
                         :class:`Forcefield` assigned
@@ -67,10 +70,10 @@ Automatically Create Topologies
                         :class:`BuildingBlock` definition in the
                         :class:`Forcefield`
 
-    :raises:            :class:`RuntimeError` if there is an interaction,
+    :raises:            :class:`RuntimeError` if there is an interaction
                         that has no parameters in the forcefield. This 
-                        :class:`RuntimeError` can be supressed by the 
-                        according flag in the :class:`Settings` object.
+                        :class:`RuntimeError` can be supressed by setting the 
+                        appropriate flag in the :class:`Settings` object.
 
 
 The Topology Class
@@ -84,14 +87,16 @@ The Topology Class
 
     Dump Toplogy into binary file
 
-    :param filename:    :class:`str`
+    :param filename:    Name of file
+    :type filename:     :class:`str`
 
 
   .. method:: Load(filename)
 
     Load binary topology from disk
 
-    :param filename:    :class:`str`
+    :param filename:    Name of file
+    :type filename:     :class:`str`
 
     :returns:           loaded :class:`Topology`
 
@@ -104,42 +109,45 @@ The Topology Class
     Assuming the actual :class:`Topology` containing n particles, the indexing of the
     other :class:`Topology` gets altered by adding n everywhere.
 
-    :param other:       :class:`Topology`
+    :param other:       Topology to merge in
+    :type other:        :class:`Topology`
 
     :raises:            :class:`RuntimeError` if fudge parameters are not consistent
 
     :raises:            :class:`RuntimeError` if current :class:`Topology` 
-                        contains charges but the other not
+                        contains charges but the **other** not
 
     :raises:            :class:`RuntimeError` if current :class:`Topology` 
-                        contains sigmas but the other not
+                        contains sigmas but the **other** not
 
     :raises:            :class:`RuntimeError` if current :class:`Topology` 
-                        contains epsilons but the other not
+                        contains epsilons but the **other** not
 
     :raises:            :class:`RuntimeError` if current :class:`Topology` 
-                        contains GBSA Radii but the other not
+                        contains GBSA Radii but the **other** not
 
     :raises:            :class:`RuntimeError` if current :class:`Topology` 
-                        contains OBC scalings but the other not
+                        contains OBC scalings but the **other** not
 
   .. method:: Merge(ent, other, other_ent)
 
     Merges in another :class:`Topology` and adds all their particles and 
-    interactions. Assuming the actual :class:`Topology` containing n particles, 
+    interactions. Assuming the actual :class:`Topology` contains n particles, 
     the indexing of the other :class:`Topology` gets altered by adding n 
-    everywhere. This version of the Merge function assumes, the current topology 
-    to describe the :class:`EntityHandle` ent and the other :class:`Topology`
-    to describe the :class:`EntityHandle` other_ent. During merging, all
-    chains, residues, atoms and bonds from other ent are pulled into ent in
+    everywhere. This version of the Merge function assumes the current topology 
+    describes the :class:`EntityHandle` ent and the other :class:`Topology`
+    describes the :class:`EntityHandle` other_ent. During merging, all
+    chains, residues, atoms and bonds from **other_ent** are pulled into **ent** in
     a way, that the current :class:`Topology` is consistent with the
-    :class:`EntityHandle` ent.
+    :class:`EntityHandle` **ent**.
 
-    :param ent:         :class:`EntityHandle`
+    :param ent:         Entity consistent with current topology
+    :param other:       Topology to merge in
+    :param other_ent:   Entity consistent with **other**
 
-    :param other:       :class:`Topology`
-
-    :param other_ent:   :class:`EntityHandle`
+    :type ent:          :class:`ost.mol.EntityHandle`
+    :type other:        :class:`Topology`
+    :type other_ent:    :class:`ost.mol.EntityHandle`
 
     :raises:            :class:`RuntimeError` if fudge parameters are not consistent
 
@@ -163,18 +171,21 @@ The Topology Class
                         topologies.
 
     :raises:            :class:`RuntimeError` other_ent contains a chain with
-                        a name already present in ent.
+                        a name already present in **ent**.
 
 
   .. method:: AddHarmonicBond(index_one, index_two, bond_length, force_constant)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param bond_length: Bond length in nm
+    :param force_constant: Force constant in kJ/mol/nm^2
 
-    :param index_two:   :class:`int`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type bond_length:  :class:`float`
+    :type force_constant: :class:`float`
 
-    :param bond_length: :class:`float`
-
-    :param force_constant: :class:`float`
 
     :returns:           :class:`int` index of added interaction
 
@@ -183,18 +194,20 @@ The Topology Class
 
 
 
-  .. method:: AddHarmonicAngle(index_one, index_two, index_three, bond_length, 
+  .. method:: AddHarmonicAngle(index_one, index_two, index_three, angle, 
                                force_constant)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param index_three: Index of particle 3
+    :param angle:       Angle in radians
+    :param force_constant: Force constant in kJ/mol/radian^2 
 
-    :param index_two:   :class:`int`
-
-    :param index_three: :class:`int`
-
-    :param angle:       :class:`float`
-
-    :param force_constant: :class:`float`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type index_three:  :class:`int`
+    :type angle:        :class:`float`
+    :type force_constant: :class:`float`
 
     :returns:           :class:`int` index of added interaction
 
@@ -206,19 +219,21 @@ The Topology Class
                                   angle, angle_force_constant,
                                   bond_length, bond_force_constant)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param index_three: Index of particle 3
+    :param angle:       Angle in radians
+    :param angle_force_constant: Angle force constant kJ/mol/radian^2 
+    :param bond_length: Bond length in nm
+    :param bond_force_constant: Bond force constant kJ/mol/nm^2 
 
-    :param index_two:   :class:`int`
-
-    :param index_three: :class:`int`
-
-    :param angle:       :class:`float`
-
-    :param angle_force_constant: :class:`float`
-
-    :param bond_length: :class:`float`
-
-    :param bond_force_constant: :class:`float`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type index_three:  :class:`int`
+    :type angle:        :class:`float`
+    :type angle_force_constant: :class:`float`
+    :type bond:         :class:`float`
+    :type bond_force_constant: :class:`float`
 
     :returns:           :class:`int` index of added interaction
 
@@ -229,19 +244,21 @@ The Topology Class
   .. method:: AddPeriodicDihedral(index_one, index_two, index_three, index_four,
                                   multiplicity, phase, force_constant)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param index_three: Index of particle 3
+    :param index_four:  Index of particle 4
+    :param multiplicity: Multiplicity
+    :param phase:       Phase in radians
+    :param force_constant: Force constant in kJ/mol/radian^2 
 
-    :param index_two:   :class:`int`
-
-    :param index_three: :class:`int`
-
-    :param index_four:  :class:`int`
-
-    :param multiplicity: :class:`int`
-
-    :param phase:       :class:`float`
-
-    :param force_constant: :class:`float`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type index_three:  :class:`int`
+    :type index_four:   :class:`int`
+    :type multiplicity: :class:`int`
+    :type phase:        :class:`float`
+    :type force_constant: :class:`float`
 
     :returns:           :class:`int` index of added interaction
 
@@ -252,19 +269,21 @@ The Topology Class
   .. method:: AddPeriodicImproper(index_one, index_two, index_three, index_four,
                                   multiplicity, phase, force_constant)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param index_three: Index of particle 3
+    :param index_four:  Index of particle 4
+    :param multiplicity: Multiplicity
+    :param phase:       Phase in radians
+    :param force_constant: Force constant in kJ/mol/radian^2 
 
-    :param index_two:   :class:`int`
-
-    :param index_three: :class:`int`
-
-    :param index_four:  :class:`int`
-
-    :param multiplicity: :class:`int`
-
-    :param phase:       :class:`float`
-
-    :param force_constant: :class:`float`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type index_three:  :class:`int`
+    :type index_four:   :class:`int`
+    :type multiplicity: :class:`int`
+    :type phase:        :class:`float`
+    :type force_constant: :class:`float`
 
     :returns:           :class:`int` index of added interaction
 
@@ -275,17 +294,19 @@ The Topology Class
   .. method:: AddHarmonicImproper(index_one, index_two, index_three, index_four,
                                   angle, force_constant)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param index_three: Index of particle 3
+    :param index_four:  Index of particle 4
+    :param phase:       Phase in radians
+    :param force_constant: Force constant kJ/mol/radian^2 
 
-    :param index_two:   :class:`int`
-
-    :param index_three: :class:`int`
-
-    :param index_four:  :class:`int`
-
-    :param angle:       :class:`float`
-
-    :param force_constant: :class:`float`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type index_three:  :class:`int`
+    :type index_four:   :class:`int`
+    :type phase:        :class:`float`
+    :type force_constant: :class:`float`
 
     :returns:           :class:`int` index of added interaction
 
@@ -296,70 +317,79 @@ The Topology Class
   .. method:: AddCMap(index_one, index_two, index_three, index_four,
                       index_five, dimension, values)
 
-    :param index_one:   :class:`int`
-
-    :param index_two:   :class:`int`
-
-    :param index_three: :class:`int`
-
-    :param index_four:  :class:`int`
-
-    :param index_five:  :class:`int`
-
-    :param dimension:   :class:`int`
-
-    :param values:      :class:`list` of :class:`float` of size 
-                        dimension*dimension describing the correction
-                        map. The values have to be ordered like
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param index_three: Index of particle 3
+    :param index_four:  Index of particle 4
+    :param index_five:  Index of particle 5
+    :param dimension:   Dimension of CMap
+    :param values:      Map of size 
+                        **dimension** * **dimension** describing the correction
+                        map in kJ/mol. The values have to be ordered like
                         (phi1,psi1),(phi1,psi2)...(phi1,psin),
                         (phi2,psi1),(phi2,psi2)...(phi2,psin),
                         ...(phin,psin).
                         the range for phi and psi are [-pi,pi[
 
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type index_three:  :class:`int`
+    :type index_four:   :class:`int`
+    :type index_five:   :class:`float`
+    :type dimension:    :class:`int`
+    :type values:       :class:`list`
+
     :returns:           :class:`int` index of added interaction
 
     :raises:            :class:`RuntimeError` when size of values is not 
-                        dimension * dimension or index exceeds number of 
+                        **dimension** * **dimension** or index exceeds number of 
                         particles.
 
 
   .. method:: AddLJPair(index_one, index_two, sigma, epsilon)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param sigma:       Sigma in nm
+    :param epsilon:     Epsilon in kJ/mol
 
-    :param index_two:   :class:`int`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type sigma:        :class:`float`
+    :type epsiolon:     :class:`float`
 
-    :param sigma:       :class:`float`
-
-    :param epsilon:     :class:`float`
 
     :returns:           :class:`int` index of added interaction
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          particles or when particular LJPair is already 
-                         parametrized
+                         parameterized
 
 
   .. method:: AddDistanceConstraint(index_one, index_two, distance)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param distance:    Constraint distance in nm
 
-    :param index_two:   :class:`int`
-
-    :param distance:    :class:`float`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type distance:     :class:`float`    
 
     :returns:           :class:`int` index of added interaction
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          particles or when particular distance constraint
-                         is already parametrized
+                         is already parameterized
 
 
   .. method:: AddExclusion(index_one, index_two)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
 
-    :param index_two:   :class:`int`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
 
     :returns:           :class:`int` index of added interaction
 
@@ -369,7 +399,9 @@ The Topology Class
 
   .. method:: AddPositionConstraint(index)
 
-    :param index:       :class:`int`
+    :param index:       Index of particle to be constrained
+
+    :type index:        :class:`int`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          particles
@@ -379,20 +411,22 @@ The Topology Class
                                            x_scale=1.0, y_scale=1.0, 
                                            z_scale=1.0)
 
-    Adds a harmonic position restraint for a particle of the form:
+    Adds a harmonic position restraint for a particle in the form:
     force_constant*(x_scale*(x-x0)^2+y_scale*(y-y0)^2+z_scale*(z-z0)^2)
 
-    :param index:       :class:`int`
+    :param index:       Index of particle to be constrained
+    :param reference_pos: Reference position in nm
+    :param force_constant: Force constant in kJ/mol/nm^2 
+    :param x_scale:     X-scale
+    :param y_scale:     Y-scale
+    :param z_scale:     Z-scale
 
-    :param reference_pos: :class:`ost.geom.Vec3` reference_position
-
-    :param force_constant: :class:`float`
-
-    :param x_scale: :class:`float`
-
-    :param y_scale: :class:`float`
-
-    :param z_scale: :class:`float`
+    :type index:        :class:`int`
+    :type reference_pos: :class:`ost.geom.Vec3`
+    :type force_constant: :class:`float`
+    :type x_scale:      :class:`float`
+    :type y_scale:      :class:`float`
+    :type z_scale:      :class:`float`
 
     :returns:           :class:`int` index of added interaction
 
@@ -403,8 +437,18 @@ The Topology Class
   .. method:: AddHarmonicDistanceRestraint(index_one, index_two, length
                                            force_constant)
 
-    Adds a force between two particles of the form:
+    Adds a force between two particles in the form:
     force_constant * (b-b0)^2
+
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param length:      Restraint length in nm
+    :param force_constant: Force constant in kJ/mol/nm^2 
+
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type length:       :class:`float`
+    :type force_constant: :class:`float`
 
     :returns:           :class:`int` index of added interaction
 
@@ -424,7 +468,9 @@ The Topology Class
 
   .. method:: SetSigmas(sigmas)
 
-    :param sigmas:      :class:`list` of :class:`float` defining sigma params
+    :param sigmas:      Sigma parameters for all particles in nm
+
+    :type sigmas:       :class:`sigma`
    
     :raises:            :class:`RuntimeError` when list size is inconsistent
                         with number of particles
@@ -432,9 +478,11 @@ The Topology Class
 
   .. method:: SetSigma(index, sigma)
 
-    :param index:       :class:`int`
+    :param index:       Index of particle in nm
+    :param sigma:        Sigma
 
-    :parm sigma:        :class:`float`
+    :type index:        :class:`int`
+    :type sigma:        :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          particles
@@ -442,7 +490,9 @@ The Topology Class
 
   .. method:: SetEpsilons(epsilons)
 
-    :param epsilons:    :class:`list` of :class:`float` defining epsilon params
+    :param epsilons:    Epsilon parameters for all particles in kJ/mol
+
+    :type epsilons:     :class:`list`
    
     :raises:            :class:`RuntimeError` when list size is inconsistent
                         with number of particles
@@ -450,9 +500,11 @@ The Topology Class
 
   .. method:: SetEpsilon(index, epsilon)
 
-    :param index:       :class:`int`
+    :param index:       Index of particle 
+    :param epsilon:     Epsilon in kJ/mol
 
-    :parm epsilon:        :class:`float`
+    :type index:        :class:`int`      
+    :type epsilon:      :class:`float`      
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          particles
@@ -460,17 +512,21 @@ The Topology Class
 
   .. method:: SetGBSARadii(radii)
 
-    :param radii:      :class:`list` of :class:`float` defining radii
+    :param radii:       GBSA radii for all particles in nm
+
+    :type radii:        :class:`list`
    
     :raises:            :class:`RuntimeError` when list size is inconsistent
                         with number of particles
 
 
-  .. method:: SetGBSARadii(index, radius)
+  .. method:: SetGBSARadius(index, radius)
 
-    :param index:       :class:`int`
+    :param index:       Index of particle
+    :param radius:      GBSA radius in nm
 
-    :parm radius:       :class:`float`
+    :type index:        :class:`int`
+    :type radius:       :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          particles
@@ -478,17 +534,21 @@ The Topology Class
 
   .. method:: SetOBCScalings(scalings)
 
-    :param scalings:    :class:`list` of :class:`float` defining scaling params
+    :param scalings:    OBC scaling factors for all particles
    
+    :type scalings:     :class:`list`
+
     :raises:            :class:`RuntimeError` when list size is inconsistent
                         with number of particles
 
 
   .. method:: SetOBCScaling(index, scaling)
 
-    :param index:       :class:`int`
+    :param index:       Index of particle
+    :param scaling:     OBC scaling factor
 
-    :parm scaling:      :class:`float`
+    :type index:        Index of particle
+    :type scaling:      :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          particles
@@ -496,7 +556,9 @@ The Topology Class
 
   .. method:: SetCharges(charges)
 
-    :param charges:     :class:`list` of :class:`float` defining charge params
+    :param charges:     Charges for all particles
+
+    :type charges:      :class:`list`
    
     :raises:            :class:`RuntimeError` when list size is inconsistent
                         with number of particles
@@ -504,16 +566,19 @@ The Topology Class
 
   .. method:: SetCharge(index, charge)
 
-    :param index:       :class:`int`
+    :param index:       Index of particle
+    :param charge:      Charge
 
-    :parm charge:       :class:`float`
+    :type index:        :class:`int`
+    :type charge:       :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          particles
 
   .. method:: SetMasses(masses)
 
-    :param masses:      :class:`list` of :class:`float` defining mass params
+    :param masses:      Masses for all particles
+    :type masses:       :class:`list`
    
     :raises:            :class:`RuntimeError` when list size is inconsistent
                         with number of particles
@@ -521,9 +586,11 @@ The Topology Class
 
   .. method:: SetMass(index, mass)
 
-    :param index:       :class:`int`
+    :param index:       Index of particle
+    :param mass:        Mass
 
-    :parm mass:         :class:`float`
+    :type index:        :class:`int`
+    :type mass:         :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          particles
@@ -531,17 +598,19 @@ The Topology Class
 
   .. method:: SetFudgeQQ(fudge)
 
-    :param fudge:       :class:`fudge`
-
+    :param fudge:       Dampening factor for electrostatic 1,4 interactions
+    :type fudge:        :class:`float`
 
   .. method:: SetFudgeLJ(fudge)
 
-    :param fudge:       :class:`fudge`
+    :param fudge:       Dampening factor for LJ 1,4 interactions       
+    :type fudge:        :class:`float`
 
 
   .. method:: GetHarmonicBondParameters(index)
 
-    :param index:       :class:`int`
+    :param index:       Index of harmonic bond
+    :type index:        :class:`int`
 
     :returns:           :class:`tuple` containing the indices of the involved
                         particles and the set parameters
@@ -552,7 +621,8 @@ The Topology Class
 
   .. method:: GetHarmonicAngleParameters(index)
 
-    :param index:       :class:`int`
+    :param index:       Index of harmonic angle
+    :type index:        :class:`int`
 
     :returns:           :class:`tuple` containing the indices of the involved
                         particles and the set parameters
@@ -562,17 +632,19 @@ The Topology Class
 
   .. method:: GetUreyBradleyAngleParameters(index)
 
-    :param index:       :class:`int`
+    :param index:       Index of Urey-Bradley angle
+    :type index:        :class:`int`
 
     :returns:           :class:`tuple` containing the indices of the involved
                         particles and the set parameters
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
-                         set urey-bradley angles
+                         set Urey-Bradley angles
 
   .. method:: GetPeriodicDiheralParameters(index)
 
-    :param index:       :class:`int`
+    :param index:       Index of periodic dihedral
+    :type index:        :class:`int`
 
     :returns:           :class:`tuple` containing the indices of the involved
                         particles and the set parameters
@@ -582,7 +654,8 @@ The Topology Class
 
   .. method:: GetPeriodicImproperParameters(index)
 
-    :param index:       :class:`int`
+    :param index:       Index of periodic improper
+    :type index:        :class:`int`
 
     :returns:           :class:`tuple` containing the indices of the involved
                         particles and the set parameters
@@ -592,7 +665,8 @@ The Topology Class
 
   .. method:: GetHarmonicImproperParameters(index)
 
-    :param index:       :class:`int`
+    :param index:       Index of harmonic improper
+    :type index:        :class:`int`
 
     :returns:           :class:`tuple` containing the indices of the involved
                         particles and the set parameters
@@ -603,7 +677,8 @@ The Topology Class
 
   .. method:: GetCMapParameters(index)
 
-    :param index:       :class:`int`
+    :param index:       Index of CMap
+    :type index:        :class:`int`
 
     :returns:           :class:`tuple` containing the indices of the involved
                         particles and the set parameters
@@ -614,7 +689,8 @@ The Topology Class
 
   .. method:: GetLJPairParameters(index)
 
-    :param index:       :class:`int`
+    :param index:       Index of LJ pair
+    :type index:        :class:`int`
 
     :returns:           :class:`tuple` containing the indices of the involved
                         particles and the set parameters
@@ -625,7 +701,8 @@ The Topology Class
 
   .. method:: GetDistanceConstraintParameters(index)
 
-    :param index:       :class:`int`
+    :param index:       Index of distance constraint
+    :type index:        :class:`int`
 
     :returns:           :class:`tuple` containing the indices of the involved
                         particles and the set parameters
@@ -636,7 +713,8 @@ The Topology Class
 
   .. method:: GetHarmonicPositionRestraintParameters(index)
 
-    :param index:       :class:`int`
+    :param index:       Index of harmonic position restraint
+    :type index:        :class:`int`
 
     :returns:           :class:`tuple` containing the indices of the involved
                         particles and the set parameters
@@ -647,7 +725,8 @@ The Topology Class
 
   .. method:: GetHarmonicDistanceRestraintParameters(index)
 
-    :param index:       :class:`int`
+    :param index:       Index of harmonic distance restraint
+    :type index:        :class:`int`
 
     :returns:           :class:`tuple` containing the indices of the involved
                         particles and the set parameters
@@ -660,11 +739,13 @@ The Topology Class
 
     Replaces existing parameters for particular interaction
 
-    :param index:       :class:`int`
+    :param index:       Index of harmonic bond
+    :param bond_length: New bond length in nm
+    :param force_constant: New force constant in kJ/mol/nm^2
 
-    :param bond_length: :class:`float`
-
-    :param force_constant: :class:`float`
+    :type index:        :class:`int`
+    :type bond_length:  :class:`float`
+    :type force_constant: :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          set harmonic bonds
@@ -674,11 +755,13 @@ The Topology Class
 
     Replaces existing parameters for particular interaction
 
-    :param index:       :class:`int`
+    :param index:       Index of harmonic angle
+    :param angle:       New angle in radians
+    :param force_constant: New force constant kJ/mol/radian^2
 
-    :param angle:       :class:`float`
-
-    :param force_constant: :class:`float`
+    :type index:        :class:`int`
+    :type angle:        :class:`float`
+    :type force_constant: :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          set harmonic angles
@@ -688,56 +771,64 @@ The Topology Class
 
     Replaces existing parameters for particular interaction
 
-    :param index:       :class:`int`
+    :param index:       Index of Urey-Bradley angle
+    :param angle_force_constant: New angle force constant in kJ/mol/radian^2
+    :param bond_length: New bond length in nm
+    :param bond_force_constant: New bond force constant in kJ/mol/nm^2
 
-    :param angle_force_constant: :class:`float`
-
-    :param bond_length: :class:`float`
-
-    :param bond_force_constant: :class:`float`
+    :type index:        :class:`int`
+    :type angle_force_constant: :class:`float`
+    :type bond_length:  :class:`float`
+    :type bond_force_constant: :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
-                         set urey-bradley angles
+                         set Urey-Bradley angles
 
   .. method:: SetPeriodicDiheralParameters(index, multiplicity, phase, force_constant)
 
-    Replaces existing parameters for particular interaction
+    Replaces existing parameters for a particular interaction
 
-    :param index:       :class:`int`
+    :param index:       Index of periodic dihedral
+    :param multiplicity: New periodicity
+    :param phase:       New phase in radians
+    :param force_constant: New force constant in kJ/mol/radian^2
 
-    :param multiplicity: :class:`int`
-
-    :param phase:       :class:`float`
-
-    :param force_constant: :class:`float`
+    :type index:        :class:`int`
+    :type multiplicity: :class:`int`
+    :type phase:        :class:`float`
+    :type force_constant: :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          set periodic dihedrals
 
   .. method:: SetPeriodicImproperParameters(index, multiplicity, phase, force_constant)
 
-    Replaces existing parameters for particular interaction
+    Replaces existing parameters for a particular interaction
 
-    :param index:       :class:`int`
+    :param index:       Index of periodic improper
+    :param multiplicity: New multiplicity
+    :param phase:       New phase in radians
+    :param force_constant: New force constant kJ/mol/radian^2
 
-    :param multiplicity: :class:`int`
-
-    :param phase:       :class:`float`
-
-    :param force_constant: :class:`float`
+    :type  index:       :class:`int`
+    :type  multiplicity: :class:`int`
+    :type  phase:       :class:`float`
+    :type  force_constant: :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          set periodic impropers
 
   .. method:: SetHarmonicImproperParameters(index, angle, force_constant)
 
-    Replaces existing parameters for particular interaction
+    Replaces existing parameters for a particular interaction
 
-    :param index:       :class:`int`
+    :param index:       Index of harmonic improper
+    :param angle:       New angle in radians
+    :param force_constant: New force constant kJ/mol/radian^2
 
-    :param angle:       :class:`float`
-
-    :param force_constant: :class:`float`
+    :type index:        :class:`int`
+    :type angle:        :class:`float`
+    :type force_constant: :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          set harmonic impropers
@@ -745,14 +836,15 @@ The Topology Class
 
   .. method:: SetCMapParameters(index, dimension, map)
 
-    Replaces existing parameters for particular interaction
+    Replaces existing parameters a for particular interaction
 
-    :param index:       :class:`int`
+    :param index:       Index of CMap
+    :param dimension:   New dimension
+    :param map:         New CMap of format described in the AddCMap function.
 
-    :param dimension:   :class:`int`
-
-    :param map:         :class:`list` of :class:`float` values in the format
-                        described in the AddCMap function.
+    :type index:        :class:`int`
+    :type dimension:    :class:`int`
+    :type map:          :class:`list` 
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          set cmaps or size of map is not dimension*dimension
@@ -760,13 +852,15 @@ The Topology Class
 
   .. method:: SetLJPairParameters(index, sigma, epsilon)
 
-    Replaces existing parameters for particular interaction
+    Replaces existing parameters for a particular interaction
 
-    :param index:       :class:`int`
+    :param index:       Index of LJ pair
+    :param sigma:       New sigma in nm
+    :param epsilon:     New epsilon in kJ/mol
 
-    :param sigma:       :class:`float`
-
-    :param epsilon:     :class:`float`
+    :type index:        :class:`int`
+    :type sigma:        :class:`float`
+    :type epsilon:      :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          set lj pairs
@@ -774,33 +868,37 @@ The Topology Class
 
   .. method:: SetDistanceConstraintParameters(index, distance)
 
-    Replaces existing parameters for particular interaction
+    Replaces existing parameters for a particular interaction
 
-    :param index:       :class:`int`
+    :param index:       Index of distance constraint
+    :param distance:    New constraint distance in nm
 
-    :param distance:    :class:`float`
+    :type index:        :class:`int`
+    :type distance:     :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          set distance constraints
 
 
-  .. method:: SetHarmonicPositionRestraintParameters(index, ref_position, k,
+  .. method:: SetHarmonicPositionRestraintParameters(index, ref_position, k,[,]
                                                      x_scale=1.0, y_scale=1.0, 
-                                                     z_scale=1.0)
+                                                     z_scale=1.0])
 
-    Replaces existing parameters for particular interaction
+    Replaces existing parameters for a particular interaction
 
-    :param index:       :class:`int`
+    :param index:       Index of harmonic position constraint
+    :param ref_position: New reference position in nm
+    :param k:           New force constant in kJ/mol/nm^2
+    :param x_scale:     New x-scale
+    :param y_scale:     New y-scale 
+    :param z_scale:     New z-scale
 
-    :param ref_position: :class:`ost.geom.Vec3`
-
-    :param k:           :class:`float`
-
-    :param x_scale:     :class:`float`
-
-    :param y_scale:     :class:`float`
-
-    :param z_scale:     :class:`float`
+    :type index:        :class:`int`
+    :type ref_position: :class:`ost.geom.Vec3`
+    :type k:            :class:`float`
+    :type x_scale:      :class:`float`
+    :type y_scale:      :class:`float`
+    :type z_scale:      :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          set harmonic position restraints
@@ -808,13 +906,15 @@ The Topology Class
 
   .. method:: SetHarmonicDistanceRestraintParameters(index, length, k)
 
-    Replaces existing parameters for particular interaction
+    Replaces existing parameters for a particular interaction
 
-    :param index:       :class:`int`
+    :param index:       Index of harmonic distance restraint
+    :param length:      New restraint distance in nm
+    :param k:           New force constant in kJ/mol/nm^2
 
-    :param length:      :class:`float`
-
-    :param k:           :class:`float`
+    :type index:       :class:`int`
+    :type length:      :class:`float`
+    :type k:           :class:`float`
 
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          set harmonic distance restraints
@@ -835,19 +935,19 @@ The Topology Class
   .. method:: GetGBSARadii()
 
     :returns:           :class:`list` of :class:`float` with previously set 
-                        gbsa radii
+                        GBSA radii
 
 
   .. method:: GetOBCScalings()
 
     :returns:           :class:`list` of :class:`float` with previously set 
-                        obc scalings
+                        OBC scalings
 
 
   .. method:: GetCharges()
 
     :returns:           :class:`list` of :class:`float` with previously set 
-                        gbsa charges
+                        charges
 
 
   .. method:: GetMasses()
@@ -858,7 +958,8 @@ The Topology Class
 
   .. method:: GetSigma(particle_index)
 
-    :param particle_index: :class:`int`
+    :param particle_index: Index of particle
+    :type particle_index: :class:`int`
 
     :returns:           :class:`float`
 
@@ -868,7 +969,8 @@ The Topology Class
 
   .. method:: GetEpsilon(particle_index)
 
-    :param particle_index: :class:`int`
+    :param particle_index: Index of particle
+    :type particle_index: :class:`int`
 
     :returns:           :class:`float`
 
@@ -879,7 +981,8 @@ The Topology Class
 
   .. method:: GetGBSARadius(particle_index)
 
-    :param particle_index: :class:`int`
+    :param particle_index: Index of particle
+    :type particle_index: :class:`int`
 
     :returns:          :class:`float`
 
@@ -889,7 +992,8 @@ The Topology Class
 
   .. method:: GetOBCScaling(particle_index)
 
-    :param particle_index: :class:`int`
+    :param particle_index: Index of particle
+    :type particle_index: :class:`int`
 
     :returns:           :class:`float`
 
@@ -899,7 +1003,8 @@ The Topology Class
 
   .. method:: GetCharge(particle_index)
 
-    :param particle_index: :class:`int`
+    :param particle_index: Index of particle
+    :type particle_index: :class:`float`
 
     :returns:           :class:`float`
 
@@ -909,7 +1014,8 @@ The Topology Class
 
   .. method:: GetMass(particle_index)
 
-    :param particle_index: :class:`int`
+    :param particle_index: Index of particle
+    :type particle_index: :class:`int`
 
     :returns:           :class:`float`
 
@@ -919,9 +1025,11 @@ The Topology Class
 
   .. method:: GetHarmonicBondIndices(index_one, index_two)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_one:   Index of particle 2
 
-    :param index_two:   :class:`int`
+    :type index_one:    :class:`int`
+    :type index_one:    :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all harmonic
                         bonds acting on given particles
@@ -932,11 +1040,13 @@ The Topology Class
 
   .. method:: GetHarmonicAngleIndices(index_one, index_two, index_three)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param index_three: Index of particle 3
 
-    :param index_two:   :class:`int`
-
-    :param index_three: :class:`int`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type index_three:  :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all harmonic
                         angles acting on given particles
@@ -947,14 +1057,16 @@ The Topology Class
 
   .. method:: GetUreyBradleyAngleIndices(index_one, index_two, index_three)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param index_three: Index of particle 3
 
-    :param index_two:   :class:`int`
-
-    :param index_three: :class:`int`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type index_three:  :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all 
-                        urey-bradley angles acting on given particles
+                        Urey-Bradley angles acting on given particles
 
     :raises:            :class:`RuntimeError` when an index exceeds
                         number of particles in topology
@@ -963,13 +1075,15 @@ The Topology Class
   .. method:: GetPeriodicDihedralIndices(index_one, index_two, index_three,
                                          index_four)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param index_three: Index of particle 3
+    :param index_four: Index of particle 4
 
-    :param index_two:   :class:`int`
-
-    :param index_three: :class:`int`
-
-    :param index_four:  :class:`int`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type index_three:  :class:`int`
+    :type index_four:  :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all periodic
                         dihedrals acting on given particles
@@ -981,13 +1095,15 @@ The Topology Class
   .. method:: GetPeriodicImpropersIndices(index_one, index_two, index_three,
                                           index_four)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param index_three: Index of particle 3
+    :param index_four: Index of particle 4
 
-    :param index_two:   :class:`int`
-
-    :param index_three: :class:`int`
-
-    :param index_four:  :class:`int`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type index_three:  :class:`int`
+    :type index_four:  :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all periodic
                         impropers acting on given particles
@@ -999,13 +1115,15 @@ The Topology Class
   .. method:: GetHarmonicImpropersIndices(index_one, index_two, index_three,
                                           index_four)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param index_three: Index of particle 3
+    :param index_four: Index of particle 4
 
-    :param index_two:   :class:`int`
-
-    :param index_three: :class:`int`
-
-    :param index_four:  :class:`int`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type index_three:  :class:`int`
+    :type index_four:  :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all harmonic
                         impropers acting on given particles
@@ -1017,15 +1135,17 @@ The Topology Class
   .. method:: GetCMapIndices(index_one, index_two, index_three,
                              index_four, index_five)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_two:   Index of particle 2
+    :param index_three: Index of particle 3
+    :param index_four: Index of particle 4
+    :param index_five: Index of particle 5
 
-    :param index_two:   :class:`int`
-
-    :param index_three: :class:`int`
-
-    :param index_four:  :class:`int`
-
-    :param index_five:  :class:`int`
+    :type index_one:    :class:`int`
+    :type index_two:    :class:`int`
+    :type index_three:  :class:`int`
+    :type index_four:  :class:`int`
+    :type index_five:  :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all cmaps
                         acting on given particles
@@ -1036,9 +1156,11 @@ The Topology Class
 
   .. method:: GetLJPairIndex(index_one, index_two)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_one:   Index of particle 2
 
-    :param index_two:   :class:`int`
+    :type index_one:    :class:`int`
+    :type index_one:    :class:`int`
 
     :returns:           :class:`int` describing LJPair acting on particles,
                         -1 if there is none
@@ -1049,9 +1171,11 @@ The Topology Class
 
   .. method:: GetDistanceConstraintIndex(index_one, index_two)
 
-    :param index_one:   :class:`int`
+    :param index_one:   Index of particle 1
+    :param index_one:   Index of particle 2
 
-    :param index_two:   :class:`int`
+    :type index_one:    :class:`int`
+    :type index_one:    :class:`int`
 
     :returns:           :class:`int` describing distance constraint acting on 
                         particles, -1 if there is none
@@ -1062,7 +1186,8 @@ The Topology Class
 
   .. method:: GetHarmonicBondIndices(index)
 
-    :param index:       :class:
+    :param index:       Index of particle
+    :type index:        :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all harmonic
                         bonds this particular particle is involved in
@@ -1073,7 +1198,8 @@ The Topology Class
 
   .. method:: GetHarmonicAngleIndices(index)
 
-    :param index:       :class:
+    :param index:       Index of particle
+    :type index:        :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all harmonic
                         angles this particular particle is involved in
@@ -1084,10 +1210,11 @@ The Topology Class
 
   .. method:: GetUreyBradleyAngleIndices(index)
 
-    :param index:       :class:
+    :param index:       Index of particle
+    :type index:        :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all 
-                        urey-bradley angles this particular particle 
+                        Urey-Bradley angles this particular particle 
                         is involved in
 
     :raises:            :class:`RuntimeError` when index exceeds
@@ -1096,7 +1223,8 @@ The Topology Class
 
   .. method:: GetPeriodicDihedralIndices(index)
 
-    :param index:       :class:
+    :param index:       Index of particle
+    :type index:        :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all periodic
                         dihedrals this particular particle is involved in
@@ -1107,7 +1235,8 @@ The Topology Class
 
   .. method:: GetPeriodicImproperIndices(index)
 
-    :param index:       :class:
+    :param index:       Index of particle
+    :type index:        :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all periodic
                         impropers this particular particle is involved in
@@ -1117,7 +1246,8 @@ The Topology Class
 
   .. method:: GetHarmonicImproperIndices(index)
 
-    :param index:       :class:
+    :param index:       Index of particle
+    :type index:        :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all harmonic
                         impropers this particular particle is involved in
@@ -1128,7 +1258,8 @@ The Topology Class
 
   .. method:: GetCMapIndices(index)
 
-    :param index:       :class:
+    :param index:       Index of particle
+    :type index:        :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all cmaps
                         this particular particle is involved in
@@ -1139,9 +1270,10 @@ The Topology Class
 
   .. method:: GetLJPairIndices(index)
 
-    :param index:       :class:
+    :param index:       Index of particle
+    :type index:        :class:`int`
 
-    :returns:           :class:`list` of :class:`int` describing all LJPairs
+    :returns:           :class:`list` of :class:`int` describing all LJ pairs
                         this particular particle is involved in
 
     :raises:            :class:`RuntimeError` when index exceeds
@@ -1150,7 +1282,8 @@ The Topology Class
 
   .. method:: GetDistanceConstraintIndices(index)
 
-    :param index:       :class:
+    :param index:       Index of particle
+    :type index:        :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all distance
                         constraints this particular particle is involved in
@@ -1161,7 +1294,8 @@ The Topology Class
 
   .. method:: GetHarmonicPositionRestraintIndices(index)
 
-    :param index:       :class:
+    :param index:       Index of particle
+    :type index:        :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all harmonic
                         position restraints this particular particle is 
@@ -1173,7 +1307,8 @@ The Topology Class
 
   .. method:: GetHarmonicDistanceRestraintIndices(index)
 
-    :param index:       :class:
+    :param index:       Index of particle
+    :type index:        :class:`int`
 
     :returns:           :class:`list` of :class:`int` describing all harmonic
                         distance restraints this particular particle is 

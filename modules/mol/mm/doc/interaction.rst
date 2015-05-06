@@ -1,9 +1,10 @@
 Interactions
 ================================================================================
 
-.. currentmodule:: ost.mol.mm
+.. currentmodule:: ost.mol
 
-The interaction object is intended to build a basic container tat can be used
+The :class:`Interaction` object is intended to build a basic container that can 
+be used
 in various scenarios. At the initialization a FuncType has to be defined.
 Whenever names, types or parameters are set, the number of parameters
 gets checked according to the FuncType. A name or type can also consist of
@@ -14,7 +15,7 @@ The FuncType enum
 --------------------------------------------------------------------------------
 
 Every Interaction is linked to one particular *FuncType* describing the types 
-of interactions supported by OpenStructure. There are a 15 possible values with
+of interactions supported by OpenStructure. There are 15 possible values with
 Invalid defining an unknown interaction:
 
   HarmonicBond, HarmonicAngle, UreyBradleyAngle, PeriodicDihedral, 
@@ -22,7 +23,7 @@ Invalid defining an unknown interaction:
   DistanceConstraint, Exclusion, HarmonicPositionRestraint,
   HarmonicDistanceRestraint, Invalid
 
-The implementation guarantees, that the parameter related to atom types,
+The implementation guarantees that the parameter related to atom types,
 names, parameters are checked regarding their dimension (e.g. 3 atoms and 2 
 parameters for a harmonic angle) 
 
@@ -111,7 +112,7 @@ Interaction Parametrization
 The Interaction Class
 --------------------------------------------------------------------------------
 
-.. class:: Interaction(func_type)
+.. class:: Interaction (func_type)
 
   :param func_type:     :class:`FuncType` defining a particular interaction
 
@@ -120,38 +121,38 @@ The Interaction Class
 
     Sets the forcefield specific atom types.
 
-    :param types:       :class:`list` of :class:`str` A list of strings 
-                        describing the force field specific atom types.
+    :param types:       Strings describing the force field specific atom types.
+    :type types:        :class:`list`
 
     :raises:            :class:`RuntimeError` when size of input is not consistent with
-                                  the interactions functype
+                        the interactions functype
 
 
   .. method:: SetNames(names)
 
-    Sets atom names.
+    Sets atom names
 
-    :param types:       :class:`list` of :class:`str` describing the atom names.
+    :param names:       Strings describing the atom names
+    :type names:        :class:`list`
 
     :raises:            :class:`RuntimeError` when size of input is not 
                         consistent with the interactions functype
 
 
-  .. method:: SetParam(names)
+  .. method:: SetParam(param)
 
     Sets interaction specific parameters.
 
-    :param types:  A :class:`list` of :class:`float` values .
+    :param param:       Float values .
+    :type param:        :class:`list`
 
-    :type names:   :class:`list`
-
-    :raises: :exc:`RuntimeError` when size of input is not consistent with
-                                  the interactions functype
+    :raises: :class:`RuntimeError` when size of input is not consistent with
+             the interactions functype
 
 
   .. method:: GetTypes()
 
-    Get Previously set types
+    Get previously set types
 
     :returns:      :class:`list`
 
@@ -159,29 +160,30 @@ The Interaction Class
 
   .. method:: GetNames()
 
-    Get Previously set names
+    Get previously set names
 
     :returns:      :class:`list`
 
 
   .. method:: GetParam()
 
-    Get Previously set parameters
+    Get previously set parameters
 
-    :returns:      :class:`bool`
+    :returns:      :class:`list`
 
 
   .. method:: GetAtoms(residue)
 
-    Returns an AtomHandleList containing the atoms in residue matching
+    Returns an :class:`AtomHandleList` containing the atoms in residue matching
     the atom names of the interaction
 
-    :param residue:     :class:`mol.ResidueHandle`
+    :param residue:     Residue from which atoms are extracted
+    :type residue:      :class:`ResidueHandle`
 
-    :returns:           :class:`mol.AtomHandleList`
+    :returns:           :class:`AtomHandleList`
 
-    :raises:            :class:`RuntimeError` when atom cannot be found in 
-                        residue
+    :raises:            :class:`RuntimeError` when an atom cannot be found in 
+                        **residue**
 
   .. method:: GetFuncType()
 
@@ -196,9 +198,14 @@ The Interaction Class
     gets changed to new_name. If the atom types are set as well, the
     associated atom type gets also reset to new_type.
 
-    :param name:        class:`str`
-    :param new_name:    class:`str`
-    :param new_type:    class:`str`
+    :param name:        Name of atom to be replaces
+    :param new_name:    Its new name
+    :param new_type:    Its new type
+
+    :type name:         :class:`str`
+    :type new_name:     :class:`str`
+    :type new_type:     :class:`str`
+
     :returns:           :class:`bool` whether replacement was successful or not
 
 
@@ -207,7 +214,8 @@ The Interaction Class
     Checks, whether the given types match the internal types. The match
     can be "as is" or in reversed order
 
-    :param atom_types:  :class:`list` of :class:`str`
+    :param atom_types:  Atom types to be matched
+    :type atom_types:   :class:`list`
     :returns:           :class:`bool`
 
 
@@ -216,7 +224,8 @@ The Interaction Class
     Checks, whether the given names match the internal names. The match
     can be "as is" or in reversed order
 
-    :param atom_names:  :class:`list` of :class:`str`
+    :param atom_names:  Atom names to be matched
+    :type atom_names:   :class:`list`
     :returns:           :class:`bool`
 
 
@@ -224,7 +233,8 @@ The Interaction Class
 
     Checks, whether the given name is present in the internal names
 
-    :param name:        :class:`string`
+    :param name:        Name to be checked
+    :type name:         :class:`str`
     :returns:           :class:`bool`
 
 
@@ -232,7 +242,8 @@ The Interaction Class
 
     Checks, whether the given type is present in the internal types
 
-    :param type:        :class:`string`
+    :param type:        Type to be checked
+    :type type:         :class:`str`
     :returns:           :class:`bool`
 
 
