@@ -57,7 +57,7 @@ public:
                     TopologyPtr top,
                     ost::mol::EntityHandle& ent) = 0;
 
-  virtual int Rythm() = 0;
+  virtual int Rhythm() = 0;
 
 };
 
@@ -66,7 +66,7 @@ class TrajObserver : public Observer{
 
 public:  
 
-  TrajObserver(int rythm): rythm_(rythm), registered_(false) { }
+  TrajObserver(int rhythm): rhythm_(rhythm), registered_(false) { }
 
   void Init(boost::shared_ptr<OpenMM::Context> c, 
             TopologyPtr top,
@@ -74,7 +74,7 @@ public:
 
   void Notify();
 
-  int Rythm() { return rythm_; }
+  int Rhythm() { return rhythm_; }
 
   CoordGroupHandle GetTraj() { return c_group_; }
 
@@ -82,7 +82,7 @@ private:
 
   ost::mol::CoordGroupHandle c_group_;
   boost::shared_ptr<OpenMM::Context> context_;
-  int rythm_;
+  int rhythm_;
   bool registered_;
 };
 
@@ -92,12 +92,12 @@ class TrajWriter : public Observer{
 
 public:
 
-  TrajWriter(int rythm, const String& pdb_filename, const String& dcd_filename): rythm_(rythm),
-                                                                                 pdb_filename_(pdb_filename),
-                                                                                 dcd_filename_(dcd_filename),
-                                                                                 stream_(),
-                                                                                 registered_(false),
-                                                                                 frames_(0) { }
+  TrajWriter(int rhythm, const String& pdb_filename, const String& dcd_filename): rhythm_(rhythm),
+                                                                                  pdb_filename_(pdb_filename),
+                                                                                  dcd_filename_(dcd_filename),
+                                                                                  stream_(),
+                                                                                  registered_(false),
+                                                                                  frames_(0) { }
 
   void Init(boost::shared_ptr<OpenMM::Context> c, 
             TopologyPtr top,
@@ -105,7 +105,7 @@ public:
 
   void Notify();
 
-  int Rythm() { return rythm_; }
+  int Rhythm() { return rhythm_; }
 
   void Finalize();
 
@@ -115,7 +115,7 @@ private:
 
 
   boost::shared_ptr<OpenMM::Context> context_;
-  int rythm_;
+  int rhythm_;
   String pdb_filename_;
   String dcd_filename_;
   std::ofstream stream_;

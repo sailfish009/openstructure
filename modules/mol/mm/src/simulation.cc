@@ -459,7 +459,7 @@ void Simulation::Steps(int steps){
       for(uint i = 0; i < time_to_notify_.size(); ++i){
         if(time_to_notify_[i] == 0){
           observers_[i]->Notify();
-          time_to_notify_[i] = observers_[i]->Rythm();
+          time_to_notify_[i] = observers_[i]->Rhythm();
         }
       }
       steps -= time_to_next_notification;
@@ -487,7 +487,7 @@ Real Simulation::GetPotentialEnergy(){
 
 void Simulation::Register(ObserverPtr o){
   observers_.push_back(o);
-  time_to_notify_.push_back(o->Rythm());
+  time_to_notify_.push_back(o->Rhythm());
   o->Init(context_,top_,ent_);
 }
 
