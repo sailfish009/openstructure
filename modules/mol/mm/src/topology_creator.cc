@@ -18,7 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include <ost/mol/mm/topology_creator.hh>
-#include <ost/mol/mm/mm_modeller.hh>
+#include <ost/mol/mm/modeller.hh>
 
 namespace{
 

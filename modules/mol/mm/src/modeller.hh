@@ -35,11 +35,10 @@
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/bond_handle.hh>
 #include <ost/message.hh>
-//#include <ost/mol/mm/gromacs_data.hh>
 #include <ost/mol/bounding_box.hh>
 #include <ost/mol/mm/buildingblock.hh>
 #include <ost/mol/mm/forcefield.hh>
-#include <ost/mol/mm/mm_settings.hh>
+#include <ost/mol/mm/settings.hh>
 #include <ost/mol/mm/index.hh>
 #include <ost/mol/mm/topology.hh>
 #include <ost/conop/heuristic.hh>

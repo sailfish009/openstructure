@@ -18,7 +18,6 @@
 //------------------------------------------------------------------------------
 
 #include <ost/mol/mm/heuristic_block_modifiers.hh>
-#include <ost/mol/mm/mm_interaction.hh>
 #include <ost/geom/geom.hh>
 #include <math.h>
 

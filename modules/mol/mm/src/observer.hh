@@ -30,7 +30,7 @@
 #include <ost/mol/coord_group.hh>
 #include <ost/mol/mm/state_extractor.hh>
 #include <ost/mol/mm/topology.hh>
-#include <ost/mol/mm/mm_modeller.hh>
+#include <ost/mol/mm/modeller.hh>
 
 namespace OpenMM{
   class Context; //hacky way of telling the Context is around.
