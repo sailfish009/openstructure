@@ -805,7 +805,7 @@ void MMCifReader::ParseCitation(const std::vector<StringRef>& columns)
     }
   }
   if (indices_[YEAR] != -1) {
-    if (columns[indices_[YEAR]][0]!='?') {
+    if (!is_undef(columns[indices_[YEAR]])) {
       cit.SetYear(this->TryGetInt(columns[indices_[YEAR]], "citation.year"));
     }
   }
