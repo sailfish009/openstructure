@@ -63,7 +63,7 @@ mapped back to the attached structure at any time.
   .. method:: Load(filename)
 
     Loads a dumped simulation from disk. You have to make sure, that the provided 
-    settings are consistent with those from the saved simualtion. Undefined 
+    settings are consistent with those from the saved simulation. Undefined 
     behaviour must be expected otherwise. 
 
     :param filename: Filename
@@ -74,31 +74,38 @@ mapped back to the attached structure at any time.
 
   .. method:: ApplyLBFGS([tolerance=1.0,max_iterations=1000])
 
-    Run minimization using the Limited-memory Broyden–Fletcher–Goldfarb–Shanno (L-BFGS) method.
+    Run minimization using the Limited-memory Broyden–Fletcher–Goldfarb–Shanno 
+    (L-BFGS) method.
    
-    :param tolerance:  Tolerance descrining abort criteria of minimization
-    :param max_iterations:  Maximum number of minimization iterations
+    :param tolerance:   Tolerance describing abort criteria of minimization.
+                        The tolerance is interpreted as the root mean square
+                        value of all force components.
+    :param max_iterations: Maximum number of minimization iterations
 
     :type tolerance:    :class:`float`
     :type max_iterations: :class:`int`
   
 
-  .. method:: ApplySD(tolerance,max_iterations)
+  .. method:: ApplySD([tolerance=100,max_iterations=1000])
 
-    Run minimization using the Steepest-Descend method.
+    Run minimization using the steepest descend method.
    
-    :param tolerance:  Tolerance descrining abort criteria of minimization
+    :param tolerance:  Tolerance describing abort criteria of minimization.
+                       The tolerance is interpreted as the norm of the maximum 
+                       force acting onto the particles.
     :param max_iterations:  Maximum number of minimization iterations
 
     :type tolerance:    :class:`float`
     :type max_iterations: :class:`int`
 
+    :returns:           :class:`bool` whether tolerance has been reached
+
   .. method:: Steps(steps)
 
     Runs the simulation for **steps** number of steps.
    
-    :param steps:  Number of steps
-    :types:             :class:`int`
+    :param steps:       Number of steps to perform
+    :type steps:        :class:`int`
 
   .. method:: GetPositions([enforce_periodic_box = false, in_angstrom = true])
 
