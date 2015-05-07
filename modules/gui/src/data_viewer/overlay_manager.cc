@@ -103,6 +103,18 @@ void OverlayManager::DeleteAllOverlays()
   ov_list_.clear();
 }
 
+void OverlayManager::DeleteActiveOverlay()
+{
+  OverlayList::iterator pos=find_ov(active_ov_);
+  if (pos!=ov_list_.end()) {
+    for(ObserverList::iterator xit=obs_list_.begin();xit!=obs_list_.end();++xit) {
+      (*xit)->OnRemoveOverlay(this, pos->id);
+    }
+  pos=ov_list_.erase(pos);
+  active_ov_.reset();
+  }
+  
+}
 
 void OverlayManager::ActivateOverlay(const String& name)
 {
@@ -344,6 +356,17 @@ OverlayManager::OverlayList::iterator OverlayManager::find_ov(const String& name
 {
   for(OverlayList::iterator it=ov_list_.begin();it!=ov_list_.end();++it) {
     if(name==it->ov->GetName()) {
+      return it;
+      break;
+    }
+  }
+  return ov_list_.end();
+}
+
+OverlayManager::OverlayList::iterator OverlayManager::find_ov(OverlayPtr anoverlay)
+{
+  for(OverlayList::iterator it=ov_list_.begin();it!=ov_list_.end();++it) {
+    if(anoverlay==it->ov) {
       return it;
       break;
     }

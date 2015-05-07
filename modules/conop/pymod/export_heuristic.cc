@@ -31,7 +31,7 @@ void export_heuristic() {
          init<>())
     .def(init<bool,bool,bool,bool,ConopAction>(
          (arg("check_bond_feasibility")=false,
-         arg("assign_torsions")=false,
+         arg("assign_torsions")=true,
          arg("connect")=true,
          arg("peptide_bonds")=true,
          arg("zero_occ_treatment")=CONOP_WARN)))

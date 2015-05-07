@@ -124,7 +124,7 @@ public:
 #if OST_IMG_ENABLED
   /// \brief create new DataViewer
   /// 
-  ost::img::gui::DataViewer* CreateDataViewer(const ost::img::ImageHandle& d, const QString& name="");
+  ost::img::gui::DataViewer* CreateDataViewer(const ost::img::ImageHandle& d, const QString& name="", const int noparent=0);
 #endif
 
   /// \brief give the application time to run the mainloop and process events

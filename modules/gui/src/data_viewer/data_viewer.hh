@@ -95,6 +95,9 @@ public:
   //! remove all overlays
   void ClearOverlays();
 
+  //! remove the active overlay
+  void ClearActiveOverlay();
+
   //! return the overlay manager for this viewer
   OverlayManagerPtr GetOverlayManager() const;
 
@@ -141,6 +144,8 @@ public:
   void SetOffset(const geom::Vec2& offset);
   //! get image offset
   geom::Vec2 GetOffset() const;
+
+  QButtonGroup* GetButtonGroup(void);
 
 signals:
   void released();

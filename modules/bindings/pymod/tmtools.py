@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2009 by the OpenStructure authors
+# Copyright (C) 2008-2015 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -128,12 +128,11 @@ def _RunTmAlign(tmalign, tmp_dir):
   return _ParseTmAlign(lines,lines_matrix)
 
 class MMAlignResult:
-  def __init__(self, rmsd, tm_score, aligned_length, transform, ref_sequence, alignment):
+  def __init__(self, rmsd, aligned_length, tm_score, transform, alignment):
     self.rmsd=rmsd
     self.tm_score=tm_score    
     self.aligned_length=aligned_length
     self.transform=transform
-    self.ref_sequence =ref_sequence
     self.alignment=alignment
 
 def _ParseMmAlign(lines):
@@ -153,6 +152,7 @@ def _ParseMmAlign(lines):
   alignment = seq.CreateAlignment()
   alignment.AddSequence(seq2)
   alignment.AddSequence(seq1)
+
   return MMAlignResult(rmsd, tm_score, aln_length, tf, seq2, alignment)
 
 def _RunMmAlign(mmalign, tmp_dir):

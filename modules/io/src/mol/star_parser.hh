@@ -114,7 +114,7 @@ public:
   /// \brief create a StarParser
   ///
   /// \param stream input stream
-  /// \param item_as_row if true, data-items are first gathered (identifier as
+  /// \param items_as_row if true, data-items are first gathered (identifier as
   ///                    header, values as row) and then parsed like a loop
   ///                    (OnBeginLoop(), OnDataRow(), OnEndLoop())
   explicit StarParser(std::istream& stream, bool items_as_row=false);

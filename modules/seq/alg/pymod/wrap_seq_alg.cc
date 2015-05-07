@@ -21,6 +21,7 @@
 
 #include <ost/seq/alg/merge_pairwise_alignments.hh>
 #include <ost/seq/alg/sequence_identity.hh>
+#include <ost/seq/alg/sequence_similarity.hh>
 #include <ost/seq/alg/ins_del.hh>
 #include <ost/seq/alg/conservation.hh>
 #include <ost/seq/alg/subst_weight_matrix.hh>
@@ -39,11 +40,18 @@ BOOST_PYTHON_MODULE(_ost_seq_alg)
     .value("LONGER_SEQUENCE", RefMode::LONGER_SEQUENCE)
     .export_values()
   ;
+
   def("SequenceIdentity", &SequenceIdentity, 
       (arg("ref_mode")=RefMode::ALIGNMENT, arg("seq_a")=0, arg("seq_b")=1));
+
+  def("SequenceSimilarity", &SequenceSimilarity,
+      (arg("aln"),arg("subst_weight"),arg("normalize")=false,
+       arg("seq_a")=0,arg("seq_b")=1));
+
   class_<AlignedRegionList>("AlignedRegionList", init<>())
     .def(vector_indexing_suite<AlignedRegionList>())
   ;
+
   class_<InsDel>("InsDel", init<const AlignmentHandle&, int, int>())
     .def(init<const AlignmentHandle&>())
     .def("GetDeletions", &InsDel::GetDeletions)
@@ -54,6 +62,7 @@ BOOST_PYTHON_MODULE(_ost_seq_alg)
     .def("GetWeight", &SubstWeightMatrix::GetWeight)
     .def("SetWeight", &SubstWeightMatrix::SetWeight)
   ;
+  
   def("MergePairwiseAlignments", &MergePairwiseAlignments);
   def("Conservation", &Conservation, (arg("assign")=true, arg("prop_name")="cons", arg("ignore_gap")=false));
   def("LocalAlign", &LocalAlign, (arg("seq1"), arg("seq2"),arg("subst_weight"), 

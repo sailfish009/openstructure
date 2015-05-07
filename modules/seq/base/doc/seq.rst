@@ -98,7 +98,8 @@ The SequenceHandle
      
     Get residue index of character at given position. This method is the
     inverse of :meth:`GetPos`. If the sequence contains a gap at that position,
-    an :exc:`Error` is raised.
+    an :exc:`Error` is raised. Admires the
+    :ref:`sequence offset <sequence-offset>`.
     
     .. code-block:: python
       

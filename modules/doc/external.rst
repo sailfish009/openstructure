@@ -24,22 +24,24 @@ As an example, we would like to obtain the full path of the msms executable (a p
 .. code-block:: python
 
   from ost import settings
-  exe_path=settings.Locate('msms', search_paths=['/opt/app','/home/app'],
+  exe_path = settings.Locate('msms', search_paths=['/opt/app','/home/app'],
               env_name='MSMS', search_system_paths=True)
   print exe_path
   
 The :func:`~ost.settings.Locate` command looks for the program with the name 
 `msms`. If env_name is set, it first looks if an environment variable with the 
-name `MSMS` is set. If not, all paths in search_paths are searched. If the 
-executable could still not be found and search_system_paths is set to True, the 
-binary search paths are searched. If the executable could not be found, a 
+name `MSMS` is set. If not, all paths in *search_paths* are searched. If the 
+executable could still not be found and *search_system_paths* is set to True, 
+the binary search paths are searched. If the executable could not be found, a 
 :exc:`~ost.FileNotFound` exception is raised with a detailed description where 
 Locate was searching for the executable.
     
 Prepare All Files
 --------------------------------------------------------------------------------
 
-The preparation of the necessary files is very dependent on the external program. Often it is useful to generate a temporary directory or file. For this, the python module tempfile is very handy.
+The preparation of the necessary files is very dependent on the external 
+program. Often it is useful to generate a temporary directory or file. For 
+this, the Python module tempfile is very handy.
 
 An example how to generate a temporary directory, open a file in this directory and write the position and radius of all atoms into this file is shown here:
 
@@ -49,17 +51,17 @@ An example how to generate a temporary directory, open a file in this directory 
   import os
   
   # generate a temporary directory
-  tmp_dir_name=tempfile.mkdtemp()
+  tmp_dir_name = tempfile.mkdtemp()
   print 'temporary directory:',tmp_dir_name
   
   # generate and open a file in the temp directory
-  tmp_file_name=os.path.join(tmp_dir_name,"entity")
-  tmp_file_handle=open(tmp_file_name, 'w')
+  tmp_file_name = os.path.join(tmp_dir_name,"entity")
+  tmp_file_handle = open(tmp_file_name, 'w')
   print 'temporary file:',tmp_file_handle
   
   # write position and radius of all atoms to file
   for a in entity.GetAtomList():
-    position=a.GetPos()
+    position = a.GetPos()
     tmp_file_handle.write('%8.3f %8.3f %8.3f %4.2f\n' % (position[0],
                           position[1], position[2], a.GetProp().radius))
                           
@@ -78,7 +80,7 @@ To run the external program msms from the above example, with the temporary file
   import subprocess
 
   # set the command to execute
-  command="%s -if %s -of %s" % (exe_path,
+  command = "%s -if %s -of %s" % (exe_path,
             tmp_file_name, tmp_file_name)
   print 'command:',command
 
@@ -86,8 +88,8 @@ To run the external program msms from the above example, with the temporary file
   proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   stdout_value, stderr_value = proc.communicate()
 
-  #check for successful completion of msms
-  if proc.returncode!=0:
+  # check for successful completion of msms
+  if proc.returncode != 0:
     print "WARNING: msms error\n", stdout_value
     raise subprocess.CalledProcessError(proc.returncode, command)
 
@@ -107,5 +109,5 @@ Here we first print the command line output and then load the generated msms sur
   print stdout_value
   
   # read msms surface from file
-  surface=io.LoadSurface(tmp_file_name, "msms")
+  surface = io.LoadSurface(tmp_file_name, "msms")
   print 'number of vertices:',len(surface.GetVertexIDList())

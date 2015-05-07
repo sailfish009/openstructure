@@ -6,8 +6,8 @@ cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 project(OpenStructure CXX C)
 set (CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set (OST_VERSION_MAJOR 1)
-set (OST_VERSION_MINOR 3)
-set (OST_VERSION_PATCH 3)
+set (OST_VERSION_MINOR 4)
+set (OST_VERSION_PATCH 0)
 set (OST_VERSION_STRING ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR}.${OST_VERSION_PATCH} )
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
 include(OST)
@@ -249,7 +249,7 @@ if (ENABLE_STATIC)
   set(Boost_LIBRARIES)
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost ${_BOOST_MIN_VERSION} 
-               COMPONENTS filesystem system iostreams regex REQUIRED)
+               COMPONENTS filesystem system iostreams regex thread REQUIRED)
   find_package(ZLIB REQUIRED)
    
   if (UNIX AND NOT APPLE)
@@ -327,7 +327,7 @@ add_subdirectory(tools)
 # magic is done
 add_subdirectory(deployment)
 
-set(FILES_TO_BE_REMOVED ${CMAKE_SOURCE_DIR}/stage tests)
+set(FILES_TO_BE_REMOVED ${PROJECT_BINARY_DIR}/stage tests)
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
                              "${FILES_TO_BE_REMOVED}")
 

@@ -52,7 +52,7 @@ namespace ost { namespace mol { namespace alg {
 /// If a string is provided as an argument to the function, residue-per-residue statistics are stored as 
 /// residue properties. Specifically, the local residue-based Distance RMSD score is stored in a float property 
 /// as the provided string, while the residue-based sum of squared distances and the number of distances checked 
-/// are saved in two properties named <string>_sum (a float property) and <string>_count (an int property).
+/// are saved in two properties named [string]_sum (a float property) and [string]_count (an int property).
 std::pair<Real,long int> DLLEXPORT_OST_MOL_ALG 
 DistanceRMSDTest(const EntityView& mdl,
                  const GlobalRDMap& glob_dist_list,

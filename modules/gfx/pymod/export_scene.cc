@@ -87,6 +87,9 @@ void scene_set_hemi_p(Scene* s, tuple p)
 
 } // anon ns
 
+void clear_scene() {
+  Scene::Instance().RemoveAll();
+}
 
 void export_Scene()
 {
@@ -140,7 +143,7 @@ void export_Scene()
     .def("CenterOn",center_on2)
     .def("UnProject",  &Scene::UnProject, arg("ignore_vp")=false)
     .def("Project",  &Scene::Project, arg("ignore_vp")=false)
-    .def("InitGL", &Scene::InitGL)
+    .def("InitGL", &Scene::InitGL, arg("full")=true)
     .def("RenderGL", &Scene::RenderGL)
     .def("Resize", &Scene::Resize)
     .def("HasNode", &Scene::HasNode)
@@ -264,4 +267,16 @@ void export_Scene()
     .add_property("show_export_aspect",&Scene::GetShowExportAspect,&Scene::SetShowExportAspect)
     .add_property("hemi_params",scene_get_hemi_p,scene_set_hemi_p)
   ;
+
+  // we need to make sure there are no pending references to Python objects
+  // tied to the scene singleton. The destructor of 
+  // scene may be called after Python is shutdown which results
+  // in a segfault.
+  scope().attr("__dict__")["atexit"]=handle<>(PyImport_ImportModule("atexit"));
+
+  def("_clear_scene", &clear_scene);
+  object r=scope().attr("_clear_scene");
+  scope().attr("atexit").attr("register")(r);
+
 }
+

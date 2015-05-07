@@ -14,11 +14,11 @@ Drag and Drop support
 --------------------------------------------------------------------------------
 The user interface of OpenStructure supports drag and drop events. Every file
 format that is supported by Openstructure can be opened by dragging and dropping
-it on the main window. When a python script (ending with .py) is being dropped
+it on the main window. When a Python script (ending with .py) is being dropped
 on the UI, the script will be executed. For any other file type (for example PDB
 files, images and density maps), OpenStructure will try to load the file and
 display it in the 3D window, in the data viewer for images or in the sequence
-viewer.
+viewer for sequences.
 
 Perspective
 --------------------------------------------------------------------------------
@@ -31,8 +31,8 @@ Perspective
 
   .. code-block:: python
   
-    app=gui.GostyApp.Instance()
-    perspective=app.perspective
+    app = gui.GostyApp.Instance()
+    perspective = app.perspective
 
   .. method:: GetMainArea()
   
@@ -86,9 +86,9 @@ how to add a  widget to the MDI area:
 
   .. code-block:: python
   
-    app=gui.GostyApp.Instance()
-    main_area=app.perspective.main_area
-    label=QtGui.QLabel("Hello World")
+    app = gui.GostyApp.Instance()
+    main_area = app.perspective.main_area
+    label = QtGui.QLabel("Hello World")
     main_area.AddWidget("The beginning..", label)
     
 .. class:: MainArea
@@ -97,22 +97,22 @@ how to add a  widget to the MDI area:
 
   .. method:: AddPersistentWidget(title, name, widget [, window_state])
 
-    add a widget whose geometry is preserved across application relaunches.
+    Add a widget whose geometry is preserved across application relaunches.
     For widgets that are volatile, use :meth:`AddWidget`
     If tabbed mode is enabled, the widget geometry is ignored.
 
-    :param title: string that is displayed in the gui
+    :param title: string that is displayed in the gui.
     :type  title: :class:`str`
     :param name: is the unique name (within the scope of the main area) for the widget that is used to restore and save the widget geometry.
     :type  name: :class:`str`
-    :param widget: is the widget to be added to the main area
+    :param widget: is the widget to be added to the main area.
     :type  widget: :class:`QtCore.QWidget`
     :param window_state: custom window_state for the widget. See Qt Documentation to learn more about WindowStates.
     :type  name: :class:`QWindowState`
 
   .. method:: AddPersistentWidget(title, name, widget, width, height, x, y)
 
-     add a widget whose geometry is preserved across application relaunches
+     Add a widget whose geometry is preserved across application relaunches
      For widgets that are volatile, use #AddWidget()
      If tabbed mode is enabled, the widget geometry is ignored.
 
@@ -133,19 +133,20 @@ how to add a  widget to the MDI area:
 
   .. method:: AddWidget(title, widget)
   
-    add volatile widget
+    Add volatile widget.
   
-    :param title: string that is displayed in the gui
+    :param title: string that is displayed in the gui.
     :type  title: :class:`str`
-    :param widget: is the widget to be added to the main area
+    :param widget: is the widget to be added to the main area.
     :type  widget: :class:`QtCore.QWidget`
 
   .. method:: ShowSubWindow(widget)
   
-    display the given widget inside the main area
-    This method can be used to make a widget visible that has been added to the mdi area.
-    This method should only be called if you are sure, that the widget has been added to the main area.
-    Otherwise, there might be an unexpected behavior!
+    Display the given widget inside the main area. This method can be 
+    used to make a widget visible that has been added to the mdi area.
+    This method should only be called if you are sure, that the widget 
+    has been added to the main area. Otherwise, there might be unexpected 
+    behavior!
   
     :param widget: widget which you want to make visible
     :type  widget: :class:`QtCore.QWidget`
@@ -153,19 +154,20 @@ how to add a  widget to the MDI area:
   
   .. method:: HideSubWindow(widget)
   
-    brief hides the given widget inside the main area
-    This method can be used to hide a widget that has been added to this mdi area.
-    This method should only be called if you are sure, that the widget has been added to the main area.
-    Otherwise, there might be an unexpected behavior!
+    Brief hides the given widget inside the main area. This method can 
+    be used to hide a widget that has been added to this mdi area. This 
+    method should only be called if you are sure, that the widget has 
+    been added to the main area. Otherwise, there might be unexpected 
+    behavior!
   
     :param widget: widget which you want to hide
     :type  widget: :class:`QtCore.QWidget`
   
   .. method:: EnableTabbedMode(tabbed_mode)
     
-    brief switch between free window and tabbed window mode
+    Brief switch between free window and tabbed window mode.
      
-    :param tabbed_mode: whether you want to enable or disable the tabbed mode. Default is True
+    :param tabbed_mode: whether you want to enable or disable the tabbed mode. Default is True.
     :type  tabbed_mode: :class:`bool`
   
 Panels
@@ -184,7 +186,7 @@ menu of the Menubar:
 Drag and Drop
 ^^^^^^^^^^^^^
 
-The widgets which are held by a Side Panel can be moved to an other position in 
+The widgets which are held by a Side Panel can be moved to another position in 
 the panel or even to another side panel. The widget can be moved by simply 
 clicking on the border of the widget and drag and drop it to the desired position.
 The drag and drop feature is currently supported by the splitter as well as the tabbed view mode.
@@ -192,21 +194,22 @@ The drag and drop feature is currently supported by the splitter as well as the 
 Adding a custom Widget
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The Left-, Bottom- and Right-Panel are organized by the :class:`PanelManager`. It is only 
-possible to display a widget which is in the widget pool of the PanelManager class. 
-Once a widget is in the pool all the methods of the PanelManager class can be used to 
-display / hide the widget in any position of the panels. OpenStructure remembers 
-the size and location of a Widget. So, OpenStructure should look the same after 
-restarting it.
+The Left-, Bottom- and Right Panel are organized by the
+:class:`PanelManager`. 
+It is only possible to display a widget which is in the widget pool of the 
+PanelManager class. Once a widget is in the pool all the methods of the 
+PanelManager class can be used to display/hide the widget in any position 
+of the panels. OpenStructure remembers the size and location of a Widget 
+and thus OpenStructure should look the same after restarting it.
 
-The following example shows, how to add a PyQt Widget to the widget pool and finally 
-display it in the right side bar:
+The following example shows, how to add a PyQt Widget to the widget pool 
+and finally display it in the right side bar:
 
   .. code-block:: python
   
     qwidget = QtGui.QLabel("Test")
-    widget=gui.WrappedWidget(qwidget)
-    panels=gui.GostyApp.Instance().perspective.GetPanels()
+    widget = gui.WrappedWidget(qwidget)
+    panels = gui.GostyApp.Instance().perspective.GetPanels()
     panels.AddWidgetToPool("Test Label",widget)
     panels.AddWidget(gui.PanelPosition.RIGHT_PANEL, widget)
     qwidget.show()
@@ -220,10 +223,10 @@ display it in the right side bar:
   .. method:: AddWidget(pos, widget[, hidden])
 
     Display a Widget in a PanelBar. 
-    With Method you can add a widget to the given PanelBar. The widget which finally will be added to the gui will be created from the WidgetRegistry.
+    With this method you can add a widget to the given PanelBar. The widget which finally will be added to the gui will be created from the WidgetRegistry.
     If the WidgetPool does not know the class name of the given widget or if there are no instances left, nothing will happen.
 
-    :param pos: Indicates which PanelBar is affected
+    :param pos: Indicates which PanelBar is affected.
     :type  pos: :data:`PanelPosition`
     :param widget: the widget will not directly added to the PanelBar. The class_name will be used to identify the widget in the WidgetRegistry which will return a fresh instance of this class.
     :type  arg3: :class:`int`
@@ -235,7 +238,7 @@ display it in the right side bar:
     Display a Widget in a PanelBar
     Same as :meth:`AddWidget`
 
-    :param pos: Indicates which PanelBar is affected
+    :param pos: Indicates which PanelBar is affected.
     :type  pos: :class:`PanelPosition`
     :param class_name: the class_name of the widget you would like to add.
     :type  class_name: :class:`str`
@@ -265,7 +268,7 @@ display it in the right side bar:
   .. method:: GetMenu()
     
      The GetMenu method returns a QMenu reference, which contains various actions. The action states will be updated automatically.
-     Returns a reference to a QMenu which can be used for example in a QMenuBar
+     Returns a reference to a QMenu which can be used for example in a QMenuBar.
      
     :rtype: :class:`QObject`
 
@@ -300,11 +303,11 @@ Adding an new Menupoint
 ^^^^^^^^^^^^^^^^^^^^^^^
 It is really straightforward to add a custom menupoint. Since the menubar is 
 exported to Python it is even easier to create such e menupoint. The following example 
-describes how this is done within python and PyQt:
+describes how this is done within Python and PyQt:
 
 .. code-block:: python
 
-  menu_bar=gui.GostyApp.Instance().perspective.GetMenuBar()
+  menu_bar = gui.GostyApp.Instance().perspective.GetMenuBar()
   test_action = QtGui.QAction('Test Menu Point', menu_bar) 
   test = menu_bar.addMenu('&Test')
   test.addAction(test_action)

@@ -30,7 +30,7 @@ namespace ost { namespace img { namespace alg {
 /// \brief Computes Fourier Trasnform honoring the origin of the image
 ///
 ///  \sa \ref view_phase_diff.py "View Phase Diference Example"
-///  \sa \ref fft_li.py "View Fourier Transform Example"
+///  \sa \example fft_li.py "View Fourier Transform Example"
 class DLLEXPORT_IMG_ALG DFT: public ConstModOPAlgorithm {
 public:
   DFT();

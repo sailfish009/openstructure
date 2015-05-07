@@ -154,6 +154,11 @@ void DataViewerProxy::ClearOverlays()
   viewer()->ClearOverlays();
 }
 
+void DataViewerProxy::ClearActiveOverlay()
+{
+  viewer()->ClearActiveOverlay();
+}
+
 OverlayManagerPtr DataViewerProxy::GetOverlayManager() const
 {
   return viewer()->GetOverlayManager();
@@ -185,6 +190,10 @@ void DataViewerProxy::Hide()
   viewer()->hide();
 }
 
+object DataViewerProxy::GetButtonGroup()
+{
+  return ost::gui::get_py_qobject<QButtonGroup>(viewer()->GetButtonGroup());
+}
 
 object DataViewerProxy::GetQObject(){
   return ost::gui::get_py_qobject<DataViewer>(viewer());

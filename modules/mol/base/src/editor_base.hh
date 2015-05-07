@@ -153,7 +153,11 @@ public:
   ///     algorithms as well as most builders in the conop module rely on proper 
   ///     naming.
   /// \param pos is the position of the atom in global coordinates
-  AtomHandle InsertAtom(ResidueHandle residue, const String& name, 
+  /// \param ele
+  /// \param occupancy
+  /// \param b_factor
+  /// \param is_hetatm
+  AtomHandle InsertAtom(ResidueHandle residue, const String& name,
                         const geom::Vec3& pos, const String& ele="",
                         Real occupancy=1.0, Real b_factor=0.0, 
                         bool is_hetatm=false);
@@ -194,6 +198,8 @@ public:
   ///     Error will be thrown.
   /// \param position
   ///         is the alternative position
+  /// \param occ
+  /// \param b_factor
   /// \sa EditorBase::InsertAltAtom(), ResidueHandle
   void AddAltAtomPos(const String& group, const AtomHandle& atom, 
                      const geom::Vec3& position, Real occ=1.0,
@@ -301,7 +307,7 @@ public:
 
   /// \brief renumber residues of one chain
   ///
-  /// \param name
+  /// \param chain
   ///           All residues of this chain will be renumbered according to the
   ///           parameters start and keep_spacing
   ///

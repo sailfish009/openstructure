@@ -52,6 +52,7 @@ private:
   const char*                           curr_chain_name_;
   bool                                  needs_adjustment_;
   int                                   last_rnum_;
+  ResNum                                last_water_rnum_;
   std::map<ResidueHandle,ResidueHandle> dst_to_src_map_;
 };
 

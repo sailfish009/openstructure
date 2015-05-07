@@ -101,12 +101,9 @@ The basic functionality of editors is implemented in the EditorBase class.
      :param chain:       Must be a valid chain
      :param description: Description to be added
 
-  .. method:: InsertAtom(residue, atom_name, pos, 
-                         element="", occupancy=1.0, b_factor=0.0,
-                         is_hetatm=False)
+  .. method:: InsertAtom(residue, atom_name, pos, element="", occupancy=1.0, b_factor=0.0, is_hetatm=False)
   
-    Insert new atom and add it to residue. For atoms with alternative atom
-    locations use :meth:`InsertAltAtom`. If the element parameter is a valid 
+    Insert new atom and add it to residue. For atoms with alternative atom locations use :meth:`InsertAltAtom`. If the element parameter is a valid 
     element, the atom properties mass, charge, and radius are set to default 
     values for that element. If element is an empty string (or an invalid 
     element), the properties are set to rather meaningless default values. You 
@@ -135,6 +132,68 @@ The basic functionality of editors is implemented in the EditorBase class.
     :param is_hetatm: whether the atom is an atom coming from a HETATM record.
     :type is_hetatm:  bool
     :returns:         :class:`AtomHandle`
+
+  .. method:: InsertAltAtom(residue, atom_name, alt_group, pos, element="", occupancy=1.0, b_factor=0.0)
+
+    Insert new atom with alternative position indicator
+
+    :param residue:   is the parent residue and must be valid
+    :type residue:    :class:`ResidueHandle`
+    :param atom_name: is the atom name. While free to choose a name, it is
+                      advised  to properly name the atoms according to IUPAC
+                      rules as several algorithms as well as most
+                      :class:`builders <conop.Builder>` in the :mod:`conop`
+                      module rely on proper naming.
+    :type atom_name:  string
+    :param alt_group: group is the name of the alternative atom position group. 
+                      If no group of that name exists, it will be created.
+    :type alt_group:  string                 
+    :param pos:       is the position of the atom in global coordinates
+    :type pos:        :class:`~ost.geom.Vec3`
+    :param element:   is the atom's element. If set to a a valid element,
+                      atom properties such as mass, charge, radius are set 
+                      based on default values for that element. If the element 
+                      string is empty, or unknown, the properties are filled 
+                      with rather meaningless default values.
+    :type element:    class:`string`
+    :param occupancy: The occupancy of the atom. between 0 and 1
+    :type occupancy:  float
+    :param b_factor:  temperature factor.
+    :type  b_factor:  float
+
+    :returns:         :class:`AtomHandle`
+
+  .. method:: InsertAltAtom(residue, atom, alt_group)
+
+    Insert new atom with alternative position indicator
+
+    :param residue:   is the parent residue and must be valid
+    :type residue:    :class:`ResidueHandle`
+    :param atom:      Must be a valid Atom
+    :type atom:       :class:`AtomHandle`
+    :param alt_group: group is the name of the alternative atom position group. 
+                      If no group of that name exists, it will be created.
+    :type alt_group:  string                 
+    :returns:         :class:`AtomHandle`
+
+  .. method:: AddAltAtomPos(alt_group, atom, pos, occupancy=1.0, b_factor=0.0)
+    
+    Add an alternative atom position
+
+    :param alt_group: group is the name of the alternative atom position group. 
+                      If no group of that name exists, it will be created.
+    :type alt_group:  string 
+    :param atom:      It is required that the atom has been inserted via InsertAltAtom, 
+                      If the atom is a conventional atom without alternative location, 
+                      a Error will be thrown.
+    :type atom:       :class:`AtomHandle`                
+    :param pos:       is the position of the atom in global coordinates
+    :type pos:        :class:`~ost.geom.Vec3`
+    :param occupancy: The occupancy of the atom. between 0 and 1
+    :type occupancy:  float
+    :param b_factor:  temperature factor.
+    :type  b_factor:  float
+
 
   .. method:: AddTorsion(name, atom1, atom2, atom3, atom4)
   
@@ -172,10 +231,18 @@ The basic functionality of editors is implemented in the EditorBase class.
     :type residue: :class:`ResidueHandle`
     :param residue: A valid residue
     
-    
     :type atom: The atom to be deleted
     
     :type atom: :class:`EntityHandle`
+  
+  .. method:: DeleteAtoms(residue)
+  
+    Deletes a set specified atoms. All associated torsions and bonds will be 
+    removed as well
+    
+    :type residue: :class:`AtomHandleList`
+    :param residue: A valid set of atoms
+    
   
   .. method:: DeleteResidue(residue)
   
@@ -184,6 +251,14 @@ The basic functionality of editors is implemented in the EditorBase class.
     
     :type residue: :class:`ResidueHandle`
     :param residue: A valid residue
+
+  .. method:: DeleteResidues(chain)
+  
+    Deletes all the residues of given chain.
+    All associated atoms, residues, torsions and bonds will also be deleted
+    
+    :type chain: :class:`ChainHandle`
+    :param chain: A valid chain
 
   .. method:: DeleteChain(chain)
   
@@ -203,6 +278,56 @@ The basic functionality of editors is implemented in the EditorBase class.
     :param chain: `A valid chain`
     :type chain: :class:`ChainHandle`
 
+  .. method:: ReorderAllResidues()
+
+    Reorder residues of the all chains such that their residues numbers 
+    are continuously increasing. This function might be useful in cases of PDB 
+    files that do not list the residues from N to C terminus but rather use the 
+    residue number to describe their position in the chain.
+  
+  .. method:: RenumberAllResidues(start, keep_spacing)
+
+    Renumber residues of all chains
+              
+    :param start: Residues of every chain will be renumbered, 
+                  whereas the first residue gets the residue number start.
+    :type start: int 
+
+    :param keep_spacing: If set to false, residues will continously 
+                         Otherwise the spacings between the residues are kept
+    :type keep_spacing: bool
+
+  .. method:: RenumberChain(chain, new_numbers)
+
+    Renumber residues of the given chain
+              
+    :param chain: A valid chain
+    :type chain: :class:`ChainHandle` 
+
+    :param new_numbers: A valid ResNumList
+    :type new_numbers: :class:`ResNumList`
+
+  .. method:: RenumberChain(chain, start, keep_spacing)
+
+    Renumber residues of the given chain
+              
+    :param chain: A valid chain
+    :type chain: :class:`ChainHandle` 
+
+    :param start: Residues of given chain will be renumbered, 
+                  whereas the first residue gets the residue number start.
+    :type start: int 
+
+    :param keep_spacing: If set to false, residues will continously 
+                         Otherwise the spacings between the residues are kept
+    :type keep_spacing: bool
+  
+  .. method:: GetMode()
+
+    Get edit mode of editor
+
+    :returns: :class:`EditMode`
+
   .. method:: RenameAtom(atom, new_name)
 
      Change the name of atom to new_name without changing anything else.
@@ -212,6 +337,15 @@ The basic functionality of editors is implemented in the EditorBase class.
      :param new_name: is the new name. Free to choose and not verified to be a
                       valid atom identifier.
      :type new_name:  string
+  
+  .. method:: SetResidueNumber(residue, num)
+
+     Change the number of residue to num without changing anything else.
+
+     :param residue:  Must be a valid residue
+     :type residue:   :class:`ResidueHandle`
+     :param num: Residue number
+     :type num:  :class: `ResNum`
 
   .. method:: Connect(atom1, atom2)
               Connect(atom1, atom2, bond_order)
@@ -249,6 +383,14 @@ Euclidian space.
      
      :param transform: The transformation to be applied
      :type  transform: :class:`geom.Mat4`
+
+  .. method:: ApplyTransform(transform)
+  
+     Apply a transformation to the entity. The transformation is applied to all 
+     atoms positions.
+     
+     :param transform: The transformation to be applied
+     :type  transform: :class:`Transform`
      
   .. method:: SetTransform(transform)
   
@@ -256,7 +398,26 @@ Euclidian space.
      
      :param transform: The transformation to be applied
      :type  transform: :class:`geom.Mat4`
+
+  .. method:: SetTransform(transform)
+  
+     Set the entity transformation. See also :meth:`ApplyTransform`
      
+     :param transform: The transformation to be applied
+     :type  transform: :class:`Transform`
+  
+  .. method:: FixTransform()
+  
+     Set transformed positions to new original positions
+
+  .. method:: UpdateICS()
+  
+     Immediately update internal coordinate system
+   
+  .. method:: ForceUpdate()
+  
+     Force spatial organizer and ICS update workaround for delayed editor call from Python garbage collection
+  
   .. method:: SetAtomPos(atom, pos)
   
      Set the (transformed) position of atom. This method will also update the
@@ -267,8 +428,30 @@ Euclidian space.
      :type  atom: :class:`ost.mol.AtomHandle`
      :param pos: The new position
      :type  pos: :class:`~ost.geom.Vec3`
+
+  .. method:: SetAtomPos(atom, pos)
+  
+     Set the (transformed) position of atom. This method will also update the
+     original position of the atom by applying the inverse of the entity
+     transform.
      
-  .. method:: SetOriginalAtomPos(atom, pos)
+     :param atom_list: must be a valid atom handle list
+     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param pos_list: a numpy array of floats having a length of 3*atom_list.size()
+     :type  pos_list: numpy array
+
+  .. method:: SetAtomPos(atom, pos)
+  
+     Set the (transformed) position of atom. This method will also update the
+     original position of the atom by applying the inverse of the entity
+     transform.
+     
+     :param atom_list: must be a valid atom handle list
+     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param pos_list: a list of double having a length of 3*atom_list.size()
+     :type  pos_list: list
+    
+  .. method:: SetAtomOriginalPos(atom, pos)
      
      Set the original (untransformed) position of the atom. This method will
      also update the transformed position by applying the entity transform to
@@ -277,7 +460,67 @@ Euclidian space.
      :param atom: must be a valid atom handle
      :type  atom: :class:`ost.mol.AtomHandle`
      :param pos: The new untransformed position
+     :type  pos: :class:`~ost.geom.Vec3` 
+  
+
+  .. method:: SetAtomOriginalPos(atom_list, pos_list)
+     
+     Set the original (untransformed) position of the atoms in the given list. This method will
+     also update the transformed position by applying the entity transform to
+     the original pos.
+     
+     :param atom_list: must be a valid atom handle list
+     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param pos_list: a list of double having a length of 3*atom_list.size()
+     :type  pos_list: list
+
+  .. method:: SetAtomOriginalPos(atom_list, pos_list)
+     
+     Set the original (untransformed) position of the atoms in the given list. This method will
+     also update the transformed position by applying the entity transform to
+     the original pos.
+     
+     :param atom_list: must be a valid atom handle list
+     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param pos_list: a numpy array of floats having a length of 3*atom_list.size()
+     :type  pos_list: numpy array
+
+
+  .. method:: SetAtomTransformedPos(atom, pos)
+  
+     Set the (transformed) position of atom. This method will also update the
+     original position of the atom by applying the inverse of the entity
+     transform.
+     
+     :param atom: must be a valid atom handle
+     :type  atom: :class:`ost.mol.AtomHandle`
+     :param pos: The new position
      :type  pos: :class:`~ost.geom.Vec3`
+
+  .. method:: SetAtomTransformedPos(atom_list, pos_list)
+  
+     Set the (transformed) position of atom. This method will also update the
+     original position of the atom by applying the inverse of the entity
+     transform.
+
+     :param atom_list: must be a valid atom handle list
+     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param pos_list: a numpy array of floats having a length of 3*atom_list.size()
+     :type  pos_list: numpy array
+
+  .. method:: SetAtomTransformedPos(atom_list, pos_list)
+  
+     Set the (transformed) position of atom. This method will also update the
+     original position of the atom by applying the inverse of the entity
+     transform.
+
+     :param atom_list: must be a valid atom handle list
+     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param pos_list: a list of double having a length of 3*atom_list.size()
+     :type  pos_list: list
+
+
+
   
 Editor for the Internal Coordinate System
 --------------------------------------------------------------------------------
@@ -318,6 +561,75 @@ using an :class:`ICSEditor` is undefined and vice versa.
     :type angle: :class:`float`
     
     :raises: :exc:`RuntimeError` when the torsion handle is invalid
+
+
+  .. method:: SetTorsionAngle(atom1, atom2, atom3, atom4, angle, update_others=True)
+    
+    Set the angles of the given atoms. All connectors at the third atom (A3) will be adjusted accordingly. 
+    If you only want to adjust the bond between A3 and A4, and leave 
+    the other bonds untouched, use the :meth:`SetDihedralAngle` function
+    
+    :see: :meth:`UpdateXCS`
+    
+    :param atom1: The first atom. Must be valid
+    :type atom1: :class:`AtomHandle`
+    
+    :param atom2: The second atom. Must be valid
+    :type atom2: :class:`AtomHandle`
+    
+    :param atom3: The third atom. Must be valid
+    :type atom3: :class:`AtomHandle`
+
+    :param atom4: The third atom. Must be valid
+    :type atom4: :class:`AtomHandle`
+    
+    :param angle: The angle in radians
+    :type: angle: :class:`Real`
+    
+    :param update_others: Update all the the other torsion angles consequently
+    :type update_others: bool
+
+
+  .. method:: RotateTorsionAngle(torsion, delta, update_others=True)
+    
+    Rotate torsion angle
+    
+    :see: :meth:`UpdateXCS`
+    
+    :param torsion: A valid torsion
+    :type torsion: :class:`TorsionHandle`
+
+    :param delta: delta
+    :type delta: :class:`Real`
+    
+    :param update_others: Update all the the other torsion angles consequently
+    :type update_others: bool
+
+
+  .. method:: RotateTorsionAngle(atom1, atom2, atom3, atom4, angle, update_others=True)
+    
+    Rotate torsion angle
+    
+    :see: :meth:`UpdateXCS`
+    
+    :param atom1: The first atom. Must be valid
+    :type atom1: :class:`AtomHandle`
+    
+    :param atom2: The second atom. Must be valid
+    :type atom2: :class:`AtomHandle`
+    
+    :param atom3: The third atom. Must be valid
+    :type atom3: :class:`AtomHandle`
+
+    :param atom4: The third atom. Must be valid
+    :type atom4: :class:`AtomHandle`
+    
+    :param angle: The angle in radians
+    :type: angle: :class:`Real`
+    
+    :param update_others: Update all the the other torsion angles consequently
+    :type update_others: bool
+  
   
   .. method:: UpdateXCS()
   

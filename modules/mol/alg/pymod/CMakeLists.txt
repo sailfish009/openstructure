@@ -4,6 +4,7 @@ set(OST_MOL_ALG_PYMOD_SOURCES
   export_clash.cc
   export_trajectory_analysis.cc
   export_structure_analysis.cc
+  export_contact_overlap.cc
 )
 
 set(OST_MOL_ALG_PYMOD_MODULES

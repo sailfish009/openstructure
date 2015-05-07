@@ -62,6 +62,13 @@ class TestClustalWBindings(unittest.TestCase):
     assert self.seq1_seq2_alignment_options_changed.ToString(80) == aln.ToString(80), \
            "Pairwise alignment with modified gap penalties differs from precomputed one"
 
+  def testUniqueIdentifier(self):
+    seq1 = seq.CreateSequence('heelloo','AWESOME')
+    seq2 = seq.CreateSequence('heelloo','AWESOME')
+
+    self.assertRaises(ValueError,clustalw.ClustalW,seq1,seq2)
+
+
 if __name__ == "__main__":
   # test if clustalw package is available on system, otherwise ignore tests
   try:

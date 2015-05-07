@@ -298,7 +298,6 @@ class DLLEXPORT_OST_GFX Scene {
   void Export(const String& fname, unsigned int w,
               unsigned int h, bool transparent=false);
   /// \brief export into bitmap, using multisample anti-aliasing
-  /// \ref Scene::StartOfffscreenMode(unsigned int, unsigned int, int) for more detail
   void Export(const String& fname, unsigned int w,
               unsigned int h, int max_samples, bool transparent=false);
 
@@ -308,7 +307,7 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief export scene into povray files named fname.pov and fname.inc
   void ExportPov(const std::string& fname, const std::string& wdir=".");
 
-  /// \rbrief export scene via exporter
+  /// \brief export scene via exporter
   void Export(Exporter* ex) const;
 
   //@}

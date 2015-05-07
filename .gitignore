@@ -60,6 +60,7 @@ Debug
 /modules/gui/src/module_config.hh
 /modules/base/pymod/__init__.py
 /modules/gui/src/dngr.qrc.depends
+/scripts/ost_startup.py
 *_out.csv
 *_out.tab
 *_out.pickle
@@ -70,3 +71,4 @@ rules.ninja
 build.ninja
 modules/gui/src/dngr.qrc.depends
 /compile_commands.json
+/modules/bindings/tests/formatdb.log

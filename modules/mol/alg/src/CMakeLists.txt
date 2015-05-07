@@ -13,6 +13,11 @@ set(OST_MOL_ALG_HEADERS
   structure_analysis.hh
   consistency_checks.hh
   pdbize.hh
+  adjacency_bitmap.hh
+  consistency_checks.hh
+  contact_overlap.hh
+  domain_find.hh
+  similarity_matrix.hh
 )
 
 set(OST_MOL_ALG_SOURCES
@@ -29,6 +34,11 @@ set(OST_MOL_ALG_SOURCES
   structure_analysis.cc
   consistency_checks.cc
   pdbize.cc
+  adjacency_bitmap.cc
+  consistency_checks.cc
+  contact_overlap.cc
+  domain_find.cc
+  similarity_matrix.cc
 )
 
 set(MOL_ALG_DEPS ost_mol ost_seq)
@@ -44,7 +54,7 @@ if (ENABLE_IMG)
     entity_to_density.cc
   )
 
-  set(MOL_ALG_DEPS ${MOL_ALG_DEPS} ost_img ost_img_alg)
+  set(MOL_ALG_DEPS ${MOL_ALG_DEPS} ost_img ost_img_alg ost_seq_alg)
 endif()
 
 executable(NAME lddt SOURCES lddt.cc 
@@ -54,7 +64,7 @@ module(NAME mol_alg SOURCES ${OST_MOL_ALG_SOURCES}
        HEADERS ${OST_MOL_ALG_HEADERS}
        HEADER_OUTPUT_DIR ost/mol/alg
        DEPENDS_ON ${MOL_ALG_DEPS}
-       LINK ${BOOST_PROGRAM_OPTIONS})
+       LINK ${BOOST_PROGRAM_OPTIONS} ${BOOST_THREAD})
 
 copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/share/openstructure"
                   "atom_scattering_properties.txt" "ATOM_SCATTERING_PROPS"

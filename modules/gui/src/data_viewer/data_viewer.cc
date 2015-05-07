@@ -205,6 +205,11 @@ geom::Vec2 DataViewer::GetOffset() const
   return panel_->GetOffset();
 }
 
+QButtonGroup* DataViewer::GetButtonGroup(void)
+{
+  return ov_manager_gui_->GetButtonGroup();
+}
+
 int DataViewer::AddOverlay(const OverlayPtr& ov, bool make_active)
 {
   int retval= ov_manager_->AddOverlay(ov,make_active);
@@ -215,6 +220,11 @@ int DataViewer::AddOverlay(const OverlayPtr& ov, bool make_active)
 void DataViewer::ClearOverlays()
 {
   ov_manager_->DeleteAllOverlays();
+}
+
+void DataViewer::ClearActiveOverlay()
+{
+  ov_manager_->DeleteActiveOverlay();
 }
 
 OverlayManagerPtr DataViewer::GetOverlayManager() const

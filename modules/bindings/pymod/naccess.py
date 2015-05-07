@@ -23,23 +23,28 @@ from ost import mol
 from ost import settings
 from ost import geom
 
-## \brief Method to check if naccess executable is present
-#
-# \param naccess Explicit path to msms executable
-# \return         Path to the executable
-# \exception      FileNotFound if executable is not found
 def _GetExecutable(naccess_exe):
+  """
+  Method to check if naccess executable is present
+
+  :param naccess:   Explicit path to msms executable
+  :returns:         Path to the executable
+  :exception:       FileNotFound if executable is not found
+  """
   return settings.Locate('naccess', explicit_file_name=naccess_exe)
 
-## \brief Setup files for naccess calculation in temporary directory
-#
-# \param entity      EntityHandle or EntityView to calculate surface
-# \param selection   Calculate surface for subset of entity 
-# \param scratch_dir Directory for temporary files (NACCESS is sensitive to "." in directory names
-# \param max_number_of_atoms Max Number of atoms in the entity (i.e. is limited in the default NACCESS version to 50 000)
-# \return            array containing temporary directory, input filename for naccess and directory of the input file
-# \exception         RuntimeError if selection is not valid
 def _SetupFiles(entity, selection, scratch_dir, max_number_of_atoms):
+  """
+  Setup files for naccess calculation in temporary directory
+
+  :param entity:      EntityHandle or EntityView to calculate surface
+  :param selection:   Calculate surface for subset of entity
+  :param scratch_dir: Directory for temporary files (NACCESS is sensitive to "." in directory names
+  :param max_number_of_atoms: Max Number of atoms in the entity (i.e. is limited in the default NACCESS version to 50 000)
+  :returns:            array containing temporary directory, input filename for naccess and directory of the input file
+  :exception:         RuntimeError if selection is not valid
+  """
+
   # create temporary directory
   tmp_dir_name=""
   if scratch_dir!=None:
@@ -60,14 +65,15 @@ def _SetupFiles(entity, selection, scratch_dir, max_number_of_atoms):
   io.SavePDB(entity_view, tmp_file_name)
   return (tmp_dir_name, tmp_file_name, tmp_file_base)
 
-## \brief Reads Area file (.asa) and attach asa per atom to an entitiy
-#
-# \param entity   EntityHandle or EntityView for attaching sasa on atom level
-# \param file     Filename of area file
-# \param asa_atom Name of the float property for SASA
- 
 
 def _ParseAsaFile(entity, file, asa_atom):
+  """
+  Reads Area file (.asa) and attach asa per atom to an entitiy
+
+  :param entity:   EntityHandle or EntityView for attaching sasa on atom level
+  :param file:     Filename of area file
+  :param asa_atom: Name of the float property for SASA
+  """
   
   asa_fh = open(file)
   asa_lines = asa_fh.readlines()
@@ -99,15 +105,16 @@ def _ParseAsaFile(entity, file, asa_atom):
       else:
         print chain_id, resNum, atom_name
       
-## \brief Reads Area file (.rsa) and attach asa (absolute + relative) per residue to an entitiy
-#
-# \param entity   EntityHandle or EntityView for attaching sasa on atom level
-# \param file     Filename of .rsa file
-# \param asa_atom Name of the float property for absolute SASA
-# \param asa_atom Name of the float property for relative SASA
-# \exception         RuntimeError if residue names are not the same  
-
 def _ParseRsaFile(enti,file, asa_abs, asa_rel):
+  """
+  Reads Area file (.rsa) and attach asa (absolute + relative) per residue to an entitiy
+
+  :param entity:     EntityHandle or EntityView for attaching sasa on atom level
+  :param file:       Filename of .rsa file
+  :param asa_atom:   Name of the float property for absolute SASA
+  :param asa_atom:   Name of the float property for relative SASA
+  :exception:        RuntimeError if residue names are not the same
+  """
   area_fh = open(file)
   area_lines = area_fh.readlines()
   area_fh.close()
@@ -143,22 +150,27 @@ def _ParseRsaFile(enti,file, asa_abs, asa_rel):
       else:
         raise RuntimeError, "Residue Names are not the same for ResNumb: %s (%s vs %s)" % (res_number, res.name, res_name)
       
-## \brief Method which recursively deletes a directory
-#
-# \warning This method removes also non-empty directories without asking, so
-#          be careful!
+
 def __CleanupFiles(dir_name):
+  """
+  Method which recursively deletes a directory
+
+  :warning: This method removes also non-empty directories without asking, so
+            be careful!
+  """
   import shutil
   shutil.rmtree(dir_name)
 
-## \brief Method to run the MSMS surface calculation
-#
-# This method starts the external MSMS executable and returns the stdout of MSMS
-#
-# \param command          Command to execute
-# \return                 stdout of MSMS
-# \exception              CalledProcessError for non-zero return value
 def _RunNACCESS(command, temp_dir):
+  """
+  Method to run the MSMS surface calculation
+
+  This method starts the external MSMS executable and returns the stdout of MSMS
+
+  :param command:          Command to execute
+  :returns:                stdout of MSMS
+  :exception:              CalledProcessError for non-zero return value
+  """
   proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, cwd = temp_dir)
   stdout_value, stderr_value = proc.communicate()
 
@@ -170,34 +182,37 @@ def _RunNACCESS(command, temp_dir):
   return stdout_value
   
 
-## \brief Calculates analytical the solvent accessible surface
-#  area by using the external naccess program
-#
-# This method calculates the molecular surface areas by invoking the external
-# program naccess. First, it is checked if the naccess executable is present, then, 
-# the necessary files are prepared in a temporary directory and naccess is
-# executed. The last step is to remove the temporary directory.
-# 
-#
-# \param entity             OST entity to calculate surface
-# \param radius             Surface probe radius
-# \param include_hydrogens  Calculate surface including hydrogens
-# \param include_hetatm     Calculate surface including hetatms
-# \param include_water      Calculate surface including water
-# \param selection          Calculate surface for subset of entity
-# \param naccess  _exe      msms executable (full path to executable)
-# \param keep_files         Do not delete temporary files
-# \param asa_abs            Attaches per residue absolute SASA to specified FloatProp on residue level
-# \param asa_rel            Attaches per residue relative SASA to specified FloatProp on residue level
-# \param asa_atom           Attaches per atom SASA to specified FloatProp at atom level
-# \param scratch_dir        Directory for temporary files (NACCESS is sensitive to "." in directory names
-# \param max_number_of_atoms Max Number of atoms in the entity (i.e. is limited in the default NACCESS version to 50 000)
-
-# \return                   absolute SASA calculated using asa_atom 
 def CalculateSurfaceArea(entity,  radius=1.4,  
                          include_hydrogens=False, include_hetatm = False, 
                          include_water = False, selection="",
                          naccess_exe=None, keep_files=False , asa_abs= "asaAbs", asa_rel="asaRel", asa_atom="asaAtom", scratch_dir = None, max_number_of_atoms=50000):
+  """
+  Calculates analytical the solvent accessible surface area by using the
+  external naccess program
+
+  This method calculates the molecular surface areas by invoking the external
+  program naccess. First, it is checked if the naccess executable is present, then,
+  the necessary files are prepared in a temporary directory and naccess is
+  executed. The last step is to remove the temporary directory.
+
+
+  :param entity:              OST entity to calculate surface
+  :param radius:              Surface probe radius
+  :param include_hydrogens:   Calculate surface including hydrogens
+  :param include_hetatm:      Calculate surface including hetatms
+  :param include_water:       Calculate surface including water
+  :param selection:           Calculate surface for subset of entity
+  :param naccess_exe:         naccess executable (full path to executable)
+  :param keep_files:          Do not delete temporary files
+  :param asa_abs:             Attaches per residue absolute SASA to specified FloatProp on residue level
+  :param asa_rel:             Attaches per residue relative SASA to specified FloatProp on residue level
+  :param asa_atom:            Attaches per atom SASA to specified FloatProp at atom level
+  :param scratch_dir:         Directory for temporary files (NACCESS is sensitive to "." in directory names
+  :param max_number_of_atoms: Max Number of atoms in the entity (i.e. is limited in the default NACCESS version to 50 000)
+
+  :returns:                   absolute SASA calculated using asa_atom
+  """
+
   import re 
   
   # check if msms executable is specified

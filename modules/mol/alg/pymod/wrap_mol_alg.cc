@@ -27,8 +27,10 @@
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/mol/alg/consistency_checks.hh>
 #include <ost/mol/alg/pdbize.hh>
+#include <ost/mol/alg/contact_overlap.hh>
 #include <ost/export_helper/pair_to_tuple_conv.hh>
 #include <ost/export_helper/vec_to_list_conv.hh>
+
 
 using namespace boost::python;
 using namespace ost;
@@ -37,6 +39,7 @@ void export_svdSuperPose();
 void export_TrajectoryAnalysis();
 void export_StructureAnalysis();
 void export_Clash();
+void export_contact_overlap();
 #if OST_IMG_ENABLED
 void export_entity_to_density();
 #endif
@@ -105,6 +108,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   export_TrajectoryAnalysis();
   export_StructureAnalysis();
   export_Clash();
+  export_contact_overlap();
   #if OST_IMG_ENABLED
   export_entity_to_density();
   #endif
@@ -119,8 +123,6 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("LDDTHA",&mol::alg::LDDTHA, (arg("sequence_separation")=0));
   def("CreateDistanceList",&mol::alg::CreateDistanceList);
   def("CreateDistanceListFromMultipleReferences",&create_distance_list_from_multiple_references);
-
-  def("DistanceRMSDTest", &mol::alg::DistanceRMSDTest, (arg("sequence_separation")=0,arg("local_lddt_property_string")=""));
 
   def("SuperposeFrames", superpose_frames1, 
       (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
@@ -261,6 +263,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
     .def(map_indexing_suite<mol::alg::GlobalRDMap,true>())
   ;
 
-  def("DRMSD",&mol::alg::DRMSD);
+  def("DRMSD",&mol::alg::DRMSD,(arg("view"),arg("distance_list"),
+                                arg("cap_distance")=5.0,arg("sequence_separation")=0));
 
 }
