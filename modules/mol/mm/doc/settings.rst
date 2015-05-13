@@ -51,7 +51,7 @@ of the :class:`Simulation` object.
 
   .. attribute::        constrain_hbonds
 
-    Flag, whether bonds involving hydrogens should be constraint
+    Flag, whether bonds involving hydrogens should be constrained
     in :class:`TopologyCreator`. default: False
 
   .. attribute::        constrain_bonds
@@ -178,7 +178,7 @@ of the :class:`Simulation` object.
 
   .. attribute::        add_barostat
 
-    Flag, whether an  MonteCarlo barostat should be attached when settings up
+    Flag, whether an  MonteCarlo barostat should be attached when setting up
     the :class:`Simulation`. default: False
 
   .. attribute::        barostat_temperature
