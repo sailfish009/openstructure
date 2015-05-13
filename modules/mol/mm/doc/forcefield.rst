@@ -7,7 +7,7 @@ The forcefields are a dump for interactions with their parameters, but also
 for atom specific information or residue definitions in the form of a 
 :class:`BuildingBlock`. Objects for modifying residues can be set in form of 
 :class:`BlockModifier` or :class:`HydrogenConstructor`.
-They're also involved in the naming mess we're observing in the molecular mechanics
+They're also involved in dealing with the naming mess we're observing in the molecular mechanics
 community and contain definable renaming rules that can be applied on an
 :class:`EntityHandle` for renaming from e.g. PDB standard to the forcefield
 specific standard. The standard forcefields in OpenStructure are loaded from
@@ -66,9 +66,9 @@ as they are used in Gromacs.
   .. method:: ReadResidueDatabase(basename)
 
     Searches and reads all files belonging the the residue database
-    defined by **basename**. With basename aminoacids this function
-    searches and reads all files in the base_dir matching aminoacids.x
-    where x is .rtp .arn .hdb .n.tdb .c.tdb .vsd .r2b
+    defined by **basename**. With *basename=aminoacids* this function
+    searches and reads all files in the **base_dir** matching *aminoacids.x*
+    where *x* is *.rtp .arn .hdb .n.tdb .c.tdb .vsd .r2b*.
     Only the rtp file is mandatory, all others are neglected if not present.
 
     :param basename:    Basename of residue database to be loaded
@@ -77,8 +77,8 @@ as they are used in Gromacs.
 
   .. method:: ReadITP(basename)
 
-    Searches and reads the itp file in the **base_dir**. **basename** amazing_ion
-    would therefore load the file amazing_ion.itp
+    Searches and reads the itp file in the **base_dir**. *basename=amazing_ion*
+    would therefore load the file *amazing_ion.itp*
 
     :param basename:    Basename of itp file to be loaded
 
@@ -191,7 +191,7 @@ The Forcefield Class
 
   .. method:: AddDihedral(dihedral)
 
-    :param dihedral:    Bond to be added
+    :param dihedral:    Dihedral to be added
 
     :type dihedral:     :class:`Interaction`     
 
@@ -280,7 +280,7 @@ The Forcefield Class
     :param factor:      Factor with which the 1,4 electrostatic term
                         should be dampened
 
-    :type factor:       :class:`factor`
+    :type factor:       :class:`float`
 
 
   .. method:: SetGenPairs(gen_pairs)
@@ -294,7 +294,7 @@ The Forcefield Class
 
   .. method:: AddResidueRenamingRule(name, ff_main_name, ff_n_ter_name, ff_c_ter_name, ff_two_ter_name)
 
-    :param name:        Original name or the residue 
+    :param name:        Original name of the residue 
                         (e.g. PDB/Gromacs standard)
     :param ff_main_name: Forcefield specific residue name
     :param ff_n_ter_name: Forcefield specific name if the residue
@@ -314,8 +314,8 @@ The Forcefield Class
 
   .. method:: AddAtomRenamingRule(res_name, old_atom_name, new_atom_name)
 
-    :param res_name:    Forcefield specific residue name the
-                                     atom belongs
+    :param res_name:    Forcefield specific name of the residue the
+                                     atom belongs to
 
     :param old_atom_name: Atom name in PDB/Gromacs standard
 
@@ -582,7 +582,7 @@ The Forcefield Class
 
     :type type:         :class:`str`
 
-    :returns: the mass
+    :returns:           :class:`float` - the mass
 
     :raises:            :class:`RuntimeError` if no mass has been set for this 
                         atom type
@@ -590,13 +590,13 @@ The Forcefield Class
 
   .. method:: GetFudgeLJ()
 
-    :returns:  Factor with which the 1,4 Lennard Jones term
-               should be dampened
+    :returns:  :class:`float` - Factor with which the 1,4 Lennard Jones 
+                term should be dampened
 
   .. method:: GetFudgeQQ()
 
-    :returns:  Factor with which the 1,4 electrostatic term
-               should be dampened
+    :returns:  :class:`float` - Factor with which the 1,4 
+                electrostatic term should be dampened
 
 
   .. method:: GetAtomType(res_name, atom_name)
@@ -609,7 +609,7 @@ The Forcefield Class
     :type res_name:     :class:`str`
     :type atom_name:    :class:`str`
 
-    :returns:  atom type
+    :returns:           :class:`str` - atom type
 
     :raises:            :class:`RuntimeError` if forcefield has no such
                         :class:`BuildingBlock` or when atom is not present 

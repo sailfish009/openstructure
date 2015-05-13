@@ -63,7 +63,6 @@ Interaction Parametrization
 * HarmonicImproper, Interacting Particles: 4, Num Parameters: 2
 
   #. :class:`float` angle in radians
-  #. :class:`float` force constant in 
   #. :class:`float` force constant in kJ/mol/radian^2
 
 * CMap, Interacting Particles: 5, Num Parameters: n*n+1 

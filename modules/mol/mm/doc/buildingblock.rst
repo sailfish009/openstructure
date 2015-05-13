@@ -32,6 +32,7 @@ The BuildingBlock Class
     :type residue:    :class:`ResidueHandle`
     :type match_connectivity:    :class:`bool`
 
+    :returns: :class:`bool`
 
   .. method:: Connect(residue, editor)
 
@@ -39,7 +40,7 @@ The BuildingBlock Class
     BuildingBlock.
 
     :param residue:     Residue to be connected
-    :param editor:      Editor associated to the residues entity
+    :param editor:      Editor associated to the residue's entity
 
     :type residue:      :class:`ResidueHandle`
     :type editor:       :class:`XCSEditor`
@@ -95,13 +96,13 @@ The BuildingBlock Class
   .. method:: RemoveInteractionsToPrev()
 
     Removes all interactions associated to an atom of a previous residues.
-    This gets indicated by an atom name prefixed by a *-*
+    This gets indicated in the :class:`BuildingBlock` by an atom name prefixed by a *-*
 
 
   .. method:: RemoveInteractionsToNext()
 
     Removes all interactions associated to an atom of a next residues.
-    This gets indicated by an atom name prefixed by a *+*
+    This gets indicated in the :class:`BuildingBlock` by an atom name prefixed by a *+*
 
 
   .. method:: AddBond(bond, [,replace_existing = False])
@@ -178,9 +179,11 @@ The BuildingBlock Class
 
     Gets forcefield type from atom with given name
 
-    :param name:        Name from atom you want the type from
+    :param name:        Name of atom you want the type from
 
     :type name:         :class:`str`
+
+    :returns: :class:`str`
 
     :raises:            :class:`RuntimeError` when atom can not be found in 
                         BuildingBlock    
@@ -189,9 +192,11 @@ The BuildingBlock Class
 
     Gets charge from atom with given name
 
-    :param name:        Name from atom you want the charge from
+    :param name:        Name of atom you want the charge from
 
     :type name:         :class:`str`
+
+    :returns: :class:`float`
 
     :raises: :class:`RuntimeError` when atom can not be found in 
                                    BuildingBlock 
@@ -201,10 +206,12 @@ The BuildingBlock Class
 
     Gets mass from atom with given name
 
-    :param name:        Name from atom you want the mass from
+    :param name:        Name of atom you want the mass from
 
     :type name:         :class:`str`
 
+    :returns: :class:`float`
+    
     :raises: :class:`RuntimeError` when atom can not be found in 
                                    BuildingBlock 
 
@@ -260,6 +267,10 @@ The BuildingBlock Class
 
 Block Modifiers
 --------------------------------------------------------------------------------
+.. class:: BlockModifier
+  
+  Basis class. Block modifiers are used to change building blocks or residues.
+  See :class:`GromacsBlockModifier` for a specific example.
 
 .. class:: GromacsBlockModifier
 
@@ -375,6 +386,11 @@ Block Modifiers
 
 Hydrogen Constructors
 --------------------------------------------------------------------------------
+
+.. class:: HydrogenConstructor
+
+  Basis class. Hydrogen constructors are used to add hydrogens to residues.
+
 
 .. class:: GromacsHydrogenConstructor
 

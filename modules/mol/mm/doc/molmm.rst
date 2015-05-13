@@ -8,11 +8,10 @@ Introduction
 
 The mol.mm module provides a wrapper around the 
 `OpenMM <http://openmm.org>`_ molecular mechanics library to provide
-basic md capabilities fully embedded into the OpenStructure universe.
+basic molecular dynamics (MD) capabilities fully embedded into the OpenStructure universe.
 The heart of every simulation is the :class:`Topology` describing how the 
-particles of an :class:`EntityHandle` interact. The :class:`Simulation` finally 
-connects the two and allows one to perform energy minimizations or move the 
-simulation through time using an :class:`Integrator`. 
+particles of an :class:`EntityHandle` interact. The :class:`Simulation` class connects the :class:`EntityHandle` with a :class:`Topology` and allows you to perform energy minimizations 
+or move the simulation through time using an :class:`Integrator`. 
 A :class:`Topology` can either be built from scratch by adding
 one interaction after the other or automatically using the
 :class:`TopologyCreator`. The process of :class:`Topology` building

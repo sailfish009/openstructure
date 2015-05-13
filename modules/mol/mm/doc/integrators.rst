@@ -3,9 +3,11 @@ Integrators
 
 .. currentmodule:: ost.mol
 
-The Integrators are a wrapper around the integrators provided by OpenMM and
-have to be attached to the :class:`Settings` when setting up a simulation.
-It provides a way of making the thing shake.
+.. class:: Integrator
+
+  The :class:`Integrator` are a wrapper around the integrators provided by OpenMM and
+  have to be attached to the :class:`Settings` when setting up a simulation.
+  It provides a way of making the thing shake.
 
 
 
@@ -55,7 +57,7 @@ Langevin Dynamics
 
   .. method:: GetTemperature()
 
-    :returns:         :class:`float`
+    :returns:         :class:`float` - the temperature in K
 
   .. method:: SetTemperature(temperature)
 
@@ -64,7 +66,7 @@ Langevin Dynamics
 
   .. method:: GetFriction()
 
-    :returns:           :class:`float`
+    :returns:           :class:`float` - the friction in 1/ps
 
   .. method:: SetFriction(friction)
 
@@ -98,7 +100,7 @@ Langevin Dynamics
 
   .. method:: GetTemperature()
 
-    :returns:         :class:`float`
+    :returns:         :class:`float` - the temperature in K
 
   .. method:: SetTemperature(temperature)
 
@@ -107,7 +109,7 @@ Langevin Dynamics
 
   .. method:: GetFriction()
 
-    :returns:           :class:`float`
+    :returns:           :class:`float` - the friction in 1/ps
 
   .. method:: SetFriction(friction)
 
@@ -151,7 +153,7 @@ Brownian Dynamics
 
   .. method:: GetTemperature()
 
-    :returns:           :class:`float`
+    :returns:           :class:`float` - the temperature in K
 
   .. method:: SetTemperature(temperature)
 
@@ -160,7 +162,7 @@ Brownian Dynamics
 
   .. method:: GetFriction()
 
-    :returns:           :class:`float`
+    :returns:           :class:`float` - the friction in 1/ps
 
   .. method:: SetFriction(friction)
 
