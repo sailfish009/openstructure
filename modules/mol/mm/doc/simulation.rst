@@ -33,8 +33,8 @@ mapped back to the attached structure at any time.
 
 .. class:: Simulation(topology,entity,settings)
 
-  Second constructor that takes a :class:`Topology` and a consistent
-  :class:`ost.mol.EntityHandle` as an input.
+  Second constructor that takes a :class:`Topology`, a consistent
+  :class:`ost.mol.EntityHandle` and a :class:`Settings` as input.
 
   :param topology:      Topology to initialize the :class:`Simulation`
   :param entity:        Entity that is consistent with
@@ -140,7 +140,7 @@ mapped back to the attached structure at any time.
   
   .. method:: GetForces()
 
-    :returns: A :class:`~ost.geom.Vec3List` of all the resulting force for each the atom in the Entity.
+    :returns: A :class:`~ost.geom.Vec3List` of all the resulting forces for each atom in the Entity.
 
   .. method:: SetVelocities(velocities)
 
@@ -153,17 +153,17 @@ mapped back to the attached structure at any time.
 
   .. method:: GetEnergy()
 
-    :returns: :class:`float` Potential + Kinetic energy min kJ/mol of current 
+    :returns: :class:`float` *Potential + Kinetic* energy in kJ/mol of current 
               simulation state
 
   .. method:: GetPotentialEnergy()
 
-    :returns: :class:`float` Potential energy in kJ/mol of current simulation 
+    :returns: :class:`float` *Potential* energy in kJ/mol of current simulation 
               state
 
   .. method:: GetKineticEnergy()
 
-    :returns: :class:`float` Kinetic energy in kJ/mol of current simulation 
+    :returns: :class:`float` *Kinetic* energy in kJ/mol of current simulation 
               state
 
   .. method:: GetTopology()
@@ -172,7 +172,7 @@ mapped back to the attached structure at any time.
 
   .. method:: GetPeriodicBoxExtents()
 
-    :returns: :class:`~ost.geom.Vec3List` Extents of the periodic box
+    :returns: :class:`~ost.geom.Vec3` Extents of the periodic box
 
   .. method:: SetPeriodicBoxExtents(vec)
 
@@ -359,7 +359,7 @@ mapped back to the attached structure at any time.
     :param z_scale:     New z-scale
 
     :type index:        :class:`int`
-    :type ref_position  :class:`ost.geom.Vec3`
+    :type ref_position:  :class:`ost.geom.Vec3`
     :type force_constant: :class:`float`
     :type x_scale:      :class:`float`
     :type y_scale:      :class:`float`

@@ -7,7 +7,7 @@ Integrators
 
   The :class:`Integrator` are a wrapper around the integrators provided by OpenMM and
   have to be attached to the :class:`Settings` when setting up a simulation.
-  It provides a way of making the thing shake.
+  They define the algorithm used to integrate the equations of motion of the system.
 
 
 
