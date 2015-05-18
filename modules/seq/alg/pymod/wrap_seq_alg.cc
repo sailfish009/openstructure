@@ -61,6 +61,8 @@ BOOST_PYTHON_MODULE(_ost_seq_alg)
   class_<SubstWeightMatrix, SubstWeightMatrixPtr>("SubstWeightMatrix", init<>())
     .def("GetWeight", &SubstWeightMatrix::GetWeight)
     .def("SetWeight", &SubstWeightMatrix::SetWeight)
+    .def("GetMinWeight", &SubstWeightMatrix::GetMinWeight)
+    .def("GetMaxWeight", &SubstWeightMatrix::GetMaxWeight)
   ;
   
   def("MergePairwiseAlignments", &MergePairwiseAlignments);
