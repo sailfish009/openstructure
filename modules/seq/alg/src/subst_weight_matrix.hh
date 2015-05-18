@@ -65,10 +65,10 @@ public:
   }
 
   /// \brief Get the minimal substitution weight of the matrix
-  WeightType GetMinWeight() { return min_weight_; }
+  WeightType GetMinWeight() const { return min_weight_; }
 
   /// \brief Get the maximal substitution weight of the matrix
-  WeightType GetMaxWeight() { return max_weight_; }
+  WeightType GetMaxWeight() const { return max_weight_; }
 
   /// \brief Set the substitution weight between two amino acids
   ///
