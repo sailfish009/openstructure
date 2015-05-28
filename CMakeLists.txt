@@ -237,6 +237,9 @@ endif()
 
 if(ENABLE_MM)
   find_package(OpenMM REQUIRED)
+  set(_OPENMM ON)
+else()
+  set(_OPENMM OFF)
 endif()
 
 if (ENABLE_IMG)
@@ -350,6 +353,7 @@ message(STATUS
         "   Shader support                    (-DUSE_SHADER) : ${_SHADER}\n"
         "   Numpy support                      (-DUSE_NUMPY) : ${_NUMPY}\n"
         "   SpaceNav Device support         (-DENABLE_SPNAV) : ${_SPNAV}\n"
+        "   OpenMM support                     (-DENABLE_MM) : ${_OPENMM}\n"
         "   Optimize                            (-DOPTIMIZE) : ${_OPT}\n"
         "   Profiling support                    (-DPROFILE) : ${_PROFILE}\n"
         "   Double Precision        (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
