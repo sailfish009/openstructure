@@ -141,6 +141,12 @@ if (PROFILE)
 else()
   set(_PROFILE OFF)
 endif()
+if(ENABLE_MM)
+  set(_OPENMM ON)
+else()
+  set(_OPENMM OFF)
+endif()
+
 
 if (UBUNTU_LAYOUT)
   set(_UBUNTU_LAYOUT ON)
@@ -237,9 +243,6 @@ endif()
 
 if(ENABLE_MM)
   find_package(OpenMM REQUIRED)
-  set(_OPENMM ON)
-else()
-  set(_OPENMM OFF)
 endif()
 
 if (ENABLE_IMG)
