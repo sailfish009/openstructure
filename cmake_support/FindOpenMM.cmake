@@ -8,8 +8,17 @@
 #  OpenMM_LIBRARIES    - List of libraries when using OpenMM.
 #  OpenMM_FOUND        - True if OpenMM found.
 
-find_path (OPEN_MM_INCLUDE_DIR OpenMM.h)
-find_library (OPEN_MM_LIBRARY NAMES OpenMM)
+if (OPEN_MM_INCLUDE_DIR)
+  set(OPEN_MM_FOUND TRUE)
+else (OPEN_MM_INCLUDE_DIR)
+  find_path (OPEN_MM_INCLUDE_DIR OpenMM.h)
+endif (OPEN_MM_INCLUDE_DIR)
+
+if (OPEN_MM_LIBRARY)
+  set(OPEN_MM_FOUND TRUE)
+else (OPEN_MM_LIBRARY)
+  find_library (OPEN_MM_LIBRARY NAMES OpenMM)
+endif(OPEN_MM_LIBRARY)
 
 set(OPEN_MM_LIBRARIES ${OPEN_MM_LIBRARY})
 set(OPEN_MM_INCLUDE_DIRS ${OPEN_MM_INCLUDE_DIR})
