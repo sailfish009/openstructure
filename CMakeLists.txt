@@ -243,7 +243,10 @@ endif()
 
 if(ENABLE_MM)
   find_package(OpenMM REQUIRED)
-endif()
+  set(_OPENMM_PLUGINS "${OPEN_MM_PLUGIN_DIR}")
+else(ENABLE_MM)
+  set(_OPENMM_PLUGINS "NONE")
+endif(ENABLE_MM)
 
 if (ENABLE_IMG)
   find_package(FFTW REQUIRED)
@@ -357,6 +360,7 @@ message(STATUS
         "   Numpy support                      (-DUSE_NUMPY) : ${_NUMPY}\n"
         "   SpaceNav Device support         (-DENABLE_SPNAV) : ${_SPNAV}\n"
         "   OpenMM support                     (-DENABLE_MM) : ${_OPENMM}\n"
+        "   OpenMM plugins            (-DOPEN_MM_PLUGIN_DIR) : ${_OPENMM_PLUGINS}\n"
         "   Optimize                            (-DOPTIMIZE) : ${_OPT}\n"
         "   Profiling support                    (-DPROFILE) : ${_PROFILE}\n"
         "   Double Precision        (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
