@@ -36,6 +36,12 @@ set(OST_MOL_MM_SOURCES
   steep.cc
 )
 
+# create settings.hh as configurational header, needed to set the plugins path
+set(config_hh_generator "CMake")
+set(SETTINGS_HH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/settings.hh")
+configure_file(settings.hh.in ${SETTINGS_HH_FILE})
+
+
 set(MOL_MM_DEPS ost_mol ost_io)
 
 
