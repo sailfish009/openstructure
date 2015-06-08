@@ -199,7 +199,7 @@ void SelNode::Dump(int level) const{
   String op = CompOPToString(op_);
   switch(sel_.type) {
     case Prop::STRING:
-      std::cout << sel_.GetName()<< " " << op << " " << boost::get<String>(param_) << std::endl;
+      std::cout << sel_.GetName()<< " " << op << " " << boost::get<StringOrRegexParam>(param_).str() << std::endl;
       break;
   case Prop::FLOAT:
     std::cout << sel_.GetName()<< " " << op << " " << boost::get<float>(param_) << std::endl;
