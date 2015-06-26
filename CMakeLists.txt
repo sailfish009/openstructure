@@ -154,8 +154,6 @@ else()
   set(_UBUNTU_LAYOUT OFF)
 endif()
 
-add_definitions(-DEIGEN2_SUPPORT)
-
 if (COMPOUND_LIB)
   set(_COMP_LIB "${COMPOUND_LIB}")
   if (NOT IS_ABSOLUTE "${COMPOUND_LIB}")

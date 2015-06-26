@@ -21,10 +21,8 @@
 #include <iostream>
 #include <boost/bind.hpp>
 
-#include <Eigen/Core>
-#include <Eigen/Array>
 #include <Eigen/SVD>
-#include <Eigen/LU>
+#include <Eigen/Geometry>
 
 #include <ost/base.hh>
 #include <ost/geom/vec3.hh>
@@ -94,7 +92,7 @@ Real calc_rmsd_for_ematx(const EMatX& atoms1,
                          const EMatX& atoms2,
                          const EMat4& transformation)
 {
-  EMatX transformed_atoms1 = EMatX::Zero(atoms1.rows(), 3);
+  EMatX transformed = EMatX::Zero(atoms1.rows(), 3);
 
   EMatX vector = EMatX::Zero(4,1);
   EMatX transformed_vector = EMatX::Zero(4,1);
@@ -103,17 +101,12 @@ Real calc_rmsd_for_ematx(const EMatX& atoms1,
   for(int i=0;i<atoms1.rows();++i){
     vector.block<3,1>(0,0)=atoms1.block<1,3>(i,0).transpose();
     transformed_vector = transformation*vector;
-    transformed_atoms1.block<1,3>(i,0)=transformed_vector.block<3,1>(0,0).transpose();
+    transformed.block<1,3>(i,0)=transformed_vector.block<3,1>(0,0).transpose();
   }
 
-  EMatX diff = EMatX::Zero(atoms1.rows(),atoms1.cols());
-  EMatX squared_dist = EMatX::Zero(atoms1.rows(),1);
-
-  diff = transformed_atoms1-atoms2;
-  squared_dist = (diff.cwise()*diff).rowwise().sum(); 
-
-  return sqrt(squared_dist.sum()/squared_dist.rows());
-
+  transformed = transformed - atoms2;
+  transformed = transformed.array()*transformed.array();
+  return sqrt(transformed.rowwise().sum().sum()/atoms1.rows());
 }
 
 Real CalculateRMSD(const mol::EntityView& ev1,
@@ -204,7 +197,8 @@ public:
 
   EMatX TransformEMatX(const EMatX& mat, const EMat4& transformation) const;
 
-  std::vector<int> CreateMatchingSubsets(const EMatX& atoms, const EMatX& atoms_ref, Real distance_threshold) const;
+  void CreateMatchingSubsets(std::vector<int>& matching_subset, const EMatX& atoms, 
+                             const EMatX& atoms_ref, Real distance_threshold) const;
 
   SuperpositionResult IterativeMinimize(int ncycles, Real distance_threshold) const;
 
@@ -287,7 +281,7 @@ SuperpositionResult MeanSquareMinimizerImpl::IterativeMinimize(int max_cycles, R
   for(;cycles<max_cycles;++cycles){
 
     transformed_atoms = this->TransformEMatX(atoms1_, transformation_matrix);
-    matching_indices = this->CreateMatchingSubsets(transformed_atoms, atoms2_, distance_threshold);
+    this->CreateMatchingSubsets(matching_indices, transformed_atoms, atoms2_, distance_threshold);
 
     if(matching_indices.size()<3){
       std::stringstream ss;
@@ -312,7 +306,7 @@ SuperpositionResult MeanSquareMinimizerImpl::IterativeMinimize(int max_cycles, R
 
     diff = transformation_matrix_old-transformation_matrix;
 
-    if(diff.cwise().abs().sum()<0.0001){
+    if(diff.array().abs().sum()<0.0001){
       ++cycles;
       break;
     }
@@ -348,24 +342,25 @@ EMatX MeanSquareMinimizerImpl::TransformEMatX(const EMatX& mat, const EMat4& tra
   return transformed_mat;
 }
 
-std::vector<int> MeanSquareMinimizerImpl::CreateMatchingSubsets(const EMatX& atoms, const EMatX& atoms_ref, Real distance_threshold) const{
+void MeanSquareMinimizerImpl::CreateMatchingSubsets(std::vector<int>& matching_subset, 
+                                                    const EMatX& atoms, const EMatX& atoms_ref, 
+                                                    Real distance_threshold) const{
 
 
-  std::vector<int> return_vec;
+  matching_subset.clear();
   EMatX diff = EMatX::Zero(atoms.rows(),atoms.cols());
   EMatX dist = EMatX::Zero(atoms.rows(),1);
 
   diff = atoms-atoms_ref;
-  dist = (diff.cwise()*diff).rowwise().sum(); 
-  dist = dist.cwise().sqrt();
+  dist = (diff.array()*diff.array()).rowwise().sum(); 
+
+  Real squared_dist_threshold = distance_threshold * distance_threshold;
   
   for(int i=0; i<dist.rows(); ++i){
-    if(dist(i,0) <= distance_threshold){
-      return_vec.push_back(i);
+    if(dist(i,0) <= squared_dist_threshold){
+      matching_subset.push_back(i);
     }
   }
-
-  return return_vec;
 }
 
 
@@ -381,7 +376,7 @@ SuperpositionResult MeanSquareMinimizerImpl::Minimize(const EMatX& atoms, const 
   EMatX atoms_ref_shifted = MatrixShiftedBy(atoms_ref, avg_ref).transpose();
 
   // determine rotational component
-  Eigen::SVD<EMat3> svd(atoms_ref_shifted*atoms_shifted);
+  Eigen::JacobiSVD<EMat3> svd(atoms_ref_shifted*atoms_shifted,Eigen::ComputeThinU | Eigen::ComputeThinV);
   EMatX matrixVT=svd.matrixV().transpose();
 
   //determine rotation
