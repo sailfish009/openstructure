@@ -30,15 +30,16 @@
 #define LIBMV_NUMERIC_LEVENBERG_MARQUARDT_H
 
 #include <cmath>
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
 
-#include <ost/img/alg/numeric.h>
 
 namespace ost { namespace img { namespace alg {
 
 template<typename Function,
          typename Jacobian,
-         typename Solver = Eigen::SVD<
-           Matrix<typename Function::FMatrixType::RealScalar,
+         typename Solver = Eigen::JacobiSVD<
+                  Eigen::Matrix<typename Function::FMatrixType::RealScalar,
                   Function::XMatrixType::RowsAtCompileTime,
                   Function::XMatrixType::RowsAtCompileTime> > >
 class LevenbergMarquardt {
@@ -46,12 +47,12 @@ class LevenbergMarquardt {
   typedef typename Function::XMatrixType::RealScalar Scalar;
   typedef typename Function::FMatrixType FVec;
   typedef typename Function::XMatrixType Parameters;
-  typedef Matrix<typename Function::FMatrixType::RealScalar,
-                 Function::FMatrixType::RowsAtCompileTime,
-                 Function::XMatrixType::RowsAtCompileTime> JMatrixType;
-  typedef Matrix<typename JMatrixType::RealScalar,
-                 JMatrixType::ColsAtCompileTime,
-                 JMatrixType::ColsAtCompileTime> AMatrixType;
+  typedef Eigen::Matrix<typename Function::FMatrixType::RealScalar,
+                        Function::FMatrixType::RowsAtCompileTime,
+                        Function::XMatrixType::RowsAtCompileTime> JMatrixType;
+  typedef Eigen::Matrix<typename JMatrixType::RealScalar,
+                        JMatrixType::ColsAtCompileTime,
+                        JMatrixType::ColsAtCompileTime> AMatrixType;
 
   // TODO(keir): Some of these knobs can be derived from each other and
   // removed, instead of requiring the user to set them.
@@ -93,7 +94,7 @@ class LevenbergMarquardt {
     *A = (*J).transpose() * (*J);
     *error = -f_(x);
     *g = (*J).transpose() * *error;
-    if (g->cwise().abs().maxCoeff() < params.gradient_threshold) {
+    if (g->array().abs().maxCoeff() < params.gradient_threshold) {
       return GRADIENT_TOO_SMALL;
     } else if (error->norm() < params.error_threshold) {
       return ERROR_TOO_SMALL;
@@ -103,7 +104,7 @@ class LevenbergMarquardt {
 
   Results minimize(Parameters *x_and_min) {
     SolverParameters params;
-    minimize(params, x_and_min);
+    return minimize(params, x_and_min);
   }
 
   Results minimize(const SolverParameters &params, Parameters *x_and_min) {
@@ -124,35 +125,33 @@ class LevenbergMarquardt {
     for (i = 0; results.status == RUNNING && i < params.max_iterations; ++i) {
 //      LOG(INFO) << "iteration: " << i;
 //      LOG(INFO) << "||f(x)||: " << f_(x).norm();
-//      LOG(INFO) << "max(g): " << g.cwise().abs().maxCoeff();
+//      LOG(INFO) << "max(g): " << g.array().abs().maxCoeff();
 //      LOG(INFO) << "u: " << u;
 //      LOG(INFO) << "v: " << v;
-
       AMatrixType A_augmented = A + u*AMatrixType::Identity(J.cols(), J.cols());
-      Solver solver(A_augmented);
-      bool solved = solver.solve(g, &dx);
-//      if (!solved) LOG(ERROR) << "Failed to solve";
-      if (solved && dx.norm() <= params.relative_step_threshold * x.norm()) {
+      Solver solver(A_augmented, Eigen::ComputeThinU | Eigen::ComputeThinV);
+      dx = solver.solve(g);
+      if (dx.norm() <= params.relative_step_threshold * x.norm()) {
           results.status = RELATIVE_STEP_SIZE_TOO_SMALL;
           break;
       }
-      if (solved) {
-        x_new = x + dx;
-        // Rho is the ratio of the actual reduction in error to the reduction
-        // in error that would be obtained if the problem was linear.
-        // See [1] for details.
-        Scalar rho((error.squaredNorm() - f_(x_new).squaredNorm())
-                   / dx.dot(u*dx + g));
-        if (rho > 0) {
-          // Accept the Gauss-Newton step because the linear model fits well.
-          x = x_new;
-          results.status = Update(x, params, &J, &A, &error, &g);
-          Scalar tmp = Scalar(2*rho-1);
-          u = u*std::max(Real(1/3.), 1 - (tmp*tmp*tmp));
-          v = 2;
-          continue;
-        }
+
+      x_new = x + dx;
+      // Rho is the ratio of the actual reduction in error to the reduction
+      // in error that would be obtained if the problem was linear.
+      // See [1] for details.
+      Scalar rho((error.squaredNorm() - f_(x_new).squaredNorm())
+                 / dx.dot(u*dx + g));
+      if (rho > 0) {
+        // Accept the Gauss-Newton step because the linear model fits well.
+        x = x_new;
+        results.status = Update(x, params, &J, &A, &error, &g);
+        Scalar tmp = Scalar(2*rho-1);
+        u = u*std::max(Scalar(1/3.), 1 - (tmp*tmp*tmp));
+        v = 2;
+        continue;
       }
+      
       // Reject the update because either the normal equations failed to solve
       // or the local linear model was not good (rho < 0). Instead, increase u
       // to move closer to gradient descent.
