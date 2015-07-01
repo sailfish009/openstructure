@@ -28,7 +28,7 @@ Installing the Dependencies
 OpenStructure uses a bunch of OpenSource libraries. If you haven't already installed them, please install them now! Where appropriate the minimally required version is given in parantheses.
 
  * `CMake <http://cmake.org>`_ (2.6.4)
- * `Eigen2 <http://eigen.tuxfamily.org>`_ (2.0.6)
+ * `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
  * `Boost <http://boost.org>`_ (1.47)
  * `libpng <http://www.libpng.org>`_ 
  * `Python <http://python.org>`_ (2.7)

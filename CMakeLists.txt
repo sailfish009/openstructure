@@ -232,7 +232,7 @@ else()
   set (PNG_LIBRARY "")
 endif()
 
-find_package(Eigen 2.0.0 REQUIRED)
+find_package(Eigen 3.2.0 REQUIRED)
 find_package(Python 2.4 REQUIRED)
 
 if(USE_NUMPY)
@@ -299,7 +299,7 @@ endif()
 # basic environment
 include_directories(${Boost_INCLUDE_DIRS} 
                     ${FFTW_INCLUDE_DIRS} 
-                    ${EIGEN2_INCLUDE_DIRS}
+                    ${EIGEN3_INCLUDE_DIRS}
                     ${TIFF_INCLUDE_DIR}
                     ${PNG_INCLUDE_DIRS}
                     ${OPEN_MM_INCLUDE_DIRS}
