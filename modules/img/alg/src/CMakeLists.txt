@@ -70,7 +70,6 @@ normalizer.hh
 norm_linear.hh
 norm_log.hh
 norm_od.hh
-numeric.h
 power_spectrum.hh
 randomize.hh
 smooth_mask_image.hh
