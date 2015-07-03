@@ -59,7 +59,6 @@ gaussian.hh
 gaussian_laplacian.hh
 highest_peak_search_3d.hh
 histogram.hh
-levenberg_marquardt.h
 line_iterator.hh
 local_sigma_threshold.hh
 mask_image.hh
