@@ -376,7 +376,7 @@ SuperpositionResult MeanSquareMinimizerImpl::Minimize(const EMatX& atoms, const 
   EMatX atoms_ref_shifted = MatrixShiftedBy(atoms_ref, avg_ref).transpose();
 
   // determine rotational component
-  Eigen::JacobiSVD<EMat3> svd(atoms_ref_shifted*atoms_shifted,Eigen::ComputeThinU | Eigen::ComputeThinV);
+  Eigen::JacobiSVD<EMat3> svd(atoms_ref_shifted*atoms_shifted,Eigen::ComputeFullU | Eigen::ComputeFullV);
   EMatX matrixVT=svd.matrixV().transpose();
 
   //determine rotation

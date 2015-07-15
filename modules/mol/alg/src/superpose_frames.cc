@@ -97,7 +97,7 @@ void AddSuperposedFrame(CoordGroupHandle& superposed, EMatX3& ref_mat,EMatX3& re
   frame_center=frame_mat.rowwise().sum()/frame_mat.cols();
   frame_centered=row_sub(frame_mat, frame_center);
   //single value decomposition
-  Eigen::JacobiSVD<EMat3> svd(frame_centered*ref_centered,Eigen::ComputeThinU | Eigen::ComputeThinV);
+  Eigen::JacobiSVD<EMat3> svd(frame_centered*ref_centered,Eigen::ComputeFullU | Eigen::ComputeFullV);
   EMat3 matrixVT=svd.matrixV().transpose();
   //determine rotation
   Real detv=matrixVT.determinant();
