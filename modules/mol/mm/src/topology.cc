@@ -287,6 +287,33 @@ uint Topology::AddHarmonicDistanceRestraint(uint index_one, uint index_two,
   return harmonic_distance_restraints_.size()-1;
 }
 
+uint Topology::AddFGMDHBondDonor(uint index_one, uint index_two,
+                                 Real length, Real k_length, Real alpha, 
+                                 Real k_alpha, Real beta, Real k_beta){
+  if(index_one >= num_particles_ || index_two >= num_particles_){
+    throw ost::Error("Index of fgmd hbond donor atom exceeds number of particles present in topology!");
+  }
+  Index<2> index(index_one,index_two);
+  std::vector<Real> parameters;
+  parameters.push_back(length);
+  parameters.push_back(k_length);
+  parameters.push_back(alpha);
+  parameters.push_back(k_alpha);
+  parameters.push_back(beta);
+  parameters.push_back(k_beta);
+  fgmd_hbond_donors_.push_back(std::make_pair(index,parameters));
+  return fgmd_hbond_donors_.size()-1;
+}
+
+uint Topology::AddFGMDHBondAcceptor(uint index_one, uint index_two){
+  if(index_one >= num_particles_ || index_two >= num_particles_){
+    throw ost::Error("Index of fgmd hbond acceptor atom exceeds number of particles present in topology!");
+  }
+  Index<2> index(index_one,index_two);
+  fgmd_hbond_acceptors_.push_back(index);
+  return fgmd_hbond_acceptors_.size()-1;
+}
+
 void Topology::SetSigmas(const std::vector<Real>& sigmas){
   if(sigmas.size() != num_particles_){
     throw ost::Error("Expect the same number of sigma parameters than particles!");
@@ -531,6 +558,29 @@ void Topology::GetHarmonicDistanceRestraintParameters(uint index, uint& atom_one
   force_constant = harmonic_distance_restraints_[index].second[1];
 }
 
+void Topology::GetFGMDHBondDonorParameters(uint index, uint& atom_one, uint& atom_two, Real& length,
+                                           Real& k_length, Real& alpha, Real& k_alpha,
+                                           Real& beta, Real& k_beta) const{
+  if(index >= fgmd_hbond_donors_.size()){
+    throw ost::Error("Provided index exceeds number of fgmd hbond donors present in topology!");
+  }
+  atom_one = harmonic_distance_restraints_[index].first[0];
+  atom_two = harmonic_distance_restraints_[index].first[1];
+  length = fgmd_hbond_donors_[index].second[0];
+  k_length = fgmd_hbond_donors_[index].second[1];  
+  alpha = fgmd_hbond_donors_[index].second[2];
+  k_alpha = fgmd_hbond_donors_[index].second[3];
+  beta = fgmd_hbond_donors_[index].second[4];
+  k_beta = fgmd_hbond_donors_[index].second[5];
+}
+
+void Topology::GetFGMDHBondAcceptorParameters(uint index, uint& atom_one, uint& atom_two) const{
+  if(index >= fgmd_hbond_acceptors_.size()){
+    throw ost::Error("Provided index exceeds number of fgmd hbond acceptors present in topology!");
+  }
+  atom_one = fgmd_hbond_acceptors_[index][0];
+  atom_two = fgmd_hbond_acceptors_[index][1];
+}
 
 void Topology::SetHarmonicBondParameters(uint index, const Real bond_length, const Real force_constant){
   if(index >= harmonic_bonds_.size()){
@@ -630,7 +680,19 @@ void Topology::SetHarmonicDistanceRestraintParameters(uint index, Real length,
   }
   harmonic_distance_restraints_[index].second[0] = length;
   harmonic_distance_restraints_[index].second[1] = force_constant; 
+}
 
+void Topology::SetFGMDHBondDonorParameters(uint index, Real length, Real k_length, 
+                                           Real alpha, Real k_alpha, Real beta, Real k_beta){
+  if(index >= fgmd_hbond_donors_.size()){
+    throw ost::Error("Provided index exceeds number of fgmd donors present in topology!");
+  }
+  fgmd_hbond_donors_[index].second[0] = length;
+  fgmd_hbond_donors_[index].second[1] = k_length;
+  fgmd_hbond_donors_[index].second[2] = alpha; 
+  fgmd_hbond_donors_[index].second[3] = k_alpha; 
+  fgmd_hbond_donors_[index].second[4] = beta; 
+  fgmd_hbond_donors_[index].second[5] = k_beta; 
 }
 
 Real Topology::GetMass(uint index) const{
@@ -819,6 +881,32 @@ std::vector<uint> Topology::GetHarmonicDistanceRestraintIndices(uint index_one, 
   return return_indices;
 }
 
+std::vector<uint> Topology::GetFGMDHBondDonorIndices(uint index_one, uint index_two) const{
+
+  Index<2> index(index_one,index_two);
+  Index<2> reverse_index(index_two,index_one);
+  std::vector<uint> return_indices;
+  for(uint i = 0; i < fgmd_hbond_donors_.size(); ++i){
+    if(index == fgmd_hbond_donors_[i].first || reverse_index == fgmd_hbond_donors_[i].first){
+      return_indices.push_back(i);
+    }
+  }
+  return return_indices;
+}
+
+std::vector<uint> Topology::GetFGMDHBondAcceptorIndices(uint index_one, uint index_two) const{
+
+  Index<2> index(index_one,index_two);
+  Index<2> reverse_index(index_two,index_one);
+  std::vector<uint> return_indices;
+  for(uint i = 0; i < fgmd_hbond_acceptors_.size(); ++i){
+    if(index == fgmd_hbond_acceptors_[i] || reverse_index == fgmd_hbond_acceptors_[i]){
+      return_indices.push_back(i);
+    }
+  }
+  return return_indices;
+}
+
 std::vector<uint> Topology::GetHarmonicBondIndices(uint atom_index) const{
   std::vector<uint> return_indices;
   for(uint i = 0; i < harmonic_bonds_.size(); ++i){
@@ -920,6 +1008,26 @@ std::vector<uint> Topology::GetHarmonicDistanceRestraintIndices(uint atom_index)
   std::vector<uint> return_indices;
   for(uint i = 0; i < harmonic_distance_restraints_.size(); ++i){
     if(harmonic_distance_restraints_[i].first[0] == atom_index || harmonic_distance_restraints_[i].first[1] == atom_index){
+      return_indices.push_back(i);
+    }
+  }
+  return return_indices;
+}
+
+std::vector<uint> Topology::GetFGMDHBondDonorIndices(uint atom_index) const{
+  std::vector<uint> return_indices;
+  for(uint i = 0; i < fgmd_hbond_donors_.size(); ++i){
+    if(fgmd_hbond_donors_[i].first[0] == atom_index || fgmd_hbond_donors_[i].first[1] == atom_index){
+      return_indices.push_back(i);
+    }
+  }
+  return return_indices;
+}
+
+std::vector<uint> Topology::GetFGMDHBondAcceptorIndices(uint atom_index) const{
+  std::vector<uint> return_indices;
+  for(uint i = 0; i < fgmd_hbond_acceptors_.size(); ++i){
+    if(fgmd_hbond_acceptors_[i][0] == atom_index || fgmd_hbond_acceptors_[i][1] == atom_index){
       return_indices.push_back(i);
     }
   }
@@ -1113,6 +1221,30 @@ void Topology::MergeTop(TopologyPtr other){
                                          old_num_particles + i->first[1],
                                          i->second[0],
                                          i->second[1]);
+    }
+  }
+
+  const std::vector<std::pair<Index<2>,std::vector<Real> > >& donors = other->GetFGMDHBondDonors();
+  if(!donors.empty()){
+    for(std::vector<std::pair<Index<2>,std::vector<Real> > >::const_iterator i = donors.begin();
+        i != donors.end(); ++i){
+      this->AddFGMDHBondDonor(old_num_particles + i->first[0],
+                              old_num_particles + i->first[1],
+                              i->second[0],
+                              i->second[1],
+                              i->second[2],
+                              i->second[3],
+                              i->second[4],
+                              i->second[5]);
+    }
+  }
+
+  const std::vector<Index<2> >& acceptors = other->GetFGMDHBondAcceptors();
+  if(!acceptors.empty()){
+    for(std::vector<Index<2> >::const_iterator i = acceptors.begin();
+        i != acceptors.end(); ++i){
+      this->AddFGMDHBondAcceptor(old_num_particles + (*i)[0],
+                                 old_num_particles + (*i)[1]);
     }
   }
 

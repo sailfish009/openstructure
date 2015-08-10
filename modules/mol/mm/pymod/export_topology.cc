@@ -218,6 +218,19 @@ namespace{
     return boost::python::make_tuple(i1,i2,l,k);
   }
 
+  boost::python::tuple WrapGetFGMDHBondDonorParam(ost::mol::mm::TopologyPtr p, uint index){
+    uint i1, i2;
+    Real d,k_d,a,k_a,b,k_b;
+    p->GetFGMDHBondDonorParameters(index,i1,i2,d,k_d,a,k_a,b,k_b);
+    return boost::python::make_tuple(i1,i2,d,k_d,a,k_a,b,k_b);
+  }
+
+  boost::python::tuple WrapGetFGMDHBondAcceptorParam(ost::mol::mm::TopologyPtr p, uint index){
+    uint i1, i2;
+    p->GetFGMDHBondAcceptorParameters(index,i1,i2);
+    return boost::python::make_tuple(i1,i2);
+  }
+
   void WrapSetCMapParameters(ost::mol::mm::TopologyPtr p, uint index, int dimension, boost::python::list l){
     std::vector<Real> v = ListToVec<Real>(l);
     p->SetCMapParameters(index,dimension,v);
@@ -313,10 +326,31 @@ namespace{
     return VecToList<uint>(return_vec);
   }
 
+  boost::python::list GetFGMDHBondDonorIndices(ost::mol::mm::TopologyPtr p, uint i1, uint i2){
+    std::vector<uint> return_vec = p->GetFGMDHBondDonorIndices(i1,i2);
+    return VecToList<uint>(return_vec);
+  }
+
+  boost::python::list GetFGMDHBondDonorIndicesSingleIndex(ost::mol::mm::TopologyPtr p, uint i){
+    std::vector<uint> return_vec = p->GetFGMDHBondDonorIndices(i);
+    return VecToList<uint>(return_vec);
+  }
+
   boost::python::list GetHarmonicPositionRestraintIndicesSingleIndex(ost::mol::mm::TopologyPtr p, uint i){
   std::vector<uint> return_vec = p->GetHarmonicPositionRestraintIndices(i);
     return VecToList<uint>(return_vec);
   }
+
+  boost::python::list GetFGMDHBondAcceptorIndices(ost::mol::mm::TopologyPtr p, uint i1, uint i2){
+    std::vector<uint> return_vec = p->GetFGMDHBondAcceptorIndices(i1,i2);
+    return VecToList<uint>(return_vec);
+  }
+
+  boost::python::list GetFGMDHBondAcceptorIndicesSingleIndex(ost::mol::mm::TopologyPtr p, uint i){
+    std::vector<uint> return_vec = p->GetFGMDHBondAcceptorIndices(i);
+    return VecToList<uint>(return_vec);
+  }
+
 
   void MergeTop(ost::mol::mm::TopologyPtr top, ost::mol::mm::TopologyPtr other){
     top->Merge(other);
@@ -357,6 +391,8 @@ void export_Topology()
     .def("ResetExclusions",&ost::mol::mm::Topology::ResetExclusions)
     .def("AddHarmonicPositionRestraint",&ost::mol::mm::Topology::AddHarmonicPositionRestraint,(arg("index"),arg("ref_position"),arg("k"),arg("x_scale")=1.0,arg("y_scale")=1.0,arg("z_scale")=1.0))
     .def("AddHarmonicDistanceRestraint",&ost::mol::mm::Topology::AddHarmonicDistanceRestraint)
+    .def("AddFGMDHBondDonor",&ost::mol::mm::Topology::AddFGMDHBondDonor)
+    .def("AddFGMDHBondAcceptor",&ost::mol::mm::Topology::AddFGMDHBondAcceptor)
  
     //single atom parameter getter and setter functions
     .def("SetSigmas",&WrapSetSigmas)
@@ -400,6 +436,8 @@ void export_Topology()
     .def("GetDistanceConstraintParameters",&WrapGetDistanceConstraintParam)
     .def("GetHarmonicPositionRestraintParameters",&WrapGetHarmonicPositionRestraintParam)
     .def("GetHarmonicDistanceRestraintParameters",&WrapGetHarmonicDistanceRestraintParam)
+    .def("GetFGMDHBondDonorParameters",&WrapGetFGMDHBondDonorParam)
+    .def("GetFGMDHBondAcceptorParameters",&WrapGetFGMDHBondAcceptorParam)
 
     //setter functions for interaction parameters
     .def("SetHarmonicBondParameters",&ost::mol::mm::Topology::SetHarmonicBondParameters)
@@ -413,6 +451,7 @@ void export_Topology()
     .def("SetDistanceConstraintParameters",&ost::mol::mm::Topology::SetDistanceConstraintParameters)
     .def("SetHarmonicPositionRestraintParameters",&ost::mol::mm::Topology::SetHarmonicPositionRestraintParameters)
     .def("SetHarmonicDistanceRestraintParameters",&ost::mol::mm::Topology::SetHarmonicDistanceRestraintParameters)
+    .def("SetFGMDHBondDonorParameters",&ost::mol::mm::Topology::SetFGMDHBondDonorParameters)
 
     //functions to find interactions certain atoms are involved in
     .def("GetHarmonicBondIndices",&GetHarmonicBondIndices)
@@ -436,6 +475,11 @@ void export_Topology()
     .def("GetHarmonicDistanceRestraintIndices",&GetHarmonicDistanceRestraintIndices)
     .def("GetHarmonicDistanceRestraintIndices",&GetHarmonicDistanceRestraintIndicesSingleIndex)
     .def("GetHarmonicPositionRestraintIndices",&GetHarmonicPositionRestraintIndicesSingleIndex)
+    .def("GetFGMDHBondDonorIndices",&GetFGMDHBondDonorIndices)
+    .def("GetFGMDHBondDonorIndices",&GetFGMDHBondDonorIndicesSingleIndex)
+    .def("GetFGMDHBondAcceptorIndices",&GetFGMDHBondAcceptorIndices)
+    .def("GetFGMDHBondAcceptorIndices",&GetFGMDHBondAcceptorIndicesSingleIndex)
+
 
     //functions to get amount of data in topology
     .def("GetNumParticles",&ost::mol::mm::Topology::GetNumParticles)
@@ -450,6 +494,8 @@ void export_Topology()
     .def("GetNumExclusions",&ost::mol::mm::Topology::GetNumExclusions)
     .def("GetNumHarmonicPositionRestraints",&ost::mol::mm::Topology::GetNumHarmonicPositionRestraints)
     .def("GetNumHarmonicDistanceRestraints",&ost::mol::mm::Topology::GetNumHarmonicDistanceRestraints)  
+    .def("GetNumFGMDHBondDonors",&ost::mol::mm::Topology::GetNumFGMDHBondDonors)  
+    .def("GetNumFGMDHBondAcceptors",&ost::mol::mm::Topology::GetNumFGMDHBondAcceptors)  
 
     .def("Merge",&MergeTop)
     .def("Merge",&MergeTopEnt)                                                           

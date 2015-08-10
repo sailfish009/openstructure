@@ -137,6 +137,12 @@ public:
   uint AddHarmonicDistanceRestraint(uint index_one, uint index_two, 
                                     Real length, Real force_constant);
 
+  uint AddFGMDHBondDonor(uint index_one, uint index_two,
+                         Real length, Real k_length, Real alpha, 
+                         Real k_alpha, Real beta, Real k_beta);
+
+  uint AddFGMDHBondAcceptor(uint index_one, uint index_two);
+
   //Single atom parameters are expected to be set at once...
   void SetSigmas(const std::vector<Real>& sigmas);
 
@@ -195,10 +201,16 @@ public:
                                        Real& distance) const;
 
   void GetHarmonicPositionRestraintParameters(uint index, uint& atom_index, geom::Vec3& ref_position,
-                                               Real& k, Real& x_scale, Real& y_scale, Real& z_scale) const;
+                                              Real& k, Real& x_scale, Real& y_scale, Real& z_scale) const;
 
   void GetHarmonicDistanceRestraintParameters(uint index, uint& atom_one, uint& atom_two, Real& length,
-                                               Real& force_constant) const;
+                                              Real& force_constant) const;
+
+  void GetFGMDHBondDonorParameters(uint index, uint& index_one, uint& index_two,
+                                   Real& length, Real& k_length, Real& alpha, 
+                                   Real& k_alpha, Real& beta, Real& k_beta) const;
+
+  void GetFGMDHBondAcceptorParameters(uint index, uint& index_one, uint& index_two) const;
 
   void SetHarmonicBondParameters(uint index, const Real bond_length, const Real force_constant);
 
@@ -226,6 +238,10 @@ public:
 
   void SetHarmonicDistanceRestraintParameters(uint index, Real length, Real force_constant);
 
+  void SetFGMDHBondDonorParameters(uint index, Real length, Real k_length, 
+                                   Real alpha, Real k_alpha, Real beta, 
+                                   Real k_beta);
+
   const std::vector<std::pair<Index<2>, std::vector<Real> > >& GetHarmonicBonds() const { return harmonic_bonds_; }
  
   const std::vector<std::pair<Index<3>, std::vector<Real> > >& GetHarmonicAngles() const { return harmonic_angles_; }
@@ -251,6 +267,10 @@ public:
   const std::vector<Index<2> >& GetExclusions() const { return exclusions_; }
  
   const std::vector<uint>& GetPositionConstraints() const { return position_constraints_; }
+
+  const std::vector<std::pair<Index<2>, std::vector<Real> > >& GetFGMDHBondDonors() const { return fgmd_hbond_donors_; }
+
+  const std::vector<Index<2> >& GetFGMDHBondAcceptors() const { return fgmd_hbond_acceptors_; }
 
   std::vector<Real> GetSigmas() const { return sigmas_; }
 
@@ -323,6 +343,11 @@ public:
   std::vector<uint> GetHarmonicDistanceRestraintIndices(uint index_one,
                                                         uint index_two) const;
 
+  std::vector<uint> GetFGMDHBondDonorIndices(uint index_one,
+                                             uint index_two) const;
+
+  std::vector<uint> GetFGMDHBondAcceptorIndices(uint index_one,
+                                                uint index_two) const;
 
   std::vector<uint> GetHarmonicBondIndices(uint atom_index) const;
 
@@ -345,6 +370,10 @@ public:
   std::vector<uint> GetHarmonicPositionRestraintIndices(uint atom_index) const;
 
   std::vector<uint> GetHarmonicDistanceRestraintIndices(uint atom_index) const;
+
+  std::vector<uint> GetFGMDHBondDonorIndices(uint atom_index) const;
+
+  std::vector<uint> GetFGMDHBondAcceptorIndices(uint atom_index) const;
 
   uint GetNumParticles() { return num_particles_; }
 
@@ -373,6 +402,10 @@ public:
   uint GetNumHarmonicDistanceRestraints() { return harmonic_distance_restraints_.size();}
 
   uint GetNumExclusions() { return exclusions_.size(); }
+
+  uint GetNumFGMDHBondDonors() { return fgmd_hbond_donors_.size(); }
+
+  uint GetNumFGMDHBondAcceptors() { return fgmd_hbond_acceptors_.size(); }
 
   void Merge(ost::mol::EntityHandle& ent, TopologyPtr other, const ost::mol::EntityHandle& other_ent);
 
@@ -517,6 +550,16 @@ public:
       for(uint i = 0; i < num_items; ++i){
         harmonic_distance_restraints_.push_back(std::make_pair(Index<2>(),std::vector<Real>(2)));
       }
+
+      ds & num_items;
+      for(uint i = 0; i < num_items; ++i){
+        fgmd_hbond_donors_.push_back(std::make_pair(Index<2>(),std::vector<Real>(6)));
+      }
+
+      ds & num_items;
+      for(uint i = 0; i < num_items; ++i){
+        fgmd_hbond_acceptors_.push_back(Index<2>());
+      }
     }
     else{
       num_items = harmonic_bonds_.size();
@@ -546,6 +589,10 @@ public:
       num_items = harmonic_position_restraints_.size();
       ds & num_items;
       num_items = harmonic_distance_restraints_.size();
+      ds & num_items;
+      num_items = fgmd_hbond_donors_.size();
+      ds & num_items;
+      num_items = fgmd_hbond_acceptors_.size();
       ds & num_items;
     }
 
@@ -641,6 +688,22 @@ public:
       ds & i->second[1];
     }
 
+    for(std::vector<std::pair<Index<2>,std::vector<Real> > >::iterator i = fgmd_hbond_donors_.begin();
+        i != fgmd_hbond_donors_.end(); ++i){
+      ds & i->first;
+      ds & i->second[0];
+      ds & i->second[1];
+      ds & i->second[2];
+      ds & i->second[3];
+      ds & i->second[4];
+      ds & i->second[5];
+    }
+
+    for(std::vector<Index<2> >::iterator i = fgmd_hbond_acceptors_.begin();
+        i != fgmd_hbond_acceptors_.end(); ++i){
+      ds & (*i);
+    }
+
     if(ds.IsSource()){
       ds & num_items;
       for(uint i = 0; i < num_items; ++i){
@@ -724,6 +787,8 @@ private:
   std::vector<Index<2> > exclusions_;
   std::vector<std::pair<Index<1>,std::vector<Real> > > harmonic_position_restraints_;
   std::vector<std::pair<Index<2>,std::vector<Real> > > harmonic_distance_restraints_;
+  std::vector<std::pair<Index<2>,std::vector<Real> > > fgmd_hbond_donors_;
+  std::vector<Index<2> > fgmd_hbond_acceptors_;
 
   //the atoms of the interactions, that should be unique get tracked in here
   //note, that this is waste of memory, needs better implementation

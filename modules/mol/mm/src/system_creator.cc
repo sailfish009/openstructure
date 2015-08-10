@@ -236,6 +236,66 @@ SystemPtr SystemCreator::Create(const TopologyPtr top,
     }
   }
 
+  const std::vector<std::pair<Index<2>,std::vector<Real> > > fgmd_hbond_donors = top->GetFGMDHBondDonors();
+  const std::vector<Index<2> > fgmd_hbond_acceptors = top->GetFGMDHBondAcceptors();
+  if(!fgmd_hbond_donors.empty() && !fgmd_hbond_acceptors.empty()){
+    String distance_term = "k_length*(distance(a1,d1)-k_length)^2";
+    String alpha_term = "k_alpha*(angle(d2,d1,a1)-alpha)^2";
+    String beta_term = "k_beta*(angle(d1,a1,a2)-beta)^2";
+    String f = distance_term + "+" + alpha_term + "+" + beta_term; 
+    OpenMM::CustomHbondForce& fgmd_hbond_force = *new OpenMM::CustomHbondForce(f);
+
+    fgmd_hbond_force.addPerDonorParameter("length");
+    fgmd_hbond_force.addPerDonorParameter("k_length");
+    fgmd_hbond_force.addPerDonorParameter("alpha");
+    fgmd_hbond_force.addPerDonorParameter("k_alpha");
+    fgmd_hbond_force.addPerDonorParameter("beta");
+    fgmd_hbond_force.addPerDonorParameter("k_beta");
+
+    fgmd_hbond_force.setCutoffDistance(3.0);
+    fgmd_hbond_force.setNonbondedMethod(OpenMM::CustomHbondForce::CutoffPeriodic);
+
+    switch(settings->nonbonded_method){
+      case NoCutoff:{
+        fgmd_hbond_force.setNonbondedMethod(OpenMM::CustomHbondForce::NoCutoff);
+        break;
+      }
+      case CutoffNonPeriodic:{
+        fgmd_hbond_force.setNonbondedMethod(OpenMM::CustomHbondForce::CutoffNonPeriodic);
+        break;        
+      }
+      case CutoffPeriodic:{
+        fgmd_hbond_force.setNonbondedMethod(OpenMM::CustomHbondForce::CutoffPeriodic);
+        break;        
+      }
+      case Ewald:{
+        fgmd_hbond_force.setNonbondedMethod(OpenMM::CustomHbondForce::CutoffPeriodic);
+        break;        
+      }
+      case PME:{
+        fgmd_hbond_force.setNonbondedMethod(OpenMM::CustomHbondForce::CutoffPeriodic);
+        break;        
+      }
+    }
+
+    for(std::vector<std::pair<Index<2>,std::vector<Real> > >::const_iterator i = fgmd_hbond_donors.begin();
+        i != fgmd_hbond_donors.end(); ++i){
+      //stupid cast
+      std::vector<double> parameters;
+      for(std::vector<Real>::const_iterator j = i->second.begin();
+          j != i->second.end(); ++j){
+        parameters.push_back(*j);
+      }
+      fgmd_hbond_force.addDonor(i->first[0],i->first[1],-1, parameters);
+    }
+    std::vector<double> dummy_vec;
+    for(std::vector<Index<2> >::const_iterator i = fgmd_hbond_acceptors.begin();
+        i != fgmd_hbond_acceptors.end(); ++i){
+      fgmd_hbond_force.addAcceptor((*i)[0],(*i)[1],-1,dummy_vec);
+    }
+    sys->addForce(&fgmd_hbond_force);
+  }
+
   std::vector<Real> sigmas = top->GetSigmas();
   std::vector<Real> epsilons = top->GetEpsilons();
   std::vector<Real> charges = top->GetCharges();
