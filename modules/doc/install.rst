@@ -29,7 +29,7 @@ OpenStructure uses a bunch of OpenSource libraries. If you haven't already insta
 
  * `CMake <http://cmake.org>`_ (2.6.4)
  * `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
- * `Boost <http://boost.org>`_ (1.47)
+ * `Boost <http://boost.org>`_ (1.53)
  * `libpng <http://www.libpng.org>`_ 
  * `Python <http://python.org>`_ (2.7)
  * `Qt <http://qt-project.org/>`_ (4.5)
