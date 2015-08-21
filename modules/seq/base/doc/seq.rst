@@ -436,3 +436,87 @@ an alignment:
   .. method:: RemoveSequence(index)
 
     Remove sequence at *index* from the alignment.
+
+
+Handling Hidden Markov Models
+--------------------------------------------------------------------------------
+
+The HMM provides a simple container for hidden markov models in form of
+single columns containing amino acid frequencies and transition probabilities.
+
+.. class:: HMMColumn
+
+  .. method:: BLOSUMNullModel()
+
+    Static method, that returns a new :class:`HMMColumn` with amino acid
+    frequencies given from the BLOSUM62 substitution matrix.
+
+  .. method:: GetFreq(aa)
+
+    :param aa:  One letter code of standard amino acid
+    :type aa:  :class:`str`
+
+    :returns:  Frequency of aa
+
+  .. method:: SetFreq(aa,freq)
+
+    :param aa:  One letter code of standard amino acid
+    :param freq:  The frequency of the given amino acid
+    :type aa:  :class:`str`
+    :type freq:  :class:`float`
+
+  .. method:: GetTransitionFreq(from,to)
+
+    :param from:  Current state of HMM (HMM_MATCH, HMM_INSERT or HMM_DELETE)
+    :param to:  Next state
+
+    :returns:  Frequency of given state transition
+
+  .. method:: SetTransitionFreq(from,to,freq)
+
+    :param from:  Current state of HMM (HMM_MATCH, HMM_INSERT or HMM_DELETE)
+    :param to:  Next state
+    :param freq:  Frequency of transition
+
+  .. attribute:: one_letter_code
+
+    One letter code, this column is associated to
+
+  .. attribute:: entropy
+
+    Shannon entropy based on the columns amino acid frequencies
+
+
+.. class:: HMM
+
+  .. method:: Load(filename)
+
+    Static method to load an hmm in the hhm format as it is in use in the HHSuite.
+
+    :param filename:  Name of file to load
+    :type filename:  :class:`str`
+
+  .. method:: AddColumn(col)
+
+    Appends column in the internal column list.
+
+    :param col:  Column to add
+    :type col:  :class:`HMMColumn`
+
+  .. attribute:: columns
+
+    Iterable columns of the HMM
+
+  .. attribute:: null_model
+
+    Null model of the HMM
+
+  .. attribute:: avg_entropy
+
+    Average entropy of all the columns
+
+
+
+
+
+
