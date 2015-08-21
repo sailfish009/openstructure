@@ -17,26 +17,36 @@ typedef enum {
 
 class HMMColumn {
  public:
+
   HMMColumn() : n_eff_(0.0), n_eff_ins_(0.0), n_eff_del_(0.0) { 
     memset(freq_, 0, sizeof(Real)*20);
     memset(trans_, 0, sizeof(Real)*9);
   }
+
   HMMColumn(const HMMColumn& rhs): olc_(rhs.olc_), n_eff_(rhs.n_eff_), 
     n_eff_ins_(rhs.n_eff_ins_), n_eff_del_(rhs.n_eff_del_) {
     memcpy(freq_, rhs.freq_, sizeof(Real)*20);
     memcpy(trans_, rhs.trans_, sizeof(Real)*9);
   }
+
   Real GetTransitionFreq(HMMState from, HMMState to) const {
     return trans_[from][to];
   }
+
   void SetTransitionFreq(HMMState from, HMMState to, Real freq){
     trans_[from][to] = freq;
   }
+
   void SetNEff(Real val) { n_eff_ = val; }
+
   void SetNEffIns(Real val) { n_eff_ins_ = val; }
+
   void SetNEffDel(Real val) { n_eff_del_ = val; }
+
   Real GetNEff() const { return n_eff_; }
+
   Real GetNEffIns() const { return n_eff_ins_; }
+
   Real GetNEffDel() const { return n_eff_del_; }
 
   Real GetFreq(char ch) const {
@@ -169,10 +179,16 @@ typedef std::vector<HMMColumn> HMMColumnList;
 class HMM { 
  public:
   HMM() {}
+
   static HMMPtr Load(const std::string& filename);
+
   const std::vector<HMMColumn>& GetColumns() const { return columns_; }
+
   const HMMColumn& GetNullModel() const { return null_model_; } 
+
   void SetNullModel(const HMMColumn& null_model) { null_model_ = null_model; }
+
+  String GetSequence() const;
 
   //some functions to make it behave like a vector
 
@@ -200,6 +216,7 @@ class HMM {
   HMMColumnList::iterator columns_end() { return columns_.end(); }
   HMMColumnList::const_iterator columns_begin() const { return columns_.begin(); }
   HMMColumnList::iterator columns_begin() { return columns_.begin(); }
+
   Real GetAverageEntropy() const;
 
   friend std::ofstream& operator<<(std::ofstream& os, HMM& hmm){

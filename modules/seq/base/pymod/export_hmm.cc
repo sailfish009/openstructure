@@ -44,5 +44,6 @@ void export_hmm()
                   make_function(&HMM::GetColumns,
                   return_value_policy<copy_const_reference>()))
     .add_property("avg_entropy", &HMM::GetAverageEntropy)
+    .add_property("sequence",&HMM::GetSequence)
   ;
 }

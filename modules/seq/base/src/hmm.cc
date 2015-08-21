@@ -149,6 +149,16 @@ HMMPtr HMM::Load(const std::string& filename) {
   return hmm;
 }
 
+String HMM::GetSequence() const{
+
+  std::stringstream ss;
+  for(HMMColumnList::const_iterator i = this->columns_begin(); 
+      i != this->columns_end(); ++i){
+    ss << i->GetOneLetterCode();
+  }
+  return ss.str();
+}
+
 
 Real HMM::GetAverageEntropy() const {
   Real n_eff=0.0;

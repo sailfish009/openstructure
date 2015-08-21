@@ -503,6 +503,10 @@ single columns containing amino acid frequencies and transition probabilities.
     :param col:  Column to add
     :type col:  :class:`HMMColumn`
 
+  .. attribute:: sequence
+
+    Sequence of the columns
+
   .. attribute:: columns
 
     Iterable columns of the HMM
