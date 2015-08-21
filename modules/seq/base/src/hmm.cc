@@ -149,6 +149,7 @@ HMMPtr HMM::Load(const std::string& filename) {
   return hmm;
 }
 
+
 Real HMM::GetAverageEntropy() const {
   Real n_eff=0.0;
   int n = 0;

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <ost/base.hh>
 
@@ -63,6 +64,92 @@ class HMMColumn {
   Real GetEntropy() const;
 
   static HMMColumn BLOSUMNullModel();
+
+  //functions to feed streams with limited accuracy of internal data
+  //not intended for python export
+
+  friend std::ofstream& operator<<(std::ofstream& os, HMMColumn& col){
+
+    char data[61];
+    char* data_ptr = &data[0];
+
+    //transform aa_freq
+    for(uint i = 0; i < 20; ++i){
+      *(reinterpret_cast<int16_t*>(data_ptr)) = static_cast<int16_t>(col.freq_[i]*10000);
+      data_ptr+=2;
+    }
+    //transform transition freq
+    *(reinterpret_cast<int16_t*>(data_ptr)) = static_cast<int16_t>(col.trans_[0][0]*10000); //M-M
+    data_ptr+=2;
+    *(reinterpret_cast<int16_t*>(data_ptr)) = static_cast<int16_t>(col.trans_[0][1]*10000); //M-I
+    data_ptr+=2;
+    *(reinterpret_cast<int16_t*>(data_ptr)) = static_cast<int16_t>(col.trans_[0][2]*10000); //M-D
+    data_ptr+=2;
+    *(reinterpret_cast<int16_t*>(data_ptr)) = static_cast<int16_t>(col.trans_[1][0]*10000); //I-M
+    data_ptr+=2;
+    *(reinterpret_cast<int16_t*>(data_ptr)) = static_cast<int16_t>(col.trans_[1][1]*10000); //I-I
+    data_ptr+=2;
+    *(reinterpret_cast<int16_t*>(data_ptr)) = static_cast<int16_t>(col.trans_[2][0]*10000); //D-M
+    data_ptr+=2;
+    *(reinterpret_cast<int16_t*>(data_ptr)) = static_cast<int16_t>(col.trans_[2][2]*10000); //D-D
+    data_ptr+=2;
+
+    //transform neff values
+    *(reinterpret_cast<int16_t*>(data_ptr)) = static_cast<int16_t>(col.n_eff_*1000); 
+    data_ptr+=2;
+    *(reinterpret_cast<int16_t*>(data_ptr)) = static_cast<int16_t>(col.n_eff_ins_*1000); 
+    data_ptr+=2;
+    *(reinterpret_cast<int16_t*>(data_ptr)) = static_cast<int16_t>(col.n_eff_del_*1000);
+    data_ptr+=2;
+
+    //finally write one letter code
+    *data_ptr = col.olc_;
+
+    os.write(data,61);
+    return os;
+  }
+
+  friend std::ifstream& operator>>(std::ifstream& is, HMMColumn& col){
+
+    char data[61];
+    char* data_ptr = &data[0];
+    is.read(data,61);
+
+    //transform aa_freq
+    for(uint i = 0; i < 20; ++i){
+      col.freq_[i] = *(reinterpret_cast<int16_t*>(data_ptr)) * 0.0001;
+      data_ptr+=2;
+    }
+    //transform transition freq
+    col.trans_[0][0] = *(reinterpret_cast<int16_t*>(data_ptr)) * 0.0001; //M-M
+    data_ptr+=2;
+    col.trans_[0][1] = *(reinterpret_cast<int16_t*>(data_ptr)) * 0.0001; //M-I
+    data_ptr+=2;
+    col.trans_[0][2] = *(reinterpret_cast<int16_t*>(data_ptr)) * 0.0001; //M-D
+    data_ptr+=2;
+    col.trans_[1][0] = *(reinterpret_cast<int16_t*>(data_ptr)) * 0.0001; //I-M
+    data_ptr+=2;
+    col.trans_[1][1] = *(reinterpret_cast<int16_t*>(data_ptr)) * 0.0001; //I-I
+    data_ptr+=2;
+    col.trans_[2][0] = *(reinterpret_cast<int16_t*>(data_ptr)) * 0.0001; //D-M
+    data_ptr+=2;
+    col.trans_[2][2] = *(reinterpret_cast<int16_t*>(data_ptr)) * 0.0001; //D-D
+    data_ptr+=2;
+
+    //transform neff values
+    col.n_eff_ = *(reinterpret_cast<int16_t*>(data_ptr)) * 0.001; 
+    data_ptr+=2;
+    col.n_eff_ins_ = *(reinterpret_cast<int16_t*>(data_ptr)) * 0.001; 
+    data_ptr+=2;
+    col.n_eff_del_ = *(reinterpret_cast<int16_t*>(data_ptr)) * 0.001;
+    data_ptr+=2;
+
+    //finally read one letter code
+    col.olc_ = *data_ptr;
+
+    return is;
+  }
+
  private:
   int GetIndex(char ch) const;
   char olc_;
@@ -86,7 +173,6 @@ class HMM {
   const std::vector<HMMColumn>& GetColumns() const { return columns_; }
   const HMMColumn& GetNullModel() const { return null_model_; } 
   void SetNullModel(const HMMColumn& null_model) { null_model_ = null_model; }
-
 
   //some functions to make it behave like a vector
 
@@ -115,6 +201,39 @@ class HMM {
   HMMColumnList::const_iterator columns_begin() const { return columns_.begin(); }
   HMMColumnList::iterator columns_begin() { return columns_.begin(); }
   Real GetAverageEntropy() const;
+
+  friend std::ofstream& operator<<(std::ofstream& os, HMM& hmm){
+
+    os << hmm.null_model_;
+
+    uint32_t size = hmm.size();
+    os.write(reinterpret_cast<char*>(&size),4);
+
+    for(uint i = 0; i < size; ++i){
+      os << hmm.columns_[i];
+    }
+
+    return os;
+  }
+
+  friend std::ifstream& operator>>(std::ifstream& is, HMM& hmm){
+
+    is >> hmm.null_model_;
+
+    uint32_t size;
+    is.read(reinterpret_cast<char*>(&size),4);
+
+    hmm.columns_.resize(size);
+
+    for(uint i = 0; i < size; ++i){
+      is >> hmm.columns_[i];
+    }
+
+    return is;
+  }
+
+
+
  private:
    HMMColumn              null_model_; 
    HMMColumnList          columns_;
