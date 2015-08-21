@@ -4,6 +4,20 @@
 using namespace ost::seq;
 using namespace boost::python;
 
+namespace{
+
+boost::python::list wrap_get_names(HMMDBPtr db){
+  std::vector<String> v_names = db->GetNames();
+  boost::python::list names;
+  for(std::vector<String>::iterator i = v_names.begin();
+      i != v_names.end(); ++i){
+    names.append(*i);
+  }
+  return names;
+}
+  
+}
+
 void export_hmm() 
 {
 
@@ -45,5 +59,15 @@ void export_hmm()
                   return_value_policy<copy_const_reference>()))
     .add_property("avg_entropy", &HMM::GetAverageEntropy)
     .add_property("sequence",&HMM::GetSequence)
+  ;
+
+
+  class_<HMMDB, HMMDBPtr>("HMMDB", init<>())
+    .def("Load", &HMMDB::Load).staticmethod("Load")
+    .def("Save", &HMMDB::Save)
+    .def("AddHMM", &HMMDB::AddHMM)
+    .def("GetHMM", &HMMDB::GetHMM)
+    .def("Size", &HMMDB::size)
+    .def("GetNames",&wrap_get_names)
   ;
 }

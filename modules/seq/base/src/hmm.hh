@@ -3,11 +3,20 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <ost/base.hh>
 
 namespace ost { namespace seq { 
+
+class HMM;
+class HMMColumn;
+class HMMDB;
+typedef boost::shared_ptr<HMM> HMMPtr;
+typedef boost::shared_ptr<HMMDB> HMMDBPtr;
+typedef std::vector<HMMColumn> HMMColumnList;
+
 typedef enum {
   HMM_MATCH=0,
   HMM_INSERT=1,
@@ -171,11 +180,6 @@ class HMMColumn {
 };
 
 
-class HMM;
-typedef boost::shared_ptr<HMM> HMMPtr;
-typedef std::vector<HMMColumn> HMMColumnList;
-// Represents a HHsearch profile
-// Minimalistic on Purpose. 
 class HMM { 
  public:
   HMM() {}
@@ -249,11 +253,31 @@ class HMM {
     return is;
   }
 
-
-
  private:
    HMMColumn              null_model_; 
    HMMColumnList          columns_;
+};
+
+
+class HMMDB{
+
+public:
+
+  void Save(const String& filename) const;
+
+  static HMMDBPtr Load(const String& filename);
+
+  void AddHMM(const String& name, HMMPtr hmm);
+
+  HMMPtr GetHMM(const String& name) const;
+
+  size_t size() const { return data_.size(); }
+
+  std::vector<String> GetNames() const;
+
+private:
+
+  std::map<String,HMMPtr> data_;
 };
 
 }}

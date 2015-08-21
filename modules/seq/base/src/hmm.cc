@@ -171,4 +171,85 @@ Real HMM::GetAverageEntropy() const {
   return (n > 0) ? n_eff/n : 0.0;
 }
 
+void HMMDB::Save(const String& filename) const{
+
+  std::ofstream out_stream(filename.c_str(), std::ios::binary);
+
+  //write out total size
+  uint32_t total_size = data_.size();
+  out_stream.write(reinterpret_cast<char*>(&total_size),4);
+
+  //write out the data elements
+  char string_size;
+  for(std::map<String,HMMPtr>::const_iterator i = data_.begin(); 
+      i != data_.end(); ++i){
+    string_size = static_cast<char>(i->first.size());
+    out_stream.write(reinterpret_cast<char*>(&string_size),1);
+    out_stream.write(i->first.c_str(),string_size);
+    out_stream << *i->second;
+  }
+  out_stream.close();
+}
+
+HMMDBPtr HMMDB::Load(const String& filename){
+
+  std::ifstream in_stream(filename.c_str(), std::ios::binary);
+  if (!in_stream){
+    std::stringstream ss;
+    ss << "the file '" << filename << "' does not exist.";
+    throw std::runtime_error(ss.str());
+  }
+
+  HMMDBPtr db(new HMMDB);
+
+  //read in the total size
+  uint32_t total_size;
+  in_stream.read(reinterpret_cast<char*>(&total_size),4);
+
+  //read in the single hmms
+  char string_size;
+  for(uint i = 0; i < total_size; ++i){
+    in_stream.read(&string_size,1);
+    String name(string_size,'X');
+    in_stream.read(&name[0],string_size);
+    HMMPtr hmm(new HMM);
+    in_stream >> *hmm;
+    db->AddHMM(name,hmm);
+  }
+
+  return db;
+}
+
+void HMMDB::AddHMM(const String& name, HMMPtr hmm){
+  if(name.size() > 255){
+    throw std::runtime_error("Name of HMM must be smaller than 256!");
+  }
+  if(name.empty()){
+    throw std::runtime_error("Name must not be empty!");
+  }
+  data_[name] = hmm;
+}
+
+HMMPtr HMMDB::GetHMM(const String& name) const{
+  std::map<String,HMMPtr>::const_iterator i = data_.find(name);
+  if(i == data_.end()){
+    std::stringstream ss;
+    ss << "HMM database does not contain an entry with name ";
+    ss << name <<"!";
+    throw std::runtime_error(ss.str());
+  }
+  return i->second;
+}
+
+std::vector<String> HMMDB::GetNames() const{
+  std::vector<String> return_vec;
+  return_vec.reserve(this->size());
+  for(std::map<String,HMMPtr>::const_iterator i = data_.begin(); 
+      i != data_.end(); ++i){
+    return_vec.push_back(i->first);
+  }
+  return return_vec;
+}
+
+
 }} //ns

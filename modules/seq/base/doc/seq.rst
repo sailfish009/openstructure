@@ -519,6 +519,49 @@ single columns containing amino acid frequencies and transition probabilities.
 
     Average entropy of all the columns
 
+.. class:: HMMDB
+
+  A simple database to gather :class:`HMM` objects. It is possible
+  to save them to disk in a compressed format with limited accuracy
+  (4 digits for freq values).
+
+  .. method:: Save(filename)
+
+    :param filename:  Name of file that will be generated on disk.
+    :type filename:  :class:`str`
+
+  .. method:: Load(filename)
+
+    Static loading method
+
+    :param filename:  Name of file from which the database should be loaded.
+    :type filename:  :class:`str`
+    :returns:  The loaded database
+
+  .. method:: AddHMM(name, hmm)
+
+    :param name:  Name of HMM to be added
+    :param hmm:  HMM to be added
+
+    :type name:  :class:`str`
+    :type hmm:  :class:`HMM`
+    :raises:  :class:`Exception` when filename is longer than 255 characters.
+
+  .. method:: GetHMM(name)
+
+    :param name:  Name of HMM to be returned
+    :type name:  :class:`str`
+    :returns:  The requested :class:`HMM`
+    :raises:  :class:`Exception` when no :class:`HMM` for **name** exists.
+
+  .. method:: Size()
+
+    :returns: Number of :class:`HMM` objects in the database
+
+  .. method:: GetNames()
+
+    :returns: A nonsorted list of the names of all :class:`HMM` objects in the database
+
 
 
 
