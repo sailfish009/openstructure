@@ -23,9 +23,6 @@
 #include <string.h>
 #include <boost/shared_ptr.hpp>
 #include <ost/config.hh>
-#if(OST_INFO_ENABLED)
-#include <ost/info/info_fw.hh>
-#endif
 #include <ost/seq/alg/module_config.hh>
 
 /*
@@ -43,6 +40,10 @@ class DLLEXPORT_OST_SEQ_ALG SubstWeightMatrix {
 public:
   typedef short WeightType;
   const static int ALPHABET_SIZE='Z'-'A'+1;
+  enum Preset{BLOSUM45 = 0,
+              BLOSUM62 = 1,
+              BLOSUM80 = 2,
+              BLOSUM100 = 3};
   /// \brief Initialize substitution matrix with zero.
   /// 
   /// In order to get a useful  substitution weight matrix, use SetWeight(). 
@@ -50,6 +51,8 @@ public:
   SubstWeightMatrix():max_weight_(0),min_weight_(0) {
     ::memset(weights_, 0, sizeof(WeightType)*ALPHABET_SIZE*ALPHABET_SIZE);
   }
+
+  void AssignPreset(Preset p);
 
   /// \brief Get the substitution weight between two amino acids
   ///
@@ -99,15 +102,6 @@ private:
   WeightType max_weight_;
   WeightType min_weight_;
 };
-
-#if(OST_INFO_ENABLED)
-SubstWeightMatrixPtr DLLEXPORT_OST_SEQ_ALG
-SubstWeightMatrixFromInfo(const info::InfoGroup& group);
-
-void DLLEXPORT_OST_SEQ_ALG 
-SubstWeightMatrixToInfo(const SubstWeightMatrixPtr& subst_mat, 
-                        info::InfoGroup& group);
-#endif
 
 }}}
 
