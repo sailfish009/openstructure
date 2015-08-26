@@ -1542,33 +1542,30 @@ void MMCifReader::ParseStructRefSeq(const std::vector<StringRef>& columns)
 
 void MMCifReader::ParseStructRefSeqDif(const std::vector<StringRef>& columns)
 {
-	String aln_id=columns[indices_[SRSD_ALIGN_ID]].str();
-	std::pair<bool,int> db_rnum(true, -1);
-	if (!is_undef(columns[indices_[SRSD_DB_RNUM]])) {
-	  db_rnum=this->TryGetInt(columns[indices_[SRSD_DB_RNUM]],
-		    	                  "_struct_ref_seq_dif.pdbx_seq_db_seq_num",
-		                        profile_.fault_tolerant);
-	  
-	}
-	std::pair<bool,int> seq_rnum(true, -1);
-	if (!is_undef(columns[indices_[SRSD_SEQ_RNUM]])) {
-	  seq_rnum=this->TryGetInt(columns[indices_[SRSD_SEQ_RNUM]],
-		  	                     "_struct_ref_seq_dif.seq_num",
-			                       profile_.fault_tolerant);
-	  
-	}
-	if (!seq_rnum.first || !db_rnum.first) {
-		return;
-	}
+  String aln_id=columns[indices_[SRSD_ALIGN_ID]].str();
+  String db_rnum;
+  if (!is_undef(columns[indices_[SRSD_DB_RNUM]])) {
+    db_rnum=columns[indices_[SRSD_DB_RNUM]].str();
+  }
+  std::pair<bool,int> seq_rnum(true, -1);
+  if (!is_undef(columns[indices_[SRSD_SEQ_RNUM]])) {
+    seq_rnum=this->TryGetInt(columns[indices_[SRSD_SEQ_RNUM]],
+                             "_struct_ref_seq_dif.seq_num",
+                             profile_.fault_tolerant);
+    
+  }
+  if (!seq_rnum.first) {
+    return;
+  }
   String details;
   if (indices_[SRSD_DETAILS]!=-1) {
 	  details=columns[indices_[SRSD_DETAILS]].str();
-	}
-	bool found=false;
+  }
+  bool found=false;
   for (MMCifInfoStructRefs::iterator i=struct_refs_.begin(), 
  		  e=struct_refs_.end(); i!=e; ++i) { 
  	 if (MMCifInfoStructRefSeqPtr s=(*i)->GetAlignedSeq(aln_id)) {
-		 s->AddDif(seq_rnum.second, db_rnum.second, details); 
+		 s->AddDif(seq_rnum.second, db_rnum, details); 
 		 found=true;
  	 	 break;
  	 }

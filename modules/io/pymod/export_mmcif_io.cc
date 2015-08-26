@@ -171,7 +171,8 @@ void export_mmcif_io()
   	.add_property("details", make_function(&MMCifInfoStructRefSeqDif::GetDetails, 
   				        return_value_policy<copy_const_reference>()))
   	.add_property("seq_rnum", &MMCifInfoStructRefSeqDif::GetSeqRNum)
-  	.add_property("db_rnum", &MMCifInfoStructRefSeqDif::GetDBRNum)
+    .add_property("db_rnum", make_function(&MMCifInfoStructRefSeqDif::GetDBRNum,
+                                           return_value_policy<copy_const_reference>()))
   ;
 
   typedef std::pair<int, int> IntPair;
