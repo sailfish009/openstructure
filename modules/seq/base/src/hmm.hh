@@ -1,6 +1,7 @@
 #ifndef OST_SEQ_HMM_HH
 #define OST_SEQ_HMM_HH
 
+#include <stdint.h>
 #include <string>
 #include <vector>
 #include <map>
