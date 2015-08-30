@@ -503,6 +503,16 @@ single columns containing amino acid frequencies and transition probabilities.
     :param col:  Column to add
     :type col:  :class:`HMMColumn`
 
+  .. method:: Extract(from,to)
+
+    :param from:  Col Idx to start from
+    :param to:  End Idx, not included in sub-HMM
+
+    :type from:  :class:`int`
+    :type to:  :class:`int`
+
+    :returns:  sub-HMM as defined by given indices
+
   .. attribute:: sequence
 
     Sequence of the columns
