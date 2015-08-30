@@ -52,6 +52,7 @@ void export_hmm()
   class_<HMM, HMMPtr>("HMM", init<>())
     .def("Load", &HMM::Load).staticmethod("Load")
     .def("AddColumn", &HMM::push_back)
+    .def("Extract", &HMM::Extract)
     .add_property("null_model", make_function(&HMM::GetNullModel,
                   return_value_policy<copy_const_reference>()))
     .add_property("columns", 

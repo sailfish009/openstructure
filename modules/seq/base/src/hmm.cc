@@ -159,6 +159,27 @@ String HMM::GetSequence() const{
   return ss.str();
 }
 
+HMMPtr HMM::Extract(uint from, uint to){
+
+  if(to <= from){
+    throw std::runtime_error("Second index must be bigger than first one!");
+  }
+
+  if(to >= this->size()){
+    throw std::runtime_error("Invalid index!");
+  }
+
+  HMMPtr return_hmm(new HMM);
+  return_hmm->SetNullModel(null_model_);
+  for(uint i = from; i < to; ++i){
+    return_hmm->push_back(columns_[i]);
+  }
+
+  return return_hmm;
+}
+
+
+
 
 Real HMM::GetAverageEntropy() const {
   Real n_eff=0.0;

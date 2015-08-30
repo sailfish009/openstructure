@@ -194,6 +194,8 @@ class HMM {
 
   String GetSequence() const;
 
+  HMMPtr Extract(uint from, uint to);
+
   //some functions to make it behave like a vector
 
   size_t size() const { return columns_.size(); }
