@@ -165,7 +165,7 @@ HMMPtr HMM::Extract(uint from, uint to){
     throw std::runtime_error("Second index must be bigger than first one!");
   }
 
-  if(to >= this->size()){
+  if(to > this->size()){
     throw std::runtime_error("Invalid index!");
   }
 
