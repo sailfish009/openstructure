@@ -215,6 +215,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                                        'data',
                                                        'cs219.lib')})
         self.assertTrue(filecmp.cmp(csfile, 'testfiles/test.seq219'))
+        self.tmpfile = "testfiles/testali.seq219"
 
     def testA3mToCSFileExists(self):
         # test A3mToCS to work with a given hhmake_file name
