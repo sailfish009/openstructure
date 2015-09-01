@@ -26,11 +26,11 @@ class HHblitsHit:
 
   .. attribute:: aln
 
-    Pairwise alignment containing the aligned part between the query and the 
+    Pairwise alignment containing the aligned part between the query and the
     target. First sequence is the query, the second sequence the target.
-    
+
     :type: :class:`ost.seq.AlignmentHandle`
-    
+
   .. attribute:: evalue
   
     The E-value of the alignment
@@ -208,95 +208,91 @@ def ParseHHblitsOutput(output):
   return header, _ParseResultBody(header.query, hits, lines)
 
 
-def ParseHHblitsProfile(profile):
-  '''
-  HHblits does not need profiles, it works on the MSA (a3m) file!
-  Do they contain all information?
+def ParseHHM(profile):
+    '''Parse secondary structure information and the MSA out of an HHM profile.
 
-  Parse secondary structure information and the MSA out of an HHM profile.
+    :param profile: Opened file handle holding the profile.
+    :type profile: :class:`file`
 
-  :param profile: Opened file handle holding the profile.
-  :type profile: :class:`file`
+    :return: Dictionary containing "ss_pred" (:class:`list`), "ss_conf"
+             (:class:`list`), "msa" (:class:`~ost.seq.AlignmentHandle`) and
+             "consensus" (~ost.seq.SequenceHandle).
+    '''
+    profile_dict = dict()
+    state = 'NONE'
+    pred_seq_txt = ''
+    conf_seq_txt = ''
+    consensus_txt = ''
+    msa_seq = list()
+    msa_head = list()
+    for line in profile:
+        if len(line.rstrip()) == 0:
+            continue
+        if line.rstrip() == '>ss_pred PSIPRED predicted secondary structure':
+            state = 'sspred'
+            continue
+        elif line.rstrip() == '>ss_conf PSIPRED confidence values':
+            state = 'ssconf'
+            continue
+        elif line.rstrip() == '>Consensus':
+            state = 'consensus'
+            continue
+        elif line[0] == '>':
+            if state == 'consensus' or state == 'msa':
+                msa_seq.append('')
+                msa_head.append(line[1:].rstrip())
+            else:
+                raise IOError('Profile file "%s" is missing ' % profile.name+
+                              'the "Consensus" section')
+            state = 'msa'
+            continue
+        elif line[0] == '#':
+            state = 'NONE'
+            continue
 
-  :return: Dictionary containing "ss_pred" (:class:`list`), "ss_conf"
-           (:class:`list`), "msa" (:class:`~ost.seq.AlignmentHandle`) and
-           "consensus" (~ost.seq.SequenceHandle).
-  '''
-  profile_dict = dict()
-  state = 'NONE'
-  pred_seq_txt = ''
-  conf_seq_txt = ''
-  consensus_txt = ''
-  msa_seq = list()
-  msa_head = list()
-  for line in profile:
-    if len(line.rstrip()) == 0:
-      continue
-    if line.rstrip() == '>ss_pred PSIPRED predicted secondary structure':
-      state = 'sspred'
-      continue
-    elif line.rstrip() == '>ss_conf PSIPRED confidence values':
-      state = 'ssconf'
-      continue
-    elif line.rstrip() == '>Consensus':
-      state = 'consensus'
-      continue
-    elif line[0] == '>':
-      if state == 'consensus' or state == 'msa':
-        msa_seq.append('')
-        msa_head.append(line[1:].rstrip())
-      else:
-        raise IOError('Profile file "%s" is missing the "Consensus" section' \
-                        % profile.name)
-      state = 'msa'
-      continue
-    elif line[0] == '#':
-      state = 'NONE'
-      continue
+        if state == 'sspred':
+            pred_seq_txt += line.rstrip()
+        elif state == 'ssconf':
+            conf_seq_txt += line.rstrip()
+        elif state == 'msa':
+            msa_seq[len(msa_seq)-1] += line.rstrip()
+        elif state == 'consensus':
+            consensus_txt += line.rstrip()
 
-    if state == 'sspred':
-      pred_seq_txt += line.rstrip()
-    elif state == 'ssconf':
-      conf_seq_txt += line.rstrip()
-    elif state == 'msa':
-      msa_seq[len(msa_seq)-1] += line.rstrip()
-    elif state == 'consensus':
-      consensus_txt += line.rstrip()
+    profile_dict['ss_pred'] = list()
+    profile_dict['ss_conf'] = list()
+    for i in range(0, len(pred_seq_txt)):
+        profile_dict['ss_pred'].append(pred_seq_txt[i])
+        profile_dict['ss_conf'].append(int(conf_seq_txt[i]))
 
-  profile_dict['ss_pred'] = list()
-  profile_dict['ss_conf'] = list()
-  for i in range(0, len(pred_seq_txt)):
-    profile_dict['ss_pred'].append(pred_seq_txt[i])
-    profile_dict['ss_conf'].append(int(conf_seq_txt[i]))
-
-  # post processing
-  # MSA
-  profile_dict['msa'] = None
-  if len(msa_seq):
-    t = msa_seq[0]
-    al=seq.AlignmentList()
-    for i in range(1, len(msa_seq)):
-      qs = ''
-      ts = ''
-      k = 0
-      for c in msa_seq[i]:
-        if c.islower():
-          qs += '-'
-          ts += c.upper()
-        else:
-          qs += t[k]
-          ts += c
-          k += 1
-      nl=seq.CreateAlignment(seq.CreateSequence(msa_head[0], qs), 
-                             seq.CreateSequence(msa_head[i], ts))
-      al.append(nl)
-    profile_dict['msa'] = seq.alg.MergePairwiseAlignments(al,
+    # post processing
+    # MSA
+    profile_dict['msa'] = None
+    if len(msa_seq):
+        t = msa_seq[0]
+        al=seq.AlignmentList()
+        for i in range(1, len(msa_seq)):
+            qs = ''
+            ts = ''
+            k = 0
+            for c in msa_seq[i]:
+                if c.islower():
+                    qs += '-'
+                    ts += c.upper()
+                else:
+                    qs += t[k]
+                    ts += c
+                    k += 1
+            nl=seq.CreateAlignment(seq.CreateSequence(msa_head[0], qs), 
+                                   seq.CreateSequence(msa_head[i], ts))
+            al.append(nl)
+        profile_dict['msa'] = seq.alg.MergePairwiseAlignments(al,
                                              seq.CreateSequence(msa_head[0], t))
-    #print profile_dict['msa'].ToString(80)
-  # Consensus
-  profile_dict['consensus'] = seq.CreateSequence('Consensus', consensus_txt)
+      #print profile_dict['msa'].ToString(80)
+    # Consensus
+    profile_dict['consensus'] = seq.CreateSequence('Consensus', consensus_txt)
 
-  return profile_dict
+    return profile_dict
 
 def EstimateMemConsumption():
     """
@@ -561,4 +557,4 @@ class HHblits:
 __all__= (HHblits)
 
 #  LocalWords:  HHblits MSA hhblits hhtools PSIPRED addss param nrdb str mact
-#  LocalWords:  cpu hhm func ParseHHblitsOutput
+#  LocalWords:  cpu hhm func ParseHHblitsOutput ss pred conf msa

@@ -264,8 +264,32 @@ class TestHHblitsBindings(unittest.TestCase):
                                      'testfiles/hhblitsdb/hhblitsdb')
         self.assertEqual(search_file, None)
 
-# search:
-# search with non-existing a3m
+    def testParseHHMWorking(self):
+        # get info from an HHM file
+        with open("testfiles/test.hmm") as hhm_fh:
+            prof = hhblits.ParseHHM(hhm_fh)
+        self.assertEqual(''.join([str(x) for x in prof['ss_conf']]),
+                         '999999999999998873391557999999998639441123987788888'+
+                         '856788999999999998735477789999999887650299989899889'+
+                         '999999997536679989999999999999999984329')
+        self.assertEqual(''.join(prof['ss_pred']), 'CCCHHHHHHHHHHHHHHHCCCHHHH'+
+                         'HHHHHHHHHHCCCCCCCCCCCCCCCCCHHHHHHHHHHHHHHHHHHHCCCCH'+
+                         'HHHHHHHHHHHHHHCCCCHHHHHHHHHHHHHHHHHHCCCCCCHHHHHHHHH'+
+                         'HHHHHHHHHHHHCC')
+        self.assertEqual(str(prof['consensus']), 'xltxxxxxxixxsWxxvxxxxxxxgxx'+
+                         'xxxxlfxxxPxxxxxFxxxxxxxxxxxxxxhxxxvxxxlxxxixxldxxxx'+
+                         'xlxxlxxxHxxxxgvxxxxxxxxxxxlxxxlxxxxgxxxxxxxxxAWxxxx'+
+                         'xxixxxmxxxyx')
+        self.assertEqual(prof['msa'].GetCount(), 7)
+
+    def testParseHHMNotWorking(self):
+        # get info from an HHM file
+        with self.assertRaises(IOError) as ioe:
+            hhblits.ParseHHM(open('testfiles/testali.a3m'))
+        self.assertEqual(ioe.exception.message,
+                         'Profile file "testfiles/testali.a3m" is missing '+
+                         'the "Consensus" section')
+
 
 if __name__ == "__main__":
     hhsuite_root_dir =  os.getenv('EBROOTHHMINSUITE')
