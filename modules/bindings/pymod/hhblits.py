@@ -197,6 +197,81 @@ def ParseHHblitsOutput(output):
     hits = _ParseTableOfContents(lines)
     return header, _ParseResultBody(header.query, hits, lines)
 
+def ParseA3M(a3m_file):
+    '''
+    Parse secondary structure information and the multiple sequence alignment 
+    out of an A3M file.
+    
+    :param a3m_file: Iterable containing the lines of the A3M file
+    :type a3m_file: iterable, e.g. an openend file
+    
+    :return: Dictionary containing "ss_pred" (:class:`list`), "ss_conf"
+             (:class:`list`) and "msa" (:class:`~ost.seq.AlignmentHandle`).
+    '''
+    profile_dict = dict()
+    state = 'NONE'
+    pred_seq_txt = ''
+    conf_seq_txt = ''
+    msa_seq = list()
+    msa_head = list()
+    for line in a3m_file:
+        if len(line.rstrip()) == 0:
+            continue
+        elif line.startswith('>ss_pred'):
+            state = 'sspred'
+            continue
+        elif line.startswith('>ss_conf'):
+            state = 'ssconf'
+            continue
+        elif line[0] == '>':
+            if state == 'ssconf' or state == 'msa':
+                msa_seq.append('')
+                msa_head.append(line[1:].rstrip())
+            else:
+                raise IOError('The A3M file is missing the "ss_conf" section')
+            state = 'msa'
+            continue
+
+        if state == 'sspred':
+            pred_seq_txt += line.rstrip()
+        elif state == 'ssconf':
+            conf_seq_txt += line.rstrip()
+        elif state == 'msa':
+            msa_seq[len(msa_seq)-1] += line.rstrip()
+
+    profile_dict['ss_pred'] = list()
+    profile_dict['ss_conf'] = list()
+    for i in range(0, len(pred_seq_txt)):
+        profile_dict['ss_pred'].append(pred_seq_txt[i])
+        profile_dict['ss_conf'].append(int(conf_seq_txt[i]))
+    
+    # post processing
+    # MSA
+    profile_dict['msa'] = None
+    if len(msa_seq) > 1:
+        t = msa_seq[0]
+        al = seq.AlignmentList()
+        for i in range(1, len(msa_seq)):
+          qs = ''
+          ts = ''
+          k = 0
+          for c in msa_seq[i]:
+            if c.islower():
+              qs += '-'
+              ts += c.upper()
+            else:
+              qs += t[k]
+              ts += c
+              k += 1
+          nl = seq.CreateAlignment(seq.CreateSequence(msa_head[0], qs), 
+                                 seq.CreateSequence(msa_head[i], ts))
+          al.append(nl)
+        profile_dict['msa'] = seq.alg.MergePairwiseAlignments(\
+                                                al,
+                                                seq.CreateSequence(msa_head[0],
+                                                                   t))
+    return profile_dict
+
 
 def ParseHHM(profile):
     '''Parse secondary structure information and the MSA out of an HHM profile.

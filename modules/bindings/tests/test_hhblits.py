@@ -291,6 +291,20 @@ class TestHHblitsBindings(unittest.TestCase):
                          'Profile file "testfiles/testali.a3m" is missing '+
                          'the "Consensus" section')
 
+    def testParseA3MWorking(self):
+        # get info from an HHM file
+        with open("testfiles/testali.a3m") as a3m_fh:
+            prof = hhblits.ParseA3M(a3m_fh)
+        self.assertEqual(''.join([str(x) for x in prof['ss_conf']]),
+                         '999999999999998873391557999999998639441123987788888'+
+                         '856788999999999998735477789999999887650299989899889'+
+                         '999999997536679989999999999999999984329')
+        self.assertEqual(''.join(prof['ss_pred']), 'CCCHHHHHHHHHHHHHHHCCCHHHH'+
+                         'HHHHHHHHHHCCCCCCCCCCCCCCCCCHHHHHHHHHHHHHHHHHHHCCCCH'+
+                         'HHHHHHHHHHHHHHCCCCHHHHHHHHHHHHHHHHHHCCCCCCHHHHHHHHH'+
+                         'HHHHHHHHHHHHCC')
+        self.assertEqual(prof['msa'].GetCount(), 253)
+
     def testParseHHblitsOutput(self):
         header, hits = hhblits.ParseHHblitsOutput(open("testfiles/test.hhr"))
         self.assertEqual(header.query, 'Test')
