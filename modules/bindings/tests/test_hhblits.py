@@ -367,9 +367,9 @@ class TestHHblitsBindings(unittest.TestCase):
         self.assertEqual(hits[3].evalue, float('64.0'))
         self.assertEqual(hits[3].pvalue, float('0.16'))
         self.assertEqual(hits[3].prob, float('0.6'))
-        self.assertEqual(str(hits[3].aln), 'Test                VDPVNFKLLSHCL'+
-                         'LVTLAAHL\ne69e1ac0a4b2554d... ATPEQAQLVHKEIRKIVKDTC'+
-                         '\n')
+        self.assertEqual(str(hits[3].aln),
+                         'Test                VDPVNFKLLSHCLLVTLAAHL\ne69e1ac0'+
+                         'a4b2554d... ATPEQAQLVHKEIRKIVKDTC\n')
 
 # ParseHHblitsOutput
 

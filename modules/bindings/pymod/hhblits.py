@@ -1,16 +1,11 @@
 '''HHblits wrapper.
 '''
 
-import math
 import subprocess
 import datetime
-import os, re, fcntl
+import os
 import shutil
 import tempfile
-try:
-    import hashlib
-except ImportError:
-    import md5 as hashlib
 
 import ost
 from ost import settings, seq
@@ -19,31 +14,31 @@ from ost.bindings import utils
 class HHblitsHit:
     """
     A hit found by HHblits
-    
+
     .. attribute:: hit_id
-    
+
       String identifying the hit
-    
+
     .. attribute:: aln
-    
+
       Pairwise alignment containing the aligned part between the query and the
       target. First sequence is the query, the second sequence the target.
-    
+
       :type: :class:`ost.seq.AlignmentHandle`
-    
+
     .. attribute:: evalue
-    
+
       The E-value of the alignment
-    
+
     .. attribute:: prob
-    
+
       The probability of the alignment (between 0 and 100)
-    
+
     .. attribute:: score
-    
+
       The alignment score
     """
-    def __init__(self, hit_id, aln, score, ss_score,evalue, pvalue, prob):
+    def __init__(self, hit_id, aln, score, ss_score, evalue, pvalue, prob):
         self.hit_id = hit_id
         self.aln = aln
         self.score = score
@@ -91,48 +86,48 @@ def ParseHHblitsOutput(output):
     Parses the HHblits output and returns a tuple of HHblitsHeader and
     a list of HHblitsHit instances.
     """
-    lines=iter(output)
+    lines = iter(output)
     def _ParseHeaderSection(lines):
         value_start_column = 14
         date_pattern = '%a %b %d %H:%M:%S %Y'
         header = HHblitsHeader()
         line = lines.next()
         assert line.startswith('Query')
-        header.query=line[value_start_column:].strip()
-        line=lines.next()
+        header.query = line[value_start_column:].strip()
+        line = lines.next()
         assert line.startswith('Match_columns')
-        header.match_columns=int(line[value_start_column:].strip())
-      
-        line=lines.next()
+        header.match_columns = int(line[value_start_column:].strip())
+
+        line = lines.next()
         assert line.startswith('No_of_seqs')
-        
-        line=lines.next()
+
+        line = lines.next()
         assert line.startswith('Neff')
-        header.n_eff=float(line[value_start_column:].strip())
-        
-        line=lines.next()
+        header.n_eff = float(line[value_start_column:].strip())
+
+        line = lines.next()
         assert line.startswith('Searched_HMMs')
-        header.searched_hmms=int(line[value_start_column:].strip())
-        
-        line=lines.next()
+        header.searched_hmms = int(line[value_start_column:].strip())
+
+        line = lines.next()
         assert line.startswith('Date')
-        value=line[value_start_column:].strip()
-        header.date=datetime.datetime.strptime(value, date_pattern)
-        
-        line=lines.next()
+        value = line[value_start_column:].strip()
+        header.date = datetime.datetime.strptime(value, date_pattern)
+
+        line = lines.next()
         assert line.startswith('Command')
-        header.command=line[value_start_column:].strip()
-        
-        line=lines.next()
-        assert len(line.strip())==0
+        header.command = line[value_start_column:].strip()
+
+        line = lines.next()
+        assert len(line.strip()) == 0
         return header
 
     def _ParseTableOfContents(lines):
         assert lines.next().startswith(' No Hit')
-        hits=[]
+        hits = []
         while True:
-            line=lines.next()
-            if len(line.strip())==0:
+            line = lines.next()
+            if len(line.strip()) == 0:
                 return hits
             hits.append(ParseHeaderLine(line))
         return hits
@@ -141,62 +136,65 @@ def ParseHHblitsOutput(output):
         entry_index = None
         query_str = ''
         templ_str = ''
-        def _MakeAln(query_id, hit_id, query_string, templ_string, 
+        def _MakeAln(query_id, hit_id, query_string, templ_string,
                      q_offset, t_offset):
-            s1=seq.CreateSequence(query_id, query_string)
-            s1.offset=q_offset-1
-            s2=seq.CreateSequence(hit_id, templ_string)
-            s2.offset=t_offset-1
+            s1 = seq.CreateSequence(query_id, query_string)
+            s1.offset = q_offset-1
+            s2 = seq.CreateSequence(hit_id, templ_string)
+            s2.offset = t_offset-1
             return seq.CreateAlignment(s1, s2)
         try:
             while True:
-                line=lines.next()
+                line = lines.next()
                 if len(line.strip()) == 0:
                     continue
                 if line.startswith('Done!'):
-                    if len(query_str)>0:
+                    if len(query_str) > 0:
                         hits[entry_index][0].aln = _MakeAln(\
                             query_id, hits[entry_index][0].hit_id,
                             query_str, templ_str, *hits[entry_index][1])
-                    return [h for h,o in hits]
+                    return [h for h, o in hits]
                 if line.startswith('No '):
-                    if len(query_str)>0:
-                        hits[entry_index][0].aln=_MakeAln(\
+                    if len(query_str) > 0:
+                        hits[entry_index][0].aln = _MakeAln(\
                             query_id, hits[entry_index][0].hit_id,
                             query_str, templ_str, *hits[entry_index][1])
-                    entry_index=int(line[3:].strip())-1
-                    hits[entry_index][0].hit_id=lines.next()[1:].strip()
-                    query_str=''
-                    templ_str=''
+                    entry_index = int(line[3:].strip())-1
+                    hits[entry_index][0].hit_id = lines.next()[1:].strip()
+                    query_str = ''
+                    templ_str = ''
                     # skip the next line. It doesn't contain information we
                     # don't already know
                     lines.next()
                     continue
-                assert entry_index!=None
-                if line[1:].startswith(' Consensus'): continue
-                if line[1:].startswith(' ss_pred'): continue
-                if line[1:].startswith(' ss_conf'): continue
+                assert entry_index != None
+                if line[1:].startswith(' Consensus'):
+                    continue
+                if line[1:].startswith(' ss_pred'):
+                    continue
+                if line[1:].startswith(' ss_conf'):
+                    continue
                 if line.startswith('T '):
-                    end_pos=line.find(' ', 22)
-                    assert end_pos!=-1
-                    templ_str+=line[22:end_pos]
+                    end_pos = line.find(' ', 22)
+                    assert end_pos != -1
+                    templ_str += line[22:end_pos]
                 if line.startswith('Q '):
-                    end_pos=line.find(' ', 22)
-                    assert end_pos!=-1
-                    query_str+=line[22:end_pos]
+                    end_pos = line.find(' ', 22)
+                    assert end_pos != -1
+                    query_str += line[22:end_pos]
         except StopIteration:
-            if len(query_str)>0:
-                hits[entry_index][0].aln=_MakeAln(query_id,
-                                                  hits[entry_index][0].hit_id,
-                                                  query_str, templ_str,
-                                                  *hits[entry_index][1]) 
-            return [h for h,o in hits]
-    header=_ParseHeaderSection(lines)
-    # parse the table of contents. This is neccessary as some of the properties 
-    # (i.e. start of alignment) we need are only given there. From the TOC we 
-    # create a list of hits that is then further filled with data when we parse 
+            if len(query_str) > 0:
+                hits[entry_index][0].aln = _MakeAln(query_id,
+                                                    hits[entry_index][0].hit_id,
+                                                    query_str, templ_str,
+                                                    *hits[entry_index][1])
+            return [h for h, o in hits]
+    header = _ParseHeaderSection(lines)
+    # parse the table of contents. This is neccessary as some of the properties
+    # (i.e. start of alignment) we need are only given there. From the TOC we
+    # create a list of hits that is then further filled with data when we parse
     # the actual result body
-    hits=_ParseTableOfContents(lines)
+    hits = _ParseTableOfContents(lines)
     return header, _ParseResultBody(header.query, hits, lines)
 
 
@@ -262,7 +260,7 @@ def ParseHHM(profile):
     profile_dict['msa'] = None
     if len(msa_seq):
         t = msa_seq[0]
-        al=seq.AlignmentList()
+        al = seq.AlignmentList()
         for i in range(1, len(msa_seq)):
             qs = ''
             ts = ''
@@ -275,11 +273,12 @@ def ParseHHM(profile):
                     qs += t[k]
                     ts += c
                     k += 1
-            nl=seq.CreateAlignment(seq.CreateSequence(msa_head[0], qs), 
-                                   seq.CreateSequence(msa_head[i], ts))
+            nl = seq.CreateAlignment(seq.CreateSequence(msa_head[0], qs),
+                                     seq.CreateSequence(msa_head[i], ts))
             al.append(nl)
-        profile_dict['msa'] = seq.alg.MergePairwiseAlignments(al,
-                                             seq.CreateSequence(msa_head[0], t))
+        profile_dict['msa'] = seq.alg.MergePairwiseAlignments(\
+                                            al,
+                                            seq.CreateSequence(msa_head[0], t))
       #print profile_dict['msa'].ToString(80)
     # Consensus
     profile_dict['consensus'] = seq.CreateSequence('Consensus', consensus_txt)
@@ -299,10 +298,10 @@ class HHblits:
     """
     Initialise a new HHblits "search" for the given query. Query may either
     be a :class:`ost.seq.SequenceHandle` or a string. In the former case, the
-    query is the actual query sequence, in the latter case, the query is the 
+    query is the actual query sequence, in the latter case, the query is the
     filename to the file containing the query.
 
-    :param query: Query sequence as file or sequence. 
+    :param query: Query sequence as file or sequence.
     :type query: :class:`ost.seq.SequenceHandle` or :class:`str`
     :param hhsuite_root: Path to the top-level directory of your hhsuite
                          installation.
@@ -322,15 +321,15 @@ class HHblits:
             self.bin_dir = os.path.join(self.hhsuite_root, 'bin')
             self.hhblits_bin = os.path.join(self.hhsuite_root, 'bin/hhblits')
         else:
-            self.hhblits_bin=settings.Locate('hhblits',
-                                             explicit_file_name=hhblits_bin)
+            self.hhblits_bin = settings.Locate('hhblits',
+                                               explicit_file_name=hhblits_bin)
             self.bin_dir = os.path.dirname(self.hhblits_bin)
         self.hhlib_dir = os.path.join(self.hhsuite_root, 'lib', 'hh')
         if working_dir:
             self.needs_cleanup = False
             self.working_dir = working_dir
             if not os.path.exists(working_dir):
-              os.mkdir(working_dir)
+                os.mkdir(working_dir)
             if isinstance(query, str):
                 self.filename = os.path.abspath(os.path.join(
                     self.working_dir, os.path.basename(query)))
@@ -364,7 +363,7 @@ class HHblits:
 
     def BuildQueryMSA(self, nrdb, iterations=1, mact=None, cpu=1):
         """Builds the MSA for the query sequence
-  
+
         This function directly uses hhblits of hhtools. While in theory it
         would be possible to do this by PSI-blasting on our own, hhblits is
         supposed to be faster. Also it is supposed to prevent alignment
@@ -390,14 +389,14 @@ class HHblits:
         full_nrdb = os.path.join(os.path.abspath(os.path.split(nrdb)[0]),
                                  os.path.split(nrdb)[1])
         # create MSA
-        hhblits_cmd='%s -e 0.001 -cpu %d -i %s -oa3m %s -d %s -n %d' % \
-            (self.hhblits_bin, cpu, self.filename, a3m_file, full_nrdb,
-             iterations)
+        hhblits_cmd = '%s -e 0.001 -cpu %d -i %s -oa3m %s -d %s -n %d' % \
+                      (self.hhblits_bin, cpu, self.filename, a3m_file,
+                       full_nrdb, iterations)
         if mact:
             hhblits_cmd += '-mact %f' % mact
         job = subprocess.Popen(hhblits_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        sout, serr = job.communicate()
+        sout, _ = job.communicate()
         #lines = sout.splitlines()
         #for l in lines:
         #    print l.strip()
@@ -420,12 +419,12 @@ class HHblits:
         job = subprocess.Popen(addss_cmd, shell=True, cwd=self.working_dir,
                                env=env, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-        sout, serr = job.communicate()
+        sout, _ = job.communicate()
         lines = sout.splitlines()
-        for l in lines:
-            if 'error' in l.lower():
+        for line in lines:
+            if 'error' in line.lower():
                 ost.LogWarning('Predicting secondary structure for MSA '+
-                               '(%s) failed, on command: %s' % (a3m_file,l))
+                               '(%s) failed, on command: %s' % (a3m_file, line))
             return a3m_file
         return a3m_file
 
@@ -436,7 +435,7 @@ class HHblits:
         """
         hhmake = os.path.join(self.bin_dir, 'hhmake')
         if not hhm_file:
-            hhm_file='%s.hhm' % os.path.splitext(a3m_file)[0]
+            hhm_file = '%s.hhm' % os.path.splitext(a3m_file)[0]
         if os.path.exists(hhm_file):
             return hhm_file
         ost.LogVerbose('converting %s to %s' % (a3m_file, hhm_file))
@@ -465,25 +464,25 @@ class HHblits:
             cs_file = '%s.seq219' % os.path.splitext(a3m_file)[0]
         if os.path.exists(cs_file):
             return cs_file
-        o = list()
-        for k, v in options.iteritems():
-            if type(v) == type(True):
-                if v == True:
-                    o.append('%s' % str(k))
+        opt_cmd = list()
+        for k, val in options.iteritems():
+            if type(val) == type(True):
+                if val == True:
+                    opt_cmd.append('%s' % str(k))
             else:
-                o.append('%s %s' % (str(k), str(v)))
-        o = ' '.join(o)
-        cs_cmd = '%s -i %s -o %s %s' % (cstranslate, a3m_file, cs_file, o)
+                opt_cmd.append('%s %s' % (str(k), str(val)))
+        opt_cmd = ' '.join(opt_cmd)
+        cs_cmd = '%s -i %s -o %s %s' % (cstranslate, a3m_file, cs_file, opt_cmd)
         ost.LogVerbose('converting %s to %s' % (a3m_file, cs_file))
         job = subprocess.Popen(cs_cmd, shell=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        sout, serr = job.communicate()
+        sout, _ = job.communicate()
         #lines = serr.splitlines()
         #for l in lines:
         #    print l
         lines = sout.splitlines()
-        for l in lines:
-            if l in 'Wrote abstract state sequence to %s' % cs_file:
+        for line in lines:
+            if line in 'Wrote abstract state sequence to %s' % cs_file:
                 return cs_file
         ost.LogWarning('Creating column state sequence file (%s) failed' % \
                        cs_file)
@@ -504,49 +503,48 @@ class HHblits:
         result file is returned. This file may be parsed with
         :func:`ParseHHblitsOutput`.
         """
-        full_db = os.path.join(os.path.abspath(os.path.split(database)[0]),
-                               os.path.split(database)[1])
-        full_a3m = os.path.abspath(a3m_file)
         opts = {'cpu' : 1, # no. of cpus used
                 'n'   : 1}   # no. of iterations
         opts.update(options)
-        o = []
-        f = []
-        for k, v in opts.iteritems():
-            if type(v) == type(True):
-                if v == True:
-                    o.append('-%s' % str(k))
-                    f.append(str(k))
+        opt_cmd = []
+        opt_str = []
+        for k, val in opts.iteritems():
+            if type(val) == type(True):
+                if val == True:
+                    opt_cmd.append('-%s' % str(k))
+                    opt_str.append(str(k))
             else:
-                o.append('-%s %s' % (str(k), str(v)))
-                f.append('%s%s' % (str(k), str(v)))
-        o = ' '.join(o)
-        f = '_'.join(f)
+                opt_cmd.append('-%s %s' % (str(k), str(val)))
+                opt_str.append('%s%s' % (str(k), str(val)))
+        opt_cmd = ' '.join(opt_cmd)
+        opt_str = '_'.join(opt_str)
         base = os.path.basename(os.path.splitext(a3m_file)[0])
-        hhr_file = '%s%s_%s.hhr' % (prefix, base, f)
+        hhr_file = '%s%s_%s.hhr' % (prefix, base, opt_str)
         hhr_file = os.path.join(self.working_dir, hhr_file)
-        search_cmd='%s %s -e 0.001 -Z 10000 -B 10000 -i %s -o %s -d %s'%(
-            self.hhblits_bin, 
-            o, full_a3m,
+        search_cmd = '%s %s -e 0.001 -Z 10000 -B 10000 -i %s -o %s -d %s'%(
+            self.hhblits_bin,
+            opt_cmd, os.path.abspath(a3m_file),
             hhr_file,
-            full_db)
+            os.path.join(os.path.abspath(os.path.split(database)[0]),
+                         os.path.split(database)[1]))
         ost.LogInfo('searching %s' % database)
         ost.LogVerbose(search_cmd)
         job = subprocess.Popen(search_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, serr = job.communicate()
-        if job.returncode !=0:
+        if job.returncode != 0:
             lines = sout.splitlines()
-            for l in lines:
-                print l.strip()
+            for line in lines:
+                print line.strip()
             lines = serr.splitlines()
-            for l in lines:
-                print l.strip()
+            for line in lines:
+                print line.strip()
             return None
         return hhr_file
 
 
-__all__= (HHblits)
+__all__ = ['HHblits', 'HHblitsHit', 'HHblitsHeader', 'ParseHeaderLine',
+           'ParseHHblitsOutput', 'ParseHHM', 'EstimateMemConsumption']
 
 #  LocalWords:  HHblits MSA hhblits hhtools PSIPRED addss param nrdb str mact
 #  LocalWords:  cpu hhm func ParseHHblitsOutput ss pred conf msa
