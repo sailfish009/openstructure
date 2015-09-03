@@ -7,6 +7,7 @@ import sys
 import tempfile
 import shutil
 import filecmp
+import datetime
 
 import ost
 from ost import seq
@@ -290,6 +291,87 @@ class TestHHblitsBindings(unittest.TestCase):
                          'Profile file "testfiles/testali.a3m" is missing '+
                          'the "Consensus" section')
 
+    def testParseHHblitsOutput(self):
+        header, hits = hhblits.ParseHHblitsOutput(open("testfiles/test.hhr"))
+        self.assertEqual(header.query, 'Test')
+        self.assertEqual(header.match_columns, 141)
+        self.assertEqual(header.n_eff, 9.4)
+        self.assertEqual(header.searched_hmms, 5)
+        self.assertEqual(header.date,
+                         datetime.datetime.strptime('Mon Aug 31 16:45:45 2015',
+                                                    '%a %b %d %H:%M:%S %Y'))
+        self.assertEqual(header.command, '/import/bc2/apps/HH-suite/2.0.16-go'+
+                         'olf-1.4.10/bin/hhblits -cpu 1 -n 1 -e 0.001 -Z 1000'+
+                         '0 -B 10000 -i /import/bc2/home/schwede/bienert/git/'+
+                         'ost_newenv.git/modules/bindings/tests/testfiles/tes'+
+                         'tali.a3m -o /scratch/tmp9E5dor/testali_cpu1_n1.hhr '+
+                         '-d /import/bc2/home/schwede/bienert/git/ost_newenv.'+
+                         'git/modules/bindings/tests/testfiles/hhblitsdb/hhbl'+
+                         'itsdb')
+        self.assertEqual(len(hits), 4)
+        # hit 1
+        self.assertEqual(hits[0].hit_id, '3e7b90809bd446a538f9eb1a1ca0e551')
+        self.assertEqual(hits[0].score, float('222.3'))
+        self.assertEqual(hits[0].ss_score, float('16.4'))
+        self.assertEqual(hits[0].evalue, float('2.7e-42'))
+        self.assertEqual(hits[0].pvalue, float('6.9E-45'))
+        self.assertEqual(hits[0].prob, float('100.0'))
+        self.assertEqual(str(hits[0].aln),
+                         'Test                VLSPADKTNVKAAWGKVGAHAGEYGAEALER'+
+                         'MFLSFPTTKTYFPHF-DL-S----HGSAQ\n3e7b90809bd446a5... '+
+                         'VLSEGEWQLVLHVWAKVEADVAGHGQDILIRLFKSHPETLEKFDRFKHLKT'+
+                         'EAEMKASED\n\nTest                VKGHGKKVADALTNAVAH'+
+                         'VDDMPNALSALSDLHAHK-LRVDPVNFKLLSHCLLVTLAAHL\n3e7b908'+
+                         '09bd446a5... LKKHGVTVLTALGAILKKKGHHEAELKPLAQSHA-TKH'+
+                         'KIPIKYLEFISEAIIHVLHSRH\n\nTest                PAEFT'+
+                         'PAVHASLDKFLASVSTVLTSKYR\n3e7b90809bd446a5... PGDFGA'+
+                         'DAQGAMNKALELFRKDIAAKYK\n')
+        # hit 2
+        self.assertEqual(hits[1].hit_id, 'af828e69a5f2d0fd42a2a213e09eb64f')
+        self.assertEqual(hits[1].score, float('215.7'))
+        self.assertEqual(hits[1].ss_score, float('17.2'))
+        self.assertEqual(hits[1].evalue, float('1.5e-41'))
+        self.assertEqual(hits[1].pvalue, float('3.9E-44'))
+        self.assertEqual(hits[1].prob, float('100.0'))
+        self.assertEqual(str(hits[1].aln),
+                         'Test                VLSPADKTNVKAAWGKVGAHAGEYGAEALER'+
+                         'MFLSFPTTKTYFPHFDLSHGSAQVKGHGK\naf828e69a5f2d0fd... '+
+                         'VLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHG'+
+                         'SAQVKGHGK\n\nTest                KVADALTNAVAHVDDMPN'+
+                         'ALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPA\naf828e6'+
+                         '9a5f2d0fd... KVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNF'+
+                         'KLLSHCLLVTLAAHLPAEFTPA\n\nTest                VHASL'+
+                         'DKFLASVSTVLTSKYR\naf828e69a5f2d0fd... VHASLDKFLASVS'+
+                         'TVLTSKYR\n')
+        # hit 3
+        self.assertEqual(hits[2].hit_id, '9287755aa6aa27583da6be3b2408bfcc')
+        self.assertEqual(hits[2].score, float('215.1'))
+        self.assertEqual(hits[2].ss_score, float('16.5'))
+        self.assertEqual(hits[2].evalue, float('3.8e-41'))
+        self.assertEqual(hits[2].pvalue, float('9.7E-44'))
+        self.assertEqual(hits[2].prob, float('100.0'))
+        self.assertEqual(str(hits[2].aln),
+                         'Test                VLSPADKTNVKAAWGKVGAHAGEYGAEALER'+
+                         'MFLSFPTTKTYFPHF-DLS-----HGSAQ\n9287755aa6aa2758... '+
+                         'HLTPEEKSAVTALWGKVN--VDEVGGEALGRLLVVYPWTQRFFESFGDLST'+
+                         'PDAVMGNPK\n\nTest                VKGHGKKVADALTNAVAH'+
+                         'VDDMPNALSALSDLHAHK-LRVDPVNFKLLSHCLLVTLAAHL\n9287755'+
+                         'aa6aa2758... VKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHC-DKL'+
+                         'HVDPENFRLLGNVLVCVLAHHF\n\nTest                PAEFT'+
+                         'PAVHASLDKFLASVSTVLTSKYR\n9287755aa6aa2758... GKEFTP'+
+                         'PVQAAYQKVVAGVANALAHKYH\n')
+        # hit 4
+        self.assertEqual(hits[3].hit_id, 'e69e1ac0a4b2554df25f2c2183b0fba0')
+        self.assertEqual(hits[3].score, float('12.6'))
+        self.assertEqual(hits[3].ss_score, float('2.6'))
+        self.assertEqual(hits[3].evalue, float('64.0'))
+        self.assertEqual(hits[3].pvalue, float('0.16'))
+        self.assertEqual(hits[3].prob, float('0.6'))
+        self.assertEqual(str(hits[3].aln), 'Test                VDPVNFKLLSHCL'+
+                         'LVTLAAHL\ne69e1ac0a4b2554d... ATPEQAQLVHKEIRKIVKDTC'+
+                         '\n')
+
+# ParseHHblitsOutput
 
 if __name__ == "__main__":
     hhsuite_root_dir =  os.getenv('EBROOTHHMINSUITE')

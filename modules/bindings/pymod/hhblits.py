@@ -32,34 +32,34 @@ class HHblitsHit:
     :type: :class:`ost.seq.AlignmentHandle`
 
   .. attribute:: evalue
-  
+
     The E-value of the alignment
-  
+
   .. attribute:: prob
-  
+
     The probability of the alignment (between 0 and 100)
-  
+
   .. attribute:: score
   
     The alignment score
   """
   def __init__(self, hit_id, aln, score, ss_score,evalue, pvalue, prob):
-    self.hit_id=hit_id
-    self.aln=aln
-    self.score=score
-    self.ss_score=ss_score
-    self.evalue=evalue
-    self.prob=prob
-    self.pvalue=pvalue
+      self.hit_id = hit_id
+      self.aln = aln
+      self.score = score
+      self.ss_score = ss_score
+      self.evalue = evalue
+      self.prob = prob
+      self.pvalue = pvalue
 
 class HHblitsHeader:
-  def __init__(self):
-    self.query=''
-    self.match_columns=0
-    self.n_eff=0
-    self.searched_hmms=0
-    self.date=None
-    self.command=''
+    def __init__(self):
+        self.query = ''
+        self.match_columns = 0
+        self.n_eff = 0
+        self.searched_hmms = 0
+        self.date = None
+        self.command = ''
 
 def ParseHeaderLine(line):
   # First, we seek the start of the identifier, that is, the first whitespace
@@ -72,7 +72,6 @@ def ParseHeaderLine(line):
     if line[i] == ' ':
       break
   assert len(line)-i >= 31 and line[i+1] != ' '
-  #hit_id=line[split_pos+1:35].strip()
   hit_id = line[i+1:i+31].strip()
   fields = line[i+32:].split()
   prob = float(fields[0])
@@ -80,132 +79,121 @@ def ParseHeaderLine(line):
   pvalue = float(fields[2])
   score = float(fields[3])
   ss_score = float(fields[4])
-  # cols = int(fields[5])
   offsets = (int(fields[6].split('-')[0]), int(fields[7].split('-')[0]))
-  #split_pos=line.find(' ', 3)
-  #assert split_pos!=-1 and split_pos<34
-  #prob=float(line[35:40].strip())
-  #evalue=float(line[41:49].strip())
-  #pvalue=float(line[48:57].strip())
-  #score=float(line[56:64].strip())
-  #ss_score=float(line[63:69].strip())
-  #offsets=(int(line[76:79].strip()), int(line[86:89].strip()))
   return (HHblitsHit(hit_id, None, score, ss_score, evalue, pvalue, prob), offsets)
 
 def ParseHHblitsOutput(output):
-  """
-  Parses the HHblits output and returns a tuple of HHblitsHeader and
-  a list of HHblitsHit instances.
-  """
-  lines=iter(output)
-  def _ParseHeaderSection(lines):
-    value_start_column=14
-    date_pattern='%a %b %d %H:%M:%S %Y'
-    header=HHblitsHeader()
-    line=lines.next()
-    assert line.startswith('Query')
-    header.query=line[value_start_column:].strip()
-    line=lines.next()
-    assert line.startswith('Match_columns')
-    header.match_columns=int(line[value_start_column:].strip())
-
-    line=lines.next()
-    assert line.startswith('No_of_seqs')
-    
-    line=lines.next()
-    assert line.startswith('Neff')
-    header.n_eff=float(line[value_start_column:].strip())
-    
-    line=lines.next()
-    assert line.startswith('Searched_HMMs')
-    header.searched_hmms=int(line[value_start_column:].strip())
-    
-    line=lines.next()
-    assert line.startswith('Date')
-    value=line[value_start_column:].strip()
-    header.date=datetime.datetime.strptime(value, date_pattern)
-    
-    line=lines.next()
-    assert line.startswith('Command')
-    header.command=line[value_start_column:].strip()
-    
-    line=lines.next()
-    assert len(line.strip())==0
-    return header
-
-  def _ParseTableOfContents(lines):
-    assert lines.next().startswith(' No Hit')
-    hits=[]
-    while True:
-      line=lines.next()
-      if len(line.strip())==0:
-        return hits
-      hits.append(ParseHeaderLine(line))
-    return hits
-  def _ParseResultBody(query_id, hits, lines):
-    entry_index=None
-    query_str=''
-    templ_str=''
-    def _MakeAln(query_id, hit_id, query_string, templ_string, 
-                 q_offset, t_offset):
-        s1=seq.CreateSequence(query_id, query_string)
-        s1.offset=q_offset-1
-        s2=seq.CreateSequence(hit_id, templ_string)
-        s2.offset=t_offset-1
-        return seq.CreateAlignment(s1, s2)
-    try:
-      while True:
+    """
+    Parses the HHblits output and returns a tuple of HHblitsHeader and
+    a list of HHblitsHit instances.
+    """
+    lines=iter(output)
+    def _ParseHeaderSection(lines):
+        value_start_column = 14
+        date_pattern = '%a %b %d %H:%M:%S %Y'
+        header = HHblitsHeader()
+        line = lines.next()
+        assert line.startswith('Query')
+        header.query=line[value_start_column:].strip()
         line=lines.next()
-        if len(line.strip())==0:
-          continue
-        if line.startswith('Done!'):
-          if len(query_str)>0:
-            hits[entry_index][0].aln=_MakeAln(query_id, hits[entry_index][0].hit_id,
-                                              query_str, templ_str,
-                                              *hits[entry_index][1]) 
-          return [h for h,o in hits]
-        if line.startswith('No '):
-          if len(query_str)>0:
-            hits[entry_index][0].aln=_MakeAln(query_id, 
-                                              hits[entry_index][0].hit_id,
-                                              query_str, templ_str,
-                                              *hits[entry_index][1])
-          entry_index=int(line[3:].strip())-1
-          hits[entry_index][0].hit_id=lines.next()[1:].strip()
-          query_str=''
-          templ_str=''
-          # skip the next line. It doesn't contain information we don't 
-          # already know
-          lines.next()
-          continue
-        assert entry_index!=None
-        if line[1:].startswith(' Consensus'): continue
-        if line[1:].startswith(' ss_pred'): continue
-        if line[1:].startswith(' ss_conf'): continue
-        if line.startswith('T '):
+        assert line.startswith('Match_columns')
+        header.match_columns=int(line[value_start_column:].strip())
+      
+        line=lines.next()
+        assert line.startswith('No_of_seqs')
+        
+        line=lines.next()
+        assert line.startswith('Neff')
+        header.n_eff=float(line[value_start_column:].strip())
+        
+        line=lines.next()
+        assert line.startswith('Searched_HMMs')
+        header.searched_hmms=int(line[value_start_column:].strip())
+        
+        line=lines.next()
+        assert line.startswith('Date')
+        value=line[value_start_column:].strip()
+        header.date=datetime.datetime.strptime(value, date_pattern)
+        
+        line=lines.next()
+        assert line.startswith('Command')
+        header.command=line[value_start_column:].strip()
+        
+        line=lines.next()
+        assert len(line.strip())==0
+        return header
 
-          end_pos=line.find(' ', 22)
-          assert end_pos!=-1
-          templ_str+=line[22:end_pos]
-        if line.startswith('Q '):
-          end_pos=line.find(' ', 22)
-          assert end_pos!=-1
-          query_str+=line[22:end_pos]
+    def _ParseTableOfContents(lines):
+        assert lines.next().startswith(' No Hit')
+        hits=[]
+        while True:
+            line=lines.next()
+            if len(line.strip())==0:
+                return hits
+            hits.append(ParseHeaderLine(line))
+        return hits
 
-        #hit.aln=seq.CreateAlignment(query_seq, templ_seq)
-    except StopIteration:
-      if len(query_str)>0:
-        hits[entry_index][0].aln=_MakeAln(query_id, hits[entry_index][0].hit_id,
-                                          query_str, templ_str,
-                                          *hits[entry_index][1]) 
-      return [h for h,o in hits]  
-  header=_ParseHeaderSection(lines)
-  # parse the table of contents. This is neccessary as some of the properties 
-  # (i.e. start of alignment) we need are only given there. From the TOC we 
-  # create a list of hits that is then further filled with data when we parse 
-  # the actual result body
-  hits=_ParseTableOfContents(lines)
-  return header, _ParseResultBody(header.query, hits, lines)
+    def _ParseResultBody(query_id, hits, lines):
+        entry_index = None
+        query_str = ''
+        templ_str = ''
+        def _MakeAln(query_id, hit_id, query_string, templ_string, 
+                     q_offset, t_offset):
+            s1=seq.CreateSequence(query_id, query_string)
+            s1.offset=q_offset-1
+            s2=seq.CreateSequence(hit_id, templ_string)
+            s2.offset=t_offset-1
+            return seq.CreateAlignment(s1, s2)
+        try:
+            while True:
+                line=lines.next()
+                if len(line.strip()) == 0:
+                    continue
+                if line.startswith('Done!'):
+                    if len(query_str)>0:
+                        hits[entry_index][0].aln = _MakeAln(\
+                            query_id, hits[entry_index][0].hit_id,
+                            query_str, templ_str, *hits[entry_index][1])
+                    return [h for h,o in hits]
+                if line.startswith('No '):
+                    if len(query_str)>0:
+                        hits[entry_index][0].aln=_MakeAln(\
+                            query_id, hits[entry_index][0].hit_id,
+                            query_str, templ_str, *hits[entry_index][1])
+                    entry_index=int(line[3:].strip())-1
+                    hits[entry_index][0].hit_id=lines.next()[1:].strip()
+                    query_str=''
+                    templ_str=''
+                    # skip the next line. It doesn't contain information we
+                    # don't already know
+                    lines.next()
+                    continue
+                assert entry_index!=None
+                if line[1:].startswith(' Consensus'): continue
+                if line[1:].startswith(' ss_pred'): continue
+                if line[1:].startswith(' ss_conf'): continue
+                if line.startswith('T '):
+                    end_pos=line.find(' ', 22)
+                    assert end_pos!=-1
+                    templ_str+=line[22:end_pos]
+                if line.startswith('Q '):
+                    end_pos=line.find(' ', 22)
+                    assert end_pos!=-1
+                    query_str+=line[22:end_pos]
+        except StopIteration:
+            if len(query_str)>0:
+                hits[entry_index][0].aln=_MakeAln(query_id,
+                                                  hits[entry_index][0].hit_id,
+                                                  query_str, templ_str,
+                                                  *hits[entry_index][1]) 
+            return [h for h,o in hits]
+    header=_ParseHeaderSection(lines)
+    # parse the table of contents. This is neccessary as some of the properties 
+    # (i.e. start of alignment) we need are only given there. From the TOC we 
+    # create a list of hits that is then further filled with data when we parse 
+    # the actual result body
+    hits=_ParseTableOfContents(lines)
+    return header, _ParseResultBody(header.query, hits, lines)
 
 
 def ParseHHM(profile):
