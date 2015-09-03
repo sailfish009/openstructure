@@ -17,40 +17,40 @@ from ost import settings, seq
 from ost.bindings import utils
 
 class HHblitsHit:
-  """
-  A hit found by HHblits
-
-  .. attribute:: hit_id
-
-    String identifying the hit
-
-  .. attribute:: aln
-
-    Pairwise alignment containing the aligned part between the query and the
-    target. First sequence is the query, the second sequence the target.
-
-    :type: :class:`ost.seq.AlignmentHandle`
-
-  .. attribute:: evalue
-
-    The E-value of the alignment
-
-  .. attribute:: prob
-
-    The probability of the alignment (between 0 and 100)
-
-  .. attribute:: score
-  
-    The alignment score
-  """
-  def __init__(self, hit_id, aln, score, ss_score,evalue, pvalue, prob):
-      self.hit_id = hit_id
-      self.aln = aln
-      self.score = score
-      self.ss_score = ss_score
-      self.evalue = evalue
-      self.prob = prob
-      self.pvalue = pvalue
+    """
+    A hit found by HHblits
+    
+    .. attribute:: hit_id
+    
+      String identifying the hit
+    
+    .. attribute:: aln
+    
+      Pairwise alignment containing the aligned part between the query and the
+      target. First sequence is the query, the second sequence the target.
+    
+      :type: :class:`ost.seq.AlignmentHandle`
+    
+    .. attribute:: evalue
+    
+      The E-value of the alignment
+    
+    .. attribute:: prob
+    
+      The probability of the alignment (between 0 and 100)
+    
+    .. attribute:: score
+    
+      The alignment score
+    """
+    def __init__(self, hit_id, aln, score, ss_score,evalue, pvalue, prob):
+        self.hit_id = hit_id
+        self.aln = aln
+        self.score = score
+        self.ss_score = ss_score
+        self.evalue = evalue
+        self.prob = prob
+        self.pvalue = pvalue
 
 class HHblitsHeader:
     def __init__(self):
@@ -62,25 +62,29 @@ class HHblitsHeader:
         self.command = ''
 
 def ParseHeaderLine(line):
-  # First, we seek the start of the identifier, that is, the first whitespace
-  # after the hit number + 1. Since the identifier may contain whitespaces
-  # itself, we cannot split the whole line
-  for i in range(0, len(line)):
-    if line[i].isdigit():
-      break
-  for i in range(i, len(line)):
-    if line[i] == ' ':
-      break
-  assert len(line)-i >= 31 and line[i+1] != ' '
-  hit_id = line[i+1:i+31].strip()
-  fields = line[i+32:].split()
-  prob = float(fields[0])
-  evalue = float(fields[1])
-  pvalue = float(fields[2])
-  score = float(fields[3])
-  ss_score = float(fields[4])
-  offsets = (int(fields[6].split('-')[0]), int(fields[7].split('-')[0]))
-  return (HHblitsHit(hit_id, None, score, ss_score, evalue, pvalue, prob), offsets)
+    '''Fetch header content.
+
+    First, we seek the start of the identifier, that is, the first whitespace
+    after the hit number + 1. Since the identifier may contain whitespaces
+    itself, we cannot split the whole line
+    '''
+    for i in range(0, len(line)):
+        if line[i].isdigit():
+            break
+    for i in range(i, len(line)):
+        if line[i] == ' ':
+            break
+    assert len(line)-i >= 31 and line[i+1] != ' '
+    hit_id = line[i+1:i+31].strip()
+    fields = line[i+32:].split()
+    prob = float(fields[0])
+    evalue = float(fields[1])
+    pvalue = float(fields[2])
+    score = float(fields[3])
+    ss_score = float(fields[4])
+    offsets = (int(fields[6].split('-')[0]), int(fields[7].split('-')[0]))
+    return (HHblitsHit(hit_id, None, score, ss_score, evalue, pvalue, prob),
+            offsets)
 
 def ParseHHblitsOutput(output):
     """
@@ -444,45 +448,45 @@ class HHblits:
 
 
     def A3MToCS(self, a3m_file, cs_file=None, options={}):
-      """
-      Converts the A3M alignment file to a column state sequence file. If
-      cs_file is not given, the output file will be set to
-      <file-basename>.seq219.
-      :param a3m_file: A3M file to be converted.
-      :type a3m_file: :class:`str`
-      :param cs_file: Output file name (may be omitted)
-      :type cs_file: :class:`str`
-      :param options: dictionary of options to *cstranslate*, must come with the
-                      right amount of '-' in front.
-      :type options: :class:`dict`
-      """
-      cstranslate = os.path.join(self.hhlib_dir, 'bin', 'cstranslate')
-      if not cs_file:
-          cs_file = '%s.seq219' % os.path.splitext(a3m_file)[0]
-      if os.path.exists(cs_file):
-          return cs_file
-      o = list()
-      for k, v in options.iteritems():
-          if type(v) == type(True):
-              if v == True:
-                  o.append('%s' % str(k))
-          else:
-              o.append('%s %s' % (str(k), str(v)))
-      o = ' '.join(o)
-      cs_cmd = '%s -i %s -o %s %s' % (cstranslate, a3m_file, cs_file, o)
-      ost.LogVerbose('converting %s to %s' % (a3m_file, cs_file))
-      job = subprocess.Popen(cs_cmd, shell=True,
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      sout, serr = job.communicate()
-      #lines = serr.splitlines()
-      #for l in lines:
-      #    print l
-      lines = sout.splitlines()
-      for l in lines:
-          if l in 'Wrote abstract state sequence to %s' % cs_file:
-              return cs_file
-      ost.LogWarning('Creating column state sequence file (%s) failed' % \
-                     cs_file)
+        """
+        Converts the A3M alignment file to a column state sequence file. If
+        cs_file is not given, the output file will be set to
+        <file-basename>.seq219.
+        :param a3m_file: A3M file to be converted.
+        :type a3m_file: :class:`str`
+        :param cs_file: Output file name (may be omitted)
+        :type cs_file: :class:`str`
+        :param options: dictionary of options to *cstranslate*, must come with
+                        the right amount of '-' in front.
+        :type options: :class:`dict`
+        """
+        cstranslate = os.path.join(self.hhlib_dir, 'bin', 'cstranslate')
+        if not cs_file:
+            cs_file = '%s.seq219' % os.path.splitext(a3m_file)[0]
+        if os.path.exists(cs_file):
+            return cs_file
+        o = list()
+        for k, v in options.iteritems():
+            if type(v) == type(True):
+                if v == True:
+                    o.append('%s' % str(k))
+            else:
+                o.append('%s %s' % (str(k), str(v)))
+        o = ' '.join(o)
+        cs_cmd = '%s -i %s -o %s %s' % (cstranslate, a3m_file, cs_file, o)
+        ost.LogVerbose('converting %s to %s' % (a3m_file, cs_file))
+        job = subprocess.Popen(cs_cmd, shell=True,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        sout, serr = job.communicate()
+        #lines = serr.splitlines()
+        #for l in lines:
+        #    print l
+        lines = sout.splitlines()
+        for l in lines:
+            if l in 'Wrote abstract state sequence to %s' % cs_file:
+                return cs_file
+        ost.LogWarning('Creating column state sequence file (%s) failed' % \
+                       cs_file)
 
     def CleanupFailed(self):
         '''In case something went wrong, call to make sure everything is clean.
