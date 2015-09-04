@@ -19,24 +19,44 @@ class HHblitsHit:
 
       String identifying the hit
 
+      :type: :class:`str`
+
     .. attribute:: aln
 
       Pairwise alignment containing the aligned part between the query and the
       target. First sequence is the query, the second sequence the target.
 
-      :type: :class:`ost.seq.AlignmentHandle`
+      :type: :class:`~ost.seq.AlignmentHandle`
+
+    .. attribute:: score
+
+      The alignment score
+
+      :type: :class:`float`
+
+    .. attribute:: ss_score
+
+      The secondary structure score
+
+      :type: :class:`float`
 
     .. attribute:: evalue
 
       The E-value of the alignment
 
+      :type: :class:`float`
+
+    .. attribute:: pvalue
+
+      The P-value of the alignment
+
+      :type: :class:`float`
+
     .. attribute:: prob
 
       The probability of the alignment (between 0 and 100)
 
-    .. attribute:: score
-
-      The alignment score
+      :type: :class:`float`
     """
     def __init__(self, hit_id, aln, score, ss_score, evalue, pvalue, prob):
         self.hit_id = hit_id
@@ -48,6 +68,44 @@ class HHblitsHit:
         self.pvalue = pvalue
 
 class HHblitsHeader:
+    """Stats from the beginning of search output.
+
+    .. attribute:: query
+
+      The name of the query sequence
+
+      :type: :class:`str`
+
+    .. attribute:: match_columns
+
+      Total of aligned Match columns
+
+      :type: :class:`int`
+
+    .. attribute:: n_eff
+
+      Value of the ``-neff`` option
+
+      :type: :class:`float`
+
+    .. attribute:: searched_hmms
+
+      Number of profiles searched
+
+      :type: :class:`int`
+
+    .. attribute:: date
+
+      Execution date
+
+      :type: :class:`datetime.datetime`
+
+    .. attribute:: command
+
+      Command used to run
+
+      :type: :class:`str`
+    """
     def __init__(self):
         self.query = ''
         self.match_columns = 0
@@ -62,6 +120,12 @@ def ParseHeaderLine(line):
     First, we seek the start of the identifier, that is, the first whitespace
     after the hit number + 1. Since the identifier may contain whitespaces
     itself, we cannot split the whole line
+
+    :param line: Line from the output header.
+    :type line: :class:`str`
+
+    :return: Hit information
+    :rtype: :class:`HHblitsHit`
     '''
     for i in range(0, len(line)):
         if line[i].isdigit():
@@ -83,8 +147,15 @@ def ParseHeaderLine(line):
 
 def ParseHHblitsOutput(output):
     """
-    Parses the HHblits output and returns a tuple of HHblitsHeader and
-    a list of HHblitsHit instances.
+    Parses the HHblits output and returns a tuple of :class:`HHblitsHeader` and
+    a list of :class:`HHblitsHit` instances.
+
+    :param output: output of a :meth:`HHblits.Search`, needs to be iteratable,
+                   e.g. an open file handle
+    :type output: :class:`file`/ iteratable
+
+    :return: a tuple of the header of the search results and the hits
+    :rtype: (:class:`HHblitsHeader`, :class:`HHblitsHit`)
     """
     lines = iter(output)
     def _ParseHeaderSection(lines):
@@ -202,8 +273,8 @@ def ParseA3M(a3m_file):
     Parse secondary structure information and the multiple sequence alignment 
     out of an A3M file.
     
-    :param a3m_file: Iterable containing the lines of the A3M file
-    :type a3m_file: iterable, e.g. an openend file
+    :param a3m_file: Iteratable containing the lines of the A3M file
+    :type a3m_file: iteratable, e.g. an opened file
     
     :return: Dictionary containing "ss_pred" (:class:`list`), "ss_conf"
              (:class:`list`) and "msa" (:class:`~ost.seq.AlignmentHandle`).
@@ -366,27 +437,31 @@ def EstimateMemConsumption():
     Also for small sequences it already uses quite some memnmory (46AA, 1.48G).
     And since the memory consumption could depend on the iterative search runs,
     how many hits are found in each step, we just go with 4G, here.
+
+    :return: Assumed memory consumtion
+    :rtype: (:class:`float`, :class:`str`)
     """
     return 4.0, 'G'
 
 class HHblits:
     """
     Initialise a new HHblits "search" for the given query. Query may either
-    be a :class:`ost.seq.SequenceHandle` or a string. In the former case, the
+    be a :class:`~ost.seq.SequenceHandle` or a string. In the former case, the
     query is the actual query sequence, in the latter case, the query is the
     filename to the file containing the query.
 
     :param query: Query sequence as file or sequence.
-    :type query: :class:`ost.seq.SequenceHandle` or :class:`str`
+    :type query: :class:`~ost.seq.SequenceHandle` or :class:`str`
     :param hhsuite_root: Path to the top-level directory of your hhsuite
                          installation.
     :type hhsuite_root: :class:`str`
     :param hhblits_bin: Name of the hhblits binary. Will only be used if
-                        ``hhsuite_root``/bin/hhblits does not exist.
+                        :attr:`hhsuite_root`:file:`/bin/hhblits` does not exist.
     :type hhblits_bin: :class:`str`
     :param working_dir: Directory for temporary files. Will be created if not
                         present but **not** automatically deleted.
     :type working_dir: :class:`str`
+
     """
     OUTPUT_PREFIX = 'query_hhblits'
     def __init__(self, query, hhsuite_root, hhblits_bin=None, working_dir=None):
@@ -435,7 +510,6 @@ class HHblits:
         if self.needs_cleanup and os.path.exists(self.working_dir):
             shutil.rmtree(self.working_dir)
 
-
     def BuildQueryMSA(self, nrdb, iterations=1, mact=None, cpu=1):
         """Builds the MSA for the query sequence
 
@@ -445,19 +519,25 @@ class HHblits:
         corruption. The alignment corruption is caused by low-scoring terminal
         alignments that draw the sequences found by PSI-blast away from the
         optimum. By removing these low scoring ends, part of the alignment
-        corruption can be suppressed. hhblits does NOT call PSIPRED on the MSA
-        to predict the secondary structure of the query sequence. This is done
-        by addss.pl of hhtools. The predicted secondary structure is stored
-        together with the sequences identified by hhblits.
+        corruption can be suppressed. hhblits does **not** call PSIPRED on the
+        MSA to predict the secondary structure of the query sequence. This is
+        done by addss.pl of hhtools. The predicted secondary structure is
+        stored together with the sequences identified by hhblits.
 
         :param nrdb: Database to be align against; has to be an hhblits database
         :type nrdb: :class:`str`
+
         :param iterations: Number of hhblits iterations
         :type iterations: :class:`int`
-        :param mact: '-mact' of hhblits
+
+        :param mact: ``-mact`` of hhblits
         :type mact: :class:`float`
-        :param cpu: '-cpu' of hhblits
+
+        :param cpu: ``-cpu`` of hhblits
         :type cpu: :class:`int`
+
+        :return: the path to the MSA file
+        :rtype: :class:`str`
         """
         a3m_file = '%s.a3m' % os.path.splitext(self.filename)[0]
         ost.LogInfo('Using hhblits from "%s"' % self.hhsuite_root)
@@ -506,7 +586,16 @@ class HHblits:
     def A3MToProfile(self, a3m_file, hhm_file=None):
         """
         Converts the A3M alignment file to a hhm profile. If hhm_file is not
-        given, the output file will be set to <file-basename>.hhm.
+        given, the output file will be set to <:attr:`a3m_file`-basename>.hhm.
+
+        :param a3m_file: input MSA
+        :type a3m_file: :class:`str`
+
+        :param hhm_file: output file name 
+        :type hhm_file: :class:`str`
+
+        :return: the path to the profile
+        :rtype: :class:`str`
         """
         hhmake = os.path.join(self.bin_dir, 'hhmake')
         if not hhm_file:
@@ -525,14 +614,20 @@ class HHblits:
         """
         Converts the A3M alignment file to a column state sequence file. If
         cs_file is not given, the output file will be set to
-        <file-basename>.seq219.
-        :param a3m_file: A3M file to be converted.
+        <:attr:`a3m_file`-basename>.seq219.
+
+        :param a3m_file: A3M file to be converted
         :type a3m_file: :class:`str`
-        :param cs_file: Output file name (may be omitted)
+
+        :param cs_file: output file name (may be omitted)
         :type cs_file: :class:`str`
+
         :param options: dictionary of options to *cstranslate*, must come with
                         the right amount of '-' in front.
         :type options: :class:`dict`
+
+        :return: the path to the column state sequence file
+        :rtype: :class:`str`
         """
         cstranslate = os.path.join(self.hhlib_dir, 'bin', 'cstranslate')
         if not cs_file:
@@ -577,6 +672,23 @@ class HHblits:
         several hhblits instances at once. Upon success, the filename of the
         result file is returned. This file may be parsed with
         :func:`ParseHHblitsOutput`.
+
+        :param a3m_file: input MSA file
+        :type a3m_file: :class:`str`
+
+        :param database: search database, needs to be the common prefix of the
+                         database files
+        :type database: :class:`str`
+
+        :param options: dictionary of options, must come with the right amount
+                        of '-' in front.
+        :type options: :class:`dict`
+
+        :param prefix: prefix to the result file
+        :type prefix: :class:`str`
+
+        :return: the path to the result file
+        :rtype: :class:`str`
         """
         opts = {'cpu' : 1, # no. of cpus used
                 'n'   : 1}   # no. of iterations
@@ -619,7 +731,11 @@ class HHblits:
 
 
 __all__ = ['HHblits', 'HHblitsHit', 'HHblitsHeader', 'ParseHeaderLine',
-           'ParseHHblitsOutput', 'ParseHHM', 'EstimateMemConsumption']
+           'ParseHHblitsOutput', 'ParseA3M', 'ParseHHM',
+           'EstimateMemConsumption']
 
 #  LocalWords:  HHblits MSA hhblits hhtools PSIPRED addss param nrdb str mact
-#  LocalWords:  cpu hhm func ParseHHblitsOutput ss pred conf msa
+#  LocalWords:  cpu hhm func ParseHHblitsOutput ss pred conf msa hhsuite dir
+#  LocalWords:  attr basename rtype cstranslate tuple HHblitsHeader meth aln
+#  LocalWords:  HHblitsHit iteratable evalue pvalue neff hmms datetime
+#  LocalWords:  whitespace whitespaces
