@@ -36,6 +36,7 @@
 #include <ost/module_config.hh>
 #include <ost/invalid_handle.hh>
 #include <ost/message.hh>
+#include <ost/geom/vec3.hh>
 
 namespace ost {
 
@@ -45,8 +46,8 @@ struct  DLLEXPORT GenericPropError: public Error
     Error(m)
   {}
 };
-  
-typedef boost::variant<String, Real, int, bool> GenericPropValue;
+
+typedef boost::variant<String, Real, int, bool, geom::Vec3> GenericPropValue;
 
 ///  \brief base class for the implementation
 class  TEMPLATE_EXPORT GenericPropContainerImpl
@@ -256,6 +257,13 @@ public:
     return this->gp_get<bool>(key);
   }
 
+  /// \brief returns Vec3 property, raises an exception if it does not exist
+  geom::Vec3 GetVec3Prop(const String& key) const
+  {
+    CheckHandleValidity(*static_cast<const H*>(this));    
+    return this->gp_get<geom::Vec3>(key);
+  }
+
   /// \brief returns String property, or the given default if it does not exist
   String GetStringProp(const String& key, const String& def) const
   {
@@ -364,6 +372,13 @@ public:
     this->GetImpl()->GenericProp(key)=value;
   }
   
+  /// \ brief sets Vec3 property
+  void SetVec3Prop(const String& key, geom::Vec3 value)
+  {
+    CheckHandleValidity(*static_cast<const H*>(this));    
+    this->GetImpl()->GenericProp(key)=value;
+  } 
+
   void RemoveProp(const String& key)
   {
     CheckHandleValidity(*static_cast<const H*>(this));
