@@ -17,10 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <Eigen/Core>
-#include <Eigen/Array>
-#include <Eigen/SVD>
-#include <Eigen/LU>
+#include <Eigen/Eigenvalues>
 #include <ost/message.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/alg/superpose_frames.hh>
@@ -100,7 +97,7 @@ void AddSuperposedFrame(CoordGroupHandle& superposed, EMatX3& ref_mat,EMatX3& re
   frame_center=frame_mat.rowwise().sum()/frame_mat.cols();
   frame_centered=row_sub(frame_mat, frame_center);
   //single value decomposition
-  Eigen::SVD<EMat3> svd(frame_centered*ref_centered);
+  Eigen::JacobiSVD<EMat3> svd(frame_centered*ref_centered,Eigen::ComputeFullU | Eigen::ComputeFullV);
   EMat3 matrixVT=svd.matrixV().transpose();
   //determine rotation
   Real detv=matrixVT.determinant();

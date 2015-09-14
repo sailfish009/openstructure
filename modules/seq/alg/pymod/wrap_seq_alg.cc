@@ -58,13 +58,6 @@ BOOST_PYTHON_MODULE(_ost_seq_alg)
     .def("GetInsertions", &InsDel::GetInsertions)
   ;
   
-  class_<SubstWeightMatrix, SubstWeightMatrixPtr>("SubstWeightMatrix", init<>())
-    .def("GetWeight", &SubstWeightMatrix::GetWeight)
-    .def("SetWeight", &SubstWeightMatrix::SetWeight)
-    .def("GetMinWeight", &SubstWeightMatrix::GetMinWeight)
-    .def("GetMaxWeight", &SubstWeightMatrix::GetMaxWeight)
-  ;
-  
   def("MergePairwiseAlignments", &MergePairwiseAlignments);
   def("Conservation", &Conservation, (arg("assign")=true, arg("prop_name")="cons", arg("ignore_gap")=false));
   def("LocalAlign", &LocalAlign, (arg("seq1"), arg("seq2"),arg("subst_weight"), 
@@ -74,5 +67,21 @@ BOOST_PYTHON_MODULE(_ost_seq_alg)
   def("SemiGlobalAlign", &SemiGlobalAlign,(arg("seq1"),arg("seq2"),arg("subst_weight"), 
       arg("gap_open")=-5, arg("gap_ext")=-2));
   def("ShannonEntropy", &ShannonEntropy, (arg("aln"), arg("ignore_gaps")=true));
+
+
+  scope mat_scope = class_<SubstWeightMatrix, SubstWeightMatrixPtr>("SubstWeightMatrix", init<>())
+                      .def("GetWeight", &SubstWeightMatrix::GetWeight)
+                      .def("SetWeight", &SubstWeightMatrix::SetWeight)
+                      .def("GetMinWeight", &SubstWeightMatrix::GetMinWeight)
+                      .def("GetMaxWeight", &SubstWeightMatrix::GetMaxWeight)
+                      .def("AssignPreset", &SubstWeightMatrix::AssignPreset)
+  ;
+
+  enum_<SubstWeightMatrix::Preset>("Preset")
+    .value("BLOSUM45", SubstWeightMatrix::BLOSUM45)
+    .value("BLOSUM62", SubstWeightMatrix::BLOSUM62)
+    .value("BLOSUM80", SubstWeightMatrix::BLOSUM80)
+    .value("BLOSUM100", SubstWeightMatrix::BLOSUM100)
+  ;
 
 }

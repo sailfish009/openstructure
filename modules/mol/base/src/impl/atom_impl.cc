@@ -355,20 +355,29 @@ void AtomImpl::DeleteAllTorsions() {
   EntityImplPtr e=this->GetEntity();
   TorsionImplMap::iterator i;
   std::vector<TorsionImplMap::iterator> t_rm_vec;
+  std::set<ResidueImpl*> involved_residues;
   for (i=e->GetTorsionMap().begin(); i!=e->GetTorsionMap().end(); ++i) {
      if (i->second->IsAtomInvolved(shared_from_this())) {
         t_rm_vec.push_back(i);
+        involved_residues.insert(i->second->GetFirst()->GetResidue().get());
+        involved_residues.insert(i->second->GetSecond()->GetResidue().get());
+        involved_residues.insert(i->second->GetThird()->GetResidue().get());
+        involved_residues.insert(i->second->GetFourth()->GetResidue().get());
      }
   }
   std::vector<TorsionImplMap::iterator>::iterator it_rm;
   for (it_rm=t_rm_vec.begin(); it_rm!=t_rm_vec.end(); ++it_rm) {
      e->GetTorsionMap().erase(*it_rm);
   }
-  TorsionImplList& l=this->GetResidue()->GetTorsionList();
-  TorsionImplList::iterator j;
-  j=std::remove_if(l.begin(), l.end(),
-                   bind(&TorsionImpl::IsAtomInvolved, _1, shared_from_this()));
-  l.erase(j, l.end());
+  
+  for(std::set<ResidueImpl*>::iterator i = involved_residues.begin(); 
+      i != involved_residues.end(); ++i){
+    TorsionImplList& l = (*i)->GetTorsionList();
+    TorsionImplList::iterator j;
+    j=std::remove_if(l.begin(), l.end(),
+                     bind(&TorsionImpl::IsAtomInvolved, _1, shared_from_this()));
+    l.erase(j, l.end());
+  }
 }
 
 }}} // ns

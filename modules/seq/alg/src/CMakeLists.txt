@@ -23,11 +23,8 @@ sequence_identity.cc
 sequence_similarity.cc
 ins_del.cc
 conservation.cc
+subst_weight_matrix.cc
 )
-
-if (ENABLE_INFO)
-  list (APPEND OST_SEQ_ALG_SOURCES subst_weight_matrix.cc)
-endif()
 
 module(NAME seq_alg HEADER_OUTPUT_DIR ost/seq/alg SOURCES ${OST_SEQ_ALG_SOURCES}
        HEADERS ${OST_SEQ_ALG_HEADERS} DEPENDS_ON ost_seq)

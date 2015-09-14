@@ -8,6 +8,7 @@ dssp.py
 clustalw.py
 utils.py
 naccess.py
+hhblits.py
 blast.py
 cadscore.py
 kclust.py

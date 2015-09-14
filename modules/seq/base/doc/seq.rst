@@ -436,3 +436,144 @@ an alignment:
   .. method:: RemoveSequence(index)
 
     Remove sequence at *index* from the alignment.
+
+
+Handling Hidden Markov Models
+--------------------------------------------------------------------------------
+
+The HMM provides a simple container for hidden markov models in form of
+single columns containing amino acid frequencies and transition probabilities.
+
+.. class:: HMMColumn
+
+  .. method:: BLOSUMNullModel()
+
+    Static method, that returns a new :class:`HMMColumn` with amino acid
+    frequencies given from the BLOSUM62 substitution matrix.
+
+  .. method:: GetFreq(aa)
+
+    :param aa:  One letter code of standard amino acid
+    :type aa:  :class:`str`
+
+    :returns:  Frequency of aa
+
+  .. method:: SetFreq(aa,freq)
+
+    :param aa:  One letter code of standard amino acid
+    :param freq:  The frequency of the given amino acid
+    :type aa:  :class:`str`
+    :type freq:  :class:`float`
+
+  .. method:: GetTransitionFreq(from,to)
+
+    :param from:  Current state of HMM (HMM_MATCH, HMM_INSERT or HMM_DELETE)
+    :param to:  Next state
+
+    :returns:  Frequency of given state transition
+
+  .. method:: SetTransitionFreq(from,to,freq)
+
+    :param from:  Current state of HMM (HMM_MATCH, HMM_INSERT or HMM_DELETE)
+    :param to:  Next state
+    :param freq:  Frequency of transition
+
+  .. attribute:: one_letter_code
+
+    One letter code, this column is associated to
+
+  .. attribute:: entropy
+
+    Shannon entropy based on the columns amino acid frequencies
+
+
+.. class:: HMM
+
+  .. method:: Load(filename)
+
+    Static method to load an hmm in the hhm format as it is in use in the HHSuite.
+
+    :param filename:  Name of file to load
+    :type filename:  :class:`str`
+
+  .. method:: AddColumn(col)
+
+    Appends column in the internal column list.
+
+    :param col:  Column to add
+    :type col:  :class:`HMMColumn`
+
+  .. method:: Extract(from,to)
+
+    :param from:  Col Idx to start from
+    :param to:  End Idx, not included in sub-HMM
+
+    :type from:  :class:`int`
+    :type to:  :class:`int`
+
+    :returns:  sub-HMM as defined by given indices
+
+  .. attribute:: sequence
+
+    Sequence of the columns
+
+  .. attribute:: columns
+
+    Iterable columns of the HMM
+
+  .. attribute:: null_model
+
+    Null model of the HMM
+
+  .. attribute:: avg_entropy
+
+    Average entropy of all the columns
+
+.. class:: HMMDB
+
+  A simple database to gather :class:`HMM` objects. It is possible
+  to save them to disk in a compressed format with limited accuracy
+  (4 digits for freq values).
+
+  .. method:: Save(filename)
+
+    :param filename:  Name of file that will be generated on disk.
+    :type filename:  :class:`str`
+
+  .. method:: Load(filename)
+
+    Static loading method
+
+    :param filename:  Name of file from which the database should be loaded.
+    :type filename:  :class:`str`
+    :returns:  The loaded database
+
+  .. method:: AddHMM(name, hmm)
+
+    :param name:  Name of HMM to be added
+    :param hmm:  HMM to be added
+
+    :type name:  :class:`str`
+    :type hmm:  :class:`HMM`
+    :raises:  :class:`Exception` when filename is longer than 255 characters.
+
+  .. method:: GetHMM(name)
+
+    :param name:  Name of HMM to be returned
+    :type name:  :class:`str`
+    :returns:  The requested :class:`HMM`
+    :raises:  :class:`Exception` when no :class:`HMM` for **name** exists.
+
+  .. method:: Size()
+
+    :returns: Number of :class:`HMM` objects in the database
+
+  .. method:: GetNames()
+
+    :returns: A nonsorted list of the names of all :class:`HMM` objects in the database
+
+
+
+
+
+

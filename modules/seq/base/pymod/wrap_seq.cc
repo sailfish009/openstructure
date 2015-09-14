@@ -20,9 +20,11 @@
 using namespace boost::python;
 
 void export_sequence();
+void export_hmm();
 
 BOOST_PYTHON_MODULE(_ost_seq)
 {
   export_sequence();
+  export_hmm();
 
 }

@@ -60,7 +60,7 @@ Mat3 Vec3List::GetPrincipalAxes() const
   Mat3 inertia=this->GetInertia();  
   EMat3 inertia_mat(inertia.Data());
 
-  Eigen::SVD<EMat3> svd(inertia_mat);
+  Eigen::JacobiSVD<EMat3> svd(inertia_mat,Eigen::ComputeFullU);
   EMat3 rot=svd.matrixU();
   Mat3 axes(rot.data());
   return axes;
