@@ -29,6 +29,10 @@
 #include <ost/seq/alg/global_align.hh>
 #include <ost/seq/alg/semiglobal_align.hh>
 #include <ost/seq/alg/entropy.hh>
+#include <ost/seq/alg/pair_subst_weight_matrix.hh>
+#include <ost/seq/alg/contact_weight_matrix.hh>
+#include <ost/seq/alg/contact_prediction_score.hh>
+
 using namespace boost::python;
 using namespace ost::seq;
 using namespace ost::seq::alg;
@@ -68,6 +72,32 @@ BOOST_PYTHON_MODULE(_ost_seq_alg)
       arg("gap_open")=-5, arg("gap_ext")=-2));
   def("ShannonEntropy", &ShannonEntropy, (arg("aln"), arg("ignore_gaps")=true));
 
+  class_<PairSubstWeightMatrix>("PairSubstWeightMatrix",init< std::vector <std::vector <std::vector <std::vector <Real> > > >,std::vector <char> >())
+    .def(init<>())
+    .def_readonly("weights",&PairSubstWeightMatrix::weights)
+    .def_readonly("aa_list",&PairSubstWeightMatrix::aa_list)
+  ;
+
+  class_<ContactWeightMatrix>("ContactWeightMatrix",init< std::vector <std::vector <Real> >,std::vector <char> >())
+    .def(init<>())
+    .def_readonly("weights",&ContactWeightMatrix::weights)
+    .def_readonly("aa_list",&ContactWeightMatrix::aa_list)
+  ;
+
+  class_<ContactPredictionScoreResult>("ContactPredictionScoreResult",no_init)
+    .def_readonly("matrix",&ContactPredictionScoreResult::matrix)
+    .def_readonly("sorted_indices",&ContactPredictionScoreResult::sorted_indices)
+    .def("RefreshSortedIndices",&ContactPredictionScoreResult::RefreshSortedIndices)
+    .def("GetScore",&ContactPredictionScoreResult::GetScore,(arg("i"),arg("j")))
+    .def("SetScore",&ContactPredictionScoreResult::SetScore,(arg("i"),arg("j"),arg("score")))
+  ;
+  def("CalculateMutualInformation", &CalculateMutualInformation,(arg("aln"),arg("w")=LoadConstantContactWeightMatrix(),
+                                                        arg("apc_correction")=true,arg("zpx_transformation")=true,arg("small_number_correction")=0.05));
+  def("CalculateContactScore", &CalculateContactScore,(arg("aln"), arg("w")=LoadDefaultContactWeightMatrix()));
+  def("CalculateContactSubstitutionScore", &CalculateContactSubstitutionScore,(arg("aln"), arg("ref_seq_index")=0, arg("w")=LoadDefaultPairSubstWeightMatrix()));
+  def("LoadDefaultContactWeightMatrix",LoadDefaultContactWeightMatrix);
+  def("LoadConstantContactWeightMatrix",LoadConstantContactWeightMatrix);
+  def("LoadDefaultPairSubstWeightMatrix",LoadDefaultPairSubstWeightMatrix);
 
   scope mat_scope = class_<SubstWeightMatrix, SubstWeightMatrixPtr>("SubstWeightMatrix", init<>())
                       .def("GetWeight", &SubstWeightMatrix::GetWeight)

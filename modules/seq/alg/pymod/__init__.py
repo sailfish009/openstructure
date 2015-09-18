@@ -168,3 +168,37 @@ def AlignmentFromChainView(chain, handle_seq_name='handle',
       s1.Append('-')
     idx0+=1
   return seq.CreateAlignment(s0, s1)
+
+def PredictContacts(ali):
+  """
+  Predicts contacts from a multiple sequence alignment using a combination
+  of Mutual Information (*MI*) and the Contact Substitution Score (*CoEvoSc*).
+  MI is calculated with the APC and small number corrections as well as with a 
+  transformation into Z-scores. The *CoEvoSc* is calculated using the default 
+  PairSubstWeightMatrix (see seq.alg.LoadDefaultPairSubstWeightMatrix).
+  The final score for a pair of columns *(i,j)* of **ali** is obtained from:
+  
+  Sc(i,j)=MI(i,j)exp(CoEvoSc(i,j))      if *(i,j)* >=0
+  
+  Sc(i,j)=MI(i,j)exp(1-CoEvoSc(i,j))    if *(i,j)* <0
+
+  :param ali: The multiple sequence alignment
+  :type ali: :class:`~ost.seq.AlignmentHandle`
+  """
+  import math
+  from ost import seq
+  if not type(ali)==type(seq.AlignmentHandle()):
+    print "Parameter should be an AlignmentHandle"
+    return
+  mi=CalculateMutualInformation(ali)
+  CoEvoSc=CalculateContactSubstitutionScore(ali)
+  ncol=ali.GetLength()
+  for i in range(ncol):
+    for j in range(ncol):
+      if mi.matrix[i][j]>=0:
+        mi.matrix[i][j]=mi.matrix[i][j]*(math.exp(CoEvoSc.matrix[i][j]))
+      else:
+        mi.matrix[i][j]=mi.matrix[i][j]*(math.exp(1.-CoEvoSc.matrix[i][j]))
+  mi.RefreshSortedIndices()
+  return mi
+
