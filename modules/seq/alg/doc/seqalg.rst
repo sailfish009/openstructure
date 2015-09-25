@@ -160,3 +160,133 @@
   :param gap_open: The gap opening penalty. Must be a negative number
   :param gap_ext: The gap extension penalty. Must be a negative number
   :returns: best-scoring alignment of *seq1* and *seq2*.
+
+
+.. _contact-prediction:
+
+Contact Prediction
+--------------------------------------------------------------------------------
+
+This is a set of functions for predicting pairwise contacts from a multiple
+sequence alignment (MSA). The core method here is mutual information which uses 
+coevolution to predict contacts. Mutual information is complemented by two other 
+methods which score pairs of columns of a MSA from the likelyhood of certain
+amino acid pairs to form contacts (statistical potential) and the likelyhood
+of finding certain substitutions of aminio-acid pairs in columns of the MSA
+corresponding to interacting residues.
+
+.. class:: ContactPredictionScoreResult
+  
+  Object containing the results form a contact prediction. 
+
+  .. attribute:: matrix
+
+    An *NxN* :class:`~ost.FloatMatrix` where *N* is the length of the alignment.
+    The element *i,j* corresponds to the score of the corresponding
+    columns of the MSA. High scores correspond to high likelyhood of
+    a contact.
+
+  .. attribute:: sorted_indices
+
+    List of all indices pairs *i,j*, containing (N*N-1)/2 elements,
+    as the **matrix** is symmetrical and elements in the diagonal
+    are ignored. The indices are sorted from the pair most likely to form
+    a contact to the least likely one.
+
+  .. method:: GetScore(i,j)
+
+    returns **matrix(i,j)**
+
+    :param i: First index
+    :param j: Second index
+    :type i:  :class:`int`
+    :type j:  :class:`int`
+
+  .. method:: SetScore(i,j,score)
+
+    Sets **matrix(i,j)** to **score**
+
+    :param i: First index
+    :param j: Second index
+    :param score: The score
+    :type i:  :class:`int`
+    :type j:  :class:`int`
+    :type score:  :class:`float`
+
+.. autofunction:: PredictContacts
+
+.. function:: CalculateMutualInformation(aln,weights=LoadConstantContactWeightMatrix(),
+            apc_correction=true,zpx_transformation=true,small_number_correction=0.05)
+
+    Calculates the mutual information (MI) from a multiple sequence alignemnt. Contributions of each pair of amino-acids are weighted using the matrix **weights** (weighted mutual information). The average product correction (**apc_correction**) correction and transformation into Z-scores (**zpx_transofrmation**) increase prediciton accuracy by reducing the effect of phylogeny and other noise sources. The small number correction reduces noise for alignments with small number of sequences of low diversity.
+
+    :param aln: The multiple sequences alignment
+    :type aln:  :class:`~ost.seq.AlignmentHandle`
+    :param weights: The weight matrix
+    :type weights:  :class`ContactWeightMatrix`
+    :param apc_correction: Whether to use the APC correction
+    :type apc_correction:  :class:`bool`
+    :param zpx_transformation:  Whether to transform the scores into Z-scores
+    :type zpx_transformation: :class:`bool`
+    :param small_number_correction: initial values for the probabilities of having a given pair of amino acids *p(a,b)*.
+    :type small_number_correction: :class:`float`
+
+.. function:: CalculateContactScore(aln,weights=LoadDefaultContactWeightMatrix())
+  
+  Calculates the Contact Score (*CoSc*) from a multiple sequence alignment. For each pair of residues *(i,j)* (pair of columns in the MSA), *CoSc(i,j)* is the average over the values of the **weights** corresponding to the amino acid pairs in the columns.
+
+  :param aln: The multiple sequences alignment
+  :type aln:  :class:`~ost.seq.AlignmentHandle`
+  :param weights: The contact weight matrix
+  :type weights:  :class`ContactWeightMatrix`
+
+.. function:: CalculateContactSubstitutionScore(aln,ref_seq_index=0,
+                            weights=LoadDefaultPairSubstWeightMatrix())
+
+  Calculates the Contact Substitution Score (*CoEvoSc*) from a multiple sequence alignment. For each pair of residues *(i,j)* (pair of columns in the MSA), *CoEvoSc(i,j)* is the average over the values of the **weights** corresponding to substituting the amino acid pair in the reference sequence (given by **ref_seq_index**) with all other pairs in columns *(i,j)* of the **aln**.
+
+  :param aln: The multiple sequences alignment
+  :type aln:  :class:`~ost.seq.AlignmentHandle`
+  :param weights: The pair substitution weight matrix
+  :type weights:  :class`ContactWeightMatrix`
+
+.. function:: LoadDefaultContactWeightMatrix()
+  
+  :returns: *CPE*, a :class:`ContactWeightMatrix` that was calculated from a large (>15000) set of
+    high quality crystal structures as *CPE=log(CF(a,b)/NCF(a,b))* and then normalised so that all its elements are comprised between 0 and 1. *CF(a,b)* is the frequency of amino acids *a* and *b* for pairs of contacting residues and *NCF(a,b)* is the frequency of amino acids *a* and *b* for pairs of non-contacting residues. Apart from weights for the standard amino acids, this matrix gives a weight of 0 to all pairs for which at least one amino-acid is a gap.
+
+.. function:: LoadConstantContactWeightMatrix()
+  
+  :returns: A :class:`ContactWeightMatrix`. This matrix gives a weight of one to all pairs of
+   standard amino-acids and a weight of 0 to pairs for which at least one amino-acid is a gap.
+
+.. function:: LoadDefaultPairSubstWeightMatrix()
+  
+  :returns: *CRPE*, a :class:`PairSubstWeightMatrix` that was calculated from a large (>15000) set of
+    high quality crystal structures as *CRPE=log(CRF(ab->cd)/NCRF(ab->cd))* and then normalised so that all its elements are comprised between 0 and 1. *CRF(ab->cd)* is the frequency of replacement of a pair of amino acids  *a* and *b* by a pair *c* and *d* in columns of the MSA corresponding to contacting residues and *NCRF(ab->cd)* is the frequency of replacement of a pair of amino acids  *a* and *b* by a pair *c* and *d* in columns of the MSA corresponding to non-contacting residues. Apart from weights for the standard amino acids, this matrix gives a weight of 0 to all pair substitutions for which at least one amino-acid is a gap.
+
+
+.. class:: PairSubstWeightMatrix(weights, aa_list)
+
+  This class is used to associate a weight to any substitution from one amino-acid pair *(a,b)* to any other pair *(c,d)*.
+
+  .. attribute:: weights
+
+    A :class:`~ost.FloatMatrix4` of size *NxNxNxN*, where *N=len(aa_list)*
+
+  .. attribute:: aa_list
+
+    A :class:`CharList` of one letter codes of the amino acids for which weights are found in the **weights** matrix.
+
+.. class:: ContactWeightMatrix(weights, aa_list)
+
+  This class is used to associate a weight to any pair of amino-acids.
+
+  .. attribute:: weights
+
+    A :class:`~ost.FloatMatrix` of size *NxN*, where *N=len(aa_list)*
+
+  .. attribute:: aa_list
+
+    A :class:`CharList` of one letter codes of the amino acids for which weights are found in the **weights** matrix.
+
