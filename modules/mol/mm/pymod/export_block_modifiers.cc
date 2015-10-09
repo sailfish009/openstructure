@@ -69,27 +69,27 @@ void export_BlockModifiers()
   boost::python::register_ptr_to_python<ost::mol::mm::BlockModifierPtr>();
 
   class_<ost::mol::mm::GromacsHydrogenConstructor, bases<ost::mol::mm::HydrogenConstructor> >("GromacsHydrogenConstructor", init<>())
-    .def("ApplyOnBuildingBlock",&ost::mol::mm::GromacsHydrogenConstructor::ApplyOnBuildingBlock)
-    .def("ApplyOnResidue",&ost::mol::mm::GromacsHydrogenConstructor::ApplyOnResidue)
-    .def("AddHydrogenRule",&WrapAddHydrogenRule)
+    .def("ApplyOnBuildingBlock",&ost::mol::mm::GromacsHydrogenConstructor::ApplyOnBuildingBlock,(arg("block")))
+    .def("ApplyOnResidue",&ost::mol::mm::GromacsHydrogenConstructor::ApplyOnResidue,(arg("residue"),arg("editor")))
+    .def("AddHydrogenRule",&WrapAddHydrogenRule,(arg("number"),arg("method"),arg("hydrogen_names"),arg("anchors")))
   ;
 
   class_<ost::mol::mm::GromacsBlockModifier, bases<ost::mol::mm::BlockModifier> >("GromacsBlockModifier", init<>())
     .def("ApplyOnBuildingBlock",&ost::mol::mm::GromacsBlockModifier::ApplyOnBuildingBlock,(arg("block")))
-    .def("ApplyOnResidue",&ost::mol::mm::GromacsBlockModifier::ApplyOnResidue,(arg("residue")))
+    .def("ApplyOnResidue",&ost::mol::mm::GromacsBlockModifier::ApplyOnResidue,(arg("residue"),arg("residue")))
     .def("AddReplaceRule",&ost::mol::mm::GromacsBlockModifier::AddReplaceRule,(arg("name"),arg("new_name"),arg("new_type"),arg("new_charge")))
     .def("AddAddRule",&ost::mol::mm::GromacsBlockModifier::AddAddRule,(arg("number"),arg("method"),arg("atom_names"),arg("anchors"),arg("type"),arg("charge")))
     .def("AddBond",&ost::mol::mm::GromacsBlockModifier::AddBond,(arg("bond")))
     .def("AddAngle",&ost::mol::mm::GromacsBlockModifier::AddAngle,(arg("angle")))
     .def("AddDihedral",&ost::mol::mm::GromacsBlockModifier::AddDihedral,(arg("dihedral")))
     .def("AddImproper",&ost::mol::mm::GromacsBlockModifier::AddImproper,(arg("improper")))
-    .def("AddCMap",&ost::mol::mm::GromacsBlockModifier::AddDeleteAtom,(arg("cmap")))
+    .def("AddCMap",&ost::mol::mm::GromacsBlockModifier::AddCMap,(arg("cmap")))
     .def("AddDeleteAtom",&ost::mol::mm::GromacsBlockModifier::AddDeleteAtom,(arg("name")))
   ;
  
   class_<ost::mol::mm::HeuristicHydrogenConstructor, bases<ost::mol::mm::HydrogenConstructor> >("HeuristicHydrogenConstructor", init<ost::mol::mm::BuildingBlockPtr>())
   .def("ApplyOnBuildingBlock",&ost::mol::mm::HeuristicHydrogenConstructor::ApplyOnBuildingBlock,(arg("block")))
-  .def("ApplyOnResidue",&ost::mol::mm::HeuristicHydrogenConstructor::ApplyOnResidue,(arg("residue")))
+  .def("ApplyOnResidue",&ost::mol::mm::HeuristicHydrogenConstructor::ApplyOnResidue,(arg("residue"),arg("editor")))
   ;
 
   boost::python::register_ptr_to_python<ost::mol::mm::GromacsHydrogenConstructorPtr>();
