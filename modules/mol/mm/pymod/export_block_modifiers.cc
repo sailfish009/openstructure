@@ -76,7 +76,7 @@ void export_BlockModifiers()
 
   class_<ost::mol::mm::GromacsBlockModifier, bases<ost::mol::mm::BlockModifier> >("GromacsBlockModifier", init<>())
     .def("ApplyOnBuildingBlock",&ost::mol::mm::GromacsBlockModifier::ApplyOnBuildingBlock,(arg("block")))
-    .def("ApplyOnResidue",&ost::mol::mm::GromacsBlockModifier::ApplyOnResidue,(arg("residue"),arg("residue")))
+    .def("ApplyOnResidue",&ost::mol::mm::GromacsBlockModifier::ApplyOnResidue,(arg("residue"),arg("editor")))
     .def("AddReplaceRule",&ost::mol::mm::GromacsBlockModifier::AddReplaceRule,(arg("name"),arg("new_name"),arg("new_type"),arg("new_charge")))
     .def("AddAddRule",&WrapAddAddRule,(arg("number"),arg("method"),arg("atom_names"),arg("anchors"),arg("type"),arg("charge")))
     .def("AddBond",&ost::mol::mm::GromacsBlockModifier::AddBond,(arg("bond")))
