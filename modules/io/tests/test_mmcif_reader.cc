@@ -584,15 +584,19 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
 
   tmmcif_h.SetCategory(StringRef("citation", 8));
   tmmcif_h.Add(StringRef("id", 2));
+  tmmcif_h.Add(StringRef("year", 4));
   tmmcif_h.Add(StringRef("book_title", 10));
   tmmcif_h.Add(StringRef("journal_abbrev", 14));
   tmmcif_p.OnBeginLoop(tmmcif_h);
 
   columns.push_back(StringRef("Foo", 3));
+  columns.push_back(StringRef("1979", 4));
   columns.push_back(StringRef("The Guide", 9));
   columns.push_back(StringRef(".", 1));
 
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
+
+  BOOST_CHECK(tmmcif_p.GetInfo().GetCitations().back().GetYear() == 1979);
 
   columns.pop_back();
   columns.pop_back();
