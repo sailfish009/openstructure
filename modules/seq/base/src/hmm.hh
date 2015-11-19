@@ -59,13 +59,9 @@ class HMMColumn {
 
   Real GetNEffDel() const { return n_eff_del_; }
 
-  Real GetFreq(char ch) const {
-    return freq_[this->GetIndex(ch)];
-  }
+  Real GetFreq(char ch) const;
 
-  void SetFreq(char ch, Real freq) {
-    freq_[this->GetIndex(ch)]=freq;
-  }
+  void SetFreq(char ch, Real freq);
 
   bool operator==(const HMMColumn& rhs) const {
     return !memcmp(freq_, rhs.freq_, sizeof(freq_)) &&

@@ -60,6 +60,22 @@ Real HMMColumn::GetEntropy() const {
   return entropy;
 }
 
+Real HMMColumn::GetFreq(char ch) const{
+  int idx = this->GetIndex(ch);
+  if(idx == -1){
+    throw std::runtime_error("Invalid One Letter Code observed when getting frequency in HMMColumn!");
+  }
+  return freq_[idx];
+}
+
+void HMMColumn::SetFreq(char ch, Real freq){
+  int idx = this->GetIndex(ch);
+  if(idx == -1){
+    throw std::runtime_error("Invalid One Letter Code observed when setting frequency in HMMColumn!");
+  }
+  freq_[idx] = freq;
+}
+
 HMMPtr HMM::Load(const std::string& filename) {
   HMMPtr hmm(new HMM);
   boost::iostreams::filtering_stream<boost::iostreams::input> in;
