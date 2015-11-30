@@ -78,6 +78,7 @@ class HMMColumn {
   char GetOneLetterCode() const { return olc_; }
   void SetOneLetterCode(char olc) { olc_ = olc; }
   Real GetEntropy() const;
+  static int GetIndex(char ch);
 
   static HMMColumn BLOSUMNullModel();
 
@@ -167,7 +168,6 @@ class HMMColumn {
   }
 
  private:
-  int GetIndex(char ch) const;
   char olc_;
   Real freq_[20];
   Real trans_[3][3];

@@ -8,7 +8,7 @@
 
 namespace ost { namespace seq{ 
 
-int HMMColumn::GetIndex(char olc) const {
+int HMMColumn::GetIndex(char olc){
   if (olc == 'A') return 0;
   if (olc >= 'C' && olc <= 'I') return (olc-'A') - 1;
   if (olc >= 'K' && olc <= 'N') return (olc-'A') - 2;
@@ -61,7 +61,7 @@ Real HMMColumn::GetEntropy() const {
 }
 
 Real HMMColumn::GetFreq(char ch) const{
-  int idx = this->GetIndex(ch);
+  int idx = HMMColumn::GetIndex(ch);
   if(idx == -1){
     throw std::runtime_error("Invalid One Letter Code observed when getting frequency in HMMColumn!");
   }
@@ -69,7 +69,7 @@ Real HMMColumn::GetFreq(char ch) const{
 }
 
 void HMMColumn::SetFreq(char ch, Real freq){
-  int idx = this->GetIndex(ch);
+  int idx = HMMColumn::GetIndex(ch);
   if(idx == -1){
     throw std::runtime_error("Invalid One Letter Code observed when setting frequency in HMMColumn!");
   }
