@@ -50,6 +50,7 @@ void export_hmm()
   ;
 
   class_<HMM, HMMPtr>("HMM", init<>())
+    .def("__len__",&HMM::size)
     .def("Load", &HMM::Load).staticmethod("Load")
     .def("AddColumn", &HMM::push_back)
     .def("Extract", &HMM::Extract)
