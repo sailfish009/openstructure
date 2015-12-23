@@ -36,7 +36,7 @@ bool BoundToSG(const ost::mol::AtomHandle& atom){
   ost::mol::AtomHandleList bound_atoms = atom.GetBondPartners();
   for(ost::mol::AtomHandleList::iterator i = bound_atoms.begin();
       i != bound_atoms.end(); ++i){
-    if(i->GetResidue() != atom.GetResidue()) continue;
+    if(i->GetResidue() == atom.GetResidue()) continue;
     if(i->GetName() != "SG") continue;
     if(IsCysteine(i->GetResidue())) return true;
   }
