@@ -44,7 +44,7 @@ typedef boost::shared_ptr<ProfileHandle> ProfileHandlePtr;
 typedef boost::shared_ptr<ProfileDB> ProfileDBPtr;
 typedef std::vector<ProfileColumn> ProfileColumnList;
 
-/// \brief Defines profile of  20 frequencies for one residue.
+/// \brief Defines profile of 20 frequencies for one residue.
 ///
 /// Frequencies are identified by the one-letter-code for that amino acid.
 /// (possible codes: ACDEFGHIKLMNPQRSTVWY)

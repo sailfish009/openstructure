@@ -96,7 +96,7 @@ Varia
 
 **Datasets:** :doc:`tabular data <table>`
 
-**Supported File Formats:** :doc:`structure formats<io/structure_formats>` | :doc:`sequence formats <io/sequence_formats>` | :doc:`image formats <io/image_formats>`
+**Supported File Formats:** :doc:`structure formats<io/structure_formats>` | :doc:`sequence formats <io/sequence_formats>` | :doc:`sequence profile formats <io/sequence_profile_formats>` | :doc:`image formats <io/image_formats>`
 
 **Users** :doc:`Reporting a problem <users>`
 

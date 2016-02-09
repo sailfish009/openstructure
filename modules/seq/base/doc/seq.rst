@@ -438,17 +438,22 @@ an alignment:
     Remove sequence at *index* from the alignment.
 
 
-Handling Hidden Markov Models
+Handling Sequence Profiles
 --------------------------------------------------------------------------------
 
-The HMM provides a simple container for hidden markov models in form of
-single columns containing amino acid frequencies and transition probabilities.
+The :class:`ProfileHandle` provides a simple container for profiles for each
+residue. It mainly contains:
 
-.. class:: HMMColumn
+- *N* :class:`ProfileColumn` objects (*N* = number of residues in sequence)
+  which each contains 20 amino acid frequencies
+- a :attr:`~ProfileHandle.sequence` (:class:`str`) of length *N*
+- a :attr:`~ProfileHandle.null_model` to use for this profile
+
+.. class:: ProfileColumn
 
   .. method:: BLOSUMNullModel()
 
-    Static method, that returns a new :class:`HMMColumn` with amino acid
+    Static method, that returns a new :class:`ProfileColumn` with amino acid
     frequencies given from the BLOSUM62 substitution matrix.
 
   .. method:: GetFreq(aa)
@@ -465,75 +470,72 @@ single columns containing amino acid frequencies and transition probabilities.
     :type aa:  :class:`str`
     :type freq:  :class:`float`
 
-  .. method:: GetTransitionFreq(from,to)
-
-    :param from:  Current state of HMM (HMM_MATCH, HMM_INSERT or HMM_DELETE)
-    :param to:  Next state
-
-    :returns:  Frequency of given state transition
-
-  .. method:: SetTransitionFreq(from,to,freq)
-
-    :param from:  Current state of HMM (HMM_MATCH, HMM_INSERT or HMM_DELETE)
-    :param to:  Next state
-    :param freq:  Frequency of transition
-
-  .. attribute:: one_letter_code
-
-    One letter code, this column is associated to
-
   .. attribute:: entropy
 
     Shannon entropy based on the columns amino acid frequencies
 
 
-.. class:: HMM
+.. class:: ProfileHandle
 
-  .. method:: Load(filename)
+  .. method:: __len__()
+    
+    Returns the length of the sequence for which we have profile.
 
-    Static method to load an hmm in the hhm format as it is in use in the HHSuite.
-
-    :param filename:  Name of file to load
-    :type filename:  :class:`str`
+    :rtype: :class:`int`
 
   .. method:: AddColumn(col)
 
     Appends column in the internal column list.
 
     :param col:  Column to add
-    :type col:  :class:`HMMColumn`
+    :type col:  :class:`ProfileColumn`
 
   .. method:: Extract(from,to)
 
     :param from:  Col Idx to start from
-    :param to:  End Idx, not included in sub-HMM
+    :param to:  End Idx, not included in sub-ProfileHandle
 
     :type from:  :class:`int`
     :type to:  :class:`int`
 
-    :returns:  sub-HMM as defined by given indices
+    :returns: sub-profile as defined by given indices
+              (:attr:`null_model` is copied)
+    :rtype: :class:`ProfileHandle`
+
+    :raises: :exc:`~exceptions.Error` if if *to* <= *from* or
+              *to* > :meth:`__len__`.
+
+  .. method:: SetSequence(sequence)
+
+    Sets :attr:`sequence`.
+
+  .. method:: SetNullModel(null_model)
+
+    Sets :attr:`null_model`.
 
   .. attribute:: sequence
 
-    Sequence of the columns
+    Sequence for which we have this profile.
+    Note: user must enforce consistency between sequence length and number of
+    profile columns.
 
   .. attribute:: columns
 
-    Iterable columns of the HMM
+    Iterable columns of the profile
 
   .. attribute:: null_model
 
-    Null model of the HMM
+    Null model of the profile
 
   .. attribute:: avg_entropy
 
     Average entropy of all the columns
 
-.. class:: HMMDB
+.. class:: ProfileDB
 
-  A simple database to gather :class:`HMM` objects. It is possible
+  A simple database to gather :class:`ProfileHandle` objects. It is possible
   to save them to disk in a compressed format with limited accuracy
-  (4 digits for freq values).
+  (4 digits for each frequency).
 
   .. method:: Save(filename)
 
@@ -548,32 +550,27 @@ single columns containing amino acid frequencies and transition probabilities.
     :type filename:  :class:`str`
     :returns:  The loaded database
 
-  .. method:: AddHMM(name, hmm)
+  .. method:: AddProfile(name, prof)
 
-    :param name:  Name of HMM to be added
-    :param hmm:  HMM to be added
+    :param name:  Name of profile to be added
+    :param prof:  Profile to be added
 
     :type name:  :class:`str`
-    :type hmm:  :class:`HMM`
+    :type prof:  :class:`ProfileHandle`
     :raises:  :class:`Exception` when filename is longer than 255 characters.
 
-  .. method:: GetHMM(name)
+  .. method:: GetProfile(name)
 
-    :param name:  Name of HMM to be returned
+    :param name:  Name of profile to be returned
     :type name:  :class:`str`
-    :returns:  The requested :class:`HMM`
-    :raises:  :class:`Exception` when no :class:`HMM` for **name** exists.
+    :returns:  The requested :class:`ProfileHandle`
+    :raises:  :class:`Exception` when no :class:`ProfileHandle` for **name** exists.
 
   .. method:: Size()
 
-    :returns: Number of :class:`HMM` objects in the database
+    :returns: Number of :class:`ProfileHandle` objects in the database
 
   .. method:: GetNames()
 
-    :returns: A nonsorted list of the names of all :class:`HMM` objects in the database
-
-
-
-
-
-
+    :returns: A nonsorted list of the names of all :class:`ProfileHandle`
+              objects in the database

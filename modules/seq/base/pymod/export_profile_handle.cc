@@ -60,6 +60,8 @@ void export_profile_handle()
     .def("__len__",&ProfileHandle::size)
     .def("AddColumn", &ProfileHandle::push_back)
     .def("Extract", &ProfileHandle::Extract)
+    .def("SetNullModel", &ProfileHandle::SetNullModel)
+    .def("SetSequence", &ProfileHandle::SetSequence)
     .add_property("null_model", make_function(&ProfileHandle::GetNullModel,
                   return_value_policy<copy_const_reference>()))
     .add_property("columns", 
