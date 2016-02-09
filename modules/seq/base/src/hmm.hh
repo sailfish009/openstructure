@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <string.h> // for memcpy, etc
 #include <vector>
 #include <map>
 #include <fstream>

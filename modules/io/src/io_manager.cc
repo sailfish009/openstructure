@@ -25,6 +25,8 @@
 #include <ost/io/seq/fasta_io_handler.hh>
 #include <ost/io/seq/pir_io_handler.hh>
 #include <ost/io/seq/promod_io_handler.hh>
+#include <ost/io/seq/hhm_io_handler.hh>
+#include <ost/io/seq/pssm_io_handler.hh>
 #include <ost/io/mol/surface_io_msms_handler.hh>
 #include <ost/io/seq/clustal_io_handler.hh>
 #if OST_IMG_ENABLED
@@ -50,10 +52,12 @@ IOManager::IOManager()
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOCRDHandlerFactory));
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOSDFHandlerFactory));
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOMAEHandlerFactory));
-  RegisterFactory(SequenceIOHandlerFactoryBasePtr(new FastaIOHandlerFactory));  
+  RegisterFactory(SequenceIOHandlerFactoryBasePtr(new FastaIOHandlerFactory));
   RegisterFactory(SequenceIOHandlerFactoryBasePtr(new PirIOHandlerFactory));
-  RegisterFactory(SequenceIOHandlerFactoryBasePtr(new ClustalIOHandlerFactory));  
-  RegisterFactory(SequenceIOHandlerFactoryBasePtr(new PromodIOHandlerFactory));    
+  RegisterFactory(SequenceIOHandlerFactoryBasePtr(new ClustalIOHandlerFactory));
+  RegisterFactory(SequenceIOHandlerFactoryBasePtr(new PromodIOHandlerFactory));
+  RegisterFactory(ProfileIOHandlerFactoryBasePtr(new HhmIOHandlerFactory));
+  RegisterFactory(ProfileIOHandlerFactoryBasePtr(new PssmIOHandlerFactory));
   RegisterFactory(SurfaceIOHandlerFactoryBasePtr(new SurfaceIOMSMSHandlerFactory));
 #if OST_IMG_ENABLED  
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIODxHandlerFactory));
@@ -103,7 +107,7 @@ EntityIOHandlerP IOManager::FindEntityExportHandler(const String& filename,
 }
 
 SequenceIOHandlerPtr IOManager::FindAlignmentImportHandler(const String& filename,
-                                                        const String& format) {
+                                                           const String& format) {
   for(AlignmentIOFList::const_iterator it=alignment_io_list_.begin();
       it!=alignment_io_list_.end();++it) {
     if( (*it)->ProvidesImport(filename,format)) {
@@ -114,7 +118,7 @@ SequenceIOHandlerPtr IOManager::FindAlignmentImportHandler(const String& filenam
 }
 
 SequenceIOHandlerPtr IOManager::FindAlignmentExportHandler(const String& filename,
-                                                 const String& format)
+                                                           const String& format)
 {
   for(AlignmentIOFList::const_iterator it=alignment_io_list_.begin();
       it!=alignment_io_list_.end();++it) {
@@ -123,6 +127,29 @@ SequenceIOHandlerPtr IOManager::FindAlignmentExportHandler(const String& filenam
     }
   }
   throw IOUnknownFormatException("no suitable alignment io handler found for "+filename);
+}
+
+ProfileIOHandlerPtr IOManager::FindProfileImportHandler(const String& filename,
+                                                        const String& format) {
+  for(ProfileIOFList::const_iterator it=profile_io_list_.begin();
+      it!=profile_io_list_.end();++it) {
+    if( (*it)->ProvidesImport(filename,format)) {
+      return (*it)->Create();
+    }
+  }
+  throw IOUnknownFormatException("no suitable profile io handler found for "+filename);
+}
+
+ProfileIOHandlerPtr IOManager::FindProfileExportHandler(const String& filename,
+                                                        const String& format)
+{
+  for(ProfileIOFList::const_iterator it=profile_io_list_.begin();
+      it!=profile_io_list_.end();++it) {
+    if( (*it)->ProvidesExport(filename,format)) {
+      return (*it)->Create();
+    }
+  }
+  throw IOUnknownFormatException("no suitable profile io handler found for "+filename);
 }
 
 SurfaceIOHandlerPtr IOManager::FindSurfaceImportHandler(const String& filename,
@@ -267,6 +294,11 @@ void IOManager::RegisterFactory(const SequenceIOHandlerFactoryBasePtr& f)
   alignment_io_list_.push_back(f);
 }
 
+void IOManager::RegisterFactory(const ProfileIOHandlerFactoryBasePtr& f) 
+{
+  profile_io_list_.push_back(f);
+}
+
 void IOManager::RegisterFactory(const SurfaceIOHandlerFactoryBasePtr& f) 
 {
   surface_io_list_.push_back(f);
@@ -280,6 +312,11 @@ const EntityIOHFList& IOManager::GetAvailableEntityHandler() const
 const AlignmentIOFList& IOManager::GetAvailableAlignmentHandler() const
 {
   return alignment_io_list_;
+}
+
+const ProfileIOFList& IOManager::GetAvailableProfileHandler() const
+{
+  return profile_io_list_;
 }
 
 const SurfaceIOFList& IOManager::GetAvailableSurfaceHandler() const

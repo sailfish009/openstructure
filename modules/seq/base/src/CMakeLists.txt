@@ -17,6 +17,7 @@ aligned_column_iterator.hh
 invalid_sequence.hh
 views_from_sequences.hh
 hmm.hh
+profile_handle.hh
 )
 
 set(OST_SEQ_SOURCES
@@ -30,6 +31,7 @@ alignment_handle.cc
 sequence_op.cc
 views_from_sequences.cc
 hmm.cc
+profile_handle.cc
 )
 
 if (ENABLE_INFO)

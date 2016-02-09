@@ -26,6 +26,7 @@
 
 #include <ost/io/mol/entity_io_handler.hh>
 #include <ost/io/seq/sequence_io_handler.hh>
+#include <ost/io/seq/profile_io_handler.hh>
 #include <ost/io/mol/surface_io_handler.hh>
 
 #if OST_IMG_ENABLED
@@ -33,10 +34,12 @@
 #endif
 
 #include <ost/io/io_exception.hh>
+
 namespace ost { namespace io {
 
 typedef std::vector<EntityIOHandlerFactoryBaseP> EntityIOHFList;
 typedef std::vector<SequenceIOHandlerFactoryBasePtr> AlignmentIOFList;
+typedef std::vector<ProfileIOHandlerFactoryBasePtr> ProfileIOFList;
 typedef std::vector<SurfaceIOHandlerFactoryBasePtr> SurfaceIOFList;
 
 #if OST_IMG_ENABLED
@@ -77,11 +80,17 @@ public:
   /// \brief get sequence io handler that is able to import the given file.
   /// \sa FindEntityImportHandler(filename)       
   SequenceIOHandlerPtr FindAlignmentImportHandler(const String& filename,
-                                                   const String& format="auto");
+                                                  const String& format="auto");
                                                    
   SequenceIOHandlerPtr FindAlignmentExportHandler(const String& filename,
-                                                   const String& format="auto");                                                   
-  
+                                                  const String& format="auto");
+
+  ProfileIOHandlerPtr FindProfileImportHandler(const String& filename,
+                                               const String& format="auto");
+                                                   
+  ProfileIOHandlerPtr FindProfileExportHandler(const String& filename,
+                                               const String& format="auto");
+
   SurfaceIOHandlerPtr FindSurfaceImportHandler(const String& filename,
                                                const String& format="auto");
   //@}
@@ -90,7 +99,10 @@ public:
   void RegisterFactory(const EntityIOHandlerFactoryBaseP&);
   /// \brief register aligment io handler factory
   /// \sa adding_io_handler
-  void RegisterFactory(const SequenceIOHandlerFactoryBasePtr&);  
+  void RegisterFactory(const SequenceIOHandlerFactoryBasePtr&);
+  /// \brief register profile io handler factory
+  /// \sa adding_io_handler
+  void RegisterFactory(const ProfileIOHandlerFactoryBasePtr&);
   /// \brief register surface io handler factory
   /// \sa adding_io_handler
   void RegisterFactory(const SurfaceIOHandlerFactoryBasePtr&);  
@@ -100,6 +112,9 @@ public:
 
   /// \brief Get a list with all available AlignmentHandler
   const AlignmentIOFList& GetAvailableAlignmentHandler() const;
+
+  /// \brief Get a list with all available ProfileHandler
+  const ProfileIOFList& GetAvailableProfileHandler() const;
 
   /// \brief Get a list with all available SurfaceHandler
   const SurfaceIOFList& GetAvailableSurfaceHandler() const;
@@ -137,6 +152,7 @@ private:
 
   EntityIOHFList entity_iohf_list_;
   AlignmentIOFList alignment_io_list_;
+  ProfileIOFList profile_io_list_;
   SurfaceIOFList surface_io_list_;
 
 #if OST_IMG_ENABLED
