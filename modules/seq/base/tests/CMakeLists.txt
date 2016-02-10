@@ -4,7 +4,6 @@ set(OST_SEQ_UNIT_TESTS
   test_aligned_column.cc
   test_aligned_region.cc
   test_alignment.cc
-  test_hmm.cc
   test_profile.cc
   tests.cc
 )
