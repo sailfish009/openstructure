@@ -21,8 +21,8 @@
  */
 
 #include <ost/log.hh>
-#include <ost/io/sdf_writer.hh>
-#include <ost/io/sdf_reader.hh>
+#include <ost/io/mol/sdf_writer.hh>
+#include <ost/io/mol/sdf_reader.hh>
 
 #include "entity_io_sdf_handler.hh"
 

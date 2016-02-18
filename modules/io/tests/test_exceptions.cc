@@ -25,7 +25,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
 
-#include <ost/io/load_map.hh>
+#include <ost/io/img/load_map.hh>
 #include <ost/img/image.hh>
 #include <ost/io/io_exception.hh>
 

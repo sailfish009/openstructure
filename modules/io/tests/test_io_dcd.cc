@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(test_io_dcd_charmm_frames)
   SaveCHARMMTraj(cg,"test_io_dcd_out.pdb","test_io_dcd_out.dcd");
   mol::CoordGroupHandle cg2=LoadCHARMMTraj(eh,"test_io_dcd_out.dcd");
   BOOST_CHECK_EQUAL(cg2.GetAtomCount(),natoms);
-  BOOST_CHECK_EQUAL(cg2.GetFrameCount(),1);
+  BOOST_CHECK_EQUAL(cg2.GetFrameCount(),uint(1));
 
   mol::CoordFramePtr cf2 = cg2.GetFrame(0);
   BOOST_CHECK(geom::Distance(cf2->GetCellSize(),cell_size)<1e-6);

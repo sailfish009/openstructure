@@ -26,11 +26,11 @@
 #include <ost/gui/module_config.hh>
 
 #include <ost/io/io_exception.hh>
-#include <ost/io/entity_io_handler.hh>
-#include <ost/io/sequence_io_handler.hh>
-#include <ost/io/surface_io_handler.hh>
+#include <ost/io/mol/entity_io_handler.hh>
+#include <ost/io/seq/sequence_io_handler.hh>
+#include <ost/io/mol/surface_io_handler.hh>
 #if OST_IMG_ENABLED
-#include <ost/io/map_io_handler.hh>
+#  include <ost/io/img/map_io_handler.hh>
 #endif
 
 #include <QString>

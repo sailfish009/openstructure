@@ -32,8 +32,8 @@ using boost::unit_test_framework::test_suite;
 #include <ost/conop/heuristic.hh>
 
 #include <ost/io/mol/entity_io_pdb_handler.hh>
-#include <ost/io/pdb_reader.hh>
-#include <ost/io/pdb_writer.hh>
+#include <ost/io/mol/pdb_reader.hh>
+#include <ost/io/mol/pdb_writer.hh>
 #include <ost/log.hh>
 
 #include <ost/io/io_exception.hh>

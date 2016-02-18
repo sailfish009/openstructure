@@ -30,7 +30,7 @@
 //#include <sstream>
 
 
-//#include <ost/img/io/io_manager.hh>
+//#include <ost/io/io_manager.hh>
 #include <ost/message.hh>
 //#include <ost/img/alg/fft.hh>   
 #include <ost/img/alg/norm.hh>   
