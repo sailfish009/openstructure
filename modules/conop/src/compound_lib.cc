@@ -49,7 +49,8 @@ const char* CREATE_CMD[]={
 "  formula           VARCHAR(64) NOT NULL,                                      "
 "  pdb_initial       TIMESTAMP,                                                 "
 "  pdb_modified      TIMESTAMP,                                                 "
-"  name              VARCHAR(256)                                               " 
+"  name              VARCHAR(256),                                              "
+"  inchi_code        TEXT                                                       " 
 ");",
 " CREATE UNIQUE INDEX IF NOT EXISTS commpound_tlc_index ON chem_compounds       "
 "                                  (tlc, dialect)",
@@ -85,8 +86,8 @@ const char* CREATE_CMD[]={
 
 
 const char* INSERT_COMPOUND_STATEMENT="INSERT INTO chem_compounds               "
-"        (tlc, olc, dialect, chem_class, chem_type, formula, pdb_initial, pdb_modified, name) "
-" VALUES (?, ?, ?, ?, ?, ?, DATE(?), DATE(?), ?)";
+"        (tlc, olc, dialect, chem_class, chem_type, formula, pdb_initial, pdb_modified, name, inchi_code) "
+" VALUES (?, ?, ?, ?, ?, ?, DATE(?), DATE(?), ?, ?)";
 
 const char* INSERT_ATOM_STATEMENT="INSERT INTO atoms                            "
 "        (compound_id, name, alt_name, element, is_aromatic, stereo_conf,       "
