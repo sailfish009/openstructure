@@ -34,6 +34,7 @@ namespace ost { namespace io {
 typedef enum {
   ATOM_SPEC,
   BOND_SPEC,
+  DESC_SPEC,
   DONT_KNOW
 } LoopType;
 
