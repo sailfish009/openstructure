@@ -78,7 +78,9 @@ private:
     STEREO_CONF=6,
     ATOM_ID1=0,
     ATOM_ID2=1,
-    BOND_ORDER=2
+    BOND_ORDER=2,
+    DESC_TYPE=0,
+    DESC=1
   } PropIndex;
   char                                    last_;
   int                                     indices_[10];
