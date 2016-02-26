@@ -221,8 +221,14 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
     Date modi_date=compound->GetModificationDate();
     crea_date_str=crea_date.ToString();
     modi_date_str=modi_date.ToString();
-    sqlite3_bind_text(stmt, 7, crea_date_str.c_str(), crea_date_str.length(), NULL);
-    sqlite3_bind_text(stmt, 8, modi_date_str.c_str(), modi_date_str.length(), NULL);
+    sqlite3_bind_text(stmt, 7, crea_date_str.c_str(), crea_date_str.length(),
+                      NULL);
+    sqlite3_bind_text(stmt, 8, modi_date_str.c_str(), modi_date_str.length(),
+                      NULL);
+    sqlite3_bind_text(stmt, 9, compound->GetName().c_str(),
+                      compound->GetName().length(), NULL);
+    sqlite3_bind_text(stmt, 10, compound->GetInchi().c_str(),
+                      compound->GetInchi().length(), NULL);
   } else {
     LOG_ERROR(sqlite3_errmsg(conn_));
     sqlite3_finalize(stmt);

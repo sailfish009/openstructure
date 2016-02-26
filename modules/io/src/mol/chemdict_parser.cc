@@ -38,6 +38,11 @@ bool ChemdictParser::OnBeginLoop(const StarLoopDesc& header)
     indices_[ATOM_ID2]=header.GetIndex("atom_id_2");
     indices_[BOND_ORDER]=header.GetIndex("value_order");
     return true;
+  } else if (header.GetCategory()=="pdbx_chem_comp_descriptor") {
+    loop_type_=DESC_SPEC;
+    indices_[DESC_TYPE]=header.GetIndex("type");
+    indices_[DESC]=header.GetIndex("descriptor");
+    return true;
   }
   loop_type_=DONT_KNOW;
   return false;
@@ -68,6 +73,17 @@ void ChemdictParser::OnDataRow(const StarLoopDesc& header,
       std::swap(bond.atom_one, bond.atom_two);
     }
     compound_->AddBond(bond);
+  } else if (loop_type_==DESC_SPEC) {
+    if (columns[indices_[DESC_TYPE]] == StringRef("InChI", 5)) {
+      // for type InChi check prefix 'InChI='
+      if (columns[indices_[DESC]].substr(0, 6) != StringRef("InChI=", 6)) {
+        std::cout << "InChI problem: compound " << compound_->GetID()
+                  << " has an InChI descriptor not starting with the "
+                     "'InChI=' prefix." << std::endl;
+        return;
+      }
+      compound_->SetInchi(columns[indices_[DESC]].substr(6).str());
+    }
   }
 }
 
