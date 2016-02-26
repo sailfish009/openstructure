@@ -50,7 +50,8 @@ const char* CREATE_CMD[]={
 "  pdb_initial       TIMESTAMP,                                                 "
 "  pdb_modified      TIMESTAMP,                                                 "
 "  name              VARCHAR(256),                                              "
-"  inchi_code        TEXT                                                       " 
+"  inchi_code        TEXT,                                                      "
+"  inchi_key         TEXT                                                       "
 ");",
 " CREATE UNIQUE INDEX IF NOT EXISTS commpound_tlc_index ON chem_compounds       "
 "                                  (tlc, dialect)",
@@ -86,8 +87,8 @@ const char* CREATE_CMD[]={
 
 
 const char* INSERT_COMPOUND_STATEMENT="INSERT INTO chem_compounds               "
-"        (tlc, olc, dialect, chem_class, chem_type, formula, pdb_initial, pdb_modified, name, inchi_code) "
-" VALUES (?, ?, ?, ?, ?, ?, DATE(?), DATE(?), ?, ?)";
+"        (tlc, olc, dialect, chem_class, chem_type, formula, pdb_initial, pdb_modified, name, inchi_code, inchi_key) "
+" VALUES (?, ?, ?, ?, ?, ?, DATE(?), DATE(?), ?, ?, ?)";
 
 const char* INSERT_ATOM_STATEMENT="INSERT INTO atoms                            "
 "        (compound_id, name, alt_name, element, is_aromatic, stereo_conf,       "
@@ -229,6 +230,8 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
                       compound->GetName().length(), NULL);
     sqlite3_bind_text(stmt, 10, compound->GetInchi().c_str(),
                       compound->GetInchi().length(), NULL);
+    sqlite3_bind_text(stmt, 11, compound->GetInchiKey().c_str(),
+                      compound->GetInchiKey().length(), NULL);
   } else {
     LOG_ERROR(sqlite3_errmsg(conn_));
     sqlite3_finalize(stmt);

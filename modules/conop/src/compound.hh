@@ -148,6 +148,7 @@ public:
     formula_(),
     name_(),
     inchi_(),
+    inchi_key_(),
     atom_specs_(),
     bond_specs_(),
     chem_class_(),
@@ -247,6 +248,10 @@ public:
 
   const String& GetInchi() { return inchi_; }
 
+  void SetInchiKey(const String& inchikey) { inchi_key_=inchikey; }
+
+  const String& GetInchiKey() { return inchi_key_; }
+
   const BondSpecList& GetBondSpecs() const {
     return bond_specs_;
   }
@@ -275,6 +280,7 @@ private:
   String                       formula_;
   String                       name_;
   String                       inchi_;
+  String                       inchi_key_;
   AtomSpecList                 atom_specs_;
   BondSpecList                 bond_specs_;
   mol::ChemClass               chem_class_;

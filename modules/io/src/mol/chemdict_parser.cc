@@ -83,6 +83,8 @@ void ChemdictParser::OnDataRow(const StarLoopDesc& header,
         return;
       }
       compound_->SetInchi(columns[indices_[DESC]].substr(6).str());
+    } else if (columns[indices_[DESC_TYPE]] == StringRef("InChIKey", 8)) {
+      compound_->SetInchiKey(columns[indices_[DESC]].str());
     }
   }
 }
