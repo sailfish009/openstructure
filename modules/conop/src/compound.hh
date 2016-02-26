@@ -147,6 +147,7 @@ public:
     tlc_(id),
     formula_(),
     name_(),
+    inchi_(),
     atom_specs_(),
     bond_specs_(),
     chem_class_(),
@@ -237,11 +238,15 @@ public:
   const String& GetName() { return name_; }
   
   void SetName(const String& name) { name_=name; }
-  
+
   void SetFormula(const String& formula) { formula_=formula; }
 
   const String& GetFormula() { return formula_; }
-  
+
+  void SetInchi(const String& inchi) { inchi_=inchi; }
+
+  const String& GetInchi() { return inchi_; }
+
   const BondSpecList& GetBondSpecs() const {
     return bond_specs_;
   }
@@ -269,6 +274,7 @@ private:
   String                       tlc_;
   String                       formula_;
   String                       name_;
+  String                       inchi_;
   AtomSpecList                 atom_specs_;
   BondSpecList                 bond_specs_;
   mol::ChemClass               chem_class_;
