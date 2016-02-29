@@ -37,6 +37,7 @@ flags to allow compilation with OpenMM support. e.g.:
     
     cmake . -DENABLE_MM=1 -DOPEN_MM_INCLUDE_DIR=/path/to/openmm/include
             -DOPEN_MM_LIBRARY=/path/to/openmm/lib/libOpenMM.so
+            -DOPEN_MM_PLUGIN_DIR=/path/to/openmm/lib/plugins
 
 
 Setting up a simple simulation
