@@ -1,12 +1,14 @@
 Changes in Release 1.5
 --------------------------------------------------------------------------------
 
-  * Wrapper for OpenMM. This allows for direct access to molecular
-    mechanics functionality from within OST.
+  * Updated dependencies (Eigen2 to Eigen3, Boost 1.47 to 1.53)
+  * Wrapper for OpenMM. This allows for direct access to molecular mechanics
+    functionality from within OST.
   * The compoundslib now features InChI and InChIKeys (machine readable InChI
     hash)
   * Names of compounds are also stored in the compoundslib now
-
+  * Added seq.ProfileHandle class and io.LoadSequenceProfile to work with 
+    sequence profiles.
 
 Changes in Release 1.4
 --------------------------------------------------------------------------------
