@@ -47,7 +47,7 @@ Setting up a simple simulation
     
     from ost.mol import mm
 
-    prot=io.LoadPDB('awesome_structure.pdb')
+    prot=io.LoadPDB('1crn',remote=True)
 
     #set up the simulation
     settings = mm.Settings()
