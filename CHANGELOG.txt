@@ -1,9 +1,12 @@
 Changes in Release 1.5
 --------------------------------------------------------------------------------
 
+  * Wrapper for OpenMM. This allows for direct access to molecular
+    mechanics functionality from within OST.
   * The compoundslib now features InChI and InChIKeys (machine readable InChI
     hash)
   * Names of compounds are also stored in the compoundslib now
+
 
 Changes in Release 1.4
 --------------------------------------------------------------------------------
