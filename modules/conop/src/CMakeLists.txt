@@ -43,9 +43,13 @@ endif(WIN32)
 
 if (COMPOUND_LIB)
   if (EXISTS "${COMPOUND_LIB}")
-    copy_if_different("./" "${STAGE_DIR}/share/openstructure" 
-                      "${COMPOUND_LIB}" "COMPOUND_LIB" ost_conop)
-    install(FILES ${COMPOUND_LIB} DESTINATION "share/openstructure")
+    # this ensures that file is called 'compounds.chemlib' (as required)
+    set(TO "${STAGE_DIR}/share/openstructure/compounds.chemlib")
+    file(MAKE_DIRECTORY "${STAGE_DIR}/share/openstructure")
+    add_custom_command(TARGET "ost_conop" PRE_BUILD
+          DEPENDS "${COMPOUND_LIB}"
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${COMPOUND_LIB} ${TO})
+    install(FILES ${TO} DESTINATION "share/openstructure")
   else()
     message(FATAL_ERROR "${COMPOUND_LIB} does not exist. \n"
             "Pass -DCOMPOUND_LIB=NONE if you would like to build "
