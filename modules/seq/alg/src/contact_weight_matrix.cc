@@ -23,7 +23,8 @@
 namespace {
 std::map<char,int> init_dict(std::vector <char> aal){
   std::map<char,int> aa_dict;
-  for (int i=0;i!=aal.size();++i){
+  const int aal_size = static_cast<int>(aal.size());
+  for (int i=0;i!=aal_size;++i){
     aa_dict[aal[i]]=i;
   }
   return aa_dict;

@@ -117,7 +117,8 @@ public:
     Real dist2=dist*dist;
     Index imin = Index::Max(min_, gen_index(pos-VEC(dist,dist,dist)));
     Index imax = Index::Min(max_, gen_index(pos+VEC(dist,dist,dist)));
-    if ((imax.u-imin.u+1)*(imax.v-imin.v+1)*(imax.w-imin.w+1)>map_.size()) {
+    const size_t tmp = (imax.u-imin.u+1)*(imax.v-imin.v+1)*(imax.w-imin.w+1);
+    if (tmp > map_.size()) {
       return this->has_within_all_buckets(pos, dist2);
     }
     for(int wc=imin.w;wc<=imax.w;++wc) {

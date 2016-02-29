@@ -158,7 +158,7 @@ AdjacencyBitmap optimize_domains(AdjacencyBitmap adj1, Real tolerance,
         adj_rows_per_thread = adj_rows_per_thread+64-modulo;
       }
       for (int i=0;i<num_threads;++i) {
-        if (i*adj_rows_per_thread>adj1p->size()) {
+        if (size_t(i*adj_rows_per_thread) > adj1p->size()) {
           continue;
         }
         if (update_img) {
