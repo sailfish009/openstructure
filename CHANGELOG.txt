@@ -16,6 +16,7 @@ Changes in Release 1.5
   * Added seq.ProfileHandle class and io.LoadSequenceProfile to work with 
     sequence profiles.
   * Added a wrapper to HHblits.
+  * Removed levenberg_marquardt.h in img/alg
 
 Changes in Release 1.4
 --------------------------------------------------------------------------------
