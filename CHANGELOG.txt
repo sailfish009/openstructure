@@ -9,6 +9,7 @@ Changes in Release 1.5
   * Names of compounds are also stored in the compoundslib now
   * Added seq.ProfileHandle class and io.LoadSequenceProfile to work with 
     sequence profiles.
+  * Added a wrapper to HHblits.
 
 Changes in Release 1.4
 --------------------------------------------------------------------------------
