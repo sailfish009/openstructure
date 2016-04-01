@@ -30,13 +30,13 @@ namespace ost { namespace io {
 
 namespace {
 
-void Import(mol::EntityHandle& eh, const String& filename, int flag)
+void Import(mol::EntityHandle& eh, const String& filename, const String& format)
 {
   Profile profile_import("import");
   LOG_DEBUG("creating EntityIOHandle for " << filename);
-  EntityIOHandlerP ent_io = IOManager::Instance().FindEntityImportHandler(filename);
+  EntityIOHandlerP ent_io = IOManager::Instance().FindEntityImportHandler(filename, format);
 
-  // TODO: proper error handling
+  // note: error handling done in FindEntityImportHandler
 
   LOG_DEBUG("calling import on entity io handle");
   ent_io->Import(eh,filename);
@@ -53,12 +53,12 @@ void Import(mol::EntityHandle& eh, const String& filename, int flag)
 
 } // anon ns
 
-mol::EntityHandle LoadEntity(const String& filename, int flag)
+mol::EntityHandle LoadEntity(const String& filename, const String& format)
 {
   LOG_DEBUG("creating emtpy entity");
   mol::EntityHandle eh=mol::CreateEntity();
   mol::XCSEditor xcs_lock=eh.EditXCS(mol::BUFFERED_EDIT);
-  Import(eh,filename,flag);
+  Import(eh, filename, format);
   return eh;
 }
 

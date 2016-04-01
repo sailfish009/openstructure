@@ -25,7 +25,7 @@
 namespace ost { namespace io {
 
 // load unmanaged entity
-DLLEXPORT_OST_IO mol::EntityHandle LoadEntity(const String& filename, int flag=0);
+DLLEXPORT_OST_IO mol::EntityHandle LoadEntity(const String& filename, const String& format="auto");
 
 }} // ns
 
