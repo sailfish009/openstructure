@@ -202,3 +202,60 @@ def PredictContacts(ali):
   mi.RefreshSortedIndices()
   return mi
 
+def CalculateContactProbability(cpred_res,method):
+  """
+  Calculate the probability of a predicted contact to be correct.
+  This simply transforms the score associated with a prediction into a probability.
+
+  :param cpred_res: A contact prediction result
+  :param method: The method which was used for contact prediction. Should be one
+   of "MI", "MIp", "MIpz", "cevoMI", "cevo"
+
+  :type cpred_res: :class:`ost.seq.alg.ContactPredictionScoreResult`
+  :type method: :class:`str`
+  """
+  import math
+  def _growth_function(x,K,x0,B,nu,Q):
+    p=K/(1+Q*math.exp(-B*(x-x0)))**(1/nu)
+    p=min(1,max(0,p))
+    return p
+  
+  def _decay_function(x,A,k):
+    p=A*math.exp(-k*x)
+    p=min(1,max(0,p))
+    return p
+
+  prob_params={}
+  prob_params["MI"]=[0.05858455345122933, 0.8930350957023122]
+  prob_params["MIp"]=[0.10019621004607637, 0.9065429261332942]
+  prob_params["MIpz"]=[0.7368147563063437, 4.638820470770171, 0.6383539191372934, 1.1627300209863376, 19.63060874042289]
+  prob_params["cevoMI"]=[0.779979757231944, 1.642357937131157, 0.3267847173036033, 0.3742848849873358, 5.1816922372446]
+  prob_params["cevo"]=[0.7564532665623617, 0.5947472274271304, 3.8548775389879166, 0.46203017320927053, 1.6198602780123705]
+
+  if not method in prob_params:
+    raise ValueError("method should be one of MI, MIp, MIpz, cevoMI, cevo")
+  params=prob_params[method]
+  cpred_res.RefreshSortedIndices()
+  nres=len(cpred_res.matrix)
+  probabilities=[[0 for i in range(nres)] for j in range(nres)]
+
+  if len(params)==2:func=_decay_function
+  else:func=_growth_function
+
+  nres=float(nres)
+  if len(params)==2:
+    for k,(i,j) in enumerate(cpred_res.sorted_indices):
+      p=_decay_function(math.log10(0.01+k/nres),*params)
+      probabilities[i][j]=p
+      probabilities[j][i]=p
+  else:
+    for k,(i,j) in enumerate(cpred_res.sorted_indices):
+      p=_growth_function(cpred_res.GetScore(i,j),*params)
+      probabilities[i][j]=p
+      probabilities[j][i]=p
+  cpred_res.probabilities=probabilities
+  return cpred_res
+
+
+
+
