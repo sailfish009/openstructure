@@ -1,7 +1,7 @@
 Simulation
 ================================================================================
 
-.. currentmodule:: ost.mol
+.. currentmodule:: ost.mol.mm
 
 The simulation finally connects a :class:`Topology` with an 
 :class:`EntityHandle`. While applying minimization or

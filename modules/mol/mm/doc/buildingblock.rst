@@ -1,7 +1,7 @@
 Blocks
 ================================================================================
 
-.. currentmodule:: ost.mol
+.. currentmodule:: ost.mol.mm
 
 The most basic type of residue description is the BuildingBlock. It contains
 information on atom names and their corresponding types, charges and
