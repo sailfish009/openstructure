@@ -228,6 +228,10 @@ def _ParseAmberForceField(filename):
       ff_dict[keyword] = []
       line = in_file.next()
       while len(line.strip()) > 0:
+        # check for warnings
+        if 'ATTN' in line:
+          ost.LogWarning('The following line in ' + filename + ' (' + keyword +\
+                         ' section) needs revision:\n' + line.strip())
         # fixed column format -> extract entries dep. on current keyword
         if keyword == 'MASS':
           atype = line[0:2].strip()
