@@ -279,7 +279,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
   geom::Vec3 cell_size, cell_angles;
   size_t frame_size=calc_frame_size(ucell_flag, gap_flag, xlist.size());
   int i=0;
-  for(;i<header.num;i+=stride) {
+  while(true){
     if (!read_frame(istream, header, frame_size, ucell_flag, gap_flag, 
                     swap_flag, xlist, clist, i,cell_size,cell_angles)) {
       break;
@@ -292,11 +292,12 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
 
     // skip frames (defined by stride)
     if(stride>1) istream.seekg(frame_size*(stride-1),std::ios_base::cur);
-  }
-  istream.get();
-  if(!istream.eof()) {
-    LOG_VERBOSE("LoadCHARMMTraj: unexpected trailing file data, bytes read: " 
-                 << istream.tellg());
+    i+=stride;
+    istream.get();
+    if(istream.eof()){
+      break;
+    }
+    istream.unget();
   }
 
   LOG_VERBOSE("Loaded " << cg.GetFrameCount() << " frames with "
