@@ -149,12 +149,14 @@ results into :class:`~ost.mol.mm.Forcefield` objects.
 
   from ost.mol import mm
 
-  # create parameters for TYR using PDB's component dictionary
+  # create parameters for RVP using PDB's component dictionary
   mm.antechamber.RunAntechamber('RVP', 'components.cif', base_out_dir='ligands')
 
   # create force field
   ff = mm.Forcefield()
   ff = mm.antechamber.AddFromPath(ff, 'ligands/RVP')
+  # equivalent: ff = mm.antechamber.AddFromFiles(ff, 'ligands/RVP/frcmod',
+  #                                              'ligands/RVP/out.mpdb')
   # since Antechamber cannot deal with ions, you can do it manually
   ff = mm.antechamber.AddIon(ff, 'CL', 'CL', 35.45, -1.0, 0.4401, 0.4184)
   # save it
