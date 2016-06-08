@@ -20,19 +20,18 @@ following values:
 Converter functions
 --------------------------------------------------------------------------------
 .. function:: ResidueToAminoAcid(residue)
-              OneLetterCodeToAminoAcid(olc) 
+              ResidueNameToAminoAcid(rname) 
+              OneLetterCodeNameToAminoAcid(olc) 
 
-  Get amino acid from residue or one-letter-code. For non-standard amino acids 
-  or one-letter-codes, XXX is returned.
+  Get amino acid from residue, residue name (three-letter-code)
+  or one-letter-code. Returns XXX if residue, residue name or 
+  one-letter-code is not one of the 20 standard amino acids.
 
 .. function:: OneLetterCodeToResidueName(olc)
               AminoAcidToResidueName(amino_acid)
 
   Get residue name from one-letter-code or amino_acid. For invalid 
   one-letter-codes or XXX, 'UNK' is returned.
- 
-
-
 
 .. function:: ResidueNameToOneLetterCode(rname)
 
