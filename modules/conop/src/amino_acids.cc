@@ -174,6 +174,17 @@ String OneLetterCodeToResidueName(char olc)
   }
 }
 
+AminoAcid ResidueNameToAminoAcid(String rn) 
+{
+  std::transform(rn.begin(),rn.end(),rn.begin(),toupper);
+  static AminoAcidKeys aa_keys = AminoAcidKeys();
+  AminoAcid* aa=find(aa_keys, rn.c_str());
+  if (aa)
+    return *aa;
+    
+  return XXX;
+}
+
 char ResidueNameToOneLetterCode(String rn)
 {
   String upper_rn=rn;
