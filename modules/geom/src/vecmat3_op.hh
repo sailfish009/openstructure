@@ -166,9 +166,16 @@ Mat3 DLLEXPORT_OST_GEOM AxisRotation(const Vec3& axis, Real angle);
 /// The returned vector is of length 1
 Vec3 DLLEXPORT_OST_GEOM OrthogonalVector(const Vec3& axis);
 
-
-Real DLLEXPORT_OST_GEOM DihedralAngle(const Vec3& p1, const Vec3& p2, 
-                                      const Vec3& p3, const Vec3&p4);
+/// \brief Get dihedral angle for p1-p2-p3-p4
+inline Real DihedralAngle(const Vec3& p1, const Vec3& p2,
+                          const Vec3& p3, const Vec3& p4) {
+  const Vec3 r1 = p2-p1;
+  const Vec3 r2 = p3-p2;
+  const Vec3 r3 = p4-p3;
+  const Vec3 r12cross = Cross(r1, r2);
+  const Vec3 r23cross = Cross(r2, r3);
+  return std::atan2(Dot(r1*Length(r2), r23cross), Dot(r12cross, r23cross));
+}
 
 //! returns std::min of each component
 inline Vec3 Min(const Vec3& v1, const Vec3& v2)
