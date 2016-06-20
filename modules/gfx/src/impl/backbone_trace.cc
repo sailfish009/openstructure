@@ -123,13 +123,15 @@ private:
 BackboneTrace::BackboneTrace():
   view_(),
   node_list_list_(),
-  seq_hack_(false)
+  seq_hack_(false),
+  twist_hack_(false)
 {}
 
 BackboneTrace::BackboneTrace(const mol::EntityView& ent):
   view_(ent),
   node_list_list_(),
-  seq_hack_(false)
+  seq_hack_(false),
+  twist_hack_(false)
 {
   Rebuild();
 }
@@ -210,8 +212,6 @@ void BackboneTrace::PrepList(NodeEntryList& nelist) const
   // start loop with the second residue
   unsigned int i=1;
   for(;i<nelist.size()-1;++i) {
-    geom::Vec3 p10=p0-p1;
-    geom::Vec3 p12=p2-p1;
     dir=geom::Normalize(p2-p0);
     e1->direction = dir;
     orth=geom::Normalize(geom::Cross(dir,e1->normal));

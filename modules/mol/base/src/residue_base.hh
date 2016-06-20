@@ -62,8 +62,6 @@ namespace ost { namespace mol {
 /// amino acids, co-enzymes, water coordinated ions, drugs, solvents) as obtained
 /// from the PDB.
 ///
-/// When loading an entity from file, the one-letter and chemical class of a
-/// residue are assigned by the \ref conop::Builder "default builder".
 class DLLEXPORT_OST_MOL ResidueBase: 
    public GenericPropContainer<ResidueBase> {
 public:

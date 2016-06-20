@@ -59,6 +59,8 @@ namespace ost {
 
 namespace gfx {
 
+bool MapIso::global_downsampling_flag=true;
+
 MapIso::MapIso(const String& name, const img::MapHandle& mh, 
                float level, uint a):
   GfxObj(name),
@@ -71,7 +73,6 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   histogram_bin_count_(100),
   level_(level),
   normals_calculated_(false),
-  alg_(a),
   debug_octree_(false),
   color_(1.0,1.0,1.0),
   bb_(),
@@ -412,6 +413,7 @@ bool MapIso::IsDownsampledMapAvailable() const
 
 img::ImageHandle MapIso::DownsampleMap(const img::ImageHandle& mh)
 {
+  if(!MapIso::global_downsampling_flag) return mh;
   uint downsampling_fact = compute_downsampling_fact(mh);
   img:: ImageHandle ret_mh = mh;
   if (downsampling_fact != 1) {

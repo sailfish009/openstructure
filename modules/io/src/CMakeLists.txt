@@ -38,12 +38,18 @@ if (ENABLE_IMG)
   foreach(fname ${OST_IO_IMG_SOURCES})
     set(OST_IO_SOURCES ${OST_IO_SOURCES} img/${fname})
   endforeach(fname ${OST_IO_IMG_SOURCES})
-
-  foreach(fname ${OST_IO_IMG_HEADERS})
-    set(OST_IO_HEADERS ${OST_IO_HEADERS} img/${fname})
-  endforeach(fname ${OST_IO_IMG_HEADERS})
 endif()
 
+####################################
+# Add headers in subfolders (additionally) to OST_IO_HEADERS.
+# In the end, we will have two copies (!) of each header in the subfolders.
+# One copy in ost/io/<SUB> and one in ost/io.
+
+# As it's silly to have duplicate headers, this behavior might be removed in the
+# future. So please always include the headers in the subfolders.
+# (e.g. use "#include <ost/io/mol/load_entity.hh>"
+#       instead of #include <ost/io/load_entity.hh>)
+# For compatibility reasons, we keep it for now (dates back to 2010).
 foreach(fname ${OST_IO_MOL_HEADERS})
   set(OST_IO_HEADERS ${OST_IO_HEADERS} mol/${fname})
 endforeach(fname ${OST_IO_MOL_HEADERS})
@@ -52,6 +58,12 @@ foreach(fname ${OST_IO_SEQ_HEADERS})
   set(OST_IO_HEADERS ${OST_IO_HEADERS} seq/${fname})
 endforeach(fname ${OST_IO_SEQ_HEADERS})
 
+if (ENABLE_IMG)
+  foreach(fname ${OST_IO_IMG_HEADERS})
+    set(OST_IO_HEADERS ${OST_IO_HEADERS} img/${fname})
+  endforeach(fname ${OST_IO_IMG_HEADERS})
+endif()
+####################################
 
 set(OST_IO_DEPENDENCIES ost_base;ost_conop;ost_seq)
 if (ENABLE_IMG)

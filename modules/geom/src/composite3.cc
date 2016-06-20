@@ -190,28 +190,28 @@ Real Rotation3::GetPhi() const
     return GetRotationAngle()*
         (q_.GetAxis().GetZ()/std::fabs(q_.GetAxis().GetZ()));
   }else{
-    return reduce_angle(M_PI-atan2(q_.GetAxis().GetX()*q_.GetAxis().GetZ()+
-                                   q_.GetAxis().GetY()*q_.GetAngle(),
-                                   q_.GetAxis().GetY()*q_.GetAxis().GetZ()-
-                                   q_.GetAxis().GetX()*q_.GetAngle()));
+    return reduce_angle(M_PI-atan2(q_.x*q_.z+
+                                   q_.y*q_.w,
+                                   q_.y*q_.z-
+                                   q_.x*q_.w));
   }
 }
 Real Rotation3::GetTheta() const
 {
-  return reduce_angle(acos(-q_.GetAxis().GetX()*q_.GetAxis().GetX()-
-                           q_.GetAxis().GetY()*q_.GetAxis().GetY()+
-                           q_.GetAxis().GetZ()*q_.GetAxis().GetZ()+
-                           q_.GetAngle()*q_.GetAngle()));
+  return reduce_angle(acos(-q_.x*q_.x-
+                           q_.y*q_.y+
+                           q_.z*q_.z+
+                           q_.w*q_.w));
 }
 Real Rotation3::GetPsi() const
 {
   if(GetTheta()<EPSILON){
     return 0.0;
   }else{
-    return reduce_angle(atan2(q_.GetAxis().GetX()*q_.GetAxis().GetZ()-
-                              q_.GetAxis().GetY()*q_.GetAngle(),
-                              q_.GetAxis().GetY()*q_.GetAxis().GetZ()+
-                              q_.GetAxis().GetX()*q_.GetAngle()));
+    return reduce_angle(atan2(q_.x*q_.z-
+                              q_.y*q_.w,
+                              q_.y*q_.z+
+                              q_.x*q_.w));
   }
 
 }
@@ -302,7 +302,7 @@ Vec3 Rotation3::find_invariant_vector(Mat3 rot)
   Real minors[9];
   for(int i=2;i>=0;--i){
     for(int j=2;j>=0;--j){
-      minors[3*i+j]=Minor(rot,i,j);
+      minors[3*(2-i)+(2-j)]=Minor(rot,i,j);
     }
   }
   Real* where = ::std::max_element(minors, minors+9);
@@ -328,7 +328,7 @@ Vec3 Rotation3::find_invariant_vector(Mat3 rot)
   case 2:
     result.SetX(1.0);
     result.SetY(-minors[1]/det);
-    result.SetZ(-minors[0]/det);
+    result.SetZ(minors[0]/det);
     break;
   case 3:
     result.SetZ(1.0);
@@ -338,7 +338,7 @@ Vec3 Rotation3::find_invariant_vector(Mat3 rot)
   case 4:
     result.SetY(1.0);
     result.SetX(-minors[5]/det);
-    result.SetZ(-minors[4]/det);
+    result.SetZ(-minors[3]/det);
     break;
   case 5:
     result.SetX(1.0);

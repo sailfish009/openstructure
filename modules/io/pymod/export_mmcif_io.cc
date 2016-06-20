@@ -99,7 +99,6 @@ void export_mmcif_io()
                   &MMCifInfoCitation::SetAuthorList)
   ;
 
-  typedef std::vector<MMCifInfoCitation> MMCifInfoCitationList;
   class_<std::vector<MMCifInfoCitation> >("MMCifInfoCitationList", init<>())
     .def(vector_indexing_suite<std::vector<MMCifInfoCitation> >())
   ;
@@ -124,7 +123,6 @@ void export_mmcif_io()
                   &MMCifInfoTransOp::SetMatrix)
   ;
 
-  typedef std::vector<MMCifInfoTransOp> MMCifInfoTransOpList;
   class_<std::vector<MMCifInfoTransOp> >("MMCifInfoTransOpList", init<>())
     .def(vector_indexing_suite<std::vector<MMCifInfoTransOp> >())
   ;
@@ -134,7 +132,6 @@ void export_mmcif_io()
     .def(vector_indexing_suite<std::vector<MMCifInfoTransOpPtr>, true >())
   ;
 
-  typedef std::vector<MMCifInfoTransOpPtrList > MMCifInfoTransOpPtrListList;
   class_<std::vector<MMCifInfoTransOpPtrList > >("MMCifInfoTransOpPtrListList",
                                                 init<>())
     .def(vector_indexing_suite<std::vector<MMCifInfoTransOpPtrList >, true >())
@@ -228,7 +225,6 @@ void export_mmcif_io()
   class_<MMCifInfoStructRefSeqDifs>("MMCifInfoStructRefSeqDifs", init<>())
   	.def(vector_indexing_suite<MMCifInfoStructRefSeqDifs, true>())
   ;
-  typedef std::vector<MMCifInfoBioUnit> MMCifInfoBioUnitList;
   class_<std::vector<MMCifInfoBioUnit> >("MMCifInfoBioUnitList", init<>())
     .def(vector_indexing_suite<std::vector<MMCifInfoBioUnit> >())
   ;

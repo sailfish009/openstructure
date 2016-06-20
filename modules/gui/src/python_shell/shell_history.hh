@@ -22,8 +22,8 @@
   Author: Andreas Schenk
  */
 
-#include <vector>
 #include "python_shell_fw.hh"
+#include <vector>
 #include <QString>
 
 namespace ost { namespace gui {

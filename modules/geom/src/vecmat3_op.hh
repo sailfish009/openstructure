@@ -195,35 +195,39 @@ inline Real Distance(const Vec3& p1, const Vec3& p2)
 }
 
 
-//! return the squared distance between two points with periodic boundaries in x,y,z given in basis_vec
-inline Real Distance2WithPBC(const Vec3& v1, const Vec3& v2, const Vec3& basis_vec){
+//! return the squared distance between two points with periodic boundaries in x,y,z given in ucell_size
+inline Real Distance2WithPBC(const Vec3& v1, const Vec3& v2, const Vec3& ucell_size){
   Vec3 v;
   v=v1-v2;
   for (int i=0; i<3; i++) {
-    if (std::fabs(v[i])>basis_vec[i]/2.){ 
-      v[i]=std::fabs(v[i])-basis_vec[i]*int(std::fabs(v[i])/basis_vec[i]+0.5);
+    if (std::fabs(v[i])>ucell_size[i]/2.){ 
+      v[i]=std::fabs(v[i])-ucell_size[i]*int(std::fabs(v[i])/ucell_size[i]+0.5);
     }
   }
   return Length2(v);
 }
-//! return the distance between two points with periodic boundaries in x,y,z given in basis_vec
-inline Real DistanceWithPBC(const Vec3& v1, const Vec3& v2, const Vec3& basis_vec){
-  return sqrt(Distance2WithPBC(v1, v2, basis_vec));
+//! return the distance between two points with periodic boundaries in x,y,z given in ucell_size
+inline Real DistanceWithPBC(const Vec3& v1, const Vec3& v2, const Vec3& ucell_size){
+  return sqrt(Distance2WithPBC(v1, v2, ucell_size));
 }
 //! returns the minimal distance between the points in two Vec3List
 Real DLLEXPORT_OST_GEOM MinDistance(const Vec3List& l1, const Vec3List& l2);
 //! returns the minimal distance between the points in two Vec3List 
-//  with periodic boundaries in x,y,z given in basis_vec
-Real DLLEXPORT_OST_GEOM MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& basis_vec);
+//  with periodic boundaries in x,y,z given in ucell_size
+Real DLLEXPORT_OST_GEOM MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& ucell_size);
 //! returns the indices index1, index2 corresponding to the points in
 //! the Vec3List l1 and l2 having the minimal distance.
 std::vector<unsigned int> DLLEXPORT_OST_GEOM MinDistanceIndices(const Vec3List& l1, const Vec3List& l2);
-  
+//! Calculates the Unit Cell Vectors from their sizes and angles (given as Vec3(gamma,beta,alpha)).
+Vec3List DLLEXPORT_OST_GEOM CalculateUnitCellVectors(const Vec3& ucell_size, const Vec3& ucell_angles);
 //!wraps a vector in a box with periodic boundaries
-Vec3 DLLEXPORT_OST_GEOM WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& basis_vec);
-//!wraps all the verctors in a Vec3List in a box with periodic boundaries
-Vec3List DLLEXPORT_OST_GEOM WrapVec3List(const Vec3List& vl,const Vec3& box_center,const Vec3& basis_vec);
-
+Vec3 DLLEXPORT_OST_GEOM WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& ucell_size);
+//!wraps all the vectors in a Vec3List in a box with periodic boundaries
+Vec3List DLLEXPORT_OST_GEOM WrapVec3List(const Vec3List& vl,const Vec3& box_center,const Vec3& ucell_size);
+//!wraps a vector in a non-rothogonal box with periodic boundaries
+Vec3 DLLEXPORT_OST_GEOM WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& ucell_size,const Vec3& ucell_angles);
+//!wraps all the vectors in a Vec3List in a non-rothogonal box with periodic boundaries
+Vec3List DLLEXPORT_OST_GEOM WrapVec3List(const Vec3List& vl,const Vec3& box_center,const Vec3& ucell_size,const Vec3& ucell_angles);
   
 } // ns
 

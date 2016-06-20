@@ -27,7 +27,7 @@ using boost::unit_test_framework::test_suite;
 #include <ost/test_utils/compare_files.hh>
 #include <ost/mol/mol.hh>
 #include <ost/io/mol/entity_io_sdf_handler.hh>
-#include <ost/io/save_entity.hh>
+#include <ost/io/mol/save_entity.hh>
 #include <ost/io/io_exception.hh>
 
 using namespace ost;

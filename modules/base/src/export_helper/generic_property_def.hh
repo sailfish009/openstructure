@@ -141,7 +141,9 @@ void const_generic_prop_def(O& bp_class)
     
   Real (C::*get_float1)(const String&, Real) const=&C::GetFloatProp;
   Real (C::*get_float2)(const String&) const=&C::GetFloatProp;
-    
+  
+  geom::Vec3 (C::*get_vec3)(const String&) const=&C::GetVec3Prop;
+
   String (C::*get_str1)(const String&, const String&) const=&C::GetStringProp;
   String (C::*get_str2)(const String&) const=&C::GetStringProp;  
   bp_class
@@ -151,7 +153,8 @@ void const_generic_prop_def(O& bp_class)
     .def("GetBoolProp", get_bool1)
     .def("GetBoolProp", get_bool2)        
     .def("GetFloatProp", get_float1)
-    .def("GetFloatProp", get_float2)    
+    .def("GetFloatProp", get_float2) 
+    .def("GetVec3Prop", get_vec3)    
     .def("GetIntProp", get_int1)
     .def("GetIntProp", get_int2)    
     .def("GetStringProp", get_str1)
@@ -179,6 +182,7 @@ void generic_prop_def(O& bp_class)
     .def("ClearProps",  &C::ClearProps)
     .def("GetPropAsString", &C::GetPropAsString)
     .def("SetFloatProp", &C::SetFloatProp)
+    .def("SetVec3Prop", &C::SetVec3Prop)
     .def("SetIntProp", &C::SetIntProp)
     .def("SetStringProp", &C::SetStringProp)
     .def("GetPropList",&C::GetPropList)

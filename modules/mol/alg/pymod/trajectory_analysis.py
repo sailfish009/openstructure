@@ -55,7 +55,7 @@ def smooth(vec,n):
 From here on the module needs numpy
 """
 
-def RMSD_Matrix_From_Traj(t,sele,first=0,last=-1):
+def RMSD_Matrix_From_Traj(t,sele,first=0,last=-1,align=True,align_sele=None):
   """
   This function calculates a matrix M such that M[i,j] is the
   RMSD (calculated on **sele**) between frames i and j of the trajectory **t**
@@ -73,14 +73,16 @@ def RMSD_Matrix_From_Traj(t,sele,first=0,last=-1):
   :return: Returns a numpy N\ :subscript:`frames`\ xN\ :subscript:`frames` matrix, 
    where N\ :subscript:`frames` is the number of frames.
   """
+  if not align_sele:align_sele=sele
   try:
     import numpy as npy
     if last==-1:last=t.GetFrameCount()
     n_frames=last-first
     rmsd_matrix=npy.identity(n_frames)
     for i in range(n_frames):
-      t=ost.mol.alg.SuperposeFrames(t,sele,begin=first,end=last,ref=i)
-      eh=t.GetEntity()
+      if align:
+        t=ost.mol.alg.SuperposeFrames(t,align_sele,begin=first,end=last,ref=i)
+        eh=t.GetEntity()
       t.CopyFrame(i)
       rmsd_matrix[i,:]=ost.mol.alg.AnalyzeRMSD(t,sele,sele)
       if i==0:
@@ -253,10 +255,35 @@ def AverageDistanceMatrixFromTraj(t,sele,first=0,last=-1):
   M=npy.zeros([n_atoms,n_atoms])
   for i,a1 in enumerate(sele.atoms):
     for j,a2 in enumerate(sele.atoms):
+      if j>i:continue
       d=ost.mol.alg.AnalyzeDistanceBetwAtoms(t,a1.GetHandle(),a2.GetHandle())[first:last]
       M[i,j]=npy.mean(d)
       M[j,i]=npy.mean(d)
   return M
 
-
+def AnalyzeDistanceFluctuationMatrix(t,sele,first=0,last=-1):
+  try:
+    import numpy as npy
+  except ImportError:
+    LogError("Function needs numpy, but I could not import it.")
+    raise
+  n_atoms=sele.GetAtomCount()
+  M=npy.zeros([n_atoms,n_atoms])
+  for i,a1 in enumerate(sele.atoms):
+    for j,a2 in enumerate(sele.atoms):
+      if i>j:continue
+      d=ost.mol.alg.AnalyzeDistanceBetwAtoms(t,a1.GetHandle(),a2.GetHandle())[first:last]
+      M[j,i]=npy.std(d)
+      M[i,j]=npy.std(d)
+  return M
+  
+def IterativeSuperposition(t,sele,threshold=1.0,initial_sele=None,iterations=5,ref_frame=0):
+  if initial_sele:current_sele=initial_sele
+  else: current_sele=sele
+  for i in range(iterations):
+    t=ost.mol.alg.SuperposeFrames(t,current_sele,ref=ref_frame)
+    al=[a for a in sele.atoms if ost.mol.alg.AnalyzeRMSF(t,ost.mol.CreateViewFromAtoms([a]))<threshold]
+    if len(al)==0:return
+    current_sele=ost.mol.CreateViewFromAtoms(al)
+  return current_sele
     

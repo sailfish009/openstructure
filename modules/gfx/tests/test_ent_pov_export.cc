@@ -22,7 +22,7 @@
  */
 
 #include <fstream>
-#include <ost/io/load_entity.hh>
+#include <ost/io/mol/load_entity.hh>
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/entity.hh>
 

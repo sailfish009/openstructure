@@ -209,6 +209,11 @@ void OverlayManagerGUI::OnEventMenu(QAction* e)
 {
 }
 
+QButtonGroup* OverlayManagerGUI::GetButtonGroup(void)
+{
+  return active_group_;
+}
+
 void OverlayManagerGUI::UpdateView()
 {
 }

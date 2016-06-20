@@ -23,10 +23,7 @@
 
 #include "cartoon_renderer.hh"
 
-#include <Eigen/Core>
-#include <Eigen/Array>
 #include <Eigen/SVD>
-#include <Eigen/LU>
 
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/impl/tabulated_trig.hh>
@@ -138,7 +135,7 @@ namespace {
       A.row(i)=to_eigen(points[i]-cen);
     }
 
-    Eigen::SVD<EMatX> svd(A);
+    Eigen::JacobiSVD<EMatX> svd(A,Eigen::ComputeThinV);
     EMatX V=svd.matrixV();
     geom::Vec3 ax(V(0,0),V(1,0),V(2,0));
 

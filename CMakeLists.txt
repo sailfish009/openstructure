@@ -4,9 +4,10 @@
 
 cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 project(OpenStructure CXX C)
+set (CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set (OST_VERSION_MAJOR 1)
-set (OST_VERSION_MINOR 4)
-set (OST_VERSION_PATCH 1)
+set (OST_VERSION_MINOR 5)
+set (OST_VERSION_PATCH 0)
 set (OST_VERSION_STRING ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR}.${OST_VERSION_PATCH} )
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
 include(OST)
@@ -50,6 +51,7 @@ option(COMPILE_TESTS "whether unit tests should be compiled by default" OFF)
 option(ENABLE_STATIC "whether static libraries should be compiled" OFF)
 option(UBUNTU_LAYOUT "whether Debian/Ubuntu's lib and libexec directory layout should be used" OFF)
 option(HIDDEN_VISIBILITY "on gcc, use -fvisibility=hidden" OFF)
+option(ENABLE_MM "whether openmm support is added" OFF)
 
 if (CXX)
   set(CMAKE_CXX_COMPILER ${CXX})
@@ -139,14 +141,18 @@ if (PROFILE)
 else()
   set(_PROFILE OFF)
 endif()
+if(ENABLE_MM)
+  set(_OPENMM ON)
+else()
+  set(_OPENMM OFF)
+endif()
+
 
 if (UBUNTU_LAYOUT)
   set(_UBUNTU_LAYOUT ON)
 else()
   set(_UBUNTU_LAYOUT OFF)
 endif()
-
-add_definitions(-DEIGEN2_SUPPORT)
 
 if (COMPOUND_LIB)
   set(_COMP_LIB "${COMPOUND_LIB}")
@@ -226,12 +232,19 @@ else()
   set (PNG_LIBRARY "")
 endif()
 
-find_package(Eigen 2.0.0 REQUIRED)
+find_package(Eigen 3.2.0 REQUIRED)
 find_package(Python 2.4 REQUIRED)
 
 if(USE_NUMPY)
   find_package(Numpy REQUIRED)
 endif()
+
+if(ENABLE_MM)
+  find_package(OpenMM REQUIRED)
+  set(_OPENMM_PLUGINS "${OPEN_MM_PLUGIN_DIR}")
+else(ENABLE_MM)
+  set(_OPENMM_PLUGINS "NONE")
+endif(ENABLE_MM)
 
 if (ENABLE_IMG)
   find_package(FFTW REQUIRED)
@@ -243,7 +256,7 @@ if (ENABLE_STATIC)
   set(Boost_LIBRARIES)
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost ${_BOOST_MIN_VERSION} 
-               COMPONENTS filesystem system iostreams regex REQUIRED)
+               COMPONENTS filesystem system iostreams regex thread REQUIRED)
   find_package(ZLIB REQUIRED)
    
   if (UNIX AND NOT APPLE)
@@ -285,10 +298,11 @@ endif()
 
 # basic environment
 include_directories(${Boost_INCLUDE_DIRS} 
-                    ${FFTW_INCLUDE_PATH} 
-                    ${EIGEN2_INCLUDE_DIR}
+                    ${FFTW_INCLUDE_DIRS} 
+                    ${EIGEN3_INCLUDE_DIRS}
                     ${TIFF_INCLUDE_DIR}
-                    ${PNG_INCLUDE_DIR}
+                    ${PNG_INCLUDE_DIRS}
+                    ${OPEN_MM_INCLUDE_DIRS}
                     )
 if(USE_NUMPY)
 include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
@@ -343,6 +357,8 @@ message(STATUS
         "   Shader support                    (-DUSE_SHADER) : ${_SHADER}\n"
         "   Numpy support                      (-DUSE_NUMPY) : ${_NUMPY}\n"
         "   SpaceNav Device support         (-DENABLE_SPNAV) : ${_SPNAV}\n"
+        "   OpenMM support                     (-DENABLE_MM) : ${_OPENMM}\n"
+        "   OpenMM plugins            (-DOPEN_MM_PLUGIN_DIR) : ${_OPENMM_PLUGINS}\n"
         "   Optimize                            (-DOPTIMIZE) : ${_OPT}\n"
         "   Profiling support                    (-DPROFILE) : ${_PROFILE}\n"
         "   Double Precision        (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"

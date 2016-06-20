@@ -70,4 +70,6 @@ ost_*_tests_log.xml
 rules.ninja
 build.ninja
 modules/gui/src/dngr.qrc.depends
+/compile_commands.json
 /modules/bindings/tests/formatdb.log
+/modules/mol/mm/src/settings.hh

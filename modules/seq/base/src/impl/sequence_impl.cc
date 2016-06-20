@@ -331,6 +331,27 @@ void SequenceImpl::Replace(const String& str,int start, int end)
   this->ShiftsFromSequence();
 }
 
+void SequenceImpl::Normalise() {
+  const char gaps[]={'.', '-', '\0'};
+  bool is_gap;
+  String new_seq_string = "";
+  int n_gaps = sizeof(gaps) / sizeof(gaps[0]);
+  for (size_t i=0; i<seq_string_.length(); ++i) {
+    is_gap = false;
+    for (int j=0; j<n_gaps; ++j) {
+      if (seq_string_[i]==gaps[j]) {
+        is_gap = true;
+        break;
+      }
+    }
+    if (is_gap == false) {
+      new_seq_string = new_seq_string + char(toupper(seq_string_[i]));
+    }
+  }
+  seq_string_ = new_seq_string;
+  this->ShiftsFromSequence();
+}
+
 void SequenceImpl::ShiftRegion(int start, int end, int amount)
 {
   if(start > end || start + amount < 0 || end + amount > this->GetLength()){

@@ -160,7 +160,7 @@ The Testing Framework
 The `tests` directory contains code for unit tests. The code is compiled and 
 executed when one invokes compilation using the 'make check' command.  Tests are 
 run by means of the `Boost Unitests Library 
-<http://www.boost.org/doc/libs/1_37_0/libs/test/doc/html/index.html>`_. Before coding the test routines, the required skeleton needs to be put in place.
+<http://www.boost.org/doc/libs/1_53_0/libs/test/doc/html/index.html>`_. Before coding the test routines, the required skeleton needs to be put in place.
 
 The main code is put into 'tests.cc', which will become the test executable. There are only 3 lines required
     
@@ -224,7 +224,7 @@ The Python Wrapper
 --------------------------------------------------------------------------------
 
 Finally, the module API is exported to Python using the `Boost Python 
-Library <http://www.boost.org/doc/libs/1_37_0/libs/python/doc/index.html>`_.
+Library <http://www.boost.org/doc/libs/1_53_0/libs/python/doc/index.html>`_.
 In `mod/pymod`, the wrapper code for the classes in the new module is put into a 
 file named `wrap\_mod.cc`:
 

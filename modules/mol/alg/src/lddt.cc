@@ -18,7 +18,9 @@
 //------------------------------------------------------------------------------
 #include <iomanip>
 #if defined (_MSC_VER)
-#define BOOST_ALL_DYN_LINK 1
+  #define BOOST_ALL_DYN_LINK 1
+  #include <BaseTsd.h>
+  typedef SSIZE_T ssize_t;
 #endif
 #include <boost/program_options.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -142,9 +144,13 @@ CompoundLibPtr load_compound_lib(const String& custom_path)
   if (!_NSGetExecutablePath(result, &size)) {
     exe_path=String(result); 
   }
-  #else 
-  ssize_t count = readlink( "/proc/self/exe", result, 1024 );
-  exe_path = std::string( result, (count > 0) ? count : 0 );
+  #else
+    #if defined (_MSC_VER)
+      // todo find exe path on Windows
+    #else
+      ssize_t count = readlink( "/proc/self/exe", result, 1024 );
+      exe_path = std::string( result, (count > 0) ? count : 0 );
+    #endif
   #endif
   if (exe_path.empty()) { 
     std::cerr << "Could not determine the path of the molck executable. Will only "
@@ -506,7 +512,6 @@ int main (int argc, char **argv)
         ResNum rnum = ritv.GetNumber();
         bool assessed = false;
         String assessed_string="No";
-        bool quality_problems = false;
         String quality_problems_string="No";
         Real lddt_local = -1;
         String lddt_local_string="-";
@@ -519,12 +524,10 @@ int main (int argc, char **argv)
         }
         if (ritv.HasProp("stereo_chemical_violation_sidechain") || 
             ritv.HasProp("steric_clash_sidechain")) {
-          quality_problems = true;
           quality_problems_string="Yes";
         }
         if (ritv.HasProp("stereo_chemical_violation_backbone") || 
             ritv.HasProp("steric_clash_backbone")) {
-          quality_problems = true;
           quality_problems_string="Yes+";
         }
 

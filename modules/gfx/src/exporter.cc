@@ -28,7 +28,6 @@ namespace ost { namespace gfx {
     normal_tf_=geom::Mat3();
     geom::Mat4 Tmat,Rmat,Smat,Cmat;
     if(to_origin_) {
-      geom::Vec3 trans=scene->GetTransform().GetTrans();
       geom::Vec3 cen=scene->GetTransform().GetCenter();
       vertex_tf_=geom::Mat4(scene->GetTransform().GetRot()) *
                  geom::Mat4(scale_, 0.0, 0.0, 0.0,

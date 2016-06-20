@@ -106,7 +106,7 @@ void export_Compound() {
     .def("GetAtomSpecs", &Compound::GetAtomSpecs,
          return_value_policy<copy_const_reference>())
     .add_property("bond_specs", make_function(&Compound::GetBondSpecs,
-         return_value_policy<copy_const_reference>()))         
+         return_value_policy<copy_const_reference>()))
     .add_property("atom_specs", make_function(&Compound::GetAtomSpecs,
          return_value_policy<copy_const_reference>()))
     .def("AddAtom", &Compound::AddAtom)
@@ -120,6 +120,12 @@ void export_Compound() {
                   &Compound::SetFormula)
     .add_property("dialect", &Compound::GetDialectAsString, 
                   &set_dialect)
+    .add_property("inchi",
+                  make_function(&Compound::GetInchi, 
+                                return_value_policy<copy_const_reference>()))
+    .add_property("inchi_key",
+                  make_function(&Compound::GetInchiKey, 
+                                return_value_policy<copy_const_reference>()))
   ;
   
   class_<AtomSpec>("AtomSpec", no_init)

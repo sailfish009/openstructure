@@ -5,6 +5,8 @@ save.cc
 fasta_io_handler.cc
 pir_io_handler.cc
 promod_io_handler.cc
+hhm_io_handler.cc
+pssm_io_handler.cc
 PARENT_SCOPE
 )
 
@@ -13,6 +15,9 @@ sequence_io_handler.hh
 fasta_io_handler.hh
 pir_io_handler.hh
 promod_io_handler.hh
+profile_io_handler.hh
+hhm_io_handler.hh
+pssm_io_handler.hh
 clustal_io_handler.hh
 load.hh
 save.hh

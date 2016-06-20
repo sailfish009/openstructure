@@ -300,6 +300,7 @@ void export_sequence()
     .def("AttachView", attach_two)
     .def("Append", &SequenceHandle::Append)
     .def("SetString", &SequenceHandle::SetString)
+    .def("Normalise", &SequenceHandle::Normalise)
     .add_property("string",
                   make_function(&SequenceHandle::GetString,
                                 return_value_policy<copy_const_reference>()),

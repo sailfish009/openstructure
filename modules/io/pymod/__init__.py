@@ -210,7 +210,7 @@ except ImportError:
   pass
 
  ## loads several images and puts them in an ImageList
- # \sa \ref fft_li.py "View Fourier Transform Example"
+ # \sa \example fft_li.py "View Fourier Transform Example"
 def LoadImageList (files):
   image_list=img.ImageList()
   for file in files:

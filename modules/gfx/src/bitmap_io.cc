@@ -114,7 +114,7 @@ Bitmap import_png(const String& filename)
   int png_transforms;
   png_bytep *row_pointers;
   png_uint_32 row,column,chn;
-  png_uint_32 width,height,bpp;
+  png_uint_32 width,height;
   
   if((fp=fopen(filename.c_str(),"rb"))==NULL) {
     LOG_ERROR("error opening " << filename);
@@ -158,8 +158,7 @@ Bitmap import_png(const String& filename)
   
   width=(unsigned int)png_get_image_width(png_ptr, info_ptr);
   height=(unsigned int)png_get_image_height(png_ptr, info_ptr);
-  bpp=(unsigned int)png_get_bit_depth(png_ptr,info_ptr);
-
+ 
   boost::shared_array<unsigned char> data(new unsigned char[width*height*channels]);
   
   row_pointers = png_get_rows(png_ptr, info_ptr);

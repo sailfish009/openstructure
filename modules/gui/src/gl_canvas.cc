@@ -16,11 +16,11 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/gui/python_shell/python_interpreter.hh>
 #ifndef _MSC_VER
 #include <sys/time.h>
 #endif
 
-#include <ost/gui/python_shell/python_interpreter.hh>
 #include "gl_canvas.hh"
 #include "gl_win.hh"
 

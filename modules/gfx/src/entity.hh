@@ -89,6 +89,7 @@ public:
   Entity(const String& name,
          RenderMode::Type m,
          const mol::EntityView& ev);
+  virtual ~Entity();
 
   virtual geom::AlignedCuboid GetBoundingBox(bool use_tf=false) const;
 
@@ -363,13 +364,13 @@ private:
 
 /// \example load_and_display.py
 /// 
-/// Shows how to  display one \ref Entity "entity" with several render modes
+/// Shows how to  display one \ref ost::gfx::Entity "entity" with several render modes
 /// at once. The sidechains  are displayed simple mode, whereas the backbone is 
 /// displayed with smooth lines.
 
 ///  \example rendermodes.py
 /// 
-/// Shows how to switch between different \ref RenderMode "render modes" and 
+/// Shows how to switch between different \ref ost::gfx::RenderMode "render modes" and
 /// explains some of the rendermode parameters.
 /// \sa \ref load_and_display.py "Loading and Displaying an Entity"
 
@@ -386,7 +387,7 @@ private:
 
 /// \example color_by_property.py
 /// 
-/// Color \ref Entity "graphical entity" by property using a gradient
+/// Color \ref ost::gfx::Entity "graphical entity" by property using a gradient
 /// \sa \ref gradient.py "Gradient Example"
 }} // ns
 

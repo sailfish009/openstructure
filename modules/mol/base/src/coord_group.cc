@@ -146,7 +146,8 @@ void CoordGroupHandle::AddFrames(const CoordGroupHandle& cg)
       throw IntegrityError("Atom number don't match");
     }
     for (size_t i=0; i<cg.GetFrameCount(); ++i) {
-      source_->AddFrame(*cg.GetFrame(i));
+      CoordFramePtr p = cg.GetFrame(i);
+      source_->AddFrame(*p,p->GetCellSize(),p->GetCellAngles());
     }
   } else {
     throw IntegrityError("Can't add frame to immutable CoordGroup");
@@ -256,7 +257,7 @@ CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected, int first,
          j=indices.begin(), e2=indices.end(); j!=e2; ++j) {
       vecs[j-indices.begin()]=(*frame)[*j];
     }
-    filtered_cg.AddFrame(vecs);
+    filtered_cg.AddFrame(vecs,(*frame).GetCellSize(),(*frame).GetCellAngles());
   }
   return filtered_cg;
 }

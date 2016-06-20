@@ -61,18 +61,22 @@ public:
   /// \brief create a MMCifReader
   ///
   /// \param stream input stream
+  /// \param ent_handle
+  /// \param profile
+
   MMCifReader(std::istream& stream, mol::EntityHandle& ent_handle,
               const IOProfile& profile);
 
   /// \brief create a MMCifReader
   ///
   /// \param filename input file
+  /// \param ent_handle
+  /// \param profile
   MMCifReader(const String& filename, mol::EntityHandle& ent_handle,
               const IOProfile& profile);
 
   /// \brief Initialise the reader.
   ///
-  /// \param loc Location of the file
   void Init();
 
   /// \brief Set up a fresh instance
@@ -193,8 +197,9 @@ protected:
   /// \brief fetch values identifying atoms
   ///
   /// \param[in]  columns data row
-  /// \param[out] chain_name takes atom_site.label_asym_id or, if
+  /// \param[out] auth_chain_name takes atom_site.label_asym_id or, if
   ///             auth_chain_id_ is set, atom_site.auth_asym_id as a chain name
+  /// \param[out] cif_chain_name
   /// \param[out] res_name fetches atom_site.label_comp_id
   /// \param[out] resnum gets atom_site.label_seq_id if available, consecutive
   ///             numbers, otherwise

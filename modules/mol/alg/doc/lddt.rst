@@ -2,9 +2,9 @@
 lDDT
 ======
 
-------------
+-------------------------------------
 Where can I find the lDDT executable? 
-------------
+-------------------------------------
 
 The lDDT executable can be found at <YOUR-OST-STAGE-DIR>/bin/
 

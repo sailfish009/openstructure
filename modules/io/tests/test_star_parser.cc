@@ -137,19 +137,19 @@ public:
     BOOST_CHECK_EQUAL(columns[0].size(), static_cast<size_t>(1));
     ++cur_char_;
     BOOST_CHECK_EQUAL(columns[1][0], cur_char_);
-    BOOST_CHECK_EQUAL(columns[1].size(), 1);
+    BOOST_CHECK_EQUAL(columns[1].size(), static_cast<size_t>(1));
     ++cur_char_;
     BOOST_CHECK_EQUAL(columns[2][0], cur_char_);
-    BOOST_CHECK_EQUAL(columns[2].size(), 1);    
+    BOOST_CHECK_EQUAL(columns[2].size(), static_cast<size_t>(1));    
     ++cur_char_;
     BOOST_CHECK_EQUAL(columns[3][0], cur_char_);
-    BOOST_CHECK_EQUAL(columns[3].size(), 1);    
+    BOOST_CHECK_EQUAL(columns[3].size(), static_cast<size_t>(1));    
     ++cur_char_;
     BOOST_CHECK_EQUAL(columns[4][0], cur_char_);
-    BOOST_CHECK_EQUAL(columns[4].size(), 1);    
+    BOOST_CHECK_EQUAL(columns[4].size(), static_cast<size_t>(1));    
     ++cur_char_;
     BOOST_CHECK_EQUAL(columns[5][0], cur_char_);
-    BOOST_CHECK_EQUAL(columns[5].size(), 1);
+    BOOST_CHECK_EQUAL(columns[5].size(), static_cast<size_t>(1));
     ++cur_char_;
   }
   

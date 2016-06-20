@@ -106,6 +106,26 @@ BOOST_AUTO_TEST_CASE(seq_string)
   BOOST_CHECK_EQUAL(s.GetGaplessString(),"");
 }
 
+BOOST_AUTO_TEST_CASE(seq_normalise)
+{
+  SequenceHandle s=CreateSequence("S1", "abfcdadeaf");
+  BOOST_CHECK_EQUAL(s.GetString(),"abfcdadeaf");
+  s.Normalise();
+  BOOST_CHECK_EQUAL(s.GetString(),"ABFCDADEAF");
+  s=CreateSequence("S1", ".afc..de.f");
+  BOOST_CHECK_EQUAL(s.GetString(),".afc..de.f");
+  s.Normalise();
+  BOOST_CHECK_EQUAL(s.GetString(),"AFCDEF");
+  s=CreateSequence("S1", "-afc--de-f");
+  BOOST_CHECK_EQUAL(s.GetString(),"-afc--de-f");
+  s.Normalise();
+  BOOST_CHECK_EQUAL(s.GetString(),"AFCDEF");
+  s=CreateSequence("S1", ".afc-.de-f");
+  BOOST_CHECK_EQUAL(s.GetString(),".afc-.de-f");
+  s.Normalise();
+  BOOST_CHECK_EQUAL(s.GetString(),"AFCDEF");
+}
+
 BOOST_AUTO_TEST_CASE(seq_onelettercode)
 {
   SequenceHandle s=CreateSequence("S1", "abfcdadeaf");

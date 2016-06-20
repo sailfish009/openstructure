@@ -99,6 +99,9 @@ BOOST_PYTHON_MODULE(_ost_io)
   def("SequenceListFromString", &SequenceListFromString);
   def("SequenceFromString", &SequenceFromString);  
   def("SaveAlignment", &SaveAlignment, arg("format")="auto");
+  
+  def("LoadSequenceProfile", &LoadSequenceProfile, arg("format")="auto");
+
   def("LoadSurface",LoadSurface,load_surface_ov());
   def("LoadManagedSurface",LoadManagedSurface,load_msurface_ov());
 

@@ -144,6 +144,8 @@ public:
   /// \brief checks is the octree needs to be rebuilt
   bool IfOctreeDirty() const;
 
+  static bool global_downsampling_flag;
+
 protected:
   void UpdateRenderParams();
   void CalculateStat() const;
@@ -163,7 +165,6 @@ private:
   int histogram_bin_count_;
   float level_;
   bool normals_calculated_;
-  uint alg_;
   float smoothf_;
   float min_;
   float max_;

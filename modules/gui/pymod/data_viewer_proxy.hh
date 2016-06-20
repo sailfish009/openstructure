@@ -83,6 +83,7 @@ public:
   int AddOverlay(const OverlayPtr& ov, bool make_active=true);
   OverlayManagerPtr GetOverlayManager() const;
   void ClearOverlays();
+  void ClearActiveOverlay();
 
   void AddDockWidget(QWidget* w, const QString& name, bool shown=true, int area=2);
   void RemoveDockWidget(QWidget* w);
@@ -96,7 +97,7 @@ public:
   //Vec3 GetClickedPosition();
 
   void Hide();  
-
+  object GetButtonGroup();
   object GetQObject();
 protected:
   QPointer<DataViewer> viewer_ptr_;

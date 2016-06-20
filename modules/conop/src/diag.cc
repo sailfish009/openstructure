@@ -79,7 +79,7 @@ String Diag::Format(bool colored) const
       char *end=NULL;
       long int id=strtol(start, &end, 10);
       assert(start!=end);
-      assert(id>=0 && id<strings.size());
+      assert(id>=0 && static_cast<unsigned long>(id)<strings.size());
       if (plural_s) {
         if (ints_[args_[id].index]!=1) {
           ss << "s";

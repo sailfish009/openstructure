@@ -407,3 +407,15 @@ def ColladaExporter(file,scale=1.0,to_origin=True):
   e.to_origin=to_origin
   return e
 
+def _go_get_vis(go):
+  return go.IsVisible()
+
+def _go_set_vis(go,flag):
+  if flag:
+    go.Show()
+  else:
+    go.Hide()
+
+GfxObj.visible=property(_go_get_vis,_go_set_vis)
+
+

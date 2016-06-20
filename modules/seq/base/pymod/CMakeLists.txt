@@ -1,5 +1,6 @@
 set(OST_SEQ_PYMOD_SOURCES
   export_sequence.cc
+  export_profile_handle.cc
   wrap_seq.cc
 )
 

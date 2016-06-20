@@ -157,16 +157,49 @@ Loading sequence or alignment files
 
 .. function:: LoadSequenceList(filename, format='auto')
 
-  For a desription of how to use :func:`LoadSequenceList` please refer to 
+  For a description of how to use :func:`LoadSequenceList` please refer to 
   :func:`LoadSequence`. For a list of file formats supported by
   :func:`LoadSequenceList` see :doc:`sequence_formats`.
 
 .. function:: LoadAlignment(filename, format='auto')
 
-  For a desription of how to use :func:`LoadAlignment` please refer to 
+  For a description of how to use :func:`LoadAlignment` please refer to 
   :func:`LoadSequence`. For a list of file formats supported by 
   :func:`LoadAlignment` see :doc:`sequence_formats`.
+
+.. function:: LoadSequenceProfile(filename, format='auto')
+
+  Load sequence profile data from disk. If format is set to 'auto', the function
+  guesses the filetype based on the extension of the file. Files ending in
+  '.hhm' (output of HHblits) and '.pssm' (ASCII Table (PSSM) output of PSI-BLAST
+  as generated with blastpgp and flag -Q) will automatically be loaded.
+  
+  For files with non-standard extensions, the format can be set explicitly 
+  specifying the `format` parameter. 
+  
+  .. code-block:: python
+
+    # recognizes hhm file by file extension
+    myprof = io.LoadSequenceProfile('myhmm.hhm')
+    # recognizes pssm file by file extension
+    myprof = io.LoadSequenceProfile('myprof.pssm')
+
+    # to override format
+    myprof = io.LoadSequenceProfile('myfile', format='hhm')
+    myprof = io.LoadSequenceProfile('myfile', format='pssm')
+    
+  For a list of file formats supported by :func:`LoadSequenceProfile` see
+  :doc:`sequence_profile_formats`.
+  
+  :rtype: :class:`~ost.seq.ProfileHandle`
+
+  :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
+      is not recognized or the file format can not be detected based on the 
+      file extension.
       
+      :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
+      inexistent file.
+
 Saving Sequence Data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -247,7 +280,7 @@ Loading Density Maps
     # recognizes mrc file by file extension
     ent = io.LoadImage('file.mrc')
 
-    # it is always possible to explicitely set the image format
+    # it is always possible to explicitly set the image format
     # DAT file explicitly
     ent = io.LoadImage('file', Dat())
 

@@ -64,7 +64,7 @@ public:
   /// \brief start time in ps, default 0.0
   float GetStartTime() const;
 
-  /// \rbrief set start time in ps
+  /// \brief set start time in ps
   void SetStartTime(float t);
 
   /// \brief assign positions to the given frame - order and count must match 

@@ -20,9 +20,10 @@
 using namespace boost::python;
 
 void export_sequence();
+void export_profile_handle();
 
 BOOST_PYTHON_MODULE(_ost_seq)
 {
   export_sequence();
-
+  export_profile_handle();
 }

@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2009 by the OpenStructure authors
+# Copyright (C) 2008-2015 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -152,7 +152,8 @@ def _ParseMmAlign(lines):
   alignment = seq.CreateAlignment()
   alignment.AddSequence(seq2)
   alignment.AddSequence(seq1)
-  return MMAlignResult(rmsd, aln_length, tm_score, tf, alignment)
+
+  return MMAlignResult(rmsd, tm_score, aln_length, tf, seq2, alignment)
 
 def _RunMmAlign(mmalign, tmp_dir):
   model1_filename=os.path.join(tmp_dir, 'model01.pdb')

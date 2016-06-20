@@ -30,7 +30,7 @@ Sequence Offset
 
 When using sequences and structures together, often the start of the structure 
 and the beginning of the sequence do not fall together. In the following case, 
-the alignment of sequences B and C only covers a subpart of structure A::
+the alignment of sequences B and C only covers a subsequence of structure A::
 
   A acefghiklmnpqrstuvwy
   B     ghiklm
@@ -98,7 +98,8 @@ The SequenceHandle
      
     Get residue index of character at given position. This method is the
     inverse of :meth:`GetPos`. If the sequence contains a gap at that position,
-    an :exc:`Error` is raised.
+    an :exc:`Error` is raised. Admires the
+    :ref:`sequence offset <sequence-offset>`.
     
     .. code-block:: python
       
@@ -167,6 +168,10 @@ The SequenceHandle
     Returns a string version of this sequence with all hyphens removed. Also
     available as the property :attr:`gapless_string`.
      
+  .. method:: Normalise()
+     
+    Remove '-' and '.' as gaps from the sequence and make it all upper case.
+    Works in place.
    
   .. method:: SetName()
   
@@ -205,7 +210,7 @@ The SequenceHandle
 
   Check whether the two sequences s1 and s2 match. This function performs are
   case-insensitive comparison of the two sequences. The character  'X' is
-  interpreted as a wildcard character that always matches the other sequence.
+  interpreted as a wild card character that always matches the other sequence.
 
 The SequenceList    
 --------------------------------------------------------------------------------
@@ -220,7 +225,7 @@ The AlignmentHandle
 --------------------------------------------------------------------------------
 
 The :class:`AlignmentHandle` represents a list of aligned sequences. In
-constrast to :class:`SequenceList`, an alignment requires all sequences to be of 
+contrast to :class:`SequenceList`, an alignment requires all sequences to be of 
 the same length. New instances of alignments are created with 
 :func:`CreateAlignment` and :func:`AlignmentFromSequenceList`.
 
@@ -432,3 +437,140 @@ an alignment:
 
     Remove sequence at *index* from the alignment.
 
+
+Handling Sequence Profiles
+--------------------------------------------------------------------------------
+
+The :class:`ProfileHandle` provides a simple container for profiles for each
+residue. It mainly contains:
+
+- *N* :class:`ProfileColumn` objects (*N* = number of residues in sequence)
+  which each contains 20 amino acid frequencies
+- a :attr:`~ProfileHandle.sequence` (:class:`str`) of length *N*
+- a :attr:`~ProfileHandle.null_model` to use for this profile
+
+.. class:: ProfileColumn
+
+  .. method:: BLOSUMNullModel()
+
+    Static method, that returns a new :class:`ProfileColumn` with amino acid
+    frequencies given from the BLOSUM62 substitution matrix.
+
+  .. method:: GetFreq(aa)
+
+    :param aa:  One letter code of standard amino acid
+    :type aa:  :class:`str`
+
+    :returns:  Frequency of aa
+
+  .. method:: SetFreq(aa,freq)
+
+    :param aa:  One letter code of standard amino acid
+    :param freq:  The frequency of the given amino acid
+    :type aa:  :class:`str`
+    :type freq:  :class:`float`
+
+  .. attribute:: entropy
+
+    Shannon entropy based on the columns amino acid frequencies
+
+
+.. class:: ProfileHandle
+
+  .. method:: __len__()
+    
+    Returns the length of the sequence for which we have profile.
+
+    :rtype: :class:`int`
+
+  .. method:: AddColumn(col)
+
+    Appends column in the internal column list.
+
+    :param col:  Column to add
+    :type col:  :class:`ProfileColumn`
+
+  .. method:: Extract(from,to)
+
+    :param from:  Col Idx to start from
+    :param to:  End Idx, not included in sub-ProfileHandle
+
+    :type from:  :class:`int`
+    :type to:  :class:`int`
+
+    :returns: sub-profile as defined by given indices
+              (:attr:`null_model` is copied)
+    :rtype: :class:`ProfileHandle`
+
+    :raises: :exc:`~exceptions.Error` if if *to* <= *from* or
+              *to* > :meth:`__len__`.
+
+  .. method:: SetSequence(sequence)
+
+    Sets :attr:`sequence`.
+
+  .. method:: SetNullModel(null_model)
+
+    Sets :attr:`null_model`.
+
+  .. attribute:: sequence
+
+    Sequence for which we have this profile.
+    Note: user must enforce consistency between sequence length and number of
+    profile columns.
+
+  .. attribute:: columns
+
+    Iterable columns of the profile
+
+  .. attribute:: null_model
+
+    Null model of the profile
+
+  .. attribute:: avg_entropy
+
+    Average entropy of all the columns
+
+.. class:: ProfileDB
+
+  A simple database to gather :class:`ProfileHandle` objects. It is possible
+  to save them to disk in a compressed format with limited accuracy
+  (4 digits for each frequency).
+
+  .. method:: Save(filename)
+
+    :param filename:  Name of file that will be generated on disk.
+    :type filename:  :class:`str`
+
+  .. method:: Load(filename)
+
+    Static loading method
+
+    :param filename:  Name of file from which the database should be loaded.
+    :type filename:  :class:`str`
+    :returns:  The loaded database
+
+  .. method:: AddProfile(name, prof)
+
+    :param name:  Name of profile to be added
+    :param prof:  Profile to be added
+
+    :type name:  :class:`str`
+    :type prof:  :class:`ProfileHandle`
+    :raises:  :class:`Exception` when filename is longer than 255 characters.
+
+  .. method:: GetProfile(name)
+
+    :param name:  Name of profile to be returned
+    :type name:  :class:`str`
+    :returns:  The requested :class:`ProfileHandle`
+    :raises:  :class:`Exception` when no :class:`ProfileHandle` for **name** exists.
+
+  .. method:: Size()
+
+    :returns: Number of :class:`ProfileHandle` objects in the database
+
+  .. method:: GetNames()
+
+    :returns: A nonsorted list of the names of all :class:`ProfileHandle`
+              objects in the database

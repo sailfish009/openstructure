@@ -26,8 +26,9 @@
 #include <ost/io/module_config.hh>
 #include <ost/seq/sequence_list.hh>
 #include <ost/seq/alignment_handle.hh>
-namespace ost { namespace io {
+#include <ost/seq/profile_handle.hh>
 
+namespace ost { namespace io {
 
 seq::AlignmentHandle DLLEXPORT_OST_IO 
 LoadAlignment(const String& file_name, const String& format="auto");
@@ -56,6 +57,9 @@ SequenceFromStream(std::istream&  stream, const String& format);
 
 seq::SequenceHandle DLLEXPORT_OST_IO 
 SequenceFromString(const String& data, const String& format);
+
+seq::ProfileHandlePtr DLLEXPORT_OST_IO 
+LoadSequenceProfile(const String& file_name, const String& format="auto");
 
 }}
 

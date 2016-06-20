@@ -27,14 +27,11 @@
 #ifndef PYTHON_INTERPRETER_HH
 #define PYTHON_INTERPRETER_HH
 
-#include <vector>
 
-#include <ost/gui/module_config.hh>
-
-#include <ost/gui/module_config.hh>
 #include "python_interpreter_worker.hh"
 #include "output_redirector.hh"
 #include "main_thread_runner.hh"
+#include <ost/gui/module_config.hh>
 
 #include <QQueue>
 #include <QMetaType>

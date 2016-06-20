@@ -44,17 +44,6 @@ BOOST_AUTO_TEST_CASE(test_transform_essentials)
   tf.SetTrans(tra);
   tf.SetCenter(cen);
 
-  Mat4 tmat = 
-    geom::Mat4(1.0,0.0,0.0,tra[0],
-               0.0,1.0,0.0,tra[1],
-               0.0,0.0,1.0,tra[2],
-               0.0,0.0,0.0,1.0) *
-    geom::Mat4(rot) *
-    geom::Mat4(1.0,0.0,0.0,-cen[0],
-               0.0,1.0,0.0,-cen[1],
-               0.0,0.0,1.0,-cen[2],
-               0.0,0.0,0.0,1.0);
-
   BOOST_CHECK_EQUAL(tf.GetRot(), rot);
   BOOST_CHECK_EQUAL(tf.GetCenter(), cen);
   BOOST_CHECK_EQUAL(tf.GetTrans(), tra);

@@ -28,7 +28,7 @@
 #include <ost/gui/scene_win/scene_win_model.hh>
 
 #include <QFlags>
-#include <QMap>
+#include <QVector>
 #include <QAbstractItemModel>
 #include <QTreeView>
 namespace ost { namespace gui {
@@ -53,6 +53,7 @@ enum ContextActionType
   MAP_DSAMPLED_AVAIL=0x4000
 #endif
 };
+
 Q_DECLARE_FLAGS(ContextActionTypes, ContextActionType)
 
 
@@ -73,7 +74,7 @@ private slots:
   void DeleteView();
 
 private:
-  QMap<QAction*, ContextActionTypes> actions_;
+  QVector<std::pair<QAction*, ContextActionTypes> > actions_;
 
   QTreeView* view_;
   SceneWinModel* model_;

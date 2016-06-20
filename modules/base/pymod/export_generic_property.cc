@@ -34,6 +34,7 @@ void export_GenericProp()
   int (GenericPropContainer::* get_int2)(const String&, int) const = &GenericPropContainer::GetIntProp;
   bool (GenericPropContainer::* get_bool1)(const String&) const = &GenericPropContainer::GetBoolProp;
   bool (GenericPropContainer::* get_bool2)(const String&, bool) const = &GenericPropContainer::GetBoolProp;
+  geom::Vec3 (GenericPropContainer::* get_vec3)(const String&) const = &GenericPropContainer::GetVec3Prop;
 
   class_<GenericPropContainer, boost::noncopyable>("GenericPropContainer",no_init)
     .def("HasProp",&GenericPropContainer::HasProp)
@@ -49,6 +50,8 @@ void export_GenericProp()
     .def("SetBoolProp",&GenericPropContainer::SetBoolProp)
     .def("GetBoolProp",get_bool1)
     .def("GetBoolProp",get_bool2)
+    .def("SetVec3Prop",&GenericPropContainer::SetVec3Prop)
+    .def("GetVec3Prop",get_vec3)
     .def("ClearProps",&GenericPropContainer::ClearProps)
     .def("GetPropAsString",&GenericPropContainer::GetPropAsString)
     ;

@@ -21,7 +21,7 @@
 #include <boost/test/auto_unit_test.hpp>
 
 #include <map>
-#include <ost/io/load_map.hh>
+#include <ost/io/img/load_map.hh>
 #include <ost/img/image_factory.hh>
 #include <ost/img/alg/randomize.hh>
 #include  <ost/io/img/map_io_df3_handler.hh>

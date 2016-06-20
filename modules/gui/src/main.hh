@@ -19,11 +19,11 @@
 #ifndef OST_GUI_OST_MAIN_HH
 #define OST_GUI_OST_MAIN_HH
 
-#include <map>
-#include <boost/shared_ptr.hpp>
 
-#include <ost/gui/module_config.hh>
 #include <ost/gui/python_shell/text_logger.hh>
+#include <boost/shared_ptr.hpp>
+#include <ost/gui/module_config.hh>
+#include <map>
 
 #include "widget_state_saver.hh"
 

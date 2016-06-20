@@ -101,4 +101,14 @@ seq::SequenceHandle SequenceFromString(const String& data,
  return get_one_seq(SequenceListFromString(data, format));
 }
 
+seq::ProfileHandlePtr LoadSequenceProfile(const String& file_name,
+                                          const String& format)
+{
+  seq::ProfileHandlePtr prof(new seq::ProfileHandle);
+  IOManager& m = IOManager::Instance();
+  ProfileIOHandlerPtr prof_io = m.FindProfileImportHandler(file_name, format);
+  prof_io->Import(*prof, file_name);
+  return prof;
+}
+
 }}

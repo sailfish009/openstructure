@@ -47,6 +47,9 @@ void ms_color_by_04(MapSlab *s, const Color& c1, const Color& c2)
   s->ColorBy(c1,c2);
 }
 
+bool get_gds() {return MapIso::global_downsampling_flag;}
+void set_gds(bool f) {MapIso::global_downsampling_flag=f;}
+
 } // anon ns
 
 void export_Map()
@@ -82,6 +85,7 @@ void export_Map()
     .def("SetColor", &MapIso::SetColor)
     .def("GetColor", &MapIso::GetColor, return_value_policy<copy_const_reference>())
     .def("SetDebugOctree", &MapIso::SetDebugOctree)    
+    .add_static_property("global_downsampling_flag",get_gds,set_gds)
   ;
 
   class_<MapSlab, bases<GfxObj>, boost::shared_ptr<MapSlab>,

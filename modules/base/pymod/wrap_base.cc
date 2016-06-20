@@ -104,10 +104,31 @@ BOOST_PYTHON_MODULE(_ost_base)
   class_<std::vector<String> >("StringList", init<>())
     .def(vector_indexing_suite<std::vector<String>, true>())
   ;
+
+  class_<std::vector<char> >("CharList", init<>())
+    .def(vector_indexing_suite<std::vector<char>, true>())
+  ;
   
   typedef std::vector<int> IntList;
   class_<std::vector<int> >("IntList", init<>())
     .def(vector_indexing_suite<std::vector<int> >())
     .def(geom::VectorAdditions<IntList>())
+  ;
+
+  typedef std::vector< FloatList > FloatMatrix;
+  class_<FloatMatrix>("FloatMatrix", init<>())
+  .def(vector_indexing_suite<FloatMatrix>())
+  ;
+
+  typedef std::vector< FloatMatrix > FloatMatrix3;
+  class_<FloatMatrix3>("FloatMatrix3", init<>())
+  .def(vector_indexing_suite<FloatMatrix3>())
+  ;
+
+  typedef std::vector< FloatMatrix3 > FloatMatrix4;
+  class_<FloatMatrix4>("FloatMatrix4", init<>())
+  .def(vector_indexing_suite<FloatMatrix4>())
+  ;
+
   ;
 }

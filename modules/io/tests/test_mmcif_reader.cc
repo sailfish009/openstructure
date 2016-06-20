@@ -644,14 +644,14 @@ BOOST_AUTO_TEST_CASE(mmcif_struct_ref)
   MMCifReader mmcif_p(s, eh, profile);
   mmcif_p.Parse();
   MMCifInfoStructRefs refs=mmcif_p.GetInfo().GetStructRefs();
-  BOOST_CHECK_EQUAL(refs.size(), 1);
+  BOOST_CHECK_EQUAL(refs.size(), size_t(1));
   MMCifInfoStructRefPtr sr1=refs[0];
   BOOST_CHECK_EQUAL(sr1->GetDBName(), "UNP");
   BOOST_CHECK_EQUAL(sr1->GetDBID(), "BLA2_BACCE");
   BOOST_CHECK_EQUAL(sr1->GetDBAccess(), "P04190");
   BOOST_CHECK_EQUAL(sr1->GetID(), "1");
   MMCifInfoStructRefSeqs seqs=sr1->GetAlignedSeqs();
-  BOOST_CHECK_EQUAL(seqs.size(), 2);
+  BOOST_CHECK_EQUAL(seqs.size(), size_t(2));
   BOOST_CHECK_EQUAL(seqs[0]->GetID(), "1");
   BOOST_CHECK_EQUAL(seqs[0]->GetChainName(), "A");
   BOOST_CHECK_EQUAL(seqs[0]->GetSeqBegin(), 1);
@@ -665,7 +665,7 @@ BOOST_AUTO_TEST_CASE(mmcif_struct_ref)
   BOOST_CHECK_EQUAL(seqs[1]->GetDBBegin(), 31);
   BOOST_CHECK_EQUAL(seqs[1]->GetDBEnd(), 49);
   MMCifInfoStructRefSeqDifs diffs=seqs[0]->GetDifs();
-  BOOST_CHECK_EQUAL(diffs.size(), 1);
+  BOOST_CHECK_EQUAL(diffs.size(), size_t(1));
   BOOST_CHECK_EQUAL(diffs[0]->GetSeqRNum(), 91);
   BOOST_CHECK_EQUAL(diffs[0]->GetDetails(), "ENGINEERED MUTATION");
 }

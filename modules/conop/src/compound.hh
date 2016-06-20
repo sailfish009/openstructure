@@ -98,6 +98,7 @@ struct DLLEXPORT_OST_CONOP AtomSpec {
     return ordinal==rhs.ordinal && name==rhs.name && alt_name==rhs.alt_name &&
            element==rhs.element && is_leaving==rhs.is_leaving && 
            rhs.is_aromatic==rhs.is_aromatic;
+
   }
   bool operator!=(const AtomSpec& rhs) const {
     return !this->operator==(rhs);
@@ -146,6 +147,8 @@ public:
     tlc_(id),
     formula_(),
     name_(),
+    inchi_(),
+    inchi_key_(),
     atom_specs_(),
     bond_specs_(),
     chem_class_(),
@@ -236,11 +239,19 @@ public:
   const String& GetName() { return name_; }
   
   void SetName(const String& name) { name_=name; }
-  
+
   void SetFormula(const String& formula) { formula_=formula; }
 
   const String& GetFormula() { return formula_; }
-  
+
+  void SetInchi(const String& inchi) { inchi_=inchi; }
+
+  const String& GetInchi() { return inchi_; }
+
+  void SetInchiKey(const String& inchikey) { inchi_key_=inchikey; }
+
+  const String& GetInchiKey() { return inchi_key_; }
+
   const BondSpecList& GetBondSpecs() const {
     return bond_specs_;
   }
@@ -268,6 +279,8 @@ private:
   String                       tlc_;
   String                       formula_;
   String                       name_;
+  String                       inchi_;
+  String                       inchi_key_;
   AtomSpecList                 atom_specs_;
   BondSpecList                 bond_specs_;
   mol::ChemClass               chem_class_;

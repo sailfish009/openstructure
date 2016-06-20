@@ -42,8 +42,8 @@ except ImportError:
   print "Could not find matplotlib: ignoring some table class unit tests"
   
 try:
-  import Image
-  import ImageChops
+  from PIL import Image
+  from PIL import ImageChops
 except ImportError:
   HAS_PIL=False
   print "Could not find python imagine library: ignoring some table class unit tests"

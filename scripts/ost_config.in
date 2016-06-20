@@ -53,6 +53,14 @@ if [ -n "$DNG_ATTACH_VALGRIND" ]; then
   pyexec="`which valgrind`#--leak-check=full#$pyexec"
 fi
 
+if [ -n "$DNG_ATTACH_VALGRIND_MASSIF" ]; then
+  if [ ! -x `which valgrind` ]; then
+    echo "Error: valgrind not found!"
+    exit
+  fi
+  pyexec="`which valgrind`#--tool=massif#$pyexec"
+fi
+
 if [ -n "$DNG_PROFILE" ]; then
   if [[ "$DNG_PROFILE" == "yep" ]]; then
     echo "Profiling activated using yep"

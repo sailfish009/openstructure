@@ -76,7 +76,7 @@ public:
   /// \brief returns a substring of the string
   ///
   /// \param pos the starting position of the substring
-  /// \param length is the length of the string. if std::string::npos, the 
+  /// \param n is the length of the string. if std::string::npos, the
   ///     substring goes from \p pos to the end of the string
   /// The function does on purpose not perform any boundary check in release 
   /// mode. It's the duty of the caller to make sure the string has the required 

@@ -21,11 +21,11 @@
   Author: Marco Biasini
  */
 
+#include "python_shell_widget.hh"
+#include "python_shell.hh"
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/widget_registry.hh>
 
-#include "python_shell.hh"
-#include "python_shell_widget.hh"
 
 #include <QVBoxLayout>
 namespace ost { namespace gui {

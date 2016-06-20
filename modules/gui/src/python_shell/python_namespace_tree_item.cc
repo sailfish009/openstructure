@@ -17,9 +17,9 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
+#include "python_namespace_tree_item.hh"
 #include <ost/base.hh>
 
-#include "python_namespace_tree_item.hh"
 
 
 
@@ -107,13 +107,9 @@ void PythonNamespaceTreeItem::FetchMore()
       continue;
     }
     bp::object child_namespace;
-    bool found=false;
     try{
       String keystring=bp::extract<String>(keys[i]);
       child_namespace=namespace_.attr(keystring.c_str());
-      if (bp::len(dir(child_namespace))>0) {
-        found=true;
-      }      
     } catch(bp::error_already_set) {
       PyErr_Clear();
     }

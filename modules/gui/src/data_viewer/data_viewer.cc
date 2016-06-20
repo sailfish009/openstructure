@@ -23,17 +23,17 @@
   Authors: Ansgar Philippsen, Andreas Schenk, Jeff Lovelace
 */
 
+#include <ost/gui/gosty_app.hh>
 #include <cassert>
 #include <iostream>
 //#include <cstring>
 //#include <sstream>
 
 
-//#include <ost/img/io/io_manager.hh>
+//#include <ost/io/io_manager.hh>
 #include <ost/message.hh>
 //#include <ost/img/alg/fft.hh>   
 #include <ost/img/alg/norm.hh>   
-#include <ost/gui/gosty_app.hh>
 #include <ost/gui/dock_widget.hh>
 
 #include <ost/gui/perspective.hh>
@@ -205,6 +205,11 @@ geom::Vec2 DataViewer::GetOffset() const
   return panel_->GetOffset();
 }
 
+QButtonGroup* DataViewer::GetButtonGroup(void)
+{
+  return ov_manager_gui_->GetButtonGroup();
+}
+
 int DataViewer::AddOverlay(const OverlayPtr& ov, bool make_active)
 {
   int retval= ov_manager_->AddOverlay(ov,make_active);
@@ -215,6 +220,11 @@ int DataViewer::AddOverlay(const OverlayPtr& ov, bool make_active)
 void DataViewer::ClearOverlays()
 {
   ov_manager_->DeleteAllOverlays();
+}
+
+void DataViewer::ClearActiveOverlay()
+{
+  ov_manager_->DeleteActiveOverlay();
 }
 
 OverlayManagerPtr DataViewer::GetOverlayManager() const

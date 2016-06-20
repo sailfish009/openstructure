@@ -74,7 +74,7 @@ u v w x . . .     d*c*b*a b c d   3
 #include <ost/base.hh>
 
 #include <ost/img/image_state.hh>
-#include <ost/img/alg/stat.hh>
+#include <ost/img/alg/stat_accumulator.hh>
 #include <ost/img/alg/normalizer_factory.hh>
 #include <ost/img/util.hh>
 #include <ost/img/progress.hh>
@@ -94,13 +94,24 @@ namespace ost { namespace io {
 String MRC::FORMAT_STRING = "defined_mrc";
 
 
-MRC::MRC(bool normalize_on_save, Subformat subformat,Endianess endianess_on_save):
+MRC::MRC(bool normalize_on_save, Subformat subformat,Endianess endianess_on_save, Format bit_depth):
   ImageFormatBase(FORMAT_STRING),
   subformat_(subformat),
   normalize_on_save_(normalize_on_save),
-  endianess_on_save_(endianess_on_save)
+  endianess_on_save_(endianess_on_save),
+  bit_depth_(bit_depth)
 {
 }
+Format MRC::GetBitDepth() const
+{
+  return bit_depth_;
+}
+
+void MRC::SetBitDepth (Format bitdepth)
+{
+  bit_depth_ = bitdepth;
+}
+
 
 Endianess MRC::GetEndianessOnSave() const
 {
@@ -132,8 +143,8 @@ void MRC::SetNormalizeOnSave(bool normalize_on_save)
   normalize_on_save_ = normalize_on_save;
 }
 
-CCP4::CCP4(bool normalize_on_save, Endianess endianess_on_save):
-  MRC(normalize_on_save,MRC_NEW_FORMAT,endianess_on_save)
+CCP4::CCP4(bool normalize_on_save, Endianess endianess_on_save, Format bit_depth):
+  MRC(normalize_on_save,MRC_NEW_FORMAT,endianess_on_save,bit_depth)
 {}
 
 
@@ -223,7 +234,7 @@ public:
       label[i]=' ';
     }
   }
-  header_base(const img::ConstImageHandle& im):
+  header_base(const img::ConstImageHandle& im, Format bit_depth):
     nc(),
     nr(static_cast<int>(im.GetExtent().GetSize().GetHeight())),
     ns(static_cast<int>(im.GetExtent().GetSize().GetDepth())),
@@ -247,22 +258,55 @@ public:
   {
     if(im.GetType()==img::REAL){
       nc=static_cast<int>(im.GetExtent().GetSize().GetWidth());
-      mode=2;
+      switch(bit_depth){
+      case OST_BIT8_FORMAT:
+        mode=0;
+        break;
+      case OST_BIT16_FORMAT:
+        mode=1;
+        break;
+      case OST_FLOAT_FORMAT:
+      case OST_DEFAULT_FORMAT:
+        mode=2;
+        break;
+      default:
+        throw(IOException("MRC/CCP4 export: Bit depth not supported."));
+        break;
+      }
       x=im.GetExtent().GetSize().GetWidth()*im.GetSpatialSampling()[0];
       y=im.GetExtent().GetSize().GetHeight()*im.GetSpatialSampling()[1];
       z=im.GetExtent().GetSize().GetDepth()*im.GetSpatialSampling()[2];
     }else{
       nc=static_cast<int>(im.GetExtent().GetSize().GetWidth()/2 +1);
-      mode=4;
+      switch(bit_depth){
+      case OST_BIT16_FORMAT:
+        mode=3;
+        break;
+      case OST_FLOAT_FORMAT:
+      case OST_DEFAULT_FORMAT:
+        mode=4;
+        break;
+      default:
+        throw(IOException("MRC/CCP4 export: Bit depth not supported."));
+        break;
+      }
       x=1.0;
       y=1.0;
       z=1.0;
     }
-    ost::img::alg::Stat stat;
-    im.Apply(stat);
-    amin=stat.GetMinimum();
-    amax=stat.GetMaximum();
-    amean=stat.GetMean();
+    ost::img::alg::StatAccumulator<1> acc;
+    if(im.GetType()==img::REAL) {
+      img::image_state::RealSpatialImageState *isr=dynamic_cast<img::image_state::RealSpatialImageState*>(im.ImageStatePtr().get());
+      if(! isr){
+        throw(IOException("MRC/CCP4 export: dynamic cast failed in header base."));
+      }
+      for(Real* ptr = isr->Data().GetData(); ptr<isr->Data().GetEnd(); ++ptr) {
+        acc(*ptr);
+      }
+      amin=acc.GetMinimum();
+      amax=acc.GetMaximum();
+      amean=acc.GetMean();
+    }
     for(unsigned int i=0;i<800;++i)
     {
       label[i]=' ';
@@ -342,8 +386,8 @@ public:
     yorigin(0.0)
   {
   }
-  mrc_header(const img::ConstImageHandle& im):
-    header_base(im),
+  mrc_header(const img::ConstImageHandle& im, Format bit_depth):
+    header_base(im,bit_depth),
     xorigin(0.0), // todo determine origin
     yorigin(0.0)
   {
@@ -435,8 +479,8 @@ public:
     arms()
   {
   }
-  ccp4_header(const img::ConstImageHandle& im):
-    header_base(im),
+  ccp4_header(const img::ConstImageHandle& im, Format bit_depth):
+    header_base(im,bit_depth),
     lskflag(),
     skwmat(),
     skwtrn(),
@@ -703,15 +747,17 @@ void real_dumper(BinaryOStream<CONVERSIONTYPE>& f, header_base& header, const Co
   char this_dummy; //create dummy variable to give to Progress as this
   Progress::Instance().Register(&this_dummy,header.ns*header.nr,100);
   for(int ss=0;ss<header.ns;++ss) {
+    std::vector<B> buffer(header.nr*header.nc);
     pnt[maps]=header.nsstart+ss;
     for(int sr=0;sr<header.nr;++sr) {
       pnt[mapr]=header.nrstart+sr;
       for(int sc=0;sc<header.nc;++sc) {
         pnt[mapc]=header.ncstart+sc;
-        f << static_cast<B>(norm.Convert(isr->Value(pnt)));
+        buffer[header.nc*sr+sc]=img::Val2Val<Real,B>(norm.Convert(isr->Value(pnt)));
       }
       Progress::Instance().AdvanceProgress(&this_dummy);
     }
+    f.write(&buffer[0],header.nr*header.nc);
   }
   Progress::Instance().DeRegister(&this_dummy);
 }
@@ -795,7 +841,7 @@ void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
     } else {
       throw IOException("internal error in MRC io: expected ComplexHalfFrequencyImageState");
     }
-  } else if (header.mode>=0 && header.mode<=2) {
+  } else if (header.mode==0 || header.mode==2 || header.mode==5 || header.mode==6 || header.mode==7) {
     img::Size msize;
     msize[header.mapc-1]=header.nc;
     msize[header.mapr-1]=header.nr;
@@ -815,11 +861,15 @@ void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
     LOG_INFO("resulting image extent: " << image.GetExtent());
     if(img::image_state::RealSpatialImageState *rs=dynamic_cast<img::image_state::RealSpatialImageState*>(image.ImageStatePtr().get())) {
       if(header.mode==0) {
-        detail::real_filler<uchar,CONVERSIONTYPE>(*rs,f,header);
-      } else if(header.mode==1) {
-        detail::real_filler<unsigned short,CONVERSIONTYPE>(*rs,f,header);
+        detail::real_filler<int8_t,CONVERSIONTYPE>(*rs,f,header);
+      } else if(header.mode==1 || header.mode==5) {
+        detail::real_filler<int16_t,CONVERSIONTYPE>(*rs,f,header);
       } else if(header.mode==2) {
         detail::real_filler<float,CONVERSIONTYPE>(*rs,f,header);
+      } else if(header.mode==6) {
+        detail::real_filler<uint16_t,CONVERSIONTYPE>(*rs,f,header);
+      } else if(header.mode==7) {
+        detail::real_filler<int32_t,CONVERSIONTYPE>(*rs,f,header);
       }
     } else {
       throw IOException("internal error in MRC/CCP4 io: expected RealSpatialImageState");
@@ -857,14 +907,39 @@ void export_helper(const img::MapHandle& image,
                                     const MRC& formatmrc)
 {
   BinaryOStream<CONVERSIONTYPE> f(out);
-  HEADER header(image);
+  HEADER header(image,formatmrc.GetBitDepth());
 
   f << header;
   if(image.GetType()==img::REAL) {
-    detail::real_dumper<float,CONVERSIONTYPE>(f,header,image,formatmrc);
+    switch(formatmrc.GetBitDepth()){
+    case OST_BIT8_FORMAT:
+      detail::real_dumper<int8_t,CONVERSIONTYPE>(f,header,image,formatmrc);
+      break;
+    case OST_BIT16_FORMAT:
+      detail::real_dumper<int16_t,CONVERSIONTYPE>(f,header,image,formatmrc);
+      break;
+    case OST_FLOAT_FORMAT:
+    case OST_DEFAULT_FORMAT:
+      detail::real_dumper<float,CONVERSIONTYPE>(f,header,image,formatmrc);
+      break;
+    default:
+      throw(IOException("MRC/CCP4 export: Bit depth not supported."));
+      break;
+    }
   } else {
     if(image.GetDomain()==img::HALF_FREQUENCY){
-      detail::complex_dumper<float,CONVERSIONTYPE>(f,header,image,formatmrc);
+      switch(formatmrc.GetBitDepth()){
+        case OST_BIT16_FORMAT:
+          detail::complex_dumper<int16_t,CONVERSIONTYPE>(f,header,image,formatmrc);
+          break;
+        case OST_FLOAT_FORMAT:
+        case OST_DEFAULT_FORMAT:
+          detail::complex_dumper<float,CONVERSIONTYPE>(f,header,image,formatmrc);
+          break;
+        default:
+          throw(IOException("MRC/CCP4 export: Bit depth not supported."));
+          break;
+      }
     } else {
       throw(IOException("MRC/CCP4 export: full complex export not supported."));
     }

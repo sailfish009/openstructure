@@ -295,6 +295,11 @@ String SequenceHandle::GetGaplessString() const
   return Impl()->GetGaplessString();
 }
 
+void SequenceHandle::Normalise() {
+  this->CheckValidity();
+  Impl()->Normalise();
+}
+
 int SequenceHandle::GetOffset() const
 {
   this->CheckValidity();

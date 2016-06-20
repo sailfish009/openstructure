@@ -49,6 +49,11 @@ void export_Surface()
     .def_readwrite("Normal", &SurfaceVertex::normal)
     .def_readwrite("Atom", &SurfaceVertex::atom)   
   ;
+  class_<SurfaceTri>("SurfaceTri", init<>())
+    .def_readwrite("v0", &SurfaceTri::v0)
+    .def_readwrite("v1", &SurfaceTri::v1)
+    .def_readwrite("v2", &SurfaceTri::v2)
+  ;
   class_<SurfaceTriIDList>("SurfaceTriIDList", init<>())
     .def(vector_indexing_suite<SurfaceTriIDList>())
   ;
@@ -60,8 +65,9 @@ void export_Surface()
     .def("Attach",attach2)
     .def("GetVertexIDList", &SurfaceHandle::GetVertexIDList)
     .def("GetTriIDList", &SurfaceHandle::GetTriIDList)    
-    .def("GetVertex", &SurfaceHandle::GetVertex)    
-    .def("FindWithin", &SurfaceHandle::FindWithin)    
+    .def("GetVertex", &SurfaceHandle::GetVertex)
+    .def("GetTri", &SurfaceHandle::GetTri)
+    .def("FindWithin", &SurfaceHandle::FindWithin)
     .def("Invert",&SurfaceHandle::Invert)
     .def("IsValid",&SurfaceHandle::IsValid)
   ;

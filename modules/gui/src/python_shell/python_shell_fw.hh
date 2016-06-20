@@ -23,7 +23,6 @@
   Author: Andreas Schenk
  */
 
-#include <vector>
 namespace ost { namespace gui {
 
 // fw decl
@@ -51,7 +50,6 @@ struct GutterBlock{
   BlockType type;
 };
 
-typedef std::vector<GutterBlock> GutterBlockList;
 
 }}//ns
 

@@ -661,10 +661,13 @@ macro(ost_unittest)
       set_target_properties(${_test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/tests"  )
       set_target_properties(${_test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/tests"  )
 
+      target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "${_ARG_PREFIX}_${_ARG_MODULE}")
       if (WIN32)
-        target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "${_ARG_PREFIX}_${_ARG_MODULE}")
-        add_custom_target("${_test_name}_run":
-                        COMMAND set PATH=${STAGE_DIR}/bin\;%PATH% & ${CMAKE_CURRENT_BINARY_DIR}/${_test_name}.exe || echo
+        set(TEST_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${_test_name}.exe || echo)
+        message(${TEST_COMMAND})
+        set(ENV{PP} ${STAGE_DIR}/bin)
+        add_custom_target("${_test_name}_run" 
+                        COMMAND echo %PP%
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "running checks for module ${_ARG_MODULE}"
                         DEPENDS ${_test_name})
@@ -672,8 +675,6 @@ macro(ost_unittest)
         set_target_properties("${_test_name}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
         add_dependencies(check "${_test_name}_run")
       else()
-        target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES}
-                            "${_ARG_PREFIX}_${_ARG_MODULE}")
         add_custom_target("${_test_name}_run"
                         COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -699,7 +700,13 @@ macro(ost_unittest)
     endif()
 
     foreach(py_test ${PY_TESTS})
+      set(python_path $ENV{PYTHONPATH})
+      if(python_path)
+        set(python_path "${python_path}:")
+      endif(python_path)
+      set(python_path "${python_path}${LIB_STAGE_PATH}/python${PYTHON_VERSION}/site-packages")
       if(WIN32)
+        set (PY_TESTS_CMD "PYTHONPATH=${python_path}  ${PYTHON_BINARY}")
         # todo fix python unit test running for Windows
         #set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost.bat")
         #add_custom_target("${py_test}_run"
@@ -710,11 +717,6 @@ macro(ost_unittest)
         #add_dependencies("${py_test}_run" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
         #add_dependencies(check "${py_test}_run")
       else()
-        set(python_path $ENV{PYTHONPATH})
-        if(python_path)
-          set(python_path "${python_path}:")
-        endif(python_path)
-        set(python_path "${python_path}${LIB_STAGE_PATH}/python${PYTHON_VERSION}/site-packages")
         set (PY_TESTS_CMD "PYTHONPATH=${python_path}  ${PYTHON_BINARY}")
         add_custom_target("${py_test}_run"
                   sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
@@ -825,6 +827,9 @@ macro(setup_stage)
   set(HEADER_STAGE_PATH ${STAGE_DIR}/include )
   set(SHARED_DATA_PATH ${STAGE_DIR}/share/openstructure  )
 
+  if (WIN32)
+    set(ENV{PATH} ${STAGE_DIR}/bin\;$ENV{PATH})
+  endif (WIN32)
   if (UNIX AND NOT APPLE)
     check_architecture()
   endif()
@@ -896,6 +901,7 @@ endmacro()
 set(_BOOST_MIN_VERSION 1.31)
 
 macro(setup_boost)
+  set (Boost_NO_BOOST_CMAKE TRUE)
   find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS python REQUIRED)
   set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
   set(Boost_LIBRARIES)
@@ -918,5 +924,8 @@ macro(setup_boost)
   set(Boost_LIBRARIES)
   find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS regex REQUIRED)
   set(BOOST_REGEX_LIBRARIES ${Boost_LIBRARIES})
+  set(Boost_LIBRARIES)
+  find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS thread REQUIRED)
+  set(BOOST_THREAD ${Boost_LIBRARIES})
   set(Boost_LIBRARIES)
 endmacro()

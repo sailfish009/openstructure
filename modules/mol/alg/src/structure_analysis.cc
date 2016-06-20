@@ -59,10 +59,42 @@ Real CalculateAverageAgreementWithDensityMap(const geom::Vec3List& vl, img::MapH
   }
   return sum/float(vl.size());
 }
+  
+std::vector< std::vector<Real> > PariwiseDistanceMatrix(const EntityView& view1, const EntityView& view2){
+  std::vector< std::vector<Real> > dist_mat;
+  unsigned int n1=view1.GetAtomCount(),n2=view2.GetAtomCount();
+  dist_mat.resize(n1,std::vector<Real>(n2,0));
+  AtomViewList atoms1=view1.GetAtomList(),atoms2=view2.GetAtomList();
+  for (unsigned int i=0; i!=n1; ++i){
+    for (unsigned int j=0; j!=n2; ++j) {
+      dist_mat[i][j]=geom::Distance(atoms1[i].GetPos(),atoms2[j].GetPos());
+    }
+  }
+  return dist_mat;
+}
 
+std::vector< std::vector<Real> > PariwiseDistanceMatrix(const EntityView& view){
+  std::vector< std::vector<Real> > dist_mat;
+  unsigned int n=view.GetAtomCount();
+  //dist_mat.resize(n,std::vector<Real>(n,0));
+  AtomViewList atoms1=view.GetAtomList(),atoms2=view.GetAtomList();
+  for (unsigned int i=0; i!=n; ++i){
+    dist_mat.push_back(std::vector<Real>(n-i-1,0));
+    for (unsigned int j=i+1; j!=n; ++j) {
+      dist_mat[i][j-i-1]=geom::Distance(atoms1[i].GetPos(),atoms2[j].GetPos());
+    }
+  }
+  return dist_mat;
+}
+  
+  
 #endif
-void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 basis_vec, bool group_residues){
+void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 ucell_size, \
+                                                    const geom::Vec3 ucell_angles, bool group_residues,bool follow_bonds){
   mol::XCSEditor edi=eh.EditXCS(mol::BUFFERED_EDIT);
+  bool orthogonal;
+  if (ucell_angles==geom::Vec3()){ orthogonal=true; }
+  else { orthogonal=false; }
   if (group_residues) {
     geom::Vec3 cm,wrapped_cm,shift;
     ResidueHandleList residues=eh.GetResidueList();
@@ -71,14 +103,43 @@ void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom:
       ResidueHandle r=residues[i];
       AtomHandleList atoms=r.GetAtomList();
       geom::Vec3 ref_pos=atoms[0].GetPos();
-      for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
-        edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),ref_pos,basis_vec));
-      }
+      if (follow_bonds) {
+        int natoms=r.GetAtomCount(),n=1,cycles=1;
+        AtomHandle a=atoms[0];
+        AtomHandleList wrapped_atoms;
+        wrapped_atoms.reserve(natoms);
+        wrapped_atoms.push_back(a);
+        while (n<natoms and cycles<natoms) {
+          ++cycles;
+          for (AtomHandleList::iterator a=wrapped_atoms.begin(), e=wrapped_atoms.end(); a!=e; ++a) {
+            AtomHandleList al=(*a).GetBondPartners();
+            ref_pos=(*a).GetPos();
+            for (AtomHandleList::iterator a2=al.begin(), e2=al.end(); a2!=e2; ++a2) {
+              if (std::find(wrapped_atoms.begin(),wrapped_atoms.end(), *a2) !=wrapped_atoms.end()){
+                continue;
+              } else {
+                ++n;
+                wrapped_atoms.push_back(*a2);
+                if (orthogonal) {
+                    edi.SetAtomPos((*a2),geom::WrapVec3((*a2).GetPos(),ref_pos,ucell_size));
+                } else {
+                  edi.SetAtomPos((*a2),geom::WrapVec3((*a2).GetPos(),ref_pos,ucell_size,ucell_angles));
+          }}}}}
+      } else {
+        if (orthogonal) {
+          for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
+            edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),ref_pos,ucell_size));
+          }}
+        else {
+          for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
+            edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),ref_pos,ucell_size,ucell_angles));
+        }}}
     }
     for (unsigned int i=0; i<n_residues; ++i) {
       ResidueHandle r=residues[i];
       cm=r.GetCenterOfMass();
-      wrapped_cm=geom::WrapVec3(cm,cell_center,basis_vec);
+      if (orthogonal) {wrapped_cm=geom::WrapVec3(cm,cell_center,ucell_size);}
+      else {wrapped_cm=geom::WrapVec3(cm,cell_center,ucell_size,ucell_angles);}
       if (wrapped_cm==cm) continue;
       AtomHandleList atoms=r.GetAtomList();
       unsigned int n_atoms=r.GetAtomCount();
@@ -90,9 +151,14 @@ void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom:
   }
   else {
     AtomHandleList atoms=eh.GetAtomList();
-    for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
-      edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),cell_center,basis_vec));
-    }
+    if (orthogonal){
+      for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
+        edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),cell_center,ucell_size));
+      }}
+    else {
+      for (AtomHandleList::iterator a=atoms.begin(), e=atoms.end(); a!=e; ++a) {
+        edi.SetAtomPos((*a),geom::WrapVec3((*a).GetPos(),cell_center,ucell_size,ucell_angles));
+      }}
   }
 }
 

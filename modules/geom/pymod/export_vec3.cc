@@ -24,6 +24,7 @@
 
 using namespace boost::python;
 
+
 const Real Vec3_getitem(const geom::Vec3& v, int i) {
   return v.At(i);
 }
@@ -50,6 +51,11 @@ list vec3_data(const geom::Vec3& v)
   }
   return nrvo;
 }
+
+boost::python::tuple wrap_FitCylinder(const geom::Vec3List& vl,const geom::Vec3& initial_direction) {
+  std::pair<geom::Line3,Real> pair=vl.FitCylinder(initial_direction);
+  return boost::python::make_tuple<geom::Line3,Real>(pair.first,pair.second);
+}  
 
 void export_Vec3()
 {
@@ -114,6 +120,6 @@ void export_Vec3()
     .add_property("inertia", &Vec3List::GetInertia)
     .add_property("principal_axes", &Vec3List::GetPrincipalAxes)
     .def("GetODRLine", &Vec3List::GetODRLine)
-    .def("FitCylinder", &Vec3List::FitCylinder)
+    .def("FitCylinder", wrap_FitCylinder,(arg("direction initial guess")))
   ;
 }

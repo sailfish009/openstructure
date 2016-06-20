@@ -20,14 +20,13 @@
   Authors: Marco Biasini, Andreas Schenk
  */
 
-#include <iostream>
 
 #include "python_shell.hh"
 #include "string_literal_positions.hh"
-
 #include "python_syntax_highlighter.hh"
 #include "python_context_parser.hh"
 
+#include <iostream>
 
 #include <QDebug>
 #include <QTextCursor>

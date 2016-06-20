@@ -49,7 +49,9 @@ const char* CREATE_CMD[]={
 "  formula           VARCHAR(64) NOT NULL,                                      "
 "  pdb_initial       TIMESTAMP,                                                 "
 "  pdb_modified      TIMESTAMP,                                                 "
-"  name              VARCHAR(256)                                               " 
+"  name              VARCHAR(256),                                              "
+"  inchi_code        TEXT,                                                      "
+"  inchi_key         TEXT                                                       "
 ");",
 " CREATE UNIQUE INDEX IF NOT EXISTS commpound_tlc_index ON chem_compounds       "
 "                                  (tlc, dialect)",
@@ -85,8 +87,8 @@ const char* CREATE_CMD[]={
 
 
 const char* INSERT_COMPOUND_STATEMENT="INSERT INTO chem_compounds               "
-"        (tlc, olc, dialect, chem_class, chem_type, formula, pdb_initial, pdb_modified, name) "
-" VALUES (?, ?, ?, ?, ?, ?, DATE(?), DATE(?), ?)";
+"        (tlc, olc, dialect, chem_class, chem_type, formula, pdb_initial, pdb_modified, name, inchi_code, inchi_key) "
+" VALUES (?, ?, ?, ?, ?, ?, DATE(?), DATE(?), ?, ?, ?)";
 
 const char* INSERT_ATOM_STATEMENT="INSERT INTO atoms                            "
 "        (compound_id, name, alt_name, element, is_aromatic, stereo_conf,       "
@@ -220,8 +222,16 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
     Date modi_date=compound->GetModificationDate();
     crea_date_str=crea_date.ToString();
     modi_date_str=modi_date.ToString();
-    sqlite3_bind_text(stmt, 7, crea_date_str.c_str(), crea_date_str.length(), NULL);
-    sqlite3_bind_text(stmt, 8, modi_date_str.c_str(), modi_date_str.length(), NULL);
+    sqlite3_bind_text(stmt, 7, crea_date_str.c_str(), crea_date_str.length(),
+                      NULL);
+    sqlite3_bind_text(stmt, 8, modi_date_str.c_str(), modi_date_str.length(),
+                      NULL);
+    sqlite3_bind_text(stmt, 9, compound->GetName().c_str(),
+                      compound->GetName().length(), NULL);
+    sqlite3_bind_text(stmt, 10, compound->GetInchi().c_str(),
+                      compound->GetInchi().length(), NULL);
+    sqlite3_bind_text(stmt, 11, compound->GetInchiKey().c_str(),
+                      compound->GetInchiKey().length(), NULL);
   } else {
     LOG_ERROR(sqlite3_errmsg(conn_));
     sqlite3_finalize(stmt);
@@ -356,6 +366,12 @@ CompoundLibPtr CompoundLib::Load(const String& database, bool readonly)
                             static_cast<int>(aq.length()),
                             &stmt, NULL);
   lib->name_available_ = retval==SQLITE_OK;
+  // check if InChIs are available
+  aq="SELECT inchi_code FROM chem_compounds LIMIT 1";
+  retval=sqlite3_prepare_v2(lib->conn_, aq.c_str(),
+                            static_cast<int>(aq.length()),
+                            &stmt, NULL);
+  lib->inchi_available_ = retval==SQLITE_OK;
 
   lib->creation_date_ = lib->GetCreationDate();
   lib->ost_version_used_ = lib->GetOSTVersionUsed();
@@ -422,11 +438,17 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
     return i->second;
   }
   String query="SELECT id, tlc, olc, chem_class, dialect, formula";
+  int col_offset = 0;
   if(chem_type_available_) {
     query+=", chem_type";
+    col_offset+=1;
     if(name_available_) {
       query+=", name";
+      col_offset+=1;
     }
+  }
+  if(inchi_available_) {
+    query+=", inchi_code, inchi_key";
   }
 
   query+=" FROM chem_compounds"
@@ -459,6 +481,16 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
           compound->SetName(name);
         }
       }
+      if (inchi_available_) {
+        const char* inchi_code=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6+col_offset));
+        if (inchi_code) {
+          compound->SetInchi(inchi_code);
+        }
+        const char* inchi_key=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6+col_offset+1));
+        if (inchi_key) {
+          compound->SetInchiKey(inchi_key);
+        }
+      }
       // Load atoms and bonds      
       this->LoadAtomsFromDB(compound, pk);
       this->LoadBondsFromDB(compound, pk);
@@ -482,6 +514,7 @@ CompoundLib::CompoundLib():
   conn_(NULL),
   chem_type_available_(false),
   name_available_(),
+  inchi_available_(),
   creation_date_(),
   ost_version_used_()
 {

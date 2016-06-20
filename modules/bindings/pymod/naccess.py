@@ -105,7 +105,6 @@ def _ParseAsaFile(entity, file, asa_atom):
       else:
         print chain_id, resNum, atom_name
       
-
 def _ParseRsaFile(enti,file, asa_abs, asa_rel):
   """
   Reads Area file (.rsa) and attach asa (absolute + relative) per residue to an entitiy
@@ -162,7 +161,6 @@ def __CleanupFiles(dir_name):
   import shutil
   shutil.rmtree(dir_name)
 
-
 def _RunNACCESS(command, temp_dir):
   """
   Method to run the MSMS surface calculation
@@ -183,7 +181,6 @@ def _RunNACCESS(command, temp_dir):
 
   return stdout_value
   
-
 
 def CalculateSurfaceArea(entity,  radius=1.4,  
                          include_hydrogens=False, include_hetatm = False, 

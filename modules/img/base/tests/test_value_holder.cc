@@ -91,8 +91,6 @@ test_suite* CreateValueHolderTest()
 {
   using namespace value_holder_test;
   
-  typedef boost::mpl::vector<Real, Complex> values;
-
   test_suite* ts=BOOST_TEST_SUITE("ValueHolder Test");
 
   ts->add( BOOST_TEST_CASE(ReadWrite<Real>) );

@@ -15,6 +15,7 @@ So far, the binding module includes:
 
   dssp
   blast
+  hhblits
   msms
   tmtools
   clustalw

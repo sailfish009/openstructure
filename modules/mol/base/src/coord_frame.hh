@@ -77,7 +77,9 @@ public:
   geom::Vec3 GetCellAngles() const {
     return this->ucell_angles_;
   }
-
+  
+  geom::Vec3List GetCellVectors() const;
+  
   geom::Vec3 GetAtomPos(const AtomHandle& atom) const;
   geom::Vec3 GetAtomPos(int atom_index) const;
   Real GetDistanceBetwAtoms(const AtomHandle& a1, const AtomHandle& a2) const;
@@ -180,10 +182,10 @@ public:
     It is assumed that we fit an alpha-helix and that the CA atoms are oredered sequentially
     This is used for the initial guess of the helix axis
   */
-  geom::Line3 FitCylinder(std::vector<unsigned long>& indices_ca) const;
+  std::pair<geom::Line3, Real> FitCylinder(std::vector<unsigned long>& indices_ca) const;
 
   //! see FitCylinder(std::vector<unsigned long>&)
-  geom::Line3 FitCylinder(const mol::EntityView& view1) const;
+  std::pair<geom::Line3, Real> FitCylinder(const mol::EntityView& view1) const;
 
   /*!
     Returns the percentage of residues in the EntityView (segment) that are in an alpha-helix

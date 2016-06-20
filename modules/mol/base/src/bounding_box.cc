@@ -22,7 +22,7 @@
  */
 
 #include <limits>
-#include <Eigen/QR>
+#include <Eigen/Eigenvalues>
 #include <ost/mol/mol.hh>
 #include <ost/mol/bounding_box.hh>
 namespace ost { namespace mol {

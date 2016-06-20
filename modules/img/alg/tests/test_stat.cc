@@ -86,6 +86,51 @@ void test() {
   BOOST_CHECK_CLOSE(acc_c.GetStandardDeviation(),Real(2.58198889747),Real(0.0001));
   BOOST_CHECK_CLOSE(acc_c.GetSkewness()+Real(0.5),Real(0.5),Real(0.0001));
   BOOST_CHECK_CLOSE(acc_c.GetKurtosis(),Real(1.77),Real(0.0001));
+
+  // check accumulator template for restriction to lower order moments
+  StatAccumulator<3> acc4;
+  for(int u=0;u<3;++u) {
+    for(int v=0;v<3;++v) {
+      acc4(val[u][v]);
+    }
+  }
+  BOOST_CHECK_CLOSE(acc4.GetMean(),Real(5.0),Real(0.0001));
+  BOOST_CHECK_CLOSE(acc4.GetStandardDeviation(),Real(2.58198889747),Real(0.0001));
+  BOOST_CHECK_CLOSE(acc4.GetSkewness()+Real(0.5),Real(0.5),Real(0.0001));
+  BOOST_CHECK_THROW(acc4.GetKurtosis(),ost::Error);
+
+  StatAccumulator<2> acc5;
+  for(int u=0;u<3;++u) {
+    for(int v=0;v<3;++v) {
+      acc5(val[u][v]);
+    }
+  }
+  BOOST_CHECK_CLOSE(acc5.GetMean(),Real(5.0),Real(0.0001));
+  BOOST_CHECK_CLOSE(acc5.GetStandardDeviation(),Real(2.58198889747),Real(0.0001));
+  BOOST_CHECK_THROW(acc5.GetSkewness(),ost::Error);
+  BOOST_CHECK_THROW(acc5.GetKurtosis(),ost::Error);
+
+  StatAccumulator<1> acc6;
+  for(int u=0;u<3;++u) {
+    for(int v=0;v<3;++v) {
+      acc6(val[u][v]);
+    }
+  }
+  BOOST_CHECK_CLOSE(acc6.GetMean(),Real(5.0),Real(0.0001));
+  BOOST_CHECK_THROW(acc6.GetStandardDeviation(),ost::Error);
+  BOOST_CHECK_THROW(acc6.GetSkewness(),ost::Error);
+  BOOST_CHECK_THROW(acc6.GetKurtosis(),ost::Error);
+
+  StatAccumulator<0> acc7;
+  for(int u=0;u<3;++u) {
+    for(int v=0;v<3;++v) {
+      acc7(val[u][v]);
+    }
+  }
+  BOOST_CHECK_THROW(acc7.GetMean(),ost::Error);
+  BOOST_CHECK_THROW(acc7.GetStandardDeviation(),ost::Error);
+  BOOST_CHECK_THROW(acc7.GetSkewness(),ost::Error);
+  BOOST_CHECK_THROW(acc7.GetKurtosis(),ost::Error);
 }
 
 } // namespace

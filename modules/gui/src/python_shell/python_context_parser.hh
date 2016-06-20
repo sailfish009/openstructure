@@ -23,10 +23,10 @@
   Author: Marco Biasini
 */
 
+#include "python_tokenizer.hh"
 #include <vector>
 #include <iostream>
 
-#include "python_tokenizer.hh"
 
 namespace ost { namespace gui {
     

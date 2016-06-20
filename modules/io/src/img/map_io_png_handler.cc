@@ -111,7 +111,7 @@ void MapIOPngHandler::Import(img::MapHandle& image, std::istream& f,const ImageF
   png_bytep *row_pointers;
   png_uint_32 row,column;
   png_byte *png_data;
-  png_uint_32 width,height,bpp;
+  png_uint_32 width,height;
   std::ostringstream mesg;
 
   PNG form;
@@ -156,7 +156,6 @@ void MapIOPngHandler::Import(img::MapHandle& image, std::istream& f,const ImageF
 
   width=(unsigned int)png_get_image_width(png_ptr, info_ptr);
   height=(unsigned int)png_get_image_height(png_ptr, info_ptr);
-  bpp=(unsigned int)png_get_bit_depth(png_ptr,info_ptr);
 
   // TODO 16 bit greyscale
 

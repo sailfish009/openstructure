@@ -16,7 +16,6 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <cassert>
 
 
 #include <ost/gui/gosty_app.hh>
@@ -30,6 +29,7 @@
 #include "panel_bar.hh"
 #include "panel_bar_widget_holder.hh"
 
+#include <cassert>
 #include <QApplication>
 #include <QMenu>
 #include <QHBoxLayout>

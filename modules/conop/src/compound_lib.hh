@@ -57,8 +57,9 @@ private:
 private:
   mutable CompoundMap       compound_cache_;
   sqlite3*                  conn_;
-  bool                      chem_type_available_; // weather pdbx_type is available in db
-  bool                      name_available_; // weather name is available in db
+  bool                      chem_type_available_; // wether pdbx_type is available in db
+  bool                      name_available_; // wether name is available in db
+  bool                      inchi_available_; //whether inchi is available in db
   Date                      creation_date_;
   String                    ost_version_used_;
 };

@@ -250,11 +250,9 @@ public:
   void FixTransform();
 
   /// \brief get complete list of residues
-  /// \sa #ResiduesBegin, #ResiduesEnd
   ResidueHandleList GetResidueList() const;
   
   /// \brief get complete list of atoms
-  /// \sa #AtomsBegin, #AtomsEnd
   AtomHandleList GetAtomList() const;
   
   /// \brief get complete list of atom positions

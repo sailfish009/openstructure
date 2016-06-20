@@ -175,6 +175,16 @@ class TestSeq(unittest.TestCase):
     self.assertEqual(string_a, 'BDFH')
     self.assertEqual(string_b, 'BDFH')
 
+  def testNormalise(self):
+    seq_a=seq.CreateSequence("A", "B-D-FGH")
+    self.assertEqual("B-D-FGH", seq_a.GetString())
+    seq_a.Normalise()
+    self.assertEqual("BDFGH", seq_a.GetString())
+    seq_a=seq.CreateSequence("A", "b.d-fgh")
+    self.assertEqual("b.d-fgh", seq_a.GetString())
+    seq_a.Normalise()
+    self.assertEqual("BDFGH", seq_a.GetString())
+
 if __name__== '__main__':
   from ost import testutils
   testutils.RunTests()

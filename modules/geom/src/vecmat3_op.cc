@@ -208,20 +208,20 @@ Real MinDistance(const Vec3List& l1, const Vec3List& l2)
   return std::sqrt(min);
 }
 
-Real MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& basis_vec)
+Real MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& ucell_size)
 { 
   // returns the minimal distance between two sets of points (Vec3List)
-  // given the periodic boundary condition along x,y,z given in the basis_vec
+  // given the periodic boundary condition along x,y,z given in the ucell_size
   if (l1.size()==0 || l2.size()==0){throw GeomException("cannot calculate minimal distance: empty Vec3List");}
   Real min=Length2(*l1.begin()-*l2.begin());
   Real d;
   Vec3 v;
   for (int i=0; i<3; i++) {
-    basis_vec[i]=std::fabs(basis_vec[i]);
+    ucell_size[i]=std::fabs(ucell_size[i]);
   }
   for (Vec3List::const_iterator p1=l1.begin(),e1=l1.end(); p1!=e1; p1++) {
     for (Vec3List::const_iterator p2=l2.begin(),e2=l2.end(); p2!=e2; p2++) {
-      d=Distance2WithPBC(*p1, *p2, basis_vec);
+      d=Distance2WithPBC(*p1, *p2, ucell_size);
       if (d<min) min=d;
     }
   }
@@ -250,26 +250,63 @@ std::vector<unsigned int> MinDistanceIndices(const Vec3List& l1, const Vec3List&
   }
   return il;
 }
+
+Vec3List CalculateUnitCellVectors(const Vec3& ucell_size, const Vec3& ucell_angles){
+  // Calculates the unit cell vectors from their sizes and angles.
+  // The angles are given as Vec3(gamma,beta,alpha)
+  geom::Vec3List ucell_vec;
+  geom::Vec3 ucell_vec1,ucell_vec2,ucell_vec3;
+  Real cosa=cos(ucell_angles[2]),cosb=cos(ucell_angles[1]);
+  Real cosg=cos(ucell_angles[0]),sing=sin(ucell_angles[0]);
+  ucell_vec1=geom::Vec3(ucell_size[0],0,0);
+  ucell_vec2=ucell_size[1]*geom::Vec3(cosg,sing,0);
+  ucell_vec3=ucell_size[2]*geom::Vec3(cosb,(cosa-cosb*cosg)/sing,\
+                                       pow(1-(cosa*cosa+cosb*cosb-2.*cosa*cosb*cosg)/(sing*sing),0.5));
+  ucell_vec.push_back(ucell_vec1);
+  ucell_vec.push_back(ucell_vec2);
+  ucell_vec.push_back(ucell_vec3);
+  return ucell_vec;  
+}
   
-Vec3 WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& basis_vec){
+Vec3 WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& ucell_size){
   Vec3 v;
   Real r;
   for (int i=0; i<3; i++) {
-    r=(v1[i]-box_center[i])/basis_vec[i];
+    r=(v1[i]-box_center[i])/ucell_size[i];
     r=(r > 0.0) ? std::floor(r + 0.5) : std::ceil(r - 0.5);
-    v[i]=v1[i]-basis_vec[i]*r;
+    v[i]=v1[i]-ucell_size[i]*r;
   }
   return v;
 }
 
-Vec3List WrapVec3List(const Vec3List& vl, const Vec3& box_center,const Vec3& basis_vec){
+Vec3List WrapVec3List(const Vec3List& vl, const Vec3& box_center,const Vec3& ucell_size){
   Vec3List vl_out;
   vl_out.reserve(vl_out.size());
   for (Vec3List::const_iterator v1=vl.begin(),e=vl.end();v1!=e ; v1++) {
-    vl_out.push_back(WrapVec3(*v1,box_center,basis_vec));
+    vl_out.push_back(WrapVec3(*v1,box_center,ucell_size));
   }
   return vl_out;
 }
   
+Vec3 WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& ucell_size,const Vec3& ucell_angles){
+  Vec3List vl=CalculateUnitCellVectors(ucell_size,ucell_angles);
+  Vec3 v=v1-box_center,v_wrapped=v1,r;
+  for (int i=0; i<3; i++) {
+    r[2-i]=v[2-i]/vl[2-i][2-i];
+    v=v-r[2-i]*vl[2-i];
+    r[2-i]=(r[2-i] > 0.0) ? std::floor(r[2-i] + 0.5) : std::ceil(r[2-i] - 0.5);
+    v_wrapped=v_wrapped-vl[2-i]*r[2-i];
+  }
+  return v_wrapped;
+}
+
+Vec3List WrapVec3List(const Vec3List& vl, const Vec3& box_center,const Vec3& ucell_size,const Vec3& ucell_angles){
+  Vec3List vl_out;
+  vl_out.reserve(vl_out.size());
+  for (Vec3List::const_iterator v1=vl.begin(),e=vl.end();v1!=e ; v1++) {
+    vl_out.push_back(WrapVec3(*v1,box_center,ucell_size,ucell_angles));
+  }
+  return vl_out;
+}  
   
 } // ns

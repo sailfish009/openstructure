@@ -49,7 +49,7 @@ void Gutter::paintEvent(QPaintEvent* paint_event)
   QPainter painter(this);
   painter.setPen(QPen(Qt::black));
   painter.fillRect(paint_event->rect(), QBrush(Qt::lightGray));
-  for (GutterBlockList::const_iterator it=blocks.begin(); 
+  for (GutterBlockList::const_iterator it=blocks.begin();
        it!=blocks.end(); ++it) {
     if (it->type & BLOCKTYPE_ACTIVE) {
       QColor green(Qt::green);

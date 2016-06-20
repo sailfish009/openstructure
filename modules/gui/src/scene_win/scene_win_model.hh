@@ -106,7 +106,7 @@ private:
   SceneNode* root_node_;
   SceneNode* scene_node_;
 
-  QMap<gfx::GfxNodeP, RenderModesNode*> render_observers_;
+  QMap<gfx::GfxNode*, RenderModesNode*>    render_observers_;
   QMap<gfx::GfxNode*, SceneNode*>       node_map_;
 };
 

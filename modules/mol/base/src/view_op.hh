@@ -73,7 +73,7 @@ EntityView DLLEXPORT_OST_MOL CreateViewFromAtomList(const AtomViewList& atoms);
 /// \throw IntegrityError if trying to compare two views that do not point to
 ///     the same entity.
 /// \return a pair of views. \c first contains the elements that are in \p view1,
-///     but not in \p view2, \second contains the elements that are in \p view2
+///     but not in \p view2, \c second contains the elements that are in \p view2
 ///     but not in \p view1
 std::pair<EntityView, EntityView> DLLEXPORT_OST_MOL 
 CompareViews(const EntityView& view1, const EntityView& view2);

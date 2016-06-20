@@ -79,7 +79,7 @@ set(OST_GUI_PYMOD_MODULES
   init_menubar.py
   init_spacenav.py
   init_splash.py
-  traj.py
+  trajectory_viewer.py
   helpwidget.py
   table.py
   gosty_startup.py

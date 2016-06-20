@@ -150,7 +150,7 @@ def CalculateHelixAxis(sele1):
     return
   eh=sele1.GetHandle()
   f=GetFrameFromEntity(eh)
-  return f.FitCylinder(sele1)
+  return f.FitCylinder(sele1)[0]
 
 
 def CalculateDistanceDifferenceMatrix(sele1,sele2):
@@ -180,10 +180,10 @@ def CalculateDistanceDifferenceMatrix(sele1,sele2):
   n_atoms=sele1.GetAtomCount()
   M=npy.zeros([n_atoms,n_atoms])
   for i,a1 in enumerate(sele1.atoms):
-    for j,a2 in enumerate(sele2.atoms):
+    for j,a2 in enumerate(sele1.atoms):
       if i>=j:continue
-      d1=geom.Distance(a1.pos,a2.pos)
-      d2=geom.Distance(sele2.atoms[i].pos,sele2.atoms[j].pos)
+      d1=ost.geom.Distance(a1.pos,a2.pos)
+      d2=ost.geom.Distance(sele2.atoms[i].pos,sele2.atoms[j].pos)
       M[i,j]=d2-d1
       M[j,i]=d2-d1
   return M

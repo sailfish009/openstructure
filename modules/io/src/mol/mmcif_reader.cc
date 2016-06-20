@@ -374,9 +374,9 @@ bool MMCifReader::ParseAtomIdent(const std::vector<StringRef>& columns,
     return false;
   } 
 
-  std::pair<bool, int> a_num = this->TryGetInt(columns[indices_[AS_ID]],
-                                               "atom_site.id",
-                                          profile_.fault_tolerant); // unit test
+  this->TryGetInt(columns[indices_[AS_ID]],
+                  "atom_site.id",
+                  profile_.fault_tolerant); // unit test
 
   alt_loc = columns[indices_[LABEL_ALT_ID]][0];
   res_name = columns[indices_[LABEL_COMP_ID]];

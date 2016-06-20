@@ -236,6 +236,7 @@ void (Entity::*set_rm2)(RenderMode::Type)=&Entity::SetRenderMode;
 
 void (Entity::*set_vis1)(const mol::EntityView&, bool)=&Entity::SetVisible;
 void (Entity::*set_vis2)(const String&, bool)=&Entity::SetVisible;
+
 RenderOptionsPtr ent_trace_opts(Entity* ent)
 {
   return ent->GetOptions(RenderMode::TRACE);
@@ -339,7 +340,6 @@ void export_Entity()
     .def("SetBlurFactors",&Entity::SetBlurFactors)
     .def("SetBlur",&Entity::SetBlur)
     .def("GetBoundingBox",&Entity::GetBoundingBox)
-    .add_property("bounding_box",&Entity::GetBoundingBox)
     .def("SetSelection",&Entity::SetSelection)
     .def("GetSelection",&Entity::GetSelection)    
     .add_property("selection", &Entity::GetSelection, 
