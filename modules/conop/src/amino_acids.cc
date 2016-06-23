@@ -187,67 +187,78 @@ AminoAcid ResidueNameToAminoAcid(String rn)
 
 char ResidueNameToOneLetterCode(String rn)
 {
+  if (rn.empty()) return 'X';
+
   std::transform(rn.begin(),rn.end(),rn.begin(),toupper);
-  if (rn == "ALA") {    
-    return 'A';
-  }  
-  if (rn == "ARG") {
-    return 'R';
+
+  switch(rn[0]){
+    case 'A': {
+      if (rn == "ALA") return 'A';
+      if (rn == "ARG") return 'R';      
+      if (rn == "ASN") return 'N';
+      if (rn == "ASP") return 'D';
+      break;
+    }
+
+    case 'C': {
+      if (rn == "CYS") return 'C';
+      break;;
+    }
+    
+    case 'G': {
+      if (rn == "GLN") return 'Q';
+      if (rn == "GLU") return 'E';
+      if (rn == "GLY") return 'G';
+      break;
+    }
+
+    case 'H': {
+      if (rn == "HIS") return 'H';
+      break;
+    }
+
+    case 'I': {
+      if (rn == "ILE") return 'I';
+      break;
+    }
+
+    case 'L': {
+      if (rn == "LEU") return 'L';
+      if (rn == "LYS") return 'K';
+      break;
+    }
+
+    case 'M': {
+      if (rn == "MET") return 'M';
+      break;
+    }  
+
+    case 'P': {
+      if (rn == "PRO") return 'P';
+      if (rn == "PHE") return 'F';
+      break;
+    } 
+
+    case 'S': {
+      if (rn == "SER") return 'S';
+      break;
+    }  
+
+    case 'T': {
+      if (rn == "TYR") return 'Y';
+      if (rn == "TRP") return 'W';
+      if (rn == "THR") return 'T';
+      break;
+    }  
+
+    case 'V': {
+      if (rn == "VAL") return 'V';
+      break;
+    }  
+
+    default: break;
   }
-  if (rn == "ASN") {
-    return 'N';
-  }  
-  if (rn == "ASP") {
-    return 'D';
-  }  
-  if (rn == "GLN") {
-    return 'Q';
-  }  
-  if (rn == "GLU") {
-    return 'E';
-  }  
-  if (rn == "LYS") {
-    return 'K';
-  }  
-  if (rn == "SER") {
-    return 'S';
-  }  
-  if (rn == "CYS") {      
-    return 'C';
-  }  
-  if (rn == "TYR") {  
-    return 'Y';
-  }  
-  if (rn == "TRP") {
-    return 'W';
-  }  
-  if (rn == "THR") {
-    return 'T';
-  }  
-  if (rn == "VAL") {
-    return 'V';
-  }  
-  if (rn == "ILE") {
-    return 'I';
-  }  
-  if (rn == "MET") {
-    return 'M';
-  }  
-  if (rn == "LEU") {  
-    return 'L';
-  }  
-  if (rn == "GLY") {  
-    return 'G';
-  }  
-  if (rn == "PRO") {  
-    return 'P';
-  }  
-  if (rn == "HIS") {  
-    return 'H';
-  }  
-  if (rn == "PHE") {
-    return 'F';
-  }  
+
   return 'X';
 }
 
