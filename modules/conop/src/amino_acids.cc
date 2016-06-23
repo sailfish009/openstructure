@@ -187,66 +187,65 @@ AminoAcid ResidueNameToAminoAcid(String rn)
 
 char ResidueNameToOneLetterCode(String rn)
 {
-  String upper_rn=rn;
   std::transform(rn.begin(),rn.end(),rn.begin(),toupper);
-  if (upper_rn == "ALA") {    
+  if (rn == "ALA") {    
     return 'A';
   }  
-  if (upper_rn == "ARG") {
+  if (rn == "ARG") {
     return 'R';
   }
-  if (upper_rn == "ASN") {
+  if (rn == "ASN") {
     return 'N';
   }  
-  if (upper_rn == "ASP") {
+  if (rn == "ASP") {
     return 'D';
   }  
-  if (upper_rn == "GLN") {
+  if (rn == "GLN") {
     return 'Q';
   }  
-  if (upper_rn == "GLU") {
+  if (rn == "GLU") {
     return 'E';
   }  
-  if (upper_rn == "LYS") {
+  if (rn == "LYS") {
     return 'K';
   }  
-  if (upper_rn == "SER") {
+  if (rn == "SER") {
     return 'S';
   }  
-  if (upper_rn == "CYS") {      
+  if (rn == "CYS") {      
     return 'C';
   }  
-  if (upper_rn == "TYR") {  
+  if (rn == "TYR") {  
     return 'Y';
   }  
-  if (upper_rn == "TRP") {
+  if (rn == "TRP") {
     return 'W';
   }  
-  if (upper_rn == "THR") {
+  if (rn == "THR") {
     return 'T';
   }  
-  if (upper_rn == "VAL") {
+  if (rn == "VAL") {
     return 'V';
   }  
-  if (upper_rn == "ILE") {
+  if (rn == "ILE") {
     return 'I';
   }  
-  if (upper_rn == "MET") {
+  if (rn == "MET") {
     return 'M';
   }  
-  if (upper_rn == "LEU") {  
+  if (rn == "LEU") {  
     return 'L';
   }  
-  if (upper_rn == "GLY") {  
+  if (rn == "GLY") {  
     return 'G';
   }  
-  if (upper_rn == "PRO") {  
+  if (rn == "PRO") {  
     return 'P';
   }  
-  if (upper_rn == "HIS") {  
+  if (rn == "HIS") {  
     return 'H';
   }  
-  if (upper_rn == "PHE") {
+  if (rn == "PHE") {
     return 'F';
   }  
   return 'X';
