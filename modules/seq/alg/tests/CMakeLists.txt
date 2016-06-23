@@ -1,4 +1,5 @@
 set(OST_SEQ_ALG_UNIT_TESTS
+  test_distance_analysis.cc
   test_merge_pairwise_alignments.cc
   test_sequence_identity.cc
   tests.cc
@@ -10,5 +11,6 @@ set(OST_SEQ_ALG_UNIT_TESTS
   test_aligntoseqres.py
 )
 
-ost_unittest(MODULE seq_alg SOURCES "${OST_SEQ_ALG_UNIT_TESTS}")
+ost_unittest(MODULE seq_alg SOURCES "${OST_SEQ_ALG_UNIT_TESTS}"
+             LINK ost_mol ost_io)
 
