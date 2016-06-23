@@ -256,16 +256,13 @@ def LoadCHARMMTraj(crd, dcd_file=None, profile='CHARMM',
       raise ValueError("No DCD filename given")
   return LoadCHARMMTraj_(crd, dcd_file, stride, lazy_load, detect_swap, swap_bytes)
 
-def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=None, profile='DEFAULT', remote=False, seqres=False, info=False):
+def LoadMMCIF(filename, fault_tolerant=None, calpha_only=None, profile='DEFAULT', remote=False, seqres=False, info=False):
   """
   Load MMCIF file from disk and return one or more entities. Several options 
   allow to customize the exact behaviour of the MMCIF import. For more
   information on these options, see :doc:`profile`.
   
   Residues are flagged as ligand if they are mentioned in a HET record.
-
-  :param restrict_chains: If not an empty string, only chains listed in the
-     string will be imported.
 
   :param fault_tolerant: Enable/disable fault-tolerant import. If set, overrides
      the value of :attr:`IOProfile.fault_tolerant`.
@@ -307,6 +304,11 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
     ent = mol.CreateEntity()
     reader = MMCifReader(filename, ent, prof)
     reader.read_seqres = seqres
+    
+    # NOTE: to speed up things, we could introduce a restrict_chains parameter
+    #       similar to the one in LoadPDB. Here, it would have to be a list/set
+    #       of chain-name-strings.
+
     #if reader.HasNext():
     reader.Parse()
     if prof.processor:
