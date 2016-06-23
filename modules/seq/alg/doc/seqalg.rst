@@ -298,6 +298,11 @@ corresponding to interacting residues.
 Get and analyze distance matrices from alignments
 --------------------------------------------------------------------------------
 
+Given a multiple sequence alignment between a reference sequence (first sequence
+in alignment) and a list of structures (remaining sequences in alignment with an
+attached view to the structure), this set of functions can be used to analyze
+differences between the structures.
+
 **Example:**
 
 .. code-block:: python
@@ -308,10 +313,12 @@ Get and analyze distance matrices from alignments
   # clip alignment to only have parts with at least 3 sequences (incl. ref.)
   # -> aln will be cut and clip_start is 1st column of aln that was kept
   clip_start = seq.alg.ClipAlignment(aln, 3)
+  
   # get variance measure and distance to mean for each residue pair
   d_map = seq.alg.CreateDistanceMap(aln)
   var_map = seq.alg.CreateVarianceMap(d_map)
   dist_to_mean = seq.alg.CreateDist2Mean(d_map)
+
   # report min. and max. variances
   print "MIN-MAX:", var_map.Min(), "-", var_map.Max()
   # get data and json-strings for further processing

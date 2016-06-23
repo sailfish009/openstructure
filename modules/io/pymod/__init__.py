@@ -300,7 +300,7 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
 
   if remote:
     from ost.io.remote import RemoteGet
-    tmp_file =RemoteGet(filename, from_repo='cif')
+    tmp_file = RemoteGet(filename, from_repo='cif')
     filename = tmp_file.name
   
   try:

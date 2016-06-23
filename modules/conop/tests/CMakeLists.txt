@@ -1,4 +1,5 @@
 set(OST_CONOP_UNIT_TESTS
+  test_amino_acids.cc
   test_heuristic_conop.cc
   tests.cc
   test_rule_based_conop.cc 
