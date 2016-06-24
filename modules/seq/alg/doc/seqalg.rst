@@ -163,6 +163,7 @@ Algorithms for Alignments
   :param gap_ext: The gap extension penalty. Must be a negative number
   :returns: best-scoring alignment of *seq1* and *seq2*.
 
+.. autofunction:: ost.seq.alg.renumber.Renumber
 
 .. _contact-prediction:
 
