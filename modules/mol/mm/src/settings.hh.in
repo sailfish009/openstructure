@@ -135,7 +135,7 @@ struct Settings{
                 use_dispersion_correction(true),
                 keep_ff_specific_naming(true),
                 openmm_plugin_directory("@OPEN_MM_PLUGIN_DIR@"),
-                custom_plugin_directory("@OPEN_MM_PLUGIN_DIR@")
+                custom_plugin_directory("@STAGE_DIR@/share/openstructure/openmm_plugins")
 
                   {   }
 

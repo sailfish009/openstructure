@@ -161,6 +161,7 @@ SimulationPtr Simulation::Load(const String& filename, SettingsPtr settings){
   sim_ptr->integrator_ = settings->integrator;
 
   OpenMM::Platform::loadPluginsFromDirectory (settings->openmm_plugin_directory);
+  OpenMM::Platform::loadPluginsFromDirectory (settings->custom_plugin_directory);
   OpenMM::Platform* platform;
 
   switch(settings->platform){
@@ -285,6 +286,7 @@ void Simulation::Init(const TopologyPtr top,
   //to proceed in time, but first we have to load the proper platform
 
   OpenMM::Platform::loadPluginsFromDirectory (settings->openmm_plugin_directory);
+  OpenMM::Platform::loadPluginsFromDirectory (settings->custom_plugin_directory);
   OpenMM::Platform* platform;
   std::map<String,String> context_properties;
 
