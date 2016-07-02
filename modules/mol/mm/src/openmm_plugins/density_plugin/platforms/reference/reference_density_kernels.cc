@@ -110,7 +110,7 @@ void ReferenceCalcDensityForceKernel::initialize(const System& system, const Den
   one_s_ = Real(1.0) / s_;
   square_one_s_ = Real(1.0) / (s_ * s_);
   one_sqrt_2_pi_s_ = Real(1.0) / std::sqrt(Real(2.0) * Real(M_PI) * s_);
-  padding_dist_ = s_ * Real(2.0);
+  padding_dist_ = s_ * Real(3.0);
   scaling_ = 10000 * force.getScaling();
 
   //let's get body and particle info...
