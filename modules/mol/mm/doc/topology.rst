@@ -414,7 +414,7 @@ The Topology Class
     force_constant*(x_scale*(x-x0)^2+y_scale*(y-y0)^2+z_scale*(z-z0)^2)
 
     :param index:       Index of particle to be constrained
-    :param reference_pos: Reference position in nm
+    :param reference_pos: Reference position in A
     :param force_constant: Force constant in kJ/mol/nm^2 
     :param x_scale:     X-scale
     :param y_scale:     Y-scale
