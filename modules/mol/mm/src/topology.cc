@@ -1238,7 +1238,7 @@ void Topology::MergeTop(TopologyPtr other){
   if(!harmonic_position_restraints.empty()){
     for(std::vector<std::pair<Index<1>,std::vector<Real> > >::const_iterator i = harmonic_position_restraints.begin();
         i != harmonic_position_restraints.end(); ++i){
-      geom::Vec3 ref_pos(i->second[0],i->second[1],i->second[2]);
+      geom::Vec3 ref_pos(i->second[0], i->second[1], i->second[2]);
       this->AddHarmonicPositionRestraint(old_num_particles + i->first[0],
                                          ref_pos,
                                          i->second[3],

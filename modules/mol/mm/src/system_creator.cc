@@ -221,6 +221,10 @@ SystemPtr SystemCreator::Create(const TopologyPtr top,
           j != i->second.end(); ++j){
         parameters.push_back(*j);
       }
+      parameters[0] *= 0.1;
+      parameters[1] *= 0.1;
+      parameters[2] *= 0.1;
+      
       position_restraint_force.addParticle(i->first[0], parameters);
     }
   } 

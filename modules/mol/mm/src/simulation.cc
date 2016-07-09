@@ -718,9 +718,9 @@ void Simulation::ResetHarmonicPositionRestraint(uint index, const geom::Vec3& re
   int particle;
   std::vector<double> parameters;
   restraint_ptr->getParticleParameters(index,particle,parameters);
-  parameters[0] = ref_position[0];
-  parameters[1] = ref_position[1];
-  parameters[2] = ref_position[2];
+  parameters[0] = ref_position[0] * 0.1;
+  parameters[1] = ref_position[1] * 0.1;
+  parameters[2] = ref_position[2] * 0.1;
   parameters[3] = k;
   parameters[4] = x_scale;
   parameters[5] = y_scale;
