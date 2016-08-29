@@ -92,10 +92,14 @@ void CoordGroupHandle::SetStartTime(float t)
 }
 
 void CoordGroupHandle::SetFramePositions(uint frame, 
-                                         const std::vector<geom::Vec3>& clist)
+                                         const geom::Vec3List& clist)
 {
   this->CheckValidity();  
-  //source_->SetFramePositions(frame, clist);
+  if (source_->IsMutable()) {
+    source_->SetFramePositions(frame, clist);
+  } else {
+    throw IntegrityError("Can't add set frame positions in immutable CoordGroup");
+  }
 }
 
   
@@ -164,7 +168,11 @@ void CoordGroupHandle::CheckValidity() const
 void CoordGroupHandle::SetAtomPos(uint frame, AtomHandle atom, const geom::Vec3& pos)
 {
   this->CheckValidity();
-  source_->SetAtomPos(frame,atom,pos);
+  if (source_->IsMutable()) {  
+    source_->SetAtomPos(frame,atom,pos);
+  } else {
+    throw IntegrityError("Can't set atom position in immutable CoordGroup");
+  }
 }
 
 geom::Vec3 CoordGroupHandle::GetAtomPos(uint frame, AtomHandle atom) const

@@ -82,6 +82,19 @@ void CoordSource::Capture()
   this->AddFrame(coords);
 }
 
+void CoordSource::SetFramePositions(uint frame, const std::vector<geom::Vec3>& clist)
+{
+  CoordFrame& fp=*(GetFrame(frame));
+  if(fp.size()!=clist.size()) {
+    throw Error("atom count and length of position vector are not equal");
+    return;
+  }
+  unsigned int count=0;
+  for (std::vector<geom::Vec3>::const_iterator i=clist.begin(); i!=clist.end(); ++i) {
+    fp[count++]=*i;
+  }
+}
+
 void CoordSource::CaptureInto(int pos)
 {
   std::vector<geom::Vec3> coords;
