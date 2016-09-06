@@ -91,6 +91,16 @@ void CoordGroupHandle::SetStartTime(float t)
   source_->SetStartTime(t);
 }
 
+void CoordGroupHandle::SetFrameCellSize(uint frame, const geom::Vec3& size)
+{
+  this->CheckValidity();  
+  if (source_->IsMutable()) {
+    source_->SetFrameCellSize(frame, size);
+  } else {
+    throw IntegrityError("Can't add set frame cell size in immutable CoordGroup");
+  }
+}
+
 void CoordGroupHandle::SetFramePositions(uint frame, 
                                          const geom::Vec3List& clist)
 {

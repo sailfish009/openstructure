@@ -71,6 +71,9 @@ public:
   ///      initial atomlist
   void SetFramePositions(uint frame, const geom::Vec3List& clist);
 
+  /// \brief set cell size for the given frame
+  void SetFrameCellSize(uint frame, const geom::Vec3& size);
+
   /// \brief get the positions of all the atoms in the given frame
   geom::Vec3List GetFramePositions(uint frame);  
   

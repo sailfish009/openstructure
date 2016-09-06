@@ -81,6 +81,7 @@ public:
   void CaptureInto(int pos);
   void Capture(uint f);
   void SetFramePositions(uint frame, const std::vector<geom::Vec3>& clist);
+  void SetFrameCellSize(uint frame, const geom::Vec3& size);
 
   virtual void AddFrame(const std::vector<geom::Vec3>& coords) = 0;
   virtual void AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& cell_size,const geom::Vec3& cell_angles) = 0;

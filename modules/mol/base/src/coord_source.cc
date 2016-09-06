@@ -82,6 +82,12 @@ void CoordSource::Capture()
   this->AddFrame(coords);
 }
 
+void CoordSource::SetFrameCellSize(uint frame, const geom::Vec3& size)
+{
+  CoordFrame& fp=*(GetFrame(frame));
+  fp.SetCellSize(size);
+}
+
 void CoordSource::SetFramePositions(uint frame, const std::vector<geom::Vec3>& clist)
 {
   CoordFrame& fp=*(GetFrame(frame));
