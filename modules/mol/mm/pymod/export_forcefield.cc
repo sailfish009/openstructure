@@ -23,16 +23,29 @@
 
 using namespace boost::python;
 
-namespace{
+namespace {
 
+ost::mol::mm::InteractionPtr GetLJOneType(ost::mol::mm::ForcefieldPtr p,
+                                          String type) {
+  return p->GetLJ(type);
+}
 
-  ost::mol::mm::InteractionPtr GetLJOneType(ost::mol::mm::ForcefieldPtr p, String type){
-    return p->GetLJ(type);
+ost::mol::mm::InteractionPtr GetLJTwoTypes(ost::mol::mm::ForcefieldPtr p,
+                                           String type1, String type2,
+                                           bool pair) {
+  return p->GetLJ(type1, type2, pair);
+}
+
+boost::python::list WrapGetAtomRenamingRules(ost::mol::mm::ForcefieldPtr p,
+                                             const String& res_name) {
+  boost::python::list result;
+  typedef ost::mol::mm::Forcefield::AtomRenamingType AtomRenamingType;
+  const AtomRenamingType& rules = p->GetAtomRenamingRules(res_name);
+  for (uint i = 0; i < rules.size(); ++i) {
+    result.append(boost::python::make_tuple(rules[i].first, rules[i].second));
   }
-
-  ost::mol::mm::InteractionPtr GetLJTwoTypes(ost::mol::mm::ForcefieldPtr p, String type1, String type2, bool pair){
-    return p->GetLJ(type1,type2,pair);
-  }
+  return result;
+}
 
 }
 
@@ -86,6 +99,9 @@ void export_Forcefield()
     .def("GetResidueRenamingTwoTer",&ost::mol::mm::Forcefield::GetResidueRenamingTwoTer,(arg("res_name")))
     .def("GetAtomRenaming",&ost::mol::mm::Forcefield::GetAtomRenaming,(arg("res_name"),arg("atom_name")))
     .def("AssignFFSpecificNames",&ost::mol::mm::Forcefield::AssignFFSpecificNames,(arg("ent"),arg("reverse")=false))
+    .def("HasAtomRenamingRules", &ost::mol::mm::Forcefield::HasAtomRenamingRules,
+         (arg("res_name")))
+    .def("GetAtomRenamingRules", &WrapGetAtomRenamingRules, (arg("res_name")))
   ;
 
   boost::python::register_ptr_to_python<ost::mol::mm::ForcefieldPtr>();

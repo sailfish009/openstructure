@@ -235,13 +235,13 @@ The basic functionality of editors is implemented in the EditorBase class.
     
     :type atom: :class:`EntityHandle`
   
-  .. method:: DeleteAtoms(residue)
+  .. method:: DeleteAtoms(atoms)
   
     Deletes a set specified atoms. All associated torsions and bonds will be 
     removed as well
     
-    :type residue: :class:`AtomHandleList`
-    :param residue: A valid set of atoms
+    :type atoms: :class:`AtomHandleList`
+    :param atoms: A valid set of atoms
     
   
   .. method:: DeleteResidue(residue)

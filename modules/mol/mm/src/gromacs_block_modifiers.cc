@@ -21,9 +21,9 @@
 
 namespace ost{ namespace mol{ namespace mm{
 
-std::vector<geom::Vec3> GromacsPositionRuleEvaluator::EvaluatePosRule(int rule, 
-                                                                      int number,
-                                                                      const std::vector<geom::Vec3>& anchors){
+std::vector<geom::Vec3> GromacsPositionRuleEvaluator::EvaluatePosRule(
+                                      int rule, int number,
+                                      const std::vector<geom::Vec3>& anchors) {
 
   std::vector<geom::Vec3> positions;
 
@@ -194,11 +194,12 @@ std::vector<geom::Vec3> GromacsPositionRuleEvaluator::EvaluatePosRule(int rule,
 }
 
 
-void GromacsHydrogenConstructor::ApplyOnBuildingBlock(BuildingBlockPtr p){
+void GromacsHydrogenConstructor::ApplyOnBuildingBlock(BuildingBlockPtr p) {
   //we assume, that the hydrogens are already correct in the building block...
 }
 
-void GromacsHydrogenConstructor::ApplyOnResidue(ost::mol::ResidueHandle& res, ost::mol::XCSEditor& ed){
+void GromacsHydrogenConstructor::ApplyOnResidue(ost::mol::ResidueHandle& res,
+                                                ost::mol::XCSEditor& ed) {
 
   if(!res.IsValid()) return;
 
@@ -230,7 +231,8 @@ void GromacsHydrogenConstructor::ApplyOnResidue(ost::mol::ResidueHandle& res, os
     ost::mol::AtomHandle atom;
     bool found_anchors = true;
 
-    for(std::vector<String>::iterator it = anchor_names.begin();it!=anchor_names.end();++it){
+    for (std::vector<String>::iterator it = anchor_names.begin();
+         it!=anchor_names.end(); ++it) {
 
       temp_res = res;
       atom_name = *it;
@@ -272,23 +274,28 @@ void GromacsHydrogenConstructor::ApplyOnResidue(ost::mol::ResidueHandle& res, os
       continue;
     }
     
-    hydrogen_positions = GromacsPositionRuleEvaluator::EvaluatePosRule(method,
-                                                                       number, 
-                                                                       anchor_positions);
+    hydrogen_positions
+     = GromacsPositionRuleEvaluator::EvaluatePosRule(method, number,
+                                                     anchor_positions);
 
     for(int b=0;b<number;++b){
       //only add hydrogen if not already present!
       atom = res.FindAtom(hydrogen_names[b]);
-      if(!atom.IsValid()) atom = ed.InsertAtom(res,hydrogen_names[b],hydrogen_positions[b],"H");
-      else ed.SetAtomPos(atom,hydrogen_positions[b]);  
+      if (!atom.IsValid()) {
+        atom = ed.InsertAtom(res, hydrogen_names[b], hydrogen_positions[b], "H");
+      }
+      else {
+        ed.SetAtomPos(atom, hydrogen_positions[b]);
+      }
     }
   }
 }
 
 
-void GromacsHydrogenConstructor::AddHydrogenRule(uint number, int method, 
-                                                 const std::vector<String>& hydrogen_names, 
-                                                 const std::vector<String>& anchors){
+void GromacsHydrogenConstructor::AddHydrogenRule(
+                                uint number, int method,
+                                const std::vector<String>& hydrogen_names,
+                                const std::vector<String>& anchors) {
 
   if(number != hydrogen_names.size()){
     std::stringstream ss;
@@ -390,7 +397,8 @@ void GromacsBlockModifier::ApplyOnBuildingBlock(BuildingBlockPtr p){
   } 
 }
 
-void GromacsBlockModifier::ApplyOnResidue(ost::mol::ResidueHandle& res, ost::mol::XCSEditor& ed){
+void GromacsBlockModifier::ApplyOnResidue(ost::mol::ResidueHandle& res,
+                                          ost::mol::XCSEditor& ed) {
 
   //let's resolve the replace statement
   for(uint i = 0; i < replace_old_atom_name_.size(); ++i){
@@ -423,9 +431,9 @@ void GromacsBlockModifier::ApplyOnResidue(ost::mol::ResidueHandle& res, ost::mol
       anchor_positions.push_back(at.GetPos());
       anchor_atoms.push_back(at);
     }
-    std::vector<geom::Vec3> positions = GromacsPositionRuleEvaluator::EvaluatePosRule(method,
-                                                                                      number,
-                                                                                      anchor_positions);
+    std::vector<geom::Vec3> positions
+     = GromacsPositionRuleEvaluator::EvaluatePosRule(method, number,
+                                                     anchor_positions);
 
     String ele = "H";
     if(method == 8 || method == 9){
