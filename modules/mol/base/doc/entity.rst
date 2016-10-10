@@ -113,7 +113,7 @@ The Handle Classes
     :param chain_name:  Chain identifier, e.g. "A"
     :type  chain_name:  str
     :param    res_num:  residue number
-    :type     res_num:  mol.ResNum
+    :type     res_num:  :class:`ResNum`
     
     :returns:           A valid :class:`ResidueHandle` if the chain exists and
                         the chain contains a residue of the given residue
@@ -131,7 +131,7 @@ The Handle Classes
     :param chain_name:  Chain identifier, e.g. "A"
     :type  chain_name:  str
     :param    res_num:  residue number
-    :type     res_num:  mol.ResNum
+    :type     res_num:  :class:`ResNum`
     :param  atom_name:  atom name, e.g. CA
     :type   atom_name:  str
     
@@ -367,7 +367,7 @@ The Handle Classes
     Get residue by residue number. See also :attr:`residues`
     
     :param    res_num:  residue number
-    :type     res_num:  mol.ResNum
+    :type     res_num:  :class:`ResNum`
     
     :returns:           A valid :class:`ResidueHandle` if the chain contains
                         a residue with matching residue number, an invalid
@@ -386,7 +386,7 @@ The Handle Classes
     Get atom by residue number and atom name. See also :attr:`atoms`
 
     :param    res_num:  residue number
-    :type     res_num:  mol.ResNum
+    :type     res_num:  :class:`ResNum`
     :param  atom_name:  atom name, e.g. CA
     :type   atom_name:  str
 
@@ -994,7 +994,7 @@ The View Classes
     :param chain_name: The chain name
     :type  chain_name: str
     :param res_num: The residue number
-    :type  res_num: ResNum or int
+    :type  res_num: :class:`ResNum` or :class:`int`
     :param atom_name: The name of the atom
     :type  atom_name: str
     :rtype: class:`AtomView`
@@ -1597,7 +1597,45 @@ Other Entity-Related Functions
        useful to combine several entities into one.
 
   :returns :class:`EntityHandle`
-  
+
+
+Residue Numbering
+--------------------------------------------------------------------------------
+
+.. class:: ResNum(num, ins_code='\0')
+
+  Number for a residue. The residue number has a numeric part and an (optional)
+  insertion-code. You can work with this object as if it was an integer and
+  comparison will look first at the numeric part and then the insertion-code.
+  All access to existing objects is read-only.
+
+  :param num: Numeric part of residue number.
+  :type num:  :class:`int`
+  :param ins_code: Alpha-numeric part of residue number (optional insertion
+                   code). Only first character kept.
+  :type ins_code:  :class:`str`
+
+  .. attribute:: num
+
+    Numeric part of residue number.
+
+    :type: :class:`int`
+
+  .. attribute:: ins_code
+
+    Alpha-numeric part of residue number (insertion code). Single character.
+
+    :type: :class:`str`
+
+  .. method:: GetNum
+
+    :returns: :attr:`num`
+
+  .. method:: GetInsCode
+
+    :returns: :attr:`ins_code`
+
+
 .. _chaintype:
 
 ChainType
