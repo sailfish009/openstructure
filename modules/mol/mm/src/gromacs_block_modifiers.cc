@@ -160,14 +160,9 @@ std::vector<geom::Vec3> GromacsPositionRuleEvaluator::EvaluatePosRule(
       Real x = 0.333806859234;
       Real y = 0.942641491092;
 
-      std::vector<geom::Vec3> new_anchors;
-      new_anchors.push_back(positions[2]);
-      new_anchors.push_back(anchors[0]);
-      new_anchors.push_back(anchors[1]);
-
-      i = new_anchors[0];
-      j = new_anchors[1];
-      k = new_anchors[2];
+      i = positions[1];
+      j = anchors[0];
+      k = anchors[1];
 
       j_i = geom::Normalize(i-j);
       q = geom::Normalize(geom::Cross(geom::Cross(k-j,j_i),j_i));
