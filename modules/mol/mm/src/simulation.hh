@@ -145,6 +145,9 @@ private:
 
   int TimeToNextNotification();
 
+  // loads plugins from directory for OpenMM BUT only once per unique path!
+  static void EnsurePluginsLoaded(const String& plugin_path);
+
   SystemPtr system_;
   IntegratorPtr integrator_;
   ContextPtr context_;

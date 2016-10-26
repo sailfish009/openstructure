@@ -267,6 +267,16 @@ SimulationPtr Simulation::Load(const String& filename, SettingsPtr settings){
 }
 
 
+void Simulation::EnsurePluginsLoaded(const String& plugin_path) {
+  // note: this is guaranteed to be constructed on first use only
+  static std::set<String> already_loaded;
+  if (already_loaded.find(plugin_path) == already_loaded.end()) {
+    // not loaded yet: load directory, but only once!
+    OpenMM::Platform::loadPluginsFromDirectory(plugin_path);
+    already_loaded.insert(plugin_path);
+  }
+}
+
 
 void Simulation::Init(const TopologyPtr top,
                       const SettingsPtr settings){
