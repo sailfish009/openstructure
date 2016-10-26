@@ -295,8 +295,8 @@ void Simulation::Init(const TopologyPtr top,
   //setting up the context, which combines the system with an integrator
   //to proceed in time, but first we have to load the proper platform
 
-  OpenMM::Platform::loadPluginsFromDirectory (settings->openmm_plugin_directory);
-  OpenMM::Platform::loadPluginsFromDirectory (settings->custom_plugin_directory);
+  EnsurePluginsLoaded(settings->openmm_plugin_directory);
+  EnsurePluginsLoaded(settings->custom_plugin_directory);
   OpenMM::Platform* platform;
   std::map<String,String> context_properties;
 
