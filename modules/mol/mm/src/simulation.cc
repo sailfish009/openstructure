@@ -267,6 +267,24 @@ SimulationPtr Simulation::Load(const String& filename, SettingsPtr settings){
 }
 
 
+bool Simulation::IsPlatformAvailable(const SettingsPtr settings) {
+  // load settings-dependent plugin directories
+  EnsurePluginsLoaded(settings->openmm_plugin_directory);
+  EnsurePluginsLoaded(settings->custom_plugin_directory);
+  // check if OpenMM platform exists by checking all (this is fast..)
+  const Platform platform_id = settings->platform;
+  for (int i = 0; i < OpenMM::Platform::getNumPlatforms(); ++i) {
+    OpenMM::Platform& platform = OpenMM::Platform::getPlatform(i);
+    if (   (platform_id == Reference && platform.getName() == "Reference")
+        || (platform_id == OpenCL && platform.getName() == "OpenCL")
+        || (platform_id == CUDA && platform.getName() == "CUDA")
+        || (platform_id == CPU && platform.getName() == "CPU")) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void Simulation::EnsurePluginsLoaded(const String& plugin_path) {
   // note: this is guaranteed to be constructed on first use only
   static std::set<String> already_loaded;

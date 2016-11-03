@@ -67,6 +67,8 @@ public:
 
   static SimulationPtr Load(const String& filename, SettingsPtr settings);
 
+  static bool IsPlatformAvailable(const SettingsPtr settings);
+
   ost::mol::EntityHandle GetEntity() { return ent_; }
 
   geom::Vec3List GetPositions(bool enforce_periodic_box = false, bool in_angstrom = true);

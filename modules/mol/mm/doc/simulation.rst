@@ -60,7 +60,7 @@ mapped back to the attached structure at any time.
     :param filename:    Filename
     :type filename:     :class:`str`
 
-  .. method:: Load(filename)
+  .. staticmethod:: Load(filename)
 
     Loads a dumped simulation from disk. You have to make sure, that the provided 
     settings are consistent with those from the saved simulation. Undefined 
@@ -71,6 +71,18 @@ mapped back to the attached structure at any time.
 
     :type filename:     :class:`str`
     :type settings:     :class:`Settings`
+
+  .. staticmethod:: IsPlatformAvailable(settings)
+
+    :return: True, if platform defined in *settings* is available. Otherwise,
+             construction of a simulation object will fail with these settings.
+    :rtype:  :class:`bool`
+    
+    :param settings: Controls the parametrization of this class.
+                     Only :attr:`Settings.openmm_plugin_directory`,
+                     :attr:`Settings.custom_plugin_directory` and
+                     :attr:`Settings.platform` are relevant.
+    :type settings:  :class:`Settings`
 
   .. method:: ApplyLBFGS([tolerance=1.0,max_iterations=1000])
 
