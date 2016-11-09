@@ -86,6 +86,10 @@ public:
   /// \brief Get entropy for this column.
   Real GetEntropy() const;
 
+  /// \brief Get column score as in Soeding-2005
+  Real GetScore(const ProfileColumn& other,
+                const ProfileColumn& null_model) const;
+
   // functions to feed streams with limited accuracy of internal data
   // not intended for python export
 
@@ -144,6 +148,11 @@ public:
 
   /// \brief Compute average entropy over all columns.
   Real GetAverageEntropy() const;
+
+  /// \brief Compute score comparing columns other[i] and this->at(i+offset)
+  /// Column score as in Soeding-2005, null model of this object used, 
+  /// result normalized by other.size()
+  Real GetAverageScore(const ProfileHandle& other, uint offset = 0) const;
 
   // some functions to make it behave like a vector
 

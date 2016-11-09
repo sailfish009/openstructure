@@ -97,6 +97,15 @@ Real ProfileColumn::GetEntropy() const {
   return entropy;
 }
 
+Real ProfileColumn::GetScore(const ProfileColumn& other,
+                             const ProfileColumn& null_model) const {
+  Real summed_col_score = 0.001; // to avoid zero score
+  for (uint i = 0; i < 20; ++i) {
+    summed_col_score += freq_[i] * other.freq_[i] / null_model.freq_[i];
+  }
+  return std::log(summed_col_score);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // ProfileHandle
 //////////////////////////////////////////////////////////////////////////////
@@ -130,6 +139,22 @@ Real ProfileHandle::GetAverageEntropy() const {
     n_eff += i->GetEntropy();
   }
   return (n > 0) ? n_eff/n : 0.0;
+}
+
+Real ProfileHandle::GetAverageScore(const ProfileHandle& other,
+                                    uint offset) const {
+  // check offsets
+  const uint other_size = other.size();
+  if (offset > this->size() || offset + other_size > this->size()) {
+    throw Error("Invalid profile size / offset when computing score!");
+  }
+  // sum them up
+  Real sum = 0;
+  for (uint i = 0; i < other_size; ++i) {
+    sum += columns_[offset + i].GetScore(other[i], null_model_);
+  }
+  if (other_size > 0) return sum / other_size;
+  else                return sum;
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -448,10 +448,10 @@ residue. It mainly contains:
 
   .. method:: GetFreq(aa)
 
-    :param aa:  One letter code of standard amino acid
+    :return: Frequency of *aa*
+    :rtype:  :class:`float`
+    :param aa: One letter code of standard amino acid
     :type aa:  :class:`str`
-
-    :returns:  Frequency of aa
 
   .. method:: SetFreq(aa,freq)
 
@@ -460,9 +460,20 @@ residue. It mainly contains:
     :type aa:  :class:`str`
     :type freq:  :class:`float`
 
+  .. method:: GetScore(other, null_model)
+
+    :return: Column score as in Soeding-2005 paper.
+    :rtype:  :class:`float`
+    :param other: Other column to compute score with.
+    :type other:  :class:`ProfileColumn`
+    :param null_model: Null model to use for weighting.
+    :type null_model:  :class:`ProfileColumn`
+
   .. attribute:: entropy
 
     Shannon entropy based on the columns amino acid frequencies
+
+    :type: :class:`float`
 
 
 .. class:: ProfileHandle
@@ -492,8 +503,21 @@ residue. It mainly contains:
               (:attr:`null_model` is copied)
     :rtype: :class:`ProfileHandle`
 
-    :raises: :exc:`~exceptions.Error` if if *to* <= *from* or
+    :raises: :exc:`~exceptions.Error` if *to* <= *from* or
               *to* > :meth:`__len__`.
+
+  .. method:: GetAverageScore(other, offset=0)
+
+    :return: Average column score between *other.columns[i]* and this object's
+             *columns[i+offset]* for *i* in [*0, len(other)-1*] using this
+             object's :attr:`null_model`. See :meth:`ProfileColumn.GetScore`.
+    :rtype:  :class:`float`
+    :param other: Other profile to compare with.
+    :type other:  :class:`ProfileHandle`
+    :param offset: Start comparison at column *offset* of this object.
+    :type offset:  :class:`int`
+
+    :raises: :exc:`~exceptions.Error` if any *columns[i+offset]* out of bounds.
 
   .. method:: SetSequence(sequence)
 
@@ -509,17 +533,26 @@ residue. It mainly contains:
     Note: user must enforce consistency between sequence length and number of
     profile columns.
 
+    :type: :class:`str`
+
   .. attribute:: columns
 
     Iterable columns of the profile
+
+    :type: :class:`ProfileColumnList`
 
   .. attribute:: null_model
 
     Null model of the profile
 
+    :type: :class:`ProfileColumn`
+
   .. attribute:: avg_entropy
 
     Average entropy of all the columns
+
+    :type: :class:`float`
+
 
 .. class:: ProfileDB
 

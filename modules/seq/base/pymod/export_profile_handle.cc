@@ -48,6 +48,8 @@ void export_profile_handle()
     .add_property("entropy", &ProfileColumn::GetEntropy)
     .def("GetFreq", &ProfileColumn::GetFreq)
     .def("SetFreq", &ProfileColumn::SetFreq)
+    .def("GetScore", &ProfileColumn::GetScore,
+         (arg("other"), arg("null_model")))
     .def("BLOSUMNullModel", 
          &ProfileColumn::BLOSUMNullModel).staticmethod("BLOSUMNullModel")
   ;
@@ -62,6 +64,8 @@ void export_profile_handle()
     .def("Extract", &ProfileHandle::Extract)
     .def("SetNullModel", &ProfileHandle::SetNullModel)
     .def("SetSequence", &ProfileHandle::SetSequence)
+    .def("GetAverageScore", &ProfileHandle::GetAverageScore,
+         (arg("other"), arg("offset")=0))
     .add_property("null_model", make_function(&ProfileHandle::GetNullModel,
                   return_value_policy<copy_const_reference>()))
     .add_property("columns", 

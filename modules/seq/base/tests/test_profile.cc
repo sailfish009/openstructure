@@ -121,8 +121,15 @@ BOOST_AUTO_TEST_CASE(profile_handle)
   BOOST_CHECK_CLOSE(prof[3].GetEntropy(), entropy3, Real(1e-3));
   BOOST_CHECK_CLOSE(prof.GetAverageEntropy(), avg_entropy, Real(1e-3));
 
-  // extract parts
+  // check scoring (scores precomputed to make sure they don't randomly change!)
   ProfileHandlePtr pp = prof.Extract(1, 4);
+  BOOST_CHECK_CLOSE(prof.GetAverageScore(*pp, 0), -1.81746, Real(1e-3));
+  BOOST_CHECK_CLOSE(prof.GetAverageScore(*pp, 1), 2.8012, Real(1e-3));
+  BOOST_CHECK_CLOSE(prof.GetAverageScore(*pp, 2), -4.12038, Real(1e-3));
+  BOOST_CHECK_THROW(prof.GetAverageScore(*pp, -1), ost::Error);
+  BOOST_CHECK_THROW(prof.GetAverageScore(*pp, 3), ost::Error);
+
+  // extract parts
   avg_entropy = (entropy1 + entropy2 + entropy3)/3;
   BOOST_CHECK_EQUAL(pp->size(), size_t(3));
   BOOST_CHECK_EQUAL(pp->GetSequence(), "RSP");
@@ -138,6 +145,10 @@ BOOST_AUTO_TEST_CASE(profile_handle)
   BOOST_CHECK_EQUAL(pp->size(), size_t(2));
   BOOST_CHECK_EQUAL(pp->GetSequence(), "PP");
   BOOST_CHECK_CLOSE(pp->GetAverageEntropy(), entropy3, Real(1e-3));
+
+  BOOST_CHECK_THROW(prof.Extract(3, 3), ost::Error);
+  BOOST_CHECK_THROW(prof.Extract(-1, 3), ost::Error);
+  BOOST_CHECK_THROW(prof.Extract(3, 6), ost::Error);
 }
 
 
