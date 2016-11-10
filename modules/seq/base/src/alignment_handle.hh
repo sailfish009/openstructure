@@ -44,7 +44,7 @@ class AlignedColumnIterator;
 ///
 /// Typically sequence alignments are used column-based, i.e by looking at an
 /// aligned columns in the sequence alignment. To get a row-based (sequence)
-/// view on the sequence list, use AlignmentHandle::GetSequenceList(). For an
+/// view on the sequence list, use AlignmentHandle::GetSequences(). For an
 /// overview of how to use the sequence module, see \ref module_seq "here"
 ///
 /// All operators that operate on an alignment will again  produce a valid

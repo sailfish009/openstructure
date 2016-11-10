@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2016 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -32,12 +32,56 @@
 #include <ost/seq/alg/pair_subst_weight_matrix.hh>
 #include <ost/seq/alg/contact_weight_matrix.hh>
 #include <ost/seq/alg/contact_prediction_score.hh>
+#include <ost/seq/alg/clip_alignment.hh>
+#include <ost/seq/alg/distance_map.hh>
+#include <ost/seq/alg/variance_map.hh>
 
 using namespace boost::python;
 using namespace ost::seq;
 using namespace ost::seq::alg;
 
-BOOST_PYTHON_MODULE(_ost_seq_alg)
+////////////////////////////////////////////////////////////////////
+// wrappers
+namespace {
+tuple WrapDistancesGetMin(const Distances& distance) {
+  const std::pair<Real, int> dist = distance.GetMin();
+  return boost::python::make_tuple(dist.first, dist.second);
+}
+tuple WrapDistancesGetMax(const Distances& distance) {
+  const std::pair<Real, int> dist = distance.GetMax();
+  return boost::python::make_tuple(dist.first, dist.second);
+}
+tuple WrapDistancesGetDataElement(const Distances& distance, uint index) {
+  const std::pair<Real, int> dist = distance.GetDataElement(index);
+  return boost::python::make_tuple(dist.first, dist.second);
+}
+
+template <typename T>
+list GetList(const T& data, uint num_rows, uint num_cols) {
+  list ret;
+  for (uint row = 0; row < num_rows; ++row) {
+    list my_row;
+    for (uint col = 0; col < num_cols; ++col) {
+      my_row.append(data(row, col));
+    }
+    ret.append(my_row);
+  }
+  return ret;
+}
+
+list VarMapGetData(const VarianceMapPtr v_map) {
+  return GetList(*v_map, v_map->GetSize(), v_map->GetSize());
+}
+
+list DistToMeanGetData(const Dist2MeanPtr d2m) {
+  return GetList(*d2m, d2m->GetNumResidues(), d2m->GetNumStructures());
+}
+} // anon ns
+////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////
+// Work on alignments
+void export_aln_alg()
 {
   enum_<RefMode::Type>("RefMode")
     .value("ALIGNMENT", RefMode::ALIGNMENT)
@@ -71,7 +115,12 @@ BOOST_PYTHON_MODULE(_ost_seq_alg)
   def("SemiGlobalAlign", &SemiGlobalAlign,(arg("seq1"),arg("seq2"),arg("subst_weight"), 
       arg("gap_open")=-5, arg("gap_ext")=-2));
   def("ShannonEntropy", &ShannonEntropy, (arg("aln"), arg("ignore_gaps")=true));
+}
 
+////////////////////////////////////////////////////////////////////
+// Contact Prediction
+void export_contact_prediction()
+{
   class_<PairSubstWeightMatrix>("PairSubstWeightMatrix",init< std::vector <std::vector <std::vector <std::vector <Real> > > >,std::vector <char> >())
     .def(init<>())
     .def_readonly("weights",&PairSubstWeightMatrix::weights)
@@ -99,7 +148,9 @@ BOOST_PYTHON_MODULE(_ost_seq_alg)
   def("LoadConstantContactWeightMatrix",LoadConstantContactWeightMatrix);
   def("LoadDefaultPairSubstWeightMatrix",LoadDefaultPairSubstWeightMatrix);
 
-  scope mat_scope = class_<SubstWeightMatrix, SubstWeightMatrixPtr>("SubstWeightMatrix", init<>())
+  // NOTE: anything after this is within SubstWeightMatrix scope
+  scope mat_scope = class_<SubstWeightMatrix, SubstWeightMatrixPtr>
+                      ("SubstWeightMatrix", init<>())
                       .def("GetWeight", &SubstWeightMatrix::GetWeight)
                       .def("SetWeight", &SubstWeightMatrix::SetWeight)
                       .def("GetMinWeight", &SubstWeightMatrix::GetMinWeight)
@@ -113,5 +164,68 @@ BOOST_PYTHON_MODULE(_ost_seq_alg)
     .value("BLOSUM80", SubstWeightMatrix::BLOSUM80)
     .value("BLOSUM100", SubstWeightMatrix::BLOSUM100)
   ;
+}
 
+////////////////////////////////////////////////////////////////////
+// getting/analyzing distance matrices from alignments
+void export_distance_analysis()
+{
+  def("ClipAlignment", &ClipAlignment, (arg("aln"), arg("n_seq_thresh")=2, 
+      arg("set_offset")=true, arg("remove_empty")=true));
+  def("CreateDistanceMap", &CreateDistanceMap, (arg("aln")));
+  def("CreateVarianceMap", &CreateVarianceMap, (arg("d_map"), arg("sigma")=25));
+  def("CreateDist2Mean", &CreateDist2Mean, (arg("d_map")));
+
+  class_<Distances>("Distances", no_init)
+    .def("GetDataSize", &Distances::GetDataSize)
+    .def("GetAverage", &Distances::GetAverage)
+    .def("GetMin", &WrapDistancesGetMin)
+    .def("GetMax", &WrapDistancesGetMax)
+    .def("GetDataElement", &WrapDistancesGetDataElement, (arg("index")))
+    .def("GetStdDev", &Distances::GetStdDev)
+    .def("GetWeightedStdDev", &Distances::GetWeightedStdDev, (arg("sigma")))
+    .def("GetNormStdDev", &Distances::GetNormStdDev)
+  ;
+
+  class_<DistanceMap, DistanceMapPtr,
+         boost::noncopyable>("DistanceMap", no_init)
+    .def("GetDistances", &DistanceMap::GetDistances,
+         return_value_policy<reference_existing_object>(),
+         (arg("i_res1"), arg("i_res2")))
+    .def("GetSize", &DistanceMap::GetSize)
+    .def("GetNumStructures", &DistanceMap::GetNumStructures)
+  ;
+
+  class_<VarianceMap, VarianceMapPtr,
+         boost::noncopyable>("VarianceMap", no_init)
+    .def("Get", &VarianceMap::Get, (arg("i_res1"), arg("i_res2")),
+         return_value_policy<return_by_value>())
+    .def("GetSize", &VarianceMap::GetSize)
+    .def("Min", &VarianceMap::Min)
+    .def("Max", &VarianceMap::Max)
+    .def("ExportDat", &VarianceMap::ExportDat, (arg("file_name")))
+    .def("ExportCsv", &VarianceMap::ExportCsv, (arg("file_name")))
+    .def("ExportJson", &VarianceMap::ExportJson, (arg("file_name")))
+    .def("GetJsonString", &VarianceMap::GetJsonString)
+    .def("GetData", &VarMapGetData)
+  ;
+
+  class_<Dist2Mean, Dist2MeanPtr,
+         boost::noncopyable>("Dist2Mean", no_init)
+    .def("Get", &Dist2Mean::Get, (arg("i_res"), arg("i_str")))
+    .def("GetNumResidues", &Dist2Mean::GetNumResidues)
+    .def("GetNumStructures", &Dist2Mean::GetNumStructures)
+    .def("ExportDat", &Dist2Mean::ExportDat, (arg("file_name")))
+    .def("ExportCsv", &Dist2Mean::ExportCsv, (arg("file_name")))
+    .def("ExportJson", &Dist2Mean::ExportJson, (arg("file_name")))
+    .def("GetJsonString", &Dist2Mean::GetJsonString)
+    .def("GetData", &DistToMeanGetData)
+  ;
+}
+
+BOOST_PYTHON_MODULE(_ost_seq_alg)
+{
+  export_aln_alg();
+  export_contact_prediction();
+  export_distance_analysis();
 }

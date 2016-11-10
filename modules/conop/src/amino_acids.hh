@@ -56,7 +56,7 @@ DLLEXPORT_OST_CONOP AminoAcid OneLetterCodeToAminoAcid(char olc);
 
 char DLLEXPORT_OST_CONOP ResidueNameToOneLetterCode(String rn);
 
-char DLLEXPORT_OST_CONOP ResidueNameToOneLetterCode(String rn);
+AminoAcid DLLEXPORT_OST_CONOP ResidueNameToAminoAcid(String rn);
 
 class AminoAcidSetIterator : public std::iterator<std::forward_iterator_tag,
                                                   AminoAcid> {

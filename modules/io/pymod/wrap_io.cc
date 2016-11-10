@@ -83,7 +83,8 @@ BOOST_PYTHON_MODULE(_ost_io)
   def("Instance",IOManager::Instance,
       return_value_policy<reference_existing_object>() );
 
-  def("LoadEntity",LoadEntity,load_entity_ov());
+  def("LoadEntity", LoadEntity,
+      load_entity_ov(args("filename", "format")));
   def("SaveEntity", &save_ent_view,
       save_entity_view_ov(args("entity", "filename", "format")));
   def("SaveEntity", &save_ent_handle,

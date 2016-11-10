@@ -434,7 +434,7 @@ SuperpositionResult MeanSquareMinimizer::IterativeMinimize(int ncycles, Real dis
 
 SuperpositionResult SuperposeAtoms(const mol::AtomViewList& atoms1,
                                    const mol::AtomViewList& atoms2,
-                                   bool apply_transform=true)
+                                   bool apply_transform)
 {
   MeanSquareMinimizer msm = MeanSquareMinimizer::FromAtomLists(atoms1, atoms2);
   SuperpositionResult result = msm.MinimizeOnce();
@@ -454,7 +454,7 @@ SuperpositionResult SuperposeAtoms(const mol::AtomViewList& atoms1,
 
 SuperpositionResult SuperposeSVD(const mol::EntityView& ev1,
                                  const mol::EntityView& ev2,
-                                 bool apply_transform=true) {
+                                 bool apply_transform) {
   AtomViewList atoms1 = ev1.GetAtomList();
   AtomViewList atoms2 = ev2.GetAtomList();
 

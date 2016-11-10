@@ -1,7 +1,7 @@
 Interactions
 ================================================================================
 
-.. currentmodule:: ost.mol
+.. currentmodule:: ost.mol.mm
 
 The :class:`Interaction` object is intended to build a basic container that can 
 be used

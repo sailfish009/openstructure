@@ -231,7 +231,7 @@ the same length. New instances of alignments are created with
 
 Typically sequence alignments are used column-based, i.e by looking at an  
 aligned columns in the sequence alignment. To get a row-based (sequence) view
-on the sequence list, use :meth:`GetSequenceList()`. 
+on the sequence list, use :meth:`GetSequences()`. 
 
 All functions that operate on an alignment will again produce a valid alignment. 
 This mean that it is not possible to change the length of one sequence, without  
@@ -277,7 +277,7 @@ an alignment:
     Returns the sequence at the given index, raising an IndexError when trying
     to access an inexistent sequence.
     
-  .. method:: GetSequenceList()
+  .. method:: GetSequences()
   
     Returns a list of all sequence of the alignment.
     
@@ -343,7 +343,7 @@ an alignment:
   .. method:: Cut(start, end)
   
     Removes the columns in the half-closed interval `start`, `end` from the
-    alignment.
+    alignment. Note that this function does not update offsets!
     
     .. code-block:: python
     
@@ -364,16 +364,6 @@ an alignment:
     
     :param new_region: The region to be inserted
     :type new_region: :class:`AlignedRegion` or :class:`AlignmentHandle`
-  
-  
-  .. method:: ShiftRegion(start, end, amount, master=-1)
-  
-    Shift columns in the half-closed interval `start`, `end`. If amount is a
-    positive number, the columns are shifted to the right, if negative, the 
-    columns are shifted to the left.
-    
-    If master is set to -1, all sequences in the region are affected, otherwise 
-    only the sequence at index equal to master is shifted.
   
   .. method:: GetMatchingBackboneViews(index1=0, index2=1)
   

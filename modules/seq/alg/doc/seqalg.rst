@@ -4,6 +4,8 @@
 .. module:: ost.seq.alg
   :synopsis: Algorithms for sequences
 
+Algorithms for Alignments
+--------------------------------------------------------------------------------
 
 .. function:: MergePairwiseAlignments(pairwise_alns, ref_seq)
 
@@ -161,6 +163,7 @@
   :param gap_ext: The gap extension penalty. Must be a negative number
   :returns: best-scoring alignment of *seq1* and *seq2*.
 
+.. autofunction:: ost.seq.alg.renumber.Renumber
 
 .. _contact-prediction:
 
@@ -215,8 +218,10 @@ corresponding to interacting residues.
 
 .. autofunction:: PredictContacts
 
-.. function:: CalculateMutualInformation(aln,weights=LoadConstantContactWeightMatrix(),
-            apc_correction=true,zpx_transformation=true,small_number_correction=0.05)
+.. function:: CalculateMutualInformation(aln, \
+                weights=LoadConstantContactWeightMatrix(), \
+                apc_correction=true, zpx_transformation=true, \
+                small_number_correction=0.05)
 
     Calculates the mutual information (MI) from a multiple sequence alignemnt. Contributions of each pair of amino-acids are weighted using the matrix **weights** (weighted mutual information). The average product correction (**apc_correction**) correction and transformation into Z-scores (**zpx_transofrmation**) increase prediciton accuracy by reducing the effect of phylogeny and other noise sources. The small number correction reduces noise for alignments with small number of sequences of low diversity.
 
@@ -231,7 +236,8 @@ corresponding to interacting residues.
     :param small_number_correction: initial values for the probabilities of having a given pair of amino acids *p(a,b)*.
     :type small_number_correction: :class:`float`
 
-.. function:: CalculateContactScore(aln,weights=LoadDefaultContactWeightMatrix())
+.. function:: CalculateContactScore(aln, \
+                weights=LoadDefaultContactWeightMatrix())
   
   Calculates the Contact Score (*CoSc*) from a multiple sequence alignment. For each pair of residues *(i,j)* (pair of columns in the MSA), *CoSc(i,j)* is the average over the values of the **weights** corresponding to the amino acid pairs in the columns.
 
@@ -240,8 +246,8 @@ corresponding to interacting residues.
   :param weights: The contact weight matrix
   :type weights:  :class`ContactWeightMatrix`
 
-.. function:: CalculateContactSubstitutionScore(aln,ref_seq_index=0,
-                            weights=LoadDefaultPairSubstWeightMatrix())
+.. function:: CalculateContactSubstitutionScore(aln, ref_seq_index=0, \
+                weights=LoadDefaultPairSubstWeightMatrix())
 
   Calculates the Contact Substitution Score (*CoEvoSc*) from a multiple sequence alignment. For each pair of residues *(i,j)* (pair of columns in the MSA), *CoEvoSc(i,j)* is the average over the values of the **weights** corresponding to substituting the amino acid pair in the reference sequence (given by **ref_seq_index**) with all other pairs in columns *(i,j)* of the **aln**.
 
@@ -290,3 +296,288 @@ corresponding to interacting residues.
 
     A :class:`CharList` of one letter codes of the amino acids for which weights are found in the **weights** matrix.
 
+Get and analyze distance matrices from alignments
+--------------------------------------------------------------------------------
+
+Given a multiple sequence alignment between a reference sequence (first sequence
+in alignment) and a list of structures (remaining sequences in alignment with an
+attached view to the structure), this set of functions can be used to analyze
+differences between the structures.
+
+**Example:**
+
+.. code-block:: python
+  
+  # SETUP: aln is multiple sequence alignment, where first sequence is the
+  #        reference sequence and all others have a structure attached
+
+  # clip alignment to only have parts with at least 3 sequences (incl. ref.)
+  # -> aln will be cut and clip_start is 1st column of aln that was kept
+  clip_start = seq.alg.ClipAlignment(aln, 3)
+  
+  # get variance measure and distance to mean for each residue pair
+  d_map = seq.alg.CreateDistanceMap(aln)
+  var_map = seq.alg.CreateVarianceMap(d_map)
+  dist_to_mean = seq.alg.CreateDist2Mean(d_map)
+
+  # report min. and max. variances
+  print "MIN-MAX:", var_map.Min(), "-", var_map.Max()
+  # get data and json-strings for further processing
+  var_map_data = var_map.GetData()
+  var_map_json = var_map.GetJsonString()
+  dist_to_mean_data = dist_to_mean.GetData()
+  dist_to_mean_json = dist_to_mean.GetJsonString()
+
+.. function:: ClipAlignment(aln, n_seq_thresh=2, set_offset=true, \
+                            remove_empty=true)
+
+  Clips alignment so that first and last column have at least the desired number
+  of structures.
+
+  :param aln: Multiple sequence alignment. Will be cut!
+  :type aln:  :class:`~ost.seq.AlignmentHandle`
+  :param n_seq_thresh: Minimal number of sequences desired.
+  :type n_seq_thresh:  :class:`int`
+  :param set_offset: Shall we update offsets for attached views?
+  :type set_offset:  :class:`bool`
+  :param remove_empty: Shall we remove sequences with only gaps in cut aln?
+  :type remove_empty:  :class:`bool`
+  :returns: Starting column (0-indexed), where cut region starts (w.r.t.
+            original aln). -1, if there is no region in the alignment with
+            at least the desired number of structures.
+  :rtype:   :class:`int`
+
+.. function:: CreateDistanceMap(aln)
+
+  Create distance map from a multiple sequence alignment.
+  
+  The algorithm requires that the sequence alignment consists of at least two
+  sequences. The sequence at index 0 serves as a frame of reference. All the
+  other sequences must have an attached view and a properly set sequence offset
+  (see :meth:`~ost.seq.AlignmentHandle.SetSequenceOffset`).
+  
+  For each of the attached views, the C-alpha distance pairs are extracted and
+  mapped onto the corresponding C-alpha distances in the reference sequence.
+
+  :param aln: Multiple sequence alignment.
+  :type aln:  :class:`~ost.seq.AlignmentHandle`
+  :returns: Distance map.
+  :rtype:   :class:`DistanceMap`
+  :raises:  Exception if *aln* has less than 2 sequences or any sequence (apart
+            from index 0) is lacking an attached view.
+
+.. function:: CreateVarianceMap(d_map, sigma=25)
+
+  :returns: Variance measure for each entry in *d_map*.
+  :rtype:   :class:`VarianceMap`
+  :param d_map: Distance map as created with :func:`CreateDistanceMap`.
+  :type d_map:  :class:`DistanceMap`
+  :param sigma: Used for weighting of variance measure
+                (see :meth:`Distances.GetWeightedStdDev`)
+  :type sigma:  :class:`float`
+  :raises:  Exception if *d_map* has no entries.
+
+.. function:: CreateDist2Mean(d_map)
+
+  :returns: Distances to mean for each structure in *d_map*.
+            Structures are in the same order as passed when creating *d_map*.
+  :rtype:   :class:`Dist2Mean`
+  :param d_map: Distance map as created with :func:`CreateDistanceMap`.
+  :type d_map:  :class:`DistanceMap`
+  :raises:  Exception if *d_map* has no entries.
+
+.. class:: Distances
+  
+  Container used by :class:`DistanceMap` to store a pair wise distance for each
+  structure. Each structure is identified by its index in the originally used
+  alignment (see :func:`CreateDistanceMap`).
+
+  .. method:: GetDataSize()
+
+    :returns: Number of pairwise distances.
+    :rtype:   :class:`int`
+
+  .. method:: GetAverage()
+
+    :returns: Average of all distances.
+    :rtype:   :class:`float`
+    :raises:  Exception if there are no distances.
+
+  .. method:: GetMin()
+              GetMax()
+
+    :returns: Minimal/maximal distance.
+    :rtype:   :class:`tuple` (distance (:class:`float`), index (:class:`int`))
+    :raises:  Exception if there are no distances.
+
+  .. method:: GetDataElement(index)
+
+    :returns: Element at given *index*.
+    :rtype:   :class:`tuple` (distance (:class:`float`), index (:class:`int`))
+    :param index: Index within list of distances (must be < :meth:`GetDataSize`).
+    :type index:  :class:`int`
+    :raises:  Exception if there are no distances or *index* out of bounds.
+
+  .. method:: GetStdDev()
+
+    :returns: Standard deviation of all distances.
+    :rtype:   :class:`float`
+    :raises:  Exception if there are no distances.
+
+  .. method:: GetWeightedStdDev(sigma)
+
+    :returns: Standard deviation of all distances multiplied by
+              exp( :meth:`GetAverage` / (-2*sigma) ).
+    :rtype:   :class:`float`
+    :param sigma: Defines weight.
+    :type sigma:  :class:`float`
+    :raises:  Exception if there are no distances.
+
+  .. method:: GetNormStdDev()
+
+    :returns: Standard deviation of all distances divided by :meth:`GetAverage`.
+    :rtype:   :class:`float`
+    :raises:  Exception if there are no distances.
+
+.. class:: DistanceMap
+
+  Container returned by :func:`CreateDistanceMap`.
+  Essentially a symmetric :meth:`GetSize` x :meth:`GetSize` matrix containing
+  up to :meth:`GetNumStructures` distances (list stored as :class:`Distances`).
+  Indexing of residues starts at 0 and corresponds to the positions in the
+  originally used alignment (see :func:`CreateDistanceMap`).
+
+  .. method:: GetDistances(i_res1, i_res2)
+
+    :returns: List of distances for given pair of residue indices.
+    :rtype:   :class:`Distances`
+    :param i_res1: Index of residue.
+    :type i_res1:  :class:`int`
+    :param i_res2: Index of residue.
+    :type i_res2:  :class:`int`
+
+  .. method:: GetSize()
+
+    :returns: Number of residues in map.
+    :rtype:   :class:`int`
+
+  .. method:: GetNumStructures()
+
+    :returns: Number of structures originally used when creating the map
+              (see :func:`CreateDistanceMap`).
+    :rtype:   :class:`int`
+
+.. class:: VarianceMap
+
+  Container returned by :func:`CreateVarianceMap`.
+  Like :class:`DistanceMap`, it is a symmetric :meth:`GetSize` x :meth:`GetSize`
+  matrix containing variance measures.
+  Indexing of residues is as in :class:`DistanceMap`.
+
+  .. method:: Get(i_res1, i_res2)
+
+    :returns: Variance measure for given pair of residue indices.
+    :rtype:   :class:`float`
+    :param i_res1: Index of residue.
+    :type i_res1:  :class:`int`
+    :param i_res2: Index of residue.
+    :type i_res2:  :class:`int`
+
+  .. method:: GetSize()
+
+    :returns: Number of residues in map.
+    :rtype:   :class:`int`
+
+  .. method:: Min()
+              Max()
+
+    :returns: Minimal/maximal variance in the map.
+    :rtype:   :class:`float`
+
+  .. method:: ExportDat(file_name)
+              ExportCsv(file_name)
+              ExportJson(file_name)
+
+    Write all variance measures into a file. The possible formats are:
+
+    - "dat" file: a list of "*i_res1+1* *i_res2+1* variance" lines
+    - "csv" file: a list of ";" separated variances (one line for each *i_res1*)
+    - "json" file: a JSON formatted file (see :meth:`GetJsonString`)
+
+    :param file_name: Path to file to be created.
+    :type file_name:  :class:`str`
+    :raises:  Exception if the file cannot be opened for writing.
+
+  .. method:: GetJsonString()
+
+    :returns: A JSON formatted list of :meth:`GetSize` lists with
+              :meth:`GetSize` variances
+    :rtype:   :class:`str`
+
+  .. method:: GetData()
+
+    Gets all the data in this map at once. Note that this is much faster (10x
+    speedup observed) than parsing :meth:`GetJsonString` or using :meth:`Get`
+    on each element.
+
+    :returns: A list of :meth:`GetSize` lists with :meth:`GetSize` variances.
+    :rtype:   :class:`list` of :class:`list` of :class:`float`
+
+.. class:: Dist2Mean
+
+  Container returned by :func:`CreateDist2Mean`.
+  Stores distances to mean for :meth:`GetNumResidues` residues of
+  :meth:`GetNumStructures` structures.
+  Indexing of residues is as in :class:`DistanceMap`.
+  Indexing of structures goes from 0 to :meth:`GetNumStructures` - 1 and is in
+  the same order as the structures in the originally used alignment.
+
+  .. method:: Get(i_res, i_str)
+
+    :returns: Distance to mean for given residue and structure indices.
+    :rtype:   :class:`float`
+    :param i_res: Index of residue.
+    :type i_res:  :class:`int`
+    :param i_str: Index of structure.
+    :type i_str:  :class:`int`
+
+  .. method:: GetNumResidues()
+
+    :returns: Number of residues.
+    :rtype:   :class:`int`
+
+  .. method:: GetNumStructures()
+
+    :returns: Number of structures.
+    :rtype:   :class:`int`
+
+  .. method:: ExportDat(file_name)
+              ExportCsv(file_name)
+              ExportJson(file_name)
+
+    Write all distance measures into a file. The possible formats are:
+
+    - "dat" file: a list of "*i_res+1* distances" lines (distances are space
+      separated)
+    - "csv" file: a list of ";" separated distances (one line for each *i_res*)
+    - "json" file: a JSON formatted file (see :meth:`GetJsonString`)
+
+    :param file_name: Path to file to be created.
+    :type file_name:  :class:`str`
+    :raises:  Exception if the file cannot be opened for writing.
+
+  .. method:: GetJsonString()
+
+    :returns: A JSON formatted list of :meth:`GetNumResidues` lists with
+              :meth:`GetNumStructures` distances.
+    :rtype:   :class:`str`
+
+  .. method:: GetData()
+
+    Gets all the data in this map at once. Note that this is much faster (10x
+    speedup observed) than parsing :meth:`GetJsonString` or using :meth:`Get`
+    on each element.
+
+    :returns: A list of :meth:`GetNumResidues` lists with
+              :meth:`GetNumStructures` distances.
+    :rtype:   :class:`list` of :class:`list` of :class:`float`

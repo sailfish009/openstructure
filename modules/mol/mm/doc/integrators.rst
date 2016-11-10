@@ -1,7 +1,7 @@
 Integrators
 ================================================================================
 
-.. currentmodule:: ost.mol
+.. currentmodule:: ost.mol.mm
 
 .. class:: Integrator
 

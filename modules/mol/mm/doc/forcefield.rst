@@ -1,7 +1,7 @@
 Forcefields
 ================================================================================
 
-.. currentmodule:: ost.mol
+.. currentmodule:: ost.mol.mm
 
 The forcefields are a dump for interactions with their parameters, but also
 for atom specific information or residue definitions in the form of a 
@@ -36,25 +36,25 @@ Loading the standard forcefields provided by OpenStructure
 
 Reading forcefields
 --------------------------------------------------------------------------------
-The :class:`FFReader` object is rather experimental. It has nevertheless been 
-thoroughly tested for loading the CHARMM and AMBER forcefields in the
-Gromacs format. The reader is capable of resolving the preprocessor statements
-as they are used in Gromacs.
-
 
 .. class:: FFReader(base_dir)
-
-  :param base_dir:      Base path of the reader.
-                        All loaded files must be defined relative to this base 
-                        path.
-
-  :type base_dir:       :class:`str`
 
   The :class:`FFReader` builds up a :class:`Forcefield`, that gets updated with
   every call to the read functions. If the read files contain preprocessor 
   statements as they are used in Gromacs, they will be applied to all
   subsequent lines read in. Parsed preprocessor statements are:
   #include, #define, #ifdef, #ifndef, #else and #endif
+
+  Note that this class is rather experimental. It has nevertheless been 
+  thoroughly tested for loading the CHARMM and AMBER forcefields in the
+  Gromacs format. The reader is capable of resolving the preprocessor statements
+  as they are used in Gromacs.
+
+  :param base_dir:      Base path of the reader.
+                        All loaded files must be defined relative to this base 
+                        path.
+
+  :type base_dir:       :class:`str`
 
   .. method:: ReadGromacsForcefield()
 
@@ -100,8 +100,6 @@ as they are used in Gromacs.
     :returns: The reader internal :class:`Forcefield` 
 
 
-
-
   .. code-block:: python
     
     path = "path_to_gromacs/share/top/charmm27.ff"
@@ -111,9 +109,9 @@ as they are used in Gromacs.
     reader.ReadGromacsForcefield()
 
     #we also want to read several residue databases
-    reader.Read("aminoacids")
-    reader.Read("rna")
-    reader.Read("dna")
+    reader.ReadResidueDatabase("aminoacids")
+    reader.ReadResidueDatabase("rna")
+    reader.ReadResidueDatabase("dna")
 
     #ions and water are also nice to have, they're stored in itp files
     reader.ReadITP("tip3p")
@@ -138,8 +136,41 @@ as they are used in Gromacs.
     ff = new_reader.GetForcefield()
     ff.Save("charmm_forcefield.dat")
 
+Generating forcefields with Antechamber
+--------------------------------------------------------------------------------
+
+The antechamber submodule of mol.mm defines functions to use Antechamber (from
+AmberTools) to automatically generate force field parameters and load the
+results into :class:`~ost.mol.mm.Forcefield` objects.
+
+**Example usage**:
+
+.. code-block:: python
+
+  from ost.mol import mm
+
+  # create parameters for RVP using PDB's component dictionary
+  mm.antechamber.RunAntechamber('RVP', 'components.cif', base_out_dir='ligands')
+
+  # create force field
+  ff = mm.Forcefield()
+  ff = mm.antechamber.AddFromPath(ff, 'ligands/RVP')
+  # equivalent: ff = mm.antechamber.AddFromFiles(ff, 'ligands/RVP/frcmod',
+  #                                              'ligands/RVP/out.mpdb')
+  # since Antechamber cannot deal with ions, you can do it manually
+  ff = mm.antechamber.AddIon(ff, 'CL', 'CL', 35.45, -1.0, 0.4401, 0.4184)
+  # save it
+  ff.Save('ligands/ff.dat')
+
+**Functions**:
+
+.. automodule:: ost.mol.mm.antechamber
+  :members:
+
 The Forcefield Class
 --------------------------------------------------------------------------------
+
+.. currentmodule:: ost.mol.mm
 
 .. class:: Forcefield
 
@@ -154,7 +185,7 @@ The Forcefield Class
 
 
 
-  .. method:: Load(filename)
+  .. staticmethod:: Load(filename)
 
     reads in binary forcefield file
 

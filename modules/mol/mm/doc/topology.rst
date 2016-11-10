@@ -1,7 +1,7 @@
 Topology
 ================================================================================
 
-.. currentmodule:: ost.mol
+.. currentmodule:: ost.mol.mm
 
 The :class:`Topology` object is an abstract representation of a protein 
 structure or any combination of particles that interact with each other in 

@@ -14,7 +14,8 @@ set(OST_MOL_MM_PYMOD_SOURCES
 )
 
 set(OST_MOL_MM_PYMOD_MODULES
-  "__init__.py"
+  __init__.py
+  antechamber.py
 )
 
 if (NOT ENABLE_STATIC)

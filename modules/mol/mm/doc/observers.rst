@@ -1,7 +1,7 @@
 Observers
 ================================================================================
 
-.. currentmodule:: ost.mol
+.. currentmodule:: ost.mol.mm
 
 Observers can be registered to a :class:`Simulation` and get called at a 
 defined interval.

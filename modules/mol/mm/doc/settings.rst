@@ -1,7 +1,7 @@
 The Molecular Mechanics Settings
 ================================================================================
 
-.. currentmodule:: ost.mol
+.. currentmodule:: ost.mol.mm
 
 The :class:`Settings` define all parameters to control the buildup of a 
 :class:`Topology` in the :class:`TopologyCreator` and the final setup

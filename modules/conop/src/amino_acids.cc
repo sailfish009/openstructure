@@ -174,70 +174,91 @@ String OneLetterCodeToResidueName(char olc)
   }
 }
 
+AminoAcid ResidueNameToAminoAcid(String rn) 
+{
+  std::transform(rn.begin(),rn.end(),rn.begin(),toupper);
+  static AminoAcidKeys aa_keys = AminoAcidKeys();
+  AminoAcid* aa=find(aa_keys, rn.c_str());
+  if (aa)
+    return *aa;
+    
+  return XXX;
+}
+
 char ResidueNameToOneLetterCode(String rn)
 {
-  String upper_rn=rn;
+  if (rn.empty()) return 'X';
+
   std::transform(rn.begin(),rn.end(),rn.begin(),toupper);
-  if (upper_rn == "ALA") {    
-    return 'A';
-  }  
-  if (upper_rn == "ARG") {
-    return 'R';
+
+  switch(rn[0]){
+    case 'A': {
+      if (rn == "ALA") return 'A';
+      if (rn == "ARG") return 'R';      
+      if (rn == "ASN") return 'N';
+      if (rn == "ASP") return 'D';
+      break;
+    }
+
+    case 'C': {
+      if (rn == "CYS") return 'C';
+      break;;
+    }
+    
+    case 'G': {
+      if (rn == "GLN") return 'Q';
+      if (rn == "GLU") return 'E';
+      if (rn == "GLY") return 'G';
+      break;
+    }
+
+    case 'H': {
+      if (rn == "HIS") return 'H';
+      break;
+    }
+
+    case 'I': {
+      if (rn == "ILE") return 'I';
+      break;
+    }
+
+    case 'L': {
+      if (rn == "LEU") return 'L';
+      if (rn == "LYS") return 'K';
+      break;
+    }
+
+    case 'M': {
+      if (rn == "MET") return 'M';
+      break;
+    }  
+
+    case 'P': {
+      if (rn == "PRO") return 'P';
+      if (rn == "PHE") return 'F';
+      break;
+    } 
+
+    case 'S': {
+      if (rn == "SER") return 'S';
+      break;
+    }  
+
+    case 'T': {
+      if (rn == "TYR") return 'Y';
+      if (rn == "TRP") return 'W';
+      if (rn == "THR") return 'T';
+      break;
+    }  
+
+    case 'V': {
+      if (rn == "VAL") return 'V';
+      break;
+    }  
+
+    default: break;
   }
-  if (upper_rn == "ASN") {
-    return 'N';
-  }  
-  if (upper_rn == "ASP") {
-    return 'D';
-  }  
-  if (upper_rn == "GLN") {
-    return 'Q';
-  }  
-  if (upper_rn == "GLU") {
-    return 'E';
-  }  
-  if (upper_rn == "LYS") {
-    return 'K';
-  }  
-  if (upper_rn == "SER") {
-    return 'S';
-  }  
-  if (upper_rn == "CYS") {      
-    return 'C';
-  }  
-  if (upper_rn == "TYR") {  
-    return 'Y';
-  }  
-  if (upper_rn == "TRP") {
-    return 'W';
-  }  
-  if (upper_rn == "THR") {
-    return 'T';
-  }  
-  if (upper_rn == "VAL") {
-    return 'V';
-  }  
-  if (upper_rn == "ILE") {
-    return 'I';
-  }  
-  if (upper_rn == "MET") {
-    return 'M';
-  }  
-  if (upper_rn == "LEU") {  
-    return 'L';
-  }  
-  if (upper_rn == "GLY") {  
-    return 'G';
-  }  
-  if (upper_rn == "PRO") {  
-    return 'P';
-  }  
-  if (upper_rn == "HIS") {  
-    return 'H';
-  }  
-  if (upper_rn == "PHE") {
-    return 'F';
-  }  
+
   return 'X';
 }
 

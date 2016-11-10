@@ -77,6 +77,7 @@ void export_AminoAcids()
   ;
   
   def("ResidueToAminoAcid",&ResidueToAminoAcid);
+  def("ResidueNameToAminoAcid",&ResidueNameToAminoAcid);
   def("AminoAcidToResidueName",&AminoAcidToResidueName);
   def("OneLetterCodeToResidueName",&OneLetterCodeToResidueName);
   def("ResidueNameToOneLetterCode",&ResidueNameToOneLetterCode); 
