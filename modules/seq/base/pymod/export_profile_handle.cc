@@ -58,6 +58,10 @@ void export_profile_handle()
     .def(vector_indexing_suite<ProfileColumnList>())
   ;
 
+  class_<ProfileHandleList>("ProfileHandleList", init<>())
+    .def(vector_indexing_suite<ProfileHandleList>())
+  ;
+
   class_<ProfileHandle, ProfileHandlePtr>("ProfileHandle", init<>())
     .def("__len__",&ProfileHandle::size)
     .def("AddColumn", &ProfileHandle::push_back)
