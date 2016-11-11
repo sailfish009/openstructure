@@ -41,7 +41,7 @@ class ProfileHandle;
 class ProfileColumn;
 class ProfileDB;
 typedef boost::shared_ptr<ProfileHandle> ProfileHandlePtr;
-typedef std::vector<ProfileHandle> ProfileHandleList;
+typedef std::vector<ProfileHandlePtr> ProfileHandleList;
 typedef boost::shared_ptr<ProfileDB> ProfileDBPtr;
 typedef std::vector<ProfileColumn> ProfileColumnList;
 
