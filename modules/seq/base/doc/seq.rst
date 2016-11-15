@@ -553,9 +553,6 @@ residue. It mainly contains:
 
     :type: :class:`float`
 
-.. class:: ProfileHandleList
-
-  Represents a list of :class:`ProfileHandle` objects
 
 .. class:: ProfileDB
 
