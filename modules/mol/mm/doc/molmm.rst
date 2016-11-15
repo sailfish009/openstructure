@@ -1,6 +1,9 @@
 The mm Module
 ================================================================================
 
+.. module:: ost.mol.mm
+   :synopsis: Wrapper for OpenMM molecular mechanics simulations
+
 .. currentmodule:: ost.mol.mm
 
 Introduction
