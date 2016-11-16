@@ -5,10 +5,13 @@ Logging
 
 OpenStructure has a logging system going beyond what print statements can offer. Messages can be logged to the terminal to the graphical user interface or a file. Depending on the needs, groups of messages can be turned and off.
 
-.. function:: LogError(message)  
-              LogWarning(message)      
+.. function:: LogError(message)
+              LogWarning(message)
+              LogScript(message)
               LogInfo(message)
               LogVerbose(message)
+              LogDebug(message)
+              LogTrace(message)
   
   Add a message to the log. For the choice of the appropriate logging level, 
   see :ref:`picking-logging-level`.
@@ -45,7 +48,7 @@ You can change the verbosity level  with the following two methods:
   Change the verbosity level to the given integer value. All log events 
   which have a severity above verbosity will be ignored. By default, the log 
   level is 2, meaning that errors, warnings and script logging events are 
-  visible.
+  visible. By setting it to -1, you can disable all logging.
 
   :type  verbosity: :class:`int`
 
