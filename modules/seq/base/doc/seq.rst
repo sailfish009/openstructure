@@ -446,6 +446,11 @@ residue. It mainly contains:
     Static method, that returns a new :class:`ProfileColumn` with amino acid
     frequencies given from the BLOSUM62 substitution matrix.
 
+  .. method:: HHblitsNullModel()
+
+    Static method, that returns a new :class:`ProfileColumn` with amino acid
+    frequencies as set in HHblits output.
+
   .. method:: GetFreq(aa)
 
     :return: Frequency of *aa*
@@ -484,14 +489,16 @@ residue. It mainly contains:
 
     :rtype: :class:`int`
 
-  .. method:: AddColumn(col)
+  .. method:: AddColumn(col, olc='X')
 
     Appends column in the internal column list.
 
-    :param col:  Column to add
+    :param col: Column to add to :attr:`columns`
     :type col:  :class:`ProfileColumn`
+    :param olc: One letter code to add to :attr:`sequence`
+    :type col:  :class:`str`
 
-  .. method:: Extract(from,to)
+  .. method:: Extract(from, to)
 
     :param from:  Col Idx to start from
     :param to:  End Idx, not included in sub-ProfileHandle
@@ -519,37 +526,31 @@ residue. It mainly contains:
 
     :raises: :exc:`~exceptions.Error` if any *columns[i+offset]* out of bounds.
 
-  .. method:: SetSequence(sequence)
-
-    Sets :attr:`sequence`.
-
-  .. method:: SetNullModel(null_model)
-
-    Sets :attr:`null_model`.
 
   .. attribute:: sequence
 
-    Sequence for which we have this profile.
-    Note: user must enforce consistency between sequence length and number of
-    profile columns.
+    Sequence for which we have this profile. When setting a new value, the
+    length and the number of profile columns must match (exception thrown
+    otherwise).
 
     :type: :class:`str`
 
   .. attribute:: columns
 
-    Iterable columns of the profile
+    Iterable columns of the profile (read-only).
 
     :type: :class:`ProfileColumnList`
 
   .. attribute:: null_model
 
-    Null model of the profile
+    Null model of the profile. By default this is set to
+    :meth:`ProfileColumn.HHblitsNullModel`.
 
     :type: :class:`ProfileColumn`
 
   .. attribute:: avg_entropy
 
-    Average entropy of all the columns
+    Average entropy of all the columns (read-only).
 
     :type: :class:`float`
 

@@ -89,20 +89,20 @@ void PssmIOHandler::Import(seq::ProfileHandle& prof,
   }
 
   // parse table (assume: index olc 20xscore 20xfreq)
-  String seqres;
   while (std::getline(in, line)) {
     sline = ost::StringRef(line.c_str(), line.length());
     chunks = sline.split();
     // stop if not enough entries
     if (chunks.size() < 42) break;
     // parse row (freq in % as integers)
-    seqres += chunks[1][0];
+    const char olc = chunks[1][0];
     Real sum_freq = 0;
     Real freqs[20];
     for (uint i = 22; i < 42; ++i) {
       std::pair<bool, int> pbi = chunks[i].to_int();
       if (!pbi.first) {
-        throw IOException("Badly formatted line\n" + line + "\n in " + loc.string());
+        throw IOException("Badly formatted line\n" + line + "\n in "
+                          + loc.string());
       }
       sum_freq += pbi.second;
       freqs[i-22] = pbi.second;
@@ -112,9 +112,8 @@ void PssmIOHandler::Import(seq::ProfileHandle& prof,
     for (uint i = 0; i < 20; ++i) {
       pc.SetFreq(olcs[i], freqs[i]/sum_freq);
     }
-    prof.push_back(pc);
+    prof.AddColumn(pc, olc);
   }
-  prof.SetSequence(seqres);
 }
 
 void PssmIOHandler::Export(const seq::ProfileHandle& prof,

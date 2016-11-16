@@ -66,6 +66,7 @@ public:
   }
 
   static ProfileColumn BLOSUMNullModel();
+  static ProfileColumn HHblitsNullModel();
 
   /// \brief Translate one-letter-code to index (0-indexing).
   static int GetIndex(char ch);
@@ -128,7 +129,7 @@ private:
 class DLLEXPORT_OST_SEQ ProfileHandle { 
 public:
   /// \brief Constructs an empty profile handle (sequence = '', 0 columns).
-  ProfileHandle() {}
+  ProfileHandle(): null_model_(ProfileColumn::HHblitsNullModel()) {}
 
   // uses compiler-generated copy- and assignment operators (work here!)
 
@@ -136,11 +137,19 @@ public:
 
   const ProfileColumn& GetNullModel() const { return null_model_; } 
 
-  void SetNullModel(const ProfileColumn& null_model) { null_model_ = null_model; }
+  void SetNullModel(const ProfileColumn& null_model) {
+    null_model_ = null_model;
+  }
 
   String GetSequence() const { return seq_; }
 
-  void SetSequence(const String& seq) { seq_ = seq; }
+  void SetSequence(const String& seq) {
+    if (seq.length() != columns_.size()) {
+      throw Error("ProfileHandle - Inconsistency between number of columns and "
+                  " seq. length.");
+    }
+    seq_ = seq;
+  }
 
   /// \brief Extract subset of profile for columns from until to-1 (0-indexing).
   /// Null model is copied from this profile.
@@ -155,6 +164,12 @@ public:
   /// result normalized by other.size()
   Real GetAverageScore(const ProfileHandle& other, uint offset = 0) const;
 
+  // \brief Can only add column with an associated olc
+  void AddColumn(const ProfileColumn& c, char olc='X') {
+    columns_.push_back(c);
+    seq_ += olc;
+  } 
+
   // some functions to make it behave like a vector
 
   void clear() { seq_ = ""; columns_.clear(); }
@@ -162,8 +177,6 @@ public:
   size_t size() const { return columns_.size(); }
 
   bool empty() const { return columns_.empty(); }
-
-  void push_back(const ProfileColumn& c) { columns_.push_back(c); }  
 
   ProfileColumn& operator[](size_t index) { return columns_[index]; }
 
@@ -179,12 +192,18 @@ public:
            null_model_ == other.null_model_;
   }
   
-  bool operator!=(const ProfileHandle& other) const { return !(other == (*this)); }
+  bool operator!=(const ProfileHandle& other) const {
+    return !(other == (*this));
+  }
 
-  ProfileColumnList::const_iterator columns_end() const { return columns_.end(); }
-  ProfileColumnList::iterator columns_end() { return columns_.end(); }
-  ProfileColumnList::const_iterator columns_begin() const { return columns_.begin(); }
   ProfileColumnList::iterator columns_begin() { return columns_.begin(); }
+  ProfileColumnList::iterator columns_end() { return columns_.end(); }
+  ProfileColumnList::const_iterator columns_begin() const {
+    return columns_.begin();
+  }
+  ProfileColumnList::const_iterator columns_end() const {
+    return columns_.end();
+  }
 
   // functions to feed streams with limited accuracy of internal data
   // not intended for python export
