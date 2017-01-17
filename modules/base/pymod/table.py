@@ -568,7 +568,9 @@ Statistics for column %(col)s
     have the same average (expected values).
     
     :param col_a: First column
+    :type col_a:  :class:`str`
     :param col_b: Second column
+    :type col_b:  :class:`str`
 
     :returns: P-value between 0 and 1 that the two columns have the 
        same average. The smaller the value, the less related the two
@@ -825,22 +827,24 @@ Statistics for column %(col)s
   def Select(self, query):
 
     """
-    Returns a new table object containing all rows matching a logical query expression.
+    Returns a new table object containing all rows matching a logical query
+    expression.
     
-    *query* is a string containing the logical expression, that will be evaluated
-    for every row. 
+    *query* is a string containing the logical expression, that will be
+    evaluated for every row.
 
-    Operands have to be the name of a column or an expression that can be parsed to 
-    float, int, bool or string.
-    Valid operators are: and, or, !=, !, <=, >=, ==, =, <, >, +, -, *, / 
+    Operands have to be the name of a column or an expression that can be
+    parsed to float, int, bool or string.
+    Valid operators are: and, or, !=, !, <=, >=, ==, =, <, >, +, -, \*, /
     
     .. code-block:: python
     
       subtab = tab.Select('col_a>0.5 and (col_b=5 or col_c=5)')
 
-    The selection query should be self explaining. Allowed parenthesis are: (), [], {}, 
-    whereas parenthesis mismatches get recognized. Expressions like '3<=col_a>=col_b'
-    throw an error, due to problems in figuring out the evaluation order.
+    The selection query should be self explaining. Allowed parenthesis are:
+    (), [], {}, whereas parenthesis mismatches get recognized. Expressions like
+    '3<=col_a>=col_b' throw an error, due to problems in figuring out the
+    evaluation order.
 
     There are two special expressions:
 
@@ -852,9 +856,8 @@ Statistics for column %(col)s
       #selects rows, where col_a=1 or col_a=2 or col_a=3
       subtab = tab.Select('col_a=1,2,3')
 
-    Only consistent types can be compared. If col_a is of type string and col_b is of type int, 
-    following expression would throw an error: 'col_a<col_b'
-
+    Only consistent types can be compared. If col_a is of type string and col_b
+    is of type int, following expression would throw an error: 'col_a<col_b'
     """
 
     try:
@@ -1986,11 +1989,15 @@ Statistics for column %(col)s
     
     .. code-block:: python
 
-      values[min(len(values), int(round(len(values)*p/100+0.5)-1))]
+      values[min(len(values), int(round(len(values)*nth/100+0.5)-1))]
 
     where values are the sorted values of *col* not equal to ''None''
-    :param: nths: list of percentiles to be calculated. Each percentile is a number
-        between 0 and 100.
+
+    :param col: column name
+    :type col:  :class:`str`
+    :param nths: list of percentiles to be calculated. Each percentile is a
+                 number between 0 and 100.
+    :type nths:  :class:`list` of numbers
 
     :raises: :class:`TypeError` if column type is ``string``
     :returns: List of percentiles in the same order as given in *nths*
