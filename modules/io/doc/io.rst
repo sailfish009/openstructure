@@ -6,6 +6,7 @@
   
   structure_formats
   sequence_formats
+  sequence_profile_formats
   image_formats
   mmcif
   profile

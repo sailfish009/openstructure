@@ -13,6 +13,7 @@ OpenStructure documentation
   geom/geom
   mol/base/mol
   mol/alg/molalg
+  mol/mm/molmm
   conop/conop
   img/base/img
   img/alg/alg
