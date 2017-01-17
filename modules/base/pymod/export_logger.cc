@@ -175,12 +175,22 @@ void export_Logger()
     .def("GetLog", &StringLogSink::GetLog)
   ;
 
-  def("PushVerbosityLevel",push_verb);
-  def("PopVerbosityLevel",pop_verb);
-  def("GetVerbosityLevel",get_verb);
-  def("PushLogSink",push_log_sink);
-  def("GetCurrentLogSink",get_log_sink);
-  def("PopLogSink",pop_log_sink);
+  enum_<Logger::LogLevel>("LogLevel")
+    .value("Error", Logger::QUIET)
+    .value("Warning", Logger::WARNING)
+    .value("Script", Logger::SCRIPT)
+    .value("Info", Logger::INFO)
+    .value("Verbose", Logger::VERBOSE)
+    .value("Debug", Logger::DEBUG)
+    .value("Trace", Logger::TRACE)
+  ;
+
+  def("PushVerbosityLevel", push_verb);
+  def("PopVerbosityLevel", pop_verb);
+  def("GetVerbosityLevel", get_verb);
+  def("PushLogSink", push_log_sink);
+  def("GetCurrentLogSink", get_log_sink);
+  def("PopLogSink", pop_log_sink);
   def("LogError", raw_function(log_error, 1));
   def("LogWarning",raw_function(log_warning, 1));
   def("LogInfo", raw_function(log_info, 1));

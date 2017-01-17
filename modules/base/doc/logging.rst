@@ -45,11 +45,12 @@ You can change the verbosity level  with the following two methods:
 
 .. function:: PushVerbosityLevel(verbosity)
 
-  Change the verbosity level to the given integer value. All log events 
-  which have a severity above verbosity will be ignored. By default, the log 
-  level is 2, meaning that errors, warnings and script logging events are 
-  visible. By setting it to -1, you can disable all logging.
+  Change the verbosity level to the given integer value. All log events which
+  have a severity above *verbosity* will not be shown. By default, the log level
+  is 2, meaning that errors, warnings and script logging events are visible. By
+  setting it to -1, you can disable all logging.
 
+  :param verbosity: Desired verbosity level
   :type  verbosity: :class:`int`
 
 .. function:: PopVerbosityLevel()
@@ -57,6 +58,17 @@ You can change the verbosity level  with the following two methods:
   Change the log level back to the previous verbosity level. It is an error to 
   pop the verbosity level without a matching call to 
   :func:`PushVerbosityLevel`.
+
+.. function:: GetVerbosityLevel()
+
+  :return: The current verbosity level
+  :rtype:  :class:`int`
+
+.. class:: LogLevel
+
+  Enumerates the logging levels (see :ref:`picking-logging-level`). Values:
+
+    Error, Warning, Script, Info, Verbose, Debug, Trace
          
 Log sinks
 --------------------------------------------------------------------------------
@@ -149,36 +161,36 @@ Guidelines for picking logging level
 
 Each logging event has an associated level that marks its importance. For example, users should always see errors, but they do not need to see detailed information on the loading process. Here is a list of guidelines that we use in the code. We encourage developers to adhere to these guidelines as closely as possible.
 
-ERROR: 
-  Cannot be silenced, very important message to the user, some command did not
-  complete as expected or was aborted. 
+**Error**:
+  Very important message to the user, some command did not complete as expected
+  or was aborted.
 
-WARNING:
+**Warning**:
   Diagnose potential problems that do not abort the execution, but may 
   point to a misconfiguration/misuse. This level is turned on by default.
 
-SCRIPT: 
+**Script**:
   Logging level that should be used from scripts, e.g. to report progress. These 
   logging messages are turned on by default.
 
-INFO: 
+**Info**:
   Informative and important messages that summarize a complex command, such as 
   information on a loaded file, or results from an algorithm. These logging 
   messages are not turned on by default.
 
-VERBOSE: 
+**Verbose**:
   Grey-zone between user and developer need, and perhaps the hardest to get
   right. This is the lowest logging level users will be able to see when they 
   use an optimized build. An example for this is the OpenGL setup/info in gfx, 
   or the path search during startup, or more detailed info on file IO. These 
   messages are not turned on by default.
 
-DEBUG: 
+**Debug**:
   For developers, but not quite at the trace level. This level is turned off by 
   default, not available in Python and only enabled when compiling with 
   debugging symbols.
 
-TRACE:
+**Trace**:
   Used to debug inner loops. Once turned on, you will probably get more debug 
   output that you will be able to handle. This  level is turned off by default, 
   not available in python and only enabled when compiling with debugging 
