@@ -1582,7 +1582,8 @@ Other Entity-Related Functions
   
   :returns: :class:`EntityView`
 
-.. function:: CreateEntityFromView(view, include_exlusive_atoms, handle=EntityHandle())
+.. function:: CreateEntityFromView(view, include_exlusive_atoms, \
+                                   handle=EntityHandle())
  
   This function behaves exactly like :meth:`EntityHandle.Copy`, except that only
   atoms, residues, chains and bonds that are present in the view will be 
@@ -1596,7 +1597,7 @@ Other Entity-Related Functions
        residues, chains, bonds and torsions will be added to handle. This is 
        useful to combine several entities into one.
 
-  :returns :class:`EntityHandle`
+  :returns: :class:`EntityHandle`
 
 
 Residue Numbering

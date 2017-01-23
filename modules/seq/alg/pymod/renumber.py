@@ -44,7 +44,9 @@ def Renumber(seq_handle, sequence_number_with_attached_view=1):
   sequence and the full-length target sequence. The aligned model sequence or
   the alignment itself with an attached view needs to be provided. Upon
   succcess, the renumbered entity is returned.
-  If an alignment is given, the sequence must 
+  If an alignment is given, the first sequence of the alignment is considered
+  the full-length sequence and it must match the model sequence wherever it is
+  aligned (i.e. excluding gaps).
 
   .. code-block:: python
 

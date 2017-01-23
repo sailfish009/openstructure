@@ -275,28 +275,25 @@ def MatchResidueByGlobalAln(ent_a, ent_b, atoms='all'):
 def Superpose(ent_a, ent_b, match='number', atoms='all', iterative=False, max_iterations=5, distance_threshold=3.0):
   """
   Superposes the model entity onto the reference. To do so, two views are
-  created, returned with the result. **atoms** describes what goes into these
-  views and **match** the selection method. For superposition,
-  :func:`~ost.mol.alg.SuperposeSVD` is called. For matching, the following methods
-  are recognised:
+  created, returned with the result. *atoms* describes what goes into these
+  views and *match* the selection method. For superposition,
+  :func:`SuperposeSVD` or :func:`IterativeSuperposeSVD` are called (depending on
+  *iterative*). For matching, the following methods are recognised:
 
-  * ``number`` - select residues by residue number, includes **atoms**, calls
-    :func:`~ost.mol.alg.MatchResidueByNum`
+  * ``number`` - select residues by residue number, includes *atoms*, calls
+    :func:`MatchResidueByNum`
 
-  * ``index`` - select residues by index in chain, includes **atoms**, calls
-    :func:`~ost.mol.alg.MatchResidueByIdx`
+  * ``index`` - select residues by index in chain, includes *atoms*, calls
+    :func:`MatchResidueByIdx`
 
   * ``local-aln`` - select residues from a Smith/Waterman alignment, includes
-    **atoms**, calls :func:`~ost.mol.alg.MatchResidueByLocalAln`
+    *atoms*, calls :func:`MatchResidueByLocalAln`
 
   * ``global-aln`` - select residues from a Needleman/Wunsch alignment, includes
-    **atoms**, calls :func:`~ost.mol.alg.MatchResidueByGlobalAln`
+    *atoms*, calls :func:`MatchResidueByGlobalAln`
 
-  There is also an option to use **iterative** matching which allows for an 
-  iterative approach to superposing two structures. **iterative** takes two
-  additional parameters, **max_iteration** and **distance_threshold**.
-
-  :param ent_a: The model entity
+  :param ent_a: The model entity (superposition transform is applied on full
+                entity handle here)
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
 
   :param ent_b: The reference entity
@@ -308,40 +305,39 @@ def Superpose(ent_a, ent_b, match='number', atoms='all', iterative=False, max_it
   :param atoms: The subset of atoms to be used in the superposition
   :type atoms: :class:`str`, :class:`list`, :class:`set`
 
-  :param max_iterations: They number of iterations that will be run during 
-                         iterative superposition
+  :param iterative: Whether or not to use iterative superpositon.
+  :type iterative:  :class:`bool`
+
+  :param max_iterations: Max. number of iterations for
+                         :func:`IterativeSuperposeSVD`
+                         (only if *iterative* = True)
   :type max_iterations: :class:`int`
 
-  :param distance_threshold: The distance threshold between which two atoms
-                             that will be used in the next superposition
-                             iteration
+  :param distance_threshold: Distance threshold for
+                             :func:`IterativeSuperposeSVD`
+                             (only if *iterative* = True)
   :type distance_threshold: :class:`float`
 
-  :returns: An instance of :class:`SuperpositionResult`, containing members
-
-  * ``rmsd`` - RMSD of the superposed entities
-
-  * ``view1`` - First :class:`~ost.mol.EntityView` used
-
-  * ``view2`` - Second :class:`~ost.mol.EntityView` used
+  :returns: An instance of :class:`SuperpositionResult`.
   """
-  not_supported="Superpose called with unsupported matching request."
+  not_supported = "Superpose called with unsupported matching request."
   ## create views to superpose
   if match.upper() == 'NUMBER':
     view_a, view_b = MatchResidueByNum(ent_a, ent_b, atoms)
   elif match.upper() == 'INDEX':
-    view_a, view_b=MatchResidueByIdx(ent_a, ent_b, atoms)
+    view_a, view_b = MatchResidueByIdx(ent_a, ent_b, atoms)
   elif match.upper() == 'LOCAL-ALN':
-    view_a, view_b=_MatchResidueByAln(ent_a, ent_b, atoms,
-                                      ost.seq.alg.LocalAlign)
+    view_a, view_b = _MatchResidueByAln(ent_a, ent_b, atoms,
+                                        ost.seq.alg.LocalAlign)
   elif match.upper() == 'GLOBAL-ALN':
-    view_a, view_b=_MatchResidueByAln(ent_a, ent_b, atoms,
-                                      ost.seq.alg.GlobalAlign)
+    view_a, view_b = _MatchResidueByAln(ent_a, ent_b, atoms,
+                                        ost.seq.alg.GlobalAlign)
   else:
     raise ValueError(not_supported)
   ## action
   if iterative:
-    res=ost.mol.alg.IterativeSuperposeSVD(view_a, view_b, max_iterations, distance_threshold)
+    res = ost.mol.alg.IterativeSuperposeSVD(view_a, view_b, max_iterations,
+                                            distance_threshold)
   else:
-    res=ost.mol.alg.SuperposeSVD(view_a, view_b)
+    res = ost.mol.alg.SuperposeSVD(view_a, view_b)
   return res

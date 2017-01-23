@@ -19,7 +19,7 @@ Attaching Structures to Sequences
 
 As OpenStructure is a computational structural biology framework, it is not
 surprising that the sequence classes have been designed to work together with
-structural data. Each sequence can have an attached :class:`~mol.EntityView`
+structural data. Each sequence can have an attached :class:`~ost.mol.EntityView`
 allowing for fast mapping between residues in the entity view and position in
 the sequence.
 
@@ -45,16 +45,17 @@ sequence offset is 0.
 Loading and Saving Sequences and Alignments
 --------------------------------------------------------------------------------
 
-The :mod:`io` module supports input and output of common sequence formats. 
-Single  sequences can be loaded from disk with :func:`io.LoadSequence`,
-alignments are loaded with :func:`io.LoadAlignment` and lists of sequences are loaded with :func:`io.LoadSequenceList`. In addition to the file based input 
-methods, sequences can also be loaded from a string:
+The :mod:`~ost.io` module supports input and output of common sequence formats.
+Single  sequences can be loaded from disk with :func:`~ost.io.LoadSequence`,
+alignments are loaded with :func:`~ost.io.LoadAlignment` and lists of sequences
+are loaded with :func:`~ost.io.LoadSequenceList`. In addition to the file based
+input  methods, sequences can also be loaded from a string:
 
 .. code-block:: python
 
-  seq_string='''>sequence
+  seq_string = '''>sequence
   abcdefghiklmnop'''
-  s=io.SequenceFromString(seq_string, 'fasta')
+  s = io.SequenceFromString(seq_string, 'fasta')
   print s.name, s # will print "sequence abcdefghiklmnop"
   
 Note that, in that case specifying the format is mandatory.
@@ -62,21 +63,24 @@ Note that, in that case specifying the format is mandatory.
 The SequenceHandle
 --------------------------------------------------------------------------------
 
-.. function:: CreateSequence(name, sequence)
+.. function:: CreateSequence(name, sequence, role="UNKNOWN")
 
   Create a new :class:`SequenceHandle` with the given name and sequence. 
 
-  :param name: name of the sequence
-  :type  name: str
+  :param name: Name of the sequence
+  :type  name: :class:`str`
   :param sequence: String of characters representing the sequence. Only   
        'word' characters (no digits), '?', '-' and '.' are allowed. In an
        upcoming release, '?' and '.' will also be forbidden so its best to
        translate those to 'X' or '-'.
-  :type sequence: str
+  :type sequence: :class:`str`
+  :param role: Role of the sequence (optional)
+  :type role:  :class:`str`
   :raises InvalidSequence: When the sequence string contains forbidden
        characters. In the future, '?' and '.' will also raise this exception.
 
 .. class:: SequenceHandle
+           ConstSequenceHandle
 
   Represents a sequence. New instances are created with :func:`CreateSequence`.
   
@@ -130,7 +134,7 @@ The SequenceHandle
     sequence, or, a sequence only consisting of hyphens, -1 is returned.
 
   .. method:: AttachView(view)
-              AttachView(view, [chain_name])
+              AttachView(view, chain_name)
     
     Attach an :class:`~mol.EntityView` to sequence. The first signature requires
     that the view contains one chain. If not, an :exc:`IntegrityError` is
@@ -176,6 +180,14 @@ The SequenceHandle
   .. method:: SetName()
   
     Set name of the sequence. Also available as the property :attr:`name`.
+
+  .. method:: GetOneLetterCode(pos)
+              __getitem__(pos)
+              __getitem__(slice)
+
+    :return: Character at position *pos* of sequence (also supports pythonic
+             slicing with [] operator)
+    :rtype:  :class:`str`
   
   .. attribute:: gapless_string
      
@@ -193,13 +205,29 @@ The SequenceHandle
   
     Shorthand for :meth:`GetOffset`/:meth:`SetOffset`
 
+  .. attribute:: role
+
+    Role of this sequence.
+
+    :type: :class:`str`
+
   .. method:: __len__()
     
-    Returns the length of the sequence (including insertions and deletions)
+    :return: The length of the sequence (including insertions and deletions)
     
   .. method:: __str__()
 
-    Returns the sequence as a string.
+    :return: The sequence as a string.
+
+.. function:: SequenceFromChain(name, chain)
+
+  :return: Sequence extracted from one letter codes in given *chain* with a
+           view to the chain attached to it
+  :rtype:  :class:`SequenceHandle`
+  :param name: Name of the sequence
+  :type  name: :class:`str`
+  :param chain: Chain from which to extract sequence
+  :type chain:  :class:`~ost.mol.ChainHandle` / :class:`~ost.mol.ChainView`
 
 .. function:: Match(s1, s2)
 
@@ -212,16 +240,57 @@ The SequenceHandle
   case-insensitive comparison of the two sequences. The character  'X' is
   interpreted as a wild card character that always matches the other sequence.
 
-The SequenceList    
+The SequenceList
 --------------------------------------------------------------------------------
 
+.. function:: CreateSequenceList()
+
+  Creates and returns a new :class:`SequenceList` with no sequences.
+
 .. class:: SequenceList
+           ConstSequenceList
 
-  Represents a list of sequences. The class provides a row-based interface. New
-  instances are created with :func:`CreateSequenceList`.
+  Represents a list of sequences. The class provides a row-based interface.
+
+  .. method:: GetCount()
+              __len__()
+  
+    :return: Number of sequences in the list.
+    :rtype:  :class:`int`
+
+  .. method:: AddSequence(sequence)
+
+    Append a sequence to the list.
+
+  .. method:: GetMinLength()
+              GetMaxLength()
+
+    :return: Minimal / maximal length of the sequences in this list.
+    :rtype:  :class:`int`
+
+  .. method:: FindSequence(name)
+  
+    Find sequence with given *name*. If the alignment contains several sequences
+    with the same name, the first sequence is returned.
+
+  .. method:: SequencesHaveEqualLength()
+
+    :return: True if all sequences have same length.
+
+  .. method:: Take(n)
+
+    :return: First *n* (or last *-n* if *n* negative) sequences.
+
+  .. method:: Slice(first, n)
+
+    :return: *n* sequences starting from *first*.
+
+  .. method:: __getitem__(key)
+
+    :return: Access sequence(s) *key* (also supports pythonic slicing).
 
 
-The AlignmentHandle   
+The AlignmentHandle
 --------------------------------------------------------------------------------
 
 The :class:`AlignmentHandle` represents a list of aligned sequences. In
@@ -231,7 +300,7 @@ the same length. New instances of alignments are created with
 
 Typically sequence alignments are used column-based, i.e by looking at an  
 aligned columns in the sequence alignment. To get a row-based (sequence) view
-on the sequence list, use :meth:`GetSequences()`. 
+on the sequence list, use :meth:`~AlignmentHandle.GetSequences()`. 
 
 All functions that operate on an alignment will again produce a valid alignment. 
 This mean that it is not possible to change the length of one sequence, without  
@@ -266,34 +335,35 @@ an alignment:
 
 .. class:: AlignmentHandle
   
-  .. note:: 
-  
-    Several of these methods just forward calls to the sequence. For more 
-    detailed information, have a look at the :class:`SequenceHandle`
-    documentation.
-  
   .. method:: GetSequence(index)
   
-    Returns the sequence at the given index, raising an IndexError when trying
-    to access an inexistent sequence.
+    :return: Sequence at the given index, raising an IndexError when trying
+             to access an inexistent sequence.
+    :rtype:  :class:`ConstSequenceHandle`
     
   .. method:: GetSequences()
   
-    Returns a list of all sequence of the alignment.
+    :return: List of all sequence of the alignment. Also available as
+             :attr:`sequences`.
+    :rtype:  :class:`ConstSequenceList`
     
   .. method:: GetLength()
+              __len__()
   
-    Returns the length of the alignment.
+    :return: Length of the alignment.
+    :rtype:  :class:`int`
     
   .. method:: GetCount()
   
-    Returns the number of sequences in the alignment.
-  
+    :return: Number of sequences in the alignment. Also available as
+             :attr:`sequence_count`.
+    :rtype:  :class:`int`
   
   .. method:: ToString(width=80)
   
-    Returns a formatted string version of the alignment. The sequences are 
-    split into smaller parts to fit into the number columns specified. 
+    :return: Formatted string version of the alignment. The sequences are
+             split into smaller parts to fit into the number columns specified.
+    :rtype:  :class:`str`
     
     .. code-block:: python
     
@@ -310,16 +380,13 @@ an alignment:
 
   .. method:: FindSequence(name)
   
-    Find sequence with given name. If the alignment contains several sequences
-    with the same name, the first sequence is returned.
+    :return: Sequence with given *name*. If the alignment contains several
+             sequences with the same name, the first sequence is returned.
     
   .. method:: SetSequenceName(seq_index, name)
   
-    Set the name of the sequence at index `seq_index` to name
-    
-  .. method:: SetSequenceOffset(seq_index, offset)
-  
-    Set the sequence offset of sequence at index `seq_index`
+    Set the name of the sequence at index `seq_index` to `name`
+    (see :attr:`SequenceHandle.name`).
     
   .. method:: Copy()
     
@@ -327,18 +394,24 @@ an alignment:
 
   .. method:: GetPos(seq_index, res_index)
     
-    Get position of residue with index equal to `res_index` in sequence at index
-    `seq_index`.
+    :return: Position of residue with index equal to `res_index` in sequence at
+             index `seq_index` (see :meth:`SequenceHandle.GetPos`)
     
   .. method:: GetResidueIndex(seq_index, pos)
   
-    Get residue index of residue at position `pos` in sequence at index
-    `seq_index`.
+    :return: Residue index of residue at position `pos` in sequence at index
+             `seq_index` (see :meth:`SequenceHandle.GetResidueIndex`)
+    
+  .. method:: GetResidue(seq_index, pos)
+  
+    :return: Attached residue at position `pos` in sequence at index `seq_index`
+             (see :meth:`SequenceHandle.GetResidue`).
   
   .. method:: AttachView(seq_index, view)
               AttachView(seq_index, view, chain_name)
     
-    Attach the given view to the sequence at index `seq_index`.
+    Attach the given view to the sequence at index `seq_index`
+    (see :meth:`SequenceHandle.AttachView`).
     
   .. method:: Cut(start, end)
   
@@ -396,7 +469,8 @@ an alignment:
   .. method:: GetSequenceOffset(index)
               SetSequenceOffset(index, offset)
 
-    Get/set the offset for sequence at *index*.
+    Get/set the offset for sequence at *index*
+    (see :attr:`SequenceHandle.offset`).
 
     :param index: The index of the sequence
     :type index: :class:`int`
@@ -407,7 +481,8 @@ an alignment:
   .. method:: GetSequenceRole(index)
               SetSequenceRole(index, role)
 
-    Get/Set the sequence role for sequence at *index*.
+    Get/Set the sequence role for sequence at *index*
+    (see :attr:`SequenceHandle.role`).
 
     :param index: The index of the sequence
     :type index: :class:`int`
@@ -426,6 +501,109 @@ an alignment:
   .. method:: RemoveSequence(index)
 
     Remove sequence at *index* from the alignment.
+  
+  .. attribute:: sequences
+  
+    Shorthand for :meth:`GetSequences`
+
+  .. attribute:: sequence_count
+  
+    Shorthand for :meth:`GetCount`
+
+  .. method:: __getitem__(pos)
+
+    :return: Column at position *pos* of alignment.
+    :rtype:  :class:`AlignedColumn`
+
+  .. method:: __getitem__(slice)
+
+    :return: Columns defined by by pythonic slicing.
+    :rtype:  :class:`AlignedRegion`
+
+
+.. class:: AlignedRegion
+
+  Represents a slice of an :class:`AlignmentHandle`.
+
+  .. method:: GetAlignmentHandle()
+
+    :return: Alignment from which we slices.
+    :rtype:  :class:`AlignmentHandle`
+
+  .. method:: GetLength()
+              __len__()
+
+    :return: Number of columns in the slice.
+
+  .. method:: __getitem__(pos)
+
+    :return: Column at position *pos* within this slice.
+    :rtype:  :class:`AlignedColumn`
+
+  .. attribute:: start
+
+    Starting position in alignment.
+
+  .. attribute:: end
+
+    One after end position in alignment.
+
+
+.. class:: AlignedColumn
+
+  .. method:: GetIndex()
+
+    :return: Position in alignment.
+
+  .. method:: GetRowCount()
+
+    :return: Number of rows in the column.
+
+  .. method:: GetResidue(row)
+  
+    :return: Attached residue for sequence at given *row* of this column
+             (see :meth:`AlignmentHandle.GetResidue`).
+
+  .. method:: __getitem__(row)
+
+    :return: Character at given *row* of this column.
+    :rtype:  :class:`str`
+
+  .. method:: __str__()
+
+    :return: String representation of column in alignment.
+
+
+Extracting views from sequences
+--------------------------------------------------------------------------------
+
+.. function:: ViewsFromSequences(seq1, seq2)
+
+  Returns a tuple of entity views containing only the atoms of the aligned
+  residues. The order of residues in the two views is guaranteed to be the same
+  but the order of atoms within each residue may differ. If the order of atoms
+  is crucial (e.g. for :func:`~ost.mol.alg.SuperposeSVD`) either prefilter the
+  attached views to include only one atom per residue or use the slower (approx.
+  50% more runtime) :meth:`AlignmentHandle.GetMatchingBackboneViews`.
+
+  :return: Pair of views including all the aligned residues of the two given
+           sequences. An alignment is 
+  :rtype:  :class:`tuple` with two :class:`~ost.mol.EntityView`
+
+  :raises: :class:`Exception` if sequence lengths do not match or if any of the
+           sequences is lacking an attached view.
+
+.. function:: ViewsFromAlignment(aln, index1=0, index2=1)
+
+  :return: Pair of views as in :meth:`ViewsFromSequences`.
+  :rtype:  :class:`tuple` with two :class:`~ost.mol.EntityView`
+
+  :param aln: Alignment from which to extract sequences.
+  :type aln:  :class:`AlignmentHandle`
+  :param index1: Index of first sequence in *aln* to use.
+  :type index1:  :class:`int`
+  :param index2: Index of second sequence in *aln* to use.
+  :type index2:  :class:`int`
 
 
 Handling Sequence Profiles
