@@ -175,35 +175,39 @@ The following properties may be used in predicates. The type is given for each p
 Properties of Chains
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
 **cname/chain** (str) :attr:`Chain name<ChainHandle.name>` 
   
 Properties of Residues
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
 **rname** (str): :attr:`Residue name<ResidueHandle.name>`
  
-**rnum** (int): :attr:`Residue number<ResidueHandle.number>`. Currently only the numeric part is honored.
+**rnum** (int): :attr:`Residue number<ResidueHandle.number>`. Currently only the
+numeric part is honored.
  
-**rtype** (str): Residue type as given by the DSSP code, i.e. H for helix, E for extended.
+**rtype** (str): Residue type as given by the DSSP code (e.g. "H" for alpha
+helix, "E" for extended), "helix" for all helix types, "ext" or "strand" for
+all beta sheets or "coil" for any type of coil.
   
-**rindex** (int): :attr:`Index<ResidueHandle.index>` of residue in chain. This 
-index is the same for views and handles.
+**rindex** (int): :attr:`Index<ResidueHandle.index>` of residue handle in chain.
+This index is the same for views and handles.
   
-**ishetatm** (bool): Whether the atom is a :attr:`heterogenous<AtomHandle.is_hetatm>` atom.
-  
-**peptide** (bool): Whether the residue is a :meth:`peptide <ResidueHandle.IsPeptideLinking>`.
+**peptide** (bool): Whether the residue is :meth:`peptide linking
+<ResidueHandle.IsPeptideLinking>`.
+
+**protein** (bool): Whether the residue is considered to be part of a protein.
+This is set when loading a structure if the residue forms a feasible peptide
+bond to the previous or next residue.
 
 **rbfac** (float): average B (temperature) factor of residue
 
-**ligand** (bool) Whether the residue is a ligand. For official PDB files, the ligand property is set based on HET records.
+**ligand** (bool) Whether the residue is a :meth:`ligand
+<ResidueHandle.is_ligand>`.
 
 **water** (bool) Whether the residue is water.
 
 Properties of Atoms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 
 **aname** (str): :attr:`Atom name<AtomHandle.name>`
   
@@ -218,6 +222,14 @@ Properties of Atoms
 **y** (float): :attr:`Y<AtomHandle.pos>` coordinate of atom.
 
 **z** (float): :attr:`Z<AtomHandle.pos>` coordinate of atom.
+
+**aindex** (int): :attr:`Atom index<AtomHandle.index>`
+
+**ishetatm** (bool): Whether the atom is a :attr:`heterogenous
+atom<AtomHandle.is_hetatom>`.
+
+**acharge** (float): :attr:`Atom charge<AtomHandle.charge>`
+
 
 Query API documentation
 --------------------------------------------------------------------------------

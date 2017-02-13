@@ -508,15 +508,16 @@ The Handle Classes
   
   .. attribute:: chem_class
   
-    The chemical class of a residue is used to broadly categorize residues based 
-    on their chemical properties. For example, peptides belong  to the 
+    The chemical class of a residue is used to broadly categorize residues based
+    on their chemical properties. For example, peptides belong to the
     `L_PEPTIDE_LINKING` or `D_PEPTIDE_LINKING` classes.
 
   .. attribute:: chem_type
 
     The chemical type of a residue is a classification of all compounds
     obtained from the PDB component dictionary. For example, ions belong to the
-    class `ChemType::IONS`, amino acids to `ChemType::AMINOACIDS`.
+    class `ChemType::IONS`, amino acids to `ChemType::AMINOACIDS`. The type is
+    only properly set if a compund library is used.
   
   .. attribute:: sec_structure
   
@@ -528,6 +529,10 @@ The Handle Classes
     is set based on the HET records. This also means, that this property will 
     most likely not be set properly for all except PDB files coming from 
     pdb.org.
+
+  .. attribute:: index
+
+    Residue index (starting at 0) within chain.
 
   .. method:: FindAtom(atom_name)
 
@@ -544,6 +549,12 @@ The Handle Classes
 
     Get list of all atoms of this residue. To access a single atom, use
     :meth:`FindAtom`.
+
+  .. method:: IsPeptideLinking()
+
+    :return: True, if residue can form peptide bonds (determined based on
+             :attr:`chem_class` set when loading the structure).
+    :rtype:  :class:`bool`
     
   .. method:: GetChain()
   
@@ -568,6 +579,10 @@ The Handle Classes
   .. method:: GetChemType()
     
     See :attr:`chem_type`
+
+  .. method:: GetIndex()
+    
+    See :attr:`index`
   
 
 .. class:: AtomHandle
@@ -668,6 +683,10 @@ The Handle Classes
     
     :type: list of :class:`bond handles<BondHandle>`
   
+  .. attribute:: index
+
+    Atom index (starting at 0) within entity.
+
   .. method:: FindBondToAtom(other_atom)
 
     Finds and returns the bond formed between this atom and `other_atom`. If no 
@@ -731,7 +750,7 @@ The Handle Classes
 
   .. method:: GetIndex()
     
-    Returns the index of the atom.
+    See :attr:`index`
     
     :rtype: int
 
@@ -1443,6 +1462,10 @@ The View Classes
     List of atoms in this view.
 
     :type: :class:`AtomViewList`
+
+  .. attribute:: index
+
+    Residue index (starting at 0) within chain view.
 
   .. method:: RemoveAtom(atom_view)
   
