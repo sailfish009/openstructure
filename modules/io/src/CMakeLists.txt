@@ -84,6 +84,8 @@ module(NAME io SOURCES "${OST_IO_SOURCES}"
                ${OST_IO_MSGPACK_MSGPACK_ADAPTOR_CPP11_HEADERS} IN_DIR msgpack/msgpack/adaptor/cpp11
                ${OST_IO_MSGPACK_MSGPACK_PREDEF_HEADERS} IN_DIR msgpack/msgpack/predef
                ${OST_IO_MSGPACK_MSGPACK_PREDEF_LANGUAGE_HEADERS}  IN_DIR msgpack/msgpack/predef/language
+               ${OST_IO_MSGPACK_MSGPACK_PREDEF_ARCHITECTURE_HEADERS}  IN_DIR msgpack/msgpack/predef/architecture
+               ${OST_IO_MSGPACK_MSGPACK_PREDEF_ARCHITECTURE_X86_HEADERS}  IN_DIR msgpack/msgpack/predef/architecture/x86
                ${OST_IO_HEADERS} 
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
 target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})
