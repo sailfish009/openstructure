@@ -1,0 +1,6 @@
+set(OST_IO_MSGPACK_MSGPACK_PREDEF_LANGUAGE_HEADERS
+objc.h
+stdc.h
+stdcpp.h
+PARENT_SCOPE
+)
