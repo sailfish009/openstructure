@@ -76,6 +76,7 @@ module(NAME io SOURCES "${OST_IO_SOURCES}"
                ${OST_IO_SEQ_HEADERS} IN_DIR seq
                ${OST_IO_MSGPACK_HEADERS} IN_DIR msgpack
                ${OST_IO_MSGPACK_MSGPACK_HEADERS} IN_DIR msgpack/msgpack
+               ${OST_IO_MSGPACK_MSGPACK_ADAPTOR_HEADERS} IN_DIR msgpack/msgpack/adaptor
                ${OST_IO_HEADERS} 
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
 target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})
