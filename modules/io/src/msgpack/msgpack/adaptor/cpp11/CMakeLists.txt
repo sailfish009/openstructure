@@ -1,0 +1,13 @@
+set(OST_IO_MSGPACK_MSGPACK_ADAPTOR_CPP11_HEADERS
+array.hpp
+forward_list.hpp
+tuple.hpp
+unordered_set.hpp
+array_char.hpp
+reference_wrapper.hpp
+unique_ptr.hpp
+array_unsigned_char.hpp
+shared_ptr.hpp
+unordered_map.hpp
+PARENT_SCOPE
+)
