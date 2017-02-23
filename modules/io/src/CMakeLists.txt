@@ -74,12 +74,15 @@ module(NAME io SOURCES "${OST_IO_SOURCES}"
        HEADERS ${OST_IO_MOL_HEADERS} IN_DIR mol
                ${OST_IO_IMG_HEADERS} IN_DIR img
                ${OST_IO_SEQ_HEADERS} IN_DIR seq
+               # Including msgpack by long lines of dirs looks ugly but is the
+               # most simple way to do this.
                ${OST_IO_MSGPACK_HEADERS} IN_DIR msgpack
                ${OST_IO_MSGPACK_MSGPACK_HEADERS} IN_DIR msgpack/msgpack
                ${OST_IO_MSGPACK_MSGPACK_ADAPTOR_HEADERS} IN_DIR msgpack/msgpack/adaptor
                ${OST_IO_MSGPACK_MSGPACK_ADAPTOR_BOOST_HEADERS} IN_DIR msgpack/msgpack/adaptor/boost
                ${OST_IO_MSGPACK_MSGPACK_ADAPTOR_TR1_HEADERS} IN_DIR msgpack/msgpack/adaptor/tr1
                ${OST_IO_MSGPACK_MSGPACK_ADAPTOR_CPP11_HEADERS} IN_DIR msgpack/msgpack/adaptor/cpp11
+               ${OST_IO_MSGPACK_MSGPACK_PREDEF_HEADERS} IN_DIR msgpack/msgpack/predef
                ${OST_IO_HEADERS} 
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
 target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})
