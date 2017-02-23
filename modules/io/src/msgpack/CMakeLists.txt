@@ -1,0 +1,12 @@
+add_subdirectory(msgpack)
+
+set(OST_IO_MSGPACK_HEADERS
+msgpack.h
+msgpack.hpp
+PARENT_SCOPE
+)
+
+set(OST_IO_MSGPACK_MSGPACK_HEADERS
+${OST_IO_MSGPACK_MSGPACK_HEADERS}
+PARENT_SCOPE
+)

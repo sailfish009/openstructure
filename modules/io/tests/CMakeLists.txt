@@ -1,4 +1,5 @@
 set(OST_IO_UNIT_TESTS
+  test_io_msgpack.cc
   test_io_pdb.py
   test_io_mmcif.py
   test_clustal.cc

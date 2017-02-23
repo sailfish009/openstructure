@@ -1,6 +1,7 @@
 add_subdirectory(mol)
 add_subdirectory(seq)
 add_subdirectory(img)
+add_subdirectory(msgpack)
 
 set(OST_IO_HEADERS
 binary_data_sink.hh		
@@ -72,7 +73,9 @@ endif()
 module(NAME io SOURCES "${OST_IO_SOURCES}" 
        HEADERS ${OST_IO_MOL_HEADERS} IN_DIR mol
                ${OST_IO_IMG_HEADERS} IN_DIR img
-               ${OST_IO_SEQ_HEADERS} IN_DIR seq            
+               ${OST_IO_SEQ_HEADERS} IN_DIR seq
+               ${OST_IO_MSGPACK_HEADERS} IN_DIR msgpack
+               ${OST_IO_MSGPACK_MSGPACK_HEADERS} IN_DIR msgpack/msgpack
                ${OST_IO_HEADERS} 
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
 target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})
