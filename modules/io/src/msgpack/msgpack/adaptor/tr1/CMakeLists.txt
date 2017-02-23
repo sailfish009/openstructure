@@ -1,0 +1,5 @@
+set(OST_IO_MSGPACK_MSGPACK_ADAPTOR_TR1_HEADERS
+unordered_map.hpp
+unordered_set.hpp
+PARENT_SCOPE
+)
