@@ -93,6 +93,7 @@ module(NAME io SOURCES "${OST_IO_SOURCES}"
                ${OST_IO_MSGPACK_MSGPACK_PREDEF_HARDWARE_HEADERS} IN_DIR msgpack/msgpack/predef/hardware
                ${OST_IO_MSGPACK_MSGPACK_PREDEF_HARDWARE_SIMD_HEADERS} IN_DIR msgpack/msgpack/predef/hardware/simd
                ${OST_IO_MSGPACK_MSGPACK_PREDEF_HARDWARE_SIMD_ARM_HEADERS} IN_DIR msgpack/msgpack/predef/hardware/simd/arm
+               ${OST_IO_MSGPACK_MSGPACK_PREDEF_HARDWARE_SIMD_PPC_HEADERS} IN_DIR msgpack/msgpack/predef/hardware/simd/ppc
                ${OST_IO_HEADERS} 
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
 target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})
