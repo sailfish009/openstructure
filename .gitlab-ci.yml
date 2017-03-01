@@ -45,6 +45,7 @@ test:centos6.6:
   - echo "Hi from the centos 6.6 container. Here I run unit tests if build finished ok"
   - cat /etc/redhat-release
   - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
+  - module list
 
 test:centos7.3:
   stage: test
