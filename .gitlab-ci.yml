@@ -1,16 +1,40 @@
+# these are the different stages for our pipelines
+# jobs in the same stage run in parallel 
+# next stage doesn't start until previous stage finishes OK
+# by now we only do build and test, we could add another stage "deploy" if needed
+stages:
+  - build
+  - test
 
 # this is executed before doing anything else
 before_script:
   - echo "hi, I am the before script"
 
-test:centos6.6:
+# BUILD STAGE
+build:centos6.6:
+  stage: build
   image: centos:6.6
   script:
-  - echo "Hi from the centos 6.6 container"
+  - echo "Hi from the centos 6.6 container. I am in the build stage"
+  - cat /etc/redhat-release
+
+build:centos7.3:
+  stage: build
+  image: centos:7.3.1611
+  script:
+  - echo "Hi from the centos 7.3 container. I am in the build stage"
+  - cat /etc/redhat-release
+
+# TESTS STAGE
+test:centos6.6:
+  stage: test
+  image: centos:6.6
+  script:
+  - echo "Hi from the centos 6.6 container. Here I run unit tests if build finished ok"
   - cat /etc/redhat-release
 
 test:centos7.3:
+  stage: test
   image: centos:7.3.1611
   script:
-  - echo "Hi from the centos 7.3 container"
-  - cat /etc/redhat-release
+  - echo "Hi from the centos 7.3 container. Here I run unit tests if build finished ok"
