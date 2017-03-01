@@ -10,7 +10,7 @@ stages:
 before_script:
   - echo "hi, I am the before script 1"
   - echo "Trying to list the contents of /export/soft"
-  - yum -y -q -e 0 install tcl
+  - yum -y -q -e 0 --nogpgcheck install tcl
   - ls /export/soft
   - mkdir -p /scicore/soft/{apps,modules}
 
@@ -21,7 +21,7 @@ build:centos6.6:
   before_script:
     - echo "hi, I am the before script 2"
     - echo "Trying to list the contents of /export/soft"
-    - yum -y -q -e 0 install tcl
+    - yum -y -q -e 0 --nogpgcheck install tcl
     - ls /export/soft
     - mkdir -p /scicore/soft/{apps,modules}
     - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
