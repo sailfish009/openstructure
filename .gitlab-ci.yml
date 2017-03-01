@@ -17,6 +17,8 @@ build:centos6.6:
   script:
   - echo "Hi from the centos 6.6 container. I am in the build stage"
   - cat /etc/redhat-release
+  - echo "Trying to list the contents of /export/soft"
+  - ls /export/soft
 
 build:centos7.3:
   stage: build
@@ -24,6 +26,8 @@ build:centos7.3:
   script:
   - echo "Hi from the centos 7.3 container. I am in the build stage"
   - cat /etc/redhat-release
+  - echo "Trying to list the contents of /export/soft"
+  - ls /export/soft
 
 # TESTS STAGE
 test:centos6.6:
