@@ -8,7 +8,7 @@ stages:
 
 # this is executed before doing anything else
 before_script:
-  - echo "hi, I am the before script"
+  - echo "hi, I am the before script 1"
   - echo "Trying to list the contents of /export/soft"
   - yum -y install tcl
   - ls /export/soft
@@ -18,6 +18,8 @@ before_script:
 build:centos6.6:
   stage: build
   image: centos:6.6
+  before_script:
+    - echo "hi, I am the before script 2"
   script:
   - echo "Hi from the centos 6.6 container. I am in the build stage"
   - cat /etc/redhat-release
