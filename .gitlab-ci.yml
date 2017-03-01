@@ -20,8 +20,8 @@ build:centos6.6:
   - echo "Trying to list the contents of /export/soft"
   - ls /export/soft
   - mkdir -p /scicore/soft/{apps,modules}
-  - ln -s /scicore/soft/apps /export/soft/apps/centos6/generic
-  - ln -s /scicore/soft/modules /export/soft/modules/centos6/generic/all
+  - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
+  - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
   - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
   - module use /scicore/soft/modules/all
   - module av
