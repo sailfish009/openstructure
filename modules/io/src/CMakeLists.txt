@@ -98,7 +98,8 @@ module(NAME io SOURCES "${OST_IO_SOURCES}"
                ${OST_IO_MSGPACK_MSGPACK_PREDEF_HARDWARE_SIMD_X86_AMD_HEADERS} IN_DIR msgpack/msgpack/predef/hardware/simd/x86_amd
                ${OST_IO_MSGPACK_MSGPACK_PREDEF_COMPILER_HEADERS} IN_DIR msgpack/msgpack/predef/compiler
                ${OST_IO_MSGPACK_MSGPACK_PREDEF_LIBRARY_HEADERS} IN_DIR msgpack/msgpack/predef/library
-               ${OST_IO_HEADERS} 
+               ${OST_IO_MSGPACK_PREPROCESSOR_HEADERS} IN_DIR msgpack/msgpack/preprocessor
+               ${OST_IO_HEADERS}
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
 target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})
 if (ENABLE_IMG)
