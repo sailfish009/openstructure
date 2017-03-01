@@ -1,0 +1,16 @@
+
+# this is executed before doing anything else
+before_script:
+  - echo "hi, I am the before script"
+
+test:centos6.6:
+  image: centos:6.6
+  script:
+  - echo "Hi from the centos 6.6 container"
+  - cat /etc/redhat-release
+
+test:centos7.3:
+  image: centos:7.3.1611
+  script:
+  - echo "Hi from the centos 7.3 container"
+  - cat /etc/redhat-release
