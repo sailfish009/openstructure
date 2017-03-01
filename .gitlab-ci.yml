@@ -18,6 +18,7 @@ build:centos6.6:
   - echo "Hi from the centos 6.6 container. I am in the build stage"
   - cat /etc/redhat-release
   - echo "Trying to list the contents of /export/soft"
+  - yum -y install tcl
   - ls /export/soft
   - mkdir -p /scicore/soft/{apps,modules}
   - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
