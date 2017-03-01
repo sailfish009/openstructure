@@ -9,6 +9,10 @@ stages:
 # this is executed before doing anything else
 before_script:
   - echo "hi, I am the before script"
+  - echo "Trying to list the contents of /export/soft"
+  - yum -y install tcl
+  - ls /export/soft
+  - mkdir -p /scicore/soft/{apps,modules}
 
 # BUILD STAGE
 build:centos6.6:
@@ -17,10 +21,6 @@ build:centos6.6:
   script:
   - echo "Hi from the centos 6.6 container. I am in the build stage"
   - cat /etc/redhat-release
-  - echo "Trying to list the contents of /export/soft"
-  - yum -y install tcl
-  - ls /export/soft
-  - mkdir -p /scicore/soft/{apps,modules}
   - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
   - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
   - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
