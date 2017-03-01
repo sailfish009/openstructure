@@ -14,29 +14,19 @@ before_script:
   - ls /export/soft
   - mkdir -p /scicore/soft/{apps,modules}
 
-centos6.6:
-  # BUILD STAGE
-  build:
-    stage: build
-    image: centos:6.6
-    script:
-    - echo "Hi from the centos 6.6 container. I am in the build stage"
-    - cat /etc/redhat-release
-    - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
-    - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
-    - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
-    - module use /scicore/soft/modules/all
-    - module load Boost/1.53.0-goolf-1.4.10-Python-2.7.5
-    - module list
-  # TEST STAGE
-  test:
-    stage: test
-    image: centos:6.6
-    script:
-    - echo "Hi from the centos 6.6 container. Here I run unit tests if build finished ok"
-    - cat /etc/redhat-release
-    - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
-    - module list
+# BUILD STAGE
+build:centos6.6:
+  stage: build
+  image: centos:6.6
+  script:
+  - echo "Hi from the centos 6.6 container. I am in the build stage"
+  - cat /etc/redhat-release
+  - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
+  - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
+  - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
+  - module use /scicore/soft/modules/all
+  - module load Boost/1.53.0-goolf-1.4.10-Python-2.7.5
+  - module list
 
 build:centos7.3:
   stage: build
@@ -46,6 +36,16 @@ build:centos7.3:
   - cat /etc/redhat-release
   - echo "Trying to list the contents of /export/soft"
   - ls /export/soft
+
+# TESTS STAGE
+test:centos6.6:
+  stage: test
+  image: centos:6.6
+  script:
+  - echo "Hi from the centos 6.6 container. Here I run unit tests if build finished ok"
+  - cat /etc/redhat-release
+  - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
+  - module list
 
 test:centos7.3:
   stage: test
