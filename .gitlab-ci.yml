@@ -20,13 +20,17 @@ build:centos6.6:
   image: centos:6.6
   before_script:
     - echo "hi, I am the before script 2"
+    - echo "Trying to list the contents of /export/soft"
+    - yum -y install tcl
+    - ls /export/soft
+    - mkdir -p /scicore/soft/{apps,modules}
+    - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
+    - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
+    - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
+    - module use /scicore/soft/modules/all
   script:
   - echo "Hi from the centos 6.6 container. I am in the build stage"
   - cat /etc/redhat-release
-  - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
-  - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
-  - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
-  - module use /scicore/soft/modules/all
   - module load Boost/1.53.0-goolf-1.4.10-Python-2.7.5
   - module list
 
