@@ -36,7 +36,7 @@ build:centos6.6:
   - echo "Building on CentOS 6..."
   - echo $PATH
   - ls /export/soft/apps/centos6/generic
-  - ll /scicore/soft/apps
+  - ls -l /scicore/soft/apps
   - ls /scicore/soft/apps/CMake/2.8.12-goolf-1.4.10/bin
   - cmake ..
   - cat /etc/redhat-release
