@@ -25,6 +25,9 @@ before_script:
   - module load Boost/1.53.0-goolf-1.4.10-Python-2.7.5
   - module load OpenMM/6.1-Linux64
   - module load PyQt/4.11.4-goolf-1.4.10-Python-2.7.5
+  - module load LibTIFF/4.0.3-goolf-1.4.10
+  - module load libpng/1.6.17-goolf-1.4.10
+  - module load zlib/1.2.8-goolf-1.4.10
   - mkdir build-ci
   - cd build-ci
   - echo "... done running global 'before_script'."
