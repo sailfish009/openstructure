@@ -24,6 +24,8 @@ before_script:
   - module load Boost/1.53.0-goolf-1.4.10-Python-2.7.5
   - module load OpenMM/6.1-Linux64
   - module load PyQt/4.11.4-goolf-1.4.10-Python-2.7.5
+  - pwd
+  - ls
   - echo "... done running global 'before_script'."
 
 # BUILD STAGE
