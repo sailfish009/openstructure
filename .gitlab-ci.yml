@@ -24,8 +24,25 @@ before_script:
   - module load Boost/1.53.0-goolf-1.4.10-Python-2.7.5
   - module load OpenMM/6.1-Linux64
   - module load PyQt/4.11.4-goolf-1.4.10-Python-2.7.5
-  - pwd
-  - ls
+  - mkdir build-ci
+  - cd build-ci
+  - 'cmake .. -DENABLE_MM=1
+              -DOPEN_MM_LIBRARY=$EBROOTOPENMM/lib/libOpenMM.so
+              -DOPEN_MM_PLUGIN_DIR=$EBROOTOPENMM/lib/plugins
+              -DOPEN_MM_INCLUDE_DIR=$EBROOTOPENMM/include
+              -DCOMPILE_TMTOOLS=1
+              -DENABLE_GFX=OFF
+              -DENABLE_GUI=OFF
+              -DUSE_NUMPY=1
+              -DUSE_RPATH=1
+              -DPYTHON_ROOT=$EBROOTPYTHON
+              -DEIGEN3_INCLUDE_DIR=$EBROOTEIGEN/include
+              -DFFTW_LIBRARY=$EBROOTFFTW/lib/libfftw3f.a
+              -DFFTW_INCLUDE_DIR=$EBROOTFFTW/include
+              -DBOOST_ROOT=$EBROOTBOOST
+              -DQT_QMAKE_EXECUTABLE=$EBROOTQT/bin/qmake
+              -DCOMPOUND_LIB=$COMP_LIB
+              -DOPTIMIZE=1'
   - echo "... done running global 'before_script'."
 
 # BUILD STAGE
