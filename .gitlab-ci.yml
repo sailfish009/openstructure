@@ -62,6 +62,7 @@ build:centos6.6:
              -DTIFF_INCLUDE_DIR=$EBROOTLIBTIFF/include
              -DTIFF_LIBRARY=$EBROOTLIBTIFF/lib/libtiff.so
              -DOPTIMIZE=1
+  - make
   - echo "... done building on CentOS 6."
 
 # TESTS STAGE
