@@ -12,6 +12,7 @@ before_script:
   - echo "Running global 'before_script'..."
   - yum -y -q -e 0 install tcl
   - yum -y -q -e 0 install glibc-devel
+  - yum -y -q -e 0 install libjpeg-turbo
   - mkdir -p /scicore/soft/modules
   - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
   - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
@@ -62,7 +63,7 @@ build:centos6.6:
              -DTIFF_INCLUDE_DIR=$EBROOTLIBTIFF/include
              -DTIFF_LIBRARY=$EBROOTLIBTIFF/lib/libtiff.so
              -DOPTIMIZE=1
-  - make
+  - make -j 2
   - echo "... done building on CentOS 6."
 
 # TESTS STAGE
