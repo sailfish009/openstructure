@@ -9,28 +9,29 @@ stages:
 
 # this is executed before doing anything else
 before_script:
+  - echo "Running global 'before_script'..."
   - yum -y -q -e 0 install tcl
   - mkdir -p /scicore/soft/{apps,modules}
   - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
   - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
   - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
   - module use /scicore/soft/modules/all
+  - echo "... done running global 'before_script'."
 
 # BUILD STAGE
 build:centos6.6:
   stage: build
   image: centos:6.6
   script:
-  - echo "Hi from the centos 6.6 container. I am in the build stage"
+  - echo "Building on CentOS 6..."
   - cat /etc/redhat-release
-  - module load Boost/1.53.0-goolf-1.4.10-Python-2.7.5
-  - module list
+  - echo "... done building on CentOS 6."
 
 # TESTS STAGE
 test:centos6.6:
   stage: test
   image: centos:6.6
   script:
-  - echo "Hi from the centos 6.6 container. Here I run unit tests if build finished ok"
+  - echo "Testing on CentOS 6..."
   - cat /etc/redhat-release
-  - module list
+  - echo "... done testing on CentOS 6."
