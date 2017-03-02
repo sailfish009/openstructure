@@ -35,7 +35,6 @@ build:centos6.6:
   script:
   - echo "Building on CentOS 6..."
   - echo $PATH
-  - which cmake
   - cmake ..
   - cat /etc/redhat-release
   - echo "... done building on CentOS 6."
