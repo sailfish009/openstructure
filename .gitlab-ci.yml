@@ -11,7 +11,7 @@ stages:
 before_script:
   - echo "Running global 'before_script'..."
   - yum -y -q -e 0 install tcl
-  - mkdir -p /scicore/soft/
+  - mkdir -p /scicore/soft/modules
   - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
   - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
   - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
