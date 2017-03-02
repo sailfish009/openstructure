@@ -54,8 +54,13 @@ build:centos6.6:
              -DBOOST_ROOT=$EBROOTBOOST
              -DQT_QMAKE_EXECUTABLE=$EBROOTQT/bin/qmake
              -DCOMPOUND_LIB=$COMP_LIB
-             -DZLIB_LIBRARY=$EBROOTZLIB
-             -DPNG_LIBRARY=$EBROOTLIBPNG
+             -DPNG_LIBRARY=$EBROOTLIBPNG/lib/libpng.so
+             -DPNG_INCLUDE_DIR=$EBROOTLIBPNG/include
+             -DPNG_PNG_INCLUDE_DIR=$EBROOTLIBPNG/include
+             -DZLIB_LIBRARY=$EBROOTZLIB/lib/libz.so
+             -DZLIB_INCLUDE_DIR=$EBROOTZLIB/include
+             -DTIFF_INCLUDE_DIR=$EBROOTLIBTIFF/include
+             -DTIFF_LIBRARY=$EBROOTLIBTIFF/lib/libtiff.so
              -DOPTIMIZE=1
   - echo "... done building on CentOS 6."
 
