@@ -1,7 +1,8 @@
 # these are the different stages for our pipelines
 # jobs in the same stage run in parallel 
-# next stage doesn't start until previous stage finishes OK
-# by now we only do build and test, we could add another stage "deploy" if needed
+# next stage doesn't start until previous stage finishes with 'OK'
+# by now we only do build and test, we could add another stage "deploy" if
+# needed
 stages:
   - build
   - test
@@ -34,15 +35,6 @@ build:centos6.6:
   - module load Boost/1.53.0-goolf-1.4.10-Python-2.7.5
   - module list
 
-build:centos7.3:
-  stage: build
-  image: centos:7.3.1611
-  script:
-  - echo "Hi from the centos 7.3 container. I am in the build stage"
-  - cat /etc/redhat-release
-  - echo "Trying to list the contents of /export/soft"
-  - ls /export/soft
-
 # TESTS STAGE
 test:centos6.6:
   stage: test
@@ -52,9 +44,3 @@ test:centos6.6:
   - cat /etc/redhat-release
   - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
   - module list
-
-test:centos7.3:
-  stage: test
-  image: centos:7.3.1611
-  script:
-  - echo "Hi from the centos 7.3 container. Here I run unit tests if build finished ok"
