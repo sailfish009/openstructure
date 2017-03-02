@@ -54,10 +54,10 @@ typedef boost::shared_ptr<WrappedLogSink> WrappedLogSinkPtr;
 
 void push_verb(int n) 
 {
- if(n<0){
-   Logger::Instance().PushVerbosityLevel(0);
-  }else{
-   Logger::Instance().PushVerbosityLevel(n);
+  if (n<0) {
+    Logger::Instance().PushVerbosityLevel(0);
+  } else {
+    Logger::Instance().PushVerbosityLevel(n);
   }
 }
 
@@ -90,17 +90,18 @@ LogSinkPtr get_log_sink()
 String args_to_string(tuple args, dict kwargs)
 {
   std::stringstream ss;
-  bool empty=true;
-  for (size_t i=0, l=len(args); i<l; ++i) {
+  bool empty = true;
+  for (size_t i = 0, l = len(args); i < l; ++i) {
     if (!empty) {
       ss << " ";
     }
-    empty=false;
+    empty = false;
     String string_val;
-    try {
-      string_val=extract<String>(args[i]);
-    } catch (...) {
-      string_val=extract<String>(args[i].attr("__str__")());
+    extract<String> tst(args[i]);
+    if (tst.check()) {
+      string_val = tst();
+    } else {
+      string_val = extract<String>(str(args[i])); // use boost python str
     }
     ss << string_val;
   }
