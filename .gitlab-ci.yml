@@ -26,7 +26,6 @@ before_script:
   - module load PyQt/4.11.4-goolf-1.4.10-Python-2.7.5
   - mkdir build-ci
   - cd build-ci
-  - cmake ..
   - echo "... done running global 'before_script'."
 
 # BUILD STAGE
@@ -35,6 +34,9 @@ build:centos6.6:
   image: centos:6.6
   script:
   - echo "Building on CentOS 6..."
+  - echo $PATH
+  - which cmake
+  - cmake ..
   - cat /etc/redhat-release
   - echo "... done building on CentOS 6."
 
