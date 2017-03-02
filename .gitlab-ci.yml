@@ -26,6 +26,7 @@ before_script:
   - module load PyQt/4.11.4-goolf-1.4.10-Python-2.7.5
   - mkdir build-ci
   - cd build-ci
+  - echo $PATH
   - 'cmake .. -DENABLE_MM=1
               -DOPEN_MM_LIBRARY=$EBROOTOPENMM/lib/libOpenMM.so
               -DOPEN_MM_PLUGIN_DIR=$EBROOTOPENMM/lib/plugins
