@@ -16,7 +16,7 @@ before_script:
   - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
   - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
   - module use /scicore/soft/modules/all
-  - module load CMake/2.8.12-goolf-1.4.10
+  - module load CMake/2.8.12-GCC-4.7.2
   - module load Python/2.7.5-goolf-1.4.10
   - module load OpenBLAS/0.2.6-gompi-1.4.10-LAPACK-3.4.2
   - module load Eigen/3.2.1-goolf-1.4.10
