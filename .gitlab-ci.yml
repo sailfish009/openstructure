@@ -14,7 +14,7 @@ test:centos6.6:
     - echo "Running global 'before_script'..."
     - yum -y -q -e 0 install tcl
     - yum -y -q -e 0 install glibc-common
-    - yum -y -q -e 0 glibc-devel
+    - yum -y -q -e 0 install glibc-devel
     - yum -y -q -e 0 install libjpeg-turbo
     - yum -y -q -e 0 install freetype
     - yum -y -q -e 0 install libpng
