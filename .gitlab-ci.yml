@@ -45,6 +45,7 @@ build:centos6.6:
   image: centos:6.6
   script:
   - echo "Building on CentOS 6..."
+  - rm -fr build-ci/
   - cmake .. -DENABLE_MM=1
              -DOPEN_MM_LIBRARY=$EBROOTOPENMM/lib/libOpenMM.so
              -DOPEN_MM_PLUGIN_DIR=$EBROOTOPENMM/lib/plugins
