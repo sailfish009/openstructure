@@ -7,6 +7,10 @@ stages:
   - build
   - test
 
+cache:
+  key: "$CI_BUILD_NAME"
+  untracked: true
+
 # this is executed before doing anything else
 before_script:
   - echo "Running global 'before_script'..."
