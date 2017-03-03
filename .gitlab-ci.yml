@@ -6,34 +6,32 @@
 stages:
   - test
 
-# this is executed before doing anything else
-before_script:
-  - echo "Running global 'before_script'..."
-  - yum -y -q -e 0 install tcl
-  - yum -y -q -e 0 install glibc-devel
-  - yum -y -q -e 0 install libjpeg-turbo
-  - mkdir -p /scicore/soft/modules
-  - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
-  - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
-  - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
-  - module use /scicore/soft/modules/all
-  - module load CMake/2.8.12-goolf-1.4.10
-  - module load Python/2.7.5-goolf-1.4.10
-  - module load OpenBLAS/0.2.6-gompi-1.4.10-LAPACK-3.4.2
-  - module load Eigen/3.2.1-goolf-1.4.10
-  - module load numpy/1.9.1-goolf-1.4.10-Python-2.7.5
-  - module load Boost/1.53.0-goolf-1.4.10-Python-2.7.5
-  - module load OpenMM/6.1-Linux64
-  - module load PyQt/4.11.4-goolf-1.4.10-Python-2.7.5
-  - module load LibTIFF/4.0.3-goolf-1.4.10
-  - module load libpng/1.6.17-goolf-1.4.10
-  - module load zlib/1.2.8-goolf-1.4.10
-  - echo "... done running global 'before_script'."
-
 # BUILD STAGE
 test:centos6.6:
   stage: test
   image: centos:6.6
+  before_script:
+    - echo "Running global 'before_script'..."
+    - yum -y -q -e 0 install tcl
+    - yum -y -q -e 0 install glibc-devel
+    - yum -y -q -e 0 install libjpeg-turbo
+    - mkdir -p /scicore/soft/modules
+    - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
+    - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
+    - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
+    - module use /scicore/soft/modules/all
+    - module load CMake/2.8.12-goolf-1.4.10
+    - module load Python/2.7.5-goolf-1.4.10
+    - module load OpenBLAS/0.2.6-gompi-1.4.10-LAPACK-3.4.2
+    - module load Eigen/3.2.1-goolf-1.4.10
+    - module load numpy/1.9.1-goolf-1.4.10-Python-2.7.5
+    - module load Boost/1.53.0-goolf-1.4.10-Python-2.7.5
+    - module load OpenMM/6.1-Linux64
+    - module load PyQt/4.11.4-goolf-1.4.10-Python-2.7.5
+    - module load LibTIFF/4.0.3-goolf-1.4.10
+    - module load libpng/1.6.17-goolf-1.4.10
+    - module load zlib/1.2.8-goolf-1.4.10
+    - echo "... done running global 'before_script'."
   script:
   - echo "Testing on CentOS 6..."
   - echo "    Building OST..."
