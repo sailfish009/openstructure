@@ -71,5 +71,7 @@ test:centos6.6:
   image: centos:6.6
   script:
   - echo "Testing on CentOS 6..."
+  - pwd
+  - ls
   - make check
   - echo "... done testing on CentOS 6."
