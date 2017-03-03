@@ -8,7 +8,8 @@ stages:
   - test
 
 cache:
-  key: "$CI_BUILD_NAME"
+  key: "$CI_BUILD_REF_NAME"
+  untracked: true
   paths:
     - build-ci/
 
@@ -80,6 +81,7 @@ test:centos6.6:
   - pwd
   - ls .
   - ls ..
+  - ls -la /cache
   - cd build-ci/
   - make check
   - echo "... done testing on CentOS 6."
