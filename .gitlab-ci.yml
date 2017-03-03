@@ -72,6 +72,7 @@ test:centos6.6:
   script:
   - echo "Testing on CentOS 6..."
   - pwd
-  - ls
+  - ls .
+  - ls ..
   - make check
   - echo "... done testing on CentOS 6."
