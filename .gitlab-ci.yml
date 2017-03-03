@@ -9,6 +9,8 @@ stages:
 
 cache:
   key: "$CI_BUILD_NAME"
+  paths:
+    - build-ci/
   untracked: true
 
 # this is executed before doing anything else
