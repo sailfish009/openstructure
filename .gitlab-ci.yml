@@ -54,7 +54,6 @@ build:centos6.6:
              -DFFTW_INCLUDE_DIR=$EBROOTFFTW/include
              -DBOOST_ROOT=$EBROOTBOOST
              -DQT_QMAKE_EXECUTABLE=$EBROOTQT/bin/qmake
-             -DCOMPOUND_LIB=$COMP_LIB
              -DPNG_LIBRARY=$EBROOTLIBPNG/lib/libpng.so
              -DPNG_INCLUDE_DIR=$EBROOTLIBPNG/include
              -DPNG_PNG_INCLUDE_DIR=$EBROOTLIBPNG/include
