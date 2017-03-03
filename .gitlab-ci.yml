@@ -81,5 +81,6 @@ test:centos6.6:
   - pwd
   - ls .
   - ls ..
+  - cd build-ci/
   - make check
   - echo "... done testing on CentOS 6."
