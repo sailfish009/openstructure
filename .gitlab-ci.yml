@@ -13,8 +13,9 @@ test:centos6.6:
   before_script:
     - echo "Running global 'before_script'..."
     - yum -y -q -e 0 install tcl
-    - yum -y -q -e 0 install glibc-devel
+    - yum -y -q -e 0 install glibc-common glibc-devel
     - yum -y -q -e 0 install libjpeg-turbo
+    - yum -y -q -e 0 install freetype
     - mkdir -p /scicore/soft/modules
     - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
     - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
