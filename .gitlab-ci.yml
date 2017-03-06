@@ -16,7 +16,6 @@ test:centos6.6:
     - yum -y -q -e 0 install glibc-common
     - yum -y -q -e 0 install glibc-devel
     - yum -y -q -e 0 install libjpeg-turbo
-    - yum -y -q -e 0 install libpng
     - mkdir -p /scicore/soft/modules
     - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
     - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
@@ -33,6 +32,7 @@ test:centos6.6:
     - module load LibTIFF/4.0.3-goolf-1.4.10
     - module load libpng/1.6.17-goolf-1.4.10
     - module load zlib/1.2.8-goolf-1.4.10
+    - module load HH-suite/2.0.16-goolf-1.4.10
     - echo "... done running centos6.6 'before_script'."
   script:
   - echo "Testing on CentOS 6..."
@@ -65,6 +65,6 @@ test:centos6.6:
   - make -j 2
   - echo "    ... done building OST."
   - echo "    Running unit tests for OST..."  
-  - make check_xml
+  - make check
   - echo "    ... done running unit tests for OST..." 
   - echo "... done testing on CentOS 6."
