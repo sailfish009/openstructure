@@ -16,7 +16,6 @@ test:centos6.6:
     - yum -y -q -e 0 install glibc-common
     - yum -y -q -e 0 install glibc-devel
     - yum -y -q -e 0 install libjpeg-turbo
-    - yum -y -q -e 0 install freetype
     - yum -y -q -e 0 install libpng
     - mkdir -p /scicore/soft/modules
     - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
