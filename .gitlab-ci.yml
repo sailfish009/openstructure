@@ -16,6 +16,8 @@ test:centos6.6:
     - yum -y -q -e 0 install glibc-common
     - yum -y -q -e 0 install glibc-devel
     - yum -y -q -e 0 install libjpeg-turbo
+    - yum -y -q -e 0 install freetype
+    - yum -y -q -e 0 install libpng
     - mkdir -p /scicore/soft/modules
     - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
     - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
@@ -32,7 +34,7 @@ test:centos6.6:
     - module load LibTIFF/4.0.3-goolf-1.4.10
     - module load libpng/1.6.17-goolf-1.4.10
     - module load zlib/1.2.8-goolf-1.4.10
-    - module load HH-suite/2.0.16-goolf-1.4.10
+    - module load HH-suite/2.0.16-goolf-1.4.10-Boost-1.53.0
     - echo "... done running centos6.6 'before_script'."
   script:
   - echo "Testing on CentOS 6..."

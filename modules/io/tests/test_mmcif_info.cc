@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(mmcif_info_biounit)
   BOOST_CHECK(bu.GetMethodDetails() == "PISA");
   BOOST_CHECK(bu.GetChainList().back() == "A");
   std::vector<std::pair<int, int> > tr = bu.GetChainIntervalList();
-  BOOST_CHECK(tr[0].first == 0);
+  BOOST_CHECK(tr[0].first == 10);
   BOOST_CHECK(tr[0].second == 2);
 
   std::vector<String> chains;
