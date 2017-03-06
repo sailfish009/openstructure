@@ -11,7 +11,7 @@ test:centos6.6:
   stage: test
   image: centos:6.6
   before_script:
-    - echo "Running global 'before_script'..."
+    - echo "Running centos6.6 'before_script'..."
     - yum -y -q -e 0 install tcl
     - yum -y -q -e 0 install glibc-common
     - yum -y -q -e 0 install glibc-devel
@@ -34,7 +34,7 @@ test:centos6.6:
     - module load LibTIFF/4.0.3-goolf-1.4.10
     - module load libpng/1.6.17-goolf-1.4.10
     - module load zlib/1.2.8-goolf-1.4.10
-    - echo "... done running global 'before_script'."
+    - echo "... done running centos6.6 'before_script'."
   script:
   - echo "Testing on CentOS 6..."
   - echo "    Building OST..."
@@ -66,6 +66,6 @@ test:centos6.6:
   - make -j 2
   - echo "    ... done building OST."
   - echo "    Running unit tests for OST..."  
-  - make check
+  - make check_xml
   - echo "    ... done running unit tests for OST..." 
   - echo "... done testing on CentOS 6."
