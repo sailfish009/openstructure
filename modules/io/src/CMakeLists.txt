@@ -103,6 +103,7 @@ module(NAME io SOURCES "${OST_IO_SOURCES}"
                ${OST_IO_MSGPACK_PREPROCESSOR_ARITHMETIC_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/arithmetic/detail
                ${OST_IO_MSGPACK_PREPROCESSOR_ARRAY_HEADERS} IN_DIR msgpack/msgpack/preprocessor/array
                ${OST_IO_MSGPACK_PREPROCESSOR_ARRAY_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/array/detail
+               ${OST_IO_MSGPACK_PREPROCESSOR_COMPARISON_HEADERS} IN_DIR msgpack/msgpack/preprocessor/comparison
                ${OST_IO_HEADERS}
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
 target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})

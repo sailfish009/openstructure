@@ -1,0 +1,9 @@
+set(OST_IO_MSGPACK_PREPROCESSOR_COMPARISON_HEADERS
+equal.hpp
+greater_equal.hpp
+greater.hpp
+less_equal.hpp
+less.hpp
+not_equal.hpp
+PARENT_SCOPE
+)
