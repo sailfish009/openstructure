@@ -70,7 +70,7 @@ set(OST_IO_DEPENDENCIES ost_base;ost_conop;ost_seq)
 if (ENABLE_IMG)
   set(OST_IO_DEPENDENCIES ${OST_IO_DEPENDENCIES};ost_img;ost_img_alg)
 endif()
-module(NAME io SOURCES "${OST_IO_SOURCES}" 
+module(NAME io SOURCES "${OST_IO_SOURCES}"
        HEADERS ${OST_IO_MOL_HEADERS} IN_DIR mol
                ${OST_IO_IMG_HEADERS} IN_DIR img
                ${OST_IO_SEQ_HEADERS} IN_DIR seq
