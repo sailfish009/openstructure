@@ -1,0 +1,9 @@
+set(OST_IO_MSGPACK_MSGPACK_PREDEF_LIBRARY_C_HEADERS
+vms.h
+uc.h
+zos.h
+gnu.h
+_prefix.h
+PARENT_SCOPE
+)
+

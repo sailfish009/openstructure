@@ -98,6 +98,9 @@ module(NAME io SOURCES "${OST_IO_SOURCES}"
                ${OST_IO_MSGPACK_MSGPACK_PREDEF_HARDWARE_SIMD_X86_AMD_HEADERS} IN_DIR msgpack/msgpack/predef/hardware/simd/x86_amd
                ${OST_IO_MSGPACK_MSGPACK_PREDEF_COMPILER_HEADERS} IN_DIR msgpack/msgpack/predef/compiler
                ${OST_IO_MSGPACK_MSGPACK_PREDEF_LIBRARY_HEADERS} IN_DIR msgpack/msgpack/predef/library
+               ${OST_IO_MSGPACK_MSGPACK_PREDEF_LIBRARY_STD_HEADERS} IN_DIR msgpack/msgpack/predef/library/std
+               ${OST_IO_MSGPACK_MSGPACK_PREDEF_LIBRARY_C_HEADERS} IN_DIR msgpack/msgpack/predef/library/c
+               ${OST_IO_MSGPACK_MSGPACK_PREDEF_OTHER_HEADERS} IN_DIR msgpack/msgpack/predef/other
                ${OST_IO_MSGPACK_PREPROCESSOR_HEADERS} IN_DIR msgpack/msgpack/preprocessor
                ${OST_IO_MSGPACK_PREPROCESSOR_ARITHMETIC_HEADERS} IN_DIR msgpack/msgpack/preprocessor/arithmetic
                ${OST_IO_MSGPACK_PREPROCESSOR_ARITHMETIC_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/arithmetic/detail
