@@ -113,7 +113,8 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
-        self.hh = hhblits.HHblits(query_seq, self.hhroot)
+        self.hh = hhblits.HHblits(query_seq, self.hhroot,
+                                  working_dir='testfiles')
         a3m = self.hh.BuildQueryMSA('testfiles/hhblitsdb/hhblitsdb')
         print "BIENCHEN A3M", a3m
         self.assertTrue(filecmp.cmp(a3m, "testfiles/testali.a3m"))
