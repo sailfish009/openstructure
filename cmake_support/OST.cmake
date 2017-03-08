@@ -719,7 +719,7 @@ macro(ost_unittest)
       else()
         set (PY_TESTS_CMD "PYTHONPATH=${python_path}  ${PYTHON_BINARY}")
         add_custom_target("${py_test}_run"
-                  sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
+                  sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test}"
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   COMMENT "running checks ${py_test}" VERBATIM)
         add_custom_target("${py_test}_run_xml"
