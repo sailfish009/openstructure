@@ -109,6 +109,7 @@ module(NAME io SOURCES "${OST_IO_SOURCES}"
                ${OST_IO_MSGPACK_PREPROCESSOR_COMPARISON_HEADERS} IN_DIR msgpack/msgpack/preprocessor/comparison
                ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_CONFIG_HEADERS} IN_DIR msgpack/msgpack/preprocessor/config
                ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_CONTROL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/control
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_CONTROL_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/control/detail
                ${OST_IO_HEADERS}
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
 target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})
