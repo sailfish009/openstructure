@@ -540,6 +540,9 @@ class HHblits:
         :rtype: :class:`str`
         """
         a3m_file = '%s.a3m' % os.path.splitext(self.filename)[0]
+        print "A3MFILE", a3m_file
+        print "A3MFILE", a3m_file
+        print "A3MFILE", a3m_file
         ost.LogInfo('Using hhblits from "%s"' % self.hhsuite_root)
         full_nrdb = os.path.join(os.path.abspath(os.path.split(nrdb)[0]),
                                  os.path.split(nrdb)[1])
