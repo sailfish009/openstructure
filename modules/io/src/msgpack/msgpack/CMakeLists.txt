@@ -6,6 +6,7 @@ add_subdirectory(v1)
 
 set(OST_IO_MSGPACK_MSGPACK_HEADERS
 unpack.hpp
+util.h
 unpack.h
 meta.hpp
 pack_template.h
@@ -34,7 +35,6 @@ zbuffer.h
 fbuffer_decl.hpp
 object_fwd_decl.hpp
 sbuffer.h
-util.h
 zbuffer.hpp
 gcc_atomic.h
 pack.h
@@ -237,5 +237,10 @@ PARENT_SCOPE
 
 set(OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DETAIL_HEADERS
 ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DETAIL_HEADERS}
+PARENT_SCOPE
+)
+
+set(OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DETAIL_DMC_HEADERS
+${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DETAIL_DMC_HEADERS}
 PARENT_SCOPE
 )
