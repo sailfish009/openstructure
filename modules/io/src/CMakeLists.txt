@@ -112,6 +112,7 @@ module(NAME io SOURCES "${OST_IO_SOURCES}"
                ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_CONTROL_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/control/detail
                ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_CONTROL_DETAIL_DMC_HEADERS} IN_DIR msgpack/msgpack/preprocessor/control/detail/dmc
                ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_CONTROL_DETAIL_EDG_HEADERS} IN_DIR msgpack/msgpack/preprocessor/control/detail/edg
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_CONTROL_DETAIL_MSVC_HEADERS} IN_DIR msgpack/msgpack/preprocessor/control/detail/msvc
                ${OST_IO_HEADERS}
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
 target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})
