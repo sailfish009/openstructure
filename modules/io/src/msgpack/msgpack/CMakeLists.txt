@@ -5,13 +5,13 @@ add_subdirectory(adaptor)
 add_subdirectory(v1)
 
 set(OST_IO_MSGPACK_MSGPACK_HEADERS
+unpack.hpp
 unpack.h
 meta.hpp
 pack_template.h
 version_master.h
 meta_decl.hpp
 parse_return.hpp
-unpack.hpp
 versioning.hpp
 cpp_config.hpp
 object.h
@@ -232,5 +232,10 @@ PARENT_SCOPE
 
 set(OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_CONTROL_DETAIL_MSVC_HEADERS
 ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_CONTROL_DETAIL_MSVC_HEADERS}
+PARENT_SCOPE
+)
+
+set(OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DETAIL_HEADERS
+${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DETAIL_HEADERS}
 PARENT_SCOPE
 )

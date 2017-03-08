@@ -1,0 +1,17 @@
+add_subdirectory(dmc)
+
+set(OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DETAIL_HEADERS
+is_unary.hpp
+is_binary.hpp
+check.hpp
+auto_rec.hpp
+is_nullary.hpp
+null.hpp
+split.hpp
+PARENT_SCOPE
+)
+
+set(OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DETAIL_DMC_HEADERS
+${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DETAIL_DMC_HEADERS}
+PARENT_SCOPE
+)
