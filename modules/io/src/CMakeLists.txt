@@ -158,6 +158,8 @@ module(NAME io SOURCES "${OST_IO_SOURCES}"
                ${OST_IO_MSGPACK_MSGPACK_V2_DETAIL_HEADERS} IN_DIR msgpack/msgpack/v2/detail
                ${OST_IO_MSGPACK_MSGPACK_V2_ADAPTOR_HEADERS} IN_DIR msgpack/msgpack/v2/adaptor
                ${OST_IO_MSGPACK_MSGPACK_V2_ADAPTOR_BOOST_HEADERS} IN_DIR msgpack/msgpack/v2/adaptor/boost
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_ARRAY_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/array/detail
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_ARITHMETIC_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/arithmetic/detail
                ${OST_IO_HEADERS}
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
 target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})

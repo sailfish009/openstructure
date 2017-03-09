@@ -1,0 +1,7 @@
+set(OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_SEQ_DETAIL_HEADERS
+binary_transform.hpp
+is_empty.hpp
+split.hpp
+PARENT_SCOPE
+)
+
