@@ -577,13 +577,17 @@ class HHblits:
         job = subprocess.Popen(addss_cmd, shell=True, cwd=self.working_dir,
                                env=env, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-        sout, _ = job.communicate()
+        sout, serr = job.communicate()
         lines = sout.splitlines()
         for line in lines:
             if 'error' in line.lower():
                 ost.LogWarning('Predicting secondary structure for MSA '+
                                '(%s) failed, on command: %s' % (a3m_file, line))
             return a3m_file
+            print "BIENCHEN", line
+        lines = serr.splitlines()
+        for line in lines:
+            print "BIENCHEN", line
         return a3m_file
 
     def A3MToProfile(self, a3m_file, hhm_file=None):
