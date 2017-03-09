@@ -118,12 +118,12 @@ class TestHHblitsBindings(unittest.TestCase):
         print "A3M"
         with open(a3m) as fh:
             for line in fh:
-                line = line.split()
+                line = line.strip()
                 print line
         print "TESTFILE"
         with open("testfiles/testali.a3m") as fh:
             for line in fh:
-                line = line.split()
+                line = line.strip()
                 print line
         self.assertTrue(filecmp.cmp(a3m, "testfiles/testali.a3m"))
 
