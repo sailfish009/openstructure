@@ -676,7 +676,7 @@ macro(ost_unittest)
         add_dependencies(check "${_test_name}_run")
       else()
         add_custom_target("${_test_name}_run"
-                        COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo
+                        COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name}
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "running checks for module ${_ARG_MODULE}"
                         DEPENDS ${_test_name})

@@ -115,7 +115,6 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         a3m = self.hh.BuildQueryMSA('testfiles/hhblitsdb/hhblitsdb')
-        print "BIENCHEN A3M", a3m
         self.assertTrue(filecmp.cmp(a3m, "testfiles/testali.a3m"))
 
     def testA3mToProfileFileName(self):
