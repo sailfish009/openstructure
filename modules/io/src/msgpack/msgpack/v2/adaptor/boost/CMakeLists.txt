@@ -1,0 +1,5 @@
+set(OST_IO_MSGPACK_MSGPACK_V2_ADAPTOR_BOOST_HEADERS
+msgpack_variant_decl.hpp
+PARENT_SCOPE
+)
+

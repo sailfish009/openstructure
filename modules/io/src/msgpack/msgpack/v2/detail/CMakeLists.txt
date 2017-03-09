@@ -1,0 +1,6 @@
+set(OST_IO_MSGPACK_MSGPACK_V2_DETAIL_HEADERS
+cpp11_zone_decl.hpp
+cpp03_zone_decl.hpp
+PARENT_SCOPE
+)
+
