@@ -117,6 +117,44 @@ module(NAME io SOURCES "${OST_IO_SOURCES}"
                ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DETAIL_DMC_HEADERS} IN_DIR msgpack/msgpack/preprocessor/detail/dmc
                ${OST_IO_MSGPACK_MSGPACK_V2_ADAPTOR_DETAIL_HEADERS} IN_DIR msgpack/msgpack/v2/adaptor/detail
                ${OST_IO_MSGPACK_MSGPACK_V1_ADAPTOR_DETAIL_HEADERS} IN_DIR msgpack/msgpack/v1/adaptor/detail
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_ITERATION_DETAIL_ITER_HEADERS} IN_DIR msgpack/msgpack/preprocessor/iteration/detail/iter
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_LIST_DETAIL_EDG_HEADERS} IN_DIR msgpack/msgpack/preprocessor/list/detail/edg
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_REPETITION_DETAIL_EDG_HEADERS} IN_DIR msgpack/msgpack/preprocessor/repetition/detail/edg
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_TUPLE_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/tuple/detail
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_REPETITION_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/repetition/detail
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_ITERATION_DETAIL_BOUNDS_HEADERS} IN_DIR msgpack/msgpack/preprocessor/iteration/detail/bounds
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_ITERATION_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/iteration/detail
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_FACILITIES_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/facilities/detail
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_SEQ_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/seq/detail
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_REPETITION_DETAIL_MSVC_HEADERS} IN_DIR msgpack/msgpack/preprocessor/repetition/detail/msvc
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_VARIADIC_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/variadic/detail
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_SLOT_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/slot/detail
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_LIST_DETAIL_DMC_HEADERS} IN_DIR msgpack/msgpack/preprocessor/list/detail/dmc
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_REPETITION_DETAIL_DMC_HEADERS} IN_DIR msgpack/msgpack/preprocessor/repetition/detail/dmc
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_PUNCTUATION_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/punctuation/detail
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_LIST_DETAIL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/list/detail
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_SEQ_HEADERS} IN_DIR msgpack/msgpack/preprocessor/seq
+               ${OST_IO_MSGPACK_MSGPACK_V2_HEADERS} IN_DIR msgpack/msgpack/v2
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_ARITHMETIC_HEADERS} IN_DIR msgpack/msgpack/preprocessor/arithmetic
+               ${OST_IO_MSGPACK_MSGPACK_V1_HEADERS} IN_DIR msgpack/msgpack/v1
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_ITERATION_HEADERS} IN_DIR msgpack/msgpack/preprocessor/iteration
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_COMPARISON_HEADERS} IN_DIR msgpack/msgpack/preprocessor/comparison
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_SLOT_HEADERS} IN_DIR msgpack/msgpack/preprocessor/slot
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_LIST_HEADERS} IN_DIR msgpack/msgpack/preprocessor/list
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_HEADERS} IN_DIR msgpack/msgpack/preprocessor
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_FACILITIES_HEADERS} IN_DIR msgpack/msgpack/preprocessor/facilities
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_VARIADIC_HEADERS} IN_DIR msgpack/msgpack/preprocessor/variadic
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_TUPLE_HEADERS} IN_DIR msgpack/msgpack/preprocessor/tuple
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_LOGICAL_HEADERS} IN_DIR msgpack/msgpack/preprocessor/logical
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_ARRAY_HEADERS} IN_DIR msgpack/msgpack/preprocessor/array
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_PUNCTUATION_HEADERS} IN_DIR msgpack/msgpack/preprocessor/punctuation
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_REPETITION_HEADERS} IN_DIR msgpack/msgpack/preprocessor/repetition
+               ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_SELECTION_HEADERS} IN_DIR msgpack/msgpack/preprocessor/selection
+               ${OST_IO_MSGPACK_MSGPACK_V1_ADAPTOR_CPP11_HEADERS} IN_DIR msgpack/msgpack/v1/adaptor/cpp11
+               ${OST_IO_MSGPACK_MSGPACK_V1_ADAPTOR_HEADERS} IN_DIR msgpack/msgpack/v1/adaptor
+               ${OST_IO_MSGPACK_MSGPACK_V1_DETAIL_HEADERS} IN_DIR msgpack/msgpack/v1/detail
+               ${OST_IO_MSGPACK_MSGPACK_V1_ADAPTOR_BOOST_HEADERS} IN_DIR msgpack/msgpack/v1/adaptor/boost
+               ${OST_IO_MSGPACK_MSGPACK_V1_ADAPTOR_TR1_HEADERS} IN_DIR msgpack/msgpack/v1/adaptor/tr1
                ${OST_IO_HEADERS}
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
 target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})
