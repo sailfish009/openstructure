@@ -1,0 +1,15 @@
+set(OST_IO_MSGPACK_MSGPACK_V1_ADAPTOR_DETAIL_HEADERS
+cpp11_msgpack_tuple_decl.hpp
+cpp03_define_array_decl.hpp
+cpp11_define_map.hpp
+cpp03_define_map.hpp
+cpp03_define_map_decl.hpp
+cpp11_define_map_decl.hpp
+cpp11_define_array_decl.hpp
+cpp03_msgpack_tuple.hpp
+cpp11_define_array.hpp
+cpp11_msgpack_tuple.hpp
+cpp03_msgpack_tuple_decl.hpp
+cpp03_define_array.hpp
+PARENT_SCOPE
+)
