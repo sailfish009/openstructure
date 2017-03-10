@@ -89,7 +89,7 @@ test:centos7.3:
     - ln -s /export/soft/modules/centos7/generic/all /scicore/soft/modules
     - source /export/soft/lua_lmod/centos7/lmod/lmod/init/bash
     - module use /scicore/soft/modules/all
-    - module load CMake/2.8.12-goolf-1.4.10
+    - module load CMake/3.4.3-goolf-1.7.20
     - module load Python/2.7.5-goolf-1.4.10
     - module load OpenBLAS/0.2.6-gompi-1.4.10-LAPACK-3.4.2
     - module load Eigen/3.2.1-goolf-1.4.10
