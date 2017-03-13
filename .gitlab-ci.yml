@@ -95,7 +95,6 @@ test:centos7.3:
     - module load Eigen/3.2.8-goolf-1.7.20
     - module load numpy/1.10.1-goolf-1.7.20-Python-2.7.11
     - module load Boost/1.53.0-goolf-1.7.20
-    - module load OpenMM/6.1-Linux64
     - module load PyQt/4.11.4-goolf-1.7.20-Python-2.7.11
     - module load LibTIFF/4.0.3-goolf-1.4.10
     - module load libpng/1.6.17-goolf-1.4.10
@@ -108,11 +107,7 @@ test:centos7.3:
   - echo "    Building OST..."
   - mkdir build-ci
   - cd build-ci
-  - cmake .. -DENABLE_MM=1
-             -DOPEN_MM_LIBRARY=$EBROOTOPENMM/lib/libOpenMM.so
-             -DOPEN_MM_PLUGIN_DIR=$EBROOTOPENMM/lib/plugins
-             -DOPEN_MM_INCLUDE_DIR=$EBROOTOPENMM/include
-             -DCOMPILE_TMTOOLS=1
+  - cmake .. -DCOMPILE_TMTOOLS=1
              -DENABLE_GFX=OFF
              -DENABLE_GUI=OFF
              -DUSE_NUMPY=1
