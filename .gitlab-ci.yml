@@ -78,6 +78,7 @@ test:centos7.3:
   image: centos:7.3.1611
   before_script:
     - echo "Running centos7.3 'before_script'..."
+    - make
     - yum -y -q -e 0 install tcl
     - yum -y -q -e 0 install glibc-common
     - yum -y -q -e 0 install glibc-devel
@@ -95,16 +96,22 @@ test:centos7.3:
     - module load Eigen/3.2.8-goolf-1.7.20
     - module load numpy/1.10.1-goolf-1.7.20-Python-2.7.11
     - module load Boost/1.53.0-goolf-1.7.20
+    - module load OpenMM/6.1-Linux64
     - module load PyQt/4.11.4-goolf-1.7.20-Python-2.7.11
     - module load LibTIFF/.4.0.4-goolf-1.7.20
     - module load Perl/5.22.2-goolf-1.7.20
+    - module load HH-suite/2.0.16-goolf-1.4.10-Boost-1.53.0
     - echo "... done running centos7.3 'before_script'."
   script:
   - echo "Testing on CentOS 7..."
   - echo "    Building OST..."
   - mkdir build-ci
   - cd build-ci
-  - cmake .. -DCOMPILE_TMTOOLS=1
+  - cmake .. -DENABLE_MM=1
+             -DOPEN_MM_LIBRARY=$EBROOTOPENMM/lib/libOpenMM.so
+             -DOPEN_MM_PLUGIN_DIR=$EBROOTOPENMM/lib/plugins
+             -DOPEN_MM_INCLUDE_DIR=$EBROOTOPENMM/include
+             -DCOMPILE_TMTOOLS=1
              -DENABLE_GFX=OFF
              -DENABLE_GUI=OFF
              -DUSE_NUMPY=1
