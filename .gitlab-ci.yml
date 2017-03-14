@@ -82,6 +82,7 @@ test:centos7.3:
     - yum -y -q -e 0 install glibc-common
     - yum -y -q -e 0 install glibc-devel
     - yum -y -q -e 0 install make
+    - yum -y -q -e 0 install libicu
     - yum -y -q -e 0 install libjpeg-turbo
     - yum -y -q -e 0 install freetype
     - yum -y -q -e 0 install libpng
