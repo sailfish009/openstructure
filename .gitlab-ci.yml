@@ -95,7 +95,7 @@ test:centos7.3:
     - module load OpenBLAS/0.2.13-GCC-4.8.4-LAPACK-3.5.0
     - module load Eigen/3.2.8-goolf-1.7.20
     - module load numpy/1.10.1-goolf-1.7.20-Python-2.7.11
-    - module load Boost/1.53.0-goolf-1.7.20
+    - module load Boost/1.53.0-goolf-1.7.20-Python-2.7.11
     - module load PyQt/4.11.4-goolf-1.7.20-Python-2.7.11
     - module load LibTIFF/.4.0.4-goolf-1.7.20
     - module load Perl/5.22.2-goolf-1.7.20
