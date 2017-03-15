@@ -47,7 +47,7 @@ test:centos6.6:
              -DOPEN_MM_PLUGIN_DIR=$EBROOTOPENMM/lib/plugins
              -DOPEN_MM_INCLUDE_DIR=$EBROOTOPENMM/include
              -DCOMPILE_TMTOOLS=1
-             -DENABLE_GFX=OFF
+             -DENABLE_GFX=ON
              -DENABLE_GUI=OFF
              -DUSE_NUMPY=1
              -DUSE_RPATH=1
@@ -113,7 +113,7 @@ test:centos7.3:
              -DOPEN_MM_PLUGIN_DIR=$EBROOTOPENMM/lib/plugins
              -DOPEN_MM_INCLUDE_DIR=$EBROOTOPENMM/include
              -DCOMPILE_TMTOOLS=1
-             -DENABLE_GFX=OFF
+             -DENABLE_GFX=ON
              -DENABLE_GUI=OFF
              -DUSE_NUMPY=1
              -DUSE_RPATH=1
