@@ -18,6 +18,7 @@ test:centos6.6:
     - yum -y -q -e 0 install libjpeg-turbo
     - yum -y -q -e 0 install freetype
     - yum -y -q -e 0 install libpng
+    - yum -y -q -e 0 install mesa-libGL-devel
     - mkdir -p /scicore/soft/modules
     - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
     - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
@@ -84,6 +85,7 @@ test:centos7.3:
     - yum -y -q -e 0 install make
     - yum -y -q -e 0 install libicu
     - yum -y -q -e 0 install libjpeg-turbo
+    - yum -y -q -e 0 install mesa-libGL-devel
     - yum -y -q -e 0 install freetype
     - yum -y -q -e 0 install libpng
     - mkdir -p /scicore/soft/modules
