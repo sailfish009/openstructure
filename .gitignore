@@ -11,6 +11,7 @@ CTestTestfile.cmake
 *.cxx
 .*
 !.gitignore
+!.gitlab-ci.yml
 CMakeCache.txt
 version.hh
 config.hh
