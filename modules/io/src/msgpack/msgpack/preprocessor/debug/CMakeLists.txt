@@ -1,0 +1,6 @@
+set(OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DEBUG_HEADERS
+line.hpp
+assert.hpp
+error.hpp
+PARENT_SCOPE
+)

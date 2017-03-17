@@ -1,6 +1,7 @@
 add_subdirectory(array)
 add_subdirectory(repetition)
 add_subdirectory(arithmetic)
+add_subdirectory(debug)
 add_subdirectory(tuple)
 add_subdirectory(punctuation)
 add_subdirectory(slot)
@@ -80,6 +81,11 @@ PARENT_SCOPE
 
 set(OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_ARITHMETIC_HEADERS
 ${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_ARITHMETIC_HEADERS}
+PARENT_SCOPE
+)
+
+set(OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DEBUG_HEADERS
+${OST_IO_MSGPACK_MSGPACK_PREPROCESSOR_DEBUG_HEADERS}
 PARENT_SCOPE
 )
 
