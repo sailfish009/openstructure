@@ -76,6 +76,7 @@ $eb_command
 
 if [[ $? != 0 ]]; then
 	echo -e "\nBuild failed. Not deleting temp dir $TEMP_DIR"
+	exit 1
 else
         echo -e "\nBuild completed succesfully. Deleting temp dir $TEMP_DIR"
 	rm -fr $TEMP_DIR
