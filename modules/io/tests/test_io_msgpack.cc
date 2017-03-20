@@ -20,4 +20,4 @@
 // the idea of this test is basically to check that we MessagePack is available
 // to OST. Real testing of MessagePack should happen in that project itself.
 
-//#include <ost/io/msgpack/msgpack.hpp>
+#include <ost/io/msgpack/msgpack.hpp>

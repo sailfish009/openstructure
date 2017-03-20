@@ -166,3 +166,6 @@ target_link_libraries(ost_io ${BOOST_IOSTREAM_LIBRARIES})
 if (ENABLE_IMG)
   target_link_libraries(ost_io ${TIFF_LIBRARIES} ${PNG_LIBRARIES})
 endif()
+
+# Extend the include path for building OST to have msgpack available.
+include_directories("${STAGE_DIR}/include/ost/io/msgpack")
