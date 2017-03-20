@@ -81,7 +81,7 @@ else
         echo -e "\nBuild completed succesfully. Deleting temp dir $TEMP_DIR"
 	rm -fr $TEMP_DIR
 	if [[ $? != 0 ]]; then
-		echo -e "\nError deling temp dir in $TEMP_DIR"
+		echo -e "\nError deleting temp dir in $TEMP_DIR"
 		exit 1
 	else
 		echo -e "\nrun 'module use $INSTALL_DIR/modules/all/' to add the new modules to your \$MODULEPATH"
