@@ -30,6 +30,15 @@ echo "cloning the OST code: $GIT_BRANCH branch"
 echo -e "running $git_cmd"
 $git_cmd
 
+# sanity check to verify that the cloned branch exists
+cd $TEMP_DIR/openstructure
+git checkout $GIT_BRANCH
+if [[ $? != 0 ]]; then
+	echo -e "\ngit branch $GIT_BRANCH not found in cloned repository. Are you sure this is an existing branch?" 
+	echo -e "Aborting.... \n" 
+	exit 1
+fi
+
 # fetch the latest git commit ID. We will use this in the module name together with the branch name
 cd $TEMP_DIR/openstructure
 LATEST_COMMIT=`git rev-parse HEAD | cut -c1-8`
