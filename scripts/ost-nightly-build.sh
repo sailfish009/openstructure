@@ -80,8 +80,13 @@ if [[ $? != 0 ]]; then
 else
         echo -e "\nBuild completed succesfully. Deleting temp dir $TEMP_DIR"
 	rm -fr $TEMP_DIR
-	echo -e "\nrun 'module use $INSTALL_DIR/modules/all/' to add the new modules to your \$MODULEPATH"
-	echo -e "If you don't see the new module try deleting your Lmod's cache doing 'rm ~/.lmod.d/.cache/*'\n"
+	if [[ $? != 0 ]]; then
+		echo -e "\nError deling temp dir in $TEMP_DIR"
+		exit 1
+	else
+		echo -e "\nrun 'module use $INSTALL_DIR/modules/all/' to add the new modules to your \$MODULEPATH"
+		echo -e "If you don't see the new module try deleting your Lmod's cache doing 'rm ~/.lmod.d/.cache/*'\n"
+	fi
 
 fi
 
