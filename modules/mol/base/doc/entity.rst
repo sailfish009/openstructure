@@ -746,6 +746,7 @@ The Handle Classes
   .. method:: GetHashCode()
     
     Returns a unique identifier for this atom.
+    
     :rtype: int
 
   .. method:: GetIndex()
