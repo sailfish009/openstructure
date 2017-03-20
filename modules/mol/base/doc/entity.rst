@@ -687,6 +687,18 @@ The Handle Classes
 
     Atom index (starting at 0) within entity.
 
+    :type: int
+
+  .. attribute:: hash_code
+
+    A unique identifier for this atom. Note that a deep copy of an entity (see
+    :meth:`EntityHandle.Copy`) will have atoms with differing identifiers.
+    Shallow copies of the entity preserve the identifier. Atom views on a handle
+    have different identifiers, but the atom view handles (see
+    :attr:`AtomView.handle`) have the same identifier.
+
+    :type: int
+
   .. method:: FindBondToAtom(other_atom)
 
     Finds and returns the bond formed between this atom and `other_atom`. If no 
@@ -745,7 +757,7 @@ The Handle Classes
 
   .. method:: GetHashCode()
     
-    Returns a unique identifier for this atom.
+    See :attr:`hash_code`
     
     :rtype: int
 
@@ -988,7 +1000,7 @@ The View Classes
     :type  pos: :class:`~ost.geom.Vec3`
     :param radius:
     :type  radius: float
-    :rtype: class:`AtomViewList`
+    :rtype: :class:`AtomViewList`
 
   .. method:: FindChain(chain_name)
 
@@ -998,7 +1010,7 @@ The View Classes
     :type  chain_name: str
     :returns: The chain if present in the view, an invalid :class:`ChainView` 
        otherwise
-    :rtype: class:`ChainView`
+    :rtype: :class:`ChainView`
 
   .. method:: FindResidue(residue)
     
@@ -1007,7 +1019,7 @@ The View Classes
     :param residue: Residue handle
     :type  residue: ResidueHandle
     :returns: The residue view pointing the the handle, or an invalid handle if  the residue is not part of the view
-    :rtype: class:`ResidueView`
+    :rtype: :class:`ResidueView`
 
   .. method:: FindAtom(chain_name, res_num, atom_name)
 
@@ -1017,7 +1029,7 @@ The View Classes
     :type  res_num: :class:`ResNum` or :class:`int`
     :param atom_name: The name of the atom
     :type  atom_name: str
-    :rtype: class:`AtomView`
+    :rtype: :class:`AtomView`
 
   .. method:: Select(query[, flags])
 
@@ -1093,7 +1105,7 @@ The View Classes
 
     See :attr:`atoms`
     
-    :rtype: class:`AtomViewList`
+    :rtype: :class:`AtomViewList`
 
   .. method:: GetBondCount()
 
@@ -1122,11 +1134,11 @@ The View Classes
   
     See :attr:`handle`
 
-    :rtype: class:`EntityHandle`
+    :rtype: :class:`EntityHandle`
 
   .. method:: GetResidueList()
 
-    :rtype: class:`ResidueViewList`
+    :rtype: :class:`ResidueViewList`
 
   .. method:: GetGeometricEnd()
 
@@ -1136,7 +1148,7 @@ The View Classes
 
     See :attr:`chains`
     
-    :rtype: class:`ChainViewList`
+    :rtype: :class:`ChainViewList`
     
   .. method:: GetAtomCount()
     
@@ -1547,6 +1559,34 @@ The View Classes
     :param flags: An ORed together combination of query flags
     :type  flags: int
     :rtype: :class:`EntityView`
+
+
+.. class:: AtomView
+
+  A view representation of an :class:`AtomHandle`. Mostly, the same
+  functionality is provided as for the handle.
+
+  .. attribute:: handle
+  
+     The underlying :class:`AtomHandle` of the atom view. Also available as
+     :meth:`GetHandle`.
+     
+     :type: :class:`AtomHandle`
+
+  .. attribute:: hash_code
+
+    A unique identifier for this atom view. Note, that this is not the same as
+    for the atom handle (see :attr:`AtomHandle.hash_code`).
+
+    :type: int
+
+  .. method:: GetHandle()
+
+    See :attr:`handle`
+
+  .. method:: GetHashCode()
+    
+    See :attr:`hash_code`
 
 
 Functions
