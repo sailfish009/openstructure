@@ -20,7 +20,7 @@ CURRENT_DATE=$(date +"%Y%m%dT%H%M%SZ")
 GIT_BRANCH=$1
 
 # create a temporary directory to download the sources and do the build
-TEMP_DIR="/scratch/${USER}/ost-builds/$CURRENT_DATE"
+TEMP_DIR="${TMPDIR}/${USER}/ost-builds/$CURRENT_DATE"
 echo -e "\ncreating temporary dir to clone and build in $TEMP_DIR\n"
 mkdir -p $TEMP_DIR
 
