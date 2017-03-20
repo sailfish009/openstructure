@@ -136,7 +136,7 @@ dependencies = [
 
 configopts = " -DOPTIMIZE=1 -DCOMPILE_TMTOOLS=1 -DENABLE_GFX=OFF -DENABLE_GUI=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE='-O3 -DNDEBUG -Wno-unused-local-typedefs' -DUSE_NUMPY=1 -DUSE_RPATH=1"
 
-configopts += " -DCOMPOUND_LIB=/scicore/home/schwede/GROUP/OpenStructure/ChemLib/1.4/compounds.chemlib"
+configopts += " -DCOMPOUND_LIB=/scicore/home/schwede/GROUP/OpenStructure/ChemLib/1.6/compounds.chemlib"
 
 configopts += " -DPYTHON_ROOT=\$EBROOTPYTHON -DEIGEN3_INCLUDE_DIR=\$EBROOTEIGEN -DFFTW_LIBRARY=\$EBROOTFFTW/lib/libfftw3f.a -DFFTW_INCLUDE_DIR=\$EBROOTFFTW/include -DBOOST_ROOT=\$EBROOTBOOST -DQT_QMAKE_EXECUTABLE=\$EBROOTQT/bin/qmake -DBoost_USE_MULTITHREADED=OFF"
 
