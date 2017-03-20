@@ -304,6 +304,8 @@ include_directories(${Boost_INCLUDE_DIRS}
                     ${PNG_INCLUDE_DIRS}
                     ${OPEN_MM_INCLUDE_DIRS}
                     )
+# Extend the include path for building OST to have msgpack available.
+include_directories("${STAGE_DIR}/include/ost/io/msgpack")
 if(USE_NUMPY)
 include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
 endif()
