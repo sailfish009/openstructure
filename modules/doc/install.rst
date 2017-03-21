@@ -61,7 +61,7 @@ Getting the Source Code
 --------------------------------------------------------------------------------
 
 
-OpenStructure uses `git` as the revision control system. The main repository can be browsed `here <http://dng.biozentrum.unibas.ch/git/>`_. To get the source code, use git clone:
+OpenStructure uses `git` as the revision control system. The main repository can be browsed `here <https://git.scicore.unibas.ch/schwede/openstructure.git>`_. To get the source code, use git clone:
 
 
 .. code-block:: bash
