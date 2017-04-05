@@ -219,6 +219,11 @@ The SequenceHandle
 
     :return: The sequence as a string.
 
+  .. method:: Copy()
+    
+    Create a deep copy of the sequence. The newly created sequence has the same
+    attached view (not a deep copy of the view!).
+
 .. function:: SequenceFromChain(name, chain)
 
   :return: Sequence extracted from one letter codes in given *chain* with a
@@ -390,7 +395,8 @@ an alignment:
     
   .. method:: Copy()
     
-    Create a deep copy of the alignment
+    Create a deep copy of the alignment by copying each contained sequence
+    (see :meth:`SequenceHandle.Copy`)
 
   .. method:: GetPos(seq_index, res_index)
     
