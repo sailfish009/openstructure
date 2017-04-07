@@ -292,7 +292,7 @@ The SequenceList
 
   .. method:: __getitem__(key)
 
-    :return: Access sequence(s) *key* (also supports pythonic slicing).
+    :return: Sequence(s) indexed by *key* (supports pythonic slicing).
 
 
 The AlignmentHandle
