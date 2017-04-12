@@ -91,6 +91,16 @@ The Handle Classes
     
     :type: :class:`~ost.geom.Vec3`
   
+  .. method:: GetName()
+
+    :returns: Name associated to this entity.
+    :rtype:   :class:`str`
+
+  .. method:: SetName(name)
+
+    :param name: Sets this as new name to be associated to this entity.
+    :type name:  :class:`str`
+
   .. method:: FindChain(chain_name)
     
     Get chain by name. See also :attr:`chains`
@@ -877,6 +887,16 @@ The View Classes
      available as :meth:`GetHandle`.
      
      :type: :class:`EntityHandle`
+
+  .. method:: GetName()
+
+    :returns: :func:`~EntityHandle.GetName` of entity :attr:`handle`.
+    :rtype:   :class:`str`
+
+  .. method:: SetName(name)
+
+    :param name: Passed to :func:`~EntityHandle.SetName` of :attr:`handle`.
+    :type name:  :class:`str`
 
   .. method:: CreateEmptyView()
   
