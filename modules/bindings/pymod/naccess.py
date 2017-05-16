@@ -60,9 +60,9 @@ def _SetupFiles(entity, selection, scratch_dir, max_number_of_atoms):
     raise RuntimeError, "Could not create view for selection (%s)"%(selection)
   
   # write entity to tmp file
-  tmp_file_name=os.path.join(tmp_dir_name,"entity.pdb")
+  tmp_file_name = "entity.pdb"
   tmp_file_base = os.path.join(tmp_dir_name,"entity")
-  io.SavePDB(entity_view, tmp_file_name)
+  io.SavePDB(entity_view, os.path.join(tmp_dir_name, tmp_file_name))
   return (tmp_dir_name, tmp_file_name, tmp_file_base)
 
 
