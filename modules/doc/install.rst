@@ -66,7 +66,7 @@ OpenStructure uses `git` as the revision control system. The main repository can
 
 .. code-block:: bash
 
-  git clone https://dng.biozentrum.unibas.ch/git/ost.git <directory-name>
+  git clone https://git.scicore.unibas.ch/schwede/openstructure.git <directory-name>
   
 The above command will clone OpenStructure into the directory called `directory-name`. If omitted, the directory will be called ost. 
 
