@@ -7,14 +7,14 @@ Contributing to OpenStructure
 
 OpenStructure uses `git <http://git-scm.org>`_ as the revision control system. It allows for branch-and-merge driven workflows ideal for a scientific environment. 
 
-The main repository can be browsed `here <http://dng.biozentrum.unibas.ch/git/>`_. 
+The main repository can be browsed `here <https://git.scicore.unibas.ch/schwede/openstructure>`_. 
 
 
 Even though, technically, there is no such a thing as a central repository in git, we use a central "repository of truth" where everyone is pulling from. You can get the source code with ``git clone``:
 
 .. code-block:: bash
 
-  git clone https://dng.biozentrum.unibas.ch/git/ost.git
+  git clone https://git.scicore.unibas.ch/schwede/openstructure.git
 
 
 For information on how to install OpenStructure from source, refer to :doc:`install`. 
