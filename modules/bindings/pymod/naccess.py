@@ -50,7 +50,10 @@ def _SetupFiles(entity, selection, scratch_dir, max_number_of_atoms):
     tmp_dir_name = tempfile.mkdtemp()
 
   # select as specified by user
-  entity_view = entity.Select(selection)
+  if selection != "":
+    entity_view = entity.Select(selection)
+  else:
+    entity_view = entity
   if len(entity_view.atoms) > max_number_of_atoms:
     raise RuntimeError, "Too much atoms for NACCESS (> %s)" % max_number_of_atoms
   if not entity_view.IsValid():
