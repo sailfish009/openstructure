@@ -1,7 +1,7 @@
 '''
 Naccess module
 
-Author: Florian Kiefer
+Author: Florian Kiefer, Gerardo Tauriello (cleanup/speedup)
 
 This module is for calculating surface areas
 from OpenStructure using the external program naccess
@@ -18,16 +18,13 @@ import tempfile
 import subprocess
 import os
 import re
-from ost import io
-from ost import mol
-from ost import settings
-from ost import geom
+from ost import io, mol, settings, LogWarning
 
 def _GetExecutable(naccess_exe):
   """
   Method to check if naccess executable is present
 
-  :param naccess:   Explicit path to msms executable
+  :param naccess:   Explicit path to naccess executable
   :returns:         Path to the executable
   :exception:       FileNotFound if executable is not found
   """
@@ -46,14 +43,14 @@ def _SetupFiles(entity, selection, scratch_dir, max_number_of_atoms):
   """
 
   # create temporary directory
-  tmp_dir_name=""
-  if scratch_dir!=None:
-    tmp_dir_name=tempfile.mkdtemp(dir=scratch_dir)
+  tmp_dir_name = ""
+  if scratch_dir != None:
+    tmp_dir_name = tempfile.mkdtemp(dir=scratch_dir)
   else:
-    tmp_dir_name=tempfile.mkdtemp()
+    tmp_dir_name = tempfile.mkdtemp()
 
-  # select only heavy atoms if no_hydrogens is true
-  entity_view=entity.Select(selection)
+  # select as specified by user
+  entity_view = entity.Select(selection)
   if len(entity_view.atoms) > max_number_of_atoms:
     raise RuntimeError, "Too much atoms for NACCESS (> %s)" % max_number_of_atoms
   if not entity_view.IsValid():
@@ -61,7 +58,7 @@ def _SetupFiles(entity, selection, scratch_dir, max_number_of_atoms):
   
   # write entity to tmp file
   tmp_file_name = "entity.pdb"
-  tmp_file_base = os.path.join(tmp_dir_name,"entity")
+  tmp_file_base = os.path.join(tmp_dir_name, "entity")
   io.SavePDB(entity_view, os.path.join(tmp_dir_name, tmp_file_name))
   return (tmp_dir_name, tmp_file_name, tmp_file_base)
 
@@ -171,10 +168,11 @@ def _RunNACCESS(command, temp_dir):
   :returns:                stdout of MSMS
   :exception:              CalledProcessError for non-zero return value
   """
-  proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, cwd = temp_dir)
+  proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
+                          cwd=temp_dir)
   stdout_value, stderr_value = proc.communicate()
 
-  #check for successful completion of msms
+  # check for successful completion of naccess
   if proc.returncode!=0:
     print "WARNING: naccess error\n", stdout_value
     raise subprocess.CalledProcessError(proc.returncode, command)
@@ -184,8 +182,10 @@ def _RunNACCESS(command, temp_dir):
 
 def CalculateSurfaceArea(entity,  radius=1.4,  
                          include_hydrogens=False, include_hetatm = False, 
-                         include_water = False, selection="",
-                         naccess_exe=None, keep_files=False , asa_abs= "asaAbs", asa_rel="asaRel", asa_atom="asaAtom", scratch_dir = None, max_number_of_atoms=50000):
+                         include_water=False, selection="", naccess_exe=None,
+                         keep_files=False, asa_abs= "asaAbs", asa_rel="asaRel",
+                         asa_atom="asaAtom", scratch_dir=None,
+                         max_number_of_atoms=50000):
   """
   Calculates analytical the solvent accessible surface area by using the
   external naccess program
@@ -203,56 +203,55 @@ def CalculateSurfaceArea(entity,  radius=1.4,
   :param include_water:       Calculate surface including water
   :param selection:           Calculate surface for subset of entity
   :param naccess_exe:         naccess executable (full path to executable)
-  :param keep_files:          Do not delete temporary files
-  :param asa_abs:             Attaches per residue absolute SASA to specified FloatProp on residue level
-  :param asa_rel:             Attaches per residue relative SASA to specified FloatProp on residue level
-  :param asa_atom:            Attaches per atom SASA to specified FloatProp at atom level
-  :param scratch_dir:         Directory for temporary files (NACCESS is sensitive to "." in directory names
-  :param max_number_of_atoms: Max Number of atoms in the entity (i.e. is limited in the default NACCESS version to 50 000)
+  :param keep_files:          If True, do not delete temporary files
+  :param asa_abs:             Attaches per residue absolute SASA to specified
+                              FloatProp on residue level
+  :param asa_rel:             Attaches per residue relative SASA to specified
+                              FloatProp on residue level
+  :param asa_atom:            Attaches per atom SASA to specified FloatProp at
+                              atom level
+  :param scratch_dir:         Scratch directory. A subfolder for temporary files
+                              is created in there. If not specified, a default
+                              directory is used (see :func:`tempfile.mkdtemp`).
+  :param max_number_of_atoms: Max Number of atoms in the entity (i.e. is limited
+                              in the default NACCESS version to 50 000)
 
   :returns:                   absolute SASA calculated using asa_atom
   """
-
-  import re 
   
-  # check if msms executable is specified
+  # check if naccess executable is specified
   naccess_executable=_GetExecutable(naccess_exe)
-  # parse selection
   
-  # setup files for msms
-  (naccess_data_dir, naccess_data_file,naccess_data_base )=_SetupFiles(entity, selection, scratch_dir, max_number_of_atoms)
+  # setup files for naccess
+  (naccess_data_dir, naccess_data_file, naccess_data_base) \
+    = _SetupFiles(entity, selection, scratch_dir, max_number_of_atoms)
 
   # set command line
-  command="%s %s -p %f " % \
-          (naccess_executable, naccess_data_file, radius)
+  command = "%s %s -p %f " % \
+            (naccess_executable, naccess_data_file, radius)
   if include_hydrogens:
     command = "%s -w" % command
   if include_water:
     command = "%s -y" % command
   if include_hetatm:
     command = "%s -h" % command
-  #print command
-  stdout_value=_RunNACCESS(command, naccess_data_dir)
+  # execute naccess
+  stdout_value = _RunNACCESS(command, naccess_data_dir)
   
+  # parse outout
   new_asa= os.path.join(naccess_data_dir, "%s.asa" % naccess_data_base) 
   _ParseAsaFile(entity, new_asa, asa_atom)
     
   new_rsa = os.path.join(naccess_data_dir, "%s.rsa" % naccess_data_base) 
   _ParseRsaFile(entity, new_rsa, asa_abs, asa_rel)
   
-  # Calculate Asa for all atoms:
+  # sum up Asa for all atoms
   sasa = 0.0 
   for a in entity.atoms:
     sasa += a.GetFloatProp(asa_atom, 0.0)
     
-  
-  # first read in result_file
-  
-  # parse MSMS output
-  
   # clean up
   if not keep_files:
     __CleanupFiles(naccess_data_dir)
 
   return sasa
-  
