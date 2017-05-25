@@ -40,6 +40,7 @@ void export_TrajectoryAnalysis();
 void export_StructureAnalysis();
 void export_Clash();
 void export_contact_overlap();
+void export_accessibility();
 #if OST_IMG_ENABLED
 void export_entity_to_density();
 #endif
@@ -109,6 +110,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   export_StructureAnalysis();
   export_Clash();
   export_contact_overlap();
+  export_accessibility();
   #if OST_IMG_ENABLED
   export_entity_to_density();
   #endif

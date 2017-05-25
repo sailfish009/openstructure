@@ -18,6 +18,7 @@ set(OST_MOL_ALG_HEADERS
   contact_overlap.hh
   domain_find.hh
   similarity_matrix.hh
+  accessibility.hh
 )
 
 set(OST_MOL_ALG_SOURCES
@@ -39,6 +40,7 @@ set(OST_MOL_ALG_SOURCES
   contact_overlap.cc
   domain_find.cc
   similarity_matrix.cc
+  accessibility.cc
 )
 
 set(MOL_ALG_DEPS ost_mol ost_seq)
