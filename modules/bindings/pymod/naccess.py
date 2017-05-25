@@ -316,9 +316,9 @@ def CalculateSurfaceArea(entity,  radius=1.4,
       command = "%s %s -p %f " % \
                 (naccess_executable, naccess_data_file, radius)
       if include_hydrogens:
-        command = "%s -w" % command
-      if include_water:
         command = "%s -y" % command
+      if include_water:
+        command = "%s -w" % command
       if include_hetatm:
         command = "%s -h" % command
       # execute naccess
