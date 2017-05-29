@@ -2,8 +2,10 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include <algorithm>
 #include <cmath>
+#include <ost/mol/chain_view.hh>
 #include <ost/mol/residue_view.hh>
 #include <ost/mol/atom_view.hh>
 
@@ -56,22 +58,15 @@ struct CubeGrid {
     cubes[cube_idx]->AddIndex(idx);
   }
 
-  void GetCubes(Real x, Real y, Real z,
-                std::vector<Cube*>& neighbouring_cubes,
-                Cube*& central_cube) {
+  void GetNeighbouringCubes(int cube_idx,
+                            std::vector<Cube*>& neighbouring_cubes) const {
 
-    int x_cube = (x - x_min) / cube_edge_length;
-    int y_cube = (y - y_min) / cube_edge_length;
-    int z_cube = (z - z_min) / cube_edge_length;
-
-    // set the central cube... we throw an error if this cube doesn't exist!
-    int cube_idx = x_cube * y_cubes * z_cubes + y_cube * z_cubes + z_cube;
-
-    if(cubes[cube_idx] == NULL){
-        throw ost::Error("This should not happen!");
-    }
-
-    central_cube = cubes[cube_idx];
+    int temp = cube_idx;
+    int x_cube = temp / (y_cubes * z_cubes);
+    temp -= x_cube * y_cubes * z_cubes;
+    int y_cube = temp / z_cubes;
+    temp -= y_cube * z_cubes;
+    int z_cube =  temp;
 
     // let's try all neighbours... only add if they actually exist!
     int x_min = std::max(x_cube - 1, 0);
@@ -97,6 +92,12 @@ struct CubeGrid {
     }
   }
 
+  int GetNumCubes() const { return x_cubes*y_cubes*z_cubes; }
+
+  bool IsInitialized(int cube_idx) const { return cubes[cube_idx] != NULL; }
+
+  Cube* GetCube(int cube_idx) const { return cubes[cube_idx]; }
+
   Real cube_edge_length;
   int x_cubes;
   int y_cubes;
@@ -107,15 +108,87 @@ struct CubeGrid {
   Cube** cubes;
 };
 
+// this struct might occur a bit stupid. The only thing it does is to keep track
+// of occupied cubes with the exactly Lookup scheme than the CubeGrid. 
+// It does not store anything else.
+struct CubeOccupationGrid{
+
+  CubeOccupationGrid(const CubeGrid& cube_grid): 
+                     cube_edge_length(cube_grid.cube_edge_length),
+                     x_cubes(cube_grid.x_cubes),
+                     y_cubes(cube_grid.y_cubes),
+                     z_cubes(cube_grid.z_cubes),
+                     x_min(cube_grid.x_min),
+                     y_min(cube_grid.y_min),
+                     z_min(cube_grid.z_min) {
+    int num_cubes = x_cubes * y_cubes * z_cubes;
+    occupied_cubes = new bool[num_cubes];
+    memset(occupied_cubes, 0, num_cubes * sizeof(bool));
+  }
+
+  ~CubeOccupationGrid() { delete [] occupied_cubes; }
+
+  void Occupy(Real x_pos, Real y_pos, Real z_pos) {
+    int x_cube = (x_pos - x_min) / cube_edge_length;
+    int y_cube = (y_pos - y_min) / cube_edge_length;
+    int z_cube = (z_pos - z_min) / cube_edge_length;
+    int cube_idx = x_cube * y_cubes * z_cubes + y_cube * z_cubes + z_cube;
+    occupied_cubes[cube_idx] = true;
+  }
+
+  bool IsOccupied(int cube_idx) {
+    return occupied_cubes[cube_idx];
+  }
+
+  bool HasOccupiedNeighbour(int cube_idx) {
+    int temp = cube_idx;
+    int x_cube = temp / (y_cubes * z_cubes);
+    temp -= x_cube * y_cubes * z_cubes;
+    int y_cube = temp / z_cubes;
+    temp -= y_cube * z_cubes;
+    int z_cube =  temp;
+
+    // let's try all neighbours... only add if they actually exist!
+    int x_min = std::max(x_cube - 1, 0);
+    int x_max = std::min(x_cube + 1, x_cubes - 1);
+    int y_min = std::max(y_cube - 1, 0);
+    int y_max = std::min(y_cube + 1, y_cubes - 1);
+    int z_min = std::max(z_cube - 1, 0);
+    int z_max = std::min(z_cube + 1, z_cubes - 1);
+   
+    for(int i = x_min; i <= x_max; ++i) {
+      for(int j = y_min; j <= y_max; ++j) {
+        for(int k = z_min; k <= z_max; ++k){
+          if(!(i == x_cube && j == y_cube && k == z_cube)){
+            // its not the central cube, so lets add it if initialized
+            cube_idx = i * y_cubes * z_cubes + j * z_cubes + k;
+            if(occupied_cubes[cube_idx]) return true; 
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  Real cube_edge_length;
+  int x_cubes;
+  int y_cubes;
+  int z_cubes;
+  Real x_min;
+  Real y_min;
+  Real z_min;
+  bool* occupied_cubes;
+};
+
 
 Real GetAtomAccessibility(Real x_pos, Real y_pos, Real z_pos,
-                           Real radius,
-                           const std::vector<Real>& dx, 
-                           const std::vector<Real>& dy, 
-                           const std::vector<Real>& d, 
-                           const std::vector<Real>& dsqr, 
-                           const std::vector<Real>& z, 
-                           const std::vector<Real>& radii) {
+                          Real radius,
+                          const std::vector<Real>& dx, 
+                          const std::vector<Real>& dy, 
+                          const std::vector<Real>& d, 
+                          const std::vector<Real>& dsqr, 
+                          const std::vector<Real>& z, 
+                          const std::vector<Real>& radii) {
 
   int num_close_atoms = dx.size();
 
@@ -242,59 +315,31 @@ Real GetAtomAccessibility(Real x_pos, Real y_pos, Real z_pos,
   return area*radius;
 }
 
-void CalculateASA(std::vector<Real>& x, std::vector<Real>& y, 
-                  std::vector<Real>& z, std::vector<Real>& radii, 
-                  Real probe_radius, std::vector<Real>& asa) {
 
-  int num_atoms = x.size();
-  asa.resize(num_atoms);
-
-  std::vector<Real> full_radii;
-  full_radii.resize(num_atoms);
-  Real x_min = x[0];
-  Real x_max = x[0];
-  Real y_min = y[0];
-  Real y_max = y[0];
-  Real z_min = z[0];
-  Real z_max = z[0];
-  Real r_max = radii[0] + probe_radius;
-  full_radii[0] = r_max;
-
-  for(int i = 1; i < num_atoms; ++i){
-    full_radii[i] = radii[i] + probe_radius;
-    x_min = std::min(x_min, x[i]);
-    x_max = std::max(x_max, x[i]);
-    y_min = std::min(y_min, y[i]);
-    y_max = std::max(y_max, y[i]);
-    z_min = std::min(z_min, z[i]);
-    z_max = std::max(z_max, z[i]);
-    r_max = std::max(r_max, full_radii[i]);
-  }
-  
-  Real x_range = x_max - x_min;
-  Real y_range = y_max - y_min;
-  Real z_range = z_max - z_min;
-  Real cube_edge_length = 2 * (r_max);
-  int x_cubes = std::ceil(x_range / cube_edge_length);
-  int y_cubes = std::ceil(y_range / cube_edge_length);
-  int z_cubes = std::ceil(z_range / cube_edge_length);
-
-  CubeGrid cube_grid(cube_edge_length, x_cubes, y_cubes, z_cubes,
-                     x_min, y_min, z_min);
-
-  for(int i = 0; i < num_atoms; ++i) {
-    cube_grid.AddIndex(x[i], y[i], z[i], i);
-  }
+void SolveCube(const CubeGrid& cube_grid, int cube_idx,
+               const std::vector<Real>& x, const std::vector<Real>& y, 
+               const std::vector<Real>& z, const std::vector<Real>& radii, 
+               std::vector<Real>& asa) {
 
   //prepare some stuff
   std::vector<Real> close_atom_dx, close_atom_dy, close_atom_d;
   std::vector<Real> close_atom_dsqr, close_atom_z, close_atom_radii;
+
+  close_atom_dx.reserve(200);
+  close_atom_dy.reserve(200);
+  close_atom_d.reserve(200);
+  close_atom_dsqr.reserve(200);
+  close_atom_z.reserve(200);
+  close_atom_radii.reserve(200);
+
+  Cube* central_cube = cube_grid.GetCube(cube_idx);;
   std::vector<Cube*> neighbouring_cubes;
-  Cube* central_cube;
+  cube_grid.GetNeighbouringCubes(cube_idx, neighbouring_cubes);
+  const std::vector<int>& cube_atoms = central_cube->GetIndices();
 
-  // iterate over every atom
-  for(int atom_idx = 0; atom_idx < num_atoms; ++atom_idx) {
+  for(uint idx = 0; idx < cube_atoms.size(); ++idx) {
 
+    int atom_idx = cube_atoms[idx];
     close_atom_dx.clear();
     close_atom_dy.clear();
     close_atom_d.clear();
@@ -305,10 +350,7 @@ void CalculateASA(std::vector<Real>& x, std::vector<Real>& y,
     Real current_x = x[atom_idx];
     Real current_y = y[atom_idx];
     Real current_z = z[atom_idx];
-    Real current_radius = full_radii[atom_idx];
-
-    cube_grid.GetCubes(current_x, current_y, current_z, 
-                       neighbouring_cubes, central_cube);
+    Real current_radius = radii[atom_idx];
 
     // gather the stuff from all neighbouring cubes
     for(std::vector<Cube*>::iterator cube_it = neighbouring_cubes.begin();
@@ -324,13 +366,13 @@ void CalculateASA(std::vector<Real>& x, std::vector<Real>& y,
         Real dy = current_y - y[close_atom_idx]; 
         Real sqr_d = dx*dx + dy*dy;
         Real d = std::sqrt(sqr_d);
-
+  
         close_atom_dx.push_back(dx);
         close_atom_dy.push_back(dy);
         close_atom_dsqr.push_back(sqr_d);
         close_atom_d.push_back(d);
         close_atom_z.push_back(z[close_atom_idx]);
-        close_atom_radii.push_back(full_radii[close_atom_idx]);
+        close_atom_radii.push_back(radii[close_atom_idx]);
       }
     }
 
@@ -352,10 +394,10 @@ void CalculateASA(std::vector<Real>& x, std::vector<Real>& y,
         close_atom_dsqr.push_back(sqr_d);
         close_atom_d.push_back(d);
         close_atom_z.push_back(z[close_atom_idx]);
-        close_atom_radii.push_back(full_radii[close_atom_idx]);
+        close_atom_radii.push_back(radii[close_atom_idx]);
       }
     }
-
+    
     asa[atom_idx] = GetAtomAccessibility(current_x, current_y, current_z, 
                                          current_radius, 
                                          close_atom_dx, close_atom_dy, 
@@ -365,11 +407,268 @@ void CalculateASA(std::vector<Real>& x, std::vector<Real>& y,
 }
 
 
+void AddProbeToRadii(const std::vector<Real>& radii,
+                     Real probe_radius,
+                     std::vector<Real>& full_radii) {
+  int size = radii.size();
+  full_radii.resize(size);
+  for(int i = 0; i < size; ++i) {
+    full_radii[i] = radii[i] + probe_radius;
+  }
+}
+
+
+CubeGrid SetupCubeGrid(const std::vector<Real>& x,
+                       const std::vector<Real>& y,
+                       const std::vector<Real>& z,
+                       const std::vector<Real>& full_radii) {
+
+  Real x_min = x[0];
+  Real x_max = x[0];
+  Real y_min = y[0];
+  Real y_max = y[0];
+  Real z_min = z[0];
+  Real z_max = z[0];
+  Real r_max = full_radii[0];
+
+  for(uint i = 1; i < x.size(); ++i){
+    x_min = std::min(x_min, x[i]);
+    x_max = std::max(x_max, x[i]);
+    y_min = std::min(y_min, y[i]);
+    y_max = std::max(y_max, y[i]);
+    z_min = std::min(z_min, z[i]);
+    z_max = std::max(z_max, z[i]);
+    r_max = std::max(r_max, full_radii[i]);
+  }
+  
+  Real x_range = x_max - x_min;
+  Real y_range = y_max - y_min;
+  Real z_range = z_max - z_min;
+  Real cube_edge_length = 2 * (r_max);
+  int x_cubes = std::ceil(x_range / cube_edge_length);
+  int y_cubes = std::ceil(y_range / cube_edge_length);
+  int z_cubes = std::ceil(z_range / cube_edge_length);
+
+  CubeGrid cube_grid(cube_edge_length, x_cubes, y_cubes, z_cubes,
+                     x_min, y_min, z_min);
+
+  return cube_grid;
+}
+
+
+void CalculateASAOligo(std::vector<Real>& x, std::vector<Real>& y, 
+                       std::vector<Real>& z, std::vector<Real>& radii,
+                       std::vector<int> chain_indices, 
+                       Real probe_radius, std::vector<Real>& asa,
+                       std::vector<Real>& asa_single_chain) {
+
+  int num_atoms = x.size();
+  asa.resize(num_atoms);
+
+  std::vector<Real> full_radii;
+  AddProbeToRadii(radii, probe_radius, full_radii);
+
+  CubeGrid cube_grid = SetupCubeGrid(x,y,z,full_radii);
+
+  for(int i = 0; i < num_atoms; ++i) {
+    cube_grid.AddIndex(x[i], y[i], z[i], i);
+  }
+
+  int num_cubes = cube_grid.GetNumCubes();
+  for(int cube_idx = 0; cube_idx < num_cubes; ++cube_idx) {
+
+    if(cube_grid.IsInitialized(cube_idx)) {
+      // there is at least one atom!
+      SolveCube(cube_grid, cube_idx, x, y, z, full_radii, asa);
+    }
+  }
+
+  // let's start with the single chain stuff
+  // the asa are assumed to be exactly the same for the majority of the atoms
+  asa_single_chain = asa;
+
+  // let's find all unique chains
+  std::set<int> unique_indices;
+  for(std::vector<int>::const_iterator it = chain_indices.begin(); 
+      it != chain_indices.end(); ++it) {
+    unique_indices.insert(*it);
+  }
+
+  for(std::set<int>::iterator set_it = unique_indices.begin(); 
+      set_it != unique_indices.end(); ++set_it) {
+
+    int current_chain_idx = *set_it;
+
+    // let's generate a cube grid with exactly the same size as before 
+    // but only fill it with stuff from the current chain
+    CubeGrid single_chain_cube_grid(cube_grid.cube_edge_length, 
+                                    cube_grid.x_cubes, 
+                                    cube_grid.y_cubes, 
+                                    cube_grid.z_cubes,
+                                    cube_grid.x_min, 
+                                    cube_grid.y_min, 
+                                    cube_grid.z_min);
+
+    // in here we store the cube grids that are occupied by the atoms NOT
+    // belonging to the current chain
+    CubeOccupationGrid occupation_grid(single_chain_cube_grid);
+
+    for(int i = 0; i < num_atoms; ++i) {
+      if(current_chain_idx == chain_indices[i]) {
+        single_chain_cube_grid.AddIndex(x[i], y[i], z[i], i);
+      }
+      else {
+        occupation_grid.Occupy(x[i], y[i], z[i]);
+      }
+    }
+
+    for(int cube_idx = 0; cube_idx < single_chain_cube_grid.GetNumCubes(); 
+        ++cube_idx) {
+
+      if(single_chain_cube_grid.IsInitialized(cube_idx) && 
+         (occupation_grid.IsOccupied(cube_idx) ||
+          occupation_grid.HasOccupiedNeighbour(cube_idx))) {
+        // there is at least one atom in the cube AND the environment has 
+        // changes compared to the previous asa calculation
+        SolveCube(single_chain_cube_grid, cube_idx, x, y, z, full_radii, 
+                  asa_single_chain);
+      }
+    }
+  }
+}
+
+
+void CalculateASA(const std::vector<Real>& x, 
+                  const std::vector<Real>& y, 
+                  const std::vector<Real>& z, 
+                  const std::vector<Real>& radii, 
+                  Real probe_radius, 
+                  std::vector<Real>& asa) {
+
+  int num_atoms = x.size();
+  asa.resize(num_atoms);
+
+  std::vector<Real> full_radii;
+  AddProbeToRadii(radii, probe_radius, full_radii);
+
+  CubeGrid cube_grid = SetupCubeGrid(x, y, z, full_radii);
+
+  for(int i = 0; i < num_atoms; ++i) {
+    cube_grid.AddIndex(x[i], y[i], z[i], i);
+  }
+
+  int num_cubes = cube_grid.GetNumCubes();
+  for(int cube_idx = 0; cube_idx < num_cubes; ++cube_idx) {
+
+    if(cube_grid.IsInitialized(cube_idx)) {
+      // there is at least one atom!
+      SolveCube(cube_grid, cube_idx, x, y, z, full_radii, asa);
+    }
+  }
+}
+
+
+void ASAParamFromAtomList(const ost::mol::AtomViewList& atom_list,
+                          std::vector<Real>& x_pos,
+                          std::vector<Real>& y_pos,
+                          std::vector<Real>& z_pos,
+                          std::vector<Real>& radii) {
+
+  const ost::mol::alg::NACCESSParam& param = 
+  ost::mol::alg::NACCESSParam::GetInstance();
+  String rname, aname, ele;
+
+  for(ost::mol::AtomViewList::const_iterator at_it = atom_list.begin();
+      at_it != atom_list.end(); ++at_it) {
+    rname = at_it->GetResidue().GetName();
+    aname = at_it->GetName();
+    ele = at_it->GetElement();
+    geom::Vec3 at_pos = at_it->GetPos();
+    x_pos.push_back(at_pos[0]);
+    y_pos.push_back(at_pos[1]);
+    z_pos.push_back(at_pos[2]);
+    radii.push_back(param.GetVdWRadius(rname, aname, ele));
+  } 
+}  
+
+
+void ASAParamFromAtomList(const ost::mol::AtomViewList& atom_list,
+                          std::vector<Real>& x_pos,
+                          std::vector<Real>& y_pos,
+                          std::vector<Real>& z_pos,
+                          std::vector<Real>& radii,
+                          std::vector<int>& chain_indices) {
+
+  const ost::mol::alg::NACCESSParam& param = 
+  ost::mol::alg::NACCESSParam::GetInstance();
+  String rname, aname, ele;
+
+  // since no function to directly access a chain index, we have to do
+  // that with an ugly hack... thats stupid and should be replaced...
+  ost::mol::ChainViewList chain_list = 
+  atom_list[0].GetEntity().GetChainList();
+  ost::mol::ChainViewList::iterator chain_list_begin = chain_list.begin();
+  ost::mol::ChainViewList::iterator chain_list_end = chain_list.end();
+
+  for(ost::mol::AtomViewList::const_iterator at_it = atom_list.begin();
+      at_it != atom_list.end(); ++at_it) {
+    rname = at_it->GetResidue().GetName();
+    aname = at_it->GetName();
+    ele = at_it->GetElement();
+    geom::Vec3 at_pos = at_it->GetPos();
+    x_pos.push_back(at_pos[0]);
+    y_pos.push_back(at_pos[1]);
+    z_pos.push_back(at_pos[2]);
+    radii.push_back(param.GetVdWRadius(rname, aname, ele));
+    ost::mol::ChainView chain = at_it->GetResidue().GetChain();
+    ost::mol::ChainViewList::iterator found_it = 
+    std::find(chain_list_begin, chain_list_end, chain);
+    chain_indices.push_back(static_cast<int>(found_it - chain_list_begin));
+  } 
+} 
+
+
+Real SetAccessibilityProps(ost::mol::EntityView& ent,
+                           ost::mol::AtomViewList& atom_list,
+                           const std::vector<Real>& asa,
+                           const String& asa_atom,
+                           const String& asa_abs,
+                           const String& asa_rel){
+
+  // assign absolute accessibilities
+  Real summed_asa = 0.0;
+  for(uint idx = 0; idx < asa.size(); ++idx) {
+    Real val = asa[idx];
+    atom_list[idx].SetFloatProp(asa_atom, val);
+    ost::mol::ResidueView res = atom_list[idx].GetResidue();
+    Real current_asa = res.GetFloatProp(asa_abs, 0.0);
+    res.SetFloatProp(asa_abs, current_asa + val);
+    summed_asa += val;
+  }
+
+  // go over residue and assign relative accessibilities
+  String rname;
+  ost::mol::ResidueViewList res_list = ent.GetResidueList();
+  for(uint idx = 0; idx < res_list.size(); ++idx) {
+    rname = res_list[idx].GetName();
+    Real tot_acc = 
+    ost::mol::alg::NACCESSParam::GetInstance().GetResidueAccessibility(rname);
+    if(tot_acc == 0.0) {
+      // no accessibility found... 
+      res_list[idx].SetFloatProp(asa_rel, 0.0);
+    }
+    else {
+      // the fraction gets multiplied by 100 (Thats how NACCESS does it...)
+      Real val = res_list[idx].GetFloatProp(asa_abs, 0.0) / tot_acc * 100.0;
+      res_list[idx].SetFloatProp(asa_rel, val);
+    }
+  }
+
+  return summed_asa;
+}
+
+
 } //ns
-
-
-
-
 
 
 
@@ -628,6 +927,7 @@ NACCESSParam::NACCESSParam() {
   accessibilities_["TYR"] = 212.76;
 }
 
+
 Real NACCESSParam::GuessRadius(const String& ele) const{
   if(ele == "C") return 1.80;
   if(ele == "N") return 1.60;
@@ -644,6 +944,7 @@ Real NACCESSParam::GuessRadius(const String& ele) const{
   return 1.80;
 }
 
+
 Real NACCESSParam::GetVdWRadius(const String& rname, const String& aname, 
                                 const String& ele) const{
   std::map<String, std::map<String, Real> >::const_iterator res_map_it =
@@ -656,6 +957,7 @@ Real NACCESSParam::GetVdWRadius(const String& rname, const String& aname,
   return GuessRadius(ele);
 }
 
+
 Real NACCESSParam::GetResidueAccessibility(const String& rname) const{
   std::map<String, Real>::const_iterator it = accessibilities_.find(rname);
   if(it != accessibilities_.end()) return it->second;
@@ -666,6 +968,7 @@ Real NACCESSParam::GetResidueAccessibility(const String& rname) const{
 Real Accessibility(ost::mol::EntityView& ent, 
                    Real probe_radius, bool include_hydrogens,
                    bool include_hetatm, bool include_water,
+                   bool oligo_mode,
                    const String& selection, 
                    const String& asa_abs, 
                    const String& asa_rel,
@@ -720,68 +1023,57 @@ Real Accessibility(ost::mol::EntityView& ent,
   radii.reserve(selected_ent.GetAtomCount());
 
   // extract data from ent
-  String rname, aname, ele;
-
-  const NACCESSParam& param = NACCESSParam::GetInstance();
-
   ost::mol::AtomViewList atom_list = selected_ent.GetAtomList();
-  for(ost::mol::AtomViewList::const_iterator at_it = atom_list.begin();
-      at_it != atom_list.end(); ++at_it) {
-    rname = at_it->GetResidue().GetName();
-    aname = at_it->GetName();
-    ele = at_it->GetElement();
-    geom::Vec3 at_pos = at_it->GetPos();
-    x_pos.push_back(at_pos[0]);
-    y_pos.push_back(at_pos[1]);
-    z_pos.push_back(at_pos[2]);
-    radii.push_back(param.GetVdWRadius(rname, aname, ele));
-  }  
 
-  // per atom accessibilities come in here
-  std::vector<Real> asa;
+  if(atom_list.size() == 0) return 0.0;
 
-  // do it! do it! do it!
-  CalculateASA(x_pos, y_pos, z_pos, radii, probe_radius, asa);
+  if(oligo_mode) {
+    std::vector<int> chain_indices;
+    chain_indices.reserve(selected_ent.GetAtomCount());
 
-  // assign 0.0 for per residue asaAbs
-  ost::mol::ResidueViewList res_list = selected_ent.GetResidueList();
-  for(uint res_idx = 0; res_idx < res_list.size(); ++res_idx) {
-    res_list[res_idx].SetFloatProp(asa_abs, 0.0);
+    ASAParamFromAtomList(atom_list, x_pos, y_pos, z_pos, radii, chain_indices);
+
+    // do it! do it! do it!              
+    std::vector<Real> asa;
+    std::vector<Real> asa_single_chain;
+    CalculateASAOligo(x_pos, y_pos, z_pos, radii, chain_indices, 
+                      probe_radius, asa, asa_single_chain);
+
+    Real summed_asa = SetAccessibilityProps(selected_ent, atom_list, asa, 
+                                            asa_atom, asa_abs, asa_rel);
+
+    // in case of the single chain asa, the property names are
+    // moodified!!
+    String single_chain_asa_atom = asa_atom + "_single_chain";
+    String single_chain_asa_abs = asa_abs + "_single_chain";
+    String single_chain_asa_rel = asa_rel + "_single_chain";
+
+    SetAccessibilityProps(selected_ent, atom_list, asa_single_chain, 
+                          single_chain_asa_atom, 
+                          single_chain_asa_abs, 
+                          single_chain_asa_rel);
+
+    return summed_asa;
+  }
+  else {
+    ASAParamFromAtomList(atom_list, x_pos, y_pos, z_pos, radii);
+    // do it! do it! do it!
+    std::vector<Real> asa;
+    CalculateASA(x_pos, y_pos, z_pos, radii, probe_radius, asa);
+
+    Real summed_asa = SetAccessibilityProps(selected_ent, atom_list, asa, 
+                                            asa_atom, asa_abs, asa_rel);
+
+    return summed_asa;
   }
 
-  // assign absolute accessibilities
-  Real summed_asa = 0.0;
-  for(uint idx = 0; idx < asa.size(); ++idx) {
-    Real val = asa[idx];
-    atom_list[idx].SetFloatProp(asa_atom, val);
-    ost::mol::ResidueView res = atom_list[idx].GetResidue();
-    Real current_asa = res.GetFloatProp(asa_abs);
-    res.SetFloatProp(asa_abs, current_asa + val);
-    summed_asa += val;
-  }
-
-  // go over residue and assign relative accessibilities
-  for(uint idx = 0; idx < res_list.size(); ++idx) {
-    rname = res_list[idx].GetName();
-    Real tot_acc = NACCESSParam::GetInstance().GetResidueAccessibility(rname);
-    if(tot_acc == 0.0) {
-      // no accessibility found... 
-      res_list[idx].SetFloatProp(asa_rel, 0.0);
-    }
-    else {
-      // the fraction gets multiplied by 100 (Thats how NACCESS does it...)
-      Real val = res_list[idx].GetFloatProp(asa_abs) / tot_acc * 100.0;
-      res_list[idx].SetFloatProp(asa_rel, val);
-    }
-  }
-
-  return summed_asa;
 }
 
 
 Real Accessibility(ost::mol::EntityHandle& ent, 
                    Real probe_radius, bool include_hydrogens,
                    bool include_hetatm, bool include_water,
+                   bool oligo_mode,
                    const String& selection,
                    const String& asa_abs, 
                    const String& asa_rel,
@@ -789,7 +1081,7 @@ Real Accessibility(ost::mol::EntityHandle& ent,
 
   ost::mol::EntityView entity_view = ent.CreateFullView();
   return Accessibility(entity_view, probe_radius, include_hydrogens,
-                       include_hetatm, include_water,
+                       include_hetatm, include_water, oligo_mode,
                        selection, asa_abs, asa_rel, asa_atom);
 }
 

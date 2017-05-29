@@ -31,13 +31,14 @@ Real WrapAccessibilityHandle(ost::mol::EntityHandle& ent,
                              bool include_hydrogens, 
                              bool include_hetatm,
                              bool include_water,
+                             bool oligo_mode,
                              const String& selection,
                              const String& asa_abs, 
                              const String& asa_rel,
                              const String& asa_atom) {
                                  
   return ost::mol::alg::Accessibility(ent, probe_radius, include_hydrogens, 
-                                      include_hetatm, include_water,
+                                      include_hetatm, include_water, oligo_mode,
                                       selection, asa_abs, asa_rel, asa_atom);
 }
 
@@ -46,12 +47,13 @@ Real WrapAccessibilityView(ost::mol::EntityView& ent,
                            bool include_hydrogens, 
                            bool include_hetatm,
                            bool include_water,
+                           bool oligo_mode,
                            const String& selection,
                            const String& asa_abs, const String& asa_rel,
                            const String& asa_atom) {
 
   return ost::mol::alg::Accessibility(ent, probe_radius, include_hydrogens, 
-                                      include_hetatm, include_water, 
+                                      include_hetatm, include_water, oligo_mode,
                                       selection, asa_abs, asa_rel, asa_atom);
 }
 
@@ -67,6 +69,7 @@ void export_accessibility() {
                                                    arg("include_hydrogens")=false,
                                                    arg("include_hetatm")=false,
                                                    arg("include_water")=false,
+                                                   arg("oligo_mode")=false,
                                                    arg("selection")="",
                                                    arg("asa_abs")="asaAbs",
                                                    arg("asa_rel")="asaRel",
@@ -77,6 +80,7 @@ void export_accessibility() {
                                                  arg("include_hydrogens")=false,
                                                  arg("include_hetatm")=false,
                                                  arg("include_water")=false,
+                                                 arg("oligo_mode")=false,
                                                  arg("selection")="",
                                                  arg("asa_abs")="asaAbs",
                                                  arg("asa_rel")="asaRel",
