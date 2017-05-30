@@ -589,19 +589,10 @@ void ASAParamFromAtomList(const ost::mol::AtomViewList& atom_list,
     z_pos.push_back(at_pos[2]);
     radii.push_back(param.GetVdWRadius(rname, aname, ele));
   } 
-}  
+}
 
-
-void ASAParamFromAtomList(const ost::mol::AtomViewList& atom_list,
-                          std::vector<Real>& x_pos,
-                          std::vector<Real>& y_pos,
-                          std::vector<Real>& z_pos,
-                          std::vector<Real>& radii,
-                          std::vector<int>& chain_indices) {
-
-  const ost::mol::alg::NACCESSParam& param = 
-  ost::mol::alg::NACCESSParam::GetInstance();
-  String rname, aname, ele;
+void ChainIndicesFromAtomList(const ost::mol::AtomViewList& atom_list,
+                              std::vector<int>& chain_indices) {
 
   // since no function to directly access a chain index, we have to do
   // that with an ugly hack... thats stupid and should be replaced...
@@ -612,21 +603,12 @@ void ASAParamFromAtomList(const ost::mol::AtomViewList& atom_list,
 
   for(ost::mol::AtomViewList::const_iterator at_it = atom_list.begin();
       at_it != atom_list.end(); ++at_it) {
-    rname = at_it->GetResidue().GetName();
-    aname = at_it->GetName();
-    ele = at_it->GetElement();
-    geom::Vec3 at_pos = at_it->GetPos();
-    x_pos.push_back(at_pos[0]);
-    y_pos.push_back(at_pos[1]);
-    z_pos.push_back(at_pos[2]);
-    radii.push_back(param.GetVdWRadius(rname, aname, ele));
     ost::mol::ChainView chain = at_it->GetResidue().GetChain();
     ost::mol::ChainViewList::iterator found_it = 
     std::find(chain_list_begin, chain_list_end, chain);
     chain_indices.push_back(static_cast<int>(found_it - chain_list_begin));
   } 
-} 
-
+}  
 
 Real SetAccessibilityProps(ost::mol::EntityView& ent,
                            ost::mol::AtomViewList& atom_list,
@@ -1024,14 +1006,16 @@ Real Accessibility(ost::mol::EntityView& ent,
 
   // extract data from ent
   ost::mol::AtomViewList atom_list = selected_ent.GetAtomList();
+  ASAParamFromAtomList(atom_list, x_pos, y_pos, z_pos, radii);
 
   if(atom_list.size() == 0) return 0.0;
 
   if(oligo_mode) {
+
+    // we additionally need the chain index for every atom
     std::vector<int> chain_indices;
     chain_indices.reserve(selected_ent.GetAtomCount());
-
-    ASAParamFromAtomList(atom_list, x_pos, y_pos, z_pos, radii, chain_indices);
+    ChainIndicesFromAtomList(atom_list, chain_indices);
 
     // do it! do it! do it!              
     std::vector<Real> asa;
@@ -1056,7 +1040,7 @@ Real Accessibility(ost::mol::EntityView& ent,
     return summed_asa;
   }
   else {
-    ASAParamFromAtomList(atom_list, x_pos, y_pos, z_pos, radii);
+    
     // do it! do it! do it!
     std::vector<Real> asa;
     CalculateASA(x_pos, y_pos, z_pos, radii, probe_radius, asa);
