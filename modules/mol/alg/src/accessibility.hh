@@ -26,12 +26,12 @@
 namespace ost { namespace mol { namespace alg {
 
 
-class NACCESSParam {
+class AccessibilityParam {
 
 public:
   // Singleton access to one constant instance
-  static const NACCESSParam& GetInstance() {
-    static NACCESSParam instance;
+  static const AccessibilityParam& GetInstance() {
+    static AccessibilityParam instance;
     return instance;
   }
   // Data access
@@ -46,7 +46,7 @@ public:
 private:
 
   // construction only inside here
-  NACCESSParam();
+  AccessibilityParam();
 
   std::map<String, std::map<String, Real> > vdw_radii_;
   std::map<String, Real> accessibilities_;

@@ -574,8 +574,8 @@ void ASAParamFromAtomList(const ost::mol::AtomViewList& atom_list,
                           std::vector<Real>& z_pos,
                           std::vector<Real>& radii) {
 
-  const ost::mol::alg::NACCESSParam& param = 
-  ost::mol::alg::NACCESSParam::GetInstance();
+  const ost::mol::alg::AccessibilityParam& param = 
+  ost::mol::alg::AccessibilityParam::GetInstance();
   String rname, aname, ele;
 
   for(ost::mol::AtomViewList::const_iterator at_it = atom_list.begin();
@@ -634,7 +634,7 @@ Real SetAccessibilityProps(ost::mol::EntityView& ent,
   for(uint idx = 0; idx < res_list.size(); ++idx) {
     rname = res_list[idx].GetName();
     Real tot_acc = 
-    ost::mol::alg::NACCESSParam::GetInstance().GetResidueAccessibility(rname);
+    ost::mol::alg::AccessibilityParam::GetInstance().GetResidueAccessibility(rname);
     if(tot_acc == 0.0) {
       // no accessibility found... 
       res_list[idx].SetFloatProp(asa_rel, 0.0);
@@ -656,7 +656,7 @@ Real SetAccessibilityProps(ost::mol::EntityView& ent,
 
 namespace ost { namespace mol { namespace alg {
 
-NACCESSParam::NACCESSParam() {
+AccessibilityParam::AccessibilityParam() {
 
   std::map<String, Real> ala_map;
   std::map<String, Real> arg_map;
@@ -677,7 +677,19 @@ NACCESSParam::NACCESSParam() {
   std::map<String, Real> thr_map;
   std::map<String, Real> trp_map;
   std::map<String, Real> tyr_map;
-  std::map<String, Real> val_map;  
+  std::map<String, Real> val_map; 
+  std::map<String, Real> asx_map;
+  std::map<String, Real> glx_map; 
+  std::map<String, Real> ace_map;
+  std::map<String, Real> __a_map;
+  std::map<String, Real> __c_map;  
+  std::map<String, Real> __g_map;
+  std::map<String, Real> __t_map;
+  std::map<String, Real> __u_map;
+  std::map<String, Real> twomg_map;
+  std::map<String, Real> h2u_map;
+  std::map<String, Real> hem_map;
+  std::map<String, Real> hoh_map;
  
   ala_map["N"]  = 1.65;  
   ala_map["CA"] = 1.87;  
@@ -865,6 +877,236 @@ NACCESSParam::NACCESSParam() {
   val_map["CB"] = 1.87; 
   val_map["CG1"] = 1.87; 
   val_map["CG2"] = 1.87;
+            
+  asx_map["N"] = 1.65; 
+  asx_map["CA"] = 1.87; 
+  asx_map["C"] = 1.76; 
+  asx_map["O"] = 1.40; 
+  asx_map["CB"] = 1.87; 
+  asx_map["CG"] = 1.76; 
+  asx_map["AD1"] = 1.50; 
+  asx_map["AD2"] = 1.50;
+            
+  glx_map["N"] = 1.65; 
+  glx_map["CA"] = 1.87; 
+  glx_map["C"] = 1.76; 
+  glx_map["O"] = 1.40; 
+  glx_map["CB"] = 1.87; 
+  glx_map["CG"] = 1.76; 
+  glx_map["CD"] = 1.87; 
+  glx_map["AE1"] = 1.50; 
+  glx_map["AE2"] = 1.50; 
+
+  ace_map["C"] = 1.76; 
+  ace_map["O"] = 1.40; 
+  ace_map["CH3"] = 1.87; 
+
+  __a_map["P"] = 1.90; 
+  __a_map["O1P"] = 1.40; 
+  __a_map["O2P"] = 1.40; 
+  __a_map["O5*"] = 1.40; 
+  __a_map["C5*"] = 1.80; 
+  __a_map["C4*"] = 1.80; 
+  __a_map["O4*"] = 1.40; 
+  __a_map["C3*"] = 1.80; 
+  __a_map["O3*"] = 1.40; 
+  __a_map["C2*"] = 1.80; 
+  __a_map["C1*"] = 1.80; 
+  __a_map["N9"] = 1.60; 
+  __a_map["C8"] = 1.80; 
+  __a_map["N7"] = 1.60; 
+  __a_map["C5"] = 1.80; 
+  __a_map["C6"] = 1.80; 
+  __a_map["N6"] = 1.60; 
+  __a_map["N1"] = 1.60; 
+  __a_map["C2"] = 1.80; 
+  __a_map["N3"] = 1.60; 
+  __a_map["C4"] = 1.80; 
+
+  __c_map["P"] = 1.90; 
+  __c_map["O1P"] = 1.40; 
+  __c_map["O2P"] = 1.40; 
+  __c_map["O5*"] = 1.40; 
+  __c_map["C5*"] = 1.80; 
+  __c_map["C4*"] = 1.80; 
+  __c_map["O4*"] = 1.40; 
+  __c_map["C3*"] = 1.80; 
+  __c_map["O3*"] = 1.40; 
+  __c_map["C2*"] = 1.80; 
+  __c_map["C1*"] = 1.80; 
+  __c_map["N1"] = 1.60; 
+  __c_map["C2"] = 1.80; 
+  __c_map["O2"] = 1.40; 
+  __c_map["N3"] = 1.60; 
+  __c_map["C4"] = 1.80; 
+  __c_map["N4"] = 1.60; 
+  __c_map["C5"] = 1.80; 
+  __c_map["C6"] = 1.80; 
+
+  __g_map["P"] = 1.90; 
+  __g_map["O1P"] = 1.40; 
+  __g_map["O2P"] = 1.40; 
+  __g_map["O5*"] = 1.40; 
+  __g_map["C5*"] = 1.80; 
+  __g_map["C4*"] = 1.80; 
+  __g_map["O4*"] = 1.40; 
+  __g_map["C3*"] = 1.80; 
+  __g_map["O3*"] = 1.40; 
+  __g_map["C2*"] = 1.80; 
+  __g_map["C1*"] = 1.80; 
+  __g_map["N9"] = 1.60; 
+  __g_map["C8"] = 1.80; 
+  __g_map["N7"] = 1.60; 
+  __g_map["C5"] = 1.80; 
+  __g_map["C6"] = 1.80; 
+  __g_map["O6"] = 1.40; 
+  __g_map["N1"] = 1.60; 
+  __g_map["C2"] = 1.80; 
+  __g_map["N2"] = 1.60; 
+  __g_map["N3"] = 1.60; 
+  __g_map["C4"] = 1.80; 
+
+  __t_map["P"] = 1.90; 
+  __t_map["O1P"] = 1.40; 
+  __t_map["O2P"] = 1.40; 
+  __t_map["O5*"] = 1.40; 
+  __t_map["C5*"] = 1.80; 
+  __t_map["C4*"] = 1.80; 
+  __t_map["O4*"] = 1.40; 
+  __t_map["C3*"] = 1.80; 
+  __t_map["O3*"] = 1.40; 
+  __t_map["C2*"] = 1.80; 
+  __t_map["C1*"] = 1.80; 
+  __t_map["N1"] = 1.60; 
+  __t_map["C2"] = 1.80; 
+  __t_map["O2"] = 1.40; 
+  __t_map["N3"] = 1.60; 
+  __t_map["C4"] = 1.80; 
+  __t_map["O4"] = 1.40; 
+  __t_map["C5"] = 1.80; 
+  __t_map["C5M"] = 1.80; 
+  __t_map["C6"] = 1.80;
+
+  __u_map["P"] = 1.90; 
+  __u_map["O1P"] = 1.40; 
+  __u_map["O2P"] = 1.40; 
+  __u_map["O5*"] = 1.40; 
+  __u_map["C5*"] = 1.80; 
+  __u_map["C4*"] = 1.80; 
+  __u_map["O4*"] = 1.40; 
+  __u_map["C3*"] = 1.80; 
+  __u_map["O3*"] = 1.40; 
+  __u_map["C2*"] = 1.80; 
+  __u_map["O2*"] = 1.40; 
+  __u_map["C1*"] = 1.80; 
+  __u_map["N1"] = 1.60; 
+  __u_map["C2"] = 1.80; 
+  __u_map["O2"] = 1.40; 
+  __u_map["N3"] = 1.60; 
+  __u_map["C4"] = 1.80; 
+  __u_map["O4"] = 1.40; 
+  __u_map["C5"] = 1.80; 
+  __u_map["C6"] = 1.80;
+
+  twomg_map["P"] = 1.90;
+  twomg_map["O1P"] = 1.40; 
+  twomg_map["O2P"] = 1.40; 
+  twomg_map["O5*"] = 1.40; 
+  twomg_map["C5*"] = 1.80; 
+  twomg_map["C4*"] = 1.80; 
+  twomg_map["O4*"] = 1.40; 
+  twomg_map["C3*"] = 1.80; 
+  twomg_map["O3*"] = 1.40; 
+  twomg_map["C2*"] = 1.80; 
+  twomg_map["O2*"] = 1.40; 
+  twomg_map["C1*"] = 1.80; 
+  twomg_map["N9"] = 1.60;
+  twomg_map["C8"] = 1.80;
+  twomg_map["N7"] = 1.60;
+  twomg_map["C5"] = 1.80;
+  twomg_map["C6"] = 1.80;
+  twomg_map["O6"] = 1.40;
+  twomg_map["N1"] = 1.60;
+  twomg_map["C2"] = 1.80;
+  twomg_map["N2"] = 1.60;
+  twomg_map["C2A"] = 1.80; 
+  twomg_map["N3"] = 1.60;
+  twomg_map["C4"] = 1.80;
+
+  h2u_map["P"] = 1.90; 
+  h2u_map["O1P"] = 1.40; 
+  h2u_map["O2P"] = 1.40; 
+  h2u_map["O5*"] = 1.40; 
+  h2u_map["C5*"] = 1.80; 
+  h2u_map["C4*"] = 1.80; 
+  h2u_map["O4*"] = 1.40; 
+  h2u_map["C3*"] = 1.80; 
+  h2u_map["O3*"] = 1.40; 
+  h2u_map["C2*"] = 1.80; 
+  h2u_map["O2*"] = 1.40; 
+  h2u_map["C1*"] = 1.80; 
+  h2u_map["N1"] = 1.60; 
+  h2u_map["C2"] = 1.80; 
+  h2u_map["O2"] = 1.40; 
+  h2u_map["N3"] = 1.60; 
+  h2u_map["C4"] = 1.80; 
+  h2u_map["O4"] = 1.40; 
+  h2u_map["C5"] = 1.80; 
+  h2u_map["C6"] = 1.80; 
+
+  hem_map["FE"] =  1.47; 
+  hem_map["CHA"] = 2.00; 
+  hem_map["CHB"] = 2.00; 
+  hem_map["CHC"] = 2.00; 
+  hem_map["CHD"] = 2.00; 
+  hem_map["N A"] = 1.55; 
+  hem_map["C1A"] = 1.78; 
+  hem_map["C2A"] = 1.78; 
+  hem_map["C3A"] = 1.78; 
+  hem_map["C4A"] = 1.78; 
+  hem_map["CMA"] = 1.90; 
+  hem_map["CAA"] = 1.90; 
+  hem_map["CBA"] = 1.90; 
+  hem_map["CGA"] = 1.90; 
+  hem_map["N B"] = 1.55; 
+  hem_map["C1B"] = 1.78; 
+  hem_map["C2B"] = 1.78; 
+  hem_map["C3B"] = 1.78; 
+  hem_map["C4B"] = 1.78; 
+  hem_map["CMB"] = 1.90; 
+  hem_map["CAB"] = 1.90; 
+  hem_map["CBB"] = 1.90; 
+  hem_map["N C"] = 1.55; 
+  hem_map["C1C"] = 1.78; 
+  hem_map["C2C"] = 1.78; 
+  hem_map["C3C"] = 1.78; 
+  hem_map["C4C"] = 1.78; 
+  hem_map["CMC"] = 1.90; 
+  hem_map["CAC"] = 1.90; 
+  hem_map["CBC"] = 1.90; 
+  hem_map["N D"] = 1.55; 
+  hem_map["C1D"] = 1.78; 
+  hem_map["C2D"] = 1.78; 
+  hem_map["C3D"] = 1.78; 
+  hem_map["C4D"] = 1.78; 
+  hem_map["CMD"] = 1.90; 
+  hem_map["CAD"] = 1.90; 
+  hem_map["CBD"] = 1.90; 
+  hem_map["CGD"] = 1.90; 
+  hem_map["O1A"] = 1.35; 
+  hem_map["O2A"] = 1.35; 
+  hem_map["O1D"] = 1.35; 
+  hem_map["O2D"] = 1.35; 
+
+  hoh_map["O"] = 1.40; 
+
+
+
+
+
+
+
+
 
   vdw_radii_["ALA"] = ala_map;
   vdw_radii_["ARG"] = arg_map;
@@ -886,6 +1128,18 @@ NACCESSParam::NACCESSParam() {
   vdw_radii_["TRP"] = trp_map;
   vdw_radii_["TYR"] = tyr_map;
   vdw_radii_["VAL"] = val_map;
+  vdw_radii_["ASX"] = asx_map;
+  vdw_radii_["GLX"] = glx_map;
+  vdw_radii_["ACE"] = ace_map;
+  vdw_radii_["__A"] = __a_map;
+  vdw_radii_["__C"] = __c_map;
+  vdw_radii_["__G"] = __g_map;
+  vdw_radii_["__T"] = __t_map;
+  vdw_radii_["__U"] = __u_map;
+  vdw_radii_["2MG"] = twomg_map;
+  vdw_radii_["H2U"] = h2u_map;
+  vdw_radii_["HEM"] = hem_map;
+  vdw_radii_["HOH"] = hoh_map;
 
   accessibilities_["ALA"] = 107.95;
   accessibilities_["CYS"] = 134.28;
@@ -910,7 +1164,7 @@ NACCESSParam::NACCESSParam() {
 }
 
 
-Real NACCESSParam::GuessRadius(const String& ele) const{
+Real AccessibilityParam::GuessRadius(const String& ele) const{
   if(ele == "C") return 1.80;
   if(ele == "N") return 1.60;
   if(ele == "S") return 1.85;
@@ -927,7 +1181,7 @@ Real NACCESSParam::GuessRadius(const String& ele) const{
 }
 
 
-Real NACCESSParam::GetVdWRadius(const String& rname, const String& aname, 
+Real AccessibilityParam::GetVdWRadius(const String& rname, const String& aname, 
                                 const String& ele) const{
   std::map<String, std::map<String, Real> >::const_iterator res_map_it =
   vdw_radii_.find(rname);
@@ -940,7 +1194,7 @@ Real NACCESSParam::GetVdWRadius(const String& rname, const String& aname,
 }
 
 
-Real NACCESSParam::GetResidueAccessibility(const String& rname) const{
+Real AccessibilityParam::GetResidueAccessibility(const String& rname) const{
   std::map<String, Real>::const_iterator it = accessibilities_.find(rname);
   if(it != accessibilities_.end()) return it->second;
   else return 0.0;
