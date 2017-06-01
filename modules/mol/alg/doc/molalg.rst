@@ -788,6 +788,92 @@ Superposing structures
                          of *view1*.
   :type transformation:  :class:`~ost.geom.Mat4`
 
+
+Algorithms on Structures
+--------------------------------------------------------------------------------
+
+.. method:: Accessibility(ent, [probe_radius=1.4, include_hydrogens=False,\
+                          include_hetatm=False, include_water=False,\
+                          oligo_mode=False, selection="", asa_abs="asaAbs",\
+                          asa_rel="asaRel", asa_atom="asaAtom"])
+            
+  Calculates the accesssible surface area for ever atom in *ent* according to 
+  Lee & Richards by "rolling" a probe with given *probe_radius* over the atoms.
+
+  :param ent:           Entity on which to calculate the surface
+  :type ent:            :class:`~ost.mol.EntityView`/
+                        :class:`~ost.mol.EntityHandle`
+
+  :param probe_radius:  Radius of probe to determine accessible surface area
+  :type probe_radius:  :class:`float`
+
+  :param include_hydrogens: Whether to include hydrogens in the solvent
+                            accessibility calculations. By default, 
+                            every atom with ele=H,D is simply neglected.
+  :type include_hydrogens:  :class:`bool`
+
+  :param include_hetatms: Whether to include atoms flagged as hetatms 
+                          , i.e. ligands, in the solvent
+                          accessibility calculations. They are neglected 
+                          by default.
+  :type include_hetatms:  :class:`bool`
+
+  :param include_water: Whether to include water in the solvent
+                        accessibility calculations. By default, 
+                        every residue with name "HOH" is neglected.
+  :type include_water:  :class:`bool`
+
+  :param oligo_mode:    A typical used case of accessibility calculations is to 
+                        determine the solvent accessibility of a full complex
+                        and then the accessibility of each chain individually.
+                        Lots of calculations can be cached because only the 
+                        values of the atoms close to an interface change.
+                        This is exactly what happens when you activate the 
+                        oligo mode. It returns exactly the same value but adds,
+                        additionally to the values estimated in full complex, 
+                        the values from each individual chain as float 
+                        properties on every residue and atom. Example for atom 
+                        accessible surface if the according property name is set 
+                        to "asaAtom": Accessibility in the full complex is 
+                        stored as "asaAtom", the accessibility when only 
+                        considering that particular chain is stored as 
+                        "asaAtom_single_chain".
+                        The other properties follow the same naming scheme.
+  :type oligo_mode:     :class:`bool`
+
+  :param selection:     Selection statement, that gets applied on *ent* before 
+                        doing anything. Everything that is not selected is 
+                        neglected. The default value of "" results in no
+                        selection at all.
+  :type selection:      :class:`str`
+
+  :param asa_abs:       Float property name to assign the summed solvent
+                        accessible surface from each atom to a residue.
+  :type asa_abs:        :class:`str`
+
+  :param asa_rel:       Float property name to assign the relative solvent 
+                        accessibility to a residue. This is the absolute 
+                        accessibility divided by the maximum solvent 
+                        accessibility of that particular residue. Only
+                        residues of the 20 standarad amino acids can be handled.
+                        Every non standard residue gets assigned a value of 
+                        -99.9.
+  :type asa_rel:       :class:`str`
+
+  :param asa_atom:      Float property name to assign the solvent accessible 
+                        area to each atom.
+  :type asa_atom:       :class:`str`      
+
+  :return: The summed solvent accessibilty of each atom in *ent*.
+
+
+
+
+
+
+
+
+
 .. _traj-analysis:
 
 Trajectory Analysis
