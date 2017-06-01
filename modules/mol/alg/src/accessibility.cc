@@ -635,9 +635,10 @@ Real SetAccessibilityProps(ost::mol::EntityView& ent,
     rname = res_list[idx].GetName();
     Real tot_acc = 
     ost::mol::alg::AccessibilityParam::GetInstance().GetResidueAccessibility(rname);
-    if(tot_acc == 0.0) {
+    if(tot_acc == Real(-1.0)) {
       // no accessibility found... 
-      res_list[idx].SetFloatProp(asa_rel, 0.0);
+      // let's mimic NACCESS behaviour
+      res_list[idx].SetFloatProp(asa_rel, Real(-99.9));
     }
     else {
       // the fraction gets multiplied by 100 (Thats how NACCESS does it...)
@@ -1197,7 +1198,7 @@ Real AccessibilityParam::GetVdWRadius(const String& rname, const String& aname,
 Real AccessibilityParam::GetResidueAccessibility(const String& rname) const{
   std::map<String, Real>::const_iterator it = accessibilities_.find(rname);
   if(it != accessibilities_.end()) return it->second;
-  else return 0.0;
+  else return Real(-1.0);
 }
 
 
