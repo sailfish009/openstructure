@@ -73,6 +73,8 @@ public:
     category_=category.str();
   }
   
+
+
   void Add(const StringRef& name)
   {
     index_map_.insert(std::make_pair(name.str(), index_map_.size()));
@@ -262,6 +264,15 @@ private:
     has_current_line_=false;
   }
 
+  // the reason for having this function are problems when generating 
+  // StringRefs that contain pointers to strings in a vector.
+  // When the vector grows, the memory of the strings might get 
+  // reallocated and the StringRefs point into nothing.
+  // This function Prepares the stringrefs given a constant
+  // vector and calls OnDataRow to minimize the change in interface.
+  void CallOnDataRow(const StarLoopDesc& header, 
+                     const std::vector<String>& columns);
+
   void ParseDataItemIdent(const StringRef ident,
                           StringRef& cat, StringRef& name);
   void ParseGlobal();
@@ -278,7 +289,6 @@ private:
   bool          items_as_row_;
   StarLoopDesc  items_row_header_;
   bool          file_open_;
-  std::vector<StringRef> items_row_columns_;
   std::vector<String> items_row_values_;
 };
  
