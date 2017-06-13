@@ -63,7 +63,8 @@ void MMCifInfo::AddAuthorsToCitation(StringRef id, std::vector<String> list)
   // find citation
   std::vector<MMCifInfoCitation>::iterator cit_it;
   for (cit_it = citations_.begin(); cit_it != citations_.end(); ++cit_it) {
-    if (id == StringRef(cit_it->GetID().c_str(), cit_it->GetID().length())) {
+    String cit_id = cit_it->GetID(); // to ensure lifetime of StringRef-pointers
+    if (id == StringRef(cit_id.c_str(), cit_id.length())) {
       cit_it->SetAuthorList(list);
       return;
     }

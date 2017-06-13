@@ -157,8 +157,6 @@ BOOST_AUTO_TEST_CASE(mmcif_convert_seqres)
   mol::EntityHandle eh=mol::CreateEntity();
   
   TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
-  std::vector<StringRef> columns;
-  StarLoopDesc tmmcif_h;  
   BOOST_CHECK_EQUAL(tmmcif_p.ConvertSEQRES("A(MSE)Y", compound_lib), "AMY");
   BOOST_CHECK_THROW(tmmcif_p.ConvertSEQRES("A(MSEY", compound_lib), 
                     IOException);
