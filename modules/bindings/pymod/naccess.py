@@ -109,15 +109,14 @@ def _ParseAsaFile(entity, file, asa_atom):
       chain_id = chain_id
       res_number = res_number.strip()
       asa = asa.strip()
-      #print "res_number:", res_number
-      m=re.match(r'(?P<num>-?\d+)(?P<ins>\w)?', res_number)
+      m = re.match(r'(?P<num>-?\d+)(?P<ins>\w)?', res_number)
       di = m.groupdict()
       
       if di["ins"] == None:
         resNum = mol.ResNum(int(di["num"]))
       else:
         resNum = mol.ResNum(int(di["num"]), di["ins"])
-      #print res_number, resNum.num, resNum.ins
+
       a = entity.FindAtom(chain_id, resNum, atom_name)
       if(a.IsValid()):
         a.SetFloatProp(asa_atom, float(asa))
@@ -125,7 +124,7 @@ def _ParseAsaFile(entity, file, asa_atom):
         LogWarning("NACCESS: invalid asa entry %s %s %s" \
                    % (chain_id, resNum, atom_name))
       
-def _ParseRsaFile(enti,file, asa_abs, asa_rel):
+def _ParseRsaFile(entity, file, asa_abs, asa_rel):
   """
   Reads Area file (.rsa) and attach asa (absolute + relative) per residue to an entitiy
 
@@ -140,30 +139,25 @@ def _ParseRsaFile(enti,file, asa_abs, asa_rel):
   area_fh.close()
   # shift first line
   area_lines = area_lines[4:]
-  
-  
+  # parse lines
   for l in area_lines:
     if l.startswith("RES"):
+      # extract data
       p = re.compile(r'\s+')
-      t = p.split(l)
-      #res_name, chain_id , res_number, abs_all, rel_all = t[1:6]
       res_name = l[3:8]
       res_name = res_name.strip()
       chain_id = l[8:9]
       res_number = l[9:14]
-      res_number= res_number.strip()
-      #print l[15:30]
-      abs_all, rel_all =l[15:28].strip().split()
-      m=re.match(r'(?P<num>-?\d+)(?P<ins>\w)?', res_number)
+      res_number = res_number.strip()
+      abs_all, rel_all = l[15:28].strip().split()
+      m = re.match(r'(?P<num>-?\d+)(?P<ins>\w)?', res_number)
       di = m.groupdict()
       if di["ins"] == None:
         resNum = mol.ResNum(int(di["num"]))
       else:
         resNum = mol.ResNum(int(di["num"]), di["ins"])
-      
-      res = enti.handle.FindResidue(chain_id, resNum)
-      #res = entity.FindResidue(chain_id, mol.ResNum(int(res_number)))
-      #print res_name, chain_id, res_number
+      # set res. props
+      res = entity.FindResidue(chain_id, resNum)
       if res_name == res.name:
         res.SetFloatProp(asa_rel, float(rel_all) )
         res.SetFloatProp(asa_abs, float(abs_all) )
@@ -337,7 +331,7 @@ def CalculateSurfaceArea(entity,  radius=1.4,
       __CleanupFiles(naccess_data_dir)
   
   # sum up Asa for all atoms
-  sasa = 0.0 
+  sasa = 0.0
   for a in entity.atoms:
     sasa += a.GetFloatProp(asa_atom, 0.0)
 

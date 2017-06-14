@@ -2,13 +2,12 @@
 '''
 
 import unittest
-import os
 import sys
 import shutil
 import tempfile
 
 from ost.bindings import naccess
-from ost import io
+from ost import io, settings
 
 class TestNaccessBindings(unittest.TestCase):
     def testTempDirWithDot(self):
@@ -18,13 +17,11 @@ class TestNaccessBindings(unittest.TestCase):
         def cleanup():
             shutil.rmtree(na_tmp_dir)
         self.addCleanup(cleanup)
-        na_bin = os.path.join(os.getenv('EBROOTNACCESS'), 'naccess')
         ost_ent = io.LoadPDB('testfiles/testprotein.pdb')
         excp_raised = False
         try:
             sasa = naccess.CalculateSurfaceArea(ost_ent, 
-                                                scratch_dir=na_tmp_dir,
-                                                naccess_exe=na_bin)
+                                                scratch_dir=na_tmp_dir)
         except:
             excp_raised = True
             raise
@@ -33,10 +30,10 @@ class TestNaccessBindings(unittest.TestCase):
                           "supposed to happen.")
 
 if __name__ == "__main__":
-    naccess_dir =  os.getenv('EBROOTNACCESS')
-    if not naccess_dir:
-        print "No environment variable 'EBROOTNACCESS'. To enable the "+\
-            "unit test, this needs to point to your Naccess installation."
+    try:
+        settings.Locate("naccess")
+    except:
+        print "Could not find NACCESS, could not test binding..."
         sys.exit(0)
     from ost import testutils
     testutils.RunTests()
