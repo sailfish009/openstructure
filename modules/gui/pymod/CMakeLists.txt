@@ -100,7 +100,6 @@ pymod(NAME gui CPP ${OST_GUI_PYMOD_SOURCES}
 
 set(PRESET_FILES
   scene/presets.xml
-  scene/loaders.xml
 )
 copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/share/openstructure/scene" 
                   "${PRESET_FILES}" "IMMUTABLE_FILES" _ost_gui)
