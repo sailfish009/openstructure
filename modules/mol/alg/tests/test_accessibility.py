@@ -3,6 +3,7 @@ import unittest
 import os
 from ost.bindings import naccess
 
+
 class AccessibilityContainer:
   def __init__(self):
     self.overall_acc = None
@@ -62,7 +63,6 @@ def Compare(acc_one, acc_two):
     return False
   for a,b in zip(acc_one.per_atom_acc, acc_two.per_atom_acc):
     if abs(a - b) > 0.01:
-      print 'b'
       return False
 
   # let's check the per atom accessibility when only single chains 
@@ -73,7 +73,6 @@ def Compare(acc_one, acc_two):
   for a,b in zip(acc_one.per_atom_acc_single_chain, \
                  acc_two.per_atom_acc_single_chain):
     if abs(a - b) > 0.01:
-      print 'b'
       return False
 
   return True
