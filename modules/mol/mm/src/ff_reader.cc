@@ -304,7 +304,6 @@ std::vector<std::vector<String> > MMPreprocessor::ReadFile(const String& filenam
     throw ost::io::IOException(ss.str());
   }
 
-  std::vector<String> file_content;
   std::vector<std::vector<String> > split_file_content;
   String string_line;
   ost::StringRef stringref_line;
@@ -313,28 +312,24 @@ std::vector<std::vector<String> > MMPreprocessor::ReadFile(const String& filenam
 
   while(file.good()){
     std::getline(file,string_line);
-    file_content.push_back(string_line);
-  }
+    stringref_line = ost::StringRef(string_line.c_str(), string_line.length());
+    stringref_line = stringref_line.trim();
+    if(stringref_line.size() != 0 && stringref_line[0] != ';') {
+      // Everything after ; is considered to be comment, so we
+      // already filter that out
+      data = stringref_line.split(';');
+      if(!data.empty()){
+        // lets split the remaining stuff
+        data = data[0].split();
+        fill_data.clear();
+        for(std::vector<ost::StringRef>::iterator it = data.begin();
+            it!=data.end(); ++it){
+          fill_data.push_back(it->str());
+        } 
 
-  //splitting the stuff up. Everything in a line coming after an element starting
-  //with a colon or exclamation mark, is neglected. (wont neglect anything of: 
-  //ab! c, but will neglect the second item of: ab !c)
-  for(std::vector<String>::iterator i = file_content.begin(); 
-      i!=file_content.end(); ++i){
-    stringref_line = ost::StringRef(i->c_str(),i->length());
-    data = stringref_line.split();
-    if(data.empty()) continue;
-    fill_data.clear();
-    for(std::vector<ost::StringRef>::iterator j = data.begin();
-        j!=data.end(); ++j){
-      //if(*(j->begin()) == ';' || *(j->begin()) == '*'){
-      if(*(j->begin()) == ';' || *(j->begin()) == '!'){
-        break;
+        split_file_content.push_back(fill_data);
       }
-     fill_data.push_back(j->str());
-    } 
-    if(fill_data.empty()) continue;
-    split_file_content.push_back(fill_data);
+    }
   }
 
   //handling linebreaks ("\")
