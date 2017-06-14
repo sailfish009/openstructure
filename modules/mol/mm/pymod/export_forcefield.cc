@@ -47,6 +47,16 @@ boost::python::list WrapGetAtomRenamingRules(ost::mol::mm::ForcefieldPtr p,
   return result;
 }
 
+boost::python::list WrapGetBuildingBlockNames(ost::mol::mm::ForcefieldPtr p) {
+  boost::python::list result;
+  std::vector<String> v_result = p->GetBuildingBlockNames();
+  for(std::vector<String>::iterator it = v_result.begin();
+      it != v_result.end(); ++it) {
+    result.append(*it);
+  }
+  return result;
+}
+
 }
 
 
@@ -58,6 +68,7 @@ void export_Forcefield()
     .def("Save",&ost::mol::mm::Forcefield::Save,(arg("filename")))
     .def("GetBuildingBlock",&ost::mol::mm::Forcefield::GetBuildingBlock,(arg("name")))
     .def("GetBlockModifier",&ost::mol::mm::Forcefield::GetBlockModifier,(arg("name")))
+    .def("GetBuildingBlockNames",&WrapGetBuildingBlockNames)
     .def("GetAtomType",&ost::mol::mm::Forcefield::GetAtomType,(arg("res_name"),arg("atom_name")))
     .def("GetHydrogenConstructor",&ost::mol::mm::Forcefield::GetHydrogenConstructor,(arg("name")))
     .def("GetNTerModifier",&ost::mol::mm::Forcefield::GetNTerModifier,(arg("residue_name"),arg("ter_name")=""))

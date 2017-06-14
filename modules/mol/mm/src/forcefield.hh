@@ -82,6 +82,8 @@ public:
 
   BlockModifierPtr GetBlockModifier(const String& modifier_name) const;
 
+  std::vector<String> GetBuildingBlockNames() const;
+
   String GetAtomType(const String& res_name, const String& atom_name) const;
 
   HydrogenConstructorPtr GetHydrogenConstructor(const String& name) const;

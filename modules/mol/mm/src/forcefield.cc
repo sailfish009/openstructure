@@ -438,6 +438,17 @@ BuildingBlockPtr Forcefield::GetBuildingBlock(const String& name) const{
   return p;
 }
 
+std::vector<String> Forcefield::GetBuildingBlockNames() const {
+
+  std::vector<String> return_vec;
+  for(boost::unordered_map<String,BuildingBlockPtr>::const_iterator i = 
+      building_blocks_.begin(); i != building_blocks_.end(); ++i) {
+    return_vec.push_back(i->first);
+  }
+
+  return return_vec;
+} 
+
 BlockModifierPtr Forcefield::GetBlockModifier(const String& modifier_name) const{
   boost::unordered_map<String,BlockModifierPtr>::const_iterator i = block_modifiers_.find(modifier_name);
   if(i == block_modifiers_.end()) return BlockModifierPtr();
