@@ -183,19 +183,32 @@ struct CubeOccupationGrid{
 
 Real GetAtomAccessibility(Real x_pos, Real y_pos, Real z_pos,
                           Real radius,
-                          const std::vector<Real>& dx, 
-                          const std::vector<Real>& dy, 
-                          const std::vector<Real>& d, 
-                          const std::vector<Real>& dsqr, 
+                          const std::vector<Real>& x,
+                          const std::vector<Real>& y,
                           const std::vector<Real>& z, 
                           const std::vector<Real>& radii) {
 
-  int num_close_atoms = dx.size();
+  int num_close_atoms = x.size();
 
   if(num_close_atoms == 0) {
     // return area of full sphere
     return Real(4.0) * M_PI * radius * radius;
   } 
+
+  std::vector<Real> dx(num_close_atoms);
+  std::vector<Real> dy(num_close_atoms);
+  std::vector<Real> dsqr(num_close_atoms);
+  std::vector<Real> d(num_close_atoms);
+
+  for(int i = 0; i < num_close_atoms; ++i) {
+    Real a = x_pos - x[i];
+    Real b = y_pos - y[i];  
+    Real c = a*a + b*b;
+    dx[i] = a;
+    dy[i] = b;
+    dsqr[i] = c;
+    d[i] = std::sqrt(c);
+  }
 
   Real area = 0.0;
   int num_z_slices = 20;
@@ -322,13 +335,10 @@ void SolveCube(const CubeGrid& cube_grid, int cube_idx,
                std::vector<Real>& asa) {
 
   //prepare some stuff
-  std::vector<Real> close_atom_dx, close_atom_dy, close_atom_d;
-  std::vector<Real> close_atom_dsqr, close_atom_z, close_atom_radii;
+  std::vector<Real> close_atom_x, close_atom_y, close_atom_z, close_atom_radii;
 
-  close_atom_dx.reserve(200);
-  close_atom_dy.reserve(200);
-  close_atom_d.reserve(200);
-  close_atom_dsqr.reserve(200);
+  close_atom_x.reserve(200);
+  close_atom_y.reserve(200);
   close_atom_z.reserve(200);
   close_atom_radii.reserve(200);
 
@@ -340,10 +350,8 @@ void SolveCube(const CubeGrid& cube_grid, int cube_idx,
   for(uint idx = 0; idx < cube_atoms.size(); ++idx) {
 
     int atom_idx = cube_atoms[idx];
-    close_atom_dx.clear();
-    close_atom_dy.clear();
-    close_atom_d.clear();
-    close_atom_dsqr.clear();
+    close_atom_x.clear();
+    close_atom_y.clear();
     close_atom_z.clear();
     close_atom_radii.clear();
 
@@ -360,17 +368,9 @@ void SolveCube(const CubeGrid& cube_grid, int cube_idx,
 
       for(std::vector<int>::const_iterator it = cube_indices.begin();
           it != cube_indices.end(); ++it) {
-
         int close_atom_idx = *it;
-        Real dx = current_x - x[close_atom_idx];
-        Real dy = current_y - y[close_atom_idx]; 
-        Real sqr_d = dx*dx + dy*dy;
-        Real d = std::sqrt(sqr_d);
-  
-        close_atom_dx.push_back(dx);
-        close_atom_dy.push_back(dy);
-        close_atom_dsqr.push_back(sqr_d);
-        close_atom_d.push_back(d);
+        close_atom_x.push_back(x[close_atom_idx]);
+        close_atom_y.push_back(y[close_atom_idx]);
         close_atom_z.push_back(z[close_atom_idx]);
         close_atom_radii.push_back(radii[close_atom_idx]);
       }
@@ -384,24 +384,17 @@ void SolveCube(const CubeGrid& cube_grid, int cube_idx,
       int close_atom_idx = *it;
 
       if(atom_idx != close_atom_idx){
-        Real dx = current_x - x[close_atom_idx];
-        Real dy = current_y - y[close_atom_idx]; 
-        Real sqr_d = dx*dx + dy*dy;
-        Real d = std::sqrt(sqr_d);
-
-        close_atom_dx.push_back(dx);
-        close_atom_dy.push_back(dy);
-        close_atom_dsqr.push_back(sqr_d);
-        close_atom_d.push_back(d);
+        close_atom_x.push_back(x[close_atom_idx]);
+        close_atom_y.push_back(y[close_atom_idx]);
         close_atom_z.push_back(z[close_atom_idx]);
         close_atom_radii.push_back(radii[close_atom_idx]);
       }
     }
     
+    // DOIT DOIT DOIT!!!
     asa[atom_idx] = GetAtomAccessibility(current_x, current_y, current_z, 
                                          current_radius, 
-                                         close_atom_dx, close_atom_dy, 
-                                         close_atom_d, close_atom_dsqr, 
+                                         close_atom_x, close_atom_y, 
                                          close_atom_z, close_atom_radii);
   }
 }
