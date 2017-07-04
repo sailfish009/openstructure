@@ -16,7 +16,6 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <ost/info/info.hh>
 #include <ost/seq/alg/pair_subst_weight_matrix.hh>
 #include <ost/seq/alg/default_pair_subst_weight_matrix.hh>
 #include <algorithm>

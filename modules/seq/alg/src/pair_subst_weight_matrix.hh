@@ -20,6 +20,9 @@
 #define OST_SEQ_PAIR_SUBST_WEIGHT_MATRIX_HH
 
 #include <map>
+#include <vector>
+
+#include <ost/base.hh>
 #include <ost/seq/alg/module_config.hh>
 
 
