@@ -20,8 +20,6 @@ Compiling OpenStructure consists of several steps that are described below in mo
  * Compiling an Linking
  
 
-.. installdeps_
-
 Installing the Dependencies
 --------------------------------------------------------------------------------
 
