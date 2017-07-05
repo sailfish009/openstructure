@@ -1,4 +1,8 @@
-"""Scoring of quaternary structures."""
+"""
+Scoring of quaternary structures as in Martino's 2017 paper.
+
+Authors: Gerardo Tauriello, Martino Bertoni
+"""
 
 from ost import mol, geom, conop, seq, settings
 from ost import LogError, LogWarning, LogScript, LogInfo, LogVerbose, LogDebug
