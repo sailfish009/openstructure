@@ -1,5 +1,5 @@
 """
-Functions to calculate helix kinks: bend, face shift and wobbla angles
+Functions to calculate helix kinks: bend, face shift and wobble angles
 
 Author: Niklaus Johner
 """
@@ -73,20 +73,21 @@ def __CalculateFaceShift(pre_proline_axis,post_proline_axis,pre_proline_centers,
   return sign*ost.geom.Angle(n1,n2)
 
 
-def AnalyzeHelixKink(t,sele,proline=False):
+def AnalyzeHelixKink(t, sele, proline=False):
   """
-  This function calculates the bend,wobble and face-shift angles
-  in an alpha-helix over a trajectory. The determination is more stable if
-  there are at least 4 residues on each side (8 is even better) of the proline around which
+  This function calculates the bend, wobble and face-shift angles in an alpha-
+  helix over a trajectory. The determination is more stable if there are at
+  least 4 residues on each side (8 is even better) of the proline around which
   the helix is kinked. The selection should contain all residues in the correct
   order and with no gaps and no missing C-alphas.
-  
+
   :param t: The trajectory to be analyzed
-  :type t: `~ost.mol.CoordGroup`
+  :type t: :class:`~ost.mol.CoordGroup`
   :param sele: A selection containing the alpha helix to be analyzed
   :type sele: :class:`~ost.mol.EntityView`
-  :param proline=False: A selection containing only the proline (or another residue) around 
-   which the helix is kinked. If False, the proline will be serached for automatically
+  :param proline: A selection containing only the proline (or another residue)
+                  around which the helix is kinked. If False, the proline will
+                  be searched for automatically
   :type proline: :class:`ost.mol.EntityView`
 
   :return: A tuple (bend_angle, face_shift, wobble_angle).
@@ -118,19 +119,20 @@ def AnalyzeHelixKink(t,sele,proline=False):
   return (bend_angle,face_shift,wobble_angle)
 
 
-def CalculateHelixKink(sele,proline=False):
+def CalculateHelixKink(sele, proline=False):
   """
-  This function calculates the bend,wobble and face-shift angles
-  in an alpha-helix of an EntityView. The determination is more stable if
-  there are at least 4 residues on each side (8 is even better) of the prolin around which
-  the helix is kinked. The selection should contain all residues in the correct
+  This function calculates the bend, wobble and face-shift angles in an alpha-
+  helix of an EntityView. The determination is more stable if there are at least
+  4 residues on each side (8 is even better) of the proline around which the
+  helix is kinked. The selection should contain all residues in the correct
   order and with no gaps and no missing C-alphas.
   
   :param sele: A selection containing the alpha helix to be analyzed
-  :type sele: :class:`~ost.mol.EntityView`
-  :param proline=False: A selection containing only the proline (or another residue) around 
-   which the helix is kinked. If False, the proline will be serached for automatically
-  :type proline: :class:`ost.mol.EntityView`
+  :type sele:  :class:`~ost.mol.EntityView`
+  :param proline: A selection containing only the proline (or another residue)
+                  around which the helix is kinked. If False, the proline will
+                  be searched for automatically
+  :type proline:  :class:`ost.mol.EntityView`
 
   :return: A tuple (bend_angle, face_shift, wobble_angle).
   :rtype: (float, float, float)
