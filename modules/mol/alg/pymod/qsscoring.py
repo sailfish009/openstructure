@@ -27,20 +27,22 @@ class QSscorer:
 
   .. code-block:: python
 
-    from ost import io, LogScript
+    import ost
     from ost.mol.alg import qsscoring
 
-    # load two structures
-    ent_1 = io.LoadPDB('4ux8', remote=True)
-    ent_2 = io.LoadPDB('3fub', remote=True)
+    # load two biounits to compare
+    ent_full = ost.io.LoadPDB('3ia3', remote=True)
+    ent_1 = ent_full.Select('cname=A,D')
+    ent_2 = ent_full.Select('cname=B,C')
     # get score
+    ost.PushVerbosityLevel(3)
     try:
       qs_scorer = qsscoring.QSscorer(ent_1, ent_2)
-      LogScript('QSscore:', str(qs_scorer.global_score))
-      LogScript('Chain mapping used:', str(qs_scorer.chain_mapping))
+      ost.LogScript('QSscore:', str(qs_scorer.global_score))
+      ost.LogScript('Chain mapping used:', str(qs_scorer.chain_mapping))
     except qsscoring.QSscoreError as ex:
-      # default handling: QS score failed!
-      LogError('QSscore failed: ...')
+      # default handling: report failure and set score to 0
+      ost.LogError('QSscore failed:', str(ex))
       qs_score = 0
 
   For maximal performance when computing QS scores of the same entity with many
