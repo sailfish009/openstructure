@@ -118,6 +118,8 @@ On Windows you have to explicitly set the build generator to "Visual Studio 9 20
   cmake -G"Visual Studio 9 2008"
 
 
+.. _cmake-flags:
+
 Flags to Control the Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -141,7 +143,8 @@ By default, `CMake <http://cmake.org>`_ searches the standard directories for de
    of a certain residue or connectivities between atoms etc. The 
    :doc:`compound library <conop/compoundlib>` itself is created from the 
    component dictionary by calling the OpenStructure chemdict_tool. 
-   By default this is switched off.
+   By default this is switched off but it is highly recommended to provide a
+   compound library to use all features of OpenStructure.
 
  * `COMPILE_TMTOOLS` will activate bindings for TMAlign and TMScore, which are 
    then available at python level. This option requires a Fortran compiler. 
