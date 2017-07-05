@@ -1,6 +1,16 @@
 """
 Scoring of quaternary structures as in Martino's 2017 paper.
 
+.. note ::
+
+  Requirements for use:
+
+  - A default :class:`compound library <ost.conop.CompoundLib>` must be defined
+    and accessible via :func:`~ost.conop.GetDefaultLib`. This is set by default
+    when executing scripts with ``ost``. Otherwise, you must set this with
+    :func:`~ost.conop.SetDefaultLib`.
+  - ClustalW must be installed (unless you provide chain mappings)
+
 Authors: Gerardo Tauriello, Martino Bertoni
 """
 
@@ -108,7 +118,7 @@ class QSscorer:
 
     Maximal number of CA atoms to use in each chain to determine chain mappings.
     Setting this to -1 disables the limit. Limiting it speeds up determination
-    of symmetries and chain mappings. By default is is set to 100.
+    of symmetries and chain mappings. By default it is set to 100.
 
     :type: :class:`int`
   """
@@ -162,7 +172,7 @@ class QSscorer:
     Limitations:
 
     - If different numbers of groups, we map only the groups for the complex
-      with less groups (rest considered unmapped and shown as LogWarning)
+      with less groups (rest considered unmapped and shown as warning)
     - The mapping is forced: the "best" mapping will be chosen independently of
       how low the seq. identity may be
 
@@ -196,7 +206,7 @@ class QSscorer:
     :getter: Computed on first use (cached)
     :type: :class:`~ost.mol.EntityHandle`
 
-    :raises: :class:`QSscoreError` if any chain ends up having less than 5 res..
+    :raises: :class:`QSscoreError` if any chain ends up having less than 5 res.
     """
     if not self._ent_to_cm_1:
       self._ComputeAlignedEntities()
@@ -296,6 +306,7 @@ class QSscorer:
         to the lowest multi-chain-RMSD given the superposition
 
     - Fallback option: try all mappings to find minimal multi-chain-RMSD
+      (warning shown)
 
       - For each chain-pair defined above: apply superposition, try all (!)
         possible chain mappings (within symmetry group) and keep mapping with
@@ -314,7 +325,7 @@ class QSscorer:
         - As a result, such a forced mapping can lead to a large range of
           resulting QS scores. An extreme example was observed between 1on3.1
           and 3u9r.1, where :attr:`global_score` can range from 0.12 to 0.43
-          for mappings similar mappings with almost the same multi-chain-RMSD.
+          for mappings with very similar multi-chain-RMSD.
 
     :getter: Computed on first use (cached)
     :type: :class:`dict` with key / value = :class:`str` (chain names, key
@@ -333,8 +344,8 @@ class QSscorer:
   def alignments(self):
     """List of successful sequence alignments using :attr:`chain_mapping`.
 
-    There will be one alignments for each mapped chain and the order is
-    according to chain name in :attr:`qs_ent_1`.
+    There will be one alignment for each mapped chain and they are ordered by
+    their chain names in :attr:`qs_ent_1`.
 
     The sequences of the alignments have views attached into
     :attr:`QSscoreEntity.ent` of :attr:`qs_ent_1` and :attr:`qs_ent_2`.
@@ -385,7 +396,7 @@ class QSscorer:
     """QS-score without penalties.
 
     Like :attr:`global_score`, but neglecting additional residues or chains in
-    one of the biounits (i.e. the score is calculated considering only on mapped
+    one of the biounits (i.e. the score is calculated considering only mapped
     chains and residues).
 
     :getter: Computed on first use (cached)
@@ -419,15 +430,17 @@ class QSscorer:
   def lddt_score(self):
     """The multi-chain lDDT score.
 
-    Note: lDDT is not considering over-prediction (i.e. extra chains) and hence
-    is not symmetric. Here, we consider :attr:`qs_ent_1` as the reference and
-    :attr:`qs_ent_2` as the model. The alignments from :attr:`alignments` are
-    used to map residue numbers and chains.
+    .. note::
 
-    The score is computed with OST's :func:`LocalDistDiffTest` function with
-    a single distance threshold of 2 A and an inclusion radius of 8 A. You can
-    use the :attr:`lddt_mdl` and :attr:`lddt_ref` to get entities on which you
-    can call any other lDDT function with any other set of parameters.
+      lDDT is not considering over-prediction (i.e. extra chains) and hence is
+      not symmetric. Here, we consider :attr:`qs_ent_1` as the reference and
+      :attr:`qs_ent_2` as the model. The alignments from :attr:`alignments` are
+      used to map residue numbers and chains.
+
+    The score is computed with OST's :func:`~ost.mol.alg.LocalDistDiffTest`
+    function with a single distance threshold of 2 A and an inclusion radius of
+    8 A. You can use :attr:`lddt_mdl` and :attr:`lddt_ref` to get entities on
+    which you can call any other lDDT function with any other set of parameters.
 
     :getter: Computed on first use (cached)
     :type: :class:`float`
@@ -438,9 +451,10 @@ class QSscorer:
 
   @property
   def lddt_mdl(self):
-    """The model entity used for lDDT scoring and annotated with local scores.
+    """The model entity used for lDDT scoring (:attr:`lddt_score`) and annotated
+    with local scores.
 
-    Local scores are available as residue properties named 'lddt' and on an each
+    Local scores are available as residue properties named 'lddt' and on each
     atom as a B-factor. Only CA atoms are considered if :attr:`calpha_only` is
     True, otherwise this is an all-atom score.
     
@@ -458,7 +472,7 @@ class QSscorer:
 
   @property
   def lddt_ref(self):
-    """The reference entity used for lDDT scoring.
+    """The reference entity used for lDDT scoring (:attr:`lddt_score`).
 
     This is a single chain X with residue numbers matching ones in
     :attr:`lddt_mdl`.
@@ -472,7 +486,9 @@ class QSscorer:
 
   @property
   def clustalw_bin(self):
-    """Full path to clustalw or clustalw2 executable to use for MSA.
+    """
+    Full path to ``clustalw`` or ``clustalw2`` executable to use for multiple
+    sequence alignments (unless :attr:`chain_mapping` is provided manually).
 
     :getter: Located in path on first use (cached)
     :type: :class:`str`
@@ -631,7 +647,7 @@ class QSscoreEntity(object):
 
   def GetName(self):
     """Wrapper to :func:`~ost.mol.EntityHandle.GetName` of :attr:`ent`.
-    This is used to to uniquely identify the entity while scoring. The name may
+    This is used to uniquely identify the entity while scoring. The name may
     therefore change while :attr:`original_name` remains fixed.
     """
     # for duck-typing and convenience

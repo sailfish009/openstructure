@@ -121,7 +121,7 @@ Local Distance Test scores (lDDT, DRMSD)
   Angstroms.
 
   The function only compares the input distance list to the first chain of the
-  model structure
+  model structure.
 
   The local residue-based lDDT score values are stored in the ResidueHandles of
   the model passed to the function in a float property called "locallddt".
@@ -353,6 +353,14 @@ Local Distance Test scores (lDDT, DRMSD)
   :class:`~ost.mol.alg.GlobalRDMap` object.
 
 
+:mod:`qsscoring <ost.mol.alg.qsscoring>` -- Quaternary Structure (QS) scores
+--------------------------------------------------------------------------------
+
+.. automodule:: ost.mol.alg.qsscoring
+   :members:
+   :synopsis: Scoring of quaternary structures
+
+.. currentmodule:: ost.mol.alg
 
 
 .. _steric-clashes:
