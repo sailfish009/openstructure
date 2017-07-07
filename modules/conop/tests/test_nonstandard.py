@@ -1,5 +1,5 @@
 import unittest
-from ost import conop
+from ost import conop, io, mol
 
 
 class TestNonStandard(unittest.TestCase):
@@ -117,10 +117,8 @@ class TestNonStandard(unittest.TestCase):
     
 
 if __name__ == "__main__":
-  if not conop.GetDefaultLib():
-    print 'No compound library available. Ignoring unit tests'
-  else:
-    from ost import testutils
+  from ost import testutils
+  if testutils.SetDefaultCompoundLib():
     testutils.RunTests()
-
-
+  else:
+    print 'No compound library available. Ignoring test_nonstandard.py tests.'

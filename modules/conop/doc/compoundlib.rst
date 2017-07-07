@@ -25,7 +25,7 @@ build the compound library manually.
            OpenStructure as a bundle or you :ref:`compiled <cmake-flags>`  it
            with a specified ``COMPOUND_LIB`` flag, this will return a compound
            library when executing scripts with ``ost``.
-  :rtype:  :class:`CompoundLib`
+  :rtype:  :class:`CompoundLib` or None if no library set
 
 .. function:: SetDefaultLib(lib)
 

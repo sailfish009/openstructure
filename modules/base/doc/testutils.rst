@@ -5,3 +5,5 @@
   :synopsis: Helper Functions to Run Python Unittests
 
 .. autofunction:: ost.testutils.RunTests
+
+.. autofunction:: ost.testutils.SetDefaultCompoundLib

@@ -4,13 +4,13 @@ set(OST_CONOP_UNIT_TESTS
   tests.cc
   test_rule_based_conop.cc 
   helper.cc
-  test_cleanup.py
   test_processor.py
-  test_nonstandard.py
 )
 
 if (COMPOUND_LIB)
-  list(APPEND OST_CONOP_UNIT_TESTS test_compound.py)
+  list(APPEND OST_CONOP_UNIT_TESTS test_compound.py
+                                   test_cleanup.py
+                                   test_nonstandard.py)
 endif()
 
 ost_unittest(MODULE conop

@@ -1,23 +1,11 @@
-import unittest
-import ost, os
-from ost import io, conop
-from ost import GetSharedDataPath, SetPrefixPath
+import unittest, os
+from ost import io
 from ost.mol.alg.qsscoring import *
+
 
 def _LoadFile(file_name):
   """Helper to avoid repeating input path over and over."""
   return io.LoadPDB(os.path.join('testfiles', file_name))
-
-def setUpModule():
-  """Called once by unittest: ensures that we have a compound library."""
-  if not conop.GetDefaultLib():
-    SetPrefixPath(os.path.abspath(os.path.join(conop.__path__[0], os.pardir,
-                                               os.pardir, os.pardir,
-                                               os.pardir, os.pardir)))
-    compound_lib_path = os.path.join(GetSharedDataPath(),
-                                     'compounds.chemlib')
-    compound_lib = conop.CompoundLib.Load(compound_lib_path)
-    conop.SetDefaultLib(compound_lib)
 
 
 class TestQSscore(unittest.TestCase):
@@ -192,6 +180,9 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.best_score, 0.975, 2)
 
 
-if __name__== '__main__':
+if __name__ == "__main__":
   from ost import testutils
-  testutils.RunTests()
+  if testutils.SetDefaultCompoundLib():
+    testutils.RunTests()
+  else:
+    print 'No compound library available. Ignoring test_qsscoring.py tests.'
