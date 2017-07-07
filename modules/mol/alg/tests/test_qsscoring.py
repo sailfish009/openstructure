@@ -71,8 +71,8 @@ class TestQSscore(unittest.TestCase):
     # use QSscoreEntity to go faster
     qs_scorer_symm = QSscorer(qs_scorer.qs_ent_1, qs_scorer.qs_ent_2)
     qs_scorer_symm.SetSymmetries(symm_1, symm_2)
-    self.assertAlmostEqual(qs_scorer_symm.global_score, 0.359, 2)
-    self.assertAlmostEqual(qs_scorer_symm.best_score, 0.958, 2)
+    self.assertAlmostEqual(qs_scorer_symm.global_score, qs_scorer.global_score)
+    self.assertAlmostEqual(qs_scorer_symm.best_score, qs_scorer.best_score)
 
   def test_HeteroCase4(self):
     # inverted chains
@@ -81,6 +81,22 @@ class TestQSscore(unittest.TestCase):
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 0.980, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.980, 2)
+
+    # check if CA-only scoring is close to this
+    ent_2_ca = ent_2.Select('aname=CA')
+    # use QSscoreEntity to go faster
+    qs_scorer_ca = QSscorer(qs_scorer.qs_ent_1, ent_2_ca)
+    self.assertAlmostEqual(qs_scorer_ca.global_score, qs_scorer.global_score, 2)
+    self.assertAlmostEqual(qs_scorer_ca.best_score, qs_scorer.best_score, 2)
+    # throw exception for messed up chains without CA atoms
+    ent_2_no_ca = ent_2.Select('aname!=CA')
+    with self.assertRaises(QSscoreError):
+      qs_scorer_tst = QSscorer(qs_scorer.qs_ent_1, ent_2_no_ca)
+      qs_scorer_tst.global_score
+    ent_2_almost_no_ca = ent_2.Select('aname!=CA or cname=A')
+    with self.assertRaises(QSscoreError):
+      qs_scorer_tst = QSscorer(qs_scorer.qs_ent_1, ent_2_almost_no_ca)
+      qs_scorer_tst.global_score
 
   def test_HeteroModel(self):
     # uncomplete model missing 2 third of the contacts
@@ -101,20 +117,6 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 0.147, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.866, 2)
 
-  def test_lDDT(self):
-    # lDDT is not symmetrical and does not account for overprediction!
-    ref = _LoadFile('4br6.1.pdb').Select('cname=A,B')
-    mdl = _LoadFile('4br6.1.pdb')
-    qs_scorer = QSscorer(ref, mdl)
-    self.assertAlmostEqual(qs_scorer.global_score, 0.171, 2)
-    self.assertAlmostEqual(qs_scorer.best_score, 1.00, 2)
-    self.assertAlmostEqual(qs_scorer.lddt_score, 1.00, 2)
-    # flip them (use QSscoreEntity to go faster)
-    qs_scorer2 = QSscorer(qs_scorer.qs_ent_2, qs_scorer.qs_ent_1)
-    self.assertAlmostEqual(qs_scorer2.global_score, 0.171, 2)
-    self.assertAlmostEqual(qs_scorer2.best_score, 1.00, 2)
-    self.assertAlmostEqual(qs_scorer2.lddt_score, 0.483, 2)
-
   def test_HomoCase2(self):
     # broken cyclic symmetry
     ent_1 = _LoadFile('4r7y.1.pdb')   # A6, symmetry: C6
@@ -133,6 +135,23 @@ class TestQSscore(unittest.TestCase):
     self.assertEqual(qs_scorer_symm.global_score, qs_scorer.global_score)
     self.assertEqual(qs_scorer_symm.best_score, qs_scorer.best_score)
 
+
+  # TEST EXTRA SCORES
+  
+  def test_lDDT(self):
+    # lDDT is not symmetrical and does not account for overprediction!
+    ref = _LoadFile('4br6.1.pdb').Select('cname=A,B')
+    mdl = _LoadFile('4br6.1.pdb')
+    qs_scorer = QSscorer(ref, mdl)
+    self.assertAlmostEqual(qs_scorer.global_score, 0.171, 2)
+    self.assertAlmostEqual(qs_scorer.best_score, 1.00, 2)
+    self.assertAlmostEqual(qs_scorer.lddt_score, 1.00, 2)
+    # flip them (use QSscoreEntity to go faster)
+    qs_scorer2 = QSscorer(qs_scorer.qs_ent_2, qs_scorer.qs_ent_1)
+    self.assertAlmostEqual(qs_scorer2.global_score, 0.171, 2)
+    self.assertAlmostEqual(qs_scorer2.best_score, 1.00, 2)
+    self.assertAlmostEqual(qs_scorer2.lddt_score, 0.483, 2)
+    
 
   # TEST BIG STUFF and FANCY SYMMETRIES
 

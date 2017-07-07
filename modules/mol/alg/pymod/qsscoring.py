@@ -180,6 +180,10 @@ class QSscorer:
     :type: :class:`dict` with key = :class:`tuple` of chain names in
            :attr:`qs_ent_1` and value = :class:`tuple` of chain names in
            :attr:`qs_ent_2`.
+
+    :raises: :class:`QSscoreError` if we end up having less than 2 chains for
+             either entity in the mapping (can happen if chains do not have CA
+             atoms).
     """
     if self._chem_mapping is None:
       self._chem_mapping = _GetChemGroupsMapping(self.qs_ent_1, self.qs_ent_2)
@@ -709,7 +713,8 @@ class QSscoreEntity(object):
   def chem_groups(self):
     """
     Intra-complex group of chemically identical (seq. id. > 95%) polypeptide
-    chains. First chain in group is the one with the longest sequence.
+    chains as extracted from :attr:`ca_chains`. First chain in group is the one
+    with the longest sequence.
 
     :getter: Computed on first use (cached)
     :type: :class:`list` of :class:`list` of :class:`str` (chain names)
@@ -994,8 +999,8 @@ def _GetChemGroups(qs_ent, seqid_thr=95.):
   :type seqid_thr:  :class:`float`
   """
   # get data from qs_ent
-  chain_names = [ch.name for ch in qs_ent.ent.chains]
   ca_chains = qs_ent.ca_chains
+  chain_names = sorted(ca_chains.keys())
   # get pairs of identical chains
   # NOTE: this scales quadratically with number of chains and may be optimized
   #       -> one could merge it with "merge transitive pairs" below...
@@ -1119,7 +1124,10 @@ def _GetChemGroupsMapping(qs_ent_1, qs_ent_2):
     LogWarning('Unmapped Chains in %s: %s'
                % (qs_ent_2.GetName(), ','.join(list(chains_2 - mapped_2))))
   
+  # check if we have any chains left
   LogInfo('Chemical chain-groups mapping: ' + str(chem_mapping))
+  if len(mapped_1) < 2 or len(mapped_2) < 2:
+    raise QSscoreError('Less than 2 chains left in chem_mapping.')
   return chem_mapping
 
 def _SelectFew(l, max_elements):
