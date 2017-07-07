@@ -181,7 +181,7 @@ class QSscorer:
            :attr:`qs_ent_1` and value = :class:`tuple` of chain names in
            :attr:`qs_ent_2`.
     """
-    if not self._chem_mapping:
+    if self._chem_mapping is None:
       self._chem_mapping = _GetChemGroupsMapping(self.qs_ent_1, self.qs_ent_2)
     return self._chem_mapping
 
@@ -208,7 +208,7 @@ class QSscorer:
 
     :raises: :class:`QSscoreError` if any chain ends up having less than 5 res.
     """
-    if not self._ent_to_cm_1:
+    if self._ent_to_cm_1 is None:
       self._ComputeAlignedEntities()
     return self._ent_to_cm_1
 
@@ -217,7 +217,7 @@ class QSscorer:
     """Subset of :attr:`qs_ent_1` used to compute chain mapping and symmetries
     (see :attr:`ent_to_cm_1` for details).
     """
-    if not self._ent_to_cm_2:
+    if self._ent_to_cm_2 is None:
       self._ComputeAlignedEntities()
     return self._ent_to_cm_2
 
@@ -249,14 +249,14 @@ class QSscorer:
     :getter: Computed on first use (cached)
     :type: :class:`list` of :class:`tuple` of :class:`str` (chain names)
     """
-    if not self._symm_1:
+    if self._symm_1 is None:
       self._ComputeSymmetry()
     return self._symm_1
 
   @property
   def symm_2(self):
     """Symmetry groups for :attr:`qs_ent_2` (see :attr:`symm_1` for details)."""
-    if not self._symm_2:
+    if self._symm_2 is None:
       self._ComputeSymmetry()
     return self._symm_2
 
@@ -333,7 +333,7 @@ class QSscorer:
     :raises: :class:`QSscoreError` if there are too many combinations to check
              to find a chain mapping.
     """
-    if not self._chain_mapping:
+    if self._chain_mapping is None:
       self._chain_mapping = _GetChainMapping(self.ent_to_cm_1, self.ent_to_cm_2,
                                              self.symm_1, self.symm_2,
                                              self.chem_mapping)
@@ -353,7 +353,7 @@ class QSscorer:
     :getter: Computed on first use (cached)
     :type: :class:`list` of :class:`~ost.seq.AlignmentHandle`
     """
-    if not self._alignments:
+    if self._alignments is None:
       self._alignments = _GetMappedAlignments(self.qs_ent_1.ent,
                                               self.qs_ent_2.ent,
                                               self.chain_mapping)
@@ -369,7 +369,7 @@ class QSscorer:
            *r1* = Residue number in first entity,
            *r2* = Residue number in second entity
     """
-    if not self._mapped_residues:
+    if self._mapped_residues is None:
       self._mapped_residues = _GetMappedResidues(self.alignments)
     return self._mapped_residues
 
@@ -387,7 +387,7 @@ class QSscorer:
     :getter: Computed on first use (cached)
     :type: :class:`float`
     """
-    if not self._global_score:
+    if self._global_score is None:
       self._ComputeScores()
     return self._global_score
 
@@ -402,7 +402,7 @@ class QSscorer:
     :getter: Computed on first use (cached)
     :type: :class:`float`
     """
-    if not self._best_score:
+    if self._best_score is None:
       self._ComputeScores()
     return self._best_score
 
@@ -417,7 +417,7 @@ class QSscorer:
     :getter: Computed on first use (cached)
     :type: :class:`ost.mol.alg.SuperpositionResult`
     """
-    if not self._superposition:
+    if self._superposition is None:
       self._superposition = _GetQsSuperposition(self.alignments)
       # report it
       sup_rmsd = self._superposition.rmsd
@@ -445,7 +445,7 @@ class QSscorer:
     :getter: Computed on first use (cached)
     :type: :class:`float`
     """
-    if not self._lddt_score:
+    if self._lddt_score is None:
       self._ComputeLDDT()
     return self._lddt_score
 
@@ -466,7 +466,7 @@ class QSscorer:
     :getter: Computed on first use (cached)
     :type: :class:`~ost.mol.EntityHandle`
     """
-    if not self._lddt_mdl:
+    if self._lddt_mdl is None:
       self._ComputeLDDT()
     return self._lddt_mdl
 
@@ -480,7 +480,7 @@ class QSscorer:
     :getter: Computed on first use (cached)
     :type: :class:`~ost.mol.EntityHandle`
     """
-    if not self._lddt_ref:
+    if self._lddt_ref is None:
       self._ComputeLDDT()
     return self._lddt_ref
 
@@ -493,7 +493,7 @@ class QSscorer:
     :getter: Located in path on first use (cached)
     :type: :class:`str`
     """
-    if not self._clustalw_bin:
+    if self._clustalw_bin is None:
       self._clustalw_bin = settings.Locate(('clustalw', 'clustalw2'))
     return self._clustalw_bin
 
@@ -669,7 +669,7 @@ class QSscoreEntity(object):
     :getter: Computed on first use (cached)
     :type: :class:`~ost.mol.EntityHandle`
     """
-    if not self._ca_entity:
+    if self._ca_entity is None:
       self._ca_entity = _GetCAOnlyEntity(self.ent)
     return self._ca_entity
 
@@ -683,7 +683,7 @@ class QSscoreEntity(object):
     :type: :class:`dict` (key = :class:`str`,
            value = :class:`~ost.seq.SequenceHandle`)
     """
-    if not self._ca_chains:
+    if self._ca_chains is None:
       self._ca_chains = dict()
       ca_entity = self.ca_entity
       for ch in ca_entity.chains:
@@ -714,7 +714,7 @@ class QSscoreEntity(object):
     :getter: Computed on first use (cached)
     :type: :class:`list` of :class:`list` of :class:`str` (chain names)
     """
-    if not self._chem_groups:
+    if self._chem_groups is None:
       self._chem_groups = _GetChemGroups(self, 95)
       LogInfo('Chemically equivalent chain-groups in %s: %s' \
               % (self.GetName(), str(self._chem_groups)))
@@ -761,7 +761,7 @@ class QSscoreEntity(object):
              for chains in the cleaned entity.
     :type: See return type of :func:`GetContacts`
     """
-    if not self._contacts:
+    if self._contacts is None:
       self._contacts = GetContacts(self.ent, False)
     return self._contacts
 
@@ -776,7 +776,7 @@ class QSscoreEntity(object):
     CA-only connectivity dictionary (**read/write**).
     Like :attr:`contacts` but with *calpha_only* = True in :func:`GetContacts`.
     """
-    if not self._contacts_ca:
+    if self._contacts_ca is None:
       self._contacts_ca = GetContacts(self.ent, True)
     return self._contacts_ca
   
