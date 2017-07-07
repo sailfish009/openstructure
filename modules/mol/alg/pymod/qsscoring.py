@@ -925,7 +925,9 @@ def _CleanInputEntity(ent):
   removed_chains = []
   for ch in ent.chains:
     # we remove chains if they are small-peptides or if the contain no aa
-    if not ch.name in '-_':
+    if ch.name in ['-', '_']:
+      removed_chains.append('"%c"' % ch.name)
+    else:
       without_aa = not any(r.chem_type.IsAminoAcid() for r in ch.residues)
       if ch.residue_count < 20 or without_aa:
         if ch.name == ' ':
@@ -941,10 +943,12 @@ def _CleanInputEntity(ent):
           removed_chains.append(ch.name)
 
   # remove them from *ent*
-  view = ent.Select('cname!=%s' \
-                    % ','.join(['"-"','"_"'] + list(set(removed_chains))))
-  ent_new = mol.CreateEntityFromView(view,True)
-  ent_new.SetName(ent.GetName())
+  if removed_chains:
+    view = ent.Select('cname!=%s' % ','.join(set(removed_chains)))
+    ent_new = mol.CreateEntityFromView(view, True)
+    ent_new.SetName(ent.GetName())
+  else:
+    ent_new = ent
 
   # check if CA only
   calpha_only = False
