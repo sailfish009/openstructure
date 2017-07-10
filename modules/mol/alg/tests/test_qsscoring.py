@@ -1,6 +1,6 @@
 import unittest, os
 import ost
-from ost import io
+from ost import io, mol
 from ost.mol.alg.qsscoring import *
 
 
@@ -131,6 +131,7 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 0.825, 2)
     # without penalties the interface is the same
     self.assertAlmostEqual(qs_scorer.best_score, 1.0, 2)
+    self._CheckScorer(qs_scorer)
 
   def test_HeteroCase1b(self):
     # as above but with assymetric unit of 3fub
@@ -150,6 +151,7 @@ class TestQSscore(unittest.TestCase):
     # check scoring
     self.assertAlmostEqual(qs_scorer.global_score, 0.356, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.419, 2)
+    self._CheckScorer(qs_scorer)
 
   def test_HeteroCase2(self):
     # different stoichiometry
@@ -157,8 +159,8 @@ class TestQSscore(unittest.TestCase):
     ent_2 = _LoadFile('4pc6.1.pdb') # A B  , no symmetry
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 0.3131, 2)
-    # without penalties the interface is the same
     self.assertAlmostEqual(qs_scorer.best_score, 0.941, 2)
+    self._CheckScorer(qs_scorer)
 
   def test_HeteroCase3(self):
     # more chains
@@ -167,6 +169,7 @@ class TestQSscore(unittest.TestCase):
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 0.359, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.958, 2)
+    self._CheckScorer(qs_scorer)
     # user's symmetry groups
     symm_1 = [('A', 'B'), ('C', 'D'), ('E', 'F'),
               ('G', 'H'), ('I', 'J'), ('K', 'L')]
@@ -176,6 +179,7 @@ class TestQSscore(unittest.TestCase):
     qs_scorer_symm.SetSymmetries(symm_1, symm_2)
     self.assertAlmostEqual(qs_scorer_symm.global_score, qs_scorer.global_score)
     self.assertAlmostEqual(qs_scorer_symm.best_score, qs_scorer.best_score)
+    self._CheckScorer(qs_scorer_symm)
 
   def test_HeteroCase4(self):
     # inverted chains
@@ -184,11 +188,20 @@ class TestQSscore(unittest.TestCase):
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 0.980, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.980, 2)
+    self._CheckScorer(qs_scorer)
     # check properties
     self.assertFalse(qs_scorer.calpha_only)
     # check mappings
     self.assertEqual(qs_scorer.chem_mapping, {('A',): ('B',), ('B',): ('A',)})
     self.assertEqual(qs_scorer.chain_mapping, {'A': 'B', 'B': 'A'})
+
+    # check superposition
+    sup = qs_scorer.superposition
+    self.assertAlmostEqual(sup.rmsd, 0.3372, 2)
+    self.assertEqual(sup.view1.atom_count, 225)
+    self.assertEqual(sup.view2.atom_count, 225)
+    rmsd = mol.alg.CalculateRMSD(sup.view1, sup.view2, sup.transformation)
+    self.assertAlmostEqual(sup.rmsd, rmsd, 2)
 
     # check if CA-only scoring is close to this
     ent_2_ca = ent_2.Select('aname=CA')
@@ -197,6 +210,7 @@ class TestQSscore(unittest.TestCase):
     self.assertTrue(qs_scorer_ca.calpha_only)
     self.assertAlmostEqual(qs_scorer_ca.global_score, qs_scorer.global_score, 2)
     self.assertAlmostEqual(qs_scorer_ca.best_score, qs_scorer.best_score, 2)
+    self._CheckScorer(qs_scorer_ca)
     # throw exception for messed up chains without CA atoms
     ent_2_no_ca = ent_2.Select('aname!=CA')
     with self.assertRaises(QSscoreError):
@@ -214,6 +228,7 @@ class TestQSscore(unittest.TestCase):
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 0.323, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.921, 2)
+    self._CheckScorer(qs_scorer)
 
 
   # TESTS HOMO
@@ -225,6 +240,7 @@ class TestQSscore(unittest.TestCase):
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 0.147, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.866, 2)
+    self._CheckScorer(qs_scorer)
 
   def test_HomoCase2(self):
     # broken cyclic symmetry
@@ -235,6 +251,7 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 1/6., 2)
     # without penalties the interface is the same
     self.assertAlmostEqual(qs_scorer.best_score, 1.0, 2)
+    self._CheckScorer(qs_scorer)
     # using user symmetry groups
     symm_1 = [('A', 'B'), ('C', 'D'), ('E', 'F')]
     symm_2 = [('A', 'B')]
@@ -243,6 +260,7 @@ class TestQSscore(unittest.TestCase):
     qs_scorer_symm.SetSymmetries(symm_1, symm_2)
     self.assertEqual(qs_scorer_symm.global_score, qs_scorer.global_score)
     self.assertEqual(qs_scorer_symm.best_score, qs_scorer.best_score)
+    self._CheckScorer(qs_scorer_symm)
 
 
   # TEST EXTRA SCORES
@@ -255,11 +273,13 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 0.171, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 1.00, 2)
     self.assertAlmostEqual(qs_scorer.lddt_score, 1.00, 2)
+    self._CheckScorer(qs_scorer)
     # flip them (use QSscoreEntity to go faster)
     qs_scorer2 = QSscorer(qs_scorer.qs_ent_2, qs_scorer.qs_ent_1)
     self.assertAlmostEqual(qs_scorer2.global_score, 0.171, 2)
     self.assertAlmostEqual(qs_scorer2.best_score, 1.00, 2)
     self.assertAlmostEqual(qs_scorer2.lddt_score, 0.483, 2)
+    self._CheckScorer(qs_scorer)
     
 
   # TEST BIG STUFF and FANCY SYMMETRIES
@@ -271,6 +291,7 @@ class TestQSscore(unittest.TestCase):
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 1/4., 2)
     self.assertAlmostEqual(qs_scorer.best_score, 1.0, 2)
+    self._CheckScorer(qs_scorer)
 
   def test_Capsid(self):
     ent_1 = _LoadFile('4gh4.2.pdb') # A5 B5 C5 D5, symmetry: C5
@@ -278,6 +299,7 @@ class TestQSscore(unittest.TestCase):
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 0.921, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.941, 2)
+    self._CheckScorer(qs_scorer)
 
   def test_TetrahedralSymmetry(self):
     ent_1 = _LoadFile('1mog.1.pdb') # A12, symmetry: T
@@ -285,6 +307,7 @@ class TestQSscore(unittest.TestCase):
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 0.954, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.994, 2)
+    self._CheckScorer(qs_scorer)
 
   def test_Urease(self):
     ent_1 = _LoadFile('1e9y.1.pdb') # A12 B12, symmetry: T
@@ -292,6 +315,7 @@ class TestQSscore(unittest.TestCase):
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 0.958, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.958, 2)
+    self._CheckScorer(qs_scorer)
 
   def test_C6SymmetryHetero(self):
     ent_1 = _LoadFile('3j3r.1.pdb') # A6 B6, symmetry: C6
@@ -299,6 +323,7 @@ class TestQSscore(unittest.TestCase):
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 0.559, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.559, 2)
+    self._CheckScorer(qs_scorer)
 
   def test_OctahedralSymmetry(self):
     ent_1 = _LoadFile('3vcd.1.pdb') # A24, symmetry: O
@@ -306,6 +331,117 @@ class TestQSscore(unittest.TestCase):
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 0.975, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.975, 2)
+    self._CheckScorer(qs_scorer)
+
+  ###########################################################################
+  # HELPERS
+  ###########################################################################
+  
+  def _CheckEntity(self, qs_ent, check_ca_contacts):
+    # check internal consistency of QS entity
+    self.assertTrue(qs_ent.is_valid)
+    # CA chains
+    ca_ent = qs_ent.ca_entity
+    self.assertEqual(ca_ent.residue_count, ca_ent.atom_count)
+    ca_names = sorted([ch.name for ch in ca_ent.chains])
+    self.assertEqual(sorted(qs_ent.ca_chains.keys()), ca_names)
+    # chem groups
+    self.assertEqual(sorted([c for cg in qs_ent.chem_groups for c in cg]),
+                     ca_names)
+    # check contacts (only chain names)
+    if check_ca_contacts:
+      contacts = qs_ent.contacts_ca
+    else:
+      contacts = qs_ent.contacts
+    for c1 in contacts:
+      self.assertTrue(c1 in ca_names)
+      for c2 in contacts[c1]:
+        self.assertTrue(c2 in ca_names)
+        self.assertLess(c1, c2)
+
+  def _CheckScorer(self, qs_scorer):
+    # check if we live up to our promises (assume: we did global score)
+    qs_ent_1 = qs_scorer.qs_ent_1
+    qs_ent_2 = qs_scorer.qs_ent_2
+    # check QS entities
+    self._CheckEntity(qs_ent_1, qs_scorer.calpha_only)
+    self._CheckEntity(qs_ent_2, qs_scorer.calpha_only)
+    self.assertNotEqual(qs_ent_1.GetName(), qs_ent_2.GetName())
+    # check scorer attributes
+    self.assertEqual(qs_scorer.calpha_only,
+                     qs_ent_1.calpha_only or qs_ent_2.calpha_only)
+    # check chem_mapping
+    cn1 = set([c for cg in qs_ent_1.chem_groups for c in cg])
+    cn2 = set([c for cg in qs_ent_2.chem_groups for c in cg])
+    cm_names_1 = list()
+    cm_names_2 = list()
+    for cg1, cg2 in qs_scorer.chem_mapping.iteritems():
+      ch_ref = qs_scorer.ent_to_cm_1.FindChain(cg1[0])
+      self.assertEqual(ch_ref.residue_count, ch_ref.atom_count)
+      self.assertGreaterEqual(ch_ref.residue_count, 5)
+      self.assertLessEqual(ch_ref.residue_count,
+                           qs_scorer.max_ca_per_chain_for_cm)
+      for ch_name in cg1:
+        self.assertTrue(ch_name in cn1)
+        ch = qs_scorer.ent_to_cm_1.FindChain(ch_name)
+        self.assertTrue(ch.IsValid())
+        self.assertEqual(ch_ref.residue_count, ch.residue_count)
+        self.assertEqual(ch_ref.atom_count, ch.atom_count)
+        cm_names_1.append(ch_name)
+      for ch_name in cg2:
+        self.assertTrue(ch_name in cn2)
+        ch = qs_scorer.ent_to_cm_2.FindChain(ch_name)
+        self.assertTrue(ch.IsValid())
+        self.assertEqual(ch_ref.residue_count, ch.residue_count)
+        self.assertEqual(ch_ref.atom_count, ch.atom_count)
+        cm_names_2.append(ch_name)
+    # check that there's no extra stuff in ent_to_cm_1/2
+    cm_names_1.sort()
+    self.assertEqual(sorted(ch.name for ch in qs_scorer.ent_to_cm_1.chains),
+                     cm_names_1)
+    cm_names_2.sort()
+    self.assertEqual(sorted(ch.name for ch in qs_scorer.ent_to_cm_2.chains),
+                     cm_names_2)
+    # check symm_1 / symm_2
+    # (>= 1 symm. group, all groups same length, all chains appear)
+    self.assertGreaterEqual(qs_scorer.symm_1, 1)
+    ref_symm_1 = qs_scorer.symm_1[0]
+    self.assertTrue(all(len(cg) == len(ref_symm_1) for cg in qs_scorer.symm_1))
+    self.assertEqual(sorted(c for cg in qs_scorer.symm_1 for c in cg),
+                     cm_names_1)
+    self.assertGreaterEqual(qs_scorer.symm_2, 1)
+    ref_symm_2 = qs_scorer.symm_2[0]
+    self.assertTrue(all(len(cg) == len(ref_symm_2) for cg in qs_scorer.symm_2))
+    self.assertEqual(sorted(c for cg in qs_scorer.symm_2 for c in cg),
+                     cm_names_2)
+    # check chain_mapping
+    # (all chains of ent with less chains mapped, each only once, chem_map)
+    chm_names_1 = qs_scorer.chain_mapping.keys()
+    chm_names_2 = qs_scorer.chain_mapping.values()
+    self.assertEqual(len(chm_names_1), min(len(cm_names_1), len(cm_names_2)))
+    self.assertEqual(len(set(chm_names_1)), len(chm_names_1))
+    self.assertEqual(len(set(chm_names_2)), len(chm_names_2))
+    for cg1, cg2 in qs_scorer.chem_mapping.iteritems():
+      for ch_name in cg1:
+        if ch_name in qs_scorer.chain_mapping:
+          self.assertTrue(qs_scorer.chain_mapping[ch_name] in cg2)
+    # check alignments
+    # (sorted and mapped and with views, all in mapped_residues)
+    self.assertEqual(len(qs_scorer.alignments), len(chm_names_1))
+    self.assertEqual(len(qs_scorer.alignments), len(qs_scorer.mapped_residues))
+    for aln, ch_name in zip(qs_scorer.alignments, sorted(chm_names_1)):
+      self.assertEqual(aln.sequences[0].name, ch_name)
+      self.assertEqual(aln.sequences[1].name, qs_scorer.chain_mapping[ch_name])
+      self.assertTrue(aln.sequences[0].HasAttachedView())
+      self.assertTrue(aln.sequences[1].HasAttachedView())
+      self.assertEqual(aln.sequences[0].attached_view.handle, qs_ent_1.ent)
+      self.assertEqual(aln.sequences[1].attached_view.handle, qs_ent_2.ent)
+      self.assertTrue(ch_name in qs_scorer.mapped_residues)
+    # best_score / global_score in [0,1]
+    self.assertGreaterEqual(qs_scorer.best_score, 0.0)
+    self.assertLessEqual(qs_scorer.best_score, 1.0)
+    self.assertGreaterEqual(qs_scorer.global_score, 0.0)
+    self.assertLessEqual(qs_scorer.global_score, 1.0)
 
 
 if __name__ == "__main__":
