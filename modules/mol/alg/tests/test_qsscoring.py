@@ -1,4 +1,5 @@
 import unittest, os
+import ost
 from ost import io
 from ost.mol.alg.qsscoring import *
 
@@ -10,13 +11,115 @@ def _LoadFile(file_name):
 
 class TestQSscore(unittest.TestCase):
 
+  # TESTS base
+
+  def test_QSscoreEntity(self):
+    # use smallest test structure...
+    ent = _LoadFile('3ia3.1.pdb')
+    ent.SetName("my_ent")
+    # create clean one
+    qs_ent = QSscoreEntity(ent)
+    self.assertTrue(qs_ent.is_valid)
+    # check naming
+    qs_ent.SetName("my_qs_ent")
+    self.assertEqual(qs_ent.original_name, "my_ent")
+    self.assertEqual(qs_ent.GetName(), "my_qs_ent")
+    # check cleanup
+    self.assertEqual(sorted(ch.name for ch in qs_ent.ent.chains), ['A', 'B'])
+    self.assertEqual(qs_ent.removed_chains, ['_'])
+    self.assertFalse(qs_ent.calpha_only)
+    # check CA entity
+    ca_ent = qs_ent.ca_entity
+    self.assertEqual(sorted(ch.name for ch in ca_ent.chains), ['A', 'B'])
+    self.assertEqual(ca_ent.residue_count, ca_ent.atom_count)
+    self.assertEqual(ca_ent.Select('aname=CA').atom_count, ca_ent.atom_count)
+    self.assertEqual(sorted(qs_ent.ca_chains.keys()), ['A', 'B'])
+    for ch in ca_ent.chains:
+      self.assertEqual(''.join([r.one_letter_code for r in ch.residues]),
+                       str(qs_ent.ca_chains[ch.name]))
+    # check chem groups
+    self.assertEqual(sorted(qs_ent.chem_groups), [['A'], ['B']])
+    # check contacts
+    self.assertEqual(len(qs_ent.contacts['A']['B']), 45)
+    self.assertAlmostEqual(qs_ent.contacts['A']['B'][23][127], 10.069, 2)
+    self.assertEqual(len(qs_ent.contacts_ca['A']['B']), 42)
+    self.assertAlmostEqual(qs_ent.contacts_ca['A']['B'][23][127], 10.471, 2)
+    # check contact filtering
+    old_contacts = qs_ent.contacts.copy()
+    old_contacts_ca = qs_ent.contacts_ca.copy()
+    qs_ent.contacts = old_contacts
+    self.assertEqual(qs_ent.contacts, old_contacts)
+    qs_ent.contacts_ca = old_contacts_ca
+    self.assertEqual(qs_ent.contacts_ca, old_contacts_ca)
+    dummy_contacts = {'A': {'B': {1: {2: 3.0, 4: 5.0}},
+                            'C': {10: {20: 30.0, 40: 50.0}}},
+                      'B': {'C': {100: {200: 300.0, 400: 500.0}}}}
+    qs_ent.contacts = dummy_contacts
+    self.assertEqual(qs_ent.contacts, {'A': {'B': {1: {2: 3.0, 4: 5.0}}}})
+    self.assertEqual(qs_ent.contacts_ca, old_contacts_ca)
+    qs_ent.contacts = old_contacts
+    qs_ent.contacts_ca = dummy_contacts
+    self.assertEqual(qs_ent.contacts, old_contacts)
+    self.assertEqual(qs_ent.contacts_ca, {'A': {'B': {1: {2: 3.0, 4: 5.0}}}})
+
+    # check chain removal for non-amino acid chains
+    ent_extra = ent.Copy()
+    edi = ent_extra.EditXCS()
+    # classic ligand chain
+    ch = edi.InsertChain('C')
+    for _ in range(30):
+      r = edi.AppendResidue(ch, 'HOH')
+      edi.InsertAtom(r, 'O', ost.geom.Vec3())
+    # DNA chain
+    ch = edi.InsertChain('D')
+    for _ in range(30):
+      r = edi.AppendResidue(ch, 'A')
+      edi.InsertAtom(r, 'P', ost.geom.Vec3())
+    edi.UpdateICS()
+    # ensure both removed
+    qs_ent_test = QSscoreEntity(ent_extra)
+    self.assertEqual(sorted(qs_ent_test.removed_chains), ['C', 'D', '_'])
+
+    # invalid structures: monomers (or less) before or after cleaning
+    ost.PushVerbosityLevel(-1)
+    # empty view
+    ent_empty = ent.CreateEmptyView()
+    qs_ent_invalid = QSscoreEntity(ent_empty)
+    self.assertFalse(qs_ent_invalid.is_valid)
+    # monomer
+    ent_mono = ent.Select('cname=A')
+    qs_ent_invalid = QSscoreEntity(ent_mono)
+    self.assertFalse(qs_ent_invalid.is_valid)
+    # short chain removed
+    ent_short = ent.Select('cname=A or rnum<20')
+    qs_ent_invalid = QSscoreEntity(ent_short)
+    self.assertFalse(qs_ent_invalid.is_valid)
+    self.assertEqual(sorted(qs_ent_invalid.removed_chains), ['B', '_'])
+    # non-AA chain removal
+    ent_non_AA = ent_extra.Select('cname=A,C,D')
+    qs_ent_invalid = QSscoreEntity(ent_non_AA)
+    self.assertFalse(qs_ent_invalid.is_valid)
+    self.assertEqual(sorted(qs_ent_invalid.removed_chains), ['C', 'D'])
+    ost.PopVerbosityLevel()
+
+    # exception when scoring with invalid QSscoreEntity
+    with self.assertRaises(QSscoreError):
+      qs_scorer_tst = QSscorer(qs_ent_invalid, qs_ent)
+      qs_scorer_tst.global_score
+    with self.assertRaises(QSscoreError):
+      qs_scorer_tst = QSscorer(qs_ent, qs_ent_invalid)
+      qs_scorer_tst.global_score
+
+
+  # TESTS HETERO
+
   def test_HeteroCase1(self):
     # additional chains
     ent_1 = _LoadFile('4ux8.1.pdb') # A2 B2 C2, symmetry: C2
     ent_2 = _LoadFile('3fub.2.pdb') # A2 B2   , symmetry: C2
     qs_scorer = QSscorer(ent_1, ent_2)
     # check properties
-    self.assertEqual(qs_scorer.calpha_only, False)
+    self.assertFalse(qs_scorer.calpha_only)
     # check mappings
     self.assertEqual(qs_scorer.chem_mapping,
                      {('D', 'F'): ('B', 'D'), ('C', 'E'): ('A', 'C')})
@@ -36,7 +139,7 @@ class TestQSscore(unittest.TestCase):
     ent_2 = _LoadFile('3fub.au.pdb')
     qs_scorer = QSscorer(ent_1, ent_2)
     # check properties
-    self.assertEqual(qs_scorer.calpha_only, False)
+    self.assertFalse(qs_scorer.calpha_only)
     # check mappings
     self.assertEqual(qs_scorer.chem_mapping,
                      {('C', 'E'): ('A', 'C'), ('D', 'F'): ('D', 'B')})
@@ -81,11 +184,17 @@ class TestQSscore(unittest.TestCase):
     qs_scorer = QSscorer(ent_1, ent_2)
     self.assertAlmostEqual(qs_scorer.global_score, 0.980, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.980, 2)
+    # check properties
+    self.assertFalse(qs_scorer.calpha_only)
+    # check mappings
+    self.assertEqual(qs_scorer.chem_mapping, {('A',): ('B',), ('B',): ('A',)})
+    self.assertEqual(qs_scorer.chain_mapping, {'A': 'B', 'B': 'A'})
 
     # check if CA-only scoring is close to this
     ent_2_ca = ent_2.Select('aname=CA')
     # use QSscoreEntity to go faster
     qs_scorer_ca = QSscorer(qs_scorer.qs_ent_1, ent_2_ca)
+    self.assertTrue(qs_scorer_ca.calpha_only)
     self.assertAlmostEqual(qs_scorer_ca.global_score, qs_scorer.global_score, 2)
     self.assertAlmostEqual(qs_scorer_ca.best_score, qs_scorer.best_score, 2)
     # throw exception for messed up chains without CA atoms
