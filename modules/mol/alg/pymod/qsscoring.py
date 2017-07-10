@@ -837,10 +837,13 @@ def FilterContacts(contacts, chain_names):
   filtered_contacts = dict()
   for c1 in contacts:
     if c1 in chain_names:
-      filtered_contacts[c1] = dict()
+      new_contacts = dict()
       for c2 in contacts[c1]:
         if c2 in chain_names:
-          filtered_contacts[c1][c2] = contacts[c1][c2]
+          new_contacts[c2] = contacts[c1][c2]
+      # avoid adding empty dicts
+      if new_contacts:
+        filtered_contacts[c1] = new_contacts
   return filtered_contacts
 
 def GetContacts(entity, calpha_only, dist_thr=12.0):
@@ -930,26 +933,22 @@ def _CleanInputEntity(ent):
   removed_chains = []
   for ch in ent.chains:
     # we remove chains if they are small-peptides or if the contain no aa
-    if ch.name in ['-', '_']:
-      removed_chains.append('"%c"' % ch.name)
-    else:
-      without_aa = not any(r.chem_type.IsAminoAcid() for r in ch.residues)
-      if ch.residue_count < 20 or without_aa:
-        if ch.name == ' ':
-          removed_chains.append('" "')
-        else:
-          removed_chains.append(ch.name)
-      res_olc = set(r.one_letter_code for r in ch.residues)
-      # also remove chains containing only unknown or modified residues
-      if not res_olc - {'?', 'X'}:
-        if ch.name == ' ':
-          removed_chains.append('" "')
-        else:
-          removed_chains.append(ch.name)
+    # or if they contain only unknown or modified residues
+    if    ch.name in ['-', '_'] \
+       or ch.residue_count < 20 \
+       or not any(r.chem_type.IsAminoAcid() for r in ch.residues) \
+       or not (set(r.one_letter_code for r in ch.residues) - {'?', 'X'}):
+      removed_chains.append(ch.name)
 
   # remove them from *ent*
   if removed_chains:
-    view = ent.Select('cname!=%s' % ','.join(set(removed_chains)))
+    chain_set = set()
+    for ch_name in removed_chains:
+      if ch_name in ['-', '_', ' ']:
+        chain_set.add('"%c"' % ch_name)
+      else:
+        chain_set.add(ch_name)
+    view = ent.Select('cname!=%s' % ','.join(chain_set))
     ent_new = mol.CreateEntityFromView(view, True)
     ent_new.SetName(ent.GetName())
   else:
