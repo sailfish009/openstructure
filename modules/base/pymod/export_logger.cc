@@ -54,11 +54,7 @@ typedef boost::shared_ptr<WrappedLogSink> WrappedLogSinkPtr;
 
 void push_verb(int n) 
 {
-  if (n<0) {
-    Logger::Instance().PushVerbosityLevel(0);
-  } else {
-    Logger::Instance().PushVerbosityLevel(n);
-  }
+  Logger::Instance().PushVerbosityLevel(n);
 }
 
 void pop_verb() 
