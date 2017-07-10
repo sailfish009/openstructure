@@ -58,13 +58,13 @@ void Logger::PushVerbosityLevel(int l)
 
 void Logger::PopVerbosityLevel()
 {
-  if(!level_stack_.empty()) {
+  if (!level_stack_.empty()) {
     level_stack_.pop();
   }
-  if(level_stack_.empty()) {
-    level_=1;
+  if (level_stack_.empty()) {
+    level_ = 0;
   } else {
-    level_=level_stack_.top();
+    level_ = level_stack_.top();
   }
 }
 
@@ -86,7 +86,7 @@ void Logger::PushSink(LogSinkPtr& sink)
 
 void Logger::PopSink()
 {
-  if(sink_stack_.size()>1) {
+  if (sink_stack_.size() > 1) {
     sink_stack_.pop();
   } else {
     LOG_ERROR("Can't pop sink. There is only one sink left on the stack");
