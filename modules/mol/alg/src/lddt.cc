@@ -40,6 +40,7 @@
 #include <ost/platform.hh>
 #include <ost/log.hh>
 #include <ost/mol/alg/consistency_checks.hh>
+#include <ost/version.hh>
 
 #if defined(__APPLE__)
 #include <mach-o/dyld.h>
@@ -153,7 +154,7 @@ CompoundLibPtr load_compound_lib(const String& custom_path)
     #endif
   #endif
   if (exe_path.empty()) { 
-    std::cerr << "Could not determine the path of the molck executable. Will only "
+    std::cerr << "Could not determine the path of the lddt executable. Will only "
        "look for compounds.chemlib in the current working directory" << std::endl;
   } else {
     fs::path path_and_exe(exe_path);
@@ -187,7 +188,7 @@ bool is_resnum_in_globalrdmap(const ResNum& resnum, const GlobalRDMap& glob_dist
 int main (int argc, char **argv)
 {
   // sets some default values for parameters
-  String version = "1.2";
+  String version = OST_VERSION_STRING;
   Real bond_tolerance = 12.0;
   Real angle_tolerance = 12.0;
   Real radius=15.0; 
