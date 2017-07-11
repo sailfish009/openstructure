@@ -179,6 +179,13 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 0.3131, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.941, 2)
     self._CheckScorer(qs_scorer)
+    # check properties
+    self.assertFalse(qs_scorer.calpha_only)
+    self.assertEqual(qs_scorer.chem_mapping,
+                     {('A', 'C'): ('A',), ('B', 'D'): ('B',)})
+    self.assertEqual(sorted(qs_scorer.symm_1), [('A', 'B'), ('C', 'D')])
+    self.assertEqual(sorted(qs_scorer.symm_2), [('A', 'B')])
+    self.assertEqual(qs_scorer.chain_mapping, {'A': 'A', 'B': 'B'})
 
   def test_HeteroCase3(self):
     # more chains
@@ -188,15 +195,36 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 0.359, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.958, 2)
     self._CheckScorer(qs_scorer)
+    # check properties
+    self.assertFalse(qs_scorer.calpha_only)
+    self.assertEqual(qs_scorer.chem_mapping,
+                     {('A', 'C', 'E', 'G', 'I', 'K'): ('A', 'C', 'E'),
+                      ('B', 'D', 'F', 'H', 'J', 'L'): ('B', 'D', 'F')})
+    self.assertEqual(sorted(qs_scorer.symm_1),
+                     [('A', 'B'), ('C', 'D'), ('E', 'F'),
+                      ('G', 'H'), ('I', 'J'), ('K', 'L')])
+    self.assertEqual(sorted(qs_scorer.symm_2),
+                     [('A', 'B'), ('C', 'D'), ('E', 'F')])
+    self.assertEqual(qs_scorer.chain_mapping,
+                     {'A':'A', 'B':'B', 'G':'C', 'H':'D', 'I':'E', 'J':'F'})
+
     # user's symmetry groups
-    symm_1 = [('A', 'B'), ('C', 'D'), ('E', 'F'),
-              ('G', 'H'), ('I', 'J'), ('K', 'L')]
-    symm_2 = [('A', 'B'), ('C', 'D'), ('E', 'F')]
+    symm_1 = [('E', 'D', 'C', 'B', 'A', 'F'), ('G', 'J', 'I', 'L', 'K', 'H')]
+    symm_2 = [('A', 'B', 'C', 'D', 'E', 'F')]
     # use QSscoreEntity to go faster
     qs_scorer_symm = QSscorer(qs_scorer.qs_ent_1, qs_scorer.qs_ent_2)
     qs_scorer_symm.SetSymmetries(symm_1, symm_2)
-    self.assertAlmostEqual(qs_scorer_symm.global_score, qs_scorer.global_score)
-    self.assertAlmostEqual(qs_scorer_symm.best_score, qs_scorer.best_score)
+    self.assertAlmostEqual(qs_scorer_symm.global_score,
+                           qs_scorer.global_score, 2)
+    self.assertAlmostEqual(qs_scorer_symm.best_score, qs_scorer.best_score, 2)
+    self._CheckScorer(qs_scorer_symm)
+    # check properties
+    self.assertFalse(qs_scorer_symm.calpha_only)
+    self.assertEqual(qs_scorer_symm.chem_mapping, qs_scorer.chem_mapping)
+    self.assertEqual(qs_scorer_symm.symm_1, symm_1)
+    self.assertEqual(qs_scorer_symm.symm_2, symm_2)
+    self.assertEqual(qs_scorer_symm.chain_mapping,
+                     {'C':'A', 'D':'B', 'E':'E', 'F':'F', 'K':'C', 'L':'D'})
     self._CheckScorer(qs_scorer_symm)
 
   def test_HeteroCase4(self):
@@ -248,6 +276,10 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 0.323, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.921, 2)
     self._CheckScorer(qs_scorer)
+    # check properties
+    self.assertFalse(qs_scorer.calpha_only)
+    self.assertEqual(qs_scorer.chem_mapping, {('A',): ('A',), ('B',): ('B',)})
+    self.assertEqual(qs_scorer.chain_mapping, {'A': 'A', 'B': 'B'})
 
 
   # TESTS HOMO
@@ -260,6 +292,12 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 0.147, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.866, 2)
     self._CheckScorer(qs_scorer)
+    # check properties
+    self.assertFalse(qs_scorer.calpha_only)
+    self.assertEqual(qs_scorer.chem_mapping, {('A', 'B'): ('B', 'C', 'D', 'A')})
+    self.assertEqual(sorted(qs_scorer.symm_1), [('A', 'B')])
+    self.assertEqual(sorted(qs_scorer.symm_2), [('B', 'A'), ('C', 'D')])
+    self.assertEqual(qs_scorer.chain_mapping, {'A': 'B', 'B': 'A'})
 
   def test_HomoCase2(self):
     # broken cyclic symmetry
@@ -278,6 +316,7 @@ class TestQSscore(unittest.TestCase):
     self.assertEqual(sorted(qs_scorer.symm_2), [('B', 'A')])
     self.assertEqual(qs_scorer.chain_mapping, {'A': 'A', 'B': 'B'})
     self._CheckScorer(qs_scorer)
+
     # using user symmetry groups
     symm_1 = [('A', 'B'), ('C', 'D'), ('E', 'F')]
     symm_2 = [('A', 'B')]
@@ -345,6 +384,12 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer2.best_score, 1.00, 2)
     self.assertAlmostEqual(qs_scorer2.lddt_score, 0.483, 2)
     self._CheckScorerLDDT(qs_scorer)
+    # check properties
+    self.assertFalse(qs_scorer.calpha_only)
+    self.assertEqual(qs_scorer.chem_mapping, {('B', 'A'): ('B', 'C', 'D', 'A')})
+    self.assertEqual(sorted(qs_scorer.symm_1), [('B', 'A')])
+    self.assertEqual(sorted(qs_scorer.symm_2), [('B', 'A'), ('C', 'D')])
+    self.assertEqual(qs_scorer.chain_mapping, {'A': 'A', 'B': 'B'})
 
 
   # TEST BIG STUFF and FANCY SYMMETRIES
@@ -357,6 +402,19 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 1/4., 2)
     self.assertAlmostEqual(qs_scorer.best_score, 1.0, 2)
     self._CheckScorer(qs_scorer)
+    # check properties
+    self.assertFalse(qs_scorer.calpha_only)
+    self.assertEqual(qs_scorer.chem_mapping,
+            {('A', 'C', 'E', 'G', 'I', 'K', 'M', 'O'): ('A', 'C', 'E', 'G'),
+             ('B', 'D', 'F', 'H', 'J', 'L', 'N', 'P'): ('B', 'D', 'F', 'H')})
+    self.assertEqual(sorted(qs_scorer.symm_1),
+                     [('A', 'B'), ('C', 'D'), ('E', 'F'), ('G', 'H'),
+                      ('I', 'J'), ('K', 'L'), ('M', 'N'), ('O', 'P')])
+    self.assertEqual(sorted(qs_scorer.symm_2),
+                     [('A', 'B'), ('C', 'D'), ('E', 'F'), ('G', 'H')])
+    self.assertEqual(qs_scorer.chain_mapping,
+                     {'A': 'A', 'C': 'C', 'B': 'B', 'E': 'E',
+                      'D': 'D', 'G': 'G', 'F': 'F', 'H': 'H'})
 
   def test_Capsid(self):
     ent_1 = _LoadFile('4gh4.2.pdb') # A5 B5 C5 D5, symmetry: C5
@@ -365,6 +423,26 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 0.921, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.941, 2)
     self._CheckScorer(qs_scorer)
+    # check properties
+    self.assertFalse(qs_scorer.calpha_only)
+    self.assertEqual(qs_scorer.chem_mapping,
+            {('D', 'H', 'L', 'P', 'T'): ('D', 'H', 'L', 'P', 'T'),
+             ('A', 'E', 'I', 'M', 'Q'): ('A', 'E', 'I', 'M', 'Q'),
+             ('C', 'G', 'K', 'O', 'S'): ('C', 'G', 'K', 'O', 'S'),
+             ('B', 'F', 'J', 'N', 'R'): ('B', 'F', 'J', 'N', 'R')})
+    self.assertEqual(sorted(qs_scorer.symm_1),
+                     [('D', 'A', 'S', 'B'), ('H', 'E', 'C', 'F'),
+                      ('L', 'I', 'G', 'J'), ('P', 'M', 'K', 'N'),
+                      ('T', 'Q', 'O', 'R')])
+    self.assertEqual(sorted(qs_scorer.symm_2),
+                     [('D', 'A', 'S', 'B'), ('H', 'E', 'C', 'F'),
+                      ('L', 'I', 'G', 'J'), ('P', 'M', 'K', 'N'),
+                      ('T', 'Q', 'O', 'R')])
+    self.assertEqual(qs_scorer.chain_mapping,
+                     {'A': 'A', 'C': 'C', 'B': 'B', 'E': 'E', 'D': 'D',
+                      'G': 'G', 'F': 'F', 'I': 'I', 'H': 'H', 'K': 'K',
+                      'J': 'J', 'M': 'M', 'L': 'L', 'O': 'O', 'N': 'N',
+                      'Q': 'Q', 'P': 'P', 'S': 'S', 'R': 'R', 'T': 'T'})
 
   def test_TetrahedralSymmetry(self):
     ent_1 = _LoadFile('1mog.1.pdb') # A12, symmetry: T
@@ -373,6 +451,21 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 0.954, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.994, 2)
     self._CheckScorer(qs_scorer)
+    # check properties
+    self.assertFalse(qs_scorer.calpha_only)
+    self.assertEqual(qs_scorer.chem_mapping,
+            {('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'): \
+               ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L')})
+    self.assertEqual(sorted(qs_scorer.symm_1),
+                     [('A', 'D'), ('B', 'E'), ('C', 'F'),
+                      ('G', 'J'), ('H', 'K'), ('I', 'L')])
+    self.assertEqual(sorted(qs_scorer.symm_2),
+                     [('A', 'G'), ('B', 'I'), ('C', 'E'),
+                      ('D', 'K'), ('F', 'J'), ('H', 'L')])
+    self.assertEqual(qs_scorer.chain_mapping,
+                     {'A': 'K', 'C': 'L', 'B': 'J', 'E': 'F',
+                      'D': 'D', 'G': 'I', 'F': 'H', 'I': 'G',
+                      'H': 'E', 'K': 'C', 'J': 'B', 'L': 'A'})
 
   def test_Urease(self):
     ent_1 = _LoadFile('1e9y.1.pdb') # A12 B12, symmetry: T
@@ -381,6 +474,27 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 0.958, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.958, 2)
     self._CheckScorer(qs_scorer)
+    # check properties
+    self.assertFalse(qs_scorer.calpha_only)
+    self.assertEqual(qs_scorer.chem_mapping,
+            {('B', 'D', 'F', 'H', 'J', 'L', 'N', 'P', 'R', 'T', 'V', 'X'): \
+               ('B', 'D', 'F', 'H', 'J', 'L', 'N', 'P', 'R', 'T', 'V', 'X'),
+             ('A', 'C', 'E', 'G', 'I', 'K', 'M', 'O', 'Q', 'S', 'U', 'W'): \
+               ('A', 'C', 'E', 'G', 'I', 'K', 'M', 'O', 'Q', 'S', 'U', 'W')})
+    self.assertEqual(sorted(qs_scorer.symm_1),
+                     [('B', 'Q'), ('D', 'G'), ('F', 'W'), ('H', 'U'),
+                      ('J', 'K'), ('L', 'S'), ('N', 'A'), ('P', 'E'),
+                      ('R', 'M'), ('T', 'I'), ('V', 'C'), ('X', 'O')])
+    self.assertEqual(sorted(qs_scorer.symm_2),
+                     [('B', 'Q'), ('D', 'W'), ('F', 'U'), ('H', 'C'),
+                      ('J', 'K'), ('L', 'S'), ('N', 'A'), ('P', 'E'),
+                      ('R', 'M'), ('T', 'I'), ('V', 'O'), ('X', 'G')])
+    self.assertEqual(qs_scorer.chain_mapping,
+                     {'A': 'A', 'C': 'W', 'B': 'B', 'E': 'E', 'D': 'X',
+                      'G': 'G', 'F': 'F', 'I': 'I', 'H': 'H', 'K': 'K',
+                      'J': 'J', 'M': 'M', 'L': 'L', 'O': 'O', 'N': 'N',
+                      'Q': 'Q', 'P': 'P', 'S': 'S', 'R': 'R', 'U': 'C',
+                      'T': 'T', 'W': 'U', 'V': 'D', 'X': 'V'})
 
   def test_C6SymmetryHetero(self):
     ent_1 = _LoadFile('3j3r.1.pdb') # A6 B6, symmetry: C6
@@ -389,6 +503,21 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 0.559, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.559, 2)
     self._CheckScorer(qs_scorer)
+    # check properties
+    self.assertFalse(qs_scorer.calpha_only)
+    self.assertEqual(qs_scorer.chem_mapping,
+            {('A', 'B', 'C', 'D', 'E', 'F'): ('A', 'B', 'C', 'D', 'E', 'F'),
+             ('G', 'H', 'I', 'J', 'K', 'L'): ('G', 'H', 'I', 'J', 'K', 'L')})
+    self.assertEqual(sorted(qs_scorer.symm_1),
+                     [('A', 'G'), ('B', 'H'), ('C', 'I'),
+                      ('D', 'J'), ('E', 'K'), ('F', 'L')])
+    self.assertEqual(sorted(qs_scorer.symm_2),
+                     [('A', 'G'), ('B', 'H'), ('C', 'I'),
+                      ('D', 'J'), ('E', 'K'), ('F', 'L')])
+    self.assertEqual(qs_scorer.chain_mapping,
+                     {'A': 'A', 'C': 'C', 'B': 'B', 'E': 'E',
+                      'D': 'D', 'G': 'G', 'F': 'F', 'I': 'I',
+                      'H': 'H', 'K': 'K', 'J': 'J', 'L': 'L'})
 
   def test_OctahedralSymmetry(self):
     ent_1 = _LoadFile('3vcd.1.pdb') # A24, symmetry: O
@@ -397,6 +526,28 @@ class TestQSscore(unittest.TestCase):
     self.assertAlmostEqual(qs_scorer.global_score, 0.975, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 0.975, 2)
     self._CheckScorer(qs_scorer)
+    # check properties
+    self.assertFalse(qs_scorer.calpha_only)
+    self.assertEqual(qs_scorer.chem_mapping,
+            {('A', 'E', 'I', 'M', 'Q', 'U', 'B', 'C', 'D', 'F', 'G', 'H',
+              'J', 'K', 'L', 'N', 'O', 'P', 'R', 'S', 'T', 'V', 'W', 'X'): \
+               ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+                'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X')})
+    self.assertEqual(sorted(qs_scorer.symm_1),
+                     [('A', 'X'), ('B', 'H'), ('C', 'P'), ('D', 'K'),
+                      ('E', 'I'), ('F', 'J'), ('G', 'T'), ('L', 'R'),
+                      ('M', 'S'), ('O', 'V'), ('Q', 'N'), ('U', 'W')])
+    self.assertEqual(sorted(qs_scorer.symm_2),
+                     [('A', 'O'), ('B', 'M'), ('C', 'N'), ('D', 'G'),
+                      ('E', 'H'), ('F', 'I'), ('J', 'W'), ('K', 'X'),
+                      ('L', 'V'), ('P', 'T'), ('Q', 'U'), ('R', 'S')])
+    self.assertEqual(qs_scorer.chain_mapping,
+                     {'A': 'J', 'C': 'L', 'B': 'K', 'E': 'P', 'D': 'R',
+                      'G': 'O', 'F': 'Q', 'I': 'T', 'H': 'X', 'K': 'S',
+                      'J': 'U', 'M': 'G', 'L': 'I', 'O': 'N', 'N': 'H',
+                      'Q': 'E', 'P': 'V', 'S': 'D', 'R': 'F', 'U': 'B',
+                      'T': 'A', 'W': 'M', 'V': 'C', 'X': 'W'})
+
 
   ###########################################################################
   # HELPERS
