@@ -14,10 +14,10 @@ Brief Overview
 
 Compiling OpenStructure consists of several steps that are described below in more detail. In essence, these steps are:
 
- * Installing the Dependencies
- * Checking out the source code from GIT
- * Configuring the build with cmake
- * Compiling an Linking
+* Installing the Dependencies
+* Checking out the source code from GIT
+* Configuring the build with cmake
+* Compiling an Linking
  
 
 Installing the Dependencies
@@ -25,25 +25,29 @@ Installing the Dependencies
 
 OpenStructure uses a bunch of OpenSource libraries. If you haven't already installed them, please install them now! Where appropriate the minimally required version is given in parantheses.
 
- * `CMake <http://cmake.org>`_ (2.6.4)
- * `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
- * `Boost <http://boost.org>`_ (1.53)
- * `libpng <http://www.libpng.org>`_ 
- * `Python <http://python.org>`_ (2.7)
- * `Qt <http://qt-project.org/>`_ (4.5)
+* `CMake <http://cmake.org>`_ (2.6.4)
+* `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
+* `Boost <http://boost.org>`_ (1.53)
+* `libpng <http://www.libpng.org>`_ 
+* `Python <http://python.org>`_ (2.7)
 
 When you enable support for image processing, you will need:
 
- * `FFTW3 <http://fftw.org>`_. By default, OpenStructure is compiled with single precision and thus also requires FFTW to be compiled with single precision. Most platforms offer this as a second package. If you are compiling manually, use the `--enable-single` option.
+* `FFTW3 <http://fftw.org>`_. By default, OpenStructure is compiled with single
+  precision and thus also requires FFTW to be compiled with single precision.
+  Most platforms offer this as a second package. If you are compiling manually,
+  use the `--enable-single` option.
 
- * `libtiff <http://www.libtiff.org>`_
+* `libtiff <http://www.libtiff.org>`_
 
+If you would like to use the info module, also install:
 
+* `Qt4 <http://qt-project.org/>`_ (4.5, Qt5 is not supported yet)
 
-If you would like to use the graphical user interface, also install:
+If you would like to use the graphical user interface (GUI), also install:
 
- * `SIP <http://www.riverbankcomputing.co.uk/software/sip/download>`_.
- * `PyQt4 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_.
+* `SIP <http://www.riverbankcomputing.co.uk/software/sip/download>`_.
+* `PyQt4 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_.
 
 In case you are compiling under Windows you have to install `Visualstudio
 2008 <http://www.microsoft.com/express/Downloads>`_. to compile the dependencies 
@@ -58,15 +62,16 @@ dependencies.
 Getting the Source Code
 --------------------------------------------------------------------------------
 
-
-OpenStructure uses `git` as the revision control system. The main repository can be browsed `here <https://git.scicore.unibas.ch/schwede/openstructure.git>`_. To get the source code, use git clone:
-
+OpenStructure uses `git` as the revision control system. The main repository can
+be browsed `here <https://git.scicore.unibas.ch/schwede/openstructure.git>`_. To
+get the source code, use git clone:
 
 .. code-block:: bash
 
   git clone https://git.scicore.unibas.ch/schwede/openstructure.git <directory-name>
   
-The above command will clone OpenStructure into the directory called `directory-name`. If omitted, the directory will be called ost. 
+The above command will clone OpenStructure into the directory specified by
+`<directory-name>`. If omitted, the directory will be called ost. 
 
 .. note::
 
@@ -83,7 +88,15 @@ The above command will clone OpenStructure into the directory called `directory-
 Picking the right branch
 --------------------------------------------------------------------------------
 
-By default you are checking out the master branch. Master is, by definition a stable branch. It always points to the latest release. However, there are several other branches at your disposal. The main development is happening in the develop branch. It contains the newest features and bug fixes. However, we dont't make any guarantees that the develop branch is bug free and doesn't contain major bugs. After all, it's in constant flux. If you are developing new features, start your feature branch off develop. Besides that, there are several smaller features branches that are used to group together commits for one specific features. To change to a specific branch, use
+By default you are checking out the master branch. Master is, by definition a
+stable branch. It always points to the latest release. However, there are
+several other branches at your disposal. The main development is happening in
+the develop branch. It contains the newest features and bug fixes. However, we
+dont't make any guarantees that the develop branch is bug free and doesn't
+contain major bugs. After all, it's in constant flux. If you are developing new
+features, start your feature branch off develop. Besides that, there are several
+smaller features branches that are used to group together commits for one
+specific features. To change to a specific branch, use
 
 .. code-block:: bash
 
@@ -94,15 +107,21 @@ Configuring
 --------------------------------------------------------------------------------
 
 
-OpenStructure uses `CMake <http://cmake.org>`_ for compiling and building the project. The next required step is to configure the build environment using cmake. You can do that by invoking `cmake` in the project directory.
+OpenStructure uses `CMake <http://cmake.org>`_ for compiling and building the
+project. The next required step is to configure the build environment using
+cmake. You can do that by invoking `cmake` in the project directory.
 
 .. code-block:: bash
 
   cmake . <options>
 
-There are two kinds of options: Options that let you control the building behaviour, enabling and disabling the compilation of certain modules and options that let you tell CMake where to find the dependencies. All of them are passed to CMake with via `-D<opt>=<value>`.
+There are two kinds of options: Options that let you control the building
+behaviour, enabling and disabling the compilation of certain modules and options
+that let you tell CMake where to find the dependencies. All of them are passed
+to CMake with via `-D<opt>=<value>`.
 
-On Windows, use Tools -> VisualStudio -> commandline prompt from within VisualStudio
+On Windows, use Tools -> VisualStudio -> commandline prompt from within
+VisualStudio.
 
 Flag to choose build generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -121,85 +140,133 @@ On Windows you have to explicitly set the build generator to "Visual Studio 9 20
 Flags to Control the Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-By default, `CMake <http://cmake.org>`_ searches the standard directories for dependencies. However, on some systems, this might not be enough. Here is a short description of how CMake figures out what dependencies to take and how you can influence it.
+By default, `CMake <http://cmake.org>`_ searches the standard directories for
+dependencies. However, on some systems, this might not be enough. Here is a
+short description of how CMake figures out what dependencies to take and how you
+can influence it.
 
- * Boost is mainly controlled via the `BOOST_ROOT` option. If boost wasn't
-   found, it should be set to the prefix of the boost installation.
+* Boost is mainly controlled via the `BOOST_ROOT` option. If boost wasn't
+  found, it should be set to the prefix of the boost installation.
 
- * `QT_QMAKE_EXECUTABLE` defines the exact Qt installation to take. It should 
-   be set to the full path to `qmake`.
- 
- * `PYTHON_ROOT` is the Python equivalent of BOOST_ROOT. It should be set to 
-   the prefix path containing the python binary, headers and libraries.
+* `PYTHON_ROOT` is the Python equivalent of BOOST_ROOT. It should be set to 
+  the prefix path containing the python binary, headers and libraries.
 
- * `SYS_ROOT` controls the general prefix for searching libraries and headers.
-   By default, it is set to `/`.
-   
- * `COMPOUND_LIB` specifies the location of the compound library and
-   activates the rule-based-builder. The compound library is based on 
-   the component dictionary released by the PDB, and it specifies atoms
-   of a certain residue or connectivities between atoms etc. The 
-   :doc:`compound library <conop/compoundlib>` itself is created from the 
-   component dictionary by calling the OpenStructure chemdict_tool. 
-   By default this is switched off but it is highly recommended to provide a
-   compound library to use all features of OpenStructure.
+* `SYS_ROOT` controls the general prefix for searching libraries and headers.
+  By default, it is set to `/`.
+  
+* `COMPOUND_LIB` specifies the location of the compound library and
+  activates the rule-based-builder. The compound library is based on 
+  the component dictionary released by the PDB, and it specifies atoms
+  of a certain residue or connectivities between atoms etc. The 
+  :doc:`compound library <conop/compoundlib>` itself is created from the 
+  component dictionary by calling the OpenStructure chemdict_tool. 
+  By default this is switched off but it is highly recommended to provide a
+  compound library to use all features of OpenStructure.
 
- * `COMPILE_TMTOOLS` will activate bindings for TMAlign and TMScore, which are 
-   then available at python level. This option requires a Fortran compiler. 
-   By default this option is switched off.
+* `QT_QMAKE_EXECUTABLE` defines the exact Qt installation to take. It should 
+  be set to the full path to `qmake`. This is only needed if `ENABLE_INFO` is
+  switched on.
 
- * `USE_NUMPY` allows OpenStructure to pass back data in NumPy format. By 
-   default this is switched off.
+* `COMPILE_TMTOOLS` will activate bindings for TMAlign and TMScore, which are 
+  then available at python level. This option requires a Fortran compiler. 
+  By default this option is switched off.
+
+* `USE_NUMPY` allows OpenStructure to pass back data in NumPy format. By 
+  default this is switched off.
 
 Build Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
- * `ENABLE_GUI` controls whether to build the graphical user interface module. By
-   default it is set to true. 
+* `OPTIMIZE` can be set to 1 to build an optimized (-O3 -DNDEBUG) version of
+  OpenStructure.
 
- * `ENABLE_IMG` controls whether to build the image processing module. This will
-   enable support for density maps, and general image processing in 1, 2 an 3
-   dimensions. By default it is set to true. 
+* `PREFIX` specifies the location on the file system where to install 
+  OpenStructure.
 
- * `ENABLE_GFX` controls whether to build the graphics module. By default, this
-   is set to true. If set to none, this implies `ENABLE_UI=NO`.
-   
- * Shader support is controlled with `USE_SHADER`. By default, no shaders are
-   used.
-   
- * If `OPTIMIZE` is set to 1, an optimized version of OpenStructure is built.
+* `USE_DOUBLE_PRECISION` will switch on double precision within OpenStructure. 
+  By default, this is switched off.
 
- * `PREFIX` specifies the location on the file system where to install 
-   OpenStructure
+* `ENABLE_STATIC` allows some parts of OpenStructure to be statically linked 
+  and thus can be used more easily across a heterogeneous setup, e.g. older 
+  systems and newer systems.
 
- * `USE_DOUBLE_PRECISION` will switch on double precision within OpenStructure. 
-   By default this is switched off.
+* `ENABLE_IMG` controls whether to build the image processing module. This will
+  enable support for density maps, and general image processing in 1, 2 an 3
+  dimensions. By default, this is switched on. 
 
- * `ENABLE_STATIC` allows some parts of OpenStructure to be statically linked 
-   and thus can be used more easily across a heterogeneous setup, e.g. older 
-   systems and newer systems.
+* `ENABLE_GUI` controls whether to build the graphical user interface module.
+  By default, this is switched on.
+
+* `ENABLE_GFX` controls whether to build the graphics module. By default, this
+  is switched on. If it is switched off, it also switches `ENABLE_GUI` off.
+
+* `ENABLE_INFO` controls whether to build the info module. By default, this is
+  switched on. If it is switched off, it also switches `ENABLE_GFX` off and
+  hence removes all dependencies to Qt.
+
+* `USE_SHADER` controls shader support. By default, no shaders are used.
 
 
 Example Configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Ubuntu 10.04 Lucid/Lynx**
+**Ubuntu 16.04**
 
-All the dependencies can be installed from the package manager and are thus located in standard locations. cmake will automatically find them without the need to pass any additional parameters. The only exception is -DOPTIMIZE, which will tell cmake to build an optimized (-O3 -DNDEBUG) version of OpenStructure.
+All the dependencies can be installed from the package manager as follows:
+
+.. code-block:: bash
+
+  sudo apt-get install cmake sip-dev libtiff-dev libfftw3-dev libeigen3-dev \
+               libpng-dev python-all python2.7 python-qt4 libboost-all-dev \
+               qt4-qtconfig  qt4-qmake libpng-dev
+
+Now, all dependencies are located in standard locations and cmake will
+automatically find them without the need to pass any additional parameters. The
+only exception is -DOPTIMIZE, which will tell cmake to build an optimized
+version of OpenStructure.
 
 .. code-block:: bash
 
   cmake . -DOPTIMIZE=1
 
+**Generic linux without GUI**
+
+On some Linux distributions, there are issues with Qt4 and hence it is not
+possible to build OpenStructure with GUI support. This is for instance known to
+be an issue with boost versions >= 1.6.2. In those cases, you can build
+OpenStructure without GUI as follows:
+
+.. code-block:: bash
+
+  cmake . -DOPTIMIZE=1 -DENABLE_INFO=OFF
+
+An additional problem arises for gcc versions >= 6. There an extra flag is
+required to use the C++98 standard:
+
+.. code-block:: bash
+
+  cmake . -DOPTIMIZE=1 -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
+
+We hope to resolve both issues in the next OpenStructure release.
+
 **MacOS X with MacPorts and optimization turned on**
 
-MacPorts installs all the software under /opt/local. Thus we have to tell cmake where to find Boost, Python and Qt.
+MacPorts installs all the software under /opt/local. Thus we have to tell cmake where to find Boost, Python and Qt:
 
 .. code-block:: bash
   
   cmake . -DBOOST_ROOT=/opt/local -DPYTHON_ROOT=/opt/local \
         -DSYS_ROOT=/opt/local -DQT_QMAKE_EXECUTABLE=/opt/local/bin/qmake \
         -DOPTIMIZE=1
+
+Qt4 is not (officially) supported on macOS Sierra (and newer). Hence, it is not
+possible to build OpenStructure with GUI support there. You can build it without
+GUI as follows:
+
+.. code-block:: bash
+  
+  cmake . -DBOOST_ROOT=/opt/local -DPYTHON_ROOT=/opt/local \
+        -DSYS_ROOT=/opt/local -DENABLE_INFO=OFF -DOPTIMIZE=1
 
 
 Building the Project
