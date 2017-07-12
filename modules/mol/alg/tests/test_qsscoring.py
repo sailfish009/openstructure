@@ -1,6 +1,6 @@
-import unittest, os
+import unittest, os, sys
 import ost
-from ost import io, mol
+from ost import io, mol, settings
 from ost.mol.alg.qsscoring import *
 
 
@@ -462,10 +462,7 @@ class TestQSscore(unittest.TestCase):
     self.assertEqual(sorted(qs_scorer.symm_2),
                      [('A', 'G'), ('B', 'I'), ('C', 'E'),
                       ('D', 'K'), ('F', 'J'), ('H', 'L')])
-    self.assertEqual(qs_scorer.chain_mapping,
-                     {'A': 'K', 'C': 'L', 'B': 'J', 'E': 'F',
-                      'D': 'D', 'G': 'I', 'F': 'H', 'I': 'G',
-                      'H': 'E', 'K': 'C', 'J': 'B', 'L': 'A'})
+    # chain mapping is ambiguous here so we cannot check it
 
   def test_Urease(self):
     ent_1 = _LoadFile('1e9y.1.pdb') # A12 B12, symmetry: T
@@ -688,6 +685,11 @@ class TestQSscore(unittest.TestCase):
 
 
 if __name__ == "__main__":
+  try:
+    settings.Locate(('clustalw', 'clustalw2'))
+  except:
+    print "Could not find ClustalW. Ignoring test_qsscoring.py tests."
+    sys.exit(0)
   from ost import testutils
   if testutils.SetDefaultCompoundLib():
     testutils.RunTests()
