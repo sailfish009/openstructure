@@ -12,7 +12,8 @@ Installing OpenStructure From Source
 Brief Overview
 --------------------------------------------------------------------------------
 
-Compiling OpenStructure consists of several steps that are described below in more detail. In essence, these steps are:
+Compiling OpenStructure consists of several steps that are described below in
+more detail. In essence, these steps are:
 
 * Installing the Dependencies
 * Checking out the source code from GIT
@@ -23,7 +24,9 @@ Compiling OpenStructure consists of several steps that are described below in mo
 Installing the Dependencies
 --------------------------------------------------------------------------------
 
-OpenStructure uses a bunch of OpenSource libraries. If you haven't already installed them, please install them now! Where appropriate the minimally required version is given in parantheses.
+OpenStructure uses a bunch of OpenSource libraries. If you haven't already
+installed them, please install them now! Where appropriate the minimally
+required version is given in parentheses.
 
 * `CMake <http://cmake.org>`_ (2.6.4)
 * `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
@@ -46,8 +49,12 @@ If you would like to use the info module, also install:
 
 If you would like to use the graphical user interface (GUI), also install:
 
-* `SIP <http://www.riverbankcomputing.co.uk/software/sip/download>`_.
-* `PyQt4 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_.
+* `SIP <http://www.riverbankcomputing.co.uk/software/sip/download>`_
+* `PyQt4 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
+
+If you would like to use the :mod:`molecular mechanics <ost.mol.mm>` module:
+
+* `OpenMM <https://simtk.org/home/openmm>`_ (6.1)
 
 In case you are compiling under Windows you have to install `Visualstudio
 2008 <http://www.microsoft.com/express/Downloads>`_. to compile the dependencies 
@@ -126,9 +133,13 @@ VisualStudio.
 Flag to choose build generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-CMake supports different build generators. On UNIX, i.e. MacOS X and Linux, the default build generator is Makefiles, but it is also possible to use other programs. For a list of supported build generators on your platform, start cmake without parameters. 
+CMake supports different build generators. On UNIX, i.e. MacOS X and Linux, the
+default build generator is Makefiles, but it is also possible to use other
+programs. For a list of supported build generators on your platform, start cmake
+without parameters.
 
-On Windows you have to explicitly set the build generator to "Visual Studio 9 2008"(or a later version):
+On Windows you have to explicitly set the build generator to
+"Visual Studio 9 2008" (or a later version):
 
 .. code-block:: bash
 
@@ -174,6 +185,14 @@ can influence it.
 * `USE_NUMPY` allows OpenStructure to pass back data in NumPy format. By 
   default this is switched off.
 
+* The paths to your local OpenMM installation are set by:
+
+  * `OPEN_MM_INCLUDE_DIR`: the include path
+  * `OPEN_MM_LIBRARY`: the libOpenMM library
+  * `OPEN_MM_PLUGIN_DIR`: the path for OpenMM plugins
+  * see example below for commonly used paths
+
+  
 Build Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -193,6 +212,10 @@ Build Options
 * `ENABLE_IMG` controls whether to build the image processing module. This will
   enable support for density maps, and general image processing in 1, 2 an 3
   dimensions. By default, this is switched on. 
+
+* `ENABLE_MM` controls whether the molecular mechanics module is enabled. By
+  default, this is switched off. If it is turned on, you should also set the
+  `OPEN_MM_INCLUDE_DIR`, `OPEN_MM_LIBRARY` and `OPEN_MM_PLUGIN_DIR` flags.
 
 * `ENABLE_GUI` controls whether to build the graphical user interface module.
   By default, this is switched on.
@@ -229,6 +252,17 @@ version of OpenStructure.
 
   cmake . -DOPTIMIZE=1
 
+The molecular mechanics module can be enabled by downloading the OpenMM binaries
+and adding the appropriate flags as follows (replace `<OPENMM>` with the actual
+path to OpenMM):
+
+.. code-block:: bash
+
+  cmake . -DOPTIMIZE=1 -DENABLE_MM=1 \
+          -DOPEN_MM_LIBRARY=<OPENMM>/lib/libOpenMM.so \
+          -DOPEN_MM_INCLUDE_DIR=<OPENMM>/include/ \
+          -DOPEN_MM_PLUGIN_DIR=<OPENMM>/lib/plugins
+
 **Generic linux without GUI**
 
 On some Linux distributions, there are issues with Qt4 and hence it is not
@@ -249,24 +283,21 @@ required to use the C++98 standard:
 
 We hope to resolve both issues in the next OpenStructure release.
 
-**MacOS X with MacPorts and optimization turned on**
+**macOS with Homebrew without GUI**
 
-MacPorts installs all the software under /opt/local. Thus we have to tell cmake where to find Boost, Python and Qt:
-
-.. code-block:: bash
-  
-  cmake . -DBOOST_ROOT=/opt/local -DPYTHON_ROOT=/opt/local \
-        -DSYS_ROOT=/opt/local -DQT_QMAKE_EXECUTABLE=/opt/local/bin/qmake \
-        -DOPTIMIZE=1
-
-Qt4 is not (officially) supported on macOS Sierra (and newer). Hence, it is not
-possible to build OpenStructure with GUI support there. You can build it without
-GUI as follows:
+Homebrew can be used to conveniently install all packages on macOS.
+Unfortunately, Qt4 is not (officially) supported on macOS Sierra (and newer).
+Hence, it is not possible to build OpenStructure with GUI support there.
+Homebrew installs all the software under /usr/local. Thus we have to tell cmake
+where to find Boost and Python. Also the Python headers and libraries are not
+located as they are on linux and hence they must be specified too:
 
 .. code-block:: bash
   
-  cmake . -DBOOST_ROOT=/opt/local -DPYTHON_ROOT=/opt/local \
-        -DSYS_ROOT=/opt/local -DENABLE_INFO=OFF -DOPTIMIZE=1
+  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/opt/python/Frameworks/Python.framework/Headers \
+          -DPYTHON_LIBRARIES=/usr/local/opt/python/Frameworks/Python.framework/Python \
+          -DBOOST_ROOT=/usr/local -DPYTHON_ROOT=/usr/local \
+          -DSYS_ROOT=/usr/local -DENABLE_INFO=OFF -DOPTIMIZE=1
 
 
 Building the Project

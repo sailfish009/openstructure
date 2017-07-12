@@ -24,23 +24,14 @@ Latest Publication of `OpenMM <http://openmm.org>`_:
 P. Eastman, M. S. Friedrichs, J. D. Chodera, R. J. Radmer, C. M. Bruns, J. P. Ku, K. A. Beauchamp, T. J. Lane, L.-P. Wang, D. Shukla, T. Tye, M. Houston, T. Stich, C. Klein, M. R. Shirts, and V. S. Pande. "OpenMM 4: A Reusable, Extensible, Hardware Independent Library for High Performance Molecular Simulation." J. Chem. Theor. Comput. 9(1):461-469. (2013)
 
 
-
-
 Installation
 --------------------------------------------------------------------------------
 
-OpenStructure does not come by default with 
-`OpenMM <http://openmm.org>`_ support.
-You have to install it as an additional dependency and
-recompile OpenStructure to dive into the amazing world of GPU accelerated
-molecular mechanics. Once installed, you have to pass cmake additional
-flags to allow compilation with OpenMM support. e.g.:
-
-  .. code-block:: bash
-    
-    cmake . -DENABLE_MM=1 -DOPEN_MM_INCLUDE_DIR=/path/to/openmm/include
-            -DOPEN_MM_LIBRARY=/path/to/openmm/lib/libOpenMM.so
-            -DOPEN_MM_PLUGIN_DIR=/path/to/openmm/lib/plugins
+If you are compiling OpenStructure from source, you need to specifically enable
+support for `OpenMM <http://openmm.org>`_. You do this by enabling the
+``ENABLE_MM`` flag and setting the ``OPEN_MM_INCLUDE_DIR``, ``OPEN_MM_LIBRARY``
+and ``OPEN_MM_PLUGIN_DIR`` flags when calling ``cmake``. See
+:ref:`here <cmake-flags>` for details and examples.
 
 
 Setting up a simple simulation
