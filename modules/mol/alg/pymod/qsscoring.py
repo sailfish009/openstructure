@@ -10,6 +10,8 @@ Scoring of quaternary structures as in Martino's 2017 paper.
     when executing scripts with ``ost``. Otherwise, you must set this with
     :func:`~ost.conop.SetDefaultLib`.
   - ClustalW must be installed (unless you provide chain mappings)
+  - Python modules `numpy` and `scipy` must be installed and available
+    (e.g. use ``pip install scipy numpy``)
 
 Authors: Gerardo Tauriello, Martino Bertoni
 """

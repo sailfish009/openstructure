@@ -1,7 +1,13 @@
 import unittest, os, sys
 import ost
 from ost import io, mol, settings
-from ost.mol.alg.qsscoring import *
+# check if we can import: fails if numpy or scipy not available
+try:
+  from ost.mol.alg.qsscoring import *
+except ImportError:
+  print "Failed to import qsscoring. Happens when numpy or scipy missing. " \
+        "Ignoring test_qsscoring.py tests."
+  sys.exit(0)
 
 
 def _LoadFile(file_name):
