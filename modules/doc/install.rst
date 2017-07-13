@@ -32,7 +32,7 @@ required version is given in parentheses.
 * `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
 * `Boost <http://boost.org>`_ (1.53)
 * `libpng <http://www.libpng.org>`_ 
-* `Python <http://python.org>`_ (2.7)
+* `Python2 <http://python.org>`_ (2.7)
 
 When you enable support for image processing, you will need:
 
@@ -58,7 +58,7 @@ If you would like to use the :mod:`molecular mechanics <ost.mol.mm>` module:
 
 In case you are compiling under Windows you have to install `Visualstudio
 2008 <http://www.microsoft.com/express/Downloads>`_. to compile the dependencies 
-and OpenStructure. We recommend to compile the dependecies manually. Enter the 
+and OpenStructure. We recommend to compile the dependencies manually. Enter the 
 directories where the dependencies are located in Tools->Options->Projects and 
 Solutions->VC++ directories. Choose 'bin' directories to enter program paths to 
 cmake, qmake and python, 'lib' directories to point to the location(s) of your 
@@ -99,7 +99,7 @@ By default you are checking out the master branch. Master is, by definition a
 stable branch. It always points to the latest release. However, there are
 several other branches at your disposal. The main development is happening in
 the develop branch. It contains the newest features and bug fixes. However, we
-dont't make any guarantees that the develop branch is bug free and doesn't
+don't make any guarantees that the develop branch is bug free and doesn't
 contain major bugs. After all, it's in constant flux. If you are developing new
 features, start your feature branch off develop. Besides that, there are several
 smaller features branches that are used to group together commits for one
@@ -161,6 +161,8 @@ can influence it.
 
 * `PYTHON_ROOT` is the Python equivalent of BOOST_ROOT. It should be set to 
   the prefix path containing the python binary, headers and libraries.
+  If the Python library (file name starting with `libpython`) is not located in
+  `$PYTHON_ROOT/lib`, you should set the full path with `PYTHON_LIBRARIES`.
 
 * `SYS_ROOT` controls the general prefix for searching libraries and headers.
   By default, it is set to `/`.
@@ -233,46 +235,36 @@ Build Options
 Example Configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Ubuntu 16.04**
-
-All the dependencies can be installed from the package manager as follows:
-
-.. code-block:: bash
-
-  sudo apt-get install cmake sip-dev libtiff-dev libfftw3-dev libeigen3-dev \
-               libpng-dev python-all python2.7 python-qt4 libboost-all-dev \
-               qt4-qtconfig  qt4-qmake libpng-dev
-
-Now, all dependencies are located in standard locations and cmake will
-automatically find them without the need to pass any additional parameters. The
-only exception is -DOPTIMIZE, which will tell cmake to build an optimized
-version of OpenStructure.
-
-.. code-block:: bash
-
-  cmake . -DOPTIMIZE=1
-
-The molecular mechanics module can be enabled by downloading the OpenMM binaries
-and adding the appropriate flags as follows (replace `<OPENMM>` with the actual
-path to OpenMM):
-
-.. code-block:: bash
-
-  cmake . -DOPTIMIZE=1 -DENABLE_MM=1 \
-          -DOPEN_MM_LIBRARY=<OPENMM>/lib/libOpenMM.so \
-          -DOPEN_MM_INCLUDE_DIR=<OPENMM>/include/ \
-          -DOPEN_MM_PLUGIN_DIR=<OPENMM>/lib/plugins
-
 **Generic linux without GUI**
 
-On some Linux distributions, there are issues with Qt4 and hence it is not
-possible to build OpenStructure with GUI support. This is for instance known to
-be an issue with boost versions >= 1.6.2. In those cases, you can build
-OpenStructure without GUI as follows:
+The simplest way to compile OpenStructure is to disable the GUI and any
+dependency to Qt4. You can build an optimized OpenStructure without GUI as
+follows:
 
 .. code-block:: bash
 
   cmake . -DOPTIMIZE=1 -DENABLE_INFO=OFF
+
+The molecular mechanics module can be enabled by installing OpenMM and adding
+the appropriate flags as follows (replace `<OPENMM>` with the actual path to
+OpenMM):
+
+.. code-block:: bash
+
+  cmake . -DOPTIMIZE=1 -DENABLE_INFO=OFF -DENABLE_MM=1 \
+          -DOPEN_MM_LIBRARY=<OPENMM>/lib/libOpenMM.so \
+          -DOPEN_MM_INCLUDE_DIR=<OPENMM>/include/ \
+          -DOPEN_MM_PLUGIN_DIR=<OPENMM>/lib/plugins
+
+Note that the OpenMM binaries available online may be incompatible with files
+compiled using your gcc compiler (known as "Dual ABI" issue). This has been
+observed for OpenMM versions 6.1 until 7.1.1 when compiling with gcc versions >=
+5.1. In those cases, you cannot use the binaries and will have to install OpenMM
+from source.
+
+On some Linux distributions, there are issues with Qt4 and hence it may not be
+possible to build OpenStructure with GUI support at all. This is for instance
+known to be an issue with boost versions >= 1.62.
 
 An additional problem arises for gcc versions >= 6. There an extra flag is
 required to use the C++98 standard:
@@ -281,13 +273,53 @@ required to use the C++98 standard:
 
   cmake . -DOPTIMIZE=1 -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
 
-We hope to resolve both issues in the next OpenStructure release.
+We hope to support Qt5 and C++11 in the next OpenStructure release.
+
+
+**Ubuntu 16.04 with GUI**
+
+All the dependencies can be installed from the package manager as follows:
+
+.. code-block:: bash
+
+  sudo apt-get install cmake sip-dev libtiff-dev libfftw3-dev libeigen3-dev \
+               libpng-dev python-all python2.7 python-qt4 libboost-all-dev \
+               qt4-qtconfig qt4-qmake libqt4-dev libpng-dev
+
+Now, all dependencies are located in standard locations and cmake will
+automatically find them without the need to pass any additional parameters. The
+only exception is the Python library which is put in a different path than
+expected. Also, we add -DOPTIMIZE, which will tell cmake to build an optimized
+version of OpenStructure.
+
+.. code-block:: bash
+
+  cmake . -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
+          -DOPTIMIZE=1
+
+
+**Fedora 26 without GUI**
+
+All the dependencies can be installed from the package manager as follows:
+
+.. code-block:: bash
+
+  sudo dnf install cmake eigen3-devel boost-devel libpng-devel python2-devel \
+                   fftw-devel libtiff-devel
+
+Fedora 26 has gcc 7 and boost 1.63 by default. Hence, we will need to disable
+Qt4, the GUI and add the extra flag described above:
+
+.. code-block:: bash
+
+  cmake . -DOPTIMIZE=1 -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
+
 
 **macOS with Homebrew without GUI**
 
-Homebrew can be used to conveniently install all packages on macOS.
-Unfortunately, Qt4 is not (officially) supported on macOS Sierra (and newer).
-Hence, it is not possible to build OpenStructure with GUI support there.
+`Homebrew <https://brew.sh/>`_ can be used to conveniently install all packages
+on macOS. Unfortunately, Qt4 is not (officially) supported on macOS Sierra (and
+newer). Hence, it is not possible to build OpenStructure with GUI support there.
 Homebrew installs all the software under /usr/local. Thus we have to tell cmake
 where to find Boost and Python. Also the Python headers and libraries are not
 located as they are on linux and hence they must be specified too:
