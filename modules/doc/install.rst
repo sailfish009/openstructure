@@ -29,10 +29,10 @@ installed them, please install them now! Where appropriate the minimally
 required version is given in parentheses.
 
 * `CMake <http://cmake.org>`_ (2.6.4)
-* `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
-* `Boost <http://boost.org>`_ (1.53)
-* `libpng <http://www.libpng.org>`_ 
 * `Python2 <http://python.org>`_ (2.7)
+* `Boost <http://boost.org>`_ (1.53)
+* `zlib <https://zlib.net/>`_ (usually comes with Boost or system)
+* `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
 
 When you enable support for image processing, you will need:
 
@@ -40,8 +40,8 @@ When you enable support for image processing, you will need:
   precision and thus also requires FFTW to be compiled with single precision.
   Most platforms offer this as a second package. If you are compiling manually,
   use the `--enable-single` option.
-
 * `libtiff <http://www.libtiff.org>`_
+* `libpng <http://www.libpng.org>`_ (also needed for GUI)
 
 If you would like to use the info module, also install:
 
@@ -157,12 +157,12 @@ short description of how CMake figures out what dependencies to take and how you
 can influence it.
 
 * Boost is mainly controlled via the `BOOST_ROOT` option. If boost wasn't
-  found, it should be set to the prefix of the boost installation.
+  found, it should be set to the prefix of the boost installation. If for some
+  reason, it is desirable to use the non-multithreaded boost libraries, you can
+  switch `Boost_USE_MULTITHREADED` on (it is off by default).
 
 * `PYTHON_ROOT` is the Python equivalent of BOOST_ROOT. It should be set to 
   the prefix path containing the python binary, headers and libraries.
-  If the Python library (file name starting with `libpython`) is not located in
-  `$PYTHON_ROOT/lib`, you should set the full path with `PYTHON_LIBRARIES`.
 
 * `SYS_ROOT` controls the general prefix for searching libraries and headers.
   By default, it is set to `/`.
@@ -176,49 +176,6 @@ can influence it.
   By default this is switched off but it is highly recommended to provide a
   compound library to use all features of OpenStructure.
 
-* `QT_QMAKE_EXECUTABLE` defines the exact Qt installation to take. It should 
-  be set to the full path to `qmake`. This is only needed if `ENABLE_INFO` is
-  switched on.
-
-* `COMPILE_TMTOOLS` will activate bindings for TMAlign and TMScore, which are 
-  then available at python level. This option requires a Fortran compiler. 
-  By default this option is switched off.
-
-* `USE_NUMPY` allows OpenStructure to pass back data in NumPy format. By 
-  default this is switched off.
-
-* The paths to your local OpenMM installation are set by:
-
-  * `OPEN_MM_INCLUDE_DIR`: the include path
-  * `OPEN_MM_LIBRARY`: the libOpenMM library
-  * `OPEN_MM_PLUGIN_DIR`: the path for OpenMM plugins
-  * see example below for commonly used paths
-
-  
-Build Options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-* `OPTIMIZE` can be set to 1 to build an optimized (-O3 -DNDEBUG) version of
-  OpenStructure.
-
-* `PREFIX` specifies the location on the file system where to install 
-  OpenStructure.
-
-* `USE_DOUBLE_PRECISION` will switch on double precision within OpenStructure. 
-  By default, this is switched off.
-
-* `ENABLE_STATIC` allows some parts of OpenStructure to be statically linked 
-  and thus can be used more easily across a heterogeneous setup, e.g. older 
-  systems and newer systems.
-
-* `ENABLE_IMG` controls whether to build the image processing module. This will
-  enable support for density maps, and general image processing in 1, 2 an 3
-  dimensions. By default, this is switched on. 
-
-* `ENABLE_MM` controls whether the molecular mechanics module is enabled. By
-  default, this is switched off. If it is turned on, you should also set the
-  `OPEN_MM_INCLUDE_DIR`, `OPEN_MM_LIBRARY` and `OPEN_MM_PLUGIN_DIR` flags.
-
 * `ENABLE_GUI` controls whether to build the graphical user interface module.
   By default, this is switched on.
 
@@ -227,9 +184,95 @@ Build Options
 
 * `ENABLE_INFO` controls whether to build the info module. By default, this is
   switched on. If it is switched off, it also switches `ENABLE_GFX` off and
-  hence removes all dependencies to Qt.
+  removes all dependencies to Qt.
 
-* `USE_SHADER` controls shader support. By default, no shaders are used.
+* `QT_QMAKE_EXECUTABLE` defines the exact Qt installation to take. It should 
+  be set to the full path to `qmake`. This is only needed if `ENABLE_INFO` is
+  switched on.
+
+* `COMPILE_TMTOOLS` will activate bindings for TMAlign and TMScore, which are 
+  then available at python level. This option requires a Fortran compiler. 
+  By default, this option is switched off.
+
+* `USE_NUMPY` allows OpenStructure to pass back data in NumPy format. By 
+  default, this is switched off.
+
+* `ENABLE_IMG` controls whether to build the image processing module. This will
+  enable support for density maps, and general image processing in 1, 2 an 3
+  dimensions. By default, this is switched on.
+
+* `ENABLE_MM` controls whether the molecular mechanics module is enabled. By
+  default, this is switched off. If it is turned on, you should also set the
+  paths to your local OpenMM installation:
+
+  * `OPEN_MM_INCLUDE_DIR`: the include path
+  * `OPEN_MM_LIBRARY`: the libOpenMM library
+  * `OPEN_MM_PLUGIN_DIR`: the path for OpenMM plugins
+  * see example below for commonly used paths
+
+* Several paths to other libraries can be set if they are not in the expected
+  locations:
+
+  * `PYTHON_LIBRARIES` defines the location of the Python library (file name
+    starting with `libpython`). This must be set if it is not in
+    `$PYTHON_ROOT/lib`.
+  * `EIGEN3_INCLUDE_DIR` defines the include folder of Eigen3 (contains `Eigen`
+    folder with include files).
+  * `FFTW_LIBRARY` defines the location of the FFTW3 library (file name starting
+    with `libfftw3f` (or `libfftw3` if `USE_DOUBLE_PRECISION` is switched on))
+  * `FFTW_INCLUDE_DIR` defines the include folder of FFTW3 (contains include
+    files directly)
+  * `PNG_LIBRARY` defines the location of the libpng library (file name starting
+    with `libpng`)
+  * `PNG_INCLUDE_DIR` defines the include folder of libpng (contains include
+    files directly)
+  * `ZLIB_LIBRARY` defines the location of the zlib library (file name starting
+    with `libz`)
+  * `ZLIB_INCLUDE_DIR` defines the include folder of zlib (contains include
+    files directly)
+  * `TIFF_LIBRARY` defines the location of the libtiff library (file name
+    starting with `libtiff`)
+  * `TIFF_INCLUDE_DIR` defines the include folder of libtiff (contains include
+    files directly)
+  * Usually, you will receive errors for those variables when executing `cmake`
+    and set them accordingly as needed.
+
+  
+Build Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* `OPTIMIZE` can be switched on to build an optimized (-O3 -DNDEBUG) version of
+  OpenStructure. By default, this is switched off.
+
+* `USE_DOUBLE_PRECISION` will switch on double precision within OpenStructure. 
+  By default, this is switched off.
+
+* `ENABLE_STATIC` allows some parts of OpenStructure to be statically linked 
+  and thus can be used more easily across a heterogeneous setup, e.g. older 
+  systems and newer systems. By default, this is switched off.
+
+* For deployment of OpenStructure with `make install` there are two relevant
+  settings to consider:
+
+  * `PREFIX` or `CMAKE_INSTALL_PREFIX` are used to define the path where the
+    OpenStructure `stage` folder will be installed to.
+  * `USE_RPATH` can be switched on to embed rpath upon make install. By default,
+    this option is switched off.
+
+* Experimental settings (only change if you know what you are doing):
+
+  * `USE_MESA` to use software rendered Mesa instead of hardware GL. By default,
+    this is turned off.
+  * `USE_SHADER` controls whether to compile with shader support. By default,
+    this is turned off.
+  * `ENABLE_SPNAV` controls whether 3DConnexion devices should be supported. By
+    default, this is turned off.
+  * `PROFILE` can be switched on to enable a (very verbose) code profiler. By
+    default, this is turned off.
+  * `UBUNTU_LAYOUT` can be turned on to switch the directory layout of the
+    `stage` folder to be more ubuntu-like. By default, this is switched off.
+  * `HIDDEN_VISIBILITY` can be turned on to add "-fvisibility=hidden" to gcc's
+    compile flags (only if GNU compiler used). By default, this is switched off.
 
 
 Example Configurations
@@ -243,7 +286,7 @@ follows:
 
 .. code-block:: bash
 
-  cmake . -DOPTIMIZE=1 -DENABLE_INFO=OFF
+  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF
 
 The molecular mechanics module can be enabled by installing OpenMM and adding
 the appropriate flags as follows (replace `<OPENMM>` with the actual path to
@@ -251,7 +294,7 @@ OpenMM):
 
 .. code-block:: bash
 
-  cmake . -DOPTIMIZE=1 -DENABLE_INFO=OFF -DENABLE_MM=1 \
+  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF -DENABLE_MM=ON \
           -DOPEN_MM_LIBRARY=<OPENMM>/lib/libOpenMM.so \
           -DOPEN_MM_INCLUDE_DIR=<OPENMM>/include/ \
           -DOPEN_MM_PLUGIN_DIR=<OPENMM>/lib/plugins
@@ -271,7 +314,7 @@ required to use the C++98 standard:
 
 .. code-block:: bash
 
-  cmake . -DOPTIMIZE=1 -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
+  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
 
 We hope to support Qt5 and C++11 in the next OpenStructure release.
 
@@ -295,7 +338,7 @@ version of OpenStructure.
 .. code-block:: bash
 
   cmake . -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
-          -DOPTIMIZE=1
+          -DOPTIMIZE=ON
 
 
 **Fedora 26 without GUI**
@@ -312,7 +355,7 @@ Qt4, the GUI and add the extra flag described above:
 
 .. code-block:: bash
 
-  cmake . -DOPTIMIZE=1 -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
+  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
 
 
 **macOS with Homebrew without GUI**
@@ -329,7 +372,7 @@ located as they are on linux and hence they must be specified too:
   cmake . -DPYTHON_INCLUDE_PATH=/usr/local/opt/python/Frameworks/Python.framework/Headers \
           -DPYTHON_LIBRARIES=/usr/local/opt/python/Frameworks/Python.framework/Python \
           -DBOOST_ROOT=/usr/local -DPYTHON_ROOT=/usr/local \
-          -DSYS_ROOT=/usr/local -DENABLE_INFO=OFF -DOPTIMIZE=1
+          -DSYS_ROOT=/usr/local -DENABLE_INFO=OFF -DOPTIMIZE=ON
 
 
 Building the Project
