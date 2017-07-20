@@ -58,7 +58,7 @@ bool CheckEqualStates(const image_state::ImageStateImpl<V,DP>& one,
   std::ostringstream msg;
   msg << one.GetSize() << " != " << two.GetSize();
   if(one.GetSize()!=two.GetSize()) {
-    BOOST_MESSAGE(msg.str());
+    BOOST_TEST_MESSAGE(msg.str());
     return false;
   }
 
