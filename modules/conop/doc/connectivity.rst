@@ -78,6 +78,7 @@ The Processor base class
     Whether an additional bond feasibility check is performed. Disabled by default.
     Turn this on, if you would like to connect atoms by bonds only if they are 
     within a reasonable distance.
+    See also :func:`IsBondFeasible`.
 
     :type: :class:`bool`
 
@@ -85,6 +86,7 @@ The Processor base class
 
     Whether backbone torsions should be added to the backbone. Disabled by default.
     Set to true, to assign PHI, PSI and OMEGA torsions to the peptide residues.
+    See also :func:`AssignBackboneTorsions`.
 
     :type: :class:`bool`
 
