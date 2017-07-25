@@ -940,6 +940,18 @@ public:
   /// \return chain name as used in the PDB file (label_asym_id)
   String GetPDBMMCifChainTr(String pdb) const;
 
+  /// \brief Add a new mmCIF chain name / entity ID tuple.
+  ///
+  /// \param cif chain name as used by the mmCIF file (label_asym_id)
+  /// \param ent_id entity ID as used by the mmCIF file (label_entity_id)
+  void AddMMCifEntityIdTr(String cif, String ent_id);
+
+  /// \brief Get the entity ID for a CIF chain name
+  ///
+  /// \param cif chain name as used by the mmCIF file (label_asym_id)
+  /// \return entity ID as used by the mmCIF file (label_entity_id)
+  String GetMMCifEntityIdTr(String cif) const;
+
   /// \brief Add a biounit
   ///
   /// \param bu biounit to be added
@@ -1043,6 +1055,7 @@ private:
 	MMCifInfoStructRefs            struct_refs_;
   std::map<String, String> cif_2_pdb_chain_id_;
   std::map<String, String> pdb_2_cif_chain_id_;
+  std::map<String, String> cif_2_entity_id_;
 };
 
 

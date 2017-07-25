@@ -44,14 +44,18 @@ The following categories of a mmCIF file are considered by the reader:
 
 Notes:
 
-* structures in mmCIF format can have two chain names. The "new" chain name
+* Structures in mmCIF format can have two chain names. The "new" chain name
   extracted from ``atom_site.label_asym_id`` is used to name the chains in the
   :class:`~ost.mol.EntityHandle`. The "old" (author provided) chain name is
   extracted from ``atom_site.auth_asym_id`` for the first atom of the chain.
   It is added as string property named "pdb_auth_chain_name" to the
-  :class:`~ost.mol.ChainHandle` and mapped into :class:`MMCifInfo` as
-  :meth:`~MMCifInfo.GetMMCifPDBChainTr` & :meth:`~MMCifInfo.GetPDBMMCifChainTr`.
-
+  :class:`~ost.mol.ChainHandle`. The mapping is also stored in
+  :class:`MMCifInfo` as :meth:`~MMCifInfo.GetMMCifPDBChainTr` and
+  :meth:`~MMCifInfo.GetPDBMMCifChainTr` if SEQRES records are read in
+  :func:`~ost.io.LoadMMCIF` and a non-empty SEQRES record exists for that chain
+  (this should exclude ligands and water).
+* Molecular entities in mmCIF are identified by an ``entity.id``. Each chain is
+  mapped to an ID in :class:`MMCifInfo` as :meth:`~MMCifInfo.GetMMCifEntityIdTr`.
 
 Info Classes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -204,15 +208,15 @@ of the annotation available.
 
     :param cif_chain_id: atom_site.label_asym_id
     :type cif_chain_id: :class:`str`
-    :returns: atom_site.auth_asym_id as :class:`str`
+    :returns: atom_site.auth_asym_id as :class:`str` (empty if no mapping)
 
   .. method:: AddPDBMMCifChainTr(pdb_chain_id, cif_chain_id)
 
     Set up a translation for a certain PDB chain name to the mmCIF chain name.
 
-    :param pdb_chain_id: atom_site.label_asym_id
+    :param pdb_chain_id: atom_site.auth_asym_id
     :type pdb_chain_id: :class:`str`
-    :param cif_chain_id: atom_site.auth_asym_id
+    :param cif_chain_id: atom_site.label_asym_id
     :type cif_chain_id: :class:`str`
 
   .. method:: GetPDBMMCifChainTr(pdb_chain_id)
@@ -221,7 +225,24 @@ of the annotation available.
 
     :param pdb_chain_id: atom_site.auth_asym_id
     :type pdb_chain_id: :class:`str`
-    :returns: atom_site.label_asym_id as :class:`str`
+    :returns: atom_site.label_asym_id as :class:`str` (empty if no mapping)
+
+  .. method:: AddMMCifEntityIdTr(cif_chain_id, entity_id)
+
+    Set up a translation for a certain mmCIF chain name to the mmCIF entity ID.
+
+    :param cif_chain_id: atom_site.label_asym_id
+    :type cif_chain_id: :class:`str`
+    :param entity_id: atom_site.label_entity_id
+    :type entity_id: :class:`str`
+
+  .. method:: GetMMCifEntityIdTr(cif_chain_id)
+
+    Get the translation of a certain mmCIF chain name to the mmCIF entity ID.
+
+    :param cif_chain_id: atom_site.label_asym_id
+    :type cif_chain_id: :class:`str`
+    :returns: atom_site.label_entity_id as :class:`str` (empty if no mapping)
 
   .. method:: AddRevision(num, date, status)
 

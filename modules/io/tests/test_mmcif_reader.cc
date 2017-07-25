@@ -97,6 +97,20 @@ void SetAtomSiteHeader(StarLoopDesc* mmcif_h)
   mmcif_h->Add(StringRef("Cartn_z", 7));
 }
 
+conop::CompoundLibPtr SetDefaultCompoundLib() {
+  // return NULL if not successful, else return newly set default lib
+  // REQ: OST_ROOT to be set
+  char * ost_root = getenv("OST_ROOT");
+  if (!ost_root) return conop::CompoundLibPtr();
+  SetPrefixPath(ost_root);
+  String lib_path = GetSharedDataPath() + "/compounds.chemlib";
+  conop::CompoundLibPtr compound_lib = conop::CompoundLib::Load(lib_path);
+  if (compound_lib) {
+    conop::Conopology::Instance().SetDefaultLib(compound_lib);
+  }
+  return compound_lib;
+}
+
 BOOST_AUTO_TEST_SUITE( io );
 
 BOOST_AUTO_TEST_CASE(mmcif_isvalidpdbident)
@@ -140,21 +154,13 @@ BOOST_AUTO_TEST_CASE(mmcif_trystoreidx)
 
 BOOST_AUTO_TEST_CASE(mmcif_convert_seqres)
 {
-  char * ost_root=getenv("OST_ROOT");
-  if(!ost_root){
-    std::cout << "WARNING: skipping SEQRES import unit test. " 
-              << "Rule-based processor is required" << std::endl;
+  conop::CompoundLibPtr compound_lib = SetDefaultCompoundLib();
+  if (!compound_lib) {
+    std::cout << "WARNING: skipping mmcif_convert_seqres unit test. " 
+              << "Compound library is required" << std::endl;
     return;
   }
-  SetPrefixPath(ost_root);
-  String lib_path=GetSharedDataPath()+"/compounds.chemlib";
-  conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);  
-  if (!compound_lib) {
-    std::cout << "WARNING: skipping SEQRES import unit test. Compound " 
-              << "library is required" << std::endl;
-    return;    
-  }
-  conop::Conopology::Instance().SetDefaultLib(compound_lib);
+
   mol::EntityHandle eh=mol::CreateEntity();
   
   TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
@@ -402,21 +408,12 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
 
 BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
 {
-  char * ost_root=getenv("OST_ROOT");
-  if(!ost_root){
-    std::cout << "WARNING: skipping SEQRES import unit test. " 
-              << "Rule-based processor is required" << std::endl;
+  if (!SetDefaultCompoundLib()) {
+    std::cout << "WARNING: skipping mmcif_entity_poly_tests unit test. " 
+              << "Compound library is required" << std::endl;
     return;
   }
-  SetPrefixPath(ost_root);
-  String lib_path=GetSharedDataPath()+"/compounds.chemlib";
-  conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);
-  if (!compound_lib) {
-    std::cout << "WARNING: skipping SEQRES import unit test. Compound  " 
-              << "lib is required" << std::endl;
-    return;
-  }
-  conop::Conopology::Instance().SetDefaultLib(compound_lib);
+  
   BOOST_TEST_MESSAGE("  Running mmcif_entity_poly_tests...");
   mol::ChainHandle ch;
   IOProfile profile;
@@ -1297,6 +1294,60 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   BOOST_CHECK(obs.GetPDBID() == "1FOO");
   BOOST_CHECK(obs.GetReplacedPDBID() == "2BAR");
   BOOST_TEST_MESSAGE("          done.");
+
+  BOOST_TEST_MESSAGE("  done.");
+}
+
+// helper for mmcif_test_chain_mappings
+inline void CheckChainMap(mol::EntityHandle eh, const MMCifInfo& info,
+                          const String& cif_name, const String& pdb_name,
+                          bool check_info_map) {
+  // check chain
+  mol::ChainHandle ch = eh.FindChain(cif_name);
+  BOOST_CHECK(ch.IsValid());
+  BOOST_CHECK(ch.HasProp("pdb_auth_chain_name"));
+  BOOST_CHECK(ch.GetStringProp("pdb_auth_chain_name") == pdb_name);
+  // info mapping
+  if (check_info_map) {
+    BOOST_CHECK(info.GetMMCifPDBChainTr(cif_name) == pdb_name);
+    BOOST_CHECK(info.GetPDBMMCifChainTr(pdb_name) == cif_name);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_test_chain_mappings)
+{
+  BOOST_TEST_MESSAGE("  Running mmcif_test_chain_mappings tests...");
+  
+  // check compound lib
+  bool compound_lib_available = SetDefaultCompoundLib();
+
+  // load data
+  mol::EntityHandle eh = mol::CreateEntity();
+  std::ifstream s("testfiles/mmcif/atom_site.mmcif");
+  IOProfile profile;
+  MMCifReader mmcif_p(s, eh, profile);
+  if (compound_lib_available) {
+    mmcif_p.SetReadSeqRes(true);
+  }
+  BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
+  const MMCifInfo& info = mmcif_p.GetInfo();
+  
+  // check 1-to-1 mappings
+  CheckChainMap(eh, info, "A", "A", compound_lib_available);
+  CheckChainMap(eh, info, "C", "C", compound_lib_available);
+  CheckChainMap(eh, info, "O", "B", false); // water
+  CheckChainMap(eh, info, "Z", "Z", compound_lib_available);
+
+  // check entity ID mapping
+  BOOST_CHECK(info.GetMMCifEntityIdTr("A") == "1");
+  BOOST_CHECK(info.GetMMCifEntityIdTr("C") == "1");
+  BOOST_CHECK(info.GetMMCifEntityIdTr("O") == "5");
+  BOOST_CHECK(info.GetMMCifEntityIdTr("Z") == "1");
+  
+  // check non-existent mappings
+  BOOST_CHECK(info.GetMMCifPDBChainTr("B") == "");
+  BOOST_CHECK(info.GetPDBMMCifChainTr("O") == "");
+  BOOST_CHECK(info.GetMMCifEntityIdTr("B") == "");
 
   BOOST_TEST_MESSAGE("  done.");
 }

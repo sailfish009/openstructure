@@ -58,6 +58,24 @@ String MMCifInfo::GetPDBMMCifChainTr(String pdb) const
   return tr_it->second;
 }
 
+void MMCifInfo::AddMMCifEntityIdTr(String cif, String ent_id)
+{
+  std::map<String, String>::iterator tr_it = cif_2_entity_id_.find(cif);
+  if (tr_it != cif_2_entity_id_.end()) {
+    throw IOException("mmCIF chain id '" + cif + "' is already mapped to "
+                      "entity id '" + tr_it->second + "'.");
+  }
+  cif_2_entity_id_.insert(std::pair<String, String>(cif, ent_id));
+}
+
+String MMCifInfo::GetMMCifEntityIdTr(String cif) const
+{
+  std::map<String, String>::const_iterator tr_it =
+    cif_2_entity_id_.find(cif);
+  if (tr_it == cif_2_entity_id_.end()) { return ""; }
+  return tr_it->second;
+}
+
 void MMCifInfo::AddAuthorsToCitation(StringRef id, std::vector<String> list)
 {
   // find citation

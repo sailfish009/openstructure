@@ -269,6 +269,11 @@ BOOST_AUTO_TEST_CASE(mmcif_info)
   BOOST_CHECK("B" == info.GetPDBMMCifChainTr("A"));
   BOOST_CHECK("" == info.GetPDBMMCifChainTr("C"));
 
+  info.AddMMCifEntityIdTr("A", "1");
+  BOOST_CHECK_THROW(info.AddMMCifEntityIdTr("A", "1"), IOException);
+  BOOST_CHECK("1" == info.GetMMCifEntityIdTr("A"));
+  BOOST_CHECK("" == info.GetMMCifEntityIdTr("C"));
+
   BOOST_CHECK(info.GetRevisions().GetSize() == 0);
 
   BOOST_TEST_MESSAGE("  done.");
