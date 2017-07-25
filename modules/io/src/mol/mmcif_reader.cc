@@ -1604,7 +1604,7 @@ void MMCifReader::OnEndData()
         info_.AddMMCifPDBChainTr(css->first.GetName(), pdb_auth_chain_name);
         info_.AddPDBMMCifChainTr(pdb_auth_chain_name, css->first.GetName());
       } else if (edm_it->second.type!=mol::CHAINTYPE_WATER) {
-        // mark everything that doesn't have SEQRES as ligand and isn't of type 
+        // mark everything that doesn't have SEQRES and isn't of type
         // water as ligand
         mol::ChainHandle chain=css->first;
         mol::ResidueHandleList residues=chain.GetResidueList();

@@ -19,29 +19,39 @@ Categories Available
 
 The following categories of a mmCIF file are considered by the reader:
 
-* ``atom_site``: Used to build the :class:`entity <ost.mol.EntityHandle>`
+* ``atom_site``: Used to build the :class:`~ost.mol.EntityHandle`
 * ``entity``: Involved in setting ChainTypes
 * ``entity_poly``: Involved in setting ChainTypes
 * ``citation``: Goes into :class:`MMCifInfoCitation`
 * ``citation_author``: Goes into :class:`MMCifInfoCitation`
-* ``exptl``: Goes into :class:`MMCifInfo` as :attr:`method <MMCifInfo.method>`.
-* ``refine``: Goes into :class:`MMCifInfo` as
-  :attr:`resolution <MMCifInfo.resolution>`.
+* ``exptl``: Goes into :class:`MMCifInfo` as :attr:`~MMCifInfo.method`.
+* ``refine``: Goes into :class:`MMCifInfo` as :attr:`~MMCifInfo.resolution`.
 * ``pdbx_struct_assembly``: Used for :class:`MMCifInfoBioUnit`.
 * ``pdbx_struct_assembly_gen``: Used for :class:`MMCifInfoBioUnit`.
 * ``pdbx_struct_oper_list``: Used for :class:`MMCifInfoBioUnit`.
 * ``struct``: Details about a structure, stored in
   :class:`MMCifInfoStructDetails`.
 * ``struct_conf``: Stores secondary structure information (practically helices)
-  in the :class:`entity <ost.mol.EntityHandle>`
+  in the :class:`~ost.mol.EntityHandle`
 * ``struct_sheet_range``: Stores secondary structure information for sheets in
-  the :class:`entity <ost.mol.EntityHandle>`
+  the :class:`~ost.mol.EntityHandle`
 * ``pdbx_database_PDB_obs_spr``: Verbose information on obsoleted/ superseded
   entries, stored in :class:`MMCifInfoObsolete`
 * ``struct_ref`` stored in :class:`MMCifInfoStructRef`
 * ``struct_ref_seq`` stored in :class:`MMCifInfoStructRefSeq`
 * ``struct_ref_seq_dif`` stored in :class:`MMCifInfoStructRefDif`
 * ``database_pdb_rev`` stored in :class:`MMCifInfoRevisions`
+
+Notes:
+
+* structures in mmCIF format can have two chain names. The "new" chain name
+  extracted from ``atom_site.label_asym_id`` is used to name the chains in the
+  :class:`~ost.mol.EntityHandle`. The "old" (author provided) chain name is
+  extracted from ``atom_site.auth_asym_id`` for the first atom of the chain.
+  It is added as string property named "pdb_auth_chain_name" to the
+  :class:`~ost.mol.ChainHandle` and mapped into :class:`MMCifInfo` as
+  :meth:`~MMCifInfo.GetMMCifPDBChainTr` & :meth:`~MMCifInfo.GetPDBMMCifChainTr`.
+
 
 Info Classes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -196,7 +206,7 @@ of the annotation available.
     :type cif_chain_id: :class:`str`
     :returns: atom_site.auth_asym_id as :class:`str`
 
-  .. method:: AddPDBCMMCifChainTr(pdb_chain_id, cif_chain_id)
+  .. method:: AddPDBMMCifChainTr(pdb_chain_id, cif_chain_id)
 
     Set up a translation for a certain PDB chain name to the mmCIF chain name.
 
@@ -420,8 +430,8 @@ of the annotation available.
 
 .. class:: MMCifInfoTransOp
 
-  This stores operations needed to transform an
-  :class:`entity <ost.mol.EntityHandle>` into a bio unit.
+  This stores operations needed to transform an :class:`~ost.mol.EntityHandle`
+  into a bio unit.
 
   .. attribute:: id
 
