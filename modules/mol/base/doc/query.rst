@@ -195,9 +195,8 @@ This index is the same for views and handles.
 **peptide** (bool): Whether the residue is :meth:`peptide linking
 <ResidueHandle.IsPeptideLinking>`.
 
-**protein** (bool): Whether the residue is considered to be part of a protein.
-This is set when loading a structure if the residue forms a feasible peptide
-bond to the previous or next residue.
+**protein** (bool): Whether the residue is considered to be
+:attr:`part of a protein <ResidueHandle.is_protein>`.
 
 **rbfac** (float): average B (temperature) factor of residue
 

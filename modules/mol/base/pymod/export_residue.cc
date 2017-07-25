@@ -202,6 +202,10 @@ void export_Residue()
     .add_property("is_ligand", &ResidueBase::IsLigand, &ResidueBase::SetIsLigand)
     .def("IsLigand", &ResidueBase::IsLigand)
     .def("SetIsLigand", &ResidueBase::SetIsLigand)
+    .add_property("is_protein", &ResidueBase::IsProtein,
+                                &ResidueBase::SetIsProtein)
+    .def("IsProtein", &ResidueBase::IsProtein)
+    .def("SetIsProtein", &ResidueBase::SetIsProtein)
     .add_property("number",
                    make_function(&ResidueBase::GetNumber,
                                  return_value_policy<copy_const_reference>()))

@@ -60,9 +60,11 @@ The Processor base class
 
   .. attribute:: connect
 
-    Whether to connect atoms by bonds. Enabled by default. Turn this off if you
-    would like to speed up the loading process and do not require connectivity
-    information to be present in your structures.
+    Whether to connect atoms by bonds. Enabled by default. This also sets the
+    :attr:`~ost.mol.ResidueHandle.is_protein` property of residues when peptide
+    bonds are created. Turn this off if you would like to speed up the loading
+    process and do not require connectivity information to be present in your
+    structures.
 
     :type: :class:`bool`
 

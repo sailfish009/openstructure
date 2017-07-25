@@ -538,7 +538,14 @@ The Handle Classes
     Whether the residue is a ligand. When loading PDB structures, this property 
     is set based on the HET records. This also means, that this property will 
     most likely not be set properly for all except PDB files coming from 
-    pdb.org.
+    pdb.org. Also available as :meth:`IsLigand`, :meth:`SetIsLigand`.
+  
+  .. attribute:: is_protein
+  
+    Whether the residue is considered to be part of a protein. This is set when
+    loading a structure if the residue forms a feasible peptide bond to the
+    previous or next residue (see :meth:`~ost.conop.IsBondFeasible`). Also
+    available as :meth:`IsProtein`, :meth:`SetIsProtein`.
 
   .. attribute:: index
 
@@ -658,7 +665,7 @@ The Handle Classes
   .. attribute:: occupancy
   
     The atom's occupancy in the range 0 to 1. Read/write. Also available as 
-    meth:`GetOccupancy`, :meth:`SetOccupancy`.
+    :meth:`GetOccupancy`, :meth:`SetOccupancy`.
     :type: float
     
   .. attribute:: b_factor
