@@ -1177,6 +1177,9 @@ The View Classes
 
 .. class:: ChainView
 
+  A view representation of a :class:`ChainHandle`. Mostly, the same
+  functionality is provided as for the handle.
+
   .. attribute:: name
   
      The chain name. The name uniquely identifies the chain in the entity. In 
@@ -1410,6 +1413,9 @@ The View Classes
     :rtype: :class:`EntityView`
 
 .. class:: ResidueView
+
+  A view representation of a :class:`ResidueHandle`. Mostly, the same
+  functionality is provided as for the handle.
 
   .. attribute:: handle
 
