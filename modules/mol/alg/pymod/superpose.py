@@ -190,19 +190,26 @@ def _MatchResidueByAln(ent_a, ent_b, atoms, alnmethod):
   atmset = ParseAtomNames(atoms)
   ## iterate chains
   for i in range(0, n_chains):
+    ## fetch chains (peptide-linking residues only)
     chain_a = ent_a.chains[i]
     chain_b = ent_b.chains[i]
+    chain_view_a = chain_a.Select('protein=true')
+    chain_view_b = chain_b.Select('protein=true')
+    if chain_view_a.chain_count == 0 or chain_view_b.chain_count == 0:
+      # skip empty chains
+      continue
     ## fetch residues
-    s_a = ''.join([r.one_letter_code
-                   for r in chain_a.Select('protein=True').residues])
-    s_b = ''.join([r.one_letter_code
-                   for r in chain_b.Select('protein=True').residues])
+    s_a = ''.join([r.one_letter_code for r in chain_view_a.residues])
+    s_b = ''.join([r.one_letter_code for r in chain_view_b.residues])
     ## create sequence from residue lists & alignment
     seq_a = ost.seq.CreateSequence(chain_a.name, s_a)
     seq_b = ost.seq.CreateSequence(chain_b.name, s_b)
     aln_a_b = alnmethod(seq_a, seq_b, ost.seq.alg.BLOSUM62)
+    if not aln_a_b:
+      # skip failed alignments
+      continue
     ## evaluate alignment
-    max_aln_res = 0
+    max_aln_res = -1
     for a in range(0, len(aln_a_b)):
       aln = aln_a_b[a]
       aln_res_len = 0
@@ -218,13 +225,13 @@ def _MatchResidueByAln(ent_a, ent_b, atoms, alnmethod):
 
     aln = aln_a_b[max_aln_idx]
     ## bind chain to alignment
-    aln.AttachView(0, chain_a.Select('protein=True'))
-    aln.AttachView(1, chain_b.Select('protein=True'))
+    aln.AttachView(0, chain_view_a)
+    aln.AttachView(1, chain_view_b)
     ## select residues (only replacement edges)
     for i in max_matches:
       r_a = aln.GetResidue(0,i)
       r_b = aln.GetResidue(1,i)
-      result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)
+      result_a, result_b = _fetch_atoms(r_a, r_b, result_a, result_b, atmset)
   result_a.AddAllInclusiveBonds()
   result_b.AddAllInclusiveBonds()
   return result_a, result_b
