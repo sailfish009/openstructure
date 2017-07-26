@@ -534,6 +534,8 @@ The Handle Classes
   .. attribute:: sec_structure
   
     The secondary structure of the residue.
+
+    :type: :class:`SecStructure`
   
   .. attribute:: is_ligand
   
@@ -1755,7 +1757,7 @@ here.
     ``CHAINTYPE_POLY_PEPTIDE_D``, ``CHAINTYPE_POLY_PEPTIDE_L``,
     ``CHAINTYPE_POLY_DN``, ``CHAINTYPE_POLY_RN``, ``CHAINTYPE_POLY_SAC_D``,
     ``CHAINTYPE_POLY_SAC_L``, ``CHAINTYPE_POLY_DN_RN``,
-    ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``  
+    ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``
 
   Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types available.
 
@@ -1795,3 +1797,49 @@ ViewAddFlags
   * ``CHECK_DUPLICATES`` - If set, it will be checked that no duplicates are
     created when adding a new handle
 
+
+SecStructure
+--------------------------------------------------------------------------------
+
+.. class:: SecStructure(type)
+
+  Defines a secondary structure type following the types defined by DSSP.
+
+  :param type: Type to be set for this object.
+  :type type:  :class:`SecStructure.Type` / :class:`str`
+
+  .. method:: IsHelical
+
+    :return: True, if the set type is any type of helix (i.e. ALPHA_HELIX,
+             PI_HELIX or THREE_TEN_HELIX)
+  
+  .. method:: IsExtended
+
+    :return: True, if the set type is any type of beta sheet (i.e. EXTENDED,
+             BETA_BRIDGE)
+
+  .. method:: IsCoil
+
+    :return: True, if the set type is any type of coil (i.e. TURN, BEND or COIL)
+
+  .. method:: __str__
+
+    :return: The character corresponding to the set type (see
+             :class:`SecStructure.Type`)
+
+.. class:: SecStructure.Type
+
+  Enumerates all popssible secondary structure types distinguished by DSSP.
+  Their values with the corresponding character code are listed here:
+
+  .. hlist::
+    :columns: 2
+
+    * ALPHA_HELIX     = 'H'
+    * PI_HELIX        = 'I'
+    * THREE_TEN_HELIX = 'G'
+    * EXTENDED        = 'E'
+    * BETA_BRIDGE     = 'B'
+    * TURN            = 'T'
+    * BEND            = 'S'
+    * COIL            = 'C'

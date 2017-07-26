@@ -187,7 +187,7 @@ numeric part is honored.
  
 **rtype** (str): Residue type as given by the DSSP code (e.g. "H" for alpha
 helix, "E" for extended), "helix" for all helix types, "ext" or "strand" for
-all beta sheets or "coil" for any type of coil.
+all beta sheets or "coil" for any type of coil (see :class:`SecStructure`).
   
 **rindex** (int): :attr:`Index<ResidueHandle.index>` of residue handle in chain.
 This index is the same for views and handles.
