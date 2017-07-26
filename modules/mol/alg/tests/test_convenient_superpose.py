@@ -223,6 +223,12 @@ class TestConvenientSuperpose(unittest.TestCase):
     view1, view2 = mol.alg.MatchResidueByGlobalAln(ent_1_full, ent_2_full)
     self.assertEqual(view1.atom_count, exp_atom_count)
     self.assertEqual(view2.atom_count, exp_atom_count)
+    # try case where local alignment fails
+    ev1 = ent_1.Select('rindex<2')   # seq = GI
+    ev2 = ent_2.Select('rindex=2:3') # seq = RA
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ev1, ev2)
+    self.assertEqual(view1.atom_count, 0)
+    self.assertEqual(view2.atom_count, 0)
 
 if __name__ == "__main__":
   from ost import testutils
