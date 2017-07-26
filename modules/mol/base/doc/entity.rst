@@ -545,7 +545,16 @@ The Handle Classes
     Whether the residue is considered to be part of a protein. This is set when
     loading a structure if the residue forms a feasible peptide bond to the
     previous or next residue (see :meth:`~ost.conop.IsBondFeasible`). Also
-    available as :meth:`IsProtein`, :meth:`SetIsProtein`.
+    available as :meth:`IsProtein`, :meth:`SetIsProtein`. In contrast to
+    :meth:`IsPeptideLinking` this excludes residues which are not connected to
+    neighbouring residues such as CA-only residues or badly positioned ones.
+
+  .. attribute:: peptide_linking
+  
+    Whether residue can form peptide bonds. This is determined based on
+    :attr:`chem_class` which is set when loading the structure.
+
+    :type: :class:`bool`
 
   .. attribute:: index
 
@@ -569,9 +578,7 @@ The Handle Classes
 
   .. method:: IsPeptideLinking()
 
-    :return: True, if residue can form peptide bonds (determined based on
-             :attr:`chem_class` set when loading the structure).
-    :rtype:  :class:`bool`
+    See :attr:`peptide_linking`
     
   .. method:: GetChain()
   

@@ -192,11 +192,11 @@ all beta sheets or "coil" for any type of coil.
 **rindex** (int): :attr:`Index<ResidueHandle.index>` of residue handle in chain.
 This index is the same for views and handles.
   
-**peptide** (bool): Whether the residue is :meth:`peptide linking
-<ResidueHandle.IsPeptideLinking>`.
+**peptide** (bool): Whether the residue is :attr:`peptide linking
+<ResidueHandle.peptide_linking>`.
 
 **protein** (bool): Whether the residue is considered to be
-:attr:`part of a protein <ResidueHandle.is_protein>`.
+:attr:`part of a connected protein <ResidueHandle.is_protein>`.
 
 **rbfac** (float): average B (temperature) factor of residue
 

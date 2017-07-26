@@ -7,10 +7,10 @@ Conop Functions
               AssignBackboneTorsions(chain)
               AssignBackboneTorsions(residues)
    
-  Assigns the backbone torsions PHI, PSI and OMEGA. The backbone atoms 
-  are required to be connected for the torsions to be added. In addition, 
-  only residues for which :meth:`~ost.mol.ResidueHandle.IsPeptideLinking`
-  returns True are considered.
+  Assigns the backbone torsions PHI, PSI and OMEGA. The backbone atoms are
+  required to be connected for the torsions to be added. In addition, only
+  residues for which :attr:`~ost.mol.ResidueHandle.peptide_linking` is True are
+  considered.
 
   The first signature assigns the torsions to *res*, assuming prev is 
   the amino acid before, and *next* is the amino acid next to *res*.  
