@@ -176,7 +176,7 @@ class TestConvenientSuperpose(unittest.TestCase):
     view1, view2 = mol.alg.MatchResidueByLocalAln(ent_view_wrong, ent_view)
     self.assertEqualAtomOrder(view1, view2)
 
-  def testWrongResidueOrder(self): 
+  def testWrongResidueOrder(self):
     ent_view = io.LoadEntity(os.path.join("testfiles","1aho.pdb")).Select("")
     ent_view_wrong = ent_view.CreateEmptyView()
     for c in ent_view.chains:
@@ -192,6 +192,37 @@ class TestConvenientSuperpose(unittest.TestCase):
     self.assertEqualAtomOrder(view1, view2)
     view1, view2 = mol.alg.MatchResidueByNum(ent_view_wrong, ent_view)
     self.assertEqualAtomOrder(view1, view2)
+
+  def testPeptideFilter(self):
+    # check that CA only chains are ok and ligand chains are skipped
+    ent_1_full = io.LoadPDB(os.path.join("testfiles", "5tglA.pdb"))
+    ent_2_full = io.LoadPDB(os.path.join("testfiles", "5tglA_modified.pdb"))
+    exp_atom_count = 253
+    # check CA-only chain
+    ent_1 = ent_1_full.Select("cname=A")
+    ent_2 = ent_2_full.Select("cname=A")
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent_1, ent_2)
+    self.assertEqual(view1.atom_count, exp_atom_count)
+    self.assertEqual(view2.atom_count, exp_atom_count)
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent_1, ent_2)
+    self.assertEqual(view1.atom_count, exp_atom_count)
+    self.assertEqual(view2.atom_count, exp_atom_count)
+    # check ligand chain
+    ent_1_ligand = ent_1_full.Select("cname='_'")
+    ent_2_ligand = ent_2_full.Select("cname='_'")
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent_1_ligand, ent_2_ligand)
+    self.assertEqual(view1.atom_count, 0)
+    self.assertEqual(view2.atom_count, 0)
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent_1_ligand, ent_2_ligand)
+    self.assertEqual(view1.atom_count, 0)
+    self.assertEqual(view2.atom_count, 0)
+    # check both together
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent_1_full, ent_2_full)
+    self.assertEqual(view1.atom_count, exp_atom_count)
+    self.assertEqual(view2.atom_count, exp_atom_count)
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent_1_full, ent_2_full)
+    self.assertEqual(view1.atom_count, exp_atom_count)
+    self.assertEqual(view2.atom_count, exp_atom_count)
 
 if __name__ == "__main__":
   from ost import testutils

@@ -193,8 +193,8 @@ def _MatchResidueByAln(ent_a, ent_b, atoms, alnmethod):
     ## fetch chains (peptide-linking residues only)
     chain_a = ent_a.chains[i]
     chain_b = ent_b.chains[i]
-    chain_view_a = chain_a.Select('protein=true')
-    chain_view_b = chain_b.Select('protein=true')
+    chain_view_a = chain_a.Select('peptide=true')
+    chain_view_b = chain_b.Select('peptide=true')
     if chain_view_a.chain_count == 0 or chain_view_b.chain_count == 0:
       # skip empty chains
       continue
@@ -240,12 +240,12 @@ def MatchResidueByLocalAln(ent_a, ent_b, atoms='all'):
   """
   Match residues by local alignment. Takes **ent_a** and **ent_b**, extracts the
   sequences chain-wise and aligns them in Smith/Waterman manner using the
-  BLOSUM62 matrix for scoring. Only residues which are marked as "protein" (see
-  :attr:`~ost.mol.ResidueHandle.is_protein`) are considered for alignment. The
-  residues of the entities are then matched based on this alignment. Only atoms
-  present in both residues are included in the views. Chains are processed in
-  order of appearance. If **ent_a** and **ent_b** contain a different number of
-  chains, processing stops with the lower count.
+  BLOSUM62 matrix for scoring. Only residues which are marked as :attr:`peptide
+  linking <ost.mol.ResidueHandle.peptide_linking>` are considered for alignment.
+  The residues of the entities are then matched based on this alignment. Only
+  atoms present in both residues are included in the views. Chains are processed
+  in order of appearance. If **ent_a** and **ent_b** contain a different number
+  of chains, processing stops with the lower count.
 
   :param ent_a: The first entity
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
