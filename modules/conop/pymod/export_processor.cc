@@ -80,10 +80,14 @@ void export_processor() {
     .add_property("check_bond_feasibility", 
                   &Processor::GetCheckBondFeasibility,
                   &Processor::SetCheckBondFeasibility)
-    .add_property("connect", &Processor::GetConnect,
-                 &Processor::SetConnect)
     .add_property("assign_torsions", &Processor::GetAssignTorsions,
-                 &Processor::SetAssignTorsions)
+                  &Processor::SetAssignTorsions)
+    .add_property("connect", &Processor::GetConnect,
+                  &Processor::SetConnect)
+    .add_property("peptide_bonds", &Processor::GetConnectAminoAcids,
+                  &Processor::SetConnectAminoAcids)
+    .add_property("zero_occ_treatment", &Processor::GetZeroOccTreatment,
+                  &Processor::SetZeroOccTreatment)
     .def("Process", &Processor::Process, 
          (arg("ent"), arg("log_diags")=true))
   ;
