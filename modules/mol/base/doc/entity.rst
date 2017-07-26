@@ -194,10 +194,10 @@ The Handle Classes
       # select atoms in a box of size 10, centred at the origin
       in_box=ent.Select('x=-5:5 and y=-5:5 and z=-5:5')
     
-    :param query: The query to be executed. See :class:`Query` for details.
-    :type  query: string or :class:`Query`
-    :param flags: An ORed combination of :class:`QueryFlags`.
-    :type  flags: int
+    :param query: The query to be executed.
+    :type  query: :class:`Query` / :class:`str`
+    :param flags: An ORed together combination of :class:`QueryFlag`
+    :type  flags: :class:`int` / :class:`QueryFlag`
     :returns:     An :class:`entity view <EntityView>`.
     :raises:      :class:`QueryError` when the query could not be executed due
                   to syntactic errors.
@@ -297,7 +297,9 @@ The Handle Classes
 
   .. attribute:: type
 
-     Describes the type of the chain. See :ref:`chaintype`.
+     Describes the type of the chain.
+
+     :type: :class:`ChainType`.
 
   .. attribute:: description
 
@@ -916,7 +918,7 @@ The View Classes
   
     See :meth:`EntityHandle.CreateEmptyView`
 
-    :rtype: EntityView
+    :rtype: :class:`EntityView`
 
   .. method:: CreateFullView()
 
@@ -948,8 +950,8 @@ The View Classes
 
     :param chain_handle: The chain handle to be added.
     :type  chain_handle: :class:`ChainHandle`
-    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`.
-    :type view_add_flags: :class:`int`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
+    :type view_add_flags: :class:`int` / :class:`ViewAddFlags`
     :rtype: :class:`ChainView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
@@ -957,12 +959,12 @@ The View Classes
     Add residue to view. If the residue's chain is not already part of the
     view, it will be added. By default, only the residue is added, but not its
     atoms. This behaviour can be modified by passing in an appropriate
-    combination of :ref:`viewaddflags`.
+    combination of :class:`ViewAddFlags`.
 
     :param residue_handle: The residue handle to be added
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
-    :type  view_add_flags: :class:`int`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
     :rtype: :class:`ResidueView`
 
   .. method:: AddAtom(atom_handle[, view_add_flags])
@@ -972,8 +974,8 @@ The View Classes
     
     :param atom_handle: The atom handle
     :type  atom_handle: :class:`AtomHandle`
-    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
-    :type  view_add_flags: :class:`int`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
     :rtype: :class:`AtomView`
 
   .. method:: AddBond(bond_handle)
@@ -1065,16 +1067,15 @@ The View Classes
     :type  atom_name: str
     :rtype: :class:`AtomView`
 
-  .. method:: Select(query[, flags])
+  .. method:: Select(query, flags=0)
 
     Perform selection on entity view. See :meth:`EntityHandle.Select`.
     
     :param query: The query
-    :type  query: (:class:`Query` or str)
-    :param flags: An ORed together combination of ViewAddFlags
-    :type  flags: int
-    
-    :rtype: EntityView
+    :type  query: :class:`Query` / :class:`str`
+    :param flags: An ORed together combination of :class:`QueryFlag`
+    :type  flags: :class:`int` / :class:`QueryFlag`
+    :rtype: :class:`EntityView`
 
   .. method:: Copy()
     
@@ -1084,7 +1085,7 @@ The View Classes
       
       the_copy=view.Select(')
     
-    :rtype: EntityView
+    :rtype: :class:`EntityView`
 
   .. method:: GetMass()
 
@@ -1306,12 +1307,12 @@ The View Classes
 
     Add atom to the view. If the residue of the atom is not already part of the 
     view, it will be added. If the atom does not belong to chain, the result is
-    undefined. Foo
+    undefined.
     
     :param atom_handle: The atom to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
-    :type  view_add_flags: :class:`int`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
     :rtype: :class:`AtomView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
@@ -1319,12 +1320,12 @@ The View Classes
     Add residue to the view. If the atom does not belong to chain, the result is
     undefined. By default, only the residue, but no atoms are added to the
     view. To change the behavior, pass in a suitable combination of
-    :ref:`viewaddflags`.
+    :class:`ViewAddFlags`.
     
     :param residue_handle: The residue handle to be added.
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
-    :type  view_add_flags: :class:`int`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
     :rtype: :class:`ResidueView`
 
   .. method:: FindAtom(res_num, atom_name)
@@ -1414,16 +1415,14 @@ The View Classes
    
     Remove all residues from this chain view
 
-  .. method:: Select(query[, flags])
+  .. method:: Select(query, flags=0)
 
-    Perform query on chain. This will return an entity view containing atoms 
-    and bonds of the residue view that match the residue. In case no atom 
-    matches the predicate, an empty view is returned.
+    Perform query on chain view. See :meth:`EntityHandle.Select`.
     
     :param query: The query
-    :type  query: :class:`Query` or str
-    :param flags: An ORed together combination of query flags
-    :type  flags: int
+    :type  query: :class:`Query` / :class:`str`
+    :param flags: An ORed together combination of :class:`QueryFlag`
+    :type  flags: :class:`int` / :class:`QueryFlag`
     :rtype: :class:`EntityView`
 
 .. class:: ResidueView
@@ -1576,8 +1575,8 @@ The View Classes
 
     :param atom_handle: Atom handle to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param flags: An ORed together combination of :ref:`viewaddflags`
-    :type  flags: :class:`int`
+    :param flags: An ORed together combination of :class:`ViewAddFlags`
+    :type  flags: :class:`int` / :class:`ViewAddFlags`
     :rtype: :class:`AtomView`
 
   .. method:: GetCenterOfAtoms()
@@ -1588,16 +1587,14 @@ The View Classes
 
     See :attr:`atoms`
     
-  .. method:: Select(query[, flags])
+  .. method:: Select(query, flags=0)
    
-    Perform selection on residue view. This method will return an entity view 
-    containing all atoms and bonds of the residue matching the predicate. In 
-    case no atom matches the predicate, this will return an empty view.
+    Perform selection on residue view. See :meth:`EntityHandle.Select`.
     
     :param query: The query
-    :type  query: :class:`Query` or str
-    :param flags: An ORed together combination of query flags
-    :type  flags: int
+    :type  query: :class:`Query` / :class:`str`
+    :param flags: An ORed together combination of :class:`QueryFlag`
+    :type  flags: :class:`int` / :class:`QueryFlag`
     :rtype: :class:`EntityView`
 
 
@@ -1741,40 +1738,26 @@ Residue Numbering
     :returns: :attr:`ins_code`
 
 
-.. _chaintype:
-
 ChainType
 --------------------------------------------------------------------------------
 
 A ChainType fills the :attr:`ChainHandle.type` attribute. Different types are
-described in the :ref:`ChainType enum <chaintype_enum>`. Functions for setting
-a type belong to the :class:`EditorBase` class, getting is provided by the
-:class:`ChainHandle` class, further convenience functions are described here.
+described in the :class:`ChainType` enum. The type is set with an editor in
+:meth:`EditorBase.SetChainType`. Further convenience functions are described
+here.
 
-.. _chaintype_enum:
+.. class:: ChainType
 
-The ChainType enum
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  The ChainType enum enumerates all types defined by the PDB for the MMCif file
+  format. Following values are supported:
 
-The ChainType enum enumerates all types defined by the PDB for the MMCif file
-format. Following values are supported:
+    ``CHAINTYPE_POLY``, ``CHAINTYPE_NON_POLY``, ``CHAINTYPE_WATER``,
+    ``CHAINTYPE_POLY_PEPTIDE_D``, ``CHAINTYPE_POLY_PEPTIDE_L``,
+    ``CHAINTYPE_POLY_DN``, ``CHAINTYPE_POLY_RN``, ``CHAINTYPE_POLY_SAC_D``,
+    ``CHAINTYPE_POLY_SAC_L``, ``CHAINTYPE_POLY_DN_RN``,
+    ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``  
 
-  ``CHAINTYPE_POLY``, ``CHAINTYPE_NON_POLY``, ``CHAINTYPE_WATER``,
-  ``CHAINTYPE_POLY_PEPTIDE_D``, ``CHAINTYPE_POLY_PEPTIDE_L``,
-  ``CHAINTYPE_POLY_DN``, ``CHAINTYPE_POLY_RN``, ``CHAINTYPE_POLY_SAC_D``,
-  ``CHAINTYPE_POLY_SAC_L``, ``CHAINTYPE_POLY_DN_RN``,
-  ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``  
-
-Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types available.
-
-Setter & Getter functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:func:`EditorBase.SetChainType`, :func:`ChainHandle.GetType`
-
-
-ChainType functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types available.
 
 .. function:: ChainTypeFromString(identifier)
 
@@ -1796,23 +1779,19 @@ ChainType functions
 
    :returns: :class:`str`
 
-.. _viewaddflags:
 
 ViewAddFlags
 --------------------------------------------------------------------------------
 
-Those are the flags controlling behaviour of routines adding handles to views.
+.. class:: ViewAddFlags
 
-* ``INCLUDE_ATOMS`` - Include all atoms when adding a residue handle to a view
+  Defines flags controlling behaviour of routines adding handles to views:
 
-* ``INCLUDE_RESIDUES`` - Include all residues when adding a chain to a view
-
-* ``INCLUDE_CHAINS`` - Include all chains when creating a new entity view
-
-* ``INCLUDE_ALL`` = ``INCLUDE_ATOMS`` | ``INCLUDE_RESIDUES`` |
-  ``INCLUDE_CHAINS`` - Convenience flags to include all substructures
-
-* ``CHECK_DUPLICATES`` - If set, it will be checked that no duplicates are
-  created when adding a new handle
-    
+  * ``INCLUDE_ATOMS`` - Include all atoms when adding a residue handle to a view
+  * ``INCLUDE_RESIDUES`` - Include all residues when adding a chain to a view
+  * ``INCLUDE_CHAINS`` - Include all chains when creating a new entity view
+  * ``INCLUDE_ALL`` = ``INCLUDE_ATOMS`` | ``INCLUDE_RESIDUES`` |
+    ``INCLUDE_CHAINS`` - Convenience flags to include all substructures
+  * ``CHECK_DUPLICATES`` - If set, it will be checked that no duplicates are
+    created when adding a new handle
 

@@ -93,15 +93,17 @@ The basic functionality of editors is implemented in the EditorBase class.
   .. method:: SetChainType(chain, type)
 
      :param chain: Must be a valid chain
-     :param type:  Must be a value of enum ChainType
-                   (see :attr:`ChainHandle.type`)   
+     :type chain:  :class:`ChainHandle`
+     :param type: Chain type to set
+     :type type:  :class:`ChainType`
 
   .. method:: SetChainDescription(chain, description)
 
      :param chain:       Must be a valid chain
      :param description: Description to be added
 
-  .. method:: InsertAtom(residue, atom_name, pos, element="", occupancy=1.0, b_factor=0.0, is_hetatm=False)
+  .. method:: InsertAtom(residue, atom_name, pos, element="", occupancy=1.0, \
+                         b_factor=0.0, is_hetatm=False)
   
     Insert new atom and add it to residue. For atoms with alternative atom locations use :meth:`InsertAltAtom`. If the element parameter is a valid 
     element, the atom properties mass, charge, and radius are set to default 
