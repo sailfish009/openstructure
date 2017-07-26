@@ -29,11 +29,11 @@ struct DLLEXPORT ChemClass {
   const static char PEPTIDE_LINKING   ='P';
   const static char D_PEPTIDE_LINKING ='D';
   const static char L_PEPTIDE_LINKING ='L';
-  const static char RNA_LINKING       ='R';  
-  const static char DNA_LINKING       ='S';    
+  const static char RNA_LINKING       ='R';
+  const static char DNA_LINKING       ='S';
   const static char NON_POLYMER       ='N';
   const static char L_SACCHARIDE      ='X';
-  const static char D_SACCHARIDE      ='Y';    
+  const static char D_SACCHARIDE      ='Y';
   const static char SACCHARIDE        ='Z';
   const static char WATER             ='W';
   const static char UNKNOWN           ='U';

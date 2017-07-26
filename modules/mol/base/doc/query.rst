@@ -273,3 +273,13 @@ In the following, the interface of the query class is described. In general, you
   .. method:: IsResidueSelected(residue)
   
     Returns true, when at least one atom of the residue matches the predicates.
+
+.. class:: QueryFlag
+
+  Defines flags to change default behaviour of Select queries. Possible values:
+
+  * ``EXCLUSIVE_BONDS`` - adds bonds to the :class:`EntityView` when at least
+    one of the two bonded atoms was selected (by default both must be selected)
+  * ``NO_BONDS`` - do not include any bonds (by default bonds are included)
+  * ``MATCH_RESIDUES`` - include all atoms of a residue if any of its atoms is
+    selected (by default only selected atoms are included)

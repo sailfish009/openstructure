@@ -520,16 +520,16 @@ The Handle Classes
   
   .. attribute:: chem_class
   
-    The chemical class of a residue is used to broadly categorize residues based
-    on their chemical properties. For example, peptides belong to the
-    `L_PEPTIDE_LINKING` or `D_PEPTIDE_LINKING` classes.
+    The chemical class of the residue.
+
+    :type: :class:`ChemClass`
 
   .. attribute:: chem_type
 
-    The chemical type of a residue is a classification of all compounds
-    obtained from the PDB component dictionary. For example, ions belong to the
-    class `ChemType::IONS`, amino acids to `ChemType::AMINOACIDS`. The type is
-    only properly set if a compund library is used.
+    The chemical type of the residue. The type is only properly set if a
+    compound library is used.
+
+    :type: :class:`ChemType`
   
   .. attribute:: sec_structure
   
@@ -1835,11 +1835,116 @@ SecStructure
   .. hlist::
     :columns: 2
 
-    * ALPHA_HELIX     = 'H'
-    * PI_HELIX        = 'I'
-    * THREE_TEN_HELIX = 'G'
-    * EXTENDED        = 'E'
-    * BETA_BRIDGE     = 'B'
-    * TURN            = 'T'
-    * BEND            = 'S'
-    * COIL            = 'C'
+    * ``ALPHA_HELIX``     = 'H'
+    * ``PI_HELIX``        = 'I'
+    * ``THREE_TEN_HELIX`` = 'G'
+    * ``EXTENDED``        = 'E'
+    * ``BETA_BRIDGE``     = 'B'
+    * ``TURN``            = 'T'
+    * ``BEND``            = 'S'
+    * ``COIL``            = 'C'
+
+
+ChemClass
+--------------------------------------------------------------------------------
+
+.. class:: ChemClass(chem_class)
+
+  The chemical class is used to broadly categorize residues based on their
+  chemical properties. For example, peptides belong to some PEPTIDE_LINKING
+  class. Possible values as constant variable names and as characters:
+
+  .. hlist::
+    :columns: 2
+
+    * ``PEPTIDE_LINKING``   = 'P'
+    * ``D_PEPTIDE_LINKING`` = 'D'
+    * ``L_PEPTIDE_LINKING`` = 'L'
+    * ``RNA_LINKING``       = 'R'
+    * ``DNA_LINKING``       = 'S'
+    * ``NON_POLYMER``       = 'N'
+    * ``L_SACCHARIDE``      = 'X'
+    * ``D_SACCHARIDE``      = 'Y'
+    * ``SACCHARIDE``        = 'Z'
+    * ``WATER``             = 'W'
+    * ``UNKNOWN``           = 'U'
+
+  Python can implicitly convert characters to objects of this type.
+
+  :param chem_class: Chemical class to set.
+  :type chem_class:  :class:`str`
+
+  .. method:: IsPeptideLinking
+
+    :return: True, if set class is PEPTIDE_LINKING, D_PEPTIDE_LINKING or
+             L_PEPTIDE_LINKING
+
+  .. method:: IsNucleotideLinking
+
+    :return: True, if set class is RNA_LINKING or DNA_LINKING
+  
+
+ChemType
+--------------------------------------------------------------------------------
+
+.. class:: ChemType
+
+  The chemical type of a residue is a classification of all compounds obtained
+  from the PDB component dictionary. For example, ions belong to the class IONS,
+  amino acids to AMINOACIDS. Possible values as constant variable names and as
+  characters:
+
+  .. hlist::
+    :columns: 2
+
+    * ``IONS``             = 'I'
+    * ``NONCANONICALMOLS`` = 'M'
+    * ``SACCHARIDES``      = 'S'
+    * ``NUCLEOTIDES``      = 'N'
+    * ``AMINOACIDS``       = 'A'
+    * ``COENZYMES``        = 'E'
+    * ``WATERCOORDIONS``   = 'C'
+    * ``DRUGS``            = 'D'
+    * ``WATERS``           = 'W'
+    * ``UNKNOWN``          = 'U'
+
+  Python can implicitly convert characters to objects of this type.
+
+  :param chem_type: Chemical type to set.
+  :type chem_type:  :class:`str`
+
+  .. method:: IsIon
+
+    :return: True, if set type is IONS or WATERCOORDIONS
+
+  .. method:: IsNucleotide
+
+    :return: True, if set type is NUCLEOTIDES
+
+  .. method:: IsSaccharide
+
+    :return: True, if set type is SACCHARIDES
+
+  .. method:: IsAminoAcid
+
+    :return: True, if set type is AMINOACIDS
+
+  .. method:: IsCoenzyme
+
+    :return: True, if set type is COENZYMES
+
+  .. method:: IsDrug
+
+    :return: True, if set type is DRUGS
+
+  .. method:: IsNonCanonical
+
+    :return: True, if set type is NONCANONICALMOLS
+
+  .. method:: IsWater
+
+    :return: True, if set type is WATERS
+
+  .. method:: IsKnown
+
+    :return: True, if set type is not UNKNOWN
