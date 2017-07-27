@@ -25,7 +25,8 @@ The following categories of a mmCIF file are considered by the reader:
 * ``citation``: Goes into :class:`MMCifInfoCitation`
 * ``citation_author``: Goes into :class:`MMCifInfoCitation`
 * ``exptl``: Goes into :class:`MMCifInfo` as :attr:`~MMCifInfo.method`.
-* ``refine``: Goes into :class:`MMCifInfo` as :attr:`~MMCifInfo.resolution`.
+* ``refine``: Goes into :class:`MMCifInfo` as :attr:`~MMCifInfo.resolution`,
+  :attr:`~MMCifInfo.r_free` and :attr:`~MMCifInfo.r_work`.
 * ``pdbx_struct_assembly``: Used for :class:`MMCifInfoBioUnit`.
 * ``pdbx_struct_assembly_gen``: Used for :class:`MMCifInfoBioUnit`.
 * ``pdbx_struct_oper_list``: Used for :class:`MMCifInfoBioUnit`.
@@ -93,10 +94,27 @@ of the annotation available.
 
   .. attribute:: resolution
 
-    Stores the resolution of the crystal structure.
+    Stores the resolution of the crystal structure. Set to 0 if no value in
+    loaded mmCIF file.
 
     Also available as :meth:`GetResolution`. May also be modified by
     :meth:`SetResolution`.
+
+  .. attribute:: r_free
+
+    Stores the R-free value of the crystal structure. Set to 0 if no value in
+    loaded mmCIF file.
+
+    Also available as :meth:`GetRFree`. May also be modified by
+    :meth:`SetRFree`.
+
+  .. attribute:: r_work
+
+    Stores the R-work value of the crystal structure. Set to 0 if no value in
+    loaded mmCIF file.
+
+    Also available as :meth:`GetRWork`. May also be modified by
+    :meth:`SetRWork`.
 
   .. attribute:: operations
 

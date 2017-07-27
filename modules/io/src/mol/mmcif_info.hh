@@ -869,7 +869,7 @@ private:
 class DLLEXPORT_OST_IO MMCifInfo {
 public:
   /// \brief Create an info object.
-  MMCifInfo(): exptl_method_(""), resolution_(0.0f) {};
+  MMCifInfo(): exptl_method_(""), resolution_(0), r_free_(0), r_work_(0) { }
 
   /// \brief Add an item to the list of citations
   ///
@@ -915,6 +915,26 @@ public:
   ///
   /// \return experiment resolution
   Real GetResolution() const { return resolution_; }
+
+  /// \brief Set R-free value.
+  ///
+  /// \param res experiment R-free value
+  void SetRFree(Real r_free) { r_free_ = r_free; }
+
+  /// \brief Get R-free value.
+  ///
+  /// \return experiment R-free value
+  Real GetRFree() const { return r_free_; }
+
+  /// \brief Set R-work value.
+  ///
+  /// \param r_work experiment R-work value
+  void SetRWork(Real r_work) { r_work_ = r_work; }
+
+  /// \brief Get R-work value.
+  ///
+  /// \return experiment R-work value
+  Real GetRWork() const { return r_work_; }
 
   /// \brief Add a new mmCIF/ PDB chain name tuple.
   ///
@@ -1049,6 +1069,8 @@ private:
   // members
   String exptl_method_;
   Real resolution_;
+  Real r_free_;
+  Real r_work_;
   MMCifInfoStructDetails struct_details_;     ///< mmCIF struct category
   MMCifInfoObsolete obsolete_;                ///< obsolete/ superseded entry
   MMCifInfoRevisions revisions_;              ///< list of revisions

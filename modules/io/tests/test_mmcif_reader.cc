@@ -678,11 +678,9 @@ BOOST_AUTO_TEST_CASE(mmcif_refine_tests)
     IOProfile profile;
     MMCifReader mmcif_p(s, eh, profile);
     BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
-    #if OST_DOUBLE_PRECISION
-    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), 2.0, 0.001);
-    #else
-    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), 2.0f, 0.001f);
-    #endif
+    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), Real(2), Real(0.001));
+    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetRFree(), Real(0.229), Real(0.01));
+    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetRWork(), Real(0.200), Real(0.01));
   }
   BOOST_TEST_MESSAGE("         done.");
   BOOST_TEST_MESSAGE("         capturing fishy data lines...");

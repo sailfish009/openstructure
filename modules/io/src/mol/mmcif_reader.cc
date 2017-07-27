@@ -219,9 +219,12 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
   } else if (header.GetCategory() == "refine") {
     category_ = REFINE;
     // mandatory items
-    this->TryStoreIdx(REFINE_ENTRY_ID, "entry_id", header);
-    this->TryStoreIdx(LS_D_RES_HIGH,   "ls_d_res_high", header);
-    this->TryStoreIdx(LS_D_RES_LOW,    "ls_d_res_low", header);
+    this->TryStoreIdx(LS_D_RES_HIGH, "ls_d_res_high", header);
+    // optional items
+    indices_[REFINE_ENTRY_ID] = header.GetIndex("entry_id");
+    indices_[LS_D_RES_LOW] = header.GetIndex("ls_d_res_low");
+    indices_[LS_R_FACTOR_R_WORK] = header.GetIndex("ls_R_factor_R_work");
+    indices_[LS_R_FACTOR_R_FREE] = header.GetIndex("ls_R_factor_R_free");
     cat_available = true;
   } else if (header.GetCategory() == "pdbx_struct_assembly") {
     category_ = PDBX_STRUCT_ASSEMBLY;
@@ -909,10 +912,21 @@ void MMCifReader::ParseExptl(const std::vector<StringRef>& columns)
 
 void MMCifReader::ParseRefine(const std::vector<StringRef>& columns)
 {
-  StringRef col=columns[indices_[LS_D_RES_HIGH]];
+  StringRef col = columns[indices_[LS_D_RES_HIGH]];
   if (col.size()!=1 || (col[0]!='?' && col[0]!='.')) {
-    info_.SetResolution(this->TryGetReal(columns[indices_[LS_D_RES_HIGH]],
-                                         "refine.ls_d_res_high"));
+    info_.SetResolution(this->TryGetReal(col, "refine.ls_d_res_high"));
+  }
+  if (indices_[LS_R_FACTOR_R_WORK] != -1) {
+    col = columns[indices_[LS_R_FACTOR_R_WORK]];
+    if (col.size()!=1 || (col[0]!='?' && col[0]!='.')) {
+      info_.SetRWork(this->TryGetReal(col, "refine.ls_R_factor_R_work"));
+    }
+  }
+  if (indices_[LS_R_FACTOR_R_FREE] != -1) {
+    col = columns[indices_[LS_R_FACTOR_R_FREE]];
+    if (col.size()!=1 || (col[0]!='?' && col[0]!='.')) {
+      info_.SetRFree(this->TryGetReal(col, "refine.ls_R_factor_R_free"));
+    }
   }
 }
 

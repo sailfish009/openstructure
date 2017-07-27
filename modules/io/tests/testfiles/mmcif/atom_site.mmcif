@@ -51,9 +51,11 @@ _citation_author.name
 _exptl.entry_id           experiment1
 _exptl.method             'Deep-fry'
 
-_refine.entry_id       '1BAR'
-_refine.ls_d_res_high  2.0
-_refine.ls_d_res_low   1.5
+_refine.entry_id              '1BAR'
+_refine.ls_d_res_high         2.0
+_refine.ls_d_res_low          1.5
+_refine.ls_R_factor_R_work    0.200 
+_refine.ls_R_factor_R_free    0.229 
 
 # biounit begin
 loop_

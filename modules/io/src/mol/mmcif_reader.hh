@@ -427,7 +427,9 @@ private:
   typedef enum {
     REFINE_ENTRY_ID,              ///< id
     LS_D_RES_HIGH,                ///< crystal resolution
-    LS_D_RES_LOW
+    LS_D_RES_LOW,
+    LS_R_FACTOR_R_WORK,           ///< R-work value
+    LS_R_FACTOR_R_FREE            ///< R-free value
   } RefineItems;
 
   /// \enum items of the pdbx_struct_assembly category
