@@ -728,24 +728,27 @@ public:
   ///
   /// \param i position in list
   /// \return date
-  String GetDate(size_t i) const { return date_[i]; }
+  String GetDate(size_t i) const { return date_.at(i); }
 
   /// \brief Get revision num by index in list.
   ///
   /// \param i position in list
   /// \return num
-  int GetNum(size_t i) const { return num_[i]; }
+  int GetNum(size_t i) const { return num_.at(i); }
 
   /// \brief Get revision status by index in list.
   ///
   /// \param i position in list
   /// \return status
-  String GetStatus(size_t i) const { return status_[i]; }
+  String GetStatus(size_t i) const { return status_.at(i); }
 
   /// \brief Get date of last revision.
   ///
   /// \return date
-  String GetLastDate() const { return date_.back(); }
+  String GetLastDate() const {
+    if (date_.empty()) return "?";
+    else               return date_.back();
+  }
 
   /// \brief Get the index of the full release revision.
   ///

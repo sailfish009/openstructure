@@ -225,6 +225,12 @@ BOOST_AUTO_TEST_CASE(mmcif_info_revisions)
   MMCifInfoRevisions rev = MMCifInfoRevisions();
 
   BOOST_CHECK(rev.GetDateOriginal() == "?");
+  BOOST_CHECK(rev.GetFirstRelease() == 0);
+  BOOST_CHECK(rev.GetSize() == 0);
+  BOOST_CHECK(rev.GetLastDate() == "?");
+  BOOST_CHECK_THROW(rev.GetDate(0), std::out_of_range);
+  BOOST_CHECK_THROW(rev.GetNum(0), std::out_of_range);
+  BOOST_CHECK_THROW(rev.GetStatus(0), std::out_of_range);
 
   rev.SetDateOriginal("2012-05-04");
   rev.AddRevision(1, "2012-05-04", "in preparation");
@@ -239,6 +245,9 @@ BOOST_AUTO_TEST_CASE(mmcif_info_revisions)
   BOOST_CHECK(rev.GetFirstRelease() == 2);
   BOOST_CHECK(rev.GetNum(1) == 2);
   BOOST_CHECK(rev.GetStatus(1) == "full release");  
+  BOOST_CHECK_THROW(rev.GetDate(2), std::out_of_range);
+  BOOST_CHECK_THROW(rev.GetNum(2), std::out_of_range);
+  BOOST_CHECK_THROW(rev.GetStatus(2), std::out_of_range);
 
   BOOST_TEST_MESSAGE("  done.");
 }

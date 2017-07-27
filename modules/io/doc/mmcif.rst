@@ -993,6 +993,7 @@ of the annotation available.
     :type i:  :class:`int`
     :return: Date the PDB revision took place. Expected format 'yyyy-mm-dd'.
     :rtype:  :class:`str`
+    :raises: Exception if *i* out of bounds.
 
   .. method:: GetNum(i)
 
@@ -1000,6 +1001,7 @@ of the annotation available.
     :type i:  :class:`int`
     :return: Unique identifier of revision (assigned in increasing order)
     :rtype:  :class:`int`
+    :raises: Exception if *i* out of bounds.
 
   .. method:: GetStatus(i)
 
@@ -1007,10 +1009,11 @@ of the annotation available.
     :type i: :class:`int`
     :return: The status of this revision.
     :rtype:  :class:`str`
+    :raises: Exception if *i* out of bounds.
 
   .. method:: GetLastDate()
 
-    :return: Date of the latest revision.
+    :return: Date of the latest revision ('?' if no revision set).
     :rtype:  :class:`str`
 
   .. method:: SetDateOriginal(date)
