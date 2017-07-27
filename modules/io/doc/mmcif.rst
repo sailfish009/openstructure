@@ -122,6 +122,8 @@ of the annotation available.
     Also available as :meth:`GetRevisions`. May be extended by
     :meth:`AddRevision`.
 
+    :type: :class:`MMCifInfoRevisions`
+
   .. method:: AddCitation(citation)
 
     Add a citation to the citation list of an info object.
@@ -246,14 +248,8 @@ of the annotation available.
 
   .. method:: AddRevision(num, date, status)
 
-    Add a new iteration to the history.
-
-    :param num: database_pdb_rev.num
-    :type num: :class:`int`
-    :param date: database_pdb_rev.date
-    :type date: :class:`str`
-    :param status: database_pdb_rev.status
-    :type status: :class:`str`
+    Add a new iteration to the revision history.
+    See :meth:`MMCifInfoRevisions.AddRevision`.
 
   .. method:: GetRevisions()
 
@@ -262,9 +258,7 @@ of the annotation available.
   .. method:: SetRevisionsDateOriginal(date)
 
     Set the date, when this entry first entered the PDB.
-
-    :param date: database_pdb_rev.date_original
-    :type date: :class:`str`
+    See :meth:`MMCifInfoRevisions.SetDateOriginal`.
 
 .. class:: MMCifInfoCitation
 
@@ -654,7 +648,7 @@ of the annotation available.
 
     Since this function is at the moment mainly used to create biounits from
     mmCIF files to be saved as PDBs, the function assumes that the
-    :ref:`ChainType` properties are set correctly. 
+    :class:`ChainType` properties are set correctly. 
 
     :param asu:  Asymmetric unit to work on. Should be created from a mmCIF
                  file.
@@ -662,7 +656,7 @@ of the annotation available.
     :param seqres: If set to a valid sequence list, the length of the seqres 
       records will be used to determine if a certain chain has the minimally 
       required length.
-    :type seqres: :class:'~ost.seq.SequenceList'
+    :type seqres: :class:`~ost.seq.SequenceList`
     :param min_polymer_size:  The minimal number of residues a polymer needs to 
       get its own chain. Everything below that number will be sorted into the 
       ligand chain.
@@ -919,7 +913,7 @@ of the annotation available.
     The starting point (1-based) and end point of the aligned range in the 
     deposited sequence, respectively.
 
-   :type: :class:`int`
+    :type: :class:`int`
    
   .. attribute:: db_begin
                  db_end
@@ -927,16 +921,16 @@ of the annotation available.
     The starting point (1-based) and end point of the aligned range in the 
     database sequence, respectively.
 
-   :type: :class:`int`
+    :type: :class:`int`
 
   .. attribute:: difs
 
     List of differences between the deposited sequence and the sequence in the 
     database.
 
- .. attribute:: chain_name
-   
-   Chain name of the polymer in the mmCIF file.
+  .. attribute:: chain_name
+
+    Chain name of the polymer in the mmCIF file.
 
 .. class:: MMCifInfoStructRefSeqDif
 
@@ -946,7 +940,7 @@ of the annotation available.
   .. attribute:: rnum
 
     The residue number (1-based) of the residue in the deposited sequence
-   
+
     :type: :class:`int`
 
   .. attribute:: details
@@ -961,77 +955,72 @@ of the annotation available.
   Revision history of a PDB entry. If you find a '?' somewhere, this means
   'not set'.
 
-   .. attribute:: date_original
+  .. attribute:: date_original
 
-   The date when this entry was seen in PDB for the very first time. This is
-   not necessarily the release date.
+    The date when this entry was seen in PDB for the very first time. This is
+    not necessarily the release date. Expected format 'yyyy-mm-dd'.
 
-   :type: :class:`str`
+    :type: :class:`str`
 
-   .. attribute:: first_release
+  .. attribute:: first_release
 
-   Index + 1 of the revision releasing this entry. If the value is 0, was not
-   set yet.
+    Index + 1 of the revision releasing this entry. If the value is 0, was not
+    set yet.
 
-   :type: :class:`int`
+    :type: :class:`int`
 
-   .. method:: SetDateOriginal(date)
+  .. method:: AddRevision(num, date, status)
 
-   Set the date, when this entry first entered the PDB.
+    Add a new iteration to the history.
 
-   :param date: database_pdb_rev.date_original
-   :type date: :class:`str`
+    :param num: See :meth:`GetNum`
+    :type num:  :class:`int`
+    :param date: See :meth:`GetDate`
+    :type date:  :class:`str`
+    :param status: See :meth:`GetStatus`
+    :type status:  :class:`str`
 
-   .. method:: GetDateOriginal()
+    :raises: Exception if *num* is <= the last added iteration.
 
-   Retrieve  database_pdb_rev.date_original.
+  .. method:: GetSize()
 
-   :returns: database_pdb_rev.date_original as :class:`str` in format 'yyyy-mm-dd'
+    :return: Number of revisions (valid revision indices are in [0, number-1]).
+    :rtype:  :class:`int`
 
-   .. method:: AddRevision(int num, String date, String status)
+  .. method:: GetDate(i)
 
-   Add a new iteration to the history.
+    :param i: Index of revision
+    :type i:  :class:`int`
+    :return: Date the PDB revision took place. Expected format 'yyyy-mm-dd'.
+    :rtype:  :class:`str`
 
-   :param num: database_pdb_rev.num
-   :type num: :class:`int`
-   :param date: database_pdb_rev.date
-   :type date: :class:`str`
-   :param status: database_pdb_rev.status
-   :type status: :class:`str`
+  .. method:: GetNum(i)
 
-   .. method:: GetSize()
+    :param i: Index of revision
+    :type i:  :class:`int`
+    :return: Unique identifier of revision (assigned in increasing order)
+    :rtype:  :class:`int`
 
-   :returns: Number of revisions as :class:`int`
+  .. method:: GetStatus(i)
 
-   .. method:: GetDate(i)
+    :param i: Index of revision
+    :type i: :class:`int`
+    :return: The status of this revision.
+    :rtype:  :class:`str`
 
-   :param i: Index of revision
-   :type i: :class:`int`
-   :returns: database_pdb_rev.date as :class:`str`
+  .. method:: GetLastDate()
 
-   .. method:: GetNum(i)
+    :return: Date of the latest revision.
+    :rtype:  :class:`str`
 
-   :param i: Index of revision
-   :type i: :class:`int`
-   :returns: database_pdb_rev.num as :class:`int`
+  .. method:: SetDateOriginal(date)
+              GetDateOriginal()
 
-   .. method:: GetStatus(i)
+    See :attr:`date_original`
 
-   :param i: Index of revision
-   :type i: :class:`int`
-   :returns: database_pdb_rev.status as :class:`str`
+  .. method:: GetFirstRelease()
 
-   .. method:: GetLastDate()
-
-   The date of the latest revision.
-
-   :returns: date as :class:`str`
-
-   .. method:: GetFirstRelease()
-
-   Points to the revision releasing the entry.
-
-   :returns: Index as :class:`int`
+    See :attr:`first_release`
 
 ..  LocalWords:  cas isbn pubmed asu seqres conop ConnectAll casp COMPND OBSLTE
 ..  LocalWords:  SPRSDE pdb func autofunction exptl attr pdbx oper conf spr dif

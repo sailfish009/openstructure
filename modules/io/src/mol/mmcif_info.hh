@@ -699,7 +699,7 @@ public:
   /// \param status status of the revision
   void AddRevision(int num, String date, String status)
   {
-    if (num_.size() && (num_.back() > num)) {
+    if (num_.size() && (num_.back() >= num)) {
       std::stringstream ss;
       ss << "'num' component of 'database_pdb_rev' category has to increase ";
       ss << "with every revision, last was ";
