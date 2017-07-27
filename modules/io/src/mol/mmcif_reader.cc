@@ -357,6 +357,10 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     indices_[PARH_ORDINAL] = header.GetIndex("ordinal");
     // TOCHECK: shouldn't ordinal be mandatory??
     his_revision_ordinal_avail_ = (indices_[PARH_ORDINAL] != -1);
+    if (!his_revision_ordinal_avail_) {
+      LOG_WARNING("No 'pdbx_audit_revision_history.ordinal' items "
+                  "found! The revision history will not have status entries!");
+    }
     cat_available = true;
   } else if (header.GetCategory()=="pdbx_audit_revision_details") {
     // THIS IS FOR mmCIF versions >= 5
@@ -367,6 +371,10 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     indices_[PARD_REVISION_ORDINAL] = header.GetIndex("revision_ordinal");
     // TOCHECK: shouldn't ordinal be mandatory??
     det_revision_ordinal_avail_ = (indices_[PARD_REVISION_ORDINAL] != -1);
+    if (!det_revision_ordinal_avail_) {
+      LOG_WARNING("No 'pdbx_audit_revision_details.revision_ordinal' items "
+                  "found! The revision history will not have status entries!");
+    }
     cat_available = true;
   } else if (header.GetCategory()=="pdbx_database_status") {
     // THIS IS FOR mmCIF versions >= 5
@@ -1413,7 +1421,7 @@ void MMCifReader::ParsePdbxAuditRevisionHistory(
   } else if (revision_dates_.empty()) {
     num = 0;
   } else {
-    num = revision_dates_.begin()->first + 1;
+    num = revision_dates_.rbegin()->first + 1;
   }
   // get date
   date = columns[indices_[PARH_REVISION_DATE]];
@@ -1432,7 +1440,7 @@ void MMCifReader::ParsePdbxAuditRevisionDetails(
   } else if (revision_types_.empty()) {
     num = 0;
   } else {
-    num = revision_types_.begin()->first + 1;
+    num = revision_types_.rbegin()->first + 1;
   }
   // get type
   type = columns[indices_[PARD_TYPE]];
@@ -1797,7 +1805,7 @@ void MMCifReader::OnEndData()
 
   // add revision history for new style mmCIFs (only if no old data there)
   if (!database_PDB_rev_added_) {
-    std::map<int, String>::const_iterator rd_it, rt_it;
+    std::map<int, String>::const_iterator rd_it;
     for (rd_it = revision_dates_.begin(); rd_it != revision_dates_.end();
          ++rd_it) {
       // look for status
