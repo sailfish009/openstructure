@@ -40,7 +40,10 @@ The following categories of a mmCIF file are considered by the reader:
 * ``struct_ref`` stored in :class:`MMCifInfoStructRef`
 * ``struct_ref_seq`` stored in :class:`MMCifInfoStructRefSeq`
 * ``struct_ref_seq_dif`` stored in :class:`MMCifInfoStructRefDif`
-* ``database_pdb_rev`` stored in :class:`MMCifInfoRevisions`
+* ``database_pdb_rev`` (mmCIF dictionary version < 5) stored in
+  :class:`MMCifInfoRevisions`
+* ``pdbx_audit_revision_history`` and ``pdbx_audit_revision_details``
+  (mmCIF dictionary version >= 5) used to fill :class:`MMCifInfoRevisions`
 
 Notes:
 
@@ -257,8 +260,8 @@ of the annotation available.
 
   .. method:: SetRevisionsDateOriginal(date)
 
-    Set the date, when this entry first entered the PDB.
-    See :meth:`MMCifInfoRevisions.SetDateOriginal`.
+    Set the date, when this entry first entered the PDB. Ignored if it was set
+    in the past. See :meth:`MMCifInfoRevisions.SetDateOriginal`.
 
 .. class:: MMCifInfoCitation
 
@@ -965,7 +968,8 @@ of the annotation available.
   .. attribute:: first_release
 
     Index + 1 of the revision releasing this entry. If the value is 0, was not
-    set yet.
+    set yet. Set first time we encounter a :meth:`GetStatus` value of
+    "full release" (mmCIF versions < 5) or "Initial release" (current mmCIF).
 
     :type: :class:`int`
 

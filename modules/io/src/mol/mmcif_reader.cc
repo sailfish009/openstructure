@@ -87,6 +87,11 @@ void MMCifReader::ClearState()
   bu_assemblies_.clear();
   helix_list_.clear();
   strand_list_.clear();
+  his_revision_ordinal_avail_ = false;
+  det_revision_ordinal_avail_ = false;
+  revision_dates_.clear();
+  revision_types_.clear();
+  database_PDB_rev_added_ = false;
 }
 
 void MMCifReader::SetRestrictChains(const String& restrict_chains)
@@ -331,6 +336,7 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     indices_[SRSD_DETAILS]=header.GetIndex("details");
     cat_available = true;
   } else if (header.GetCategory()=="database_PDB_rev") {
+    // THIS IS FOR mmCIF versions < 5
     category_ = DATABASE_PDB_REV;
     // mandatory items
     this->TryStoreIdx(DPI_NUM, "num", header);
@@ -338,6 +344,33 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     indices_[DPI_DATE] = header.GetIndex("date");
     indices_[DPI_DATE_ORIGINAL] = header.GetIndex("date_original");
     indices_[DPI_STATUS] = header.GetIndex("status");
+    cat_available = true;
+  } else if (header.GetCategory()=="pdbx_audit_revision_history") {
+    // THIS IS FOR mmCIF versions >= 5
+    category_ = PDBX_AUDIT_REVISION_HISTORY;
+    // mandatory items
+    this->TryStoreIdx(PARH_REVISION_DATE, "revision_date", header);
+    // optional items
+    indices_[PARH_ORDINAL] = header.GetIndex("ordinal");
+    // TOCHECK: shouldn't ordinal be mandatory??
+    his_revision_ordinal_avail_ = (indices_[PARH_ORDINAL] != -1);
+    cat_available = true;
+  } else if (header.GetCategory()=="pdbx_audit_revision_details") {
+    // THIS IS FOR mmCIF versions >= 5
+    category_ = PDBX_AUDIT_REVISION_DETAILS;
+    // mandatory items
+    this->TryStoreIdx(PARD_TYPE, "type", header);
+    // optional items
+    indices_[PARD_REVISION_ORDINAL] = header.GetIndex("revision_ordinal");
+    // TOCHECK: shouldn't ordinal be mandatory??
+    det_revision_ordinal_avail_ = (indices_[PARD_REVISION_ORDINAL] != -1);
+    cat_available = true;
+  } else if (header.GetCategory()=="pdbx_database_status") {
+    // THIS IS FOR mmCIF versions >= 5
+    category_ = PDBX_DATABASE_STATUS;
+    // optional items
+    indices_[PDS_RECVD_INITIAL_DEPOSITION_DATE]
+     = header.GetIndex("recvd_initial_deposition_date");
     cat_available = true;
   }
   category_counts_[category_]++;
@@ -1352,6 +1385,53 @@ void MMCifReader::ParseDatabasePDBRev(const std::vector<StringRef>& columns)
     status = StringRef("", 0);
   }
   info_.AddRevision(num, date.str(), status.str());
+  database_PDB_rev_added_ = true;
+}
+
+void MMCifReader::ParsePdbxAuditRevisionHistory(
+                                       const std::vector<StringRef>& columns) {
+  int num;
+  StringRef date;
+  // get ordinal (or count)
+  if (his_revision_ordinal_avail_) {
+    num = this->TryGetInt(columns[indices_[PARH_ORDINAL]],
+                          "pdbx_audit_revision_history.ordinal");
+  } else if (revision_dates_.empty()) {
+    num = 0;
+  } else {
+    num = revision_dates_.begin()->first + 1;
+  }
+  // get date
+  date = columns[indices_[PARH_REVISION_DATE]];
+  // add to map
+  revision_dates_[num] = date.str();
+}
+
+void MMCifReader::ParsePdbxAuditRevisionDetails(
+                                       const std::vector<StringRef>& columns) {
+  int num;
+  StringRef type;
+  // get ordinal (or count)
+  if (det_revision_ordinal_avail_) {
+    num = this->TryGetInt(columns[indices_[PARD_REVISION_ORDINAL]],
+                          "pdbx_audit_revision_details.revision_ordinal");
+  } else if (revision_types_.empty()) {
+    num = 0;
+  } else {
+    num = revision_types_.begin()->first + 1;
+  }
+  // get type
+  type = columns[indices_[PARD_TYPE]];
+  // add to map
+  revision_types_[num] = type.str();
+}
+
+void MMCifReader::ParsePdbxDatabaseStatus(
+                                       const std::vector<StringRef>& columns) {
+  const int idx = indices_[PDS_RECVD_INITIAL_DEPOSITION_DATE];
+  if (idx != -1) {
+    info_.SetRevisionsDateOriginal(columns[idx].str());
+  }
 }
 
 void MMCifReader::OnDataRow(const StarLoopDesc& header, 
@@ -1429,6 +1509,18 @@ void MMCifReader::OnDataRow(const StarLoopDesc& header,
   case DATABASE_PDB_REV:
     LOG_TRACE("processing database_PDB_rev entry");
     this->ParseDatabasePDBRev(columns);
+    break;
+  case PDBX_AUDIT_REVISION_HISTORY:
+    LOG_TRACE("processing pdbx_audit_revision_history entry");
+    this->ParsePdbxAuditRevisionHistory(columns);
+    break;
+  case PDBX_AUDIT_REVISION_DETAILS:
+    LOG_TRACE("processing pdbx_audit_revision_details entry");
+    this->ParsePdbxAuditRevisionDetails(columns);
+    break;
+  case PDBX_DATABASE_STATUS:
+    LOG_TRACE("processing pdbx_database_status entry");
+    this->ParsePdbxDatabaseStatus(columns);
     break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
@@ -1688,6 +1780,23 @@ void MMCifReader::OnEndData()
 
   // create secondary structure from struct_conf info
   this->AssignSecStructure(ent_handle_);
+
+  // add revision history for new style mmCIFs (only if no old data there)
+  if (!database_PDB_rev_added_) {
+    std::map<int, String>::const_iterator rd_it, rt_it;
+    for (rd_it = revision_dates_.begin(); rd_it != revision_dates_.end();
+         ++rd_it) {
+      // look for status
+      const int num = rd_it->first;
+      const String& date = rd_it->second;
+      if (   his_revision_ordinal_avail_ && det_revision_ordinal_avail_
+          && revision_types_.find(num) != revision_types_.end()) {
+        info_.AddRevision(num, date, revision_types_[num]);
+      } else {
+        info_.AddRevision(num, date, "?");
+      }
+    }
+  }
 
   LOG_INFO("imported "
            << chain_count_ << " chains, "

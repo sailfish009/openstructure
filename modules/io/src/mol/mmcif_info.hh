@@ -675,7 +675,7 @@ private:
   String replaced_pdb_id_; ///< replaced entry
 };
 
-/// \brief container class for information on file revisions (database_pdb_rev)
+/// \brief Container class for information on file revisions
 /// 
 class DLLEXPORT_OST_IO MMCifInfoRevisions {
 public:
@@ -701,19 +701,16 @@ public:
   {
     if (num_.size() && (num_.back() >= num)) {
       std::stringstream ss;
-      ss << "'num' component of 'database_pdb_rev' category has to increase ";
-      ss << "with every revision, last was ";
-      ss << num_.back();
-      ss << ", trying to add ";
-      ss << num;
+      ss << "Unique ID of revision has to increase with every revision, "
+         << "last was " << num_.back() << ", trying to add " << num;
       throw IOException(ss.str());
-      }
+    }
     num_.push_back(num);
     date_.push_back(date);
     status_.push_back(status);
-    // set first release date if not already occuoied
+    // set first release date if not already occupied
     if (first_release_ == 0) {
-      if (status == "full release") {
+      if (status == "full release" || status == "Initial release") {
         first_release_ = status_.size();
       }
     }
@@ -1023,7 +1020,10 @@ public:
   /// \param date
   void SetRevisionsDateOriginal(String date)
   {
-    revisions_.SetDateOriginal(date);
+    // only set once
+    if (revisions_.GetDateOriginal() == "?") {
+      revisions_.SetDateOriginal(date);
+    }
   }
 
   /// \brief Add a revision to history
@@ -1051,7 +1051,7 @@ private:
   Real resolution_;
   MMCifInfoStructDetails struct_details_;     ///< mmCIF struct category
   MMCifInfoObsolete obsolete_;                ///< obsolete/ superseded entry
-  MMCifInfoRevisions revisions_;              ///< database_pdb_rev category
+  MMCifInfoRevisions revisions_;              ///< list of revisions
   std::vector<MMCifInfoCitation> citations_;  ///< list of citations
   std::vector<MMCifInfoBioUnit>  biounits_;   ///< list of biounits
   std::vector<MMCifInfoTransOpPtr> transops_;
