@@ -669,7 +669,7 @@ of the annotation available.
 
     Since this function is at the moment mainly used to create biounits from
     mmCIF files to be saved as PDBs, the function assumes that the
-    :class:`ChainType` properties are set correctly. 
+    :class:`~ost.mol.ChainType` properties are set correctly. 
 
     :param asu:  Asymmetric unit to work on. Should be created from a mmCIF
                  file.

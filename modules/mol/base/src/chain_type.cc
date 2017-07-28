@@ -26,30 +26,36 @@ ChainType ChainTypeFromString(StringRef identifier)
 {
 
   // chain types as found in the entity category of a mmcif file
-  if(StringRef("polymer", 7) == identifier) {
-      return CHAINTYPE_POLY;
-    }else if(StringRef("non-polymer", 11) == identifier) {
-      return CHAINTYPE_NON_POLY;
-    }else if(StringRef("water", 5) == identifier) {
-      return CHAINTYPE_WATER;
+  if (StringRef("polymer", 7) == identifier) {
+    return CHAINTYPE_POLY;
+  } else if (StringRef("non-polymer", 11) == identifier) {
+    return CHAINTYPE_NON_POLY;
+  } else if (StringRef("water", 5) == identifier) {
+    return CHAINTYPE_WATER;
+  } else if (StringRef("macrolide", 9) == identifier) {
+    return CHAINTYPE_MACROLIDE;
   // chain types as found in the entity_poly category of a mmcif file
-    } else if(StringRef("polypeptide(D)", 14) == identifier) {
-      return CHAINTYPE_POLY_PEPTIDE_D;
-    } else if(StringRef("polypeptide(L)", 14) == identifier) {
-      return CHAINTYPE_POLY_PEPTIDE_L;
-    } else if(StringRef("polydeoxyribonucleotide", 23) == identifier) {
-      return CHAINTYPE_POLY_DN;
-    } else if(StringRef("polyribonucleotide", 18) == identifier) {
-      return CHAINTYPE_POLY_RN;
-    } else if(StringRef("polysaccharide(D)", 17) == identifier) {
-      return CHAINTYPE_POLY_SAC_D;
-    } else if(StringRef("polysaccharide(L)", 17) == identifier) {
-      return CHAINTYPE_POLY_SAC_L;
-    } else if(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
+  } else if (StringRef("polypeptide(D)", 14) == identifier) {
+    return CHAINTYPE_POLY_PEPTIDE_D;
+  } else if (StringRef("polypeptide(L)", 14) == identifier) {
+    return CHAINTYPE_POLY_PEPTIDE_L;
+  } else if (StringRef("polydeoxyribonucleotide", 23) == identifier) {
+    return CHAINTYPE_POLY_DN;
+  } else if (StringRef("polyribonucleotide", 18) == identifier) {
+    return CHAINTYPE_POLY_RN;
+  } else if (StringRef("polysaccharide(D)", 17) == identifier) {
+    return CHAINTYPE_POLY_SAC_D;
+  } else if (StringRef("polysaccharide(L)", 17) == identifier) {
+    return CHAINTYPE_POLY_SAC_L;
+  } else if (StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
                         49) == identifier) {
-      return CHAINTYPE_POLY_DN_RN;
-  } else if(StringRef("other", 5) == identifier) {
-      return CHAINTYPE_UNKNOWN;
+    return CHAINTYPE_POLY_DN_RN;
+  } else if (StringRef("cyclic-pseudo-peptide", 21) == identifier) {
+    return CHAINTYPE_CYCLIC_PSEUDO_PEPTIDE;
+  } else if (StringRef("peptide nucleic acid", 20) == identifier) {
+    return CHAINTYPE_POLY_PEPTIDE_DN_RN;
+  } else if (StringRef("other", 5) == identifier) {
+    return CHAINTYPE_UNKNOWN;
   }
 
   throw Error("Unrecognised chain type descriptor found: '" +
@@ -69,10 +75,12 @@ String StringFromChainType(ChainType type)
     return "polymer";
   } else if (CHAINTYPE_NON_POLY == type) {
     return "non-polymer";
-  }  else if (CHAINTYPE_WATER == type) {
+  } else if (CHAINTYPE_WATER == type) {
     return "water";
+  } else if (CHAINTYPE_MACROLIDE == type) {
+    return "macrolide";
   // chain types as found in the entity_poly category of a mmcif file
-  }  else if (CHAINTYPE_POLY_PEPTIDE_D == type) {
+  } else if (CHAINTYPE_POLY_PEPTIDE_D == type) {
     return "polypeptide(D)";
   } else if (CHAINTYPE_POLY_PEPTIDE_L == type) {
     return "polypeptide(L)";
@@ -86,11 +94,15 @@ String StringFromChainType(ChainType type)
     return "polysaccharide(L)";
   } else if (CHAINTYPE_POLY_DN_RN == type) {
     return "polydeoxyribonucleotide/polyribonucleotide hybrid";
+  } else if (CHAINTYPE_CYCLIC_PSEUDO_PEPTIDE == type) {
+    return "cyclic-pseudo-peptide";
+  } else if (CHAINTYPE_POLY_PEPTIDE_DN_RN == type) {
+    return "peptide nucleic acid";
   } else if (CHAINTYPE_UNKNOWN == type) {
     return "other";
   }
 
-  std::stringstream ss("Unknonw ChainType item found: '");
+  std::stringstream ss("Unknown ChainType item found: '");
   ss << type << "'!";
   throw Error(ss.str());
 }

@@ -38,8 +38,12 @@ typedef enum {
   CHAINTYPE_POLY_RN,        ///< polyribonucleotide
   CHAINTYPE_POLY_SAC_D,     ///< polysaccharide(D)
   CHAINTYPE_POLY_SAC_L,     ///< polysaccharide(L)
-  CHAINTYPE_POLY_DN_RN,     ///<polydeoxyribonucleotide/ -ribonucleotide hybrid
+  CHAINTYPE_POLY_DN_RN,     ///< polydeoxyribonucleotide/ -ribonucleotide hybrid
   CHAINTYPE_UNKNOWN,        ///< guess what
+  // new chain types
+  CHAINTYPE_MACROLIDE,              ///< macrolide
+  CHAINTYPE_CYCLIC_PSEUDO_PEPTIDE,  ///< cyclic-pseudo-peptide
+  CHAINTYPE_POLY_PEPTIDE_DN_RN,     ///< peptide nucleic acid
   CHAINTYPE_N_CHAINTYPES    ///< no. of chain types
 } ChainType;
 
