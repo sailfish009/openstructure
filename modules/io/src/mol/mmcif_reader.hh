@@ -659,8 +659,6 @@ private:
   MMCifHSVector strand_list_; ///< for storing struct_conf sec.struct. data
   MMCifInfoStructRefs struct_refs_;
   // for storing revisions 
-  bool his_revision_ordinal_avail_;
-  bool det_revision_ordinal_avail_;
   std::map<int, String> revision_dates_;
   std::map<int, String> revision_types_;
   bool database_PDB_rev_added_;

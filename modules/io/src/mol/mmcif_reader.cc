@@ -87,8 +87,6 @@ void MMCifReader::ClearState()
   bu_assemblies_.clear();
   helix_list_.clear();
   strand_list_.clear();
-  his_revision_ordinal_avail_ = false;
-  det_revision_ordinal_avail_ = false;
   revision_dates_.clear();
   revision_types_.clear();
   database_PDB_rev_added_ = false;
@@ -352,27 +350,18 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     // THIS IS FOR mmCIF versions >= 5
     category_ = PDBX_AUDIT_REVISION_HISTORY;
     // mandatory items
+    this->TryStoreIdx(PARH_ORDINAL, "ordinal", header);
     this->TryStoreIdx(PARH_REVISION_DATE, "revision_date", header);
-    // optional items
-    indices_[PARH_ORDINAL] = header.GetIndex("ordinal");
-    // TOCHECK: shouldn't ordinal be mandatory??
-    his_revision_ordinal_avail_ = (indices_[PARH_ORDINAL] != -1);
-    if (!his_revision_ordinal_avail_) {
-      LOG_WARNING("No 'pdbx_audit_revision_history.ordinal' items "
-                  "found! The revision history will not have status entries!");
-    }
     cat_available = true;
   } else if (header.GetCategory()=="pdbx_audit_revision_details") {
     // THIS IS FOR mmCIF versions >= 5
     category_ = PDBX_AUDIT_REVISION_DETAILS;
     // mandatory items
-    this->TryStoreIdx(PARD_TYPE, "type", header);
+    this->TryStoreIdx(PARD_REVISION_ORDINAL, "revision_ordinal", header);
     // optional items
-    indices_[PARD_REVISION_ORDINAL] = header.GetIndex("revision_ordinal");
-    // TOCHECK: shouldn't ordinal be mandatory??
-    det_revision_ordinal_avail_ = (indices_[PARD_REVISION_ORDINAL] != -1);
-    if (!det_revision_ordinal_avail_) {
-      LOG_WARNING("No 'pdbx_audit_revision_details.revision_ordinal' items "
+    indices_[PARD_TYPE] = header.GetIndex("type");
+    if (indices_[PARD_TYPE] == -1) {
+      LOG_WARNING("No 'pdbx_audit_revision_details.type' items "
                   "found! The revision history will not have status entries!");
     }
     cat_available = true;
@@ -1412,40 +1401,24 @@ void MMCifReader::ParseDatabasePDBRev(const std::vector<StringRef>& columns)
 
 void MMCifReader::ParsePdbxAuditRevisionHistory(
                                        const std::vector<StringRef>& columns) {
-  int num;
-  StringRef date;
-  // get ordinal (or count)
-  if (his_revision_ordinal_avail_) {
-    num = this->TryGetInt(columns[indices_[PARH_ORDINAL]],
-                          "pdbx_audit_revision_history.ordinal");
-  } else if (revision_dates_.empty()) {
-    num = 0;
-  } else {
-    num = revision_dates_.rbegin()->first + 1;
-  }
-  // get date
-  date = columns[indices_[PARH_REVISION_DATE]];
+  // get ordinal and date
+  int num = this->TryGetInt(columns[indices_[PARH_ORDINAL]],
+                            "pdbx_audit_revision_history.ordinal");
+  StringRef date = columns[indices_[PARH_REVISION_DATE]];
   // add to map
   revision_dates_[num] = date.str();
 }
 
 void MMCifReader::ParsePdbxAuditRevisionDetails(
                                        const std::vector<StringRef>& columns) {
-  int num;
-  StringRef type;
-  // get ordinal (or count)
-  if (det_revision_ordinal_avail_) {
-    num = this->TryGetInt(columns[indices_[PARD_REVISION_ORDINAL]],
-                          "pdbx_audit_revision_details.revision_ordinal");
-  } else if (revision_types_.empty()) {
-    num = 0;
-  } else {
-    num = revision_types_.rbegin()->first + 1;
+  // get ordinal
+  int num = this->TryGetInt(columns[indices_[PARD_REVISION_ORDINAL]],
+                            "pdbx_audit_revision_details.revision_ordinal");
+  // add type to map if available
+  if (indices_[PARD_TYPE] != -1) {
+    StringRef type = columns[indices_[PARD_TYPE]];
+    revision_types_[num] = type.str();
   }
-  // get type
-  type = columns[indices_[PARD_TYPE]];
-  // add to map
-  revision_types_[num] = type.str();
 }
 
 void MMCifReader::ParsePdbxDatabaseStatus(
@@ -1811,9 +1784,9 @@ void MMCifReader::OnEndData()
       // look for status
       const int num = rd_it->first;
       const String& date = rd_it->second;
-      if (   his_revision_ordinal_avail_ && det_revision_ordinal_avail_
-          && revision_types_.find(num) != revision_types_.end()) {
-        info_.AddRevision(num, date, revision_types_[num]);
+      std::map<int, String>::const_iterator rt_it = revision_types_.find(num);
+      if (rt_it != revision_types_.end()) {
+        info_.AddRevision(num, date, rt_it->second);
       } else {
         info_.AddRevision(num, date, "?");
       }
