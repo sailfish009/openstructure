@@ -920,6 +920,15 @@ Algorithms on Structures
   :return: The summed solvent accessibilty of each atom in *ent*.
 
 
+.. method:: AssignSecStruct(ent)
+
+  Assigns secondary structures to all residues based on hydrogen bond patterns
+  as described by DSSP.
+
+  :param ent:           Entity on which to assign secondary structures
+  :type ent:            :class:`~ost.mol.EntityView`/
+                        :class:`~ost.mol.EntityHandle`
+
 
 .. _traj-analysis:
 
