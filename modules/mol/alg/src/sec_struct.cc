@@ -455,7 +455,7 @@ String RawEstimateSS(const std::vector<geom::Vec3>& ca_positions,
                      const std::vector<int>& donor_for_two, 
                      const std::vector<int>& connected_to_next) {
 
-  if(size < 3){
+  if(size < 1){
     throw ost::Error("Size of input  is too small!in dssp calculation");
   }
 
@@ -536,7 +536,7 @@ void PrepareSSData(const ost::mol::ResidueViewList& res_list,
 
     if(res_list[res_indices[i]].GetChain() == 
        res_list[res_indices[i+1]].GetChain() &&
-       geom::Distance(c_positions[i], n_positions[i+1]) <= 2.5) {
+       geom::Length2(n_positions[i+1] - c_positions[i]) <= 6.25) {
       connected_to_next.push_back(1);
     }
     else {
