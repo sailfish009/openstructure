@@ -17,6 +17,7 @@ class TestSecStruct(unittest.TestCase):
         dssp_path = settings.locate("mkdssp")
       except:
         print "Could not find dssp, could not compare sec struct assignment..."
+        return
 
     dssp_ent = io.LoadPDB(os.path.join("testfiles", "1a0s.pdb"))
     ost_ent = io.LoadPDB(os.path.join("testfiles", "1a0s.pdb"))
