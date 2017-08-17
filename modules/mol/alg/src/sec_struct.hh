@@ -61,16 +61,16 @@ inline Real DSSPHBondEnergy(const geom::Vec3& h_pos, const geom::Vec3& n_pos,
 
 String RawEstimateSS(const std::vector<geom::Vec3>& ca_positions, 
                      int start_idx, int size,
-	                   const std::vector<int>& donor_for_one,
+                     const std::vector<int>& donor_for_one,
                      const std::vector<int>& donor_for_two, 
                      const std::vector<int>& connected_to_next);
 
 void PrepareSSData(const ost::mol::ResidueViewList& res_list,
-                 std::vector<int>& res_indices,
-                 std::vector<geom::Vec3>& ca_positions,
-                 std::vector<int>& donor_for_one,
-                 std::vector<int>& donor_for_two,
-                 std::vector<int>& connected_to_next);
+                   std::vector<int>& res_indices,
+                   std::vector<geom::Vec3>& ca_positions,
+                   std::vector<int>& donor_for_one,
+                   std::vector<int>& donor_for_two,
+                   std::vector<int>& connected_to_next);
 
 void AssignSecStruct(ost::mol::EntityView& ent);
 
