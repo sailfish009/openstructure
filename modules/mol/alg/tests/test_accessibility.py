@@ -2,6 +2,7 @@ from ost import io, mol, settings
 import unittest
 import os
 from ost.bindings import naccess
+from ost.bindings import dssp
 
 
 class AccessibilityContainer:
@@ -80,7 +81,7 @@ def Compare(acc_one, acc_two):
 
 class TestAccessibility(unittest.TestCase):
   
-  def testAcc(self):
+  def testAccNACCESS(self):
 
     # tests oligo mode by comparing the results from doing the
     # corresponding calculations manually
@@ -100,15 +101,54 @@ class TestAccessibility(unittest.TestCase):
     # naccess results 
     try:
       naccess_path = settings.Locate("naccess")
+      ent_three = io.LoadPDB(os.path.join("testfiles", "1a0s.pdb"))
+      ent_three = ent_three.Select("peptide=true")
+      acc_naccess = AccessibilitiesRaw(ent_three, use_naccess=True)
+      self.assertTrue(Compare(acc_classic, acc_naccess))
     except:
       print "Could not find NACCESS, could not compare Accessiblity function..."
-      return
 
-    ent_three = io.LoadPDB(os.path.join("testfiles", "1a0s.pdb"))
-    ent_three = ent_three.Select("peptide=true")
-    acc_naccess = AccessibilitiesRaw(ent_three, use_naccess=True)
 
-    self.assertTrue(Compare(acc_classic, acc_naccess))
+  def testAccDSSP(self):
+
+    dssp_path = None
+
+    try:
+      dssp_path = settings.Locate("dssp")
+    except:
+      try:
+        dssp_path = settings.locate("mkdssp")
+      except:
+        pass
+      pass
+
+    if dssp_path == None:
+      print "Could not find DSSP, could not compare Accessibility function..."
+
+    # we assume oligo mode to be working as it is tested in 
+    # testAccNACCESS. So we only test the single residue
+    # accessibilitities
+    ent_one = io.LoadPDB(os.path.join("testfiles", "1a0s.pdb"))
+    ent_two = io.LoadPDB(os.path.join("testfiles", "1a0s.pdb"))
+    ent_one = ent_one.Select("peptide=true")
+    ent_two = ent_two.Select("peptide=true")
+
+    dssp.AssignDSSP(ent_one, extract_burial_status=True, dssp_bin = dssp_path)
+    mol.alg.Accessibility(ent_two, algorithm=mol.alg.AccessibilityAlgorithm.DSSP)
+
+    for a,b in zip(ent_one.residues, ent_two.residues):
+
+      # overall accessibility
+      if a.HasProp("solvent_accessibility") and b.HasProp("asaAbs"):
+        diff = abs(a.GetFloatProp("solvent_accessibility") -\
+                   round(b.GetFloatProp("asaAbs")))
+        self.assertTrue(diff < 0.01)
+
+      # relative accessibility
+      if a.HasProp("relative_solvent_accessibility") and b.HasProp("asaRel"):
+        diff = abs(a.GetFloatProp("relative_solvent_accessibility") -\
+                   b.GetFloatProp("asaRel"))
+        self.assertTrue(diff < 0.01)
 
 
 if __name__ == "__main__":

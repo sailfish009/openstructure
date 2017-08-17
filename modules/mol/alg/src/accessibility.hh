@@ -25,19 +25,19 @@
 
 namespace ost { namespace mol { namespace alg {
 
+typedef enum {
+NACCESS, DSSP
+} AccessibilityAlgorithm;
 
-class AccessibilityParam {
+class NACCESSAccessibilityParam {
 
 public:
   // Singleton access to one constant instance
-  static const AccessibilityParam& GetInstance() {
-    static AccessibilityParam instance;
+  static const NACCESSAccessibilityParam& GetInstance() {
+    static NACCESSAccessibilityParam instance;
     return instance;
   }
   // Data access
-
-  Real GuessRadius(const String& ele) const;
-
   Real GetVdWRadius(const String& rname, const String& aname, 
                     const String& ele) const;
 
@@ -46,11 +46,45 @@ public:
 private:
 
   // construction only inside here
-  AccessibilityParam();
+  NACCESSAccessibilityParam();
+
+  Real GuessRadius(const String& ele) const;
+  
 
   std::map<String, std::map<String, Real> > vdw_radii_;
   std::map<String, Real> accessibilities_;
 };
+
+class DSSPAccessibilityParam {
+  
+  public:
+    // Singleton access to one constant instance
+    static const DSSPAccessibilityParam& GetInstance() {
+      static DSSPAccessibilityParam instance;
+      return instance;
+    }
+    // Data access
+    Real GetVdWRadius(const String& aname) const;
+  
+    Real GetResidueAccessibility(const String& rname) const;
+
+    const std::vector<Real>& GetFibonacciX() const { return fibonacci_x_; }
+    const std::vector<Real>& GetFibonacciY() const { return fibonacci_y_; }
+    const std::vector<Real>& GetFibonacciZ() const { return fibonacci_z_; }
+    Real GetPointWeight() const { return point_weight_; }
+  
+  private:
+  
+    // construction only inside here
+    DSSPAccessibilityParam();
+  
+    std::map<String, std::map<String, Real> > vdw_radii_;
+    std::map<String, Real> accessibilities_;
+    std::vector<Real> fibonacci_x_;
+    std::vector<Real> fibonacci_y_;
+    std::vector<Real> fibonacci_z_;
+    Real point_weight_;
+  };
 
 Real Accessibility(ost::mol::EntityView& ent, 
                    Real probe_radius = 1.4,
@@ -61,7 +95,8 @@ Real Accessibility(ost::mol::EntityView& ent,
                    const String& selection = "",
                    const String& asa_abs = "asaAbs",
                    const String& asa_rel = "asaRel",
-                   const String& asa_atom = "asaAtom");
+                   const String& asa_atom = "asaAtom",
+                   AccessibilityAlgorithm algorithm = NACCESS);
 
 
 Real Accessibility(ost::mol::EntityHandle& ent, 
@@ -73,7 +108,8 @@ Real Accessibility(ost::mol::EntityHandle& ent,
                    const String& selection = "",
                    const String& asa_abs = "asaAbs",
                    const String& asa_rel = "asaRel",
-                   const String& asa_atom = "asaAtom");
+                   const String& asa_atom = "asaAtom",
+                   AccessibilityAlgorithm algorithm = NACCESS);
 
 }}} //ns
 

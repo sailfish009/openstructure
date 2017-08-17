@@ -180,14 +180,13 @@ struct CubeOccupationGrid{
   bool* occupied_cubes;
 };
 
-
-Real GetAtomAccessibility(Real x_pos, Real y_pos, Real z_pos,
-                          Real radius,
-                          const std::vector<Real>& x,
-                          const std::vector<Real>& y,
-                          const std::vector<Real>& z, 
-                          const std::vector<Real>& radii) {
-
+Real GetAtomAccessibilityNACCESS(Real x_pos, Real y_pos, Real z_pos,
+                                 Real radius,
+                                 const std::vector<Real>& x,
+                                 const std::vector<Real>& y,
+                                 const std::vector<Real>& z, 
+                                 const std::vector<Real>& radii) {
+                                  
   int num_close_atoms = x.size();
 
   if(num_close_atoms == 0) {
@@ -329,9 +328,119 @@ Real GetAtomAccessibility(Real x_pos, Real y_pos, Real z_pos,
 }
 
 
+struct DSSPHelper{
+  
+  DSSPHelper(Real x, Real y, Real z, Real r, Real d): x_pos(x), y_pos(y),
+                                                      z_pos(z), 
+                                                      squared_radius(r),
+                                                      squared_distance(d) { }
+  
+  Real x_pos;
+  Real y_pos;
+  Real z_pos;
+  Real squared_radius;
+  Real squared_distance;
+  
+  bool operator<(const DSSPHelper& rhs) const { return squared_distance < 
+                                                       rhs.squared_distance; }
+};
+
+
+Real GetAtomAccessibilityDSSP(Real x_pos, Real y_pos, Real z_pos,
+                              Real radius,
+                              const std::vector<Real>& x,
+                              const std::vector<Real>& y,
+                              const std::vector<Real>& z, 
+                              const std::vector<Real>& radii) {
+
+  int num_close_atoms = x.size();
+  
+  if(num_close_atoms == 0) {
+    // return area of full sphere
+    return Real(4.0) * M_PI * radius * radius;
+  } 
+
+  std::vector<DSSPHelper> helpers;
+  helpers.reserve(num_close_atoms);
+
+  Real dx, dy, dz, dist_squared, summed_radii;
+  for(int i = 0; i < num_close_atoms; ++i) {
+    dx = x_pos - x[i];
+    dy = y_pos - y[i];
+    dz = z_pos - z[i];
+    dist_squared = dx*dx + dy*dy + dz*dz;
+    summed_radii = radius + radii[i];
+    summed_radii *= summed_radii;
+    if(dist_squared < summed_radii) {
+      helpers.push_back(DSSPHelper(x[i] - x_pos, y[i] - y_pos, z[i] - z_pos, 
+                                   radii[i] * radii[i], dist_squared));
+    }
+  }
+
+  std::sort(helpers.begin(), helpers.end());
+  
+  const ost::mol::alg::DSSPAccessibilityParam& param = 
+  ost::mol::alg::DSSPAccessibilityParam::GetInstance();
+  const std::vector<Real>& fibonacci_x = param.GetFibonacciX();
+  const std::vector<Real>& fibonacci_y = param.GetFibonacciY();
+  const std::vector<Real>& fibonacci_z = param.GetFibonacciZ();
+  Real fibo_weight = param.GetPointWeight();
+  Real summed_fibo_weight = 0.0;
+  Real fibo_x, fibo_y, fibo_z;
+  uint num_helpers = helpers.size();
+
+  for(uint i = 0; i < fibonacci_x.size(); ++i) {
+    fibo_x = fibonacci_x[i] * radius;
+    fibo_y = fibonacci_y[i] * radius;
+    fibo_z = fibonacci_z[i] * radius;
+
+    bool covered = false;
+
+    for(uint j = 0; j < num_helpers; ++j) {
+      dx = fibo_x - helpers[j].x_pos;
+      dy = fibo_y - helpers[j].y_pos;
+      dz = fibo_z - helpers[j].z_pos;
+      dist_squared = dx*dx + dy*dy + dz*dz;
+      if(dist_squared < helpers[j].squared_radius) {
+        covered = true;
+        break;
+      }
+    }
+    if(!covered) {
+      summed_fibo_weight += fibo_weight;
+    } 
+  }
+
+  return summed_fibo_weight * radius * radius;
+}
+
+Real GetAtomAccessibility(Real x_pos, Real y_pos, Real z_pos,
+                          Real radius,
+                          const std::vector<Real>& x,
+                          const std::vector<Real>& y,
+                          const std::vector<Real>& z, 
+                          const std::vector<Real>& radii,
+                          ost::mol::alg::AccessibilityAlgorithm algorithm) {
+  switch(algorithm){
+    case ost::mol::alg::NACCESS: return GetAtomAccessibilityNACCESS(x_pos, y_pos,
+                                                                    z_pos, radius,
+                                                                    x, y, z, radii);
+
+    case ost::mol::alg::DSSP: return GetAtomAccessibilityDSSP(x_pos, y_pos,
+                                                              z_pos, radius,
+                                                              x, y, z, radii);
+
+  }
+
+  // silence compiler warning...
+  return Real(0);
+}
+
+
 void SolveCube(const CubeGrid& cube_grid, int cube_idx,
                const std::vector<Real>& x, const std::vector<Real>& y, 
                const std::vector<Real>& z, const std::vector<Real>& radii, 
+               ost::mol::alg::AccessibilityAlgorithm algorithm,
                std::vector<Real>& asa) {
 
   //prepare some stuff
@@ -395,7 +504,8 @@ void SolveCube(const CubeGrid& cube_grid, int cube_idx,
     asa[atom_idx] = GetAtomAccessibility(current_x, current_y, current_z, 
                                          current_radius, 
                                          close_atom_x, close_atom_y, 
-                                         close_atom_z, close_atom_radii);
+                                         close_atom_z, close_atom_radii,
+                                         algorithm);
   }
 }
 
@@ -451,8 +561,9 @@ CubeGrid SetupCubeGrid(const std::vector<Real>& x,
 
 void CalculateASAOligo(std::vector<Real>& x, std::vector<Real>& y, 
                        std::vector<Real>& z, std::vector<Real>& radii,
-                       std::vector<int> chain_indices, 
-                       Real probe_radius, std::vector<Real>& asa,
+                       std::vector<int> chain_indices, Real probe_radius, 
+                       ost::mol::alg::AccessibilityAlgorithm algorithm,
+                       std::vector<Real>& asa,
                        std::vector<Real>& asa_single_chain) {
 
   int num_atoms = x.size();
@@ -472,7 +583,8 @@ void CalculateASAOligo(std::vector<Real>& x, std::vector<Real>& y,
 
     if(cube_grid.IsInitialized(cube_idx)) {
       // there is at least one atom!
-      SolveCube(cube_grid, cube_idx, x, y, z, full_radii, asa);
+      SolveCube(cube_grid, cube_idx, x, y, z, full_radii, 
+                algorithm, asa);
     }
   }
 
@@ -524,7 +636,7 @@ void CalculateASAOligo(std::vector<Real>& x, std::vector<Real>& y,
         // there is at least one atom in the cube AND the environment has 
         // changes compared to the previous asa calculation
         SolveCube(single_chain_cube_grid, cube_idx, x, y, z, full_radii, 
-                  asa_single_chain);
+                  algorithm, asa_single_chain);
       }
     }
   }
@@ -536,6 +648,7 @@ void CalculateASA(const std::vector<Real>& x,
                   const std::vector<Real>& z, 
                   const std::vector<Real>& radii, 
                   Real probe_radius, 
+                  ost::mol::alg::AccessibilityAlgorithm algorithm,
                   std::vector<Real>& asa) {
 
   int num_atoms = x.size();
@@ -555,33 +668,51 @@ void CalculateASA(const std::vector<Real>& x,
 
     if(cube_grid.IsInitialized(cube_idx)) {
       // there is at least one atom!
-      SolveCube(cube_grid, cube_idx, x, y, z, full_radii, asa);
+      SolveCube(cube_grid, cube_idx, x, y, z, full_radii, 
+                algorithm, asa);
     }
   }
 }
 
 
 void ASAParamFromAtomList(const ost::mol::AtomViewList& atom_list,
+                          ost::mol::alg::AccessibilityAlgorithm algorithm,
                           std::vector<Real>& x_pos,
                           std::vector<Real>& y_pos,
                           std::vector<Real>& z_pos,
                           std::vector<Real>& radii) {
 
-  const ost::mol::alg::AccessibilityParam& param = 
-  ost::mol::alg::AccessibilityParam::GetInstance();
-  String rname, aname, ele;
+  if(algorithm == ost::mol::alg::NACCESS) {                          
+    const ost::mol::alg::NACCESSAccessibilityParam& param = 
+    ost::mol::alg::NACCESSAccessibilityParam::GetInstance();
+    String rname, aname, ele;
 
-  for(ost::mol::AtomViewList::const_iterator at_it = atom_list.begin();
-      at_it != atom_list.end(); ++at_it) {
-    rname = at_it->GetResidue().GetName();
-    aname = at_it->GetName();
-    ele = at_it->GetElement();
-    geom::Vec3 at_pos = at_it->GetPos();
-    x_pos.push_back(at_pos[0]);
-    y_pos.push_back(at_pos[1]);
-    z_pos.push_back(at_pos[2]);
-    radii.push_back(param.GetVdWRadius(rname, aname, ele));
-  } 
+    for(ost::mol::AtomViewList::const_iterator at_it = atom_list.begin();
+        at_it != atom_list.end(); ++at_it) {
+      rname = at_it->GetResidue().GetName();
+      aname = at_it->GetName();
+      ele = at_it->GetElement();
+      geom::Vec3 at_pos = at_it->GetPos();
+      x_pos.push_back(at_pos[0]);
+      y_pos.push_back(at_pos[1]);
+      z_pos.push_back(at_pos[2]);
+      radii.push_back(param.GetVdWRadius(rname, aname, ele));
+    } 
+  } else if(algorithm == ost::mol::alg::DSSP) {
+    const ost::mol::alg::DSSPAccessibilityParam& param = 
+    ost::mol::alg::DSSPAccessibilityParam::GetInstance();
+    String aname;
+
+    for(ost::mol::AtomViewList::const_iterator at_it = atom_list.begin();
+        at_it != atom_list.end(); ++at_it) {
+      aname = at_it->GetName();
+      geom::Vec3 at_pos = at_it->GetPos();
+      x_pos.push_back(at_pos[0]);
+      y_pos.push_back(at_pos[1]);
+      z_pos.push_back(at_pos[2]);
+      radii.push_back(param.GetVdWRadius(aname));
+    } 
+  }
 }
 
 void ChainIndicesFromAtomList(const ost::mol::AtomViewList& atom_list,
@@ -608,7 +739,8 @@ Real SetAccessibilityProps(ost::mol::EntityView& ent,
                            const std::vector<Real>& asa,
                            const String& asa_atom,
                            const String& asa_abs,
-                           const String& asa_rel){
+                           const String& asa_rel,
+                           ost::mol::alg::AccessibilityAlgorithm algorithm) {
 
   // assign absolute accessibilities
   Real summed_asa = 0.0;
@@ -621,22 +753,40 @@ Real SetAccessibilityProps(ost::mol::EntityView& ent,
     summed_asa += val;
   }
 
-  // go over residue and assign relative accessibilities
   String rname;
   ost::mol::ResidueViewList res_list = ent.GetResidueList();
-  for(uint idx = 0; idx < res_list.size(); ++idx) {
-    rname = res_list[idx].GetName();
-    Real tot_acc = 
-    ost::mol::alg::AccessibilityParam::GetInstance().GetResidueAccessibility(rname);
-    if(tot_acc == Real(-1.0)) {
-      // no accessibility found... 
-      // let's mimic NACCESS behaviour
-      res_list[idx].SetFloatProp(asa_rel, Real(-99.9));
+  if(algorithm == ost::mol::alg::NACCESS) {
+    // go over residue and assign relative accessibilities
+    for(uint idx = 0; idx < res_list.size(); ++idx) {
+      rname = res_list[idx].GetName();
+      Real tot_acc = 
+      ost::mol::alg::NACCESSAccessibilityParam::GetInstance().GetResidueAccessibility(rname);
+      if(tot_acc == Real(-1.0)) {
+        // no accessibility found... 
+        // let's mimic NACCESS behaviour
+        res_list[idx].SetFloatProp(asa_rel, Real(-99.9));
+      }
+      else {
+        // the fraction gets multiplied by 100 (Thats how NACCESS does it...)
+        Real val = res_list[idx].GetFloatProp(asa_abs, 0.0) / tot_acc * 100.0;
+        res_list[idx].SetFloatProp(asa_rel, val);
+      }
     }
-    else {
-      // the fraction gets multiplied by 100 (Thats how NACCESS does it...)
-      Real val = res_list[idx].GetFloatProp(asa_abs, 0.0) / tot_acc * 100.0;
-      res_list[idx].SetFloatProp(asa_rel, val);
+  } else if(algorithm == ost::mol::alg::DSSP) {
+    // go over residue and assign relative accessibilities
+    for(uint idx = 0; idx < res_list.size(); ++idx) {
+      rname = res_list[idx].GetName();
+      Real tot_acc = 
+      ost::mol::alg::DSSPAccessibilityParam::GetInstance().GetResidueAccessibility(rname);
+      if(tot_acc == Real(-1.0)) {
+        // no accessibility found... 
+        // let's mimic DSSP binding behaviour
+        // => do nothing
+      }
+      else {
+        Real val = res_list[idx].GetFloatProp(asa_abs, 0.0) / tot_acc;
+        res_list[idx].SetFloatProp(asa_rel, val);
+      }
     }
   }
 
@@ -650,7 +800,7 @@ Real SetAccessibilityProps(ost::mol::EntityView& ent,
 
 namespace ost { namespace mol { namespace alg {
 
-AccessibilityParam::AccessibilityParam() {
+NACCESSAccessibilityParam::NACCESSAccessibilityParam() {
 
   std::map<String, Real> ala_map;
   std::map<String, Real> arg_map;
@@ -1095,13 +1245,6 @@ AccessibilityParam::AccessibilityParam() {
   hoh_map["O"] = 1.40; 
 
 
-
-
-
-
-
-
-
   vdw_radii_["ALA"] = ala_map;
   vdw_radii_["ARG"] = arg_map;
   vdw_radii_["ASP"] = asp_map;
@@ -1158,7 +1301,7 @@ AccessibilityParam::AccessibilityParam() {
 }
 
 
-Real AccessibilityParam::GuessRadius(const String& ele) const{
+Real NACCESSAccessibilityParam::GuessRadius(const String& ele) const{
   if(ele == "C") return 1.80;
   if(ele == "N") return 1.60;
   if(ele == "S") return 1.85;
@@ -1175,8 +1318,9 @@ Real AccessibilityParam::GuessRadius(const String& ele) const{
 }
 
 
-Real AccessibilityParam::GetVdWRadius(const String& rname, const String& aname, 
-                                const String& ele) const{
+Real NACCESSAccessibilityParam::GetVdWRadius(const String& rname, 
+                                             const String& aname, 
+                                             const String& ele) const{
   std::map<String, std::map<String, Real> >::const_iterator res_map_it =
   vdw_radii_.find(rname);
   if(res_map_it != vdw_radii_.end()) {
@@ -1188,12 +1332,70 @@ Real AccessibilityParam::GetVdWRadius(const String& rname, const String& aname,
 }
 
 
-Real AccessibilityParam::GetResidueAccessibility(const String& rname) const{
+Real NACCESSAccessibilityParam::GetResidueAccessibility(const String& rname) const{
   std::map<String, Real>::const_iterator it = accessibilities_.find(rname);
   if(it != accessibilities_.end()) return it->second;
   else return Real(-1.0);
 }
 
+DSSPAccessibilityParam::DSSPAccessibilityParam() {
+
+  // these values are from the dssp binding. nobody knows
+  // the source...
+  accessibilities_["ALA"] = Real(118.0);
+  accessibilities_["ARG"] = Real(317.0);
+  accessibilities_["ASN"] = Real(238.0);
+  accessibilities_["ASP"] = Real(243.0);
+  accessibilities_["CYS"] = Real(183.0);
+  accessibilities_["GLN"] = Real(262.0);
+  accessibilities_["GLU"] = Real(286.0);
+  accessibilities_["GLY"] = Real(154.0);
+  accessibilities_["HIS"] = Real(258.0);
+  accessibilities_["ILE"] = Real(228.0);
+  accessibilities_["LEU"] = Real(243.0);
+  accessibilities_["LYS"] = Real(278.0);
+  accessibilities_["MET"] = Real(260.0);
+  accessibilities_["PHE"] = Real(271.0);
+  accessibilities_["PRO"] = Real(204.0);
+  accessibilities_["SER"] = Real(234.0);
+  accessibilities_["THR"] = Real(206.0);
+  accessibilities_["TRP"] = Real(300.0);
+  accessibilities_["TYR"] = Real(303.0);
+  accessibilities_["VAL"] = Real(216.0);
+
+
+  // construct evenly distributed points on a sphere.
+  // same as in DSSP...
+  fibonacci_x_.reserve(401);
+  fibonacci_y_.reserve(401);
+  fibonacci_z_.reserve(401);
+
+  Real golden_ratio = (Real(1.0) + std::sqrt(5.0)) * Real(0.5); 
+	point_weight_ = (Real(4.0) * Real(M_PI)) / Real(401.0);
+
+	for (int i = -200; i <= 200; ++i) {
+		Real lat = std::asin((Real(2.0) * Real(i)) / Real(401.0));
+    Real lon = std::fmod(Real(i), golden_ratio) * 
+               Real(2.0) * Real(M_PI) / golden_ratio;
+    fibonacci_x_.push_back(std::sin(lon) * std::cos(lat));
+    fibonacci_y_.push_back(std::cos(lon) * std::cos(lat));
+    fibonacci_z_.push_back(std::sin(lat));
+	}
+}
+
+Real DSSPAccessibilityParam::GetVdWRadius(const String& aname) const{
+  if(aname == "N") return Real(1.65);
+  if(aname == "CA") return Real(1.87);
+  if(aname == "C") return Real(1.76);
+  if(aname == "O") return Real(1.4);
+  return Real(1.8); 
+}
+
+Real DSSPAccessibilityParam::GetResidueAccessibility(const String& rname) const{
+  std::map<String, Real>::const_iterator it = accessibilities_.find(rname);
+  if(it != accessibilities_.end()) return it->second;
+  else return Real(-1.0);
+}
 
 Real Accessibility(ost::mol::EntityView& ent, 
                    Real probe_radius, bool include_hydrogens,
@@ -1202,7 +1404,8 @@ Real Accessibility(ost::mol::EntityView& ent,
                    const String& selection, 
                    const String& asa_abs, 
                    const String& asa_rel,
-                   const String& asa_atom) {
+                   const String& asa_atom,
+                   AccessibilityAlgorithm algorithm) {
 
   String internal_selection = selection;
 
@@ -1254,7 +1457,7 @@ Real Accessibility(ost::mol::EntityView& ent,
 
   // extract data from ent
   ost::mol::AtomViewList atom_list = selected_ent.GetAtomList();
-  ASAParamFromAtomList(atom_list, x_pos, y_pos, z_pos, radii);
+  ASAParamFromAtomList(atom_list, algorithm, x_pos, y_pos, z_pos, radii);
 
   if(atom_list.size() == 0) return 0.0;
 
@@ -1269,10 +1472,11 @@ Real Accessibility(ost::mol::EntityView& ent,
     std::vector<Real> asa;
     std::vector<Real> asa_single_chain;
     CalculateASAOligo(x_pos, y_pos, z_pos, radii, chain_indices, 
-                      probe_radius, asa, asa_single_chain);
+                      probe_radius, algorithm, asa, asa_single_chain);
 
     Real summed_asa = SetAccessibilityProps(selected_ent, atom_list, asa, 
-                                            asa_atom, asa_abs, asa_rel);
+                                            asa_atom, asa_abs, asa_rel, 
+                                            algorithm);
 
     // in case of the single chain asa, the property names are
     // moodified!!
@@ -1283,7 +1487,7 @@ Real Accessibility(ost::mol::EntityView& ent,
     SetAccessibilityProps(selected_ent, atom_list, asa_single_chain, 
                           single_chain_asa_atom, 
                           single_chain_asa_abs, 
-                          single_chain_asa_rel);
+                          single_chain_asa_rel, algorithm);
 
     return summed_asa;
   }
@@ -1291,14 +1495,14 @@ Real Accessibility(ost::mol::EntityView& ent,
     
     // do it! do it! do it!
     std::vector<Real> asa;
-    CalculateASA(x_pos, y_pos, z_pos, radii, probe_radius, asa);
+    CalculateASA(x_pos, y_pos, z_pos, radii, probe_radius, algorithm, asa);
 
     Real summed_asa = SetAccessibilityProps(selected_ent, atom_list, asa, 
-                                            asa_atom, asa_abs, asa_rel);
+                                            asa_atom, asa_abs, asa_rel,
+                                            algorithm);
 
     return summed_asa;
   }
-
 }
 
 
@@ -1309,12 +1513,13 @@ Real Accessibility(ost::mol::EntityHandle& ent,
                    const String& selection,
                    const String& asa_abs, 
                    const String& asa_rel,
-                   const String& asa_atom) {
+                   const String& asa_atom,
+                   AccessibilityAlgorithm algorithm) {
 
   ost::mol::EntityView entity_view = ent.CreateFullView();
   return Accessibility(entity_view, probe_radius, include_hydrogens,
                        include_hetatm, include_water, oligo_mode,
-                       selection, asa_abs, asa_rel, asa_atom);
+                       selection, asa_abs, asa_rel, asa_atom, algorithm);
 }
 
 }}} //ns

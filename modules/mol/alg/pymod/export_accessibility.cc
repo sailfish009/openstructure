@@ -35,11 +35,12 @@ Real WrapAccessibilityHandle(ost::mol::EntityHandle& ent,
                              const String& selection,
                              const String& asa_abs, 
                              const String& asa_rel,
-                             const String& asa_atom) {
+                             const String& asa_atom,
+                             ost::mol::alg::AccessibilityAlgorithm algorithm) {
                                  
   return ost::mol::alg::Accessibility(ent, probe_radius, include_hydrogens, 
                                       include_hetatm, include_water, oligo_mode,
-                                      selection, asa_abs, asa_rel, asa_atom);
+                                      selection, asa_abs, asa_rel, asa_atom, algorithm);
 }
 
 Real WrapAccessibilityView(ost::mol::EntityView& ent, 
@@ -50,11 +51,12 @@ Real WrapAccessibilityView(ost::mol::EntityView& ent,
                            bool oligo_mode,
                            const String& selection,
                            const String& asa_abs, const String& asa_rel,
-                           const String& asa_atom) {
+                           const String& asa_atom,
+                           ost::mol::alg::AccessibilityAlgorithm algorithm) {
 
   return ost::mol::alg::Accessibility(ent, probe_radius, include_hydrogens, 
                                       include_hetatm, include_water, oligo_mode,
-                                      selection, asa_abs, asa_rel, asa_atom);
+                                      selection, asa_abs, asa_rel, asa_atom, algorithm);
 }
 
 } // ns
@@ -63,6 +65,12 @@ Real WrapAccessibilityView(ost::mol::EntityView& ent,
 
 
 void export_accessibility() {
+
+    enum_<ost::mol::alg::AccessibilityAlgorithm>("AccessibilityAlgorithm")
+    .value("NACCESS", ost::mol::alg::NACCESS)
+    .value("DSSP", ost::mol::alg::DSSP)
+    .export_values()
+    ;
 
     def("Accessibility", WrapAccessibilityHandle, (arg("ent"), 
                                                    arg("probe_radius")=1.4,
@@ -73,7 +81,8 @@ void export_accessibility() {
                                                    arg("selection")="",
                                                    arg("asa_abs")="asaAbs",
                                                    arg("asa_rel")="asaRel",
-                                                   arg("asa_atom")="asaAtom"));
+                                                   arg("asa_atom")="asaAtom",
+                                                   arg("algorithm")=ost::mol::alg::NACCESS));
 
     def("Accessibility", WrapAccessibilityView, (arg("ent"), 
                                                  arg("probe_radius")=1.4,
@@ -84,6 +93,7 @@ void export_accessibility() {
                                                  arg("selection")="",
                                                  arg("asa_abs")="asaAbs",
                                                  arg("asa_rel")="asaRel",
-                                                 arg("asa_atom")="asaAtom"));
+                                                 arg("asa_atom")="asaAtom",
+                                                 arg("algorithm")=ost::mol::alg::NACCESS));
 }
 
