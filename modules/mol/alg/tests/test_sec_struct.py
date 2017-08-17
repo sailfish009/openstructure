@@ -11,10 +11,10 @@ class TestSecStruct(unittest.TestCase):
     # unit test only makes sense, when a dssp binary is around
     dssp_path = None
     try:
-      dssp_path = settings.locate("dssp")
+      dssp_path = settings.Locate("dssp")
     except:
       try:
-        dssp_path = settings.locate("mkdssp")
+        dssp_path = settings.Locate("mkdssp")
       except:
         print "Could not find dssp, could not compare sec struct assignment..."
         return
