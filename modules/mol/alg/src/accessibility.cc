@@ -742,13 +742,19 @@ Real SetAccessibilityProps(ost::mol::EntityView& ent,
                            const String& asa_rel,
                            ost::mol::alg::AccessibilityAlgorithm algorithm) {
 
+  // first set accessibilities of all involved residues to 0.0
+  for(uint idx = 0; idx < asa.size(); ++idx) {
+    ost::mol::ResidueView res = atom_list[idx].GetResidue();
+    res.SetFloatProp(asa_abs, 0.0);
+  }
+
   // assign absolute accessibilities
   Real summed_asa = 0.0;
   for(uint idx = 0; idx < asa.size(); ++idx) {
     Real val = asa[idx];
     atom_list[idx].SetFloatProp(asa_atom, val);
     ost::mol::ResidueView res = atom_list[idx].GetResidue();
-    Real current_asa = res.GetFloatProp(asa_abs, 0.0);
+    Real current_asa = res.GetFloatProp(asa_abs);
     res.SetFloatProp(asa_abs, current_asa + val);
     summed_asa += val;
   }
