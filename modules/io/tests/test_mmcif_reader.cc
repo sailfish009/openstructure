@@ -587,28 +587,38 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
   tmmcif_h.Add(StringRef("journal_abbrev", 14));
   tmmcif_p.OnBeginLoop(tmmcif_h);
 
+  // ensure that we use book_title if no journal given (no RCSB use of this)
   columns.push_back(StringRef("Foo", 3));
   columns.push_back(StringRef("1979", 4));
   columns.push_back(StringRef("The Guide", 9));
   columns.push_back(StringRef(".", 1));
 
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
+  const MMCifInfoCitation& cit = tmmcif_p.GetInfo().GetCitations().back();
+  BOOST_CHECK_EQUAL(cit.GetID(), String("Foo"));
+  BOOST_CHECK_EQUAL(cit.GetYear(), 1979);
+  BOOST_CHECK_EQUAL(cit.GetPublishedIn(), String("The Guide"));
 
-  BOOST_CHECK(tmmcif_p.GetInfo().GetCitations().back().GetYear() == 1979);
-
+  // ensure that we override book_title if not properly given
   columns.pop_back();
   columns.pop_back();
   columns.push_back(StringRef(".", 1));
   columns.push_back(StringRef("Hitch", 5));
 
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
+  BOOST_CHECK_EQUAL(tmmcif_p.GetInfo().GetCitations().back().GetPublishedIn(),
+                    String("Hitch"));
 
+  // ensure that we override book_title if journal given
+  // (def. behavior on RCSB webpage)
   columns.pop_back();
   columns.pop_back();
   columns.push_back(StringRef("The Guide", 9));
   columns.push_back(StringRef("Hitch", 5));
 
-  BOOST_CHECK_THROW(tmmcif_p.ParseCitation(columns), IOException);
+  BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
+  BOOST_CHECK_EQUAL(tmmcif_p.GetInfo().GetCitations().back().GetPublishedIn(),
+                    String("Hitch"));
 
   BOOST_TEST_MESSAGE("  done.");
 }

@@ -848,10 +848,12 @@ Algorithms on Structures
 .. method:: Accessibility(ent, probe_radius=1.4, include_hydrogens=False,\
                           include_hetatm=False, include_water=False,\
                           oligo_mode=False, selection="", asa_abs="asaAbs",\
-                          asa_rel="asaRel", asa_atom="asaAtom")
+                          asa_rel="asaRel", asa_atom="asaAtom", \
+                          algorithm = NACCESS)
             
-  Calculates the accesssible surface area for ever atom in *ent* according to 
-  Lee & Richards by "rolling" a probe with given *probe_radius* over the atoms.
+  Calculates the accesssible surface area for ever atom in *ent*. The algorithm
+  mimics the behaviour of the bindings available for the NACCESS and DSSP tools 
+  and has been tested to reproduce the numbers accordingly.
 
   :param ent:           Entity on which to calculate the surface
   :type ent:            :class:`~ost.mol.EntityView` /
@@ -907,18 +909,52 @@ Algorithms on Structures
   :param asa_rel:       Float property name to assign the relative solvent 
                         accessibility to a residue. This is the absolute 
                         accessibility divided by the maximum solvent 
-                        accessibility of that particular residue. Only
-                        residues of the 20 standarad amino acids can be handled.
-                        Every non standard residue gets assigned a value of 
-                        -99.9.
+                        accessibility of that particular residue. 
+                        This maximum solvent accessibility is dependent on
+                        the chosen :class:`AccessibilityAlgorithm`.
+                        Only residues of the 20 standarad amino acids 
+                        can be handled.
+
+                        * In case of the **NACCESS** algorithm you can expect
+                          a value in range [0.0, 100.0] and a value of -99.9
+                          for non standard residues.
+
+                        * In case of the **DSSP** algorithm you can expect a
+                          value in range [0.0, 1.0], no float property is assigned
+                          in case of a non standard residue.
+
   :type asa_rel:       :class:`str`
 
   :param asa_atom:      Float property name to assign the solvent accessible 
                         area to each atom.
-  :type asa_atom:       :class:`str`      
+  :type asa_atom:       :class:`str`   
+
+  :param algorithm:     Specifies the used algorithm for solvent accessibility
+                        calculations
+
+  :type algorithm:      :class:`AccessibilityAlgorithm`   
+
+  
 
   :return: The summed solvent accessibilty of each atom in *ent*.
 
+.. class:: AccessibilityAlgorithm
+
+  The accessibility algorithm enum specifies the algorithm used by
+  the respective tools. Available are:
+
+    NACCESS, DSSP
+
+
+
+.. method:: AssignSecStruct(ent)
+
+  Assigns secondary structures to all residues based on hydrogen bond patterns
+  as described by DSSP.
+
+  :param ent:           Entity on which to assign secondary structures
+  :type ent:            :class:`~ost.mol.EntityView`/
+                        :class:`~ost.mol.EntityHandle`
 
 
 .. _traj-analysis:

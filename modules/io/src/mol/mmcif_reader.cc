@@ -795,6 +795,10 @@ void MMCifReader::ParseCitation(const std::vector<StringRef>& columns)
     }
   }
   if (indices_[BOOK_TITLE] != -1) {
+    // this is only set in few PDB entries and RCSB overrides it with
+    // the journal_abbrev for their citations
+    // -> as of August 1, 2017, 5 entries known: 5b1j, 5b1k, 5fax, 5fbz, 5ffn
+    //    -> all those have journal_abbrev set
     if ((columns[indices_[BOOK_TITLE]] != StringRef(".", 1)) &&
         (columns[indices_[BOOK_TITLE]][0]!='?')) {
       cit.SetPublishedIn(columns[indices_[BOOK_TITLE]].str());
@@ -802,15 +806,19 @@ void MMCifReader::ParseCitation(const std::vector<StringRef>& columns)
   }
   if (indices_[JOURNAL_ABBREV] != -1) {
     if (columns[indices_[JOURNAL_ABBREV]] != StringRef(".", 1)) {
-      if (cit.GetPublishedIn().length() > 0) {
-        throw IOException(this->FormatDiagnostic(STAR_DIAG_WARNING,
-                                                 "citation.book_title already occupies the 'published_in' field of this citation, cannot add " +
-                                                 columns[indices_[JOURNAL_ABBREV]].str() +
-                                                 ".",
-                                                 this->GetCurrentLinenum()));
-      } else {
-        cit.SetPublishedIn(columns[indices_[JOURNAL_ABBREV]].str());
+      const String journal_abbrev = columns[indices_[JOURNAL_ABBREV]].str();
+      const String published_in = cit.GetPublishedIn();
+      if (published_in.length() > 0 && published_in != journal_abbrev) {
+        LOG_WARNING(this->FormatDiagnostic(STAR_DIAG_WARNING,
+                                           "The 'published_in' field was "
+                                           "already set by citation.book_title "
+                                           "'" + published_in + "'! "
+                                           "This will be overwritten by "
+                                           "citation.journal_abbrev '" +
+                                           journal_abbrev + "'.",
+                                           this->GetCurrentLinenum()));
       }
+      cit.SetPublishedIn(journal_abbrev);
     }
   }
   if (indices_[JOURNAL_VOLUME] != -1) {
