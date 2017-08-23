@@ -231,12 +231,14 @@ of the :class:`Simulation` object.
 
     Path where OpenMM specific plugins are searched. If you want
     to use other platforms than Reference, this has to be set.
-    default: "/usr/local/openmm/lib/plugins"
+    Defaults to *OPEN_MM_PLUGIN_DIR* which was set when
+    :ref:`configuring the compilation <cmake-flags>`.
 
   .. attribute::        custom_plugin_directory
 
-    Path where custom plugins are searched for. 
-    default: "/usr/local/openmm/lib/plugins"
+    Path where custom plugins are searched for. Defaults to
+    "share/openstructure/openmm_plugins" within the OST installation or to
+    :attr:`openmm_plugin_directory` if the OST path could not be determined.
 
 
 
