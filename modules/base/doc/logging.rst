@@ -187,14 +187,12 @@ Each logging event has an associated level that marks its importance. For exampl
 
 **Debug**:
   For developers, but not quite at the trace level. This level is turned off by 
-  default, not available in Python and only enabled when compiling with 
-  debugging symbols.
+  default and only enabled when compiling with debugging symbols.
 
 **Trace**:
   Used to debug inner loops. Once turned on, you will probably get more debug 
-  output that you will be able to handle. This  level is turned off by default, 
-  not available in python and only enabled when compiling with debugging 
-  symbols.
+  output that you will be able to handle. This level is turned off by default
+  and only enabled when compiling with debugging symbols.
 
 
 Example
