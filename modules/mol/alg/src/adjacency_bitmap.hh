@@ -7,6 +7,7 @@
 #include <ost/tri_matrix.hh>
 #include <ost/seq/sequence_handle.hh>
 #include <ost/seq/alignment_handle.hh>
+#include <ost/stdint.hh>
 #include "similarity_matrix.hh"
 #include "contact_overlap.hh"
 #include "module_config.hh"
