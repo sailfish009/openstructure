@@ -900,12 +900,13 @@ void Simulation::ReinitializeContext() {
   // reinitializing requires to reset all those things!
   // Be aware, state of random number generators etc might not be
   // preserved!
-  OpenMM::State state = context_->getState(OpenMM::State::Positions |
-                                           OpenMM::State::Velocities |
-                                           OpenMM::State::Forces |
-                                           OpenMM::State::Energy |
-                                           OpenMM::State::Parameters |
-                                           OpenMM::State::ParameterDerivatives);
+
+  // openmm uses bitmasks to selectively extract data from the context.
+  // The context data might change with different OpenMM versions.
+  // Passing -1 automagically sets all bits to true => ALL available
+  // data gets extracted. 
+  int true_bitmask = -1;
+  OpenMM::State state = context_->getState(true_bitmask);
   context_->reinitialize();
   context_->setState(state); 
 }
