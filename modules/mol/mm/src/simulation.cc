@@ -694,7 +694,7 @@ void Simulation::ResetDistanceConstraint(uint index, Real constraint_length){
   int particle1, particle2;
   system_->getConstraintParameters(index,particle1,particle2,dummy);
   system_->setConstraintParameters(index,particle1,particle2,constraint_length);
-  context_->reinitialize();
+  this->ReinitializeContext();
   top_->SetDistanceConstraintParameters(index, constraint_length);
 }
 
@@ -703,7 +703,7 @@ void Simulation::AddPositionConstraint(uint index){
     throw ost::Error("Provided index exceeds number of atoms!");
   }
   system_->setParticleMass(index,0.0);
-  context_->reinitialize();
+  this->ReinitializeContext();
   top_->AddPositionConstraint(index);
 }
 
@@ -717,7 +717,7 @@ void Simulation::AddPositionConstraints(const std::vector<uint>& index){
     system_->setParticleMass(*i,0.0);
     top_->AddPositionConstraint(*i);
   }
-  context_->reinitialize();
+  this->ReinitializeContext();
 }
 
 void Simulation::ResetPositionConstraints(){
@@ -726,7 +726,7 @@ void Simulation::ResetPositionConstraints(){
     system_->setParticleMass(i,original_masses[i]);
   }
   top_->ResetPositionConstraints();
-  context_->reinitialize();
+  this->ReinitializeContext();
 }
 
 void Simulation::ResetHarmonicPositionRestraint(uint index, const geom::Vec3& ref_position, Real k,
@@ -872,7 +872,7 @@ void Simulation::ResetMass(uint index, Real mass){
     throw ost::Error("Provided index exceeds number of atoms!");
   }
   system_->setParticleMass(index,mass);
-  context_->reinitialize();
+  this->ReinitializeContext();
   top_->SetMass(index,mass);
 }
 
@@ -894,6 +894,20 @@ void Simulation::SetPeriodicBoxExtents(geom::Vec3& vec){
   OpenMM::Vec3 ucell_b(0.0,vec[1]/10.0,0.0);
   OpenMM::Vec3 ucell_c(0.0,0.0,vec[2]/10.0);
   context_->setPeriodicBoxVectors(ucell_a,ucell_b,ucell_c);
+}
+
+void Simulation::ReinitializeContext() {
+  // reinitializing requires to reset all those things!
+  // Be aware, state of random number generators etc might not be
+  // preserved!
+  OpenMM::State state = context_->getState(OpenMM::State::Positions |
+                                           OpenMM::State::Velocities |
+                                           OpenMM::State::Forces |
+                                           OpenMM::State::Energy |
+                                           OpenMM::State::Parameters |
+                                           OpenMM::State::ParameterDerivatives);
+  context_->reinitialize();
+  context_->setState(state); 
 }
 
 }}}

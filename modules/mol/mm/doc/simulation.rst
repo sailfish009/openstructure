@@ -201,6 +201,10 @@ mapped back to the attached structure at any time.
   .. method:: AddPositionConstraint(index)
 
     Fixes the position of the particle with index given in the argument.
+    This requires to reinitialize the internal openmm Context 
+    (this is expensive!). Positions, velocities, forces, energies etc. 
+    are properly preserved but e.g. states of random number generators etc.
+    might be lost.
 
     :param index:       Particle to be fixed
     :type index:        :class:`int`
@@ -211,6 +215,10 @@ mapped back to the attached structure at any time.
   .. method:: AddPositionConstraints(indices)
 
     Fixes the position of the atoms with the indices given in in the argument.
+    This requires to reinitialize the internal openmm Context 
+    (this is expensive!). Positions, velocities, forces, energies etc. 
+    are properly preserved but e.g. states of random number generators etc.
+    might be lost.
 
     :param indices:     Particles to be fixed
     :type indices:      :class:`list`
@@ -221,6 +229,10 @@ mapped back to the attached structure at any time.
   .. method:: ResetPositionConstraints()
 
     Removes all position constraints.
+    This requires to reinitialize the internal openmm Context 
+    (this is expensive!). Positions, velocities, forces, energies etc. 
+    are properly preserved but e.g. states of random number generators etc.
+    might be lost.
 
   .. method:: ResetHarmonicBond(index, bond_length, force_constant)
 
@@ -347,7 +359,11 @@ mapped back to the attached structure at any time.
   .. method:: ResetDistanceConstraint(index, constraint_length)
 
     Update of the distance constraint parameters in the simulation **and**
-    in the attached :class:`Topology`
+    in the attached :class:`Topology`. 
+    This requires to reinitialize the internal openmm Context 
+    (this is expensive!). Positions, velocities, forces, energies etc. 
+    are properly preserved but e.g. states of random number generators etc.
+    might be lost. 
     
     :param index:       Distance constraint to be reset
     :param constraint_length: New constraint length in nm
@@ -445,6 +461,10 @@ mapped back to the attached structure at any time.
 
     Update of the mass in the simulation **and**
     in the attached :class:`Topology`
+    This requires to reinitialize the internal openmm Context 
+    (this is expensive!). Positions, velocities, forces, energies etc. 
+    are properly preserved but e.g. states of random number generators etc.
+    might be lost.
 
     :param index:       Mass to be reset
     :param mass:        New mass
