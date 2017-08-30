@@ -37,6 +37,14 @@ The Handle Classes
     :meth:`FindChain`.
     
     This property is read-only.
+
+    :type: :class:`ChainHandleList` (list of :class:`ChainHandle`)
+
+  .. attribute:: chain_count
+    
+    Number of chains. Read-only. See :meth:`GetChainCount`.
+    
+    :type: :class:`int`
     
   .. attribute:: residues
     
@@ -55,7 +63,13 @@ The Handle Classes
     Also available as :meth:`GetResidueList`. To access a single residue, use 
     :meth:`FindResidue`. 
   
-     :returns: A list of :class:`residue handles<ResidueHandle>`
+    :type: :class:`ResidueHandleList` (list of :class:`ResidueHandle`)
+    
+  .. attribute:: residue_count
+    
+    Number of residues. Read-only. See :meth:`GetResidueCount`.
+    
+    :type: :class:`int`
   
   .. attribute:: atoms
   
@@ -63,8 +77,14 @@ The Handle Classes
      :meth:`FindAtom`.
      
      This property is read-only. Also available as :meth:`GetAtomList`
-  
-     :type: A list of :class:`atom handles<AtomHandle>`
+     
+     :type: :class:`AtomHandleList` (list of :class:`AtomHandle`)
+    
+  .. attribute:: atom_count
+    
+    Number of atoms. Read-only. See :meth:`GetAtomCount`.
+    
+    :type: :class:`int`
   
   .. attribute:: bounds
   
@@ -90,6 +110,14 @@ The Handle Classes
     :meth:`GetCenterOfAtoms`.
     
     :type: :class:`~ost.geom.Vec3`
+
+  .. attribute:: positions
+
+    Equivalent to calling :meth:`GetPositions` with *sort_by_index = True*. This
+    property is read-only and only available if OpenStructure was compiled with
+    an enabled ``USE_NUMPY`` flag (see :ref:`here <cmake-flags>` for details).
+
+    :type: :class:`numpy.array`
   
   .. method:: GetName()
 
@@ -114,6 +142,10 @@ The Handle Classes
   .. method:: GetChainList()
     
     See :attr:`chains`
+
+  .. method:: GetChainCount()
+
+    See :attr:`chain_count`
     
   .. method:: FindResidue(chain_name, res_num)
     
@@ -132,6 +164,10 @@ The Handle Classes
   .. method:: GetResidueList()
     
     See :attr:`residues`
+
+  .. method:: GetResidueCount()
+    
+    See :attr:`residue_count`
     
   .. method:: FindAtom(chain_name, res_num, atom_name)
     
@@ -152,6 +188,10 @@ The Handle Classes
   .. method:: GetAtomList()
     
     See :attr:`atoms`
+    
+  .. method:: GetAtomCount()
+    
+    See :attr:`atom_count`
     
   .. method:: EditXCS([edit_mode=mol.EditMode.UNBUFFERED_EDIT])
     
@@ -187,12 +227,13 @@ The Handle Classes
     
     **Example Usage:**
     
-    .. code-block::python
+    .. code-block:: python
+
       # select calpha atoms of peptides
-      calphas=ent.Select('aname=CA and peptide=true')
+      calphas = ent.Select('aname=CA and peptide=true')
       
       # select atoms in a box of size 10, centred at the origin
-      in_box=ent.Select('x=-5:5 and y=-5:5 and z=-5:5')
+      in_box = ent.Select('x=-5:5 and y=-5:5 and z=-5:5')
     
     :param query: The query to be executed.
     :type  query: :class:`Query` / :class:`str`
@@ -262,7 +303,17 @@ The Handle Classes
   .. method:: GetMass()
   
     See :attr:`mass`
-    
+
+  .. method:: GetPositions(sort_by_index=True)
+
+    :return: Array of atom positions for this entity.
+    :rtype:  :class:`numpy.array` (shape [:attr:`atom_count`, 3])
+    :param sort_by_index: If True, the atoms are sorted by their
+                          :attr:`~AtomHandle.index`. Otherwise, they are sorted
+                          as they appear in the :attr:`atoms` list.
+
+    This method is only available if OpenStructure was compiled with an enabled
+    ``USE_NUMPY`` flag (see :ref:`here <cmake-flags>` for details).
     
   .. method:: FindWithin(pos, radius)
   
@@ -275,7 +326,7 @@ The Handle Classes
     :param radius: The radius of the sphere
     :type radius: float
     
-    :returns: A list of :class:`atom handles<AtomHandle>`
+    :returns: :class:`AtomHandleList` (list of :class:`AtomHandle`)
     
 .. class:: ChainHandle
 
@@ -324,7 +375,7 @@ The Handle Classes
      Also available as :meth:`GetResidueList`. To access a single residue, use 
      :meth:`FindResidue`. 
 
-     :returns: A list of :class:`residue handles<ResidueHandle>`
+     :type: :class:`ResidueHandleList` (list of :class:`ResidueHandle`)
   
   .. attribute:: in_sequence
   
@@ -347,7 +398,7 @@ The Handle Classes
    
      This property is read-only. Also available as :meth:`GetAtomList`
 
-     :type: A list of :class:`atom handles<AtomHandle>`
+     :type: :class:`AtomHandleList` (list of :class:`AtomHandle`)
 
   .. attribute:: bounds
 
@@ -376,7 +427,7 @@ The Handle Classes
     
   .. method:: FindResidue(res_num)
    
-    Get residue by residue number. See also :attr:`residues`
+    Get residue by residue number. See also :attr:`residues`.
     
     :param    res_num:  residue number
     :type     res_num:  :class:`ResNum`
@@ -387,11 +438,7 @@ The Handle Classes
                         
   .. method:: GetResidueList()
 
-    Get list of all residues of this chain. For peptide chains, the residues
-    are usually ordered from N- to C-terminus.To access a single residue, use     
-    :meth:`FindResidue`.
-    
-    :returns: A list of :class:`residue handles<ResidueHandle>`
+    See :attr:`residues`.
 
   .. method:: FindAtom(res_num, atom_name)
 
@@ -464,6 +511,15 @@ The Handle Classes
     
     :type: str
     
+  .. attribute:: atoms
+
+     Get list of all atoms of this residue. To access a single atom, use
+     :meth:`FindAtom`.
+   
+     This property is read-only. Also available as :meth:`GetAtomList`
+
+     :type: :class:`AtomHandleList` (list of :class:`AtomHandle`)
+
   .. attribute:: bounds
   
     Axis-aligned bounding box of the residue. Read-only.
@@ -577,8 +633,7 @@ The Handle Classes
 
   .. method:: GetAtomList()
 
-    Get list of all atoms of this residue. To access a single atom, use
-    :meth:`FindAtom`.
+    See :attr:`atoms`
 
   .. method:: IsPeptideLinking()
 
@@ -864,6 +919,14 @@ The View Classes
     :meth:`FindChain`.
     
     This property is read-only.
+
+    :type: :class:`ChainViewList` (list of :class:`ChainView`)
+
+  .. attribute:: chain_count
+    
+    Number of chains. Read-only. See :meth:`GetChainCount`.
+    
+    :type: :class:`int`
     
   .. attribute:: residues
     
@@ -882,7 +945,13 @@ The View Classes
     Also available as :meth:`GetResidueList`. To access a single residue, use 
     :meth:`FindResidue`. 
     
-    :type: A list of :class:`ResidueViews <ResidueView>`
+    :type: :class:`ResidueViewList` (list of :class:`ResidueView`)
+    
+  .. attribute:: residue_count
+    
+    Number of residues. Read-only. See :meth:`GetResidueCount`.
+    
+    :type: :class:`int`
 
   .. attribute:: atoms
 
@@ -891,7 +960,13 @@ The View Classes
     
     This property is read-only. Also available as :meth:`GetAtomList`
     
-    :type: A list of :class:`AtomViews <AtomView>`
+    :type: :class:`AtomViewList` (list of :class:`AtomView`)
+    
+  .. attribute:: atom_count
+    
+    Number of atoms. Read-only. See :meth:`GetAtomCount`.
+    
+    :type: :class:`int`
 
   .. attribute:: bounds
   
@@ -1034,18 +1109,19 @@ The View Classes
     Find all atoms that are within radius of the given position. See 
     :meth:`EntityHandle.FindWithin`.
     
-    :param pos:
-    :type  pos: :class:`~ost.geom.Vec3`
-    :param radius:
-    :type  radius: float
-    :rtype: :class:`AtomViewList`
+    :param pos: Center of sphere
+    :type pos: :class:`~ost.geom.Vec3`
+    :param radius: The radius of the sphere
+    :type radius: float
+    
+    :returns: :class:`AtomHandleList` (list of :class:`AtomHandle`)
 
   .. method:: FindChain(chain_name)
 
     Find chain by name.
     
-    :param chain_name:
-    :type  chain_name: str
+    :param chain_name:  Chain identifier, e.g. "A"
+    :type  chain_name:  str
     :returns: The chain if present in the view, an invalid :class:`ChainView` 
        otherwise
     :rtype: :class:`ChainView`
@@ -1112,24 +1188,6 @@ The View Classes
   .. method:: GetGeometricStart()
     
     :rtype: :class:`~ost.geom.Vec3`
-
-  .. attribute:: chain_count
-    
-    Number of chains. Read-only. See :meth:`GetChainCount`.
-    
-    :type: int
-    
-  .. attribute:: residue_count
-    
-    Number of residues. Read-only. See :meth:`GetResidueCount`.
-    
-    :type: int
-    
-  .. attribute:: atom_count
-    
-    Number of atoms. Read-only. See :meth:`GetAtomCount`.
-    
-    :type: int
     
   .. method:: GetCenterOfAtoms()
     
@@ -1138,27 +1196,9 @@ The View Classes
     
     :rtype: :class:`~ost.geom.Vec3`
 
-  .. method:: GetAtomList()
-
-    See :attr:`atoms`
-    
-    :rtype: :class:`AtomViewList`
-
   .. method:: GetBondCount()
 
     Get number of bonds
-    :rtype: int
-
-  .. method:: GetChainCount()
-
-    Get number chains. See :attr:`chain_count`
-    
-    :rtype: int
-
-  .. method:: GetResidueCount()
-    
-    See :attr:`residue_count`
-    
     :rtype: int
 
   .. method:: GetBondList()
@@ -1173,10 +1213,6 @@ The View Classes
 
     :rtype: :class:`EntityHandle`
 
-  .. method:: GetResidueList()
-
-    :rtype: :class:`ResidueViewList`
-
   .. method:: GetGeometricEnd()
 
     :rtype: :class:`~ost.geom.Vec3`
@@ -1184,13 +1220,26 @@ The View Classes
   .. method:: GetChainList()
 
     See :attr:`chains`
+
+  .. method:: GetChainCount()
+
+    See :attr:`chain_count`
+
+  .. method:: GetResidueList()
+
+    See :attr:`residues`
+
+  .. method:: GetResidueCount()
     
-    :rtype: :class:`ChainViewList`
+    See :attr:`residue_count`
+
+  .. method:: GetAtomList()
+
+    See :attr:`atoms`
     
   .. method:: GetAtomCount()
     
-    Get number of atoms. See :attr`atom_count`.
-    :rtype: int
+    See :attr:`atom_count`
 
 .. class:: ChainView
 
@@ -1199,12 +1248,12 @@ The View Classes
 
   .. attribute:: name
   
-     The chain name. The name uniquely identifies the chain in the entity. In 
-     most cases, the chain name is one character. This is restriction of the PDB 
-     file format. However, you are free to use longer names as long as you don't 
-     want to save them as PDB files
+     The chain name. The name uniquely identifies the chain in the entity. In
+     most cases, the chain name is one character. This is a restriction of the
+     PDB file format. However, you are free to use longer names as long as you
+     don't  want to save them as PDB files.
      
-     This property is read-only. To change the name, use an :class:`XCSEditor`. 
+     This property is read-only. To change the name, use an :class:`XCSEditor`.
      
      Also available as :meth:`GetName`
      
@@ -1212,8 +1261,8 @@ The View Classes
 
   .. attribute:: residues
    
-     List of all residues of this chain. The residues are sorted from N- to 
-     C-terminus. Usually the residue numbers are in ascending order 
+     List of all residues of this chain. The residues are sorted from N- to
+     C-terminus. Usually the residue numbers are in ascending order
      (see :attr:`in_sequence`).
    
      This property is read-only.
@@ -1226,10 +1275,10 @@ The View Classes
        for res in chain.residues:
          print res.name, res.atom_count
    
-     Also available as :meth:`GetResidueList`. To access a single residue, use 
-     :meth:`FindResidue`. 
+     Also available as :meth:`GetResidueList`. To access a single residue, use
+     :meth:`FindResidue`.
 
-     :type: A list of :class:`residue views<residueView>`
+     :type: :class:`ResidueViewList` (list of :class:`ResidueView`)
   
   .. attribute:: in_sequence
   
@@ -1252,7 +1301,7 @@ The View Classes
    
      This property is read-only. Also available as :meth:`GetAtomList`
 
-     :type: A list of :class:`atom handles<AtomHandle>`
+     :type: :class:`AtomViewList` (list of :class:`AtomView`)
 
   .. attribute:: bounds
 
@@ -1394,8 +1443,6 @@ The View Classes
 
     See :attr:`residues`
 
-    :rtype: bool
-
   .. method:: InSequence()
   
     See :attr:`in_sequence`
@@ -1513,9 +1560,12 @@ The View Classes
 
   .. attribute:: atoms
 
-    List of atoms in this view.
+     Get list of all atoms of this residue. To access a single atom, use
+     :meth:`FindAtom`.
+   
+     This property is read-only. Also available as :meth:`GetAtomList`
 
-    :type: :class:`AtomViewList`
+     :type: :class:`AtomHandleList` (list of :class:`AtomHandle`)
 
   .. attribute:: index
 

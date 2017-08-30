@@ -421,33 +421,47 @@ Euclidian space.
               SetAtomTransformedPos(atom_list, pos_list)
   
      Set the transformed position of atoms. This method will also update the
-     original position of the atom by applying the inverse of the entity
-     transform.
+     original position of atoms by applying the inverse of the entity transform.
+
+     Setting all positions at once is by far faster than call the function for
+     each atom, but it is only available if OpenStructure was compiled with an
+     enabled ``USE_NUMPY`` flag (see :ref:`here <cmake-flags>` for details). The
+     fastest option to work with all atom positions externally is to extract the
+     list of :attr:`~ost.mol.EntityHandle.atoms` with
+     :meth:`ost.mol.EntityHandle.GetPositions` (with *sort_by_index = False*).
+     Then extract a buffered editor and use the same list of atoms with a
+     modified numpy array as input to this function. Example:
+
+     .. code-block:: python
+
+       # get atom list and positions
+       atom_list = ent.atoms
+       positions = ent.GetPositions(False)
+       # modify positions but keep ent and atom_list unchanged
+       # ...
+       # apply changes to entity all at once
+       edi = ent.EditXCS(mol.BUFFERED_EDIT)
+       edi.SetAtomPos(atom_list, positions)
+       edi.UpdateICS()
      
      :param atom: A valid atom handle
      :type  atom: :class:`ost.mol.AtomHandle`
-     :param atom_list: A valid atom handle
-     :type  atom_list: :class:`ost.mol.AtomHandleList`
+     :param atom_list: A valid atom handle list or a list of atom :attr:`indices
+                       <ost.mol.AtomHandle.index>`.
+     :type  atom_list: :class:`ost.mol.AtomHandleList` or :class:`list` of
+                       :class:`int`
      :param pos: The new position
      :type  pos: :class:`~ost.geom.Vec3`
-     :param pos_list: An array or a list of 3*atom_list.size() floats
-     :type  pos_list: :class:`numpy.array` or :class:`list` of :class:`float`
+     :param pos_list: An array of positions (shape [*len(atom_list)*, 3],
+                      preferably contiguous array in memory (C order)).
+     :type  pos_list: :class:`numpy.array`
     
   .. method:: SetAtomOriginalPos(atom, pos)
               SetAtomOriginalPos(atom_list, pos_list)
      
      Set the original (untransformed) position of atoms. This method will
      also update the transformed position by applying the entity transform to
-     the original pos.
-     
-     :param atom: A valid atom handle
-     :type  atom: :class:`ost.mol.AtomHandle`
-     :param atom_list: A valid atom handle
-     :type  atom_list: :class:`ost.mol.AtomHandleList`
-     :param pos: The new untransformed position
-     :type  pos: :class:`~ost.geom.Vec3`
-     :param pos_list: An array or a list of 3*atom_list.size() floats
-     :type  pos_list: :class:`numpy.array` or :class:`list` of :class:`float`
+     the original pos. See :meth:`SetAtomPos` for more details.
 
   
 Editor for the Internal Coordinate System
