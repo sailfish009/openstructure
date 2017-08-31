@@ -27,10 +27,10 @@ Simulation::Simulation(const ost::mol::EntityHandle& handle,
 
   //note, that ent_ will be "completed" inside this function!
   //(hydrogens and shit)
-
-  ent_ = handle.Copy();
-  TopologyPtr top = TopologyCreator::Create(ent_,settings);
-  this->Init(top, settings);
+  
+  ost::mol::EntityHandle ent = handle.Copy();
+  TopologyPtr top = TopologyCreator::Create(ent,settings);
+  this->Init(top, ent, settings);
 }
 
 Simulation::Simulation(const TopologyPtr top,
@@ -40,8 +40,8 @@ Simulation::Simulation(const TopologyPtr top,
   if(static_cast<uint>(handle.GetAtomCount()) != top->GetNumParticles()){
     throw ost::Error("Number of atoms in entity must be consistent with number of particles in topology!");
   }
-  ent_ = handle.Copy();
-  this->Init(top, settings);
+  ost::mol::EntityHandle ent = handle.Copy();
+  this->Init(top, ent, settings);
 }
 
 void Simulation::Save(const String& filename){
@@ -112,19 +112,18 @@ void Simulation::Save(const String& filename){
     }
   }
 
-  ost::mol::AtomHandleList atom_list = ent_.GetAtomList();
   ost::mol::AtomHandleList bonded_atoms;
 
   std::map<long,int> atom_indices;
   int actual_index = 0;
-  for(ost::mol::AtomHandleList::const_iterator i = atom_list.begin(), e = atom_list.end(); 
-      i != e; ++i){
+  for(ost::mol::AtomHandleList::const_iterator i = atom_list_.begin(), 
+      e = atom_list_.end(); i != e; ++i){
     atom_indices[i->GetHashCode()] = actual_index;
     ++actual_index;
   }
 
-  for(ost::mol::AtomHandleList::iterator i = atom_list.begin();
-      i != atom_list.end(); ++i){
+  for(ost::mol::AtomHandleList::iterator i = atom_list_.begin();
+      i != atom_list_.end(); ++i){
     bonded_atoms = i->GetBondPartners();
     num_bonded_atoms = bonded_atoms.size();
     ds & num_bonded_atoms;
@@ -250,16 +249,16 @@ SimulationPtr Simulation::Load(const String& filename, SettingsPtr settings){
       }
     }
   }
-  ost::mol::AtomHandleList atom_list = ent.GetAtomList();
-  for(uint i = 0; i < atom_list.size(); ++i){
+  sim_ptr->ent_ = ent;
+  sim_ptr->atom_list_ = sim_ptr->ent_.GetAtomList();
+
+  for(uint i = 0; i < sim_ptr->atom_list_.size(); ++i){
     ds & num_bonded_atoms;
     for(uint j = 0; j < num_bonded_atoms; ++j){
       ds & atom_index;
-      ed.Connect(atom_list[i],atom_list[atom_index]);
+      ed.Connect(sim_ptr->atom_list_[i], sim_ptr->atom_list_[atom_index]);
     }
   }
-
-  sim_ptr->ent_ = ent;
 
   sim_ptr->context_->loadCheckpoint(stream);
 
@@ -297,10 +296,12 @@ void Simulation::EnsurePluginsLoaded(const String& plugin_path) {
 
 
 void Simulation::Init(const TopologyPtr top,
+                      const ost::mol::EntityHandle& ent,
                       const SettingsPtr settings){
 
-
   top_ = top;
+  ent_ = ent;
+  atom_list_ = ent_.GetAtomList();
 
   if(!settings->integrator){
     //user did not specify an integrator, so let's just use a standard integrator
@@ -358,12 +359,11 @@ void Simulation::Init(const TopologyPtr top,
 
   context_ = ContextPtr(new OpenMM::Context(*system_,*integrator_,*platform,context_properties));
 
-  ost::mol::AtomHandleList atom_list = ent_.GetAtomList();
   std::vector<OpenMM::Vec3> positions;
   geom::Vec3 ost_vec;
   OpenMM::Vec3 open_mm_vec;
-  for(ost::mol::AtomHandleList::iterator i = atom_list.begin();
-      i!=atom_list.end();++i){
+  for(ost::mol::AtomHandleList::iterator i = atom_list_.begin();
+      i!=atom_list_.end();++i){
     ost_vec = i->GetPos();
     open_mm_vec[0] = ost_vec[0]/10;
     open_mm_vec[1] = ost_vec[1]/10;
@@ -446,14 +446,12 @@ void Simulation::UpdatePositions(bool enforce_periodic_box){
   if(top_->GetNumParticles() != static_cast<uint>(ent_.GetAtomCount())){
     throw ost::Error("Num particles in topology and num atoms in entity are not consistent!");
   }
-  geom::Vec3List positions = this->GetPositions(enforce_periodic_box, true);
+  geom::Vec3List positions;
+  StateExtractor::ExtractPositions(context_, positions, enforce_periodic_box, 
+                                   true);
   ost::mol::XCSEditor ed = ent_.EditXCS(ost::mol::BUFFERED_EDIT);
-  ost::mol::AtomHandleList atom_list = ent_.GetAtomList();
-  ost::mol::AtomHandleList::iterator a = atom_list.begin();
-  ost::mol::AtomHandleList::iterator ae = atom_list.end();
-  geom::Vec3List::iterator v = positions.begin();
-  for(; a != ae; ++a, ++v){
-    ed.SetAtomPos(*a,*v);
+  for(uint i = 0; i < atom_list_.size(); ++i) {
+    ed.SetAtomPos(atom_list_[i], positions[i]);
   }
 }
 
