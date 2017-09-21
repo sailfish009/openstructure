@@ -1,11 +1,16 @@
 mmCIF File Format
 --------------------------------------------------------------------------------
 
+.. currentmodule:: ost.io
+
 The mmCIF file format is an alternate container for structural entities, also
 provided by the PDB. Here we describe how to load those files and how to deal
 with information provided above the common PDB format (:class:`MMCifInfo`,
 :class:`MMCifInfoCitation`, :class:`MMCifInfoTransOp`,
-:class:`MMCifInfoBioUnit`, :class:`MMCifInfoStructDetails`).
+:class:`MMCifInfoBioUnit`, :class:`MMCifInfoStructDetails`,
+:class:`MMCifInfoObsolete`, :class:`MMCifInfoStructRef`,
+:class:`MMCifInfoStructRefSeq`, :class:`MMCifInfoStructRefSeqDif`,
+:class:`MMCifInfoRevisions`).
 
 
 Loading mmCIF Files
@@ -20,8 +25,8 @@ Categories Available
 The following categories of a mmCIF file are considered by the reader:
 
 * ``atom_site``: Used to build the :class:`~ost.mol.EntityHandle`
-* ``entity``: Involved in setting ChainTypes
-* ``entity_poly``: Involved in setting ChainTypes
+* ``entity``: Involved in setting :class:`~ost.mol.ChainType` of chains
+* ``entity_poly``: Involved in setting :class:`~ost.mol.ChainType` of chains
 * ``citation``: Goes into :class:`MMCifInfoCitation`
 * ``citation_author``: Goes into :class:`MMCifInfoCitation`
 * ``exptl``: Goes into :class:`MMCifInfo` as :attr:`~MMCifInfo.method`.
@@ -39,7 +44,7 @@ The following categories of a mmCIF file are considered by the reader:
 * ``pdbx_database_PDB_obs_spr``: Verbose information on obsoleted/ superseded
   entries, stored in :class:`MMCifInfoObsolete`
 * ``struct_ref`` stored in :class:`MMCifInfoStructRef`
-* ``struct_ref_seq`` stored in :class:`MMCifInfoStructRefSeq`
+* ``struct_ref_seq`` stored in :class:`MMCifInfoStructRefSeqDif`
 * ``struct_ref_seq_dif`` stored in :class:`MMCifInfoStructRefDif`
 * ``database_pdb_rev`` (mmCIF dictionary version < 5) stored in
   :class:`MMCifInfoRevisions`
