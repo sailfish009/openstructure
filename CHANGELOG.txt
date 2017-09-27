@@ -1,8 +1,24 @@
+Changes in Release 1.7
+--------------------------------------------------------------------------------
+
+  * Removed Qt dependency for non-GUI compilation and fixed issues with recent
+    gcc and boost versions
+  * Added Quaternary Structure (QS) scoring module
+  * Fixed mmCIF parser to work with mmCIF dictionary version 5 (now with useful
+    revision data) and add r_free, r_work and entity.id to MMCifInfo
+  * Added fast accessibility and secondary structure (mimicking naccess & dssp)
+    computation (Accessibility & AssignSecStruct in mol.alg)
+  * Changed behaviour of mol.alg.Superpose with match = 'local-aln' or
+    'global-aln' which used to fail for chains without peptide bonds (e.g.
+    CA-only)
+  * Large updates for documentation
+  * Several minor bug fixes, improvements, and speed-ups
+
 Changes in Release 1.6
 --------------------------------------------------------------------------------
 
- * Added code to compare structures attached to a multiple seq. aln.
- * Incorporated Antechamber based force-field parameter generation for mm mod.
+  * Added code to compare structures attached to a multiple seq. aln.
+  * Incorporated Antechamber based force-field parameter generation for mm mod.
 
 Changes in Release 1.5
 --------------------------------------------------------------------------------

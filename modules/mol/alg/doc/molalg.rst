@@ -953,7 +953,7 @@ Algorithms on Structures
   as described by DSSP.
 
   :param ent:           Entity on which to assign secondary structures
-  :type ent:            :class:`~ost.mol.EntityView`/
+  :type ent:            :class:`~ost.mol.EntityView` /
                         :class:`~ost.mol.EntityHandle`
 
 
