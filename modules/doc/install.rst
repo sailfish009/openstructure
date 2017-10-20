@@ -151,7 +151,7 @@ can influence it.
 * Boost is mainly controlled via the `BOOST_ROOT` option. If boost wasn't
   found, it should be set to the prefix of the boost installation. If for some
   reason, it is desirable to use the non-multithreaded boost libraries, you can
-  switch `Boost_USE_MULTITHREADED` on (it is off by default).
+  switch `Boost_USE_MULTITHREADED` off (it is on by default).
 
 * `PYTHON_ROOT` is the Python equivalent of BOOST_ROOT. It should be set to 
   the prefix path containing the python binary, headers and libraries.
