@@ -58,6 +58,33 @@ ProfileColumn ProfileColumn::BLOSUMNullModel() {
   return col;
 }
 
+ProfileColumn ProfileColumn::HHblitsNullModel() {
+  ProfileColumn col;
+
+  col.freq_[0] = 0.07662717998027802;
+  col.freq_[1] = 0.01886688359081745;
+  col.freq_[2] = 0.05399613827466965;
+  col.freq_[3] = 0.05978801101446152;
+  col.freq_[4] = 0.03493943437933922;
+  col.freq_[5] = 0.0754152461886406;
+  col.freq_[6] = 0.03682935610413551;
+  col.freq_[7] = 0.050485048443078995;
+  col.freq_[8] = 0.05958116054534912;
+  col.freq_[9] = 0.09992572665214539;
+  col.freq_[10] = 0.021959668025374413;
+  col.freq_[11] = 0.040107060223817825;
+  col.freq_[12] = 0.045310840010643005;
+  col.freq_[13] = 0.03264486789703369;
+  col.freq_[14] = 0.05129634961485863;
+  col.freq_[15] = 0.04661700129508972;
+  col.freq_[16] = 0.07105106115341187;
+  col.freq_[17] = 0.07264462858438492;
+  col.freq_[18] = 0.012473411858081818;
+  col.freq_[19] = 0.039418045431375504;
+
+  return col;
+}
+
 int ProfileColumn::GetIndex(char olc) {
   if (olc == 'A') return 0;
   if (olc >= 'C' && olc <= 'I') return (olc-'A') - 1;
@@ -97,26 +124,34 @@ Real ProfileColumn::GetEntropy() const {
   return entropy;
 }
 
+Real ProfileColumn::GetScore(const ProfileColumn& other,
+                             const ProfileColumn& null_model) const {
+  Real summed_col_score = 0.001; // to avoid zero score
+  for (uint i = 0; i < 20; ++i) {
+    summed_col_score += freq_[i] * other.freq_[i] / null_model.freq_[i];
+  }
+  return std::log(summed_col_score);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // ProfileHandle
 //////////////////////////////////////////////////////////////////////////////
 
-ProfileHandlePtr ProfileHandle::Extract(uint from, uint to){
-
+ProfileHandlePtr ProfileHandle::Extract(uint from, uint to) {
+  // check
   if (to <= from) {
     throw Error("Second index must be bigger than first one!");
   }
-
   if (to > this->size()) {
     throw Error("Invalid index!");
   }
 
+  // get subset to return
   ProfileHandlePtr return_prof(new ProfileHandle);
   return_prof->SetNullModel(null_model_);
-  for(uint i = from; i < to; ++i){
-    return_prof->push_back(columns_[i]);
+  for (uint i = from; i < to; ++i) {
+    return_prof->AddColumn(columns_[i], seq_[i]);
   }
-  return_prof->SetSequence(seq_.substr(from, to-from));
 
   return return_prof;
 }
@@ -130,6 +165,22 @@ Real ProfileHandle::GetAverageEntropy() const {
     n_eff += i->GetEntropy();
   }
   return (n > 0) ? n_eff/n : 0.0;
+}
+
+Real ProfileHandle::GetAverageScore(const ProfileHandle& other,
+                                    uint offset) const {
+  // check offsets
+  const uint other_size = other.size();
+  if (offset > this->size() || offset + other_size > this->size()) {
+    throw Error("Invalid profile size / offset when computing score!");
+  }
+  // sum them up
+  Real sum = 0;
+  for (uint i = 0; i < other_size; ++i) {
+    sum += columns_[offset + i].GetScore(other[i], null_model_);
+  }
+  if (other_size > 0) return sum / other_size;
+  else                return sum;
 }
 
 //////////////////////////////////////////////////////////////////////////////

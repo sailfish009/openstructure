@@ -181,14 +181,14 @@ BOOST_AUTO_TEST_CASE(name_based_connect)
     dheuristic_builder.FillAtomProps(*i);
   }
    
-  BOOST_MESSAGE("running distance based checks on arginine");
+  BOOST_TEST_MESSAGE("running distance based checks on arginine");
   heuristic_builder.ConnectAtomsOfResidue(arg);
   verify_connectivity(arg);
-  BOOST_MESSAGE("running distance based checks on leu");
+  BOOST_TEST_MESSAGE("running distance based checks on leu");
   heuristic_builder.ConnectAtomsOfResidue(ile);
   verify_connectivity(ile);
   
-  BOOST_MESSAGE("running distance based checks on defective leu");
+  BOOST_TEST_MESSAGE("running distance based checks on defective leu");
   dheuristic_builder.ConnectAtomsOfResidue(dile);
   verify_connectivity(dile);  
 }

@@ -298,6 +298,21 @@ protected:
   /// \param columns data row
   void ParseDatabasePDBRev(const std::vector<StringRef>& columns);
 
+  /// \brief Fetch mmCIF pdbx_audit_revision_history information
+  ///
+  /// \param columns data row
+  void ParsePdbxAuditRevisionHistory(const std::vector<StringRef>& columns);
+
+  /// \brief Fetch mmCIF pdbx_audit_revision_details information
+  ///
+  /// \param columns data row
+  void ParsePdbxAuditRevisionDetails(const std::vector<StringRef>& columns);
+
+  /// \brief Fetch mmCIF pdbx_database_status information
+  ///
+  /// \param columns data row
+  void ParsePdbxDatabaseStatus(const std::vector<StringRef>& columns);
+
   /// \brief Fetch mmCIF struct information
   ///
   /// \param columns data row
@@ -412,7 +427,9 @@ private:
   typedef enum {
     REFINE_ENTRY_ID,              ///< id
     LS_D_RES_HIGH,                ///< crystal resolution
-    LS_D_RES_LOW
+    LS_D_RES_LOW,
+    LS_R_FACTOR_R_WORK,           ///< R-work value
+    LS_R_FACTOR_R_FREE            ///< R-free value
   } RefineItems;
 
   /// \enum items of the pdbx_struct_assembly category
@@ -531,6 +548,23 @@ private:
     DPI_STATUS,        ///< status of a revision
   } DatabasePDBRevItems;
 
+  /// \enum categories of the pdbx_audit_revision_history category
+  typedef enum {
+    PARH_ORDINAL,         ///< unique identifier
+    PARH_REVISION_DATE,   ///< revision date
+  } PdbxAuditRevisionHistoryItems;
+
+  /// \enum categories of the pdbx_audit_revision_details category
+  typedef enum {
+    PARD_REVISION_ORDINAL, ///< link to pdbx_audit_revision_history.ordinal
+    PARD_TYPE,             ///< type classification of the revision
+  } PdbxAuditRevisionDetailsItems;
+
+  /// \enum categories of the pdbx_database_status category
+  typedef enum {
+    PDS_RECVD_INITIAL_DEPOSITION_DATE, ///< date of initial deposition
+  } PdbxDatabaseStatusItems;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
@@ -551,6 +585,9 @@ private:
     STRUCT_REF_SEQ,
     STRUCT_REF_SEQ_DIF,
     DATABASE_PDB_REV,
+    PDBX_AUDIT_REVISION_HISTORY,
+    PDBX_AUDIT_REVISION_DETAILS,
+    PDBX_DATABASE_STATUS,
     DONT_KNOW
   } MMCifCategory;
 
@@ -621,6 +658,10 @@ private:
   MMCifHSVector helix_list_; ///< for storing struct_conf sec.struct. data
   MMCifHSVector strand_list_; ///< for storing struct_conf sec.struct. data
   MMCifInfoStructRefs struct_refs_;
+  // for storing revisions 
+  std::map<int, String> revision_dates_;
+  std::map<int, String> revision_types_;
+  bool database_PDB_rev_added_;
 };
 
 }}

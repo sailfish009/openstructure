@@ -438,6 +438,17 @@ BuildingBlockPtr Forcefield::GetBuildingBlock(const String& name) const{
   return p;
 }
 
+std::vector<String> Forcefield::GetBuildingBlockNames() const {
+
+  std::vector<String> return_vec;
+  for(boost::unordered_map<String,BuildingBlockPtr>::const_iterator i = 
+      building_blocks_.begin(); i != building_blocks_.end(); ++i) {
+    return_vec.push_back(i->first);
+  }
+
+  return return_vec;
+} 
+
 BlockModifierPtr Forcefield::GetBlockModifier(const String& modifier_name) const{
   boost::unordered_map<String,BlockModifierPtr>::const_iterator i = block_modifiers_.find(modifier_name);
   if(i == block_modifiers_.end()) return BlockModifierPtr();
@@ -836,14 +847,26 @@ String Forcefield::GetResidueRenamingTwoTer(const String& name) const{
   return i->second->twoter;  
 }
 
-String Forcefield::GetAtomRenaming(const String& res_name, const String& atom_name) const{
-  boost::unordered_map<String,std::vector<std::pair<String,String> > >::const_iterator i = atom_renaming_ff_specific_.find(res_name);
+String Forcefield::GetAtomRenaming(const String& res_name,
+                                   const String& atom_name) const {
+  boost::unordered_map<String,AtomRenamingType>::const_iterator i;
+  i = atom_renaming_ff_specific_.find(res_name);
   if(i == atom_renaming_ff_specific_.end()) return atom_name;
   for(std::vector<std::pair<String,String> >::const_iterator j = i->second.begin(), e = i->second.end();
       j != e; ++j){
     if(atom_name == j->first) return j->second; 
   } 
   return atom_name;
+}
+
+const Forcefield::AtomRenamingType&
+Forcefield::GetAtomRenamingRules(const String& res_name) const {
+  boost::unordered_map<String,AtomRenamingType>::const_iterator i;
+  i = atom_renaming_ff_specific_.find(res_name);
+  if (i == atom_renaming_ff_specific_.end()) {
+    throw ost::Error(String("No atom renaming rules for ") + res_name);
+  }
+  return i->second;
 }
 
 void Forcefield::AssignFFSpecificNames(ost::mol::EntityHandle& handle, bool reverse) const{

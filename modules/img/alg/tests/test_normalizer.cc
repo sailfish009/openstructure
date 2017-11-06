@@ -39,7 +39,11 @@ using namespace ost::img::alg;
 
 void test() 
 {
-  boost::test_tools::close_at_tolerance<Real> close_test(::boost::test_tools::percent_tolerance(0.001));
+#if BOOST_VERSION<105900
+  boost::test_tools::close_at_tolerance<Real> close_test(boost::test_tools::percent_tolerance(0.001));
+#else
+  boost::math::fpc::close_at_tolerance<Real> close_test(boost::math::fpc::percent_tolerance(0.001));
+#endif
   ost::img::ImageHandle testimage=ost::img::CreateImage(ost::img::Extent(ost::img::Point(0,0),ost::img::Point(3,3)));
   int counter=0;
   for (ost::img::ExtentIterator i(testimage.GetExtent()); !i.AtEnd(); ++i, ++counter) {

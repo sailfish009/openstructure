@@ -28,10 +28,10 @@ namespace ost { namespace mol {
 /// format.
 struct DLLEXPORT_OST_MOL SecStructure {
   typedef enum {
-    ALPHA_HELIX     ='H', 
-    PI_HELIX        ='I', 
+    ALPHA_HELIX     ='H',
+    PI_HELIX        ='I',
     THREE_TEN_HELIX ='G',
-    TURN            ='T',  
+    TURN            ='T',
     EXTENDED        ='E',
     BETA_BRIDGE     ='B',
     BEND            ='S',

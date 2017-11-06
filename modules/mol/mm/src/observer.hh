@@ -31,6 +31,7 @@
 #include <ost/mol/mm/state_extractor.hh>
 #include <ost/mol/mm/topology.hh>
 #include <ost/mol/mm/modeller.hh>
+#include <ost/stdint.hh>
 
 namespace OpenMM{
   class Context; //hacky way of telling the Context is around.
@@ -92,12 +93,10 @@ class TrajWriter : public Observer{
 
 public:
 
-  TrajWriter(int rhythm, const String& pdb_filename, const String& dcd_filename): rhythm_(rhythm),
-                                                                                  pdb_filename_(pdb_filename),
-                                                                                  dcd_filename_(dcd_filename),
-                                                                                  stream_(),
-                                                                                  registered_(false),
-                                                                                  frames_(0) { }
+  TrajWriter(int rhythm, const String& pdb_filename, const String& dcd_filename)
+            : rhythm_(rhythm), pdb_filename_(pdb_filename),
+              dcd_filename_(dcd_filename), stream_(), registered_(false),
+              frames_(0) { }
 
   void Init(boost::shared_ptr<OpenMM::Context> c, 
             TopologyPtr top,

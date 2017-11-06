@@ -194,7 +194,7 @@ The Topology Class
 
 
 
-  .. method:: AddHarmonicAngle(index_one, index_two, index_three, angle, 
+  .. method:: AddHarmonicAngle(index_one, index_two, index_three, angle, \
                                force_constant)
 
     :param index_one:   Index of particle 1
@@ -215,8 +215,8 @@ The Topology Class
                          particles
 
 
-  .. method:: AddUreyBradleyAngle(index_one, index_two, index_three, 
-                                  angle, angle_force_constant,
+  .. method:: AddUreyBradleyAngle(index_one, index_two, index_three, \
+                                  angle, angle_force_constant, \
                                   bond_length, bond_force_constant)
 
     :param index_one:   Index of particle 1
@@ -241,8 +241,9 @@ The Topology Class
                          particles
 
 
-  .. method:: AddPeriodicDihedral(index_one, index_two, index_three, index_four,
-                                  multiplicity, phase, force_constant)
+  .. method:: AddPeriodicDihedral(index_one, index_two, index_three, \
+                                  index_four, multiplicity, phase, \
+                                  force_constant)
 
     :param index_one:   Index of particle 1
     :param index_two:   Index of particle 2
@@ -266,8 +267,9 @@ The Topology Class
                          particles
 
 
-  .. method:: AddPeriodicImproper(index_one, index_two, index_three, index_four,
-                                  multiplicity, phase, force_constant)
+  .. method:: AddPeriodicImproper(index_one, index_two, index_three, \
+                                  index_four, multiplicity, phase, \
+                                  force_constant)
 
     :param index_one:   Index of particle 1
     :param index_two:   Index of particle 2
@@ -291,8 +293,8 @@ The Topology Class
                          particles
 
 
-  .. method:: AddHarmonicImproper(index_one, index_two, index_three, index_four,
-                                  angle, force_constant)
+  .. method:: AddHarmonicImproper(index_one, index_two, index_three, \
+                                  index_four, angle, force_constant)
 
     :param index_one:   Index of particle 1
     :param index_two:   Index of particle 2
@@ -314,7 +316,7 @@ The Topology Class
                          particles
 
 
-  .. method:: AddCMap(index_one, index_two, index_three, index_four,
+  .. method:: AddCMap(index_one, index_two, index_three, index_four, \
                       index_five, dimension, values)
 
     :param index_one:   Index of particle 1
@@ -407,14 +409,15 @@ The Topology Class
                          particles
 
 
-  .. method:: AddHarmonicPositionRestraint(index, reference_pos, force_constant,
-                                           x_scale=1.0, y_scale=1.0, z_scale=1.0)
+  .. method:: AddHarmonicPositionRestraint(index, reference_pos, \
+                                           force_constant, x_scale=1.0, \
+                                           y_scale=1.0, z_scale=1.0)
 
     Adds a harmonic position restraint for a particle in the form:
     force_constant*(x_scale*(x-x0)^2+y_scale*(y-y0)^2+z_scale*(z-z0)^2)
 
     :param index:       Index of particle to be constrained
-    :param reference_pos: Reference position in nm
+    :param reference_pos: Reference position in A
     :param force_constant: Force constant in kJ/mol/nm^2 
     :param x_scale:     X-scale
     :param y_scale:     Y-scale
@@ -433,7 +436,8 @@ The Topology Class
                          particles
 
 
-  .. method:: AddHarmonicDistanceRestraint(index_one, index_two, length, force_constant)
+  .. method:: AddHarmonicDistanceRestraint(index_one, index_two, length, \
+                                           force_constant)
 
     Adds a force between two particles in the form:
     force_constant * (b-b0)^2
@@ -784,7 +788,8 @@ The Topology Class
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          set Urey-Bradley angles
 
-  .. method:: SetPeriodicDiheralParameters(index, multiplicity, phase, force_constant)
+  .. method:: SetPeriodicDiheralParameters(index, multiplicity, phase, \
+                                           force_constant)
 
     Replaces existing parameters for a particular interaction
 
@@ -801,7 +806,8 @@ The Topology Class
     :raises:            :class:`RuntimeError` when index exceeds number of 
                          set periodic dihedrals
 
-  .. method:: SetPeriodicImproperParameters(index, multiplicity, phase, force_constant)
+  .. method:: SetPeriodicImproperParameters(index, multiplicity, phase, \
+                                            force_constant)
 
     Replaces existing parameters for a particular interaction
 
@@ -880,8 +886,9 @@ The Topology Class
                          set distance constraints
 
 
-  .. method:: SetHarmonicPositionRestraintParameters(index, ref_position, k,[,
-                                                     x_scale=1.0, y_scale=1.0, z_scale=1.0])
+  .. method:: SetHarmonicPositionRestraintParameters(index, ref_position, k,\
+                                                     x_scale=1.0, y_scale=1.0,\
+                                                     z_scale=1.0)
 
     Replaces existing parameters for a particular interaction
 
@@ -1071,7 +1078,7 @@ The Topology Class
                         number of particles in topology
 
 
-  .. method:: GetPeriodicDihedralIndices(index_one, index_two, index_three,
+  .. method:: GetPeriodicDihedralIndices(index_one, index_two, index_three, \
                                          index_four)
 
     :param index_one:   Index of particle 1
@@ -1091,7 +1098,7 @@ The Topology Class
                         number of particles in topology
 
 
-  .. method:: GetPeriodicImpropersIndices(index_one, index_two, index_three,
+  .. method:: GetPeriodicImpropersIndices(index_one, index_two, index_three, \
                                           index_four)
 
     :param index_one:   Index of particle 1
@@ -1111,7 +1118,7 @@ The Topology Class
                         number of particles in topology
 
 
-  .. method:: GetHarmonicImpropersIndices(index_one, index_two, index_three,
+  .. method:: GetHarmonicImpropersIndices(index_one, index_two, index_three, \
                                           index_four)
 
     :param index_one:   Index of particle 1
@@ -1131,7 +1138,7 @@ The Topology Class
                         number of particles in topology
 
 
-  .. method:: GetCMapIndices(index_one, index_two, index_three,
+  .. method:: GetCMapIndices(index_one, index_two, index_three, \
                              index_four, index_five)
 
     :param index_one:   Index of particle 1

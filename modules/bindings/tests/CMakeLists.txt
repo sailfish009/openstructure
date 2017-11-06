@@ -4,6 +4,7 @@ set(OST_BINDINGS_UNIT_TESTS
   test_hhblits.py
   test_blast.py
   test_kclust.py
+  test_naccess.py
 )
 
 ost_unittest(MODULE bindings 

@@ -24,6 +24,9 @@ using namespace ost;
 using namespace ost::conop;
 using namespace boost::python;
 
+// WRAPPERS
+namespace {
+
 struct PyProcessor : public Processor {};
 struct WrappedProcessor : public PyProcessor, public wrapper<WrappedProcessor> {
   WrappedProcessor(PyObject* self): self_(self)
@@ -48,6 +51,13 @@ struct WrappedProcessor : public PyProcessor, public wrapper<WrappedProcessor> {
   PyObject* self_;
 };
 
+void (*AssignBackboneTorsionsChain)(mol::ChainHandle) = &AssignBackboneTorsions;
+void (*AssignBackboneTorsionsResList)(mol::ResidueHandleList)
+                                      = &AssignBackboneTorsions;
+void (*AssignBackboneTorsionsRes)(mol::ResidueHandle, mol::ResidueHandle,
+                                  mol::ResidueHandle) = &AssignBackboneTorsions;
+
+} // anon ns
 
 void export_processor() {
   
@@ -70,10 +80,14 @@ void export_processor() {
     .add_property("check_bond_feasibility", 
                   &Processor::GetCheckBondFeasibility,
                   &Processor::SetCheckBondFeasibility)
-    .add_property("connect", &Processor::GetConnect,
-                 &Processor::SetConnect)
     .add_property("assign_torsions", &Processor::GetAssignTorsions,
-                 &Processor::SetAssignTorsions)
+                  &Processor::SetAssignTorsions)
+    .add_property("connect", &Processor::GetConnect,
+                  &Processor::SetConnect)
+    .add_property("peptide_bonds", &Processor::GetConnectAminoAcids,
+                  &Processor::SetConnectAminoAcids)
+    .add_property("zero_occ_treatment", &Processor::GetZeroOccTreatment,
+                  &Processor::SetZeroOccTreatment)
     .def("Process", &Processor::Process, 
          (arg("ent"), arg("log_diags")=true))
   ;
@@ -84,6 +98,12 @@ void export_processor() {
     .def("DoProcess", &WrappedProcessor::DoProcessDefault)
     .def("ToString", &WrappedProcessor::ToStringDefault)
   ;
-  def("IsBondFeasible", &IsBondFeasible);
+  def("AssignBackboneTorsions", AssignBackboneTorsionsChain, (arg("chain")));
+  def("AssignBackboneTorsions", AssignBackboneTorsionsResList,
+      (arg("residues")));
+  def("AssignBackboneTorsions", AssignBackboneTorsionsRes,
+      (arg("prev"), arg("res"), arg("next")));
+  def("IsBondFeasible", &IsBondFeasible, (arg("atom_a"), arg("atom_b")));
+  def("GetUnknownAtomsOfResidue", &GetUnknownAtomsOfResidue,
+      (arg("residue"), arg("compound"), arg("strict_hydrogens")=false));
 }
-

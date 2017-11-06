@@ -33,7 +33,7 @@ namespace ost { namespace io {
 StarParser::StarParser(std::istream& stream, bool items_as_row):
   filename_("<stream>"), line_num_(0),
   has_current_line_(false), current_line_(),
-  items_row_header_(), file_open_(true), items_row_columns_(),
+  items_row_header_(), file_open_(true),
   items_row_values_()
 {
   items_as_row_ = items_as_row;
@@ -48,7 +48,7 @@ StarParser::StarParser(std::istream& stream, bool items_as_row):
 StarParser::StarParser(const String& filename, bool items_as_row):
   fstream_(filename.c_str()), filename_(filename),
   line_num_(0), has_current_line_(false), current_line_(),
-  items_row_header_(), file_open_(true), items_row_columns_(),
+  items_row_header_(), file_open_(true),
   items_row_values_()
 {
   items_as_row_=items_as_row;
@@ -292,7 +292,6 @@ void StarParser::ParseLoop()
     }
   }
   bool process_rows=this->OnBeginLoop(header);
-  std::vector<StringRef> columns;
   std::vector<String> tmp_values;
   // optimized for the common case where all values are present on the same 
   // line.
@@ -310,12 +309,9 @@ void StarParser::ParseLoop()
         if (process_rows) {
           tmp_values.push_back(String());
           this->ParseMultilineValue(tmp_values.back());
-          columns.push_back(StringRef(tmp_values.back().data(), 
-                                      tmp_values.back().length()).trim());
-          if (columns.size()==header.GetSize()) {
-            this->OnDataRow(header, columns);
+          if (tmp_values.size()==header.GetSize()) {
+            this->CallOnDataRow(header, tmp_values);
             tmp_values.clear();
-            columns.clear();
           }          
         } else {
           String s;
@@ -334,19 +330,14 @@ void StarParser::ParseLoop()
         }
       default:
         if (process_rows) {
-          int before=columns.size();
-          StarParser::SplitLine(tline, columns, false);
-          if (columns.size()==header.GetSize()) {
-            this->OnDataRow(header, columns);            
+          std::vector<StringRef> split_elements;
+          StarParser::SplitLine(tline, split_elements);
+          for(uint i = 0; i < split_elements.size(); ++i) {
+            tmp_values.push_back(split_elements[i].str());
+          }
+          if (tmp_values.size()==header.GetSize()) {
+            this->CallOnDataRow(header, tmp_values);           
             tmp_values.clear();
-            columns.clear();
-          } else {
-            tmp_values.push_back(tline.str());
-            const char* d=tmp_values.back().c_str();
-            for (size_t i=before; i<columns.size(); ++i) {
-              columns[i]=StringRef(d+(columns[i].begin()-tline.begin()), 
-                                   columns[i].size());
-            }
           }
         }
         this->ConsumeLine();
@@ -362,11 +353,10 @@ void StarParser::ParseLastDataItemRow()
 {
   if (items_row_header_.GetCategory().size() > 0) {
     if (this->OnBeginLoop(items_row_header_)) {
-      this->OnDataRow(items_row_header_, items_row_columns_);
+      this->CallOnDataRow(items_row_header_, items_row_values_);
       this->OnEndLoop();
     }
     items_row_values_.clear();
-    items_row_columns_.clear();
     items_row_header_.Clear();
   }
 }
@@ -385,8 +375,7 @@ void StarParser::ParseDataItemOrRow(StarDataItem& item)
     // row
     items_row_header_.Add(item.GetName());
     items_row_values_.push_back(item.GetValue().str());
-    items_row_columns_.push_back(StringRef(items_row_values_.back().data(), 
-                                     items_row_values_.back().length()).trim());
+
   } else {
     this->OnDataItem(item);
   }
@@ -577,6 +566,18 @@ void StarParser::Parse()
         break;
     }
   }
+}
+
+void StarParser::CallOnDataRow(const StarLoopDesc& header,
+                               const std::vector<String>& columns) {
+
+  std::vector<StringRef> string_refs;
+  string_refs.reserve(columns.size());
+  for(uint i = 0; i < columns.size(); ++i) {
+    string_refs.push_back(StringRef(columns[i].data(), 
+                                    columns[i].length()).trim());
+  }
+  this->OnDataRow(header, string_refs);
 }
 
 }}

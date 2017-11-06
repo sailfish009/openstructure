@@ -1,8 +1,9 @@
 Supported Structure File Formats
 ================================================================================
 
-The following file formats are supported by :func:`~ost.io.LoadEntity`:
+.. currentmodule:: ost.io
 
+The following file formats are supported by :func:`LoadEntity`:
 
 
 CRD - CARD format file used by CHARMM
@@ -14,9 +15,9 @@ This trajectory file format is used by the CHARMM program suite (Molecular Model
 
 PDB - Brookhaven PDB File
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Fine grained control over PDB file import is available via the 
-:func:`~ost.io.LoadPDB` function. The PDB importer supports loading gzipped PDB 
-files, which are auto-detected by the .gz file extension.
+Fine grained control over PDB file import is available via the :func:`LoadPDB`
+function. The PDB importer supports loading gzipped PDB files, which are auto-
+detected by the .gz file extension.
 
 *Recognized File Extensions*
   .ent, .pdb, .ent.gz, .pdb.gz
@@ -26,10 +27,10 @@ files, which are auto-detected by the .gz file extension.
 
 mmCIF - macromolecular Crystallographic Information File
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Fine grained control over mmCIFile import is available via the 
-:func:`~ost.io.LoadMMCIF` function. Most notably, this gives you access to the
-:class:`MMCifInfo` class. The mmCIF importer supports loading gzipped files,
-which are auto-detected by the .gz file extension.
+Fine grained control over mmCIFile import is available via the :func:`LoadMMCIF`
+function. Most notably, this gives you access to the :class:`MMCifInfo` class.
+The mmCIF importer supports loading gzipped files, which are auto-detected by
+the .gz file extension.
 
 *Recognized File Extensions*
   .cif, .cif.gz

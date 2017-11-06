@@ -68,7 +68,8 @@ public:
   bool IsPolymer() const
   {
     return type_==CHAINTYPE_POLY || this->IsPolypeptide() || 
-          this->IsPolynucleotide() || this->IsPolysaccharide();
+           this->IsPolynucleotide() || this->IsPolysaccharide() ||
+           type_==CHAINTYPE_POLY_PEPTIDE_DN_RN;
   }
   /// \brief whether the chain is a polysaccharide
   bool IsPolysaccharide() const
@@ -78,7 +79,8 @@ public:
   /// \brief whether the chain is a polypeptide
   bool IsPolypeptide() const
   {
-    return type_==CHAINTYPE_POLY_PEPTIDE_D || type_==CHAINTYPE_POLY_PEPTIDE_L;
+    return type_==CHAINTYPE_POLY_PEPTIDE_D || type_==CHAINTYPE_POLY_PEPTIDE_L ||
+           type_==CHAINTYPE_CYCLIC_PSEUDO_PEPTIDE;
   }
   /// \brief whether the chain is a polynucleotide
   bool IsPolynucleotide() const

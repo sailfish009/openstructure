@@ -56,9 +56,9 @@ class RemoteRepository:
         status = connection.getcode()
     except urllib2.HTTPError, e:
       status = e.code
-    msg = 'Could not load %s from %s (status code %d)'
-    if status!=200:
-      raise IOError(msg % (id , self.name ,status))
+    if status != 200:
+      raise IOError('Could not load %s from %s (status code %d, url %s)' \
+                    % (id, self.name, status, remote_url))
     tmp_file = tempfile.NamedTemporaryFile(suffix=tmp_file_suffix)
     contents = ''.join(connection)
     tmp_file.write(contents)
@@ -73,14 +73,14 @@ class RemoteRepository:
       return LoadMMCIF(tmp_file.name)
 
 REMOTE_REPOSITORIES = {
-    'pdb' : RemoteRepository('pdb.org (PDB)', 'http://www.pdb.org/pdb/files/$ID.ent.gz',
+    'pdb' : RemoteRepository('pdb.org (PDB)', 'http://www.pdb.org/pdb/files/$ID.pdb.gz',
                    type='pdb', id_transform='upper'),
-    'smtl' : RemoteRepository('SMTL', 'http://beta.swissmodel.expasy.org/templates/$ID.pdb',
+    'smtl' : RemoteRepository('SMTL', 'http://swissmodel.expasy.org/templates/$ID.pdb',
                    type='pdb', id_transform='lower'),
     'cif' : RemoteRepository('pdb.org (mmCIF)', 'http://www.pdb.org/pdb/files/$ID.cif.gz',
                    type='cif', id_transform='lower'),
-    'pdb_redo' : RemoteRepository('pdbredo', 'http://www.cmbi.ru.nl/pdb_redo/$ID/$ID_besttls.pdb',
-                   type='pdb'),
+    'pdb_redo' : RemoteRepository('pdbredo', 'http://pdb-redo.eu/db/$ID/$ID_besttls.pdb.gz',
+                   type='pdb', id_transform='lower'),
 }
 
 def RemoteGet(id, from_repo='pdb'):
@@ -89,7 +89,7 @@ def RemoteGet(id, from_repo='pdb'):
     raise ValueError('%s is not a valid repository' % from_repo)
   return remote_repo.Get(id)
 
-def RemoteLoad(id ,from_repo='pdb'):
+def RemoteLoad(id, from_repo='pdb'):
   remote_repo = REMOTE_REPOSITORIES.get(from_repo, None) 
   if not remote_repo:
     raise ValueError('%s is not a valid repository' % from_repo)

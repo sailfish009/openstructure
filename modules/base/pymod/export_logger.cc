@@ -54,11 +54,7 @@ typedef boost::shared_ptr<WrappedLogSink> WrappedLogSinkPtr;
 
 void push_verb(int n) 
 {
- if(n<0){
-   Logger::Instance().PushVerbosityLevel(0);
-  }else{
-   Logger::Instance().PushVerbosityLevel(n);
-  }
+  Logger::Instance().PushVerbosityLevel(n);
 }
 
 void pop_verb() 
@@ -90,17 +86,18 @@ LogSinkPtr get_log_sink()
 String args_to_string(tuple args, dict kwargs)
 {
   std::stringstream ss;
-  bool empty=true;
-  for (size_t i=0, l=len(args); i<l; ++i) {
+  bool empty = true;
+  for (size_t i = 0, l = len(args); i < l; ++i) {
     if (!empty) {
       ss << " ";
     }
-    empty=false;
+    empty = false;
     String string_val;
-    try {
-      string_val=extract<String>(args[i]);
-    } catch (...) {
-      string_val=extract<String>(args[i].attr("__str__")());
+    extract<String> tst(args[i]);
+    if (tst.check()) {
+      string_val = tst();
+    } else {
+      string_val = extract<String>(str(args[i])); // use boost python str
     }
     ss << string_val;
   }
@@ -175,12 +172,22 @@ void export_Logger()
     .def("GetLog", &StringLogSink::GetLog)
   ;
 
-  def("PushVerbosityLevel",push_verb);
-  def("PopVerbosityLevel",pop_verb);
-  def("GetVerbosityLevel",get_verb);
-  def("PushLogSink",push_log_sink);
-  def("GetCurrentLogSink",get_log_sink);
-  def("PopLogSink",pop_log_sink);
+  enum_<Logger::LogLevel>("LogLevel")
+    .value("Error", Logger::QUIET)
+    .value("Warning", Logger::WARNING)
+    .value("Script", Logger::SCRIPT)
+    .value("Info", Logger::INFO)
+    .value("Verbose", Logger::VERBOSE)
+    .value("Debug", Logger::DEBUG)
+    .value("Trace", Logger::TRACE)
+  ;
+
+  def("PushVerbosityLevel", push_verb);
+  def("PopVerbosityLevel", pop_verb);
+  def("GetVerbosityLevel", get_verb);
+  def("PushLogSink", push_log_sink);
+  def("GetCurrentLogSink", get_log_sink);
+  def("PopLogSink", pop_log_sink);
   def("LogError", raw_function(log_error, 1));
   def("LogWarning",raw_function(log_warning, 1));
   def("LogInfo", raw_function(log_info, 1));

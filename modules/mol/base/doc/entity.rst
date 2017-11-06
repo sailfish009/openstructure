@@ -37,6 +37,14 @@ The Handle Classes
     :meth:`FindChain`.
     
     This property is read-only.
+
+    :type: :class:`ChainHandleList` (list of :class:`ChainHandle`)
+
+  .. attribute:: chain_count
+    
+    Number of chains. Read-only. See :meth:`GetChainCount`.
+    
+    :type: :class:`int`
     
   .. attribute:: residues
     
@@ -55,7 +63,13 @@ The Handle Classes
     Also available as :meth:`GetResidueList`. To access a single residue, use 
     :meth:`FindResidue`. 
   
-     :returns: A list of :class:`residue handles<ResidueHandle>`
+    :type: :class:`ResidueHandleList` (list of :class:`ResidueHandle`)
+    
+  .. attribute:: residue_count
+    
+    Number of residues. Read-only. See :meth:`GetResidueCount`.
+    
+    :type: :class:`int`
   
   .. attribute:: atoms
   
@@ -63,8 +77,14 @@ The Handle Classes
      :meth:`FindAtom`.
      
      This property is read-only. Also available as :meth:`GetAtomList`
-  
-     :type: A list of :class:`atom handles<AtomHandle>`
+     
+     :type: :class:`AtomHandleList` (list of :class:`AtomHandle`)
+    
+  .. attribute:: atom_count
+    
+    Number of atoms. Read-only. See :meth:`GetAtomCount`.
+    
+    :type: :class:`int`
   
   .. attribute:: bounds
   
@@ -90,7 +110,25 @@ The Handle Classes
     :meth:`GetCenterOfAtoms`.
     
     :type: :class:`~ost.geom.Vec3`
+
+  .. attribute:: positions
+
+    Equivalent to calling :meth:`GetPositions` with *sort_by_index = True*. This
+    property is read-only and only available if OpenStructure was compiled with
+    an enabled ``USE_NUMPY`` flag (see :ref:`here <cmake-flags>` for details).
+
+    :type: :class:`numpy.array`
   
+  .. method:: GetName()
+
+    :returns: Name associated to this entity.
+    :rtype:   :class:`str`
+
+  .. method:: SetName(name)
+
+    :param name: Sets this as new name to be associated to this entity.
+    :type name:  :class:`str`
+
   .. method:: FindChain(chain_name)
     
     Get chain by name. See also :attr:`chains`
@@ -104,6 +142,10 @@ The Handle Classes
   .. method:: GetChainList()
     
     See :attr:`chains`
+
+  .. method:: GetChainCount()
+
+    See :attr:`chain_count`
     
   .. method:: FindResidue(chain_name, res_num)
     
@@ -113,7 +155,7 @@ The Handle Classes
     :param chain_name:  Chain identifier, e.g. "A"
     :type  chain_name:  str
     :param    res_num:  residue number
-    :type     res_num:  mol.ResNum
+    :type     res_num:  :class:`ResNum`
     
     :returns:           A valid :class:`ResidueHandle` if the chain exists and
                         the chain contains a residue of the given residue
@@ -122,6 +164,10 @@ The Handle Classes
   .. method:: GetResidueList()
     
     See :attr:`residues`
+
+  .. method:: GetResidueCount()
+    
+    See :attr:`residue_count`
     
   .. method:: FindAtom(chain_name, res_num, atom_name)
     
@@ -131,7 +177,7 @@ The Handle Classes
     :param chain_name:  Chain identifier, e.g. "A"
     :type  chain_name:  str
     :param    res_num:  residue number
-    :type     res_num:  mol.ResNum
+    :type     res_num:  :class:`ResNum`
     :param  atom_name:  atom name, e.g. CA
     :type   atom_name:  str
     
@@ -143,7 +189,11 @@ The Handle Classes
     
     See :attr:`atoms`
     
-  .. method:: EditXCS([edit_mode=mol.EditMode.BUFFERED_EDIT])
+  .. method:: GetAtomCount()
+    
+    See :attr:`atom_count`
+    
+  .. method:: EditXCS([edit_mode=mol.EditMode.UNBUFFERED_EDIT])
     
     Request :class:`XCSEditor` for editing the external coordinate system. This
     call will fail when there are pending changes of the internal coordinate
@@ -156,7 +206,7 @@ The Handle Classes
     
     :returns: :class:`XCSEditor`
     
-  .. method:: EditICS([edit_mode=mol.EditMode.BUFFERED_EDIT])
+  .. method:: EditICS([edit_mode=mol.EditMode.UNBUFFERED_EDIT])
     
     Request :class:`ICSEditor` for editing the internal coordinate system, such
     as torsions, bond lengths and angle between two bonds. This call will fail
@@ -177,17 +227,18 @@ The Handle Classes
     
     **Example Usage:**
     
-    .. code-block::python
+    .. code-block:: python
+
       # select calpha atoms of peptides
-      calphas=ent.Select('aname=CA and peptide=true')
+      calphas = ent.Select('aname=CA and peptide=true')
       
       # select atoms in a box of size 10, centred at the origin
-      in_box=ent.Select('x=-5:5 and y=-5:5 and z=-5:5')
+      in_box = ent.Select('x=-5:5 and y=-5:5 and z=-5:5')
     
-    :param query: The query to be executed. See :class:`Query` for details.
-    :type  query: string or :class:`Query`
-    :param flags: An ORed combination of :class:`QueryFlags`.
-    :type  flags: int
+    :param query: The query to be executed.
+    :type  query: :class:`Query` / :class:`str`
+    :param flags: An ORed together combination of :class:`QueryFlag`
+    :type  flags: :class:`int` / :class:`QueryFlag`
     :returns:     An :class:`entity view <EntityView>`.
     :raises:      :class:`QueryError` when the query could not be executed due
                   to syntactic errors.
@@ -252,7 +303,17 @@ The Handle Classes
   .. method:: GetMass()
   
     See :attr:`mass`
-    
+
+  .. method:: GetPositions(sort_by_index=True)
+
+    :return: Array of atom positions for this entity.
+    :rtype:  :class:`numpy.array` (shape [:attr:`atom_count`, 3])
+    :param sort_by_index: If True, the atoms are sorted by their
+                          :attr:`~AtomHandle.index`. Otherwise, they are sorted
+                          as they appear in the :attr:`atoms` list.
+
+    This method is only available if OpenStructure was compiled with an enabled
+    ``USE_NUMPY`` flag (see :ref:`here <cmake-flags>` for details).
     
   .. method:: FindWithin(pos, radius)
   
@@ -265,7 +326,7 @@ The Handle Classes
     :param radius: The radius of the sphere
     :type radius: float
     
-    :returns: A list of :class:`atom handles<AtomHandle>`
+    :returns: :class:`AtomHandleList` (list of :class:`AtomHandle`)
     
 .. class:: ChainHandle
 
@@ -287,7 +348,9 @@ The Handle Classes
 
   .. attribute:: type
 
-     Describes the type of the chain. See :ref:`chaintype`.
+     Describes the type of the chain.
+
+     :type: :class:`ChainType`.
 
   .. attribute:: description
 
@@ -312,7 +375,7 @@ The Handle Classes
      Also available as :meth:`GetResidueList`. To access a single residue, use 
      :meth:`FindResidue`. 
 
-     :returns: A list of :class:`residue handles<ResidueHandle>`
+     :type: :class:`ResidueHandleList` (list of :class:`ResidueHandle`)
   
   .. attribute:: in_sequence
   
@@ -335,7 +398,7 @@ The Handle Classes
    
      This property is read-only. Also available as :meth:`GetAtomList`
 
-     :type: A list of :class:`atom handles<AtomHandle>`
+     :type: :class:`AtomHandleList` (list of :class:`AtomHandle`)
 
   .. attribute:: bounds
 
@@ -364,10 +427,10 @@ The Handle Classes
     
   .. method:: FindResidue(res_num)
    
-    Get residue by residue number. See also :attr:`residues`
+    Get residue by residue number. See also :attr:`residues`.
     
     :param    res_num:  residue number
-    :type     res_num:  mol.ResNum
+    :type     res_num:  :class:`ResNum`
     
     :returns:           A valid :class:`ResidueHandle` if the chain contains
                         a residue with matching residue number, an invalid
@@ -375,18 +438,14 @@ The Handle Classes
                         
   .. method:: GetResidueList()
 
-    Get list of all residues of this chain. For peptide chains, the residues
-    are usually ordered from N- to C-terminus.To access a single residue, use     
-    :meth:`FindResidue`.
-    
-    :returns: A list of :class:`residue handles<ResidueHandle>`
+    See :attr:`residues`.
 
   .. method:: FindAtom(res_num, atom_name)
 
     Get atom by residue number and atom name. See also :attr:`atoms`
 
     :param    res_num:  residue number
-    :type     res_num:  mol.ResNum
+    :type     res_num:  :class:`ResNum`
     :param  atom_name:  atom name, e.g. CA
     :type   atom_name:  str
 
@@ -452,6 +511,15 @@ The Handle Classes
     
     :type: str
     
+  .. attribute:: atoms
+
+     Get list of all atoms of this residue. To access a single atom, use
+     :meth:`FindAtom`.
+   
+     This property is read-only. Also available as :meth:`GetAtomList`
+
+     :type: :class:`AtomHandleList` (list of :class:`AtomHandle`)
+
   .. attribute:: bounds
   
     Axis-aligned bounding box of the residue. Read-only.
@@ -508,26 +576,49 @@ The Handle Classes
   
   .. attribute:: chem_class
   
-    The chemical class of a residue is used to broadly categorize residues based 
-    on their chemical properties. For example, peptides belong  to the 
-    `L_PEPTIDE_LINKING` or `D_PEPTIDE_LINKING` classes.
+    The chemical class of the residue.
+
+    :type: :class:`ChemClass`
 
   .. attribute:: chem_type
 
-    The chemical type of a residue is a classification of all compounds
-    obtained from the PDB component dictionary. For example, ions belong to the
-    class `ChemType::IONS`, amino acids to `ChemType::AMINOACIDS`.
+    The chemical type of the residue. The type is only properly set if a
+    compound library is used.
+
+    :type: :class:`ChemType`
   
   .. attribute:: sec_structure
   
     The secondary structure of the residue.
+
+    :type: :class:`SecStructure`
   
   .. attribute:: is_ligand
   
     Whether the residue is a ligand. When loading PDB structures, this property 
     is set based on the HET records. This also means, that this property will 
     most likely not be set properly for all except PDB files coming from 
-    pdb.org.
+    pdb.org. Also available as :meth:`IsLigand`, :meth:`SetIsLigand`.
+  
+  .. attribute:: is_protein
+  
+    Whether the residue is considered to be part of a protein. This is set when
+    loading a structure if the residue forms a feasible peptide bond to the
+    previous or next residue (see :meth:`~ost.conop.IsBondFeasible`). Also
+    available as :meth:`IsProtein`, :meth:`SetIsProtein`. In contrast to
+    :meth:`IsPeptideLinking` this excludes residues which are not connected to
+    neighbouring residues such as CA-only residues or badly positioned ones.
+
+  .. attribute:: peptide_linking
+  
+    Whether residue can form peptide bonds. This is determined based on
+    :attr:`chem_class` which is set when loading the structure.
+
+    :type: :class:`bool`
+
+  .. attribute:: index
+
+    Residue index (starting at 0) within chain.
 
   .. method:: FindAtom(atom_name)
 
@@ -542,8 +633,11 @@ The Handle Classes
 
   .. method:: GetAtomList()
 
-    Get list of all atoms of this residue. To access a single atom, use
-    :meth:`FindAtom`.
+    See :attr:`atoms`
+
+  .. method:: IsPeptideLinking()
+
+    See :attr:`peptide_linking`
     
   .. method:: GetChain()
   
@@ -568,6 +662,10 @@ The Handle Classes
   .. method:: GetChemType()
     
     See :attr:`chem_type`
+
+  .. method:: GetIndex()
+    
+    See :attr:`index`
   
 
 .. class:: AtomHandle
@@ -633,7 +731,7 @@ The Handle Classes
   .. attribute:: occupancy
   
     The atom's occupancy in the range 0 to 1. Read/write. Also available as 
-    meth:`GetOccupancy`, :meth:`SetOccupancy`.
+    :meth:`GetOccupancy`, :meth:`SetOccupancy`.
     :type: float
     
   .. attribute:: b_factor
@@ -668,6 +766,22 @@ The Handle Classes
     
     :type: list of :class:`bond handles<BondHandle>`
   
+  .. attribute:: index
+
+    Atom index (starting at 0) within entity.
+
+    :type: int
+
+  .. attribute:: hash_code
+
+    A unique identifier for this atom. Note that a deep copy of an entity (see
+    :meth:`EntityHandle.Copy`) will have atoms with differing identifiers.
+    Shallow copies of the entity preserve the identifier. Atom views on a handle
+    have different identifiers, but the atom view handles (see
+    :attr:`AtomView.handle`) have the same identifier.
+
+    :type: int
+
   .. method:: FindBondToAtom(other_atom)
 
     Finds and returns the bond formed between this atom and `other_atom`. If no 
@@ -726,12 +840,13 @@ The Handle Classes
 
   .. method:: GetHashCode()
     
-    Returns a unique identifier for this atom.
+    See :attr:`hash_code`
+    
     :rtype: int
 
   .. method:: GetIndex()
     
-    Returns the index of the atom.
+    See :attr:`index`
     
     :rtype: int
 
@@ -804,6 +919,14 @@ The View Classes
     :meth:`FindChain`.
     
     This property is read-only.
+
+    :type: :class:`ChainViewList` (list of :class:`ChainView`)
+
+  .. attribute:: chain_count
+    
+    Number of chains. Read-only. See :meth:`GetChainCount`.
+    
+    :type: :class:`int`
     
   .. attribute:: residues
     
@@ -822,7 +945,13 @@ The View Classes
     Also available as :meth:`GetResidueList`. To access a single residue, use 
     :meth:`FindResidue`. 
     
-    :type: A list of :class:`ResidueViews <ResidueView>`
+    :type: :class:`ResidueViewList` (list of :class:`ResidueView`)
+    
+  .. attribute:: residue_count
+    
+    Number of residues. Read-only. See :meth:`GetResidueCount`.
+    
+    :type: :class:`int`
 
   .. attribute:: atoms
 
@@ -831,7 +960,13 @@ The View Classes
     
     This property is read-only. Also available as :meth:`GetAtomList`
     
-    :type: A list of :class:`AtomViews <AtomView>`
+    :type: :class:`AtomViewList` (list of :class:`AtomView`)
+    
+  .. attribute:: atom_count
+    
+    Number of atoms. Read-only. See :meth:`GetAtomCount`.
+    
+    :type: :class:`int`
 
   .. attribute:: bounds
   
@@ -846,11 +981,21 @@ The View Classes
      
      :type: :class:`EntityHandle`
 
+  .. method:: GetName()
+
+    :returns: :func:`~EntityHandle.GetName` of entity :attr:`handle`.
+    :rtype:   :class:`str`
+
+  .. method:: SetName(name)
+
+    :param name: Passed to :func:`~EntityHandle.SetName` of :attr:`handle`.
+    :type name:  :class:`str`
+
   .. method:: CreateEmptyView()
   
     See :meth:`EntityHandle.CreateEmptyView`
 
-    :rtype: EntityView
+    :rtype: :class:`EntityView`
 
   .. method:: CreateFullView()
 
@@ -882,8 +1027,8 @@ The View Classes
 
     :param chain_handle: The chain handle to be added.
     :type  chain_handle: :class:`ChainHandle`
-    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`.
-    :type view_add_flags: :class:`int`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
+    :type view_add_flags: :class:`int` / :class:`ViewAddFlags`
     :rtype: :class:`ChainView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
@@ -891,12 +1036,12 @@ The View Classes
     Add residue to view. If the residue's chain is not already part of the
     view, it will be added. By default, only the residue is added, but not its
     atoms. This behaviour can be modified by passing in an appropriate
-    combination of :ref:`viewaddflags`.
+    combination of :class:`ViewAddFlags`.
 
     :param residue_handle: The residue handle to be added
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
-    :type  view_add_flags: :class:`int`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
     :rtype: :class:`ResidueView`
 
   .. method:: AddAtom(atom_handle[, view_add_flags])
@@ -906,8 +1051,8 @@ The View Classes
     
     :param atom_handle: The atom handle
     :type  atom_handle: :class:`AtomHandle`
-    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
-    :type  view_add_flags: :class:`int`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
     :rtype: :class:`AtomView`
 
   .. method:: AddBond(bond_handle)
@@ -964,21 +1109,22 @@ The View Classes
     Find all atoms that are within radius of the given position. See 
     :meth:`EntityHandle.FindWithin`.
     
-    :param pos:
-    :type  pos: :class:`~ost.geom.Vec3`
-    :param radius:
-    :type  radius: float
-    :rtype: class:`AtomViewList`
+    :param pos: Center of sphere
+    :type pos: :class:`~ost.geom.Vec3`
+    :param radius: The radius of the sphere
+    :type radius: float
+    
+    :returns: :class:`AtomHandleList` (list of :class:`AtomHandle`)
 
   .. method:: FindChain(chain_name)
 
     Find chain by name.
     
-    :param chain_name:
-    :type  chain_name: str
+    :param chain_name:  Chain identifier, e.g. "A"
+    :type  chain_name:  str
     :returns: The chain if present in the view, an invalid :class:`ChainView` 
        otherwise
-    :rtype: class:`ChainView`
+    :rtype: :class:`ChainView`
 
   .. method:: FindResidue(residue)
     
@@ -987,28 +1133,27 @@ The View Classes
     :param residue: Residue handle
     :type  residue: ResidueHandle
     :returns: The residue view pointing the the handle, or an invalid handle if  the residue is not part of the view
-    :rtype: class:`ResidueView`
+    :rtype: :class:`ResidueView`
 
   .. method:: FindAtom(chain_name, res_num, atom_name)
 
     :param chain_name: The chain name
     :type  chain_name: str
     :param res_num: The residue number
-    :type  res_num: ResNum or int
+    :type  res_num: :class:`ResNum` or :class:`int`
     :param atom_name: The name of the atom
     :type  atom_name: str
-    :rtype: class:`AtomView`
+    :rtype: :class:`AtomView`
 
-  .. method:: Select(query[, flags])
+  .. method:: Select(query, flags=0)
 
     Perform selection on entity view. See :meth:`EntityHandle.Select`.
     
     :param query: The query
-    :type  query: (:class:`Query` or str)
-    :param flags: An ORed together combination of ViewAddFlags
-    :type  flags: int
-    
-    :rtype: EntityView
+    :type  query: :class:`Query` / :class:`str`
+    :param flags: An ORed together combination of :class:`QueryFlag`
+    :type  flags: :class:`int` / :class:`QueryFlag`
+    :rtype: :class:`EntityView`
 
   .. method:: Copy()
     
@@ -1018,7 +1163,7 @@ The View Classes
       
       the_copy=view.Select(')
     
-    :rtype: EntityView
+    :rtype: :class:`EntityView`
 
   .. method:: GetMass()
 
@@ -1043,24 +1188,6 @@ The View Classes
   .. method:: GetGeometricStart()
     
     :rtype: :class:`~ost.geom.Vec3`
-
-  .. attribute:: chain_count
-    
-    Number of chains. Read-only. See :meth:`GetChainCount`.
-    
-    :type: int
-    
-  .. attribute:: residue_count
-    
-    Number of residues. Read-only. See :meth:`GetResidueCount`.
-    
-    :type: int
-    
-  .. attribute:: atom_count
-    
-    Number of atoms. Read-only. See :meth:`GetAtomCount`.
-    
-    :type: int
     
   .. method:: GetCenterOfAtoms()
     
@@ -1069,27 +1196,9 @@ The View Classes
     
     :rtype: :class:`~ost.geom.Vec3`
 
-  .. method:: GetAtomList()
-
-    See :attr:`atoms`
-    
-    :rtype: class:`AtomViewList`
-
   .. method:: GetBondCount()
 
     Get number of bonds
-    :rtype: int
-
-  .. method:: GetChainCount()
-
-    Get number chains. See :attr:`chain_count`
-    
-    :rtype: int
-
-  .. method:: GetResidueCount()
-    
-    See :attr:`residue_count`
-    
     :rtype: int
 
   .. method:: GetBondList()
@@ -1102,11 +1211,7 @@ The View Classes
   
     See :attr:`handle`
 
-    :rtype: class:`EntityHandle`
-
-  .. method:: GetResidueList()
-
-    :rtype: class:`ResidueViewList`
+    :rtype: :class:`EntityHandle`
 
   .. method:: GetGeometricEnd()
 
@@ -1115,24 +1220,40 @@ The View Classes
   .. method:: GetChainList()
 
     See :attr:`chains`
+
+  .. method:: GetChainCount()
+
+    See :attr:`chain_count`
+
+  .. method:: GetResidueList()
+
+    See :attr:`residues`
+
+  .. method:: GetResidueCount()
     
-    :rtype: class:`ChainViewList`
+    See :attr:`residue_count`
+
+  .. method:: GetAtomList()
+
+    See :attr:`atoms`
     
   .. method:: GetAtomCount()
     
-    Get number of atoms. See :attr`atom_count`.
-    :rtype: int
+    See :attr:`atom_count`
 
 .. class:: ChainView
 
+  A view representation of a :class:`ChainHandle`. Mostly, the same
+  functionality is provided as for the handle.
+
   .. attribute:: name
   
-     The chain name. The name uniquely identifies the chain in the entity. In 
-     most cases, the chain name is one character. This is restriction of the PDB 
-     file format. However, you are free to use longer names as long as you don't 
-     want to save them as PDB files
+     The chain name. The name uniquely identifies the chain in the entity. In
+     most cases, the chain name is one character. This is a restriction of the
+     PDB file format. However, you are free to use longer names as long as you
+     don't  want to save them as PDB files.
      
-     This property is read-only. To change the name, use an :class:`XCSEditor`. 
+     This property is read-only. To change the name, use an :class:`XCSEditor`.
      
      Also available as :meth:`GetName`
      
@@ -1140,8 +1261,8 @@ The View Classes
 
   .. attribute:: residues
    
-     List of all residues of this chain. The residues are sorted from N- to 
-     C-terminus. Usually the residue numbers are in ascending order 
+     List of all residues of this chain. The residues are sorted from N- to
+     C-terminus. Usually the residue numbers are in ascending order
      (see :attr:`in_sequence`).
    
      This property is read-only.
@@ -1154,10 +1275,10 @@ The View Classes
        for res in chain.residues:
          print res.name, res.atom_count
    
-     Also available as :meth:`GetResidueList`. To access a single residue, use 
-     :meth:`FindResidue`. 
+     Also available as :meth:`GetResidueList`. To access a single residue, use
+     :meth:`FindResidue`.
 
-     :type: A list of :class:`residue views<residueView>`
+     :type: :class:`ResidueViewList` (list of :class:`ResidueView`)
   
   .. attribute:: in_sequence
   
@@ -1180,7 +1301,7 @@ The View Classes
    
      This property is read-only. Also available as :meth:`GetAtomList`
 
-     :type: A list of :class:`atom handles<AtomHandle>`
+     :type: :class:`AtomViewList` (list of :class:`AtomView`)
 
   .. attribute:: bounds
 
@@ -1237,12 +1358,12 @@ The View Classes
 
     Add atom to the view. If the residue of the atom is not already part of the 
     view, it will be added. If the atom does not belong to chain, the result is
-    undefined. Foo
+    undefined.
     
     :param atom_handle: The atom to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
-    :type  view_add_flags: :class:`int`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
     :rtype: :class:`AtomView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
@@ -1250,12 +1371,12 @@ The View Classes
     Add residue to the view. If the atom does not belong to chain, the result is
     undefined. By default, only the residue, but no atoms are added to the
     view. To change the behavior, pass in a suitable combination of
-    :ref:`viewaddflags`.
+    :class:`ViewAddFlags`.
     
     :param residue_handle: The residue handle to be added.
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
-    :type  view_add_flags: :class:`int`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
     :rtype: :class:`ResidueView`
 
   .. method:: FindAtom(res_num, atom_name)
@@ -1322,8 +1443,6 @@ The View Classes
 
     See :attr:`residues`
 
-    :rtype: bool
-
   .. method:: InSequence()
   
     See :attr:`in_sequence`
@@ -1345,19 +1464,20 @@ The View Classes
    
     Remove all residues from this chain view
 
-  .. method:: Select(query[, flags])
+  .. method:: Select(query, flags=0)
 
-    Perform query on chain. This will return an entity view containing atoms 
-    and bonds of the residue view that match the residue. In case no atom 
-    matches the predicate, an empty view is returned.
+    Perform query on chain view. See :meth:`EntityHandle.Select`.
     
     :param query: The query
-    :type  query: :class:`Query` or str
-    :param flags: An ORed together combination of query flags
-    :type  flags: int
+    :type  query: :class:`Query` / :class:`str`
+    :param flags: An ORed together combination of :class:`QueryFlag`
+    :type  flags: :class:`int` / :class:`QueryFlag`
     :rtype: :class:`EntityView`
 
 .. class:: ResidueView
+
+  A view representation of a :class:`ResidueHandle`. Mostly, the same
+  functionality is provided as for the handle.
 
   .. attribute:: handle
 
@@ -1440,9 +1560,16 @@ The View Classes
 
   .. attribute:: atoms
 
-    List of atoms in this view.
+     Get list of all atoms of this residue. To access a single atom, use
+     :meth:`FindAtom`.
+   
+     This property is read-only. Also available as :meth:`GetAtomList`
 
-    :type: :class:`AtomViewList`
+     :type: :class:`AtomHandleList` (list of :class:`AtomHandle`)
+
+  .. attribute:: index
+
+    Residue index (starting at 0) within chain view.
 
   .. method:: RemoveAtom(atom_view)
   
@@ -1500,8 +1627,8 @@ The View Classes
 
     :param atom_handle: Atom handle to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param flags: An ORed together combination of :ref:`viewaddflags`
-    :type  flags: :class:`int`
+    :param flags: An ORed together combination of :class:`ViewAddFlags`
+    :type  flags: :class:`int` / :class:`ViewAddFlags`
     :rtype: :class:`AtomView`
 
   .. method:: GetCenterOfAtoms()
@@ -1512,17 +1639,43 @@ The View Classes
 
     See :attr:`atoms`
     
-  .. method:: Select(query[, flags])
+  .. method:: Select(query, flags=0)
    
-    Perform selection on residue view. This method will return an entity view 
-    containing all atoms and bonds of the residue matching the predicate. In 
-    case no atom matches the predicate, this will return an empty view.
+    Perform selection on residue view. See :meth:`EntityHandle.Select`.
     
     :param query: The query
-    :type  query: :class:`Query` or str
-    :param flags: An ORed together combination of query flags
-    :type  flags: int
+    :type  query: :class:`Query` / :class:`str`
+    :param flags: An ORed together combination of :class:`QueryFlag`
+    :type  flags: :class:`int` / :class:`QueryFlag`
     :rtype: :class:`EntityView`
+
+
+.. class:: AtomView
+
+  A view representation of an :class:`AtomHandle`. Mostly, the same
+  functionality is provided as for the handle.
+
+  .. attribute:: handle
+  
+     The underlying :class:`AtomHandle` of the atom view. Also available as
+     :meth:`GetHandle`.
+     
+     :type: :class:`AtomHandle`
+
+  .. attribute:: hash_code
+
+    A unique identifier for this atom view. Note, that this is not the same as
+    for the atom handle (see :attr:`AtomHandle.hash_code`).
+
+    :type: int
+
+  .. method:: GetHandle()
+
+    See :attr:`handle`
+
+  .. method:: GetHashCode()
+    
+    See :attr:`hash_code`
 
 
 Functions
@@ -1582,7 +1735,8 @@ Other Entity-Related Functions
   
   :returns: :class:`EntityView`
 
-.. function:: CreateEntityFromView(view, include_exlusive_atoms, handle=EntityHandle())
+.. function:: CreateEntityFromView(view, include_exlusive_atoms, \
+                                   handle=EntityHandle())
  
   This function behaves exactly like :meth:`EntityHandle.Copy`, except that only
   atoms, residues, chains and bonds that are present in the view will be 
@@ -1596,42 +1750,68 @@ Other Entity-Related Functions
        residues, chains, bonds and torsions will be added to handle. This is 
        useful to combine several entities into one.
 
-  :returns :class:`EntityHandle`
-  
-.. _chaintype:
+  :returns: :class:`EntityHandle`
+
+
+Residue Numbering
+--------------------------------------------------------------------------------
+
+.. class:: ResNum(num, ins_code='\0')
+
+  Number for a residue. The residue number has a numeric part and an (optional)
+  insertion-code. You can work with this object as if it was an integer and
+  comparison will look first at the numeric part and then the insertion-code.
+  All access to existing objects is read-only.
+
+  :param num: Numeric part of residue number.
+  :type num:  :class:`int`
+  :param ins_code: Alpha-numeric part of residue number (optional insertion
+                   code). Only first character kept.
+  :type ins_code:  :class:`str`
+
+  .. attribute:: num
+
+    Numeric part of residue number.
+
+    :type: :class:`int`
+
+  .. attribute:: ins_code
+
+    Alpha-numeric part of residue number (insertion code). Single character.
+
+    :type: :class:`str`
+
+  .. method:: GetNum
+
+    :returns: :attr:`num`
+
+  .. method:: GetInsCode
+
+    :returns: :attr:`ins_code`
+
 
 ChainType
 --------------------------------------------------------------------------------
 
 A ChainType fills the :attr:`ChainHandle.type` attribute. Different types are
-described in the :ref:`ChainType enum <chaintype_enum>`. Functions for setting
-a type belong to the :class:`EditorBase` class, getting is provided by the
-:class:`ChainHandle` class, further convenience functions are described here.
+described in the :class:`ChainType` enum. The type is set with an editor in
+:meth:`EditorBase.SetChainType`. Further convenience functions are described
+here.
 
-.. _chaintype_enum:
+.. class:: ChainType
 
-The ChainType enum
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  The ChainType enum enumerates all types defined by the PDB for the MMCif file
+  format. Following values are supported:
 
-The ChainType enum enumerates all types defined by the PDB for the MMCif file
-format. Following values are supported:
+    ``CHAINTYPE_POLY``, ``CHAINTYPE_NON_POLY``, ``CHAINTYPE_WATER``,
+    ``CHAINTYPE_POLY_PEPTIDE_D``, ``CHAINTYPE_POLY_PEPTIDE_L``,
+    ``CHAINTYPE_POLY_DN``, ``CHAINTYPE_POLY_RN``, ``CHAINTYPE_POLY_SAC_D``,
+    ``CHAINTYPE_POLY_SAC_L``, ``CHAINTYPE_POLY_DN_RN``,
+    ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_MACROLIDE``,
+    ``CHAINTYPE_CYCLIC_PSEUDO_PEPTIDE``, ``CHAINTYPE_POLY_PEPTIDE_DN_RN``,
+    ``CHAINTYPE_N_CHAINTYPES``
 
-  ``CHAINTYPE_POLY``, ``CHAINTYPE_NON_POLY``, ``CHAINTYPE_WATER``,
-  ``CHAINTYPE_POLY_PEPTIDE_D``, ``CHAINTYPE_POLY_PEPTIDE_L``,
-  ``CHAINTYPE_POLY_DN``, ``CHAINTYPE_POLY_RN``, ``CHAINTYPE_POLY_SAC_D``,
-  ``CHAINTYPE_POLY_SAC_L``, ``CHAINTYPE_POLY_DN_RN``,
-  ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``  
-
-Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types available.
-
-Setter & Getter functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:func:`EditorBase.SetChainType`, :func:`ChainHandle.GetType`
-
-
-ChainType functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types available.
 
 .. function:: ChainTypeFromString(identifier)
 
@@ -1653,23 +1833,170 @@ ChainType functions
 
    :returns: :class:`str`
 
-.. _viewaddflags:
 
 ViewAddFlags
 --------------------------------------------------------------------------------
 
-Those are the flags controlling behaviour of routines adding handles to views.
+.. class:: ViewAddFlags
 
-* ``INCLUDE_ATOMS`` - Include all atoms when adding a residue handle to a view
+  Defines flags controlling behaviour of routines adding handles to views:
 
-* ``INCLUDE_RESIDUES`` - Include all residues when adding a chain to a view
+  * ``INCLUDE_ATOMS`` - Include all atoms when adding a residue handle to a view
+  * ``INCLUDE_RESIDUES`` - Include all residues when adding a chain to a view
+  * ``INCLUDE_CHAINS`` - Include all chains when creating a new entity view
+  * ``INCLUDE_ALL`` = ``INCLUDE_ATOMS`` | ``INCLUDE_RESIDUES`` |
+    ``INCLUDE_CHAINS`` - Convenience flags to include all substructures
+  * ``CHECK_DUPLICATES`` - If set, it will be checked that no duplicates are
+    created when adding a new handle
 
-* ``INCLUDE_CHAINS`` - Include all chains when creating a new entity view
 
-* ``INCLUDE_ALL`` = ``INCLUDE_ATOMS`` | ``INCLUDE_RESIDUES`` |
-  ``INCLUDE_CHAINS`` - Convenience flags to include all substructures
+SecStructure
+--------------------------------------------------------------------------------
 
-* ``CHECK_DUPLICATES`` - If set, it will be checked that no duplicates are
-  created when adding a new handle
-    
+.. class:: SecStructure(type)
 
+  Defines a secondary structure type following the types defined by DSSP.
+
+  :param type: Type to be set for this object.
+  :type type:  :class:`SecStructure.Type` / :class:`str`
+
+  .. method:: IsHelical
+
+    :return: True, if the set type is any type of helix (i.e. ALPHA_HELIX,
+             PI_HELIX or THREE_TEN_HELIX)
+  
+  .. method:: IsExtended
+
+    :return: True, if the set type is any type of beta sheet (i.e. EXTENDED,
+             BETA_BRIDGE)
+
+  .. method:: IsCoil
+
+    :return: True, if the set type is any type of coil (i.e. TURN, BEND or COIL)
+
+  .. method:: __str__
+
+    :return: The character corresponding to the set type (see
+             :class:`SecStructure.Type`)
+
+.. class:: SecStructure.Type
+
+  Enumerates all popssible secondary structure types distinguished by DSSP.
+  Their values with the corresponding character code are listed here:
+
+  .. hlist::
+    :columns: 2
+
+    * ``ALPHA_HELIX``     = 'H'
+    * ``PI_HELIX``        = 'I'
+    * ``THREE_TEN_HELIX`` = 'G'
+    * ``EXTENDED``        = 'E'
+    * ``BETA_BRIDGE``     = 'B'
+    * ``TURN``            = 'T'
+    * ``BEND``            = 'S'
+    * ``COIL``            = 'C'
+
+
+ChemClass
+--------------------------------------------------------------------------------
+
+.. class:: ChemClass(chem_class)
+
+  The chemical class is used to broadly categorize residues based on their
+  chemical properties. For example, peptides belong to some PEPTIDE_LINKING
+  class. Possible values as constant variable names and as characters:
+
+  .. hlist::
+    :columns: 2
+
+    * ``PEPTIDE_LINKING``   = 'P'
+    * ``D_PEPTIDE_LINKING`` = 'D'
+    * ``L_PEPTIDE_LINKING`` = 'L'
+    * ``RNA_LINKING``       = 'R'
+    * ``DNA_LINKING``       = 'S'
+    * ``NON_POLYMER``       = 'N'
+    * ``L_SACCHARIDE``      = 'X'
+    * ``D_SACCHARIDE``      = 'Y'
+    * ``SACCHARIDE``        = 'Z'
+    * ``WATER``             = 'W'
+    * ``UNKNOWN``           = 'U'
+
+  Python can implicitly convert characters to objects of this type.
+
+  :param chem_class: Chemical class to set.
+  :type chem_class:  :class:`str`
+
+  .. method:: IsPeptideLinking
+
+    :return: True, if set class is PEPTIDE_LINKING, D_PEPTIDE_LINKING or
+             L_PEPTIDE_LINKING
+
+  .. method:: IsNucleotideLinking
+
+    :return: True, if set class is RNA_LINKING or DNA_LINKING
+  
+
+ChemType
+--------------------------------------------------------------------------------
+
+.. class:: ChemType
+
+  The chemical type of a residue is a classification of all compounds obtained
+  from the PDB component dictionary. For example, ions belong to the class IONS,
+  amino acids to AMINOACIDS. Possible values as constant variable names and as
+  characters:
+
+  .. hlist::
+    :columns: 2
+
+    * ``IONS``             = 'I'
+    * ``NONCANONICALMOLS`` = 'M'
+    * ``SACCHARIDES``      = 'S'
+    * ``NUCLEOTIDES``      = 'N'
+    * ``AMINOACIDS``       = 'A'
+    * ``COENZYMES``        = 'E'
+    * ``WATERCOORDIONS``   = 'C'
+    * ``DRUGS``            = 'D'
+    * ``WATERS``           = 'W'
+    * ``UNKNOWN``          = 'U'
+
+  Python can implicitly convert characters to objects of this type.
+
+  :param chem_type: Chemical type to set.
+  :type chem_type:  :class:`str`
+
+  .. method:: IsIon
+
+    :return: True, if set type is IONS or WATERCOORDIONS
+
+  .. method:: IsNucleotide
+
+    :return: True, if set type is NUCLEOTIDES
+
+  .. method:: IsSaccharide
+
+    :return: True, if set type is SACCHARIDES
+
+  .. method:: IsAminoAcid
+
+    :return: True, if set type is AMINOACIDS
+
+  .. method:: IsCoenzyme
+
+    :return: True, if set type is COENZYMES
+
+  .. method:: IsDrug
+
+    :return: True, if set type is DRUGS
+
+  .. method:: IsNonCanonical
+
+    :return: True, if set type is NONCANONICALMOLS
+
+  .. method:: IsWater
+
+    :return: True, if set type is WATERS
+
+  .. method:: IsKnown
+
+    :return: True, if set type is not UNKNOWN

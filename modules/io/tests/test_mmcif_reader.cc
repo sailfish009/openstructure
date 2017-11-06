@@ -97,6 +97,20 @@ void SetAtomSiteHeader(StarLoopDesc* mmcif_h)
   mmcif_h->Add(StringRef("Cartn_z", 7));
 }
 
+conop::CompoundLibPtr SetDefaultCompoundLib() {
+  // return NULL if not successful, else return newly set default lib
+  // REQ: OST_ROOT to be set
+  char * ost_root = getenv("OST_ROOT");
+  if (!ost_root) return conop::CompoundLibPtr();
+  SetPrefixPath(ost_root);
+  String lib_path = GetSharedDataPath() + "/compounds.chemlib";
+  conop::CompoundLibPtr compound_lib = conop::CompoundLib::Load(lib_path);
+  if (compound_lib) {
+    conop::Conopology::Instance().SetDefaultLib(compound_lib);
+  }
+  return compound_lib;
+}
+
 BOOST_AUTO_TEST_SUITE( io );
 
 BOOST_AUTO_TEST_CASE(mmcif_isvalidpdbident)
@@ -104,28 +118,29 @@ BOOST_AUTO_TEST_CASE(mmcif_isvalidpdbident)
   mol::EntityHandle eh=mol::CreateEntity();
 
   // on changing the tests for a PDB id in mmcif files, extend this unit test
-  BOOST_MESSAGE("  Running mmcif_isvalidpdbident tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_isvalidpdbident tests...");
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   TestMMCifReaderProtected tmmcif_p(s, eh);
   StringRef id = StringRef("1FOO", 4);
-  BOOST_MESSAGE("    Testing valid id ('"+ id.str() +"')...");
+  BOOST_TEST_MESSAGE("    Testing valid id ('"+ id.str() +"')...");
   BOOST_CHECK(tmmcif_p.IsValidPDBIdent(id));
-  BOOST_MESSAGE("    done.");
+  BOOST_TEST_MESSAGE("    done.");
   id = StringRef("this is to long for a PDB id", 28);
-  BOOST_MESSAGE("    Testing oversized PDB id ('"+ id.str() +"')...");
+  BOOST_TEST_MESSAGE("    Testing oversized PDB id ('"+ id.str() +"')...");
   BOOST_CHECK(!tmmcif_p.IsValidPDBIdent(id));
-  BOOST_MESSAGE("    done.");
+  BOOST_TEST_MESSAGE("    done.");
   id = StringRef("nFOO", 4);
-  BOOST_MESSAGE("    Testing PDB id with missing number ('"+ id.str() +"')...");
+  BOOST_TEST_MESSAGE("    Testing PDB id with missing number ('"
+                     + id.str() + "')...");
   BOOST_CHECK(!tmmcif_p.IsValidPDBIdent(id));
-  BOOST_MESSAGE("    done.");
+  BOOST_TEST_MESSAGE("    done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_trystoreidx)
 {
   mol::EntityHandle eh = mol::CreateEntity();
 
-  BOOST_MESSAGE("  Running mmcif_trystoreidx tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_trystoreidx tests...");
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   TestMMCifReaderProtected tmmcif_p(s, eh, IOProfile());
   StarLoopDesc mmcif_h;
@@ -139,26 +154,16 @@ BOOST_AUTO_TEST_CASE(mmcif_trystoreidx)
 
 BOOST_AUTO_TEST_CASE(mmcif_convert_seqres)
 {
-  char * ost_root=getenv("OST_ROOT");
-  if(!ost_root){
-    std::cout << "WARNING: skipping SEQRES import unit test. " 
-              << "Rule-based processor is required" << std::endl;
+  conop::CompoundLibPtr compound_lib = SetDefaultCompoundLib();
+  if (!compound_lib) {
+    std::cout << "WARNING: skipping mmcif_convert_seqres unit test. " 
+              << "Compound library is required" << std::endl;
     return;
   }
-  SetPrefixPath(ost_root);
-  String lib_path=GetSharedDataPath()+"/compounds.chemlib";
-  conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);  
-  if (!compound_lib) {
-    std::cout << "WARNING: skipping SEQRES import unit test. Compound " 
-              << "library is required" << std::endl;
-    return;    
-  }
-  conop::Conopology::Instance().SetDefaultLib(compound_lib);
+
   mol::EntityHandle eh=mol::CreateEntity();
   
   TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
-  std::vector<StringRef> columns;
-  StarLoopDesc tmmcif_h;  
   BOOST_CHECK_EQUAL(tmmcif_p.ConvertSEQRES("A(MSE)Y", compound_lib), "AMY");
   BOOST_CHECK_THROW(tmmcif_p.ConvertSEQRES("A(MSEY", compound_lib), 
                     IOException);
@@ -169,68 +174,68 @@ BOOST_AUTO_TEST_CASE(mmcif_onbeginloop)
   mol::EntityHandle eh=mol::CreateEntity();
 
   // add more tests on new mandatory items
-  BOOST_MESSAGE("  Running mmcif_onbeginloop tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_onbeginloop tests...");
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   MMCifReader mmcif_p(s, eh, IOProfile());
   StarLoopDesc mmcif_h;
-  BOOST_MESSAGE("          testing atom_site items...");
+  BOOST_TEST_MESSAGE("          testing atom_site items...");
   mmcif_h.SetCategory(StringRef("atom_site", 9));
-  BOOST_MESSAGE("             auth_asym_id");
+  BOOST_TEST_MESSAGE("             auth_asym_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("auth_asym_id", 12));
-  BOOST_MESSAGE("             id");
+  BOOST_TEST_MESSAGE("             id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("id", 2));
-  BOOST_MESSAGE("             label_alt_id");
+  BOOST_TEST_MESSAGE("             label_alt_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("label_alt_id", 12));
-  BOOST_MESSAGE("             label_asym_id");
+  BOOST_TEST_MESSAGE("             label_asym_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("label_asym_id", 13));
-  BOOST_MESSAGE("             label_atom_id");
+  BOOST_TEST_MESSAGE("             label_atom_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("label_atom_id", 13));
-  BOOST_MESSAGE("             label_comp_id");
+  BOOST_TEST_MESSAGE("             label_comp_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("label_comp_id", 13));
-  BOOST_MESSAGE("             label_entity_id");
+  BOOST_TEST_MESSAGE("             label_entity_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("label_entity_id", 15));
-  BOOST_MESSAGE("             label_seq_id");
+  BOOST_TEST_MESSAGE("             label_seq_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("label_seq_id", 12));
-  BOOST_MESSAGE("             type_symbol");
+  BOOST_TEST_MESSAGE("             type_symbol");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("type_symbol", 11));
-  BOOST_MESSAGE("             Cartn_x");
+  BOOST_TEST_MESSAGE("             Cartn_x");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("Cartn_x", 7));
-  BOOST_MESSAGE("             Cartn_y");
+  BOOST_TEST_MESSAGE("             Cartn_y");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("Cartn_y", 7));
-  BOOST_MESSAGE("             Cartn_z");
+  BOOST_TEST_MESSAGE("             Cartn_z");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("Cartn_z", 7));
   BOOST_CHECK_NO_THROW(mmcif_p.OnBeginLoop(mmcif_h));
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
   mmcif_h.Clear();
-  BOOST_MESSAGE("          testing entity items...");
+  BOOST_TEST_MESSAGE("          testing entity items...");
   mmcif_h.SetCategory(StringRef("entity", 6));
-  BOOST_MESSAGE("             id");
+  BOOST_TEST_MESSAGE("             id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("id", 2));
   BOOST_CHECK_NO_THROW(mmcif_p.OnBeginLoop(mmcif_h));
-  BOOST_MESSAGE("          done.");
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_parse_models)
 {
-  BOOST_MESSAGE("  Running mmcif_parse_models tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_parse_models tests...");
   IOProfile profile;
 
   // positive w models
-  BOOST_MESSAGE("          true positive test for models...");
+  BOOST_TEST_MESSAGE("          true positive test for models...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
     MMCifReader mmcif_p("testfiles/mmcif/model_truepos.mmcif", eh, profile);
@@ -239,18 +244,19 @@ BOOST_AUTO_TEST_CASE(mmcif_parse_models)
     BOOST_REQUIRE_EQUAL(eh.GetResidueCount(), 2);
     BOOST_REQUIRE_EQUAL(eh.GetAtomCount(),   26);
   }
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
   // positive wo models atom_site.mmcif
-  BOOST_MESSAGE("          test absent atom_site.pdbx_PDB_model_num entry...");
+  BOOST_TEST_MESSAGE("          test absent atom_site.pdbx_PDB_model_num "
+                     "entry...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
     MMCifReader mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
     BOOST_CHECK_NO_THROW(mmcif_p.Parse());
   }
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
   // negative, more than 1 atom_site category
-  BOOST_MESSAGE("          testing more than one atom_site block...");
+  BOOST_TEST_MESSAGE("          testing more than one atom_site block...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
     MMCifReader mmcif_p("testfiles/mmcif/model_multi_atom_site.mmcif", eh,
@@ -263,9 +269,9 @@ BOOST_AUTO_TEST_CASE(mmcif_parse_models)
                         eh, profile);
     BOOST_CHECK_THROW(mmcif_p.Parse(), IOException);
   }
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("          testing single model with model no. entry...");
+  BOOST_TEST_MESSAGE("          testing single model with model no. entry...");
   {
     // build dummy header
     mol::EntityHandle eh = mol::CreateEntity();
@@ -276,41 +282,41 @@ BOOST_AUTO_TEST_CASE(mmcif_parse_models)
     tmmcif_h.Add(StringRef("pdbx_PDB_model_num", 18));
     BOOST_CHECK_THROW(tmmcif_p.OnBeginLoop(tmmcif_h), IOException);
   }
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_changing_label_entity_id)
 {
-  BOOST_MESSAGE("  Running mmcif_changing_label_entity_id tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_changing_label_entity_id tests...");
   IOProfile profile;
 
   // positive
-  BOOST_MESSAGE("          true positive test...");
+  BOOST_TEST_MESSAGE("          true positive test...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
     MMCifReader mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
     BOOST_CHECK_NO_THROW(mmcif_p.Parse());
   }
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
   // negative
-  BOOST_MESSAGE("          true negative test...");
+  BOOST_TEST_MESSAGE("          true negative test...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
     MMCifReader mmcif_p("testfiles/mmcif/changing_label_entity_id.mmcif", eh,
                         profile);
     BOOST_CHECK_THROW(mmcif_p.Parse(), IOException);
   }
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_unknown_entity_type)
 {
-  BOOST_MESSAGE("  Running mmcif_unknown_entity_type tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_unknown_entity_type tests...");
 
   mol::EntityHandle eh = mol::CreateEntity();
   std::vector<StringRef> columns;
@@ -324,7 +330,7 @@ BOOST_AUTO_TEST_CASE(mmcif_unknown_entity_type)
   tmmcif_p.OnBeginLoop(tmmcif_h);
 
   // positive
-  BOOST_MESSAGE("          known type...");
+  BOOST_TEST_MESSAGE("          known type...");
   // build datarow
   columns.push_back(StringRef("1", 1));
   columns.push_back(StringRef("polymer", 7));
@@ -335,26 +341,26 @@ BOOST_AUTO_TEST_CASE(mmcif_unknown_entity_type)
   columns.pop_back();
   columns.push_back(StringRef("water", 5));
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntity(columns));
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
   // negative
-  BOOST_MESSAGE("          unknown type...");
+  BOOST_TEST_MESSAGE("          unknown type...");
   columns.pop_back();
   columns.push_back(StringRef("foo", 3));
   BOOST_CHECK_THROW(tmmcif_p.ParseEntity(columns), Error);
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
 {
-  BOOST_MESSAGE("  Running mmcif_entity_tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_entity_tests...");
   mol::ChainHandle ch;
   IOProfile profile;
 
   // positive
-  BOOST_MESSAGE("          fetching chain type...");
+  BOOST_TEST_MESSAGE("          fetching chain type...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
     MMCifReader mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
@@ -369,9 +375,9 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
     BOOST_CHECK(ch.IsValid());
     BOOST_CHECK(ch.GetType() == mol::CHAINTYPE_WATER);
   }
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
   // negative: no entity description
-  BOOST_MESSAGE("          check missing entity description...");
+  BOOST_TEST_MESSAGE("          check missing entity description...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
     MMCifReader mmcif_p("testfiles/mmcif/model_truepos.mmcif",
@@ -385,8 +391,8 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
     BOOST_CHECK(ch.IsValid());
     BOOST_CHECK(ch.GetType() == mol::CHAINTYPE_UNKNOWN);
   }
-  BOOST_MESSAGE("          done.");
-  BOOST_MESSAGE("          fetch details...");
+  BOOST_TEST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          fetch details...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
     MMCifReader mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
@@ -395,29 +401,20 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
     BOOST_CHECK(ch.IsValid());
     BOOST_CHECK(ch.GetDescription() == "Very important information.");
   }
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
 {
-  char * ost_root=getenv("OST_ROOT");
-  if(!ost_root){
-    std::cout << "WARNING: skipping SEQRES import unit test. " 
-              << "Rule-based processor is required" << std::endl;
+  if (!SetDefaultCompoundLib()) {
+    std::cout << "WARNING: skipping mmcif_entity_poly_tests unit test. " 
+              << "Compound library is required" << std::endl;
     return;
   }
-  SetPrefixPath(ost_root);
-  String lib_path=GetSharedDataPath()+"/compounds.chemlib";
-  conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);
-  if (!compound_lib) {
-    std::cout << "WARNING: skipping SEQRES import unit test. Compound  " 
-              << "lib is required" << std::endl;
-    return;
-  }
-  conop::Conopology::Instance().SetDefaultLib(compound_lib);
-  BOOST_MESSAGE("  Running mmcif_entity_poly_tests...");
+  
+  BOOST_TEST_MESSAGE("  Running mmcif_entity_poly_tests...");
   mol::ChainHandle ch;
   IOProfile profile;
   StarLoopDesc tmmcif_h;
@@ -432,7 +429,7 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
   seq::SequenceHandle curr = seqres.FindSequence("A");
   BOOST_CHECK(curr.GetString() == "VTI");
 
-  BOOST_MESSAGE("          testing missing corresponding entity entry...");
+  BOOST_TEST_MESSAGE("          testing missing corresponding entity entry...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
     std::vector<StringRef> columns;
@@ -445,8 +442,8 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
     columns.push_back(StringRef("1", 1));
     BOOST_CHECK_THROW(tmmcif_p.ParseEntityPoly(columns), IOException);
   }
-  BOOST_MESSAGE("          done.");
-  BOOST_MESSAGE("          testing type recognition...");
+  BOOST_TEST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          testing type recognition...");
   {
     TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
     std::vector<StringRef> columns;
@@ -501,8 +498,8 @@ columns.push_back(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
     BOOST_CHECK_THROW(tmmcif_p.ParseEntityPoly(columns), IOException);
     columns.pop_back();
   }
-  BOOST_MESSAGE("          done.");
-  BOOST_MESSAGE("          testing pdbx_seq_one_letter_code reading...");
+  BOOST_TEST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          testing pdbx_seq_one_letter_code reading...");
   {
     TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
     std::vector<StringRef> columns;
@@ -535,8 +532,9 @@ columns.push_back(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
     BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntityPoly(columns));
     BOOST_CHECK_THROW(tmmcif_p.ParseEntityPoly(columns), IOException);
   }
-  BOOST_MESSAGE("          done.");
-  BOOST_MESSAGE("          testing pdbx_seq_one_letter_code_can reading...");
+  BOOST_TEST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          testing pdbx_seq_one_letter_code_can "
+                     "reading...");
   {
     TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
     std::vector<StringRef> columns;
@@ -568,14 +566,14 @@ columns.push_back(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
     BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntityPoly(columns));
     BOOST_CHECK_THROW(tmmcif_p.ParseEntityPoly(columns), IOException);
   }
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
 {
-  BOOST_MESSAGE("  Running mmcif_citation_tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_citation_tests...");
   //build dummy citation
   mol::EntityHandle eh;
   TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
@@ -589,35 +587,45 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
   tmmcif_h.Add(StringRef("journal_abbrev", 14));
   tmmcif_p.OnBeginLoop(tmmcif_h);
 
+  // ensure that we use book_title if no journal given (no RCSB use of this)
   columns.push_back(StringRef("Foo", 3));
   columns.push_back(StringRef("1979", 4));
   columns.push_back(StringRef("The Guide", 9));
   columns.push_back(StringRef(".", 1));
 
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
+  const MMCifInfoCitation& cit = tmmcif_p.GetInfo().GetCitations().back();
+  BOOST_CHECK_EQUAL(cit.GetID(), String("Foo"));
+  BOOST_CHECK_EQUAL(cit.GetYear(), 1979);
+  BOOST_CHECK_EQUAL(cit.GetPublishedIn(), String("The Guide"));
 
-  BOOST_CHECK(tmmcif_p.GetInfo().GetCitations().back().GetYear() == 1979);
-
+  // ensure that we override book_title if not properly given
   columns.pop_back();
   columns.pop_back();
   columns.push_back(StringRef(".", 1));
   columns.push_back(StringRef("Hitch", 5));
 
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
+  BOOST_CHECK_EQUAL(tmmcif_p.GetInfo().GetCitations().back().GetPublishedIn(),
+                    String("Hitch"));
 
+  // ensure that we override book_title if journal given
+  // (def. behavior on RCSB webpage)
   columns.pop_back();
   columns.pop_back();
   columns.push_back(StringRef("The Guide", 9));
   columns.push_back(StringRef("Hitch", 5));
 
-  BOOST_CHECK_THROW(tmmcif_p.ParseCitation(columns), IOException);
+  BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
+  BOOST_CHECK_EQUAL(tmmcif_p.GetInfo().GetCitations().back().GetPublishedIn(),
+                    String("Hitch"));
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_citation_author_tests)
 {
-  BOOST_MESSAGE("  Running mmcif_citation_author_tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_citation_author_tests...");
 
   mol::EntityHandle eh = mol::CreateEntity();
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
@@ -633,7 +641,7 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_author_tests)
   BOOST_CHECK(authors[1] == "McCheese, B.M.");
   BOOST_CHECK(authors[2] == "Van Hummel, J.F.");
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_struct_ref)
@@ -672,22 +680,20 @@ BOOST_AUTO_TEST_CASE(mmcif_struct_ref)
 
 BOOST_AUTO_TEST_CASE(mmcif_refine_tests)
 {
-  BOOST_MESSAGE("  Running mmcif_refine_tests...");
-  BOOST_MESSAGE("         positive test...");
+  BOOST_TEST_MESSAGE("  Running mmcif_refine_tests...");
+  BOOST_TEST_MESSAGE("         positive test...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
     std::ifstream s("testfiles/mmcif/atom_site.mmcif");
     IOProfile profile;
     MMCifReader mmcif_p(s, eh, profile);
     BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
-    #if OST_DOUBLE_PRECISION
-    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), 2.0, 0.001);
-    #else
-    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), 2.0f, 0.001f);
-    #endif
+    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), Real(2), Real(0.001));
+    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetRFree(), Real(0.229), Real(0.01));
+    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetRWork(), Real(0.200), Real(0.01));
   }
-  BOOST_MESSAGE("         done.");
-  BOOST_MESSAGE("         capturing fishy data lines...");
+  BOOST_TEST_MESSAGE("         done.");
+  BOOST_TEST_MESSAGE("         capturing fishy data lines...");
   {
     mol::EntityHandle eh;
     TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
@@ -706,13 +712,13 @@ BOOST_AUTO_TEST_CASE(mmcif_refine_tests)
     
     BOOST_CHECK_THROW(tmmcif_p.ParseRefine(columns), IOException);
   }
-  BOOST_MESSAGE("         done.");
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("         done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_biounit_tests)
 {
-  BOOST_MESSAGE("  Running mmcif_biounit_tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_biounit_tests...");
   //build dummy biounit
   mol::EntityHandle eh = mol::CreateEntity();
   TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
@@ -826,12 +832,12 @@ BOOST_AUTO_TEST_CASE(mmcif_biounit_tests)
   columns.push_back(StringRef("3", 1));
   BOOST_CHECK_THROW(tmmcif_p.ParsePdbxStructOperList(columns), IOException);
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_struct_tests)
 {
-  BOOST_MESSAGE("  Running mmcif_struct_tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_struct_tests...");
 
   mol::EntityHandle eh = mol::CreateEntity();
   TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
@@ -864,16 +870,16 @@ BOOST_AUTO_TEST_CASE(mmcif_struct_tests)
   columns.push_back(StringRef("A", 1));
   BOOST_CHECK_THROW(tmmcif_p.ParseStruct(columns), IOException);
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_struct_conf_tests)
 {
-  BOOST_MESSAGE("  Running mmcif_struct_conf_tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_struct_conf_tests...");
   mol::EntityHandle eh = mol::CreateEntity();
   TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
 
-  BOOST_MESSAGE("          testing type validation");
+  BOOST_TEST_MESSAGE("          testing type validation");
   StringRef type = StringRef("HELX_P", 6);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
               TestMMCifReaderProtected::MMCIF_HELIX);
@@ -1000,9 +1006,9 @@ BOOST_AUTO_TEST_CASE(mmcif_struct_conf_tests)
   type = StringRef("Foo", 3);
   BOOST_CHECK_THROW(tmmcif_p.DetermineSecStructType(type), IOException);
 
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("          testing auth_chain_id switch...");
+  BOOST_TEST_MESSAGE("          testing auth_chain_id switch...");
   StarLoopDesc tmmcif_h;
   {
     std::vector<StringRef> columns;
@@ -1046,18 +1052,18 @@ BOOST_AUTO_TEST_CASE(mmcif_struct_conf_tests)
     BOOST_CHECK_THROW(tmmcif_p.ParseStructConf(columns), IOException);
   }
   tmmcif_p.SetAuthChainID(false);
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_struct_sheet_range_tests)
 {
-  BOOST_MESSAGE("  Running mmcif_struct_sheet_range_tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_struct_sheet_range_tests...");
   mol::EntityHandle eh = mol::CreateEntity();
   TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
 
-  BOOST_MESSAGE("          testing auth_chain_id switch...");
+  BOOST_TEST_MESSAGE("          testing auth_chain_id switch...");
   StarLoopDesc tmmcif_h;
   std::vector<StringRef> columns;
   tmmcif_h.SetCategory(StringRef("struct_sheet_range", 18));
@@ -1099,16 +1105,16 @@ BOOST_AUTO_TEST_CASE(mmcif_struct_sheet_range_tests)
   tmmcif_p.SetAuthChainID(true);
   BOOST_CHECK_THROW(tmmcif_p.ParseStructSheetRange(columns), IOException);
   tmmcif_p.SetAuthChainID(false);
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
 
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
 {
-  BOOST_MESSAGE("  Running mmcif_parseatomident tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_parseatomident tests...");
 
   mol::EntityHandle eh = mol::CreateEntity();
 
@@ -1125,8 +1131,8 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
   char alt_loc;
   StringRef atom_name;
 
-  BOOST_MESSAGE("          testing valid line");
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          testing valid line");
+  BOOST_TEST_MESSAGE("          done.");
   // negative
   //cols.push_back(StringRef("ATOM", 4));
   //BOOST_CHECK_THROW(tmmcif_p.ParseAtomIdent(cols,
@@ -1155,7 +1161,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
     this->TryStoreIdx(CARTN_Z, "Cartn_z", header);
 */
 
-  BOOST_MESSAGE("          testing profile to read calpha only");
+  BOOST_TEST_MESSAGE("          testing profile to read calpha only");
   {
     profile.calpha_only = true;
     // set up dummy header to pre-set indices
@@ -1199,9 +1205,9 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
                                               resnum, valid_res_num, atom_name,
                                               alt_loc), false);
   }
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 /*
@@ -1209,21 +1215,21 @@ BOOST_AUTO_TEST_CASE(mmcif_parseandaddatom)
 {
   mol::EntityHandle eh = mol::CreateEntity();
 
-  BOOST_MESSAGE("  Running mmcif_parseandaddatom tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_parseandaddatom tests...");
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   TestMMCifReaderProtected tmmcif_p(s, eh, IOProfile());
   std::vector<StringRef> cols;
 
-  //BOOST_MESSAGE("    testing short atom_site entry");
+  //BOOST_TEST_MESSAGE("    testing short atom_site entry");
   //cols.push_back(StringRef("ATOM", 4));
   //BOOST_CHECK_THROW(tmmcif_p.ParseAndAddAtom(cols), IOException);
-  //BOOST_MESSAGE("  done.");
+  //BOOST_TEST_MESSAGE("  done.");
 }
 */
 
 BOOST_AUTO_TEST_CASE(mmcif_testreader)
 {
-  BOOST_MESSAGE("  Running mmcif_testreader tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_testreader tests...");
   mol::EntityHandle eh = mol::CreateEntity();
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   IOProfile profile;
@@ -1231,7 +1237,7 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
 
   mmcif_p.SetRestrictChains("A O C");
 
-  BOOST_MESSAGE("          testing Parse()...");
+  BOOST_TEST_MESSAGE("          testing Parse()...");
   BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
 
   BOOST_REQUIRE_EQUAL(eh.GetChainCount(),    3);
@@ -1240,9 +1246,9 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
 
   mol::ChainHandle ch = eh.FindChain("A");
   BOOST_CHECK(ch.IsValid());
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("          testing numbering water...");
+  BOOST_TEST_MESSAGE("          testing numbering water...");
   ch = eh.FindChain("O");
   BOOST_CHECK(ch.IsValid());
   mol::ResidueHandleList rl = ch.GetResidueList();
@@ -1251,9 +1257,9 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   for (rs = rl.begin(); rs != rl.end(); ++rs, ++i) {
     BOOST_CHECK_EQUAL(rs->GetNumber().GetNum(), i);
   }
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("          testing secondary structure...");
+  BOOST_TEST_MESSAGE("          testing secondary structure...");
   // pick chains, iterate residues, check for correct sec.struct.
   ch = eh.FindChain("A");
   rl = ch.GetResidueList();
@@ -1263,10 +1269,10 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   ch = eh.FindChain("C");
   rl = ch.GetResidueList();
   BOOST_CHECK_EQUAL(rl[0].GetSecStructure().IsExtended(), true);
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("          reading data fields which should not fail...");
-  BOOST_MESSAGE(mmcif_p.GetInfo().GetBioUnits().back().GetID());
+  BOOST_TEST_MESSAGE("          reading data fields which should not fail...");
+  BOOST_TEST_MESSAGE(mmcif_p.GetInfo().GetBioUnits().back().GetID());
   BOOST_CHECK(mmcif_p.GetInfo().GetMethod().str() == "Deep-fry");
   BOOST_CHECK(mmcif_p.GetInfo().GetBioUnits().back().GetDetails() ==
               "author_defined_assembly");
@@ -1295,9 +1301,127 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   BOOST_CHECK(obs.GetID() == "Obsolete");
   BOOST_CHECK(obs.GetPDBID() == "1FOO");
   BOOST_CHECK(obs.GetReplacedPDBID() == "2BAR");
-  BOOST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          done.");
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
+}
+
+// helper for mmcif_test_chain_mappings
+inline void CheckChainMap(mol::EntityHandle eh, const MMCifInfo& info,
+                          const String& cif_name, const String& pdb_name,
+                          bool check_info_map) {
+  // check chain
+  mol::ChainHandle ch = eh.FindChain(cif_name);
+  BOOST_CHECK(ch.IsValid());
+  BOOST_CHECK(ch.HasProp("pdb_auth_chain_name"));
+  BOOST_CHECK(ch.GetStringProp("pdb_auth_chain_name") == pdb_name);
+  // info mapping
+  if (check_info_map) {
+    BOOST_CHECK(info.GetMMCifPDBChainTr(cif_name) == pdb_name);
+    BOOST_CHECK(info.GetPDBMMCifChainTr(pdb_name) == cif_name);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_test_chain_mappings)
+{
+  BOOST_TEST_MESSAGE("  Running mmcif_test_chain_mappings tests...");
+  
+  // check compound lib
+  bool compound_lib_available = SetDefaultCompoundLib();
+
+  // load data
+  mol::EntityHandle eh = mol::CreateEntity();
+  std::ifstream s("testfiles/mmcif/atom_site.mmcif");
+  IOProfile profile;
+  MMCifReader mmcif_p(s, eh, profile);
+  if (compound_lib_available) {
+    mmcif_p.SetReadSeqRes(true);
+  }
+  BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
+  const MMCifInfo& info = mmcif_p.GetInfo();
+  
+  // check 1-to-1 mappings
+  CheckChainMap(eh, info, "A", "A", compound_lib_available);
+  CheckChainMap(eh, info, "C", "C", compound_lib_available);
+  CheckChainMap(eh, info, "O", "B", false); // water
+  CheckChainMap(eh, info, "Z", "Z", compound_lib_available);
+
+  // check entity ID mapping
+  BOOST_CHECK(info.GetMMCifEntityIdTr("A") == "1");
+  BOOST_CHECK(info.GetMMCifEntityIdTr("C") == "1");
+  BOOST_CHECK(info.GetMMCifEntityIdTr("O") == "5");
+  BOOST_CHECK(info.GetMMCifEntityIdTr("Z") == "1");
+  
+  // check non-existent mappings
+  BOOST_CHECK(info.GetMMCifPDBChainTr("B") == "");
+  BOOST_CHECK(info.GetPDBMMCifChainTr("O") == "");
+  BOOST_CHECK(info.GetMMCifEntityIdTr("B") == "");
+
+  BOOST_TEST_MESSAGE("  done.");
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_test_revisions_old)
+{
+  BOOST_TEST_MESSAGE("  Running mmcif_test_revisions_old tests...");
+  
+  // load data
+  mol::EntityHandle eh = mol::CreateEntity();
+  std::ifstream s("testfiles/mmcif/3IMJ_rev_old.cif");
+  IOProfile profile;
+  MMCifReader mmcif_p(s, eh, profile);
+  BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
+  const MMCifInfo& info = mmcif_p.GetInfo();
+  const MMCifInfoRevisions& revs = info.GetRevisions();
+  
+  // check items
+  BOOST_CHECK_EQUAL(revs.GetSize(), size_t(3));
+  BOOST_CHECK_EQUAL(revs.GetNum(0), 1);
+  BOOST_CHECK_EQUAL(revs.GetDate(0), String("2009-11-17"));
+  BOOST_CHECK_EQUAL(revs.GetStatus(0), String("full release"));
+  BOOST_CHECK_EQUAL(revs.GetNum(1), 2);
+  BOOST_CHECK_EQUAL(revs.GetDate(1), String("2011-07-13"));
+  BOOST_CHECK_EQUAL(revs.GetStatus(1), String("?"));
+  BOOST_CHECK_EQUAL(revs.GetNum(2), 3);
+  BOOST_CHECK_EQUAL(revs.GetDate(2), String("2012-12-12"));
+  BOOST_CHECK_EQUAL(revs.GetStatus(2), String("?"));
+  // check rest
+  BOOST_CHECK_EQUAL(revs.GetDateOriginal(), String("2009-08-10"));
+  BOOST_CHECK_EQUAL(revs.GetLastDate(), String("2012-12-12"));
+  BOOST_CHECK_EQUAL(revs.GetFirstRelease(), size_t(1));
+
+  BOOST_TEST_MESSAGE("  done.");
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_test_revisions_new)
+{
+  BOOST_TEST_MESSAGE("  Running mmcif_test_revisions_new tests...");
+  
+  // load data
+  mol::EntityHandle eh = mol::CreateEntity();
+  std::ifstream s("testfiles/mmcif/3IMJ_rev_new.cif");
+  IOProfile profile;
+  MMCifReader mmcif_p(s, eh, profile);
+  BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
+  const MMCifInfo& info = mmcif_p.GetInfo();
+  const MMCifInfoRevisions& revs = info.GetRevisions();
+  
+  // check items
+  BOOST_CHECK_EQUAL(revs.GetSize(), size_t(3));
+  BOOST_CHECK_EQUAL(revs.GetNum(0), 1);
+  BOOST_CHECK_EQUAL(revs.GetDate(0), String("2009-11-17"));
+  BOOST_CHECK_EQUAL(revs.GetStatus(0), String("Initial release"));
+  BOOST_CHECK_EQUAL(revs.GetNum(1), 2);
+  BOOST_CHECK_EQUAL(revs.GetDate(1), String("2011-07-13"));
+  BOOST_CHECK_EQUAL(revs.GetStatus(1), String("?"));
+  BOOST_CHECK_EQUAL(revs.GetNum(2), 3);
+  BOOST_CHECK_EQUAL(revs.GetDate(2), String("2012-12-12"));
+  BOOST_CHECK_EQUAL(revs.GetStatus(2), String("?"));
+  // check rest
+  BOOST_CHECK_EQUAL(revs.GetDateOriginal(), String("2009-08-10"));
+  BOOST_CHECK_EQUAL(revs.GetLastDate(), String("2012-12-12"));
+  BOOST_CHECK_EQUAL(revs.GetFirstRelease(), size_t(1));
+
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_SUITE_END();

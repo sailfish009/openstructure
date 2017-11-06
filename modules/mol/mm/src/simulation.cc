@@ -161,6 +161,7 @@ SimulationPtr Simulation::Load(const String& filename, SettingsPtr settings){
   sim_ptr->integrator_ = settings->integrator;
 
   OpenMM::Platform::loadPluginsFromDirectory (settings->openmm_plugin_directory);
+  OpenMM::Platform::loadPluginsFromDirectory (settings->custom_plugin_directory);
   OpenMM::Platform* platform;
 
   switch(settings->platform){
@@ -266,6 +267,34 @@ SimulationPtr Simulation::Load(const String& filename, SettingsPtr settings){
 }
 
 
+bool Simulation::IsPlatformAvailable(const SettingsPtr settings) {
+  // load settings-dependent plugin directories
+  EnsurePluginsLoaded(settings->openmm_plugin_directory);
+  EnsurePluginsLoaded(settings->custom_plugin_directory);
+  // check if OpenMM platform exists by checking all (this is fast..)
+  const Platform platform_id = settings->platform;
+  for (int i = 0; i < OpenMM::Platform::getNumPlatforms(); ++i) {
+    OpenMM::Platform& platform = OpenMM::Platform::getPlatform(i);
+    if (   (platform_id == Reference && platform.getName() == "Reference")
+        || (platform_id == OpenCL && platform.getName() == "OpenCL")
+        || (platform_id == CUDA && platform.getName() == "CUDA")
+        || (platform_id == CPU && platform.getName() == "CPU")) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void Simulation::EnsurePluginsLoaded(const String& plugin_path) {
+  // note: this is guaranteed to be constructed on first use only
+  static std::set<String> already_loaded;
+  if (already_loaded.find(plugin_path) == already_loaded.end()) {
+    // not loaded yet: load directory, but only once!
+    OpenMM::Platform::loadPluginsFromDirectory(plugin_path);
+    already_loaded.insert(plugin_path);
+  }
+}
+
 
 void Simulation::Init(const TopologyPtr top,
                       const SettingsPtr settings){
@@ -284,7 +313,8 @@ void Simulation::Init(const TopologyPtr top,
   //setting up the context, which combines the system with an integrator
   //to proceed in time, but first we have to load the proper platform
 
-  OpenMM::Platform::loadPluginsFromDirectory (settings->openmm_plugin_directory);
+  EnsurePluginsLoaded(settings->openmm_plugin_directory);
+  EnsurePluginsLoaded(settings->custom_plugin_directory);
   OpenMM::Platform* platform;
   std::map<String,String> context_properties;
 
@@ -664,7 +694,7 @@ void Simulation::ResetDistanceConstraint(uint index, Real constraint_length){
   int particle1, particle2;
   system_->getConstraintParameters(index,particle1,particle2,dummy);
   system_->setConstraintParameters(index,particle1,particle2,constraint_length);
-  context_->reinitialize();
+  this->ReinitializeContext();
   top_->SetDistanceConstraintParameters(index, constraint_length);
 }
 
@@ -673,7 +703,7 @@ void Simulation::AddPositionConstraint(uint index){
     throw ost::Error("Provided index exceeds number of atoms!");
   }
   system_->setParticleMass(index,0.0);
-  context_->reinitialize();
+  this->ReinitializeContext();
   top_->AddPositionConstraint(index);
 }
 
@@ -687,7 +717,7 @@ void Simulation::AddPositionConstraints(const std::vector<uint>& index){
     system_->setParticleMass(*i,0.0);
     top_->AddPositionConstraint(*i);
   }
-  context_->reinitialize();
+  this->ReinitializeContext();
 }
 
 void Simulation::ResetPositionConstraints(){
@@ -696,7 +726,7 @@ void Simulation::ResetPositionConstraints(){
     system_->setParticleMass(i,original_masses[i]);
   }
   top_->ResetPositionConstraints();
-  context_->reinitialize();
+  this->ReinitializeContext();
 }
 
 void Simulation::ResetHarmonicPositionRestraint(uint index, const geom::Vec3& ref_position, Real k,
@@ -716,9 +746,9 @@ void Simulation::ResetHarmonicPositionRestraint(uint index, const geom::Vec3& re
   int particle;
   std::vector<double> parameters;
   restraint_ptr->getParticleParameters(index,particle,parameters);
-  parameters[0] = ref_position[0];
-  parameters[1] = ref_position[1];
-  parameters[2] = ref_position[2];
+  parameters[0] = ref_position[0] * 0.1;
+  parameters[1] = ref_position[1] * 0.1;
+  parameters[2] = ref_position[2] * 0.1;
   parameters[3] = k;
   parameters[4] = x_scale;
   parameters[5] = y_scale;
@@ -842,7 +872,7 @@ void Simulation::ResetMass(uint index, Real mass){
     throw ost::Error("Provided index exceeds number of atoms!");
   }
   system_->setParticleMass(index,mass);
-  context_->reinitialize();
+  this->ReinitializeContext();
   top_->SetMass(index,mass);
 }
 
@@ -864,6 +894,21 @@ void Simulation::SetPeriodicBoxExtents(geom::Vec3& vec){
   OpenMM::Vec3 ucell_b(0.0,vec[1]/10.0,0.0);
   OpenMM::Vec3 ucell_c(0.0,0.0,vec[2]/10.0);
   context_->setPeriodicBoxVectors(ucell_a,ucell_b,ucell_c);
+}
+
+void Simulation::ReinitializeContext() {
+  // reinitializing requires to reset all those things!
+  // Be aware, state of random number generators etc might not be
+  // preserved!
+
+  // openmm uses bitmasks to selectively extract data from the context.
+  // The context data might change with different OpenMM versions.
+  // Passing -1 automagically sets all bits to true => ALL available
+  // data gets extracted. 
+  int true_bitmask = -1;
+  OpenMM::State state = context_->getState(true_bitmask);
+  context_->reinitialize();
+  context_->setState(state); 
 }
 
 }}}

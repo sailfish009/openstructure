@@ -6,6 +6,7 @@
   
   structure_formats
   sequence_formats
+  sequence_profile_formats
   image_formats
   mmcif
   profile
@@ -60,12 +61,11 @@ on the file extension.
       :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
       inexistent file.
 
-Some of the formats have a dedicated function that allows you to tweak many 
-parameters that affect the import. PDB files can be loaded with 
-:func:`~ost.io.LoadPDB`. It offers tighter control over the exact loading behaviour.
-
-
-:doc:`profile`
+Some of the formats have a dedicated function that allows you to tweak many
+parameters that affect the import. PDB files can be loaded with  :func:`LoadPDB`
+and mmCIF files with :func:`LoadMMCIF` (this also gives you access to the
+:class:`MMCifInfo` class). It offers tighter control over the exact loading
+behaviour.
 
 
 .. autofunction:: ost.io.LoadPDB

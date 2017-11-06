@@ -69,7 +69,10 @@ public:
 
   /// \brief assign positions to the given frame - order and count must match 
   ///      initial atomlist
-  void SetFramePositions(uint frame, const std::vector<geom::Vec3>& clist);
+  void SetFramePositions(uint frame, const geom::Vec3List& clist);
+
+  /// \brief set cell size for the given frame
+  void SetFrameCellSize(uint frame, const geom::Vec3& size);
 
   /// \brief get the positions of all the atoms in the given frame
   geom::Vec3List GetFramePositions(uint frame);  

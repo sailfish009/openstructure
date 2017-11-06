@@ -302,6 +302,24 @@ BOOST_AUTO_TEST_CASE(chain_type)
    BOOST_CHECK(ch1.GetType() == CHAINTYPE_N_CHAINTYPES);
    e.SetChainType(ch1, CHAINTYPE_UNKNOWN);
    BOOST_CHECK(ch1.GetType() == CHAINTYPE_UNKNOWN);
+   e.SetChainType(ch1, CHAINTYPE_MACROLIDE);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_MACROLIDE);
+   BOOST_CHECK(!ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(!ch1.IsPolypeptide());
+   BOOST_CHECK(!ch1.IsPolynucleotide());
+   e.SetChainType(ch1, CHAINTYPE_CYCLIC_PSEUDO_PEPTIDE);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_CYCLIC_PSEUDO_PEPTIDE);
+   BOOST_CHECK(ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(ch1.IsPolypeptide());
+   BOOST_CHECK(!ch1.IsPolynucleotide());
+   e.SetChainType(ch1, CHAINTYPE_POLY_PEPTIDE_DN_RN);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_PEPTIDE_DN_RN);
+   BOOST_CHECK(ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(!ch1.IsPolypeptide());
+   BOOST_CHECK(!ch1.IsPolynucleotide());
 
    // string -> chain type
    BOOST_CHECK(ChainTypeFromString("polymer") == CHAINTYPE_POLY);
@@ -323,6 +341,11 @@ BOOST_AUTO_TEST_CASE(chain_type)
                       "polydeoxyribonucleotide/polyribonucleotide hybrid") ==
                CHAINTYPE_POLY_DN_RN);
    BOOST_CHECK(ChainTypeFromString("other") == CHAINTYPE_UNKNOWN);
+   BOOST_CHECK(ChainTypeFromString("macrolide") == CHAINTYPE_MACROLIDE);
+   BOOST_CHECK(ChainTypeFromString("cyclic-pseudo-peptide") ==
+               CHAINTYPE_CYCLIC_PSEUDO_PEPTIDE);
+   BOOST_CHECK(ChainTypeFromString("peptide nucleic acid") ==
+               CHAINTYPE_POLY_PEPTIDE_DN_RN);
    BOOST_CHECK_THROW(ChainTypeFromString("supposed to fail"),
                      Error);
 
@@ -344,6 +367,11 @@ BOOST_AUTO_TEST_CASE(chain_type)
    BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY_DN_RN) ==
                "polydeoxyribonucleotide/polyribonucleotide hybrid");
    BOOST_CHECK(StringFromChainType(CHAINTYPE_UNKNOWN) == "other");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_MACROLIDE) == "macrolide");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_CYCLIC_PSEUDO_PEPTIDE) ==
+               "cyclic-pseudo-peptide");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY_PEPTIDE_DN_RN) ==
+               "peptide nucleic acid");
    BOOST_CHECK_THROW(StringFromChainType(CHAINTYPE_N_CHAINTYPES),
                      Error);
 }

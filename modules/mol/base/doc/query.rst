@@ -175,35 +175,38 @@ The following properties may be used in predicates. The type is given for each p
 Properties of Chains
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
 **cname/chain** (str) :attr:`Chain name<ChainHandle.name>` 
   
 Properties of Residues
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
 **rname** (str): :attr:`Residue name<ResidueHandle.name>`
  
-**rnum** (int): :attr:`Residue number<ResidueHandle.number>`. Currently only the numeric part is honored.
+**rnum** (int): :attr:`Residue number<ResidueHandle.number>`. Currently only the
+numeric part is honored.
  
-**rtype** (str): Residue type as given by the DSSP code, i.e. H for helix, E for extended.
+**rtype** (str): Residue type as given by the DSSP code (e.g. "H" for alpha
+helix, "E" for extended), "helix" for all helix types, "ext" or "strand" for
+all beta sheets or "coil" for any type of coil (see :class:`SecStructure`).
   
-**rindex** (int): :attr:`Index<ResidueHandle.index>` of residue in chain. This 
-index is the same for views and handles.
+**rindex** (int): :attr:`Index<ResidueHandle.index>` of residue handle in chain.
+This index is the same for views and handles.
   
-**ishetatm** (bool): Whether the atom is a :attr:`heterogenous<AtomHandle.is_hetatm>` atom.
-  
-**peptide** (bool): Whether the residue is a :meth:`peptide <ResidueHandle.IsPeptideLinking>`.
+**peptide** (bool): Whether the residue is :attr:`peptide linking
+<ResidueHandle.peptide_linking>`.
+
+**protein** (bool): Whether the residue is considered to be
+:attr:`part of a connected protein <ResidueHandle.is_protein>`.
 
 **rbfac** (float): average B (temperature) factor of residue
 
-**ligand** (bool) Whether the residue is a ligand. For official PDB files, the ligand property is set based on HET records.
+**ligand** (bool) Whether the residue is a :meth:`ligand
+<ResidueHandle.is_ligand>`.
 
 **water** (bool) Whether the residue is water.
 
 Properties of Atoms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 
 **aname** (str): :attr:`Atom name<AtomHandle.name>`
   
@@ -218,6 +221,14 @@ Properties of Atoms
 **y** (float): :attr:`Y<AtomHandle.pos>` coordinate of atom.
 
 **z** (float): :attr:`Z<AtomHandle.pos>` coordinate of atom.
+
+**aindex** (int): :attr:`Atom index<AtomHandle.index>`
+
+**ishetatm** (bool): Whether the atom is a :attr:`heterogenous
+atom<AtomHandle.is_hetatom>`.
+
+**acharge** (float): :attr:`Atom charge<AtomHandle.charge>`
+
 
 Query API documentation
 --------------------------------------------------------------------------------
@@ -262,3 +273,13 @@ In the following, the interface of the query class is described. In general, you
   .. method:: IsResidueSelected(residue)
   
     Returns true, when at least one atom of the residue matches the predicates.
+
+.. class:: QueryFlag
+
+  Defines flags to change default behaviour of Select queries. Possible values:
+
+  * ``EXCLUSIVE_BONDS`` - adds bonds to the :class:`EntityView` when at least
+    one of the two bonded atoms was selected (by default both must be selected)
+  * ``NO_BONDS`` - do not include any bonds (by default bonds are included)
+  * ``MATCH_RESIDUES`` - include all atoms of a residue if any of its atoms is
+    selected (by default only selected atoms are included)

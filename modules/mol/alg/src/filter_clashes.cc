@@ -207,7 +207,7 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
   bool found=false;
   std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
   while (line_iter!=stereo_chemical_props_file.end()) {
-    if ((*line_iter).length()!=0 && (*line_iter).length()!=1) {
+    if ((*line_iter).length() > 1) {
       StringRef line_string_ref(line_iter->data(),(*line_iter).length());
       std::vector<StringRef> line_str_vec = line_string_ref.split();
       if (line_str_vec[0].str()==header) {
@@ -266,8 +266,8 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
               return StereoChemicalParams();
             }            
             table.SetParam(rearranged_item,res,value,stddev);
-            line_iter++;
-            }  
+          }
+          line_iter++;
         }
       }  
     }
@@ -286,7 +286,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
   bool found=false;
   std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
   while (line_iter!=stereo_chemical_props_file.end()) {
-    if ((*line_iter).length()!=0 && (*line_iter).length()!=1) {
+    if ((*line_iter).length() > 1) {
       StringRef line_string_ref(line_iter->data(),(*line_iter).length());
       std::vector<StringRef> line_str_vec = line_string_ref.split();
       if (line_str_vec[0].str()=="Non-bonded") {
@@ -329,11 +329,11 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
               table.SetClashingDistance(ele2,ele1,value,stddev);
             } else {
               table.SetClashingDistance(ele1,ele2,value,stddev);
-            }  
-            line_iter++;
-          }  
+            }
+          }
+          line_iter++;
         }
-      }  
+      }
     }
     line_iter++;    
   }

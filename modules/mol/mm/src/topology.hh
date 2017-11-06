@@ -38,6 +38,7 @@
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/bond_handle.hh>
 #include <ost/mol/residue_prop.hh>
+#include <ost/img/image_handle.hh>
 
 #include <time.h>
 
@@ -127,6 +128,12 @@ public:
 
   void AddPositionConstraint(uint index);
 
+  void SetDensity(const ost::img::ImageHandle& d, Real r, Real s = 1.0);
+
+  void DefineDensityBody(const std::vector<int>& indices);
+
+  int GetNumDensityBodies() const { return density_bodies_.size(); }
+
   void ResetPositionConstraints() { position_constraints_.clear(); }
 
   void ResetExclusions() { exclusions_.clear(); }
@@ -212,6 +219,12 @@ public:
 
   void GetFGMDHBondAcceptorParameters(uint index, uint& index_one, uint& index_two) const;
 
+  ost::img::ImageHandle GetDensity() { return density_; }
+
+  Real GetDensityResolution() { return density_resolution_; }
+
+  Real GetDensityScaling() { return density_scaling_; }
+
   void SetHarmonicBondParameters(uint index, const Real bond_length, const Real force_constant);
 
   void SetHarmonicAngleParameters(uint index, const Real angle, const Real force_constant);
@@ -271,6 +284,9 @@ public:
   const std::vector<std::pair<Index<2>, std::vector<Real> > >& GetFGMDHBondDonors() const { return fgmd_hbond_donors_; }
 
   const std::vector<Index<2> >& GetFGMDHBondAcceptors() const { return fgmd_hbond_acceptors_; }
+
+  const std::vector<std::vector<int> >& GetDensityBodies() const { return density_bodies_; }
+
 
   std::vector<Real> GetSigmas() const { return sigmas_; }
 
@@ -796,6 +812,12 @@ private:
   std::set<Index<2> > added_distance_constraints_;
   std::set<Index<2> > added_exclusions_;
 
+  //density map
+  ost::img::ImageHandle density_;
+  Real density_resolution_;
+  Real density_scaling_;
+  std::vector<std::vector<int> > density_bodies_;
+  std::vector<bool> in_density_body_;
 };
 
 

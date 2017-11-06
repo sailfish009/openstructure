@@ -1,17 +1,6 @@
 import unittest
-import os
-from ost import GetSharedDataPath, SetPrefixPath
-from ost import mol
-from ost import conop
+from ost import mol, conop
 
-def setUpModule():
-    SetPrefixPath(os.path.abspath(os.path.join(conop.__path__[0], os.pardir,
-                                               os.pardir, os.pardir,
-                                               os.pardir, os.pardir)))
-    compound_lib_path = os.path.join(GetSharedDataPath(),
-                                     'compounds.chemlib')
-    compound_lib = conop.CompoundLib.Load(compound_lib_path)
-    conop.SetDefaultLib(compound_lib)
 
 class TestCompound(unittest.TestCase):
     def setUp(self):
@@ -36,5 +25,7 @@ class TestCompound(unittest.TestCase):
      
 if __name__=='__main__':
     from ost import testutils
-    testutils.RunTests()
-
+    if testutils.SetDefaultCompoundLib():
+        testutils.RunTests()
+    else:
+        print 'No compound library available. Ignoring test_compound.py tests.'

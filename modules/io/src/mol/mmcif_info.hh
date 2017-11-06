@@ -675,7 +675,7 @@ private:
   String replaced_pdb_id_; ///< replaced entry
 };
 
-/// \brief container class for information on file revisions (database_pdb_rev)
+/// \brief Container class for information on file revisions
 /// 
 class DLLEXPORT_OST_IO MMCifInfoRevisions {
 public:
@@ -699,21 +699,18 @@ public:
   /// \param status status of the revision
   void AddRevision(int num, String date, String status)
   {
-    if (num_.size() && (num_.back() > num)) {
+    if (num_.size() && (num_.back() >= num)) {
       std::stringstream ss;
-      ss << "'num' component of 'database_pdb_rev' category has to increase ";
-      ss << "with every revision, last was ";
-      ss << num_.back();
-      ss << ", trying to add ";
-      ss << num;
+      ss << "Unique ID of revision has to increase with every revision, "
+         << "last was " << num_.back() << ", trying to add " << num;
       throw IOException(ss.str());
-      }
+    }
     num_.push_back(num);
     date_.push_back(date);
     status_.push_back(status);
-    // set first release date if not already occuoied
+    // set first release date if not already occupied
     if (first_release_ == 0) {
-      if (status == "full release") {
+      if (status == "full release" || status == "Initial release") {
         first_release_ = status_.size();
       }
     }
@@ -728,24 +725,27 @@ public:
   ///
   /// \param i position in list
   /// \return date
-  String GetDate(size_t i) const { return date_[i]; }
+  String GetDate(size_t i) const { return date_.at(i); }
 
   /// \brief Get revision num by index in list.
   ///
   /// \param i position in list
   /// \return num
-  int GetNum(size_t i) const { return num_[i]; }
+  int GetNum(size_t i) const { return num_.at(i); }
 
   /// \brief Get revision status by index in list.
   ///
   /// \param i position in list
   /// \return status
-  String GetStatus(size_t i) const { return status_[i]; }
+  String GetStatus(size_t i) const { return status_.at(i); }
 
   /// \brief Get date of last revision.
   ///
   /// \return date
-  String GetLastDate() const { return date_.back(); }
+  String GetLastDate() const {
+    if (date_.empty()) return "?";
+    else               return date_.back();
+  }
 
   /// \brief Get the index of the full release revision.
   ///
@@ -869,7 +869,7 @@ private:
 class DLLEXPORT_OST_IO MMCifInfo {
 public:
   /// \brief Create an info object.
-  MMCifInfo(): exptl_method_(""), resolution_(0.0f) {};
+  MMCifInfo(): exptl_method_(""), resolution_(0), r_free_(0), r_work_(0) { }
 
   /// \brief Add an item to the list of citations
   ///
@@ -916,6 +916,26 @@ public:
   /// \return experiment resolution
   Real GetResolution() const { return resolution_; }
 
+  /// \brief Set R-free value.
+  ///
+  /// \param res experiment R-free value
+  void SetRFree(Real r_free) { r_free_ = r_free; }
+
+  /// \brief Get R-free value.
+  ///
+  /// \return experiment R-free value
+  Real GetRFree() const { return r_free_; }
+
+  /// \brief Set R-work value.
+  ///
+  /// \param r_work experiment R-work value
+  void SetRWork(Real r_work) { r_work_ = r_work; }
+
+  /// \brief Get R-work value.
+  ///
+  /// \return experiment R-work value
+  Real GetRWork() const { return r_work_; }
+
   /// \brief Add a new mmCIF/ PDB chain name tuple.
   ///
   /// \param cif chain name as used by the mmCIF file (label_asym_id)
@@ -939,6 +959,18 @@ public:
   /// \param pdb chain name as used by the mmCIF file (auth_asym_id)
   /// \return chain name as used in the PDB file (label_asym_id)
   String GetPDBMMCifChainTr(String pdb) const;
+
+  /// \brief Add a new mmCIF chain name / entity ID tuple.
+  ///
+  /// \param cif chain name as used by the mmCIF file (label_asym_id)
+  /// \param ent_id entity ID as used by the mmCIF file (label_entity_id)
+  void AddMMCifEntityIdTr(String cif, String ent_id);
+
+  /// \brief Get the entity ID for a CIF chain name
+  ///
+  /// \param cif chain name as used by the mmCIF file (label_asym_id)
+  /// \return entity ID as used by the mmCIF file (label_entity_id)
+  String GetMMCifEntityIdTr(String cif) const;
 
   /// \brief Add a biounit
   ///
@@ -1008,7 +1040,10 @@ public:
   /// \param date
   void SetRevisionsDateOriginal(String date)
   {
-    revisions_.SetDateOriginal(date);
+    // only set once
+    if (revisions_.GetDateOriginal() == "?") {
+      revisions_.SetDateOriginal(date);
+    }
   }
 
   /// \brief Add a revision to history
@@ -1034,15 +1069,18 @@ private:
   // members
   String exptl_method_;
   Real resolution_;
+  Real r_free_;
+  Real r_work_;
   MMCifInfoStructDetails struct_details_;     ///< mmCIF struct category
   MMCifInfoObsolete obsolete_;                ///< obsolete/ superseded entry
-  MMCifInfoRevisions revisions_;              ///< database_pdb_rev category
+  MMCifInfoRevisions revisions_;              ///< list of revisions
   std::vector<MMCifInfoCitation> citations_;  ///< list of citations
   std::vector<MMCifInfoBioUnit>  biounits_;   ///< list of biounits
   std::vector<MMCifInfoTransOpPtr> transops_;
 	MMCifInfoStructRefs            struct_refs_;
   std::map<String, String> cif_2_pdb_chain_id_;
   std::map<String, String> pdb_2_cif_chain_id_;
+  std::map<String, String> cif_2_entity_id_;
 };
 
 

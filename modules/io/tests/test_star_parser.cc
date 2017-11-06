@@ -278,7 +278,7 @@ BOOST_AUTO_TEST_CASE(star_split3)
 
 BOOST_AUTO_TEST_CASE(star_data_item)
 {
-  BOOST_MESSAGE("  Running star_data_item tests...");
+  BOOST_TEST_MESSAGE("  Running star_data_item tests...");
   std::ifstream s("testfiles/data-item.cif");
   DataItemTestParser star_p(s);
   BOOST_CHECK_NO_THROW(star_p.Parse());
@@ -286,12 +286,12 @@ BOOST_AUTO_TEST_CASE(star_data_item)
   BOOST_CHECK_EQUAL(star_p.s2, "a b c");
   BOOST_CHECK_EQUAL(star_p.s3, "a\nb\nc");
   BOOST_CHECK_EQUAL(star_p.s4, "a'b");
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(format_diag_stream)
 {
-  BOOST_MESSAGE("  Running format_diag_stream tests...");
+  BOOST_TEST_MESSAGE("  Running format_diag_stream tests...");
   std::ifstream s("testfiles/data-item.cif");
   DataItemTestParser star_p(s);
   BOOST_CHECK_EQUAL(star_p.FormatDiagnostic(STAR_DIAG_WARNING, "bad", -1),
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(format_diag_stream)
 
 BOOST_AUTO_TEST_CASE(format_diag_filename)
 {
-  BOOST_MESSAGE("  Running format_diag_filename tests...");
+  BOOST_TEST_MESSAGE("  Running format_diag_filename tests...");
   DataItemTestParser star_p("testfiles/data-item.cif");
   BOOST_CHECK_EQUAL(star_p.FormatDiagnostic(STAR_DIAG_WARNING, "bad", -1),
                     "testfiles/data-item.cif: warning: bad");
@@ -335,7 +335,7 @@ BOOST_AUTO_TEST_CASE(star_multiline_loop)
   
 BOOST_AUTO_TEST_CASE(star_loop)
 {
-  BOOST_MESSAGE("  Running star_loop tests...");
+  BOOST_TEST_MESSAGE("  Running star_loop tests...");
   std::ifstream s("testfiles/loop.cif");
   LoopTestParser star_p(s);
   star_p.Parse();
@@ -358,15 +358,15 @@ BOOST_AUTO_TEST_CASE(star_loop)
   BOOST_CHECK_EQUAL(star_p.lines[4][0], "13");
   BOOST_CHECK_EQUAL(star_p.lines[4][1], "14");
   BOOST_CHECK_EQUAL(star_p.lines[4][2], "15");
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(star_items_as_row)
 {
-  BOOST_MESSAGE("  Running star_items_as_row tests...");
+  BOOST_TEST_MESSAGE("  Running star_items_as_row tests...");
   std::ifstream s("testfiles/items-as-row.cif");
   ItemsAsRowTestParser star_p(s);
-  BOOST_MESSAGE("          checking parsing abilities...");
+  BOOST_TEST_MESSAGE("          checking parsing abilities...");
   star_p.Parse();
   BOOST_CHECK_EQUAL(star_p.s1, "a");
   BOOST_CHECK_EQUAL(star_p.s2, "a b c");
@@ -385,8 +385,8 @@ BOOST_AUTO_TEST_CASE(star_items_as_row)
   BOOST_CHECK_EQUAL(star_p.s6, "1.22");
   BOOST_CHECK_EQUAL(star_p.s7, "1.33");
   BOOST_CHECK_EQUAL(star_p.s8, "1.44");
-  BOOST_MESSAGE("          done.");
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(star_missing_data)
@@ -454,7 +454,7 @@ BOOST_AUTO_TEST_CASE(star_loop_category_change_inplace)
 
 BOOST_AUTO_TEST_CASE(star_try_float_conversions)
 {
-  BOOST_MESSAGE("  Running star_try_float_conversions tests...");
+  BOOST_TEST_MESSAGE("  Running star_try_float_conversions tests...");
   std::ifstream s("testfiles/loop_category_change_inplace.cif");
   DataItemTestParser star_p(s);
   StringRef data = StringRef("1.5", 3);
@@ -462,12 +462,12 @@ BOOST_AUTO_TEST_CASE(star_try_float_conversions)
   data = StringRef("foo", 3);
   BOOST_CHECK_THROW(star_p.TryGetFloat(data, "negative float test"),
                     IOException);
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(star_try_int_conversions)
 {
-  BOOST_MESSAGE("  Running star_try_int_conversions tests...");
+  BOOST_TEST_MESSAGE("  Running star_try_int_conversions tests...");
   std::ifstream s("testfiles/loop_category_change_inplace.cif");
   DataItemTestParser star_p(s);
   StringRef data = StringRef("101", 3);
@@ -475,12 +475,12 @@ BOOST_AUTO_TEST_CASE(star_try_int_conversions)
   data = StringRef("foo", 3);
   BOOST_CHECK_THROW(star_p.TryGetInt(data, "negative int test"),
                     IOException);
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(star_try_bool_conversions)
 {
-  BOOST_MESSAGE("  Running star_try_bool_conversions tests...");
+  BOOST_TEST_MESSAGE("  Running star_try_bool_conversions tests...");
   std::ifstream s("testfiles/loop_category_change_inplace.cif");
   DataItemTestParser star_p(s);
   StringRef data = StringRef("Y", 1);
@@ -499,15 +499,15 @@ BOOST_AUTO_TEST_CASE(star_try_bool_conversions)
   BOOST_CHECK_THROW(star_p.TryGetInt(data,
                                      "negative bool test ("+data.str()+")"),
                     IOException);
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(star_wrong_filename)
 {
-  BOOST_MESSAGE("  Running star_wrong_filename tests...");
+  BOOST_TEST_MESSAGE("  Running star_wrong_filename tests...");
   DataItemTestParser star_p("testfiles/doesnotexist.foo");
   BOOST_CHECK_THROW(star_p.Parse(), IOException);
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_SUITE_END();

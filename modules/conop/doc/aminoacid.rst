@@ -9,13 +9,15 @@ This document describes functions and classes to work with the 20 standard amino
 The AminoAcid enum
 --------------------------------------------------------------------------------
 
-The amino acid enum enumerates all 20 standard amino acid and the special value 
-XXX, to signify an unknown amino acid. The amino acid enum supports the 
-following values:
+.. class:: AminoAcid
 
-  ALA, ARG, ASN, ASP, GLN, GLU, LYS, SER, CYS, MET
-  TRP, TYR, THR, VAL, ILE, LEU, GLY, PRO, HIS, PHE
-  XXX
+  The amino acid enum enumerates all 20 standard amino acid and the special
+  value XXX, to signify an unknown amino acid. The amino acid enum supports the
+  following values:
+
+    ALA, ARG, ASN, ASP, GLN, GLU, LYS, SER, CYS, MET
+    TRP, TYR, THR, VAL, ILE, LEU, GLY, PRO, HIS, PHE
+    XXX
 
 Converter functions
 --------------------------------------------------------------------------------
@@ -23,20 +25,33 @@ Converter functions
               ResidueNameToAminoAcid(rname) 
               OneLetterCodeNameToAminoAcid(olc) 
 
-  Get amino acid from residue, residue name (three-letter-code)
-  or one-letter-code. Returns XXX if residue, residue name or 
-  one-letter-code is not one of the 20 standard amino acids.
+  :return: Amino acid from residue, residue name (three-letter-code)
+           or one-letter-code. Returns XXX if residue, residue name or 
+           one-letter-code is not one of the 20 standard amino acids.
+  :rtype:  :class:`AminoAcid`
 
 .. function:: OneLetterCodeToResidueName(olc)
               AminoAcidToResidueName(amino_acid)
 
-  Get residue name from one-letter-code or amino_acid. For invalid 
-  one-letter-codes or XXX, 'UNK' is returned.
+  :return: Residue name from one-letter-code or amino_acid. For invalid 
+           one-letter-codes or XXX, 'UNK' is returned.
+  :rtype:  :class:`str`
+
+  :param olc: One-letter-code
+  :type olc:  :class:`str`
+  :param amino_acid: Amino acid type
+  :type amino_acid:  :class:`AminoAcid`
+
 
 .. function:: ResidueNameToOneLetterCode(rname)
 
-  Get one-letter-code for the given residue name. Returns 'X' if residue name is 
-  not one of the 20 standard amino acids.
+  :return: One-letter-code for the given residue name. Returns 'X' if residue
+           name is not one of the 20 standard amino acids.
+  :rtype:  :class:`str`
+
+  :param rname: Residue name
+  :type rname:  :class:`str`
+
 
 .. class:: AminoAcidSet
 
@@ -48,7 +63,6 @@ Converter functions
 
     Returns a set containing all polar, aromatic or apolar amino acids, 
     respectively.
-  
 
 
   .. method:: Add(amino_acid)
@@ -85,9 +99,9 @@ to standard amino acids.
   called, otherwise CopyNonConserved will be called.
 
   :param src_res: The source residue
-  :type src_res: :class:`~mol.ResidueHandle`
+  :type src_res: :class:`~ost.mol.ResidueHandle`
   :param dst_res: The destination residue
-  :type dst_res: :class:`~mol.ResidueHandle`
+  :type dst_res: :class:`~ost.mol.ResidueHandle`
 
   :returns: true if the residue could be copied, false if not.
 
@@ -106,9 +120,9 @@ to standard amino acids.
   Additionally, the selenium atom of ``MSE`` is converted to sulphur.
 
   :param src_res: The source residue
-  :type src_res: :class:`~mol.ResidueHandle`
+  :type src_res: :class:`~ost.mol.ResidueHandle`
   :param dst_res: The destination residue
-  :type dst_res: :class:`~mol.ResidueHandle`
+  :type dst_res: :class:`~ost.mol.ResidueHandle`
 
   :returns: a tuple of bools stating whether the residue could be copied and
     whether the Cbeta atom was inserted into the ``dst_res``.
@@ -119,9 +133,9 @@ to standard amino acids.
   to ``dst_res``.
 
   :param src_res: The source residue
-  :type src_res: :class:`~mol.ResidueHandle`
+  :type src_res: :class:`~ost.mol.ResidueHandle`
   :param dst_res: The destination residue
-  :type dst_res: :class:`~mol.ResidueHandle`
+  :type dst_res: :class:`~ost.mol.ResidueHandle`
 
   :returns: a tuple of bools stating whether the residue could be copied and
     whether the Cbeta atom was inserted into the ``dst_res``.

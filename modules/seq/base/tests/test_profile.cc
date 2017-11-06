@@ -32,9 +32,22 @@
 
 using namespace ost::seq;
 
-
 BOOST_AUTO_TEST_SUITE( profile );
 
+namespace {
+
+void CheckNullModel(const ProfileColumn& nm) {
+  BOOST_CHECK_GE(nm.GetEntropy(), Real(0));
+  Real sum_freq = 0;
+  const Real* freq_ptr = nm.freqs_begin();
+  for (uint i = 0; i < 20; ++i) {
+    BOOST_CHECK_GE(freq_ptr[i], Real(0));
+    sum_freq += freq_ptr[i];
+  }
+  BOOST_CHECK_CLOSE(sum_freq, Real(1), Real(1e-2));
+}
+
+} // anon ns
 
 BOOST_AUTO_TEST_CASE(profile_column)
 {
@@ -53,20 +66,15 @@ BOOST_AUTO_TEST_CASE(profile_column)
     BOOST_CHECK_EQUAL(pc.GetFreq(olc[i]), tst);
   }
 
-  // check null model
+  // check null models
   ProfileColumn nm = ProfileColumn::BLOSUMNullModel();
-  BOOST_CHECK_GE(pc.GetEntropy(), Real(0));
-  Real sum_freq = 0;
-  freq_ptr = nm.freqs_begin();
-  for (uint i = 0; i < 20; ++i) {
-    BOOST_CHECK_GE(freq_ptr[i], Real(0));
-    sum_freq += freq_ptr[i];
-  }
-  BOOST_CHECK_CLOSE(sum_freq, Real(1), Real(1e-3));
+  CheckNullModel(nm);
+  CheckNullModel(ProfileColumn::HHblitsNullModel());
 
   // check assign/copy
   ProfileColumn nm2(nm);
   BOOST_CHECK(nm == nm2);
+  freq_ptr = nm.freqs_begin();
   Real* freq_ptr2 = nm2.freqs_begin();
   for (uint i = 0; i < 20; ++i) {
     BOOST_CHECK_EQUAL(freq_ptr[i], freq_ptr2[i]);
@@ -81,7 +89,7 @@ BOOST_AUTO_TEST_CASE(profile_handle)
   ProfileHandle prof;
   BOOST_CHECK_EQUAL(prof.size(), size_t(0));
   BOOST_CHECK_EQUAL(prof.GetSequence(), "");
-  prof.SetSequence("RRSPP");
+  CheckNullModel(prof.GetNullModel());
   ProfileColumn pc0 = ProfileColumn::BLOSUMNullModel();
   prof.SetNullModel(pc0);
   ProfileColumn pc1, pc2, pc3, pc4;
@@ -93,11 +101,18 @@ BOOST_AUTO_TEST_CASE(profile_handle)
   pc3.SetFreq('E', 0.5);
   pc4.SetFreq('A', 0.5);
   pc4.SetFreq('H', 0.5);
-  prof.push_back(pc0);
-  prof.push_back(pc1);
-  prof.push_back(pc2);
-  prof.push_back(pc3);
-  prof.push_back(pc4);
+  prof.AddColumn(pc0);
+  prof.AddColumn(pc1);
+  prof.AddColumn(pc2);
+  BOOST_CHECK_EQUAL(prof.size(), prof.GetSequence().length());
+  prof.AddColumn(pc3);
+  prof.AddColumn(pc4);
+  prof.SetSequence("RRSPP");
+  BOOST_CHECK_EQUAL(prof.size(), prof.GetSequence().length());
+
+  // check invalid sequence settings
+  BOOST_CHECK_THROW(prof.SetSequence("RRSP"), ost::Error);
+  BOOST_CHECK_THROW(prof.SetSequence("RRSPPT"), ost::Error);
 
   // check components
   BOOST_CHECK_EQUAL(prof.size(), size_t(5));
@@ -121,8 +136,15 @@ BOOST_AUTO_TEST_CASE(profile_handle)
   BOOST_CHECK_CLOSE(prof[3].GetEntropy(), entropy3, Real(1e-3));
   BOOST_CHECK_CLOSE(prof.GetAverageEntropy(), avg_entropy, Real(1e-3));
 
-  // extract parts
+  // check scoring (scores precomputed to make sure they don't randomly change!)
   ProfileHandlePtr pp = prof.Extract(1, 4);
+  BOOST_CHECK_CLOSE(prof.GetAverageScore(*pp, 0), -1.81746, Real(1e-3));
+  BOOST_CHECK_CLOSE(prof.GetAverageScore(*pp, 1), 2.8012, Real(1e-3));
+  BOOST_CHECK_CLOSE(prof.GetAverageScore(*pp, 2), -4.12038, Real(1e-3));
+  BOOST_CHECK_THROW(prof.GetAverageScore(*pp, -1), ost::Error);
+  BOOST_CHECK_THROW(prof.GetAverageScore(*pp, 3), ost::Error);
+
+  // extract parts
   avg_entropy = (entropy1 + entropy2 + entropy3)/3;
   BOOST_CHECK_EQUAL(pp->size(), size_t(3));
   BOOST_CHECK_EQUAL(pp->GetSequence(), "RSP");
@@ -138,6 +160,10 @@ BOOST_AUTO_TEST_CASE(profile_handle)
   BOOST_CHECK_EQUAL(pp->size(), size_t(2));
   BOOST_CHECK_EQUAL(pp->GetSequence(), "PP");
   BOOST_CHECK_CLOSE(pp->GetAverageEntropy(), entropy3, Real(1e-3));
+
+  BOOST_CHECK_THROW(prof.Extract(3, 3), ost::Error);
+  BOOST_CHECK_THROW(prof.Extract(-1, 3), ost::Error);
+  BOOST_CHECK_THROW(prof.Extract(3, 6), ost::Error);
 }
 
 

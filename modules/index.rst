@@ -13,6 +13,7 @@ OpenStructure documentation
   geom/geom
   mol/base/mol
   mol/alg/molalg
+  mol/mm/molmm
   conop/conop
   img/base/img
   img/alg/alg
@@ -76,7 +77,7 @@ Sequences and Alignments
 Graphics
 --------------------------------------------------------------------------------
 
-**Overview** :doc:`graphics intro <intro-03>`
+**Overview**: :doc:`graphics intro <intro-03>`
 
 **Main Classes**: :doc:`the scene <gfx/scene>` | :doc:`graphical entity <gfx/entity>`
 
@@ -94,19 +95,17 @@ Graphical User Interface
 Varia
 --------------------------------------------------------------------------------
 
-**Datasets:** :doc:`tabular data <table>`
+**Datasets**: :doc:`tabular data <table>`
 
-**Supported File Formats:** :doc:`structure formats<io/structure_formats>` | :doc:`sequence formats <io/sequence_formats>` | :doc:`sequence profile formats <io/sequence_profile_formats>` | :doc:`image formats <io/image_formats>`
+**Supported File Formats**: :doc:`structure formats<io/structure_formats>` | :doc:`sequence formats <io/sequence_formats>` | :doc:`sequence profile formats <io/sequence_profile_formats>` | :doc:`image formats <io/image_formats>`
 
-**Users** :doc:`Reporting a problem <users>`
+**Users**: :doc:`Reporting a problem <users>`
 
-**lDDT** :doc:`lDDT command line executable<mol/alg/lddt>`
+**lDDT**: :doc:`lDDT command line executable<mol/alg/lddt>`
 
 Extending OpenStructure
 --------------------------------------------------------------------------------
 
-**External Tools** :doc:`bindings <bindings/bindings>`
+**External Tools**: :doc:`bindings <bindings/bindings>`
 
-**Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>` | :doc:`instructions for developers <contributing>`
-
-
+**Howto**: :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>` | :doc:`instructions for developers <contributing>`

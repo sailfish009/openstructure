@@ -132,21 +132,19 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
                               + null_line + "\n in " + loc.string()));
 
   // set columns
-  String seqres;
   while (std::getline(in, line)) {
     sline = ost::StringRef(line.c_str(), line.length());
     if (sline.trim().empty()) continue;
     if (sline.trim() == ost::StringRef("//", 2)) break;
     chunks = sline.split();
     // one letter code
-    seqres += chunks[0][0];
+    const char olc = chunks[0][0];
     // frequencies
-    prof.push_back(GetColumn(chunks, 2, olcs, "Badly formatted line\n"
-                             + line + "\n in " + loc.string()));
+    prof.AddColumn(GetColumn(chunks, 2, olcs, "Badly formatted line\n"
+                             + line + "\n in " + loc.string()), olc);
     // skip line (trans. matrix)
     std::getline(in, line);
   }
-  prof.SetSequence(seqres);
 }
 
 void HhmIOHandler::Export(const seq::ProfileHandle& prof,

@@ -1,8 +1,6 @@
 import unittest
-from ost import *
-from ost import settings
-from ost import seq
-from ost import io
+import ost
+from ost import seq, io, mol
 
 class TestAlignToSeqRes(unittest.TestCase):
   def testAlignWorking(self):
@@ -67,9 +65,10 @@ class TestAlignToSeqRes(unittest.TestCase):
                                        validate = False)
     self.assertEqual(seq.alg.ValidateSEQRESAlignment(seqres_aln, chain), False)
 
+
 if __name__ == "__main__":
-  if not conop.GetDefaultLib():
-    print 'No compound library available. Ignoring unit tests'
-  else:
-    from ost import testutils
+  from ost import testutils
+  if testutils.SetDefaultCompoundLib():
     testutils.RunTests()
+  else:
+    print 'No compound library available. Ignoring test_aligntoseqres.py tests.'

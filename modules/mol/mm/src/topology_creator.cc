@@ -253,6 +253,7 @@ TopologyPtr TopologyCreator::Create(ost::mol::EntityHandle& ent,
     residue_names_of_atoms.push_back(i->GetResidue().GetName());
     atom_types.push_back(building_blocks[residue_index]->GetType(i->GetName()));
     atom_charges.push_back(building_blocks[residue_index]->GetCharge(i->GetName()));
+    atom_names.push_back(i->GetName());
     atom_masses.push_back(ff->GetMass(atom_types.back()));
     bonded_atoms = i->GetBondPartners();
     temp.clear();

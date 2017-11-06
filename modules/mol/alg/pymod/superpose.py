@@ -190,19 +190,26 @@ def _MatchResidueByAln(ent_a, ent_b, atoms, alnmethod):
   atmset = ParseAtomNames(atoms)
   ## iterate chains
   for i in range(0, n_chains):
+    ## fetch chains (peptide-linking residues only)
     chain_a = ent_a.chains[i]
     chain_b = ent_b.chains[i]
+    chain_view_a = chain_a.Select('peptide=true')
+    chain_view_b = chain_b.Select('peptide=true')
+    if chain_view_a.chain_count == 0 or chain_view_b.chain_count == 0:
+      # skip empty chains
+      continue
     ## fetch residues
-    s_a = ''.join([r.one_letter_code
-                   for r in chain_a.Select('protein=True').residues])
-    s_b = ''.join([r.one_letter_code
-                   for r in chain_b.Select('protein=True').residues])
+    s_a = ''.join([r.one_letter_code for r in chain_view_a.residues])
+    s_b = ''.join([r.one_letter_code for r in chain_view_b.residues])
     ## create sequence from residue lists & alignment
     seq_a = ost.seq.CreateSequence(chain_a.name, s_a)
     seq_b = ost.seq.CreateSequence(chain_b.name, s_b)
     aln_a_b = alnmethod(seq_a, seq_b, ost.seq.alg.BLOSUM62)
+    if not aln_a_b:
+      # skip failed alignments
+      continue
     ## evaluate alignment
-    max_aln_res = 0
+    max_aln_res = -1
     for a in range(0, len(aln_a_b)):
       aln = aln_a_b[a]
       aln_res_len = 0
@@ -218,26 +225,27 @@ def _MatchResidueByAln(ent_a, ent_b, atoms, alnmethod):
 
     aln = aln_a_b[max_aln_idx]
     ## bind chain to alignment
-    aln.AttachView(0, chain_a.Select('protein=True'))
-    aln.AttachView(1, chain_b.Select('protein=True'))
+    aln.AttachView(0, chain_view_a)
+    aln.AttachView(1, chain_view_b)
     ## select residues (only replacement edges)
     for i in max_matches:
       r_a = aln.GetResidue(0,i)
       r_b = aln.GetResidue(1,i)
-      result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)
+      result_a, result_b = _fetch_atoms(r_a, r_b, result_a, result_b, atmset)
   result_a.AddAllInclusiveBonds()
   result_b.AddAllInclusiveBonds()
   return result_a, result_b
 
 def MatchResidueByLocalAln(ent_a, ent_b, atoms='all'):
   """
-  Match residues by local alignment. Takes **ent_a** and **ent_b**, extracts
-  the sequences chain-wise and aligns them in Smith/Waterman manner using the
-  BLOSUM62 matrix for scoring. The residues of the entities are then matched
-  based on this alignment. Only atoms present in both residues are included in
-  the views. Chains are processed in order of appearance. If **ent_a** and
-  **ent_b** contain a different number of chains, processing stops with
-  the lower count.
+  Match residues by local alignment. Takes **ent_a** and **ent_b**, extracts the
+  sequences chain-wise and aligns them in Smith/Waterman manner using the
+  BLOSUM62 matrix for scoring. Only residues which are marked as :attr:`peptide
+  linking <ost.mol.ResidueHandle.peptide_linking>` are considered for alignment.
+  The residues of the entities are then matched based on this alignment. Only
+  atoms present in both residues are included in the views. Chains are processed
+  in order of appearance. If **ent_a** and **ent_b** contain a different number
+  of chains, processing stops with the lower count.
 
   :param ent_a: The first entity
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
@@ -252,13 +260,9 @@ def MatchResidueByLocalAln(ent_a, ent_b, atoms='all'):
 
 def MatchResidueByGlobalAln(ent_a, ent_b, atoms='all'):
   """
-  Match residues by global alignment. Takes **ent_a** and **ent_b**, extracts
-  the sequences chain-wise and aligns them in Needleman/Wunsch manner using the
-  BLOSUM62 matrix for scoring. The residues of the entities are then matched
-  based on this alignment. Only atoms present in both residues are included in
-  the views. Chains are processed in order of appearance. If **ent_a** and
-  **ent_b** contain a different number of chains, processing stops with
-  the lower count.
+  Match residues by global alignment.
+  Same as :func:`MatchResidueByLocalAln` but performs a global Needleman/Wunsch
+  alignment of the sequences using the BLOSUM62 matrix for scoring.
 
   :param ent_a: The first entity
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
@@ -272,31 +276,29 @@ def MatchResidueByGlobalAln(ent_a, ent_b, atoms='all'):
   return _MatchResidueByAln(ent_a, ent_b, atoms, ost.seq.alg.GlobalAlign)
 
 
-def Superpose(ent_a, ent_b, match='number', atoms='all', iterative=False, max_iterations=5, distance_threshold=3.0):
+def Superpose(ent_a, ent_b, match='number', atoms='all', iterative=False,
+              max_iterations=5, distance_threshold=3.0):
   """
   Superposes the model entity onto the reference. To do so, two views are
-  created, returned with the result. **atoms** describes what goes into these
-  views and **match** the selection method. For superposition,
-  :func:`~ost.mol.alg.SuperposeSVD` is called. For matching, the following methods
-  are recognised:
+  created, returned with the result. *atoms* describes what goes into these
+  views and *match* the selection method. For superposition,
+  :func:`SuperposeSVD` or :func:`IterativeSuperposeSVD` are called (depending on
+  *iterative*). For matching, the following methods are recognised:
 
-  * ``number`` - select residues by residue number, includes **atoms**, calls
-    :func:`~ost.mol.alg.MatchResidueByNum`
+  * ``number`` - select residues by residue number, includes *atoms*, calls
+    :func:`MatchResidueByNum`
 
-  * ``index`` - select residues by index in chain, includes **atoms**, calls
-    :func:`~ost.mol.alg.MatchResidueByIdx`
+  * ``index`` - select residues by index in chain, includes *atoms*, calls
+    :func:`MatchResidueByIdx`
 
   * ``local-aln`` - select residues from a Smith/Waterman alignment, includes
-    **atoms**, calls :func:`~ost.mol.alg.MatchResidueByLocalAln`
+    *atoms*, calls :func:`MatchResidueByLocalAln`
 
   * ``global-aln`` - select residues from a Needleman/Wunsch alignment, includes
-    **atoms**, calls :func:`~ost.mol.alg.MatchResidueByGlobalAln`
+    *atoms*, calls :func:`MatchResidueByGlobalAln`
 
-  There is also an option to use **iterative** matching which allows for an 
-  iterative approach to superposing two structures. **iterative** takes two
-  additional parameters, **max_iteration** and **distance_threshold**.
-
-  :param ent_a: The model entity
+  :param ent_a: The model entity (superposition transform is applied on full
+                entity handle here)
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
 
   :param ent_b: The reference entity
@@ -308,40 +310,37 @@ def Superpose(ent_a, ent_b, match='number', atoms='all', iterative=False, max_it
   :param atoms: The subset of atoms to be used in the superposition
   :type atoms: :class:`str`, :class:`list`, :class:`set`
 
-  :param max_iterations: They number of iterations that will be run during 
-                         iterative superposition
+  :param iterative: Whether or not to use iterative superpositon.
+  :type iterative:  :class:`bool`
+
+  :param max_iterations: Max. number of iterations for
+                         :func:`IterativeSuperposeSVD`
+                         (only if *iterative* = True)
   :type max_iterations: :class:`int`
 
-  :param distance_threshold: The distance threshold between which two atoms
-                             that will be used in the next superposition
-                             iteration
+  :param distance_threshold: Distance threshold for
+                             :func:`IterativeSuperposeSVD`
+                             (only if *iterative* = True)
   :type distance_threshold: :class:`float`
 
-  :returns: An instance of :class:`SuperpositionResult`, containing members
-
-  * ``rmsd`` - RMSD of the superposed entities
-
-  * ``view1`` - First :class:`~ost.mol.EntityView` used
-
-  * ``view2`` - Second :class:`~ost.mol.EntityView` used
+  :returns: An instance of :class:`SuperpositionResult`.
   """
-  not_supported="Superpose called with unsupported matching request."
+  not_supported = "Superpose called with unsupported matching request."
   ## create views to superpose
   if match.upper() == 'NUMBER':
     view_a, view_b = MatchResidueByNum(ent_a, ent_b, atoms)
   elif match.upper() == 'INDEX':
-    view_a, view_b=MatchResidueByIdx(ent_a, ent_b, atoms)
+    view_a, view_b = MatchResidueByIdx(ent_a, ent_b, atoms)
   elif match.upper() == 'LOCAL-ALN':
-    view_a, view_b=_MatchResidueByAln(ent_a, ent_b, atoms,
-                                      ost.seq.alg.LocalAlign)
+    view_a, view_b = MatchResidueByLocalAln(ent_a, ent_b, atoms)
   elif match.upper() == 'GLOBAL-ALN':
-    view_a, view_b=_MatchResidueByAln(ent_a, ent_b, atoms,
-                                      ost.seq.alg.GlobalAlign)
+    view_a, view_b = MatchResidueByGlobalAln(ent_a, ent_b, atoms)
   else:
     raise ValueError(not_supported)
   ## action
   if iterative:
-    res=ost.mol.alg.IterativeSuperposeSVD(view_a, view_b, max_iterations, distance_threshold)
+    res = ost.mol.alg.IterativeSuperposeSVD(view_a, view_b, max_iterations,
+                                            distance_threshold)
   else:
-    res=ost.mol.alg.SuperposeSVD(view_a, view_b)
+    res = ost.mol.alg.SuperposeSVD(view_a, view_b)
   return res

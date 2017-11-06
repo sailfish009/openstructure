@@ -26,6 +26,18 @@ using namespace boost::python;
 
 namespace{
 
+template <typename Iterator>
+void AppendToList(Iterator first, Iterator last, boost::python::list& l) {
+  for (Iterator i = first; i != last; ++i) {
+    l.append(*i);
+  }
+}
+
+template <typename Vec>
+void AppendVectorToList(const Vec& v, boost::python::list& l) {
+  AppendToList(v.begin(), v.end(), l);
+}
+
 template<typename T>
 std::vector<T> ListToVec(const boost::python::list& l){
   std::vector<T> vec;
@@ -47,7 +59,8 @@ void WrapAddAddRule(ost::mol::mm::GromacsBlockModifierPtr p,
 
 }
 
-void WrapAddHydrogenRule(ost::mol::mm::GromacsHydrogenConstructorPtr p, int number, int method, 
+void WrapAddHydrogenRule(ost::mol::mm::GromacsHydrogenConstructorPtr p,
+                         int number, int method, 
                          const boost::python::list& hydrogen_names, 
                          const boost::python::list& anchors){
   std::vector<String> v_hydrogen_names = ListToVec<String>(hydrogen_names);
@@ -55,6 +68,91 @@ void WrapAddHydrogenRule(ost::mol::mm::GromacsHydrogenConstructorPtr p, int numb
   p->AddHydrogenRule(number,method,v_hydrogen_names,v_anchors);
 }
 
+boost::python::list
+WrapGetHydrogenRules(ost::mol::mm::GromacsHydrogenConstructorPtr p) {
+  // for data extraction: get all rules as list of tuples
+  // -> data: (number, method, names, anchors)
+  boost::python::list result;
+  for (uint i = 0; i < p->GetNumHydrogenRules(); ++i) {
+    int number = p->GetHydrogenRuleNumber(i);
+    int method = p->GetHydrogenRuleMethod(i);
+    boost::python::list names;
+    AppendVectorToList(p->GetHydrogenRuleNames(i), names);
+    boost::python::list anchors;
+    AppendVectorToList(p->GetHydrogenRuleAnchors(i), anchors);
+    result.append(boost::python::make_tuple(number, method, names, anchors));
+  }
+  return result;
+}
+
+boost::python::list WrapGetBonds(ost::mol::mm::GromacsBlockModifierPtr p) {
+  boost::python::list result;
+  AppendVectorToList(p->GetBonds(), result);
+  return result;
+}
+
+boost::python::list WrapGetAngles(ost::mol::mm::GromacsBlockModifierPtr p) {
+  boost::python::list result;
+  AppendVectorToList(p->GetAngles(), result);
+  return result;
+}
+
+boost::python::list WrapGetDihedrals(ost::mol::mm::GromacsBlockModifierPtr p) {
+  boost::python::list result;
+  AppendVectorToList(p->GetDihedrals(), result);
+  return result;
+}
+
+boost::python::list WrapGetImpropers(ost::mol::mm::GromacsBlockModifierPtr p) {
+  boost::python::list result;
+  AppendVectorToList(p->GetImpropers(), result);
+  return result;
+}
+
+boost::python::list WrapGetCmaps(ost::mol::mm::GromacsBlockModifierPtr p) {
+  boost::python::list result;
+  AppendVectorToList(p->GetCmaps(), result);
+  return result;
+}
+
+boost::python::list WrapGetDeleteAtoms(ost::mol::mm::GromacsBlockModifierPtr p) {
+  boost::python::list result;
+  AppendVectorToList(p->GetDeleteAtoms(), result);
+  return result;
+}
+
+boost::python::list
+WrapGetReplaceRules(ost::mol::mm::GromacsBlockModifierPtr p) {
+  // for data extraction: get all rules as list of tuples
+  // -> data: (name, new_name, new_type, new_charge)
+  boost::python::list result;
+  for (uint i = 0; i < p->GetNumReplaceRules(); ++i) {
+    result.append(boost::python::make_tuple(p->GetReplaceRuleName(i),
+                                            p->GetReplaceRuleNewName(i),
+                                            p->GetReplaceRuleNewType(i),
+                                            p->GetReplaceRuleNewCharge(i)));
+  }
+  return result;
+}
+
+boost::python::list
+WrapGetAddRules(ost::mol::mm::GromacsBlockModifierPtr p) {
+  // for data extraction: get all rules as list of tuples
+  // -> data: (number, method, names, anchors, type, charge)
+  boost::python::list result;
+  for (uint i = 0; i < p->GetNumAddRules(); ++i) {
+    boost::python::list names;
+    AppendVectorToList(p->GetAddRuleNames(i), names);
+    boost::python::list anchors;
+    AppendVectorToList(p->GetAddRuleAnchors(i), anchors);
+    result.append(boost::python::make_tuple(p->GetAddRuleNumber(i),
+                                            p->GetAddRuleMethod(i),
+                                            names, anchors,
+                                            p->GetAddRuleType(i),
+                                            p->GetAddRuleCharge(i)));
+  }
+  return result;
+}
 
 }
 
@@ -72,6 +170,7 @@ void export_BlockModifiers()
     .def("ApplyOnBuildingBlock",&ost::mol::mm::GromacsHydrogenConstructor::ApplyOnBuildingBlock,(arg("block")))
     .def("ApplyOnResidue",&ost::mol::mm::GromacsHydrogenConstructor::ApplyOnResidue,(arg("residue"),arg("editor")))
     .def("AddHydrogenRule",&WrapAddHydrogenRule,(arg("number"),arg("method"),arg("hydrogen_names"),arg("anchors")))
+    .def("GetHydrogenRules",&WrapGetHydrogenRules)
   ;
 
   class_<ost::mol::mm::GromacsBlockModifier, bases<ost::mol::mm::BlockModifier> >("GromacsBlockModifier", init<>())
@@ -85,6 +184,14 @@ void export_BlockModifiers()
     .def("AddImproper",&ost::mol::mm::GromacsBlockModifier::AddImproper,(arg("improper")))
     .def("AddCMap",&ost::mol::mm::GromacsBlockModifier::AddCMap,(arg("cmap")))
     .def("AddDeleteAtom",&ost::mol::mm::GromacsBlockModifier::AddDeleteAtom,(arg("name")))
+    .def("GetBonds", &WrapGetBonds)
+    .def("GetAngles", &WrapGetAngles)
+    .def("GetDihedrals", &WrapGetDihedrals)
+    .def("GetImpropers", &WrapGetImpropers)
+    .def("GetCmaps", &WrapGetCmaps)
+    .def("GetDeleteAtoms", &WrapGetDeleteAtoms)
+    .def("GetReplaceRules", &WrapGetReplaceRules)
+    .def("GetAddRules", &WrapGetAddRules)
   ;
  
   class_<ost::mol::mm::HeuristicHydrogenConstructor, bases<ost::mol::mm::HydrogenConstructor> >("HeuristicHydrogenConstructor", init<ost::mol::mm::BuildingBlockPtr>())

@@ -207,8 +207,7 @@ SequenceList SequenceList::Take(int n) const
 {
   this->CheckValidity();
   if (n<0) {
-    return SequenceList(impl_->Slice(impl_->GetCount()+n-1, 
-                                      impl_->GetCount()));
+    return SequenceList(impl_->Slice(impl_->GetCount()+n, -n));
   } else {
     return SequenceList(impl_->Slice(0, n));
   }
@@ -224,8 +223,7 @@ ConstSequenceList ConstSequenceList::Take(int n) const
 {
   this->CheckValidity();
   if (n<0) {
-    return ConstSequenceList(impl_->Slice(impl_->GetCount()+n-1, 
-                                           impl_->GetCount()));
+    return ConstSequenceList(impl_->Slice(impl_->GetCount()+n, -n));
   } else {
     return ConstSequenceList(impl_->Slice(0, n));
   }

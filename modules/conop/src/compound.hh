@@ -97,7 +97,7 @@ struct DLLEXPORT_OST_CONOP AtomSpec {
   bool operator==(const AtomSpec& rhs) const {
     return ordinal==rhs.ordinal && name==rhs.name && alt_name==rhs.alt_name &&
            element==rhs.element && is_leaving==rhs.is_leaving && 
-           rhs.is_aromatic==rhs.is_aromatic;
+           is_aromatic==rhs.is_aromatic;
 
   }
   bool operator!=(const AtomSpec& rhs) const {

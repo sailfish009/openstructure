@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_SUITE( io );
 
 BOOST_AUTO_TEST_CASE(mmcif_info_obsolete)
 {
-  BOOST_MESSAGE("  Running mmcif_info_obsolete tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_info_obsolete tests...");
 
   MMCifInfoObsolete obs = MMCifInfoObsolete();
 
@@ -49,12 +49,12 @@ BOOST_AUTO_TEST_CASE(mmcif_info_obsolete)
   obs.SetID(StringRef("SPRSDE", 6));
   BOOST_CHECK(obs.GetID() == "Supersede");
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_info_citation)
 {
-  BOOST_MESSAGE("  Running mmcif_info_citation tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_info_citation tests...");
 
   MMCifInfoCitation cit = MMCifInfoCitation();
   std::vector<String> author_list;
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(mmcif_info_citation)
   author_list = cit.GetAuthorList();
   BOOST_CHECK(author_list.back() == "Kabel, H.");
 
-  BOOST_MESSAGE("  done.");
-  BOOST_MESSAGE("  trying to add everything to an info object");
+  BOOST_TEST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  trying to add everything to an info object");
   MMCifInfo info = MMCifInfo();
   info.AddCitation(cit);
   std::vector<MMCifInfoCitation> citations = info.GetCitations();
@@ -99,12 +99,12 @@ BOOST_AUTO_TEST_CASE(mmcif_info_citation)
   BOOST_CHECK_THROW(info.AddAuthorsToCitation(StringRef("Foo", 3),
                                               author_list),
                     IOException);
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_info_biounit)
 {
-  BOOST_MESSAGE("  Running mmcif_info_biounit tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_info_biounit tests...");
 
   MMCifInfoBioUnit bu = MMCifInfoBioUnit();
 
@@ -147,12 +147,12 @@ BOOST_AUTO_TEST_CASE(mmcif_info_biounit)
   BOOST_CHECK(tr[1].first == 1);
   BOOST_CHECK(tr[1].second == 2);
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_info_transoperation)
 {
-  BOOST_MESSAGE("  Running mmcif_info_transoperation tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_info_transoperation tests...");
 
   MMCifInfoTransOpPtr op(new MMCifInfoTransOp);
 
@@ -180,12 +180,12 @@ BOOST_AUTO_TEST_CASE(mmcif_info_transoperation)
   BOOST_CHECK(tr.back().first == 0);
   BOOST_CHECK(tr.back().second == 1);
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_info_structdetails)
 {
-  BOOST_MESSAGE("  Running mmcif_info_structdetails tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_info_structdetails tests...");
 
   MMCifInfoStructDetails sd = MMCifInfoStructDetails();
 
@@ -215,16 +215,22 @@ BOOST_AUTO_TEST_CASE(mmcif_info_structdetails)
   info.SetStructDetails(sd);
   BOOST_CHECK(info.GetStructDetails() == sd);
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_info_revisions)
 {
-  BOOST_MESSAGE("  Running mmcif_info_revisions tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_info_revisions tests...");
 
   MMCifInfoRevisions rev = MMCifInfoRevisions();
 
   BOOST_CHECK(rev.GetDateOriginal() == "?");
+  BOOST_CHECK(rev.GetFirstRelease() == 0);
+  BOOST_CHECK(rev.GetSize() == 0);
+  BOOST_CHECK(rev.GetLastDate() == "?");
+  BOOST_CHECK_THROW(rev.GetDate(0), std::out_of_range);
+  BOOST_CHECK_THROW(rev.GetNum(0), std::out_of_range);
+  BOOST_CHECK_THROW(rev.GetStatus(0), std::out_of_range);
 
   rev.SetDateOriginal("2012-05-04");
   rev.AddRevision(1, "2012-05-04", "in preparation");
@@ -239,13 +245,16 @@ BOOST_AUTO_TEST_CASE(mmcif_info_revisions)
   BOOST_CHECK(rev.GetFirstRelease() == 2);
   BOOST_CHECK(rev.GetNum(1) == 2);
   BOOST_CHECK(rev.GetStatus(1) == "full release");  
+  BOOST_CHECK_THROW(rev.GetDate(2), std::out_of_range);
+  BOOST_CHECK_THROW(rev.GetNum(2), std::out_of_range);
+  BOOST_CHECK_THROW(rev.GetStatus(2), std::out_of_range);
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_info)
 {
-  BOOST_MESSAGE("  Running mmcif_info tests...");
+  BOOST_TEST_MESSAGE("  Running mmcif_info tests...");
 
   MMCifInfo info = MMCifInfo();
 
@@ -269,9 +278,14 @@ BOOST_AUTO_TEST_CASE(mmcif_info)
   BOOST_CHECK("B" == info.GetPDBMMCifChainTr("A"));
   BOOST_CHECK("" == info.GetPDBMMCifChainTr("C"));
 
+  info.AddMMCifEntityIdTr("A", "1");
+  BOOST_CHECK_THROW(info.AddMMCifEntityIdTr("A", "1"), IOException);
+  BOOST_CHECK("1" == info.GetMMCifEntityIdTr("A"));
+  BOOST_CHECK("" == info.GetMMCifEntityIdTr("C"));
+
   BOOST_CHECK(info.GetRevisions().GetSize() == 0);
 
-  BOOST_MESSAGE("  done.");
+  BOOST_TEST_MESSAGE("  done.");
 }
 
 

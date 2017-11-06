@@ -5,12 +5,15 @@ set(OST_MOL_ALG_PYMOD_SOURCES
   export_trajectory_analysis.cc
   export_structure_analysis.cc
   export_contact_overlap.cc
+  export_accessibility.cc
+  export_sec_structure.cc
 )
 
 set(OST_MOL_ALG_PYMOD_MODULES
   "__init__.py"
   views.py
   superpose.py
+  qsscoring.py
   trajectory_analysis.py
   structure_analysis.py
   helix_kinks.py

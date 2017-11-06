@@ -104,7 +104,7 @@ AlignedColumn AlignedRegion::operator[](int index) const
 bool AlignedRegion::operator==(const AlignedRegion& rhs) const
 {
   return aln_==rhs.aln_ && rhs.start_==start_ && 
-         rhs.end_==rhs.end_ && master_==rhs.master_;
+         end_==rhs.end_ && master_==rhs.master_;
 }
 
 bool AlignedRegion::operator!=(const AlignedRegion& rhs) const

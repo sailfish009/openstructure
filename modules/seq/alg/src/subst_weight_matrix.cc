@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "subst_weight_matrix.hh"
+#include <ost/base.hh>
 #include <iostream>
 
 namespace{

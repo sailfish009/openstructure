@@ -60,7 +60,7 @@ mapped back to the attached structure at any time.
     :param filename:    Filename
     :type filename:     :class:`str`
 
-  .. method:: Load(filename)
+  .. staticmethod:: Load(filename)
 
     Loads a dumped simulation from disk. You have to make sure, that the provided 
     settings are consistent with those from the saved simulation. Undefined 
@@ -71,6 +71,18 @@ mapped back to the attached structure at any time.
 
     :type filename:     :class:`str`
     :type settings:     :class:`Settings`
+
+  .. staticmethod:: IsPlatformAvailable(settings)
+
+    :return: True, if platform defined in *settings* is available. Otherwise,
+             construction of a simulation object will fail with these settings.
+    :rtype:  :class:`bool`
+    
+    :param settings: Controls the parametrization of this class.
+                     Only :attr:`Settings.openmm_plugin_directory`,
+                     :attr:`Settings.custom_plugin_directory` and
+                     :attr:`Settings.platform` are relevant.
+    :type settings:  :class:`Settings`
 
   .. method:: ApplyLBFGS([tolerance=1.0,max_iterations=1000])
 
@@ -189,6 +201,10 @@ mapped back to the attached structure at any time.
   .. method:: AddPositionConstraint(index)
 
     Fixes the position of the particle with index given in the argument.
+    This requires to reinitialize the internal openmm Context 
+    (this is expensive!). Positions, velocities, forces, energies etc. 
+    are properly preserved but e.g. states of random number generators etc.
+    might be lost.
 
     :param index:       Particle to be fixed
     :type index:        :class:`int`
@@ -199,6 +215,10 @@ mapped back to the attached structure at any time.
   .. method:: AddPositionConstraints(indices)
 
     Fixes the position of the atoms with the indices given in in the argument.
+    This requires to reinitialize the internal openmm Context 
+    (this is expensive!). Positions, velocities, forces, energies etc. 
+    are properly preserved but e.g. states of random number generators etc.
+    might be lost.
 
     :param indices:     Particles to be fixed
     :type indices:      :class:`list`
@@ -209,6 +229,10 @@ mapped back to the attached structure at any time.
   .. method:: ResetPositionConstraints()
 
     Removes all position constraints.
+    This requires to reinitialize the internal openmm Context 
+    (this is expensive!). Positions, velocities, forces, energies etc. 
+    are properly preserved but e.g. states of random number generators etc.
+    might be lost.
 
   .. method:: ResetHarmonicBond(index, bond_length, force_constant)
 
@@ -335,7 +359,11 @@ mapped back to the attached structure at any time.
   .. method:: ResetDistanceConstraint(index, constraint_length)
 
     Update of the distance constraint parameters in the simulation **and**
-    in the attached :class:`Topology`
+    in the attached :class:`Topology`. 
+    This requires to reinitialize the internal openmm Context 
+    (this is expensive!). Positions, velocities, forces, energies etc. 
+    are properly preserved but e.g. states of random number generators etc.
+    might be lost. 
     
     :param index:       Distance constraint to be reset
     :param constraint_length: New constraint length in nm
@@ -433,6 +461,10 @@ mapped back to the attached structure at any time.
 
     Update of the mass in the simulation **and**
     in the attached :class:`Topology`
+    This requires to reinitialize the internal openmm Context 
+    (this is expensive!). Positions, velocities, forces, energies etc. 
+    are properly preserved but e.g. states of random number generators etc.
+    might be lost.
 
     :param index:       Mass to be reset
     :param mass:        New mass

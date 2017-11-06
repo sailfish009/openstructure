@@ -82,6 +82,8 @@ public:
 
   BlockModifierPtr GetBlockModifier(const String& modifier_name) const;
 
+  std::vector<String> GetBuildingBlockNames() const;
+
   String GetAtomType(const String& res_name, const String& atom_name) const;
 
   HydrogenConstructorPtr GetHydrogenConstructor(const String& name) const;
@@ -195,6 +197,14 @@ public:
   //Renaming to the forcefield specific names (residues/atoms)
   void AssignFFSpecificNames(ost::mol::EntityHandle& handle, bool reverse=false) const;
 
+  // get renaming rules (for data extraction)
+  bool HasAtomRenamingRules(const String& res_name) const {
+    return (atom_renaming_ff_specific_.find(res_name)
+            != atom_renaming_ff_specific_.end());
+  }
+  typedef std::vector<std::pair<String,String> > AtomRenamingType;
+  const AtomRenamingType& GetAtomRenamingRules(const String& res_name) const;
+
 private:
 
   String AtomTypesToKeyword(std::vector<String>& types, bool allow_reordering = true) const;
@@ -220,7 +230,7 @@ private:
   boost::unordered_map<String,std::vector<InteractionPtr> > dihedrals_;
   boost::unordered_map<String,std::vector<InteractionPtr> > improper_dihedrals_;
 
-  boost::unordered_map<String, std::vector<std::pair<String,String> > > atom_renaming_ff_specific_;
+  boost::unordered_map<String, AtomRenamingType> atom_renaming_ff_specific_;
   boost::unordered_map<String, ResidueNamesPtr> res_renaming_ff_specific_;
 
   boost::unordered_map<String, HydrogenConstructorPtr> hydrogen_constructors_;

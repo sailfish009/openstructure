@@ -93,15 +93,17 @@ The basic functionality of editors is implemented in the EditorBase class.
   .. method:: SetChainType(chain, type)
 
      :param chain: Must be a valid chain
-     :param type:  Must be a value of enum ChainType
-                   (see :attr:`ChainHandle.type`)   
+     :type chain:  :class:`ChainHandle`
+     :param type: Chain type to set
+     :type type:  :class:`ChainType`
 
   .. method:: SetChainDescription(chain, description)
 
      :param chain:       Must be a valid chain
      :param description: Description to be added
 
-  .. method:: InsertAtom(residue, atom_name, pos, element="", occupancy=1.0, b_factor=0.0, is_hetatm=False)
+  .. method:: InsertAtom(residue, atom_name, pos, element="", occupancy=1.0, \
+                         b_factor=0.0, is_hetatm=False)
   
     Insert new atom and add it to residue. For atoms with alternative atom locations use :meth:`InsertAltAtom`. If the element parameter is a valid 
     element, the atom properties mass, charge, and radius are set to default 
@@ -235,13 +237,13 @@ The basic functionality of editors is implemented in the EditorBase class.
     
     :type atom: :class:`EntityHandle`
   
-  .. method:: DeleteAtoms(residue)
+  .. method:: DeleteAtoms(atoms)
   
     Deletes a set specified atoms. All associated torsions and bonds will be 
     removed as well
     
-    :type residue: :class:`AtomHandleList`
-    :param residue: A valid set of atoms
+    :type atoms: :class:`AtomHandleList`
+    :param atoms: A valid set of atoms
     
   
   .. method:: DeleteResidue(residue)
@@ -358,12 +360,7 @@ The basic functionality of editors is implemented in the EditorBase class.
      :type atom2:        :class:`AtomHandle`
      :param bond_order:  bond order (e.g. 1=single, 2=double, 3=triple)
      :type bond_order:   :class:`int`
-
-BondHandle (EditorBase::*connect_b)(const AtomHandle&, const AtomHandle&,
-                                    Real, Real, Real)=&EditorBase::Connect;
-BondHandle (EditorBase::*connect_d)(const AtomHandle&, const AtomHandle&,
-                                    Real, Real, Real,
-                                    unsigned char)=&EditorBase::Connect;
+     
 
 Editor for the External Coordinate System
 --------------------------------------------------------------------------------
@@ -419,107 +416,52 @@ Euclidian space.
      Force spatial organizer and ICS update workaround for delayed editor call from Python garbage collection
   
   .. method:: SetAtomPos(atom, pos)
+              SetAtomPos(atom_list, pos_list)
+              SetAtomTransformedPos(atom, pos)
+              SetAtomTransformedPos(atom_list, pos_list)
   
-     Set the (transformed) position of atom. This method will also update the
-     original position of the atom by applying the inverse of the entity
-     transform.
+     Set the transformed position of atoms. This method will also update the
+     original position of atoms by applying the inverse of the entity transform.
+
+     Setting all positions at once is by far faster than call the function for
+     each atom, but it is only available if OpenStructure was compiled with an
+     enabled ``USE_NUMPY`` flag (see :ref:`here <cmake-flags>` for details). The
+     fastest option to work with all atom positions externally is to extract the
+     list of :attr:`~ost.mol.EntityHandle.atoms` with
+     :meth:`ost.mol.EntityHandle.GetPositions` (with *sort_by_index = False*).
+     Then extract a buffered editor and use the same list of atoms with a
+     modified numpy array as input to this function. Example:
+
+     .. code-block:: python
+
+       # get atom list and positions
+       atom_list = ent.atoms
+       positions = ent.GetPositions(False)
+       # modify positions but keep ent and atom_list unchanged
+       # ...
+       # apply changes to entity all at once
+       edi = ent.EditXCS(mol.BUFFERED_EDIT)
+       edi.SetAtomPos(atom_list, positions)
+       edi.UpdateICS()
      
-     :param atom: must be a valid atom handle
+     :param atom: A valid atom handle
      :type  atom: :class:`ost.mol.AtomHandle`
+     :param atom_list: A valid atom handle list or a list of atom :attr:`indices
+                       <ost.mol.AtomHandle.index>`.
+     :type  atom_list: :class:`ost.mol.AtomHandleList` or :class:`list` of
+                       :class:`int`
      :param pos: The new position
      :type  pos: :class:`~ost.geom.Vec3`
-
-  .. method:: SetAtomPos(atom, pos)
-  
-     Set the (transformed) position of atom. This method will also update the
-     original position of the atom by applying the inverse of the entity
-     transform.
-     
-     :param atom_list: must be a valid atom handle list
-     :type  atom_list: :class:`ost.mol.AtomHandleList`
-     :param pos_list: a numpy array of floats having a length of 3*atom_list.size()
-     :type  pos_list: numpy array
-
-  .. method:: SetAtomPos(atom, pos)
-  
-     Set the (transformed) position of atom. This method will also update the
-     original position of the atom by applying the inverse of the entity
-     transform.
-     
-     :param atom_list: must be a valid atom handle list
-     :type  atom_list: :class:`ost.mol.AtomHandleList`
-     :param pos_list: a list of double having a length of 3*atom_list.size()
-     :type  pos_list: list
+     :param pos_list: An array of positions (shape [*len(atom_list)*, 3],
+                      preferably contiguous array in memory (C order)).
+     :type  pos_list: :class:`numpy.array`
     
   .. method:: SetAtomOriginalPos(atom, pos)
+              SetAtomOriginalPos(atom_list, pos_list)
      
-     Set the original (untransformed) position of the atom. This method will
+     Set the original (untransformed) position of atoms. This method will
      also update the transformed position by applying the entity transform to
-     the original pos.
-     
-     :param atom: must be a valid atom handle
-     :type  atom: :class:`ost.mol.AtomHandle`
-     :param pos: The new untransformed position
-     :type  pos: :class:`~ost.geom.Vec3` 
-  
-
-  .. method:: SetAtomOriginalPos(atom_list, pos_list)
-     
-     Set the original (untransformed) position of the atoms in the given list. This method will
-     also update the transformed position by applying the entity transform to
-     the original pos.
-     
-     :param atom_list: must be a valid atom handle list
-     :type  atom_list: :class:`ost.mol.AtomHandleList`
-     :param pos_list: a list of double having a length of 3*atom_list.size()
-     :type  pos_list: list
-
-  .. method:: SetAtomOriginalPos(atom_list, pos_list)
-     
-     Set the original (untransformed) position of the atoms in the given list. This method will
-     also update the transformed position by applying the entity transform to
-     the original pos.
-     
-     :param atom_list: must be a valid atom handle list
-     :type  atom_list: :class:`ost.mol.AtomHandleList`
-     :param pos_list: a numpy array of floats having a length of 3*atom_list.size()
-     :type  pos_list: numpy array
-
-
-  .. method:: SetAtomTransformedPos(atom, pos)
-  
-     Set the (transformed) position of atom. This method will also update the
-     original position of the atom by applying the inverse of the entity
-     transform.
-     
-     :param atom: must be a valid atom handle
-     :type  atom: :class:`ost.mol.AtomHandle`
-     :param pos: The new position
-     :type  pos: :class:`~ost.geom.Vec3`
-
-  .. method:: SetAtomTransformedPos(atom_list, pos_list)
-  
-     Set the (transformed) position of atom. This method will also update the
-     original position of the atom by applying the inverse of the entity
-     transform.
-
-     :param atom_list: must be a valid atom handle list
-     :type  atom_list: :class:`ost.mol.AtomHandleList`
-     :param pos_list: a numpy array of floats having a length of 3*atom_list.size()
-     :type  pos_list: numpy array
-
-  .. method:: SetAtomTransformedPos(atom_list, pos_list)
-  
-     Set the (transformed) position of atom. This method will also update the
-     original position of the atom by applying the inverse of the entity
-     transform.
-
-     :param atom_list: must be a valid atom handle list
-     :type  atom_list: :class:`ost.mol.AtomHandleList`
-     :param pos_list: a list of double having a length of 3*atom_list.size()
-     :type  pos_list: list
-
-
+     the original pos. See :meth:`SetAtomPos` for more details.
 
   
 Editor for the Internal Coordinate System

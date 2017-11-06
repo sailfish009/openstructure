@@ -65,6 +65,16 @@ public:
                        const std::vector<String>& hydrogen_names, 
                        const std::vector<String>& anchors);
 
+  // GET STUFF (for data extraction)
+  uint GetNumHydrogenRules() const { return add_number_.size(); }
+  // all getters for idx < GetNumHydrogenRules()
+  int GetHydrogenRuleNumber(uint idx) const { return add_number_[idx]; }
+  int GetHydrogenRuleMethod(uint idx) const { return methods_[idx]; }
+  const std::vector<String>& 
+  GetHydrogenRuleNames(uint idx) const { return hydrogen_names_[idx]; }
+  const std::vector<String>& 
+  GetHydrogenRuleAnchors(uint idx) const { return anchor_atom_names_[idx]; }
+
   virtual void OnSave(ost::io::BinaryDataSink& ds) { ds << *this; }
 
   virtual BlockModifierType GetBlockModifierType() { return GromacsBlockModifiers; }
@@ -144,6 +154,38 @@ public:
                                      cmaps_.push_back(p); }
 
   void AddDeleteAtom(const String& atom_name) { delete_atom_names_.push_back(atom_name); }
+
+  // GET STUFF (for data extraction)
+  const std::vector<InteractionPtr>& GetBonds() const { return bonds_; }
+  const std::vector<InteractionPtr>& GetAngles() const { return angles_; }
+  const std::vector<InteractionPtr>& GetDihedrals() const { return dihedrals_; }
+  const std::vector<InteractionPtr>& GetImpropers() const { return impropers_; }
+  const std::vector<InteractionPtr>& GetCmaps() const { return cmaps_; }
+  const std::vector<String>& GetDeleteAtoms() const { return delete_atom_names_; }
+  // all idx for replace rules < GetNumReplaceRules()
+  uint GetNumReplaceRules() const { return replace_old_atom_name_.size(); }
+  const String& GetReplaceRuleName(uint idx) const {
+    return replace_old_atom_name_[idx];
+  }
+  const String& GetReplaceRuleNewName(uint idx) const {
+    return replace_new_atom_name_[idx];
+  }
+  const String& GetReplaceRuleNewType(uint idx) const {
+    return replace_new_atom_type_[idx];
+  }
+  Real GetReplaceRuleNewCharge(uint idx) const {
+    return replace_new_charge_[idx];
+  }
+  // all idx for add rules < GetNumAddRules()
+  uint GetNumAddRules() const { return add_add_number_.size(); }
+  int GetAddRuleNumber(uint idx) const { return add_add_number_[idx]; }
+  int GetAddRuleMethod(uint idx) const { return add_methods_[idx]; }
+  const std::vector<String>& 
+  GetAddRuleNames(uint idx) const { return add_atom_names_[idx]; }
+  const std::vector<String>& 
+  GetAddRuleAnchors(uint idx) const { return add_anchor_atom_names_[idx]; }
+  const String& GetAddRuleType(uint idx) const { return add_atom_types_[idx]; }
+  Real GetAddRuleCharge(uint idx) const { return add_charges_[idx]; }
 
   virtual void OnSave(ost::io::BinaryDataSink& ds) { ds << *this; }
 

@@ -19,6 +19,20 @@ latest compound definitions, follow :ref:`these instructions <mmcif-convert>` to
 build the compound library manually.
 
 
+.. function:: GetDefaultLib()
+
+  :return: Default compound library set by :func:`SetDefaultLib`. If you got
+           OpenStructure as a bundle or you :ref:`compiled <cmake-flags>`  it
+           with a specified ``COMPOUND_LIB`` flag, this will return a compound
+           library when executing scripts with ``ost``.
+  :rtype:  :class:`CompoundLib` or None if no library set
+
+.. function:: SetDefaultLib(lib)
+
+  :param lib: Library to be set as default compound library.
+  :type lib:  :class:`CompoundLib`
+
+
 .. class:: CompoundLib
 
   .. staticmethod:: Load(database, readonly=True)
@@ -69,19 +83,15 @@ build the compound library manually.
 
   .. method:: GetOSTVersionUsed()
 
-     reads out ost_version_used from the table chemlib_info.
-
-     :returns: a version string
-
-     :rtype: :class:`String`
+     :return: OST version (ost_version_used from the table chemlib_info)
+     :rtype:  :class:`str`
 
   .. method:: GetCreationDate()
 
-     reads out creation_date from the table chemlib_info.
+     :return: creation date (creation_date from the table chemlib_info)
+     :rtype:  :class:`str`
 
-     :returns: a date string (Py), a Date (C++)
 
-     :rtype: :class:`String` (Py), :class:`Date`
 .. class:: Compound
 
   Holds the description of a chemical compound, such as three-letter-code, and

@@ -87,6 +87,9 @@ void MMCifReader::ClearState()
   bu_assemblies_.clear();
   helix_list_.clear();
   strand_list_.clear();
+  revision_dates_.clear();
+  revision_types_.clear();
+  database_PDB_rev_added_ = false;
 }
 
 void MMCifReader::SetRestrictChains(const String& restrict_chains)
@@ -214,9 +217,12 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
   } else if (header.GetCategory() == "refine") {
     category_ = REFINE;
     // mandatory items
-    this->TryStoreIdx(REFINE_ENTRY_ID, "entry_id", header);
-    this->TryStoreIdx(LS_D_RES_HIGH,   "ls_d_res_high", header);
-    this->TryStoreIdx(LS_D_RES_LOW,    "ls_d_res_low", header);
+    this->TryStoreIdx(LS_D_RES_HIGH, "ls_d_res_high", header);
+    // optional items
+    indices_[REFINE_ENTRY_ID] = header.GetIndex("entry_id");
+    indices_[LS_D_RES_LOW] = header.GetIndex("ls_d_res_low");
+    indices_[LS_R_FACTOR_R_WORK] = header.GetIndex("ls_R_factor_R_work");
+    indices_[LS_R_FACTOR_R_FREE] = header.GetIndex("ls_R_factor_R_free");
     cat_available = true;
   } else if (header.GetCategory() == "pdbx_struct_assembly") {
     category_ = PDBX_STRUCT_ASSEMBLY;
@@ -331,6 +337,7 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     indices_[SRSD_DETAILS]=header.GetIndex("details");
     cat_available = true;
   } else if (header.GetCategory()=="database_PDB_rev") {
+    // THIS IS FOR mmCIF versions < 5
     category_ = DATABASE_PDB_REV;
     // mandatory items
     this->TryStoreIdx(DPI_NUM, "num", header);
@@ -338,6 +345,32 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     indices_[DPI_DATE] = header.GetIndex("date");
     indices_[DPI_DATE_ORIGINAL] = header.GetIndex("date_original");
     indices_[DPI_STATUS] = header.GetIndex("status");
+    cat_available = true;
+  } else if (header.GetCategory()=="pdbx_audit_revision_history") {
+    // THIS IS FOR mmCIF versions >= 5
+    category_ = PDBX_AUDIT_REVISION_HISTORY;
+    // mandatory items
+    this->TryStoreIdx(PARH_ORDINAL, "ordinal", header);
+    this->TryStoreIdx(PARH_REVISION_DATE, "revision_date", header);
+    cat_available = true;
+  } else if (header.GetCategory()=="pdbx_audit_revision_details") {
+    // THIS IS FOR mmCIF versions >= 5
+    category_ = PDBX_AUDIT_REVISION_DETAILS;
+    // mandatory items
+    this->TryStoreIdx(PARD_REVISION_ORDINAL, "revision_ordinal", header);
+    // optional items
+    indices_[PARD_TYPE] = header.GetIndex("type");
+    if (indices_[PARD_TYPE] == -1) {
+      LOG_WARNING("No 'pdbx_audit_revision_details.type' items "
+                  "found! The revision history will not have status entries!");
+    }
+    cat_available = true;
+  } else if (header.GetCategory()=="pdbx_database_status") {
+    // THIS IS FOR mmCIF versions >= 5
+    category_ = PDBX_DATABASE_STATUS;
+    // optional items
+    indices_[PDS_RECVD_INITIAL_DEPOSITION_DATE]
+     = header.GetIndex("recvd_initial_deposition_date");
     cat_available = true;
   }
   category_counts_[category_]++;
@@ -506,8 +539,10 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
       curr_chain_.SetStringProp("pdb_auth_chain_name", auth_chain_name);
       ++chain_count_;
       // store entity id
+      String ent_id = columns[indices_[LABEL_ENTITY_ID]].str();
       chain_id_pairs_.push_back(std::pair<mol::ChainHandle,String>(curr_chain_,
-                                     columns[indices_[LABEL_ENTITY_ID]].str()));
+                                                                   ent_id));
+      info_.AddMMCifEntityIdTr(cif_chain_name, ent_id);
     }
     assert(curr_chain_.IsValid());
   } else if (chain_id_pairs_.back().second != // unit test
@@ -760,6 +795,10 @@ void MMCifReader::ParseCitation(const std::vector<StringRef>& columns)
     }
   }
   if (indices_[BOOK_TITLE] != -1) {
+    // this is only set in few PDB entries and RCSB overrides it with
+    // the journal_abbrev for their citations
+    // -> as of August 1, 2017, 5 entries known: 5b1j, 5b1k, 5fax, 5fbz, 5ffn
+    //    -> all those have journal_abbrev set
     if ((columns[indices_[BOOK_TITLE]] != StringRef(".", 1)) &&
         (columns[indices_[BOOK_TITLE]][0]!='?')) {
       cit.SetPublishedIn(columns[indices_[BOOK_TITLE]].str());
@@ -767,15 +806,19 @@ void MMCifReader::ParseCitation(const std::vector<StringRef>& columns)
   }
   if (indices_[JOURNAL_ABBREV] != -1) {
     if (columns[indices_[JOURNAL_ABBREV]] != StringRef(".", 1)) {
-      if (cit.GetPublishedIn().length() > 0) {
-        throw IOException(this->FormatDiagnostic(STAR_DIAG_WARNING,
-                                                 "citation.book_title already occupies the 'published_in' field of this citation, cannot add " +
-                                                 columns[indices_[JOURNAL_ABBREV]].str() +
-                                                 ".",
-                                                 this->GetCurrentLinenum()));
-      } else {
-        cit.SetPublishedIn(columns[indices_[JOURNAL_ABBREV]].str());
+      const String journal_abbrev = columns[indices_[JOURNAL_ABBREV]].str();
+      const String published_in = cit.GetPublishedIn();
+      if (published_in.length() > 0 && published_in != journal_abbrev) {
+        LOG_WARNING(this->FormatDiagnostic(STAR_DIAG_WARNING,
+                                           "The 'published_in' field was "
+                                           "already set by citation.book_title "
+                                           "'" + published_in + "'! "
+                                           "This will be overwritten by "
+                                           "citation.journal_abbrev '" +
+                                           journal_abbrev + "'.",
+                                           this->GetCurrentLinenum()));
       }
+      cit.SetPublishedIn(journal_abbrev);
     }
   }
   if (indices_[JOURNAL_VOLUME] != -1) {
@@ -874,10 +917,21 @@ void MMCifReader::ParseExptl(const std::vector<StringRef>& columns)
 
 void MMCifReader::ParseRefine(const std::vector<StringRef>& columns)
 {
-  StringRef col=columns[indices_[LS_D_RES_HIGH]];
+  StringRef col = columns[indices_[LS_D_RES_HIGH]];
   if (col.size()!=1 || (col[0]!='?' && col[0]!='.')) {
-    info_.SetResolution(this->TryGetReal(columns[indices_[LS_D_RES_HIGH]],
-                                         "refine.ls_d_res_high"));
+    info_.SetResolution(this->TryGetReal(col, "refine.ls_d_res_high"));
+  }
+  if (indices_[LS_R_FACTOR_R_WORK] != -1) {
+    col = columns[indices_[LS_R_FACTOR_R_WORK]];
+    if (col.size()!=1 || (col[0]!='?' && col[0]!='.')) {
+      info_.SetRWork(this->TryGetReal(col, "refine.ls_R_factor_R_work"));
+    }
+  }
+  if (indices_[LS_R_FACTOR_R_FREE] != -1) {
+    col = columns[indices_[LS_R_FACTOR_R_FREE]];
+    if (col.size()!=1 || (col[0]!='?' && col[0]!='.')) {
+      info_.SetRFree(this->TryGetReal(col, "refine.ls_R_factor_R_free"));
+    }
   }
 }
 
@@ -1350,6 +1404,37 @@ void MMCifReader::ParseDatabasePDBRev(const std::vector<StringRef>& columns)
     status = StringRef("", 0);
   }
   info_.AddRevision(num, date.str(), status.str());
+  database_PDB_rev_added_ = true;
+}
+
+void MMCifReader::ParsePdbxAuditRevisionHistory(
+                                       const std::vector<StringRef>& columns) {
+  // get ordinal and date
+  int num = this->TryGetInt(columns[indices_[PARH_ORDINAL]],
+                            "pdbx_audit_revision_history.ordinal");
+  StringRef date = columns[indices_[PARH_REVISION_DATE]];
+  // add to map
+  revision_dates_[num] = date.str();
+}
+
+void MMCifReader::ParsePdbxAuditRevisionDetails(
+                                       const std::vector<StringRef>& columns) {
+  // get ordinal
+  int num = this->TryGetInt(columns[indices_[PARD_REVISION_ORDINAL]],
+                            "pdbx_audit_revision_details.revision_ordinal");
+  // add type to map if available
+  if (indices_[PARD_TYPE] != -1) {
+    StringRef type = columns[indices_[PARD_TYPE]];
+    revision_types_[num] = type.str();
+  }
+}
+
+void MMCifReader::ParsePdbxDatabaseStatus(
+                                       const std::vector<StringRef>& columns) {
+  const int idx = indices_[PDS_RECVD_INITIAL_DEPOSITION_DATE];
+  if (idx != -1) {
+    info_.SetRevisionsDateOriginal(columns[idx].str());
+  }
 }
 
 void MMCifReader::OnDataRow(const StarLoopDesc& header, 
@@ -1427,6 +1512,18 @@ void MMCifReader::OnDataRow(const StarLoopDesc& header,
   case DATABASE_PDB_REV:
     LOG_TRACE("processing database_PDB_rev entry");
     this->ParseDatabasePDBRev(columns);
+    break;
+  case PDBX_AUDIT_REVISION_HISTORY:
+    LOG_TRACE("processing pdbx_audit_revision_history entry");
+    this->ParsePdbxAuditRevisionHistory(columns);
+    break;
+  case PDBX_AUDIT_REVISION_DETAILS:
+    LOG_TRACE("processing pdbx_audit_revision_details entry");
+    this->ParsePdbxAuditRevisionDetails(columns);
+    break;
+  case PDBX_DATABASE_STATUS:
+    LOG_TRACE("processing pdbx_database_status entry");
+    this->ParsePdbxDatabaseStatus(columns);
     break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
@@ -1604,7 +1701,7 @@ void MMCifReader::OnEndData()
         info_.AddMMCifPDBChainTr(css->first.GetName(), pdb_auth_chain_name);
         info_.AddPDBMMCifChainTr(pdb_auth_chain_name, css->first.GetName());
       } else if (edm_it->second.type!=mol::CHAINTYPE_WATER) {
-        // mark everything that doesn't have SEQRES as ligand and isn't of type 
+        // mark everything that doesn't have SEQRES and isn't of type
         // water as ligand
         mol::ChainHandle chain=css->first;
         mol::ResidueHandleList residues=chain.GetResidueList();
@@ -1686,6 +1783,23 @@ void MMCifReader::OnEndData()
 
   // create secondary structure from struct_conf info
   this->AssignSecStructure(ent_handle_);
+
+  // add revision history for new style mmCIFs (only if no old data there)
+  if (!database_PDB_rev_added_) {
+    std::map<int, String>::const_iterator rd_it;
+    for (rd_it = revision_dates_.begin(); rd_it != revision_dates_.end();
+         ++rd_it) {
+      // look for status
+      const int num = rd_it->first;
+      const String& date = rd_it->second;
+      std::map<int, String>::const_iterator rt_it = revision_types_.find(num);
+      if (rt_it != revision_types_.end()) {
+        info_.AddRevision(num, date, rt_it->second);
+      } else {
+        info_.AddRevision(num, date, "?");
+      }
+    }
+  }
 
   LOG_INFO("imported "
            << chain_count_ << " chains, "

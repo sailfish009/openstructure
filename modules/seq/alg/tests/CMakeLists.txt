@@ -8,8 +8,11 @@ set(OST_SEQ_ALG_UNIT_TESTS
   test_global_align.py
   test_semiglobal_align.py
   test_weight_matrix.py
-  test_aligntoseqres.py
 )
+
+if (COMPOUND_LIB)
+  list(APPEND OST_SEQ_ALG_UNIT_TESTS test_aligntoseqres.py)
+endif()
 
 ost_unittest(MODULE seq_alg SOURCES "${OST_SEQ_ALG_UNIT_TESTS}"
              LINK ost_mol ost_io)

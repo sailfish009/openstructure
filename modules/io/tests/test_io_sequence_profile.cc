@@ -168,7 +168,6 @@ BOOST_AUTO_TEST_CASE(pssm_loading)
 
   // compare manually
   ProfileHandle prof_pssm_ref;
-  prof_pssm_ref.SetSequence("RRSPP");
   prof_pssm_ref.SetNullModel(ProfileColumn::BLOSUMNullModel());
   ProfileColumn pc1, pc2, pc3, pc4, pc5;
   pc1.SetFreq('R', 0.74);
@@ -241,11 +240,12 @@ BOOST_AUTO_TEST_CASE(pssm_loading)
   pc5.SetFreq('T', 0.02);
   pc5.SetFreq('V', 0.04);
 
-  prof_pssm_ref.push_back(pc1);
-  prof_pssm_ref.push_back(pc2);
-  prof_pssm_ref.push_back(pc3);
-  prof_pssm_ref.push_back(pc4);
-  prof_pssm_ref.push_back(pc5);
+  prof_pssm_ref.AddColumn(pc1);
+  prof_pssm_ref.AddColumn(pc2);
+  prof_pssm_ref.AddColumn(pc3);
+  prof_pssm_ref.AddColumn(pc4);
+  prof_pssm_ref.AddColumn(pc5);
+  prof_pssm_ref.SetSequence("RRSPP");
 
   compareProfiles(*prof, prof_pssm_ref, 1e-3);
 

@@ -664,6 +664,11 @@ The Forcefield Class
     :returns:  :class:`BuildingBlock` for this name, invalid if it can't be 
                found
 
+  .. method:: GetBuildingBlockNames()
+
+    :returns:  :class:`list` of all building block names present in that 
+               forcefield
+
 
   .. method:: GetBlockModifier(res_name)
 
