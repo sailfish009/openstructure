@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(alignment_attach_view)
   BOOST_CHECK_NO_THROW(a.AttachView(0,EntityView()));
   BOOST_CHECK_EQUAL(a.GetResidue(0,1), EntityView());
   BOOST_CHECK_EQUAL(a.GetResidue(0,3), EntityView());
-  BOOST_CHECK_THROW(a.GetResidue(-1,0),std::out_of_range)
+  BOOST_CHECK_THROW(a.GetResidue(-1,0),std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(alignment_cut)

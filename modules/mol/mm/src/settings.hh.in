@@ -30,6 +30,9 @@
 #include <limits>
 #include <ost/mol/residue_handle.hh>
 #include <ost/mol/mm/forcefield.hh>
+#include <ost/platform.hh>
+#include <boost/filesystem/path.hpp>
+#include <ost/log.hh>
 
 namespace OpenMM{
   class Integrator;//hacky way of telling the Integrator us around
@@ -91,7 +94,7 @@ typedef std::map<String,String> PropertyMap;
 
 struct Settings{
 
-  Settings(): add_bonds(true),
+  Settings():   add_bonds(true),
                 add_angles(true),
                 add_dihedrals(true),
                 add_impropers(true),
@@ -134,10 +137,22 @@ struct Settings{
                 reaction_field_dielectric(78.3),
                 use_dispersion_correction(true),
                 keep_ff_specific_naming(true),
-                openmm_plugin_directory("@OPEN_MM_PLUGIN_DIR@"),
-                custom_plugin_directory("@STAGE_DIR@/share/openstructure/openmm_plugins")
+                openmm_plugin_directory("@OPEN_MM_PLUGIN_DIR@") {
 
-                  {   }
+    try {
+      // try to guess custom_plugin_directory
+      boost::filesystem::path shared_path(GetSharedDataPath());
+      custom_plugin_directory = (shared_path / "openmm_plugins").string();
+    } catch (std::runtime_error& e) {
+      // fallback to OpenMM path (used to be default in OST before 1.7)
+      LOG_WARNING("Failed to find shared data path for openmm_plugins. "
+                  "Please set custom_plugin_directory of Settings object "
+                  "manually or ensure that OST_ROOT is set properly. "
+                  "Caught exception: " << e.what());
+      custom_plugin_directory = openmm_plugin_directory;
+    }
+
+  }
 
   //
   bool add_bonds;

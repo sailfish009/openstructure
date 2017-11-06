@@ -467,7 +467,8 @@ class QSscorer:
     Since, the lDDT computation requires a single chain with mapped residue
     numbering, all chains are appended into a single chain X with unique residue
     numbers according to the column-index in the alignment. The alignments are
-    in the same order as they appear in :attr:`alignments`.
+    in the same order as they appear in :attr:`alignments`. Additional residues
+    are appended at the end of the chain with unique residue numbers.
 
     :getter: Computed on first use (cached)
     :type: :class:`~ost.mol.EntityHandle`
@@ -481,7 +482,7 @@ class QSscorer:
     """The reference entity used for lDDT scoring (:attr:`lddt_score`).
 
     This is a single chain X with residue numbers matching ones in
-    :attr:`lddt_mdl`.
+    :attr:`lddt_mdl` where aligned and unique numbers for additional residues.
 
     :getter: Computed on first use (cached)
     :type: :class:`~ost.mol.EntityHandle`

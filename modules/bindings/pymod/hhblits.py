@@ -574,7 +574,7 @@ class HHblits:
         job = subprocess.Popen(addss_cmd, shell=True, cwd=self.working_dir,
                                env=env, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-        sout, _ = job.communicate()
+        sout, serr = job.communicate()
         lines = sout.splitlines()
         for line in lines:
             if 'error' in line.lower():

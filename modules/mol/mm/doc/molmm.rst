@@ -21,7 +21,7 @@ one interaction after the other or automatically using the
 and setting up a :class:`Simulation` gets controlled with the :class:`Settings`.
 
 Latest Publication of `OpenMM <http://openmm.org>`_:
-P. Eastman, M. S. Friedrichs, J. D. Chodera, R. J. Radmer, C. M. Bruns, J. P. Ku, K. A. Beauchamp, T. J. Lane, L.-P. Wang, D. Shukla, T. Tye, M. Houston, T. Stich, C. Klein, M. R. Shirts, and V. S. Pande. "OpenMM 4: A Reusable, Extensible, Hardware Independent Library for High Performance Molecular Simulation." J. Chem. Theor. Comput. 9(1):461-469. (2013)
+P. Eastman, J. Swails, J. D. Chodera, R. T. McGibbon, Y. Zhao, K. A. Beauchamp, L.-P. Wang, A. C. Simmonett, M. P. Harrigan, C. D. Stern, R. P. Wiewiora, B. R. Brooks, and V. S. Pande. "OpenMM 7: Rapid development of high performance algorithms for molecular dynamics." PLOS Comp. Biol. 13(7): e1005659. (2017) 
 
 
 Installation

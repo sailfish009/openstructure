@@ -36,9 +36,7 @@ class Anim(QtCore.QTimer):
           self.counter += 1
 
         self.sim.Steps(1)
-        positions = sim.GetPositions()
-        for a, pos in zip(self.ent.atoms,positions):
-          self.ed.SetAtomPos(a,pos)
+        self.sim.UpdatePositions()
         self.go.UpdatePositions()
         self.steps+=1
 

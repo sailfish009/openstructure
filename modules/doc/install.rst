@@ -1,14 +1,6 @@
 Installing OpenStructure From Source
 ================================================================================
 
-.. note::
-
-  This document describes how to install OpenStructure from source. If you are
-  mainly insterested in using OpenStructure and are not planning to modify the
-  code of OpenStructure itself, please use one of the binaries `available for
-  download <http://www.openstructure.org/download/>`_.
-  
-
 Brief Overview
 --------------------------------------------------------------------------------
 
@@ -159,7 +151,7 @@ can influence it.
 * Boost is mainly controlled via the `BOOST_ROOT` option. If boost wasn't
   found, it should be set to the prefix of the boost installation. If for some
   reason, it is desirable to use the non-multithreaded boost libraries, you can
-  switch `Boost_USE_MULTITHREADED` on (it is off by default).
+  switch `Boost_USE_MULTITHREADED` off (it is on by default).
 
 * `PYTHON_ROOT` is the Python equivalent of BOOST_ROOT. It should be set to 
   the prefix path containing the python binary, headers and libraries.

@@ -39,10 +39,10 @@ boost::test_tools::predicate_result vec_is_close(const V& v1, const V& v2,
   std::string labels[]={"x","y","z","w"};
   bool flag=true;
   boost::test_tools::predicate_result res( false );
-#if BOOST_VERSION<103400
-  boost::test_tools::close_at_tolerance<Real> close_test(tolerance);
-#else
+#if BOOST_VERSION<105900
   boost::test_tools::close_at_tolerance<Real> close_test(boost::test_tools::percent_tolerance(tolerance));
+#else
+  boost::math::fpc::close_at_tolerance<Real> close_test(boost::math::fpc::percent_tolerance(tolerance));
 #endif
   for(unsigned int i=0;i<dim;++i){
     if(v1[i]==0.0){
@@ -97,10 +97,10 @@ boost::test_tools::predicate_result mat_is_close(const M& m1, const M& m2,
 {
   bool flag=true;
   boost::test_tools::predicate_result res( false );
-#if BOOST_VERSION<103400
-  boost::test_tools::close_at_tolerance<Real> close_test(tolerance);
-#else
+#if BOOST_VERSION<105900
   boost::test_tools::close_at_tolerance<Real> close_test(boost::test_tools::percent_tolerance(tolerance));
+#else
+  boost::math::fpc::close_at_tolerance<Real> close_test(boost::math::fpc::percent_tolerance(tolerance));
 #endif
   for(unsigned int i=0;i<dim;++i){
     for(unsigned int j=0;j<dim;++j){

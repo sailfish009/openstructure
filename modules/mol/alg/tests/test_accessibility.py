@@ -111,19 +111,14 @@ class TestAccessibility(unittest.TestCase):
 
   def testAccDSSP(self):
 
-    dssp_path = None
-
+    # only relevant if dssp there
     try:
-      dssp_path = settings.Locate("dssp")
+      # same check used in dssp binding
+      dssp_path = settings.Locate(['dsspcmbi', 'dssp', 'mkdssp'],
+                                  env_name='DSSP_EXECUTABLE')
     except:
-      try:
-        dssp_path = settings.locate("mkdssp")
-      except:
-        pass
-      pass
-
-    if dssp_path == None:
       print "Could not find DSSP, could not compare Accessibility function..."
+      return
 
     # we assume oligo mode to be working as it is tested in 
     # testAccNACCESS. So we only test the single residue
@@ -133,7 +128,7 @@ class TestAccessibility(unittest.TestCase):
     ent_one = ent_one.Select("peptide=true")
     ent_two = ent_two.Select("peptide=true")
 
-    dssp.AssignDSSP(ent_one, extract_burial_status=True, dssp_bin = dssp_path)
+    dssp.AssignDSSP(ent_one, extract_burial_status=True, dssp_bin=dssp_path)
     mol.alg.Accessibility(ent_two, algorithm=mol.alg.AccessibilityAlgorithm.DSSP)
 
     for a,b in zip(ent_one.residues, ent_two.residues):
