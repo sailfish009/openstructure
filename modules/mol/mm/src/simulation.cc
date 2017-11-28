@@ -45,16 +45,11 @@ Simulation::Simulation(const TopologyPtr top,
 }
 
 void Simulation::Save(const String& filename){
+
   std::ofstream stream(filename.c_str(), std::ios_base::binary);
   io::BinaryDataSink ds(stream);
+
   ds << *top_;
-  geom::Vec3List positions = this->GetPositions(false,false);
-  for(geom::Vec3List::iterator i = positions.begin(); 
-      i != positions.end(); ++i){
-    ds & (*i)[0];
-    ds & (*i)[1];
-    ds & (*i)[2];
-  }
 
   uint num_chains;
   uint num_residues;
@@ -96,15 +91,11 @@ void Simulation::Save(const String& filename){
           k != atom_list.end(); ++k){
         atom_name = k->GetName();
         atom_element = k->GetElement();
-        geom::Vec3 pos = k->GetPos();
         bfac = k->GetBFactor();
         occ = k->GetOccupancy();
         is_hetatm = k->IsHetAtom();
         ds & atom_name;
         ds & atom_element;
-        ds & pos[0];
-        ds & pos[1];
-        ds & pos[2];
         ds & bfac;
         ds & occ;
         ds & is_hetatm;
@@ -138,6 +129,7 @@ void Simulation::Save(const String& filename){
 }
 
 SimulationPtr Simulation::Load(const String& filename, SettingsPtr settings){
+  
   if (!boost::filesystem::exists(filename)) {
     std::stringstream ss;
     ss << "Could not open simulation File '"
@@ -145,71 +137,17 @@ SimulationPtr Simulation::Load(const String& filename, SettingsPtr settings){
     throw ost::io::IOException(ss.str());
   }
 
-  SimulationPtr sim_ptr(new Simulation);
-
   std::ifstream stream(filename.c_str(), std::ios_base::binary);
   io::BinaryDataSource ds(stream);
-  TopologyPtr top_p(new Topology);
-  ds >> *top_p;
 
-  sim_ptr->top_ = top_p;
-
-  sim_ptr->system_ = SystemCreator::Create(sim_ptr->top_,settings,
-                                       sim_ptr->system_force_mapper_);
-
-  sim_ptr->integrator_ = settings->integrator;
-
-  OpenMM::Platform::loadPluginsFromDirectory (settings->openmm_plugin_directory);
-  OpenMM::Platform::loadPluginsFromDirectory (settings->custom_plugin_directory);
-  OpenMM::Platform* platform;
-
-  switch(settings->platform){
-    case Reference:{
-      platform = &OpenMM::Platform::getPlatformByName("Reference");
-      break;
-    }
-    case OpenCL:{
-      platform = &OpenMM::Platform::getPlatformByName("OpenCL");
-      break;
-    }
-    case CUDA:{
-      platform = &OpenMM::Platform::getPlatformByName("CUDA");
-      break;
-    }
-    case CPU:{
-      platform = &OpenMM::Platform::getPlatformByName("CPU");
-      break;
-    }
-    default:{
-      throw ost::Error("Invalid Platform when Loading simulation!");
-    }
-  }
-
-  sim_ptr->context_ = ContextPtr(new OpenMM::Context(*(sim_ptr->system_),
-                                                     *(sim_ptr->integrator_),
-                                                     *platform));
-
-  std::vector<OpenMM::Vec3> positions;
-  OpenMM::Vec3 open_mm_vec;
-  Real a,b,c;
-  for(int i = 0; i < sim_ptr->system_->getNumParticles(); ++i){
-    ds & a;
-    ds & b;
-    ds & c;
-    open_mm_vec[0] = a;
-    open_mm_vec[1] = b;
-    open_mm_vec[2] = c;
-    positions.push_back(open_mm_vec);
-  }
-  sim_ptr->context_->setPositions(positions);
+  SimulationPtr sim_ptr(new Simulation);
+  TopologyPtr top(new Topology);
+  ds >> *top;
 
   uint num_chains;
   uint num_residues;
   uint num_atoms;
   uint num_bonded_atoms;
-  Real x_pos;
-  Real y_pos;
-  Real z_pos;
   Real bfac;
   Real occ;
   bool is_hetatm;
@@ -238,19 +176,16 @@ SimulationPtr Simulation::Load(const String& filename, SettingsPtr settings){
       for(uint k = 0; k < num_atoms; ++k){
         ds & atom_name;
         ds & atom_element;
-        ds & x_pos;
-        ds & y_pos;
-        ds & z_pos;
         ds & bfac;
         ds & occ;
         ds & is_hetatm;
-        geom::Vec3 pos(x_pos,y_pos,z_pos);
-        ed.InsertAtom(res,atom_name,pos,atom_element,occ,bfac,is_hetatm);
+        ed.InsertAtom(res, atom_name, geom::Vec3(0.0,0.0,0.0),
+                      atom_element, occ, bfac, is_hetatm);
       }
     }
   }
-  sim_ptr->ent_ = ent;
-  sim_ptr->atom_list_ = sim_ptr->ent_.GetAtomList();
+
+  sim_ptr->Init(top, ent, settings);
 
   for(uint i = 0; i < sim_ptr->atom_list_.size(); ++i){
     ds & num_bonded_atoms;
@@ -260,7 +195,10 @@ SimulationPtr Simulation::Load(const String& filename, SettingsPtr settings){
     }
   }
 
+  // also loads the positions that have been set in the context
+  // they get mapped over to the attached entity
   sim_ptr->context_->loadCheckpoint(stream);
+  sim_ptr->UpdatePositions();
 
   return sim_ptr;
 }
