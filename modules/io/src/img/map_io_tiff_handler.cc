@@ -847,11 +847,11 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
     break;
   case RESUNIT_INCH:
     image.SetPixelSampling(geom::Vec3(xreso*Units::in,yreso*Units::in,1));
-    image.SetSpatialOrigin(img::Point(static_cast<int>(round(xpos/xreso)),static_cast<int>(round(ypos/yreso)),0));
+    image.SetSpatialOrigin(img::Point(static_cast<int>(round_float(xpos/xreso)),static_cast<int>(round_float(ypos/yreso)),0));
     break;
   case RESUNIT_CENTIMETER:
     image.SetPixelSampling(geom::Vec3(xreso*Units::cm,yreso*Units::cm,1));
-    image.SetSpatialOrigin(img::Point(static_cast<int>(round(xpos/xreso)),static_cast<int>(round(ypos/yreso)),0));
+    image.SetSpatialOrigin(img::Point(static_cast<int>(round_float(xpos/xreso)),static_cast<int>(round_float(ypos/yreso)),0));
     break;
   }
   _TIFFfree(buf);

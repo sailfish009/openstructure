@@ -150,7 +150,7 @@ class TestMMCifInfo(unittest.TestCase):
                       [mol.ResNum(1), mol.ResNum(2), mol.ResNum(3), mol.ResNum(4)])
 
   def test_mmcifinfo_biounit_pdbize(self):
-    ent, seqres, info = io.LoadMMCIF("testfiles/mmcif/3T6C.cif.gz",
+    ent, seqres, info = io.LoadMMCIF("testfiles/mmcif/3T6C.cif",
                                      seqres=True,
                                      info=True)
     pdb_ent = info.GetBioUnits()[0].PDBize(ent)

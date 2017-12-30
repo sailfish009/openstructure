@@ -51,7 +51,7 @@ public:
 
   Texture(const Bitmap& b);
 
-  bool IsValid() const {return d_;}
+  bool IsValid() const {return static_cast<bool>(d_);}
 
   float* data() {return &d_[0];}
   

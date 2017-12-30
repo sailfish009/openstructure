@@ -163,7 +163,7 @@ template <> void set_new_type<IT_FLOAT,IT_STRING>(EleImpl& item)
 
 template <> void set_new_type<IT_FLOAT,IT_INT>(EleImpl& item)
 {
-  item.SetIntRepr(static_cast<int>(round(item.GetFloatRepr())));
+  item.SetIntRepr(static_cast<int>(round_real(item.GetFloatRepr())));
 }
 
 template <> void set_new_type<IT_FLOAT,IT_FLOAT>(EleImpl& item)

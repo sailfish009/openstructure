@@ -26,10 +26,10 @@
 #define DATA_VIEWER_PANEL_BASE_HH_
 
 #include <map>    
+
+#ifndef Q_MOC_RUN
+
 #include <boost/shared_ptr.hpp>
-
-
-
 #include <ost/base.hh>
 #include <ost/img/extent.hh>
 #include <ost/img/data_observer.hh>
@@ -40,6 +40,8 @@
 #include <ost/gui/data_viewer/viewer_normalizer.hh>
 
 #include <ost/img/normalizer_impl.hh>
+
+#endif
 
 #include <QWidget>
 #include <QCursor>

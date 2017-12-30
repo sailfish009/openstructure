@@ -191,7 +191,7 @@ RasterImage::Pixel get_value_t(const Data& d, const Point& p, const geom::Vec3& 
       if(signcolor) vv = std::abs(vv);
       rv = n->Convert(vv);
     }
-    uchar v = (unsigned char)::round(rv);
+    uchar v = (unsigned char)::round_real(rv);
     if(signcolor) {
       float hsv[3];
       hsv[0] = sg ? 0.0 : 120.0;
@@ -268,7 +268,7 @@ RasterImage::Pixel isi_to_pixel(const ImageStateImpl<T,D>& isi,
   } else {
     rv = n->Convert(Val2Val<T,Real>(isi.Value(p)));
   }
-  uchar v = (unsigned char)::round(rv);
+  uchar v = (unsigned char)::round_real(rv);
   return RasterImage::Pixel(v,v,v);
 }
 

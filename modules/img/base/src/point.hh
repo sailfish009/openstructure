@@ -87,8 +87,8 @@ public:
   
   //! conversion from Vec2
   explicit Point(const Vec2& v):
-    x(static_cast<int>(round(v[0]))),
-    y(static_cast<int>(round(v[1]))),
+    x(static_cast<int>(round_real(v[0]))),
+    y(static_cast<int>(round_real(v[1]))),
     z()
   {
   } 
@@ -96,18 +96,18 @@ public:
 
   //! conversion from Vec3
   explicit Point(const Vec3& v):
-    x(static_cast<int>(round(v[0]))),
-    y(static_cast<int>(round(v[1]))),
-    z(static_cast<int>(round(v[2])))
+    x(static_cast<int>(round_real(v[0]))),
+    y(static_cast<int>(round_real(v[1]))),
+    z(static_cast<int>(round_real(v[2])))
   {
   } 
 
 
   //! conversion from Vec4 (normalization)
   explicit Point(const Vec4& v):
-    x(static_cast<int>(round(v[0]))),
-    y(static_cast<int>(round(v[1]))),
-    z(static_cast<int>(round(v[2])))
+    x(static_cast<int>(round_real(v[0]))),
+    y(static_cast<int>(round_real(v[1]))),
+    z(static_cast<int>(round_real(v[2])))
   {
     if(std::abs(v[3])<1e-100) {
       throw geom::OutOfRangeException("4th element of Vec4 is too close to zero for normalization");

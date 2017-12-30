@@ -51,27 +51,39 @@ typedef unsigned int uint;
 typedef std::complex<Real> Complex;
 typedef unsigned short Word;
 
+typedef std::string String;
 
-
-#ifndef round_function
-#define round_function
-#ifndef round
-inline Real round( Real d )
+#ifndef round_real_function
+#define round_real_function
+#ifndef round_real
+inline Real round_real(Real d) 
 {
   return floor(d+Real(0.5));
 }
 #endif
 #endif
 
-#ifndef rint_function
-#define rint_function
-#ifndef rint
-inline Real rint(Real d)
+#ifndef round_float_function
+#define round_float_function
+#ifndef round_float
+inline float round_float(float d) 
 {
-  return floor(d+Real(0.5));
+  return (float)floor(d+float(0.5));
 }
 #endif
 #endif
+
+#ifndef round_double_function
+#define round_double_function
+#ifndef round_double
+inline double round_double(double d) 
+{
+  return (double)floor(d+double(0.5));
+}
+#endif
+#endif
+
+
 
 #if _MSC_VER
 #pragma warning(disable:4251)
@@ -103,8 +115,6 @@ inline double log2( double n )
 
 #endif
 
-
-typedef std::string String;
 
 
 #endif

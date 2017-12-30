@@ -1327,7 +1327,8 @@ BOOST_AUTO_TEST_CASE(mmcif_test_chain_mappings)
   BOOST_TEST_MESSAGE("  Running mmcif_test_chain_mappings tests...");
   
   // check compound lib
-  bool compound_lib_available = SetDefaultCompoundLib();
+  bool compound_lib_available = 
+  static_cast<bool>(SetDefaultCompoundLib());
 
   // load data
   mol::EntityHandle eh = mol::CreateEntity();

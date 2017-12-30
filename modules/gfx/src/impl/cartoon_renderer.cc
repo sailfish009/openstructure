@@ -380,7 +380,7 @@ void CartoonRenderer::rebuild_spline_obj(IndexedVertexArray& va,
         double ang=-geom::SignedAngle(geom::Cross(slist.at(sc-1).normal,dir),
                                       geom::Cross(slist.at(sc).normal,dir),
                                       dir);
-        offset=psize+static_cast<size_t>(round(ang*of)+psized);
+        offset=psize+static_cast<size_t>(round_real(ang*of)+psized);
       }
       if(slist.at(sc).type==3) {
         if(slist.at(sc-1).type!=3) {

@@ -91,9 +91,9 @@ void Modeller::LowerPrecision(ost::mol::EntityHandle& handle){
   for(ost::mol::AtomHandleList::iterator i = atom_list.begin();
       i != atom_list.end(); ++i){
     pos = i->GetPos();
-    truncated_pos[0] = Real(round(pos[0]*100))/100;
-    truncated_pos[1] = Real(round(pos[1]*100))/100;
-    truncated_pos[2] = Real(round(pos[2]*100))/100;
+    truncated_pos[0] = Real(round_real(pos[0]*100))/100;
+    truncated_pos[1] = Real(round_real(pos[1]*100))/100;
+    truncated_pos[2] = Real(round_real(pos[2]*100))/100;
     ed.SetAtomPos(*i,truncated_pos);
   }
   ed.UpdateICS();

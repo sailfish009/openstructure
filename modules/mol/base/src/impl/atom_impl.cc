@@ -227,7 +227,7 @@ std::ostream& operator<<(std::ostream& o, const AtomImplPtr ap)
 }
 
 bool ConnectorExists(const AtomImplPtr& a, const AtomImplPtr& b) {
-  return GetConnector(a, b);
+  return static_cast<bool>(GetConnector(a, b));
 }
 
 ConnectorImplP GetConnector(const AtomImplPtr& a, const AtomImplPtr& b) {
