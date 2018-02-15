@@ -56,6 +56,8 @@ class QSscorer:
       qs_scorer = qsscoring.QSscorer(ent_1, ent_2)
       ost.LogScript('QSscore:', str(qs_scorer.global_score))
       ost.LogScript('Chain mapping used:', str(qs_scorer.chain_mapping))
+      # commonly you want the QS global score as output
+      qs_score = qs_scorer.global_score
     except qsscoring.QSscoreError as ex:
       # default handling: report failure and set score to 0
       ost.LogError('QSscore failed:', str(ex))

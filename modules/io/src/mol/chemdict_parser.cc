@@ -195,17 +195,18 @@ void ChemdictParser::InitTypeMap()
   tm_["DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
   tm_["RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);
   tm_["L-DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
-  tm_["L-RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);  
+  tm_["L-RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);
   tm_["R-DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
-  tm_["R-RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);  
+  tm_["R-RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);
   tm_["DNA OH 3 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
+  tm_["DNA OH 5 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
   tm_["PEPTIDE-LIKE"]=mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING);
   tm_["PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING);
-  tm_["PEPTIDE-LINKING"]=mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING);  
+  tm_["PEPTIDE-LINKING"]=mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING);
   tm_["NON-POLYMER"]=mol::ChemClass(mol::ChemClass::NON_POLYMER);
   tm_["RNA OH 3 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);
   tm_["RNA OH 5 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);
-  tm_["?"]=mol::ChemClass(mol::ChemClass::UNKNOWN);  
+  tm_["?"]=mol::ChemClass(mol::ChemClass::UNKNOWN);
   tm_["WATER"]=mol::ChemClass(mol::ChemClass::WATER);
 }
 

@@ -17,7 +17,7 @@ set(OST_MOL_BASE_UNIT_TESTS
 )
 
 if (USE_NUMPY)
-   set(OST_MOST_BASE_UNIT_TESTS "${OST_MOST_BASE_UNIT_TESTS}" test_numpy.py)
+  list(APPEND OST_MOL_BASE_UNIT_TESTS test_numpy.py)
 endif (USE_NUMPY)
 
 ost_unittest(MODULE mol SOURCES "${OST_MOL_BASE_UNIT_TESTS}")
