@@ -1,0 +1,23 @@
+#! /bin/bash
+
+# end when error
+set -e
+
+image_name=$1
+script_path=$2
+
+if [[ ${#@} -lt 1 ]]; then
+    echo "Usage: (sudo) run_docker_ost <IMAGE_NAME> [<SCRIPT_PATH>]"
+    exit 1
+fi
+
+if [[ ${script_path} -eq "" ]]; then
+    docker run -ti --rm ${image_name}
+else
+    abspath=$(readlink -f $script_path)
+    dirpath=$(dirname $abspath)
+    name=$(basename $script_path)
+    docker run --rm -v ${dirpath}:/home ${image_name} /home/${name} ${@:3}
+fi
+
+
