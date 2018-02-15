@@ -46,7 +46,7 @@ RUN pip install --upgrade pip && pip install numpy==1.14.0 \
 # copy ost release
 WORKDIR /opt/ost
 
-RUN git clone https://git.scicore.unibas.ch/schwede/openstructure.git /opt/ost
+RUN git clone https://git.scicore.unibas.ch/schwede/openstructure.git /opt/ost && git checkout -b develop origin/develop
 
 # compile ost
 RUN cmake . -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
