@@ -5,14 +5,9 @@
 #include <ost/base.hh>
 #include <ost/boost_filesystem_helper.hh>
 #include <ost/platform.hh>
-#include <ost/conop/model_check.hh>
 #include <ost/conop/conop.hh>
-#include <ost/conop/amino_acids.hh>
-#include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/mol/pdb_writer.hh>
-#include <ost/io/mol/mmcif_reader.hh>
 #include <ost/io/io_exception.hh>
-#include <ost/conop/nonstandard.hh>
 #include <ost/mol/alg/molck.hh>
 #if defined(__APPLE__)
 #include <mach-o/dyld.h>
@@ -63,19 +58,12 @@ int main(int argc, char *argv[])
   }
   IOProfile prof;
   prof.fault_tolerant=true;
+  MolckSettings settings;
   String rm;
   String color;
-  bool colored = false;
 
-  bool rm_unk_atoms=false;
-  bool rm_hyd_atoms=false;
-  bool rm_non_std=false;
-  bool rm_oxt_atoms=false;
-  bool rm_zero_occ_atoms=false;
   bool write_to_stdout = false;
   bool write_to_file = false;
-  bool map_nonstd_res = false;
-  bool assign_elem = false;
   String output_blueprint_string;
   String custom_path="";
 
@@ -123,24 +111,24 @@ int main(int argc, char *argv[])
     output_blueprint_string = vm["out"].as<String>();
   }
   if (vm.count("map-nonstd")) {
-    map_nonstd_res = true;
+    settings.map_nonstd_res = true;
   }
   if (vm.count("fix-ele")) {
-    assign_elem = true;
+    settings.assign_elem = true;
   }
   
   std::vector<StringRef> rms=StringRef(rm.c_str(), rm.size()).split(',');
   for (size_t i=0; i<rms.size(); ++i) {
     if (rms[i] == StringRef("unk", 3)) {
-      rm_unk_atoms = true;
+      settings.rm_unk_atoms = true;
     } else if (rms[i] == StringRef("nonstd", 6)) {
-      rm_non_std = true;
+      settings.rm_non_std = true;
     } else if (rms[i] == StringRef("hyd", 3)) {
-      rm_hyd_atoms = true;
+      settings.rm_hyd_atoms = true;
     } else if (rms[i] == StringRef("oxt", 3)) {
-      rm_oxt_atoms = true;
+      settings.rm_oxt_atoms = true;
     } else if (rms[i] == StringRef("zeroocc", 7)) {
-      rm_zero_occ_atoms = true;
+      settings.rm_zero_occ_atoms = true;
     } else {
       std::cerr << "unknown value to remove '" << rms[i] << "'" << std::endl;
       usage();
@@ -148,11 +136,11 @@ int main(int argc, char *argv[])
     }
   }
   if (color=="auto") {
-    colored = isatty(STDERR_FILENO);
+    settings.colored = isatty(STDERR_FILENO);
   } else if (color == "on" || color == "1" || color == "yes") {
-    colored = true;
+    settings.colored = true;
   } else if (color == "off" || color == "0" || color == "no") {
-    colored = false;	
+    settings.colored = false;	
   } else {
     usage();
     exit(-1);
@@ -163,22 +151,8 @@ int main(int argc, char *argv[])
     if (!ent.IsValid()) {
       continue;
     }
-    if (map_nonstd_res)  {
-      ent = MapNonStandardResidues(ent, lib);
-    }
-
-    RemoveAtoms(ent, 
-                lib, 
-                rm_unk_atoms,
-                rm_non_std,
-                rm_hyd_atoms,
-                rm_oxt_atoms,
-                rm_zero_occ_atoms,
-                colored);
     
-    if (assign_elem)  {
-      CleanUpElementColumn(ent, lib);
-    }          
+    Molck(ent, lib, settings);
  
     if (write_to_stdout) {
       PDBWriter writer(std::cout, prof);

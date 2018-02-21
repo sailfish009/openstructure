@@ -1,29 +1,21 @@
-// #include <unistd.h>
-// #include <boost/program_options.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <ost/base.hh>
 #include <ost/boost_filesystem_helper.hh>
-// #include <ost/platform.hh>
 #include <ost/conop/model_check.hh>
 #include <ost/conop/conop.hh>
 #include <ost/conop/amino_acids.hh>
 #include <ost/io/mol/pdb_reader.hh>
-// #include <ost/io/mol/pdb_writer.hh>
 #include <ost/io/mol/mmcif_reader.hh>
-// #include <ost/io/io_exception.hh>
 #include <ost/conop/nonstandard.hh>
 #include <ost/mol/alg/molck.hh>
-// #if defined(__APPLE__)
-// #include <mach-o/dyld.h>
-// #endif
-// using namespace ost;
+
 using namespace ost::conop;
 using namespace ost::mol;
 using namespace ost::io;
 
-// namespace po=boost::program_options;
 namespace fs=boost::filesystem;
+
 
 EntityHandle ost::mol::alg::molck::load_x(const String& file, const IOProfile& profile)
 {
@@ -135,7 +127,8 @@ EntityHandle ost::mol::alg::molck::MapNonStandardResidues(EntityHandle& ent, Com
   return new_ent;
 }
 
-void ost::mol::alg::molck::RemoveAtoms(EntityHandle& ent,
+void ost::mol::alg::molck::RemoveAtoms(
+                 EntityHandle& ent,
                  CompoundLibPtr lib,
                  bool rm_unk_atoms,
                  bool rm_non_std,
@@ -232,3 +225,52 @@ void ost::mol::alg::molck::CleanUpElementColumn(EntityHandle& ent, CompoundLibPt
     }    
   }
 }
+
+void ost::mol::alg::molck::Molck(
+           ost::mol::EntityHandle& ent,
+           ost::conop::CompoundLibPtr lib,
+           const ost::mol::alg::molck::MolckSettings& settings=ost::mol::alg::molck::MolckSettings()){
+  if (settings.map_nonstd_res)  {
+    ent = ost::mol::alg::molck::MapNonStandardResidues(ent, lib);
+  }
+  ost::mol::alg::molck::RemoveAtoms(ent, 
+              lib, 
+              settings.rm_unk_atoms,
+              settings.rm_non_std,
+              settings.rm_hyd_atoms,
+              settings.rm_oxt_atoms,
+              settings.rm_zero_occ_atoms,
+              settings.colored);
+  if (settings.assign_elem)  {
+    ost::mol::alg::molck::CleanUpElementColumn(ent, lib);
+  }          
+}
+
+// ost::mol::EntityHandle ost::mol::alg::molck::Molck(
+//            String& file,
+//            ost::conop::CompoundLibPtr lib,
+//            const ost::mol::alg::molck::MolckSettings& settings=ost::mol::alg::molck::MolckSettings()){
+//   IOProfile prof;
+//   prof.fault_tolerant=true;
+//   EntityHandle ent = ost::mol::alg::molck::load_x(file, prof);
+//   if (!ent.IsValid()) {
+//     throw std::runtime_error("Entity is invalid!");
+//   }
+
+//   if (settings.map_nonstd_res)  {
+//     ent = ost::mol::alg::molck::MapNonStandardResidues(ent, lib);
+//   }
+//   ost::mol::alg::molck::RemoveAtoms(ent, 
+//               lib, 
+//               settings.rm_unk_atoms,
+//               settings.rm_non_std,
+//               settings.rm_hyd_atoms,
+//               settings.rm_oxt_atoms,
+//               settings.rm_zero_occ_atoms,
+//               settings.colored);
+//   if (settings.assign_elem)  {
+//     ost::mol::alg::molck::CleanUpElementColumn(ent, lib);
+//   }
+
+//   return ent;          
+// }
