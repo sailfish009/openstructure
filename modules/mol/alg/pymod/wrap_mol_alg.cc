@@ -39,6 +39,7 @@ void export_svdSuperPose();
 void export_TrajectoryAnalysis();
 void export_StructureAnalysis();
 void export_Clash();
+void export_Molck();
 void export_contact_overlap();
 void export_accessibility();
 void export_sec_struct();
@@ -110,6 +111,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   export_TrajectoryAnalysis();
   export_StructureAnalysis();
   export_Clash();
+  export_Molck();
   export_contact_overlap();
   export_accessibility();
   export_sec_struct();
