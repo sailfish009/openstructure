@@ -15,10 +15,8 @@
 #include <mach-o/dyld.h>
 #endif
 using namespace ost;
-using namespace ost::conop;
 using namespace ost::mol;
 using namespace ost::io;
-using namespace ost::mol::alg;
 
 namespace po=boost::program_options;
 namespace fs=boost::filesystem;
@@ -82,20 +80,20 @@ EntityHandle load_x(const String& file, const IOProfile& profile)
 }
 
 // load compound library, exiting if it could not be found...
-CompoundLibPtr load_compound_lib(const String& custom_path)
+ost::conop::CompoundLibPtr load_compound_lib(const String& custom_path)
 {
   if (custom_path!="") {
     if (fs::exists(custom_path)) {  
-      return CompoundLib::Load(custom_path);
+      return ost::conop::CompoundLib::Load(custom_path);
     } else {
       std::cerr << "Could not find compounds.chemlib at the provided location, trying other options" << std::endl;
     }
   } 
   if (fs::exists("compounds.chemlib")) {
-    return CompoundLib::Load("compounds.chemlib");
+    return ost::conop::CompoundLib::Load("compounds.chemlib");
   }
   char result[ 1024 ]; 
-  CompoundLibPtr lib;
+  ost::conop::CompoundLibPtr lib;
   String exe_path; 
   #if defined(__APPLE__)
   uint32_t size=1023;
@@ -118,14 +116,14 @@ CompoundLibPtr load_compound_lib(const String& custom_path)
     String share_path_string=BFPathToString(share_path);
       
     if (fs::exists(share_path_string)) {
-      return CompoundLib::Load(share_path_string);
+      return ost::conop::CompoundLib::Load(share_path_string);
     }  
   }
   if (!lib) {
     std::cerr << "Could not load compounds.chemlib" << std::endl;
     exit(-1);
   }
-  return CompoundLibPtr();
+  return ost::conop::CompoundLibPtr();
 }
 
 
@@ -136,7 +134,7 @@ int main(int argc, char *argv[])
   }
   IOProfile prof;
   prof.fault_tolerant=true;
-  MolckSettings settings;
+  ost::mol::alg::MolckSettings settings;
   String rm;
   String color;
 
@@ -223,14 +221,14 @@ int main(int argc, char *argv[])
     usage();
     exit(-1);
   }
-  CompoundLibPtr lib=load_compound_lib(custom_path);  
+  ost::conop::CompoundLibPtr lib=load_compound_lib(custom_path);  
   for (unsigned int i = 0; i < files.size(); ++i) {
     EntityHandle ent=load_x(files[i], prof);
     if (!ent.IsValid()) {
       continue;
     }
     
-    Molck(ent, lib, settings);
+    ost::mol::alg::Molck(ent, lib, settings);
  
     if (write_to_stdout) {
       PDBWriter writer(std::cout, prof);

@@ -23,11 +23,11 @@
   Author: Marco Biasini, Juergen Haas
  */
 #include "module_config.hh"
-#include "compound_lib.hh"
+#include <ost/conop/compound_lib.hh>
 
 
 
-namespace ost { namespace conop {
+namespace ost { namespace mol { namespace alg {
 
 
 /// \brief copies all atom of src_res to dst_res, gets compound lib from builder
@@ -40,7 +40,8 @@ bool DLLEXPORT_OST_CONOP CopyResidue(ost::mol::ResidueHandle src_res,
 /// \brief copies all atom of src_res to dst_res, requires a compound lib 
 bool DLLEXPORT_OST_CONOP CopyResidue(ost::mol::ResidueHandle src_res,
                                      ost::mol::ResidueHandle dst_res,
-                                     ost::mol::XCSEditor& edi, CompoundLibPtr lib);
+                                     ost::mol::XCSEditor& edi,
+                                     ost::conop::CompoundLibPtr lib);
 
                              
 /// \brief copies all atom of src_res to dst_res
@@ -66,7 +67,8 @@ bool DLLEXPORT_OST_CONOP CopyIdentical(ost::mol::ResidueHandle src_res,
 bool DLLEXPORT_OST_CONOP CopyConserved(ost::mol::ResidueHandle src_res, 
                                        ost::mol::ResidueHandle dst_res,
                                        ost::mol::XCSEditor& edi,
-                                       bool& has_cbeta, CompoundLibPtr lib);
+                                       bool& has_cbeta,
+                                       ost::conop::CompoundLibPtr lib);
 
 /// \brief copies atoms of src_res to dst_res, requires compound lib
 ///
@@ -107,10 +109,11 @@ bool DLLEXPORT_OST_CONOP CopyMSE(ost::mol::ResidueHandle src_res,
 bool DLLEXPORT_OST_CONOP CopyModified(ost::mol::ResidueHandle src_res, 
                                       ost::mol::ResidueHandle dst_res,
                                       ost::mol::XCSEditor& edi,
-                                      bool& has_cbeta, CompoundLibPtr lib);
+                                      bool& has_cbeta,
+                                      ost::conop::CompoundLibPtr lib);
 
 
 
-}}
+}}}
 
 #endif

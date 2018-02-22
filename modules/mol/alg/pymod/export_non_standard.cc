@@ -18,11 +18,11 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 #include <ost/mol/mol.hh>
-#include <ost/conop/nonstandard.hh>
+#include <ost/mol/alg/nonstandard.hh>
 
 using namespace boost::python;
 
-using namespace ost::conop;
+using namespace ost::mol::alg;
 using namespace ost::mol;
                    
 object copy_conserved_handle(ResidueHandle src_res, ResidueHandle dst_res,

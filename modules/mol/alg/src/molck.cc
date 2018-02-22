@@ -1,7 +1,7 @@
 #include <ost/mol/xcs_editor.hh>
+#include <ost/mol/alg/nonstandard.hh>
 #include <ost/conop/model_check.hh>
 #include <ost/conop/amino_acids.hh>
-#include <ost/conop/nonstandard.hh>
 #include <ost/mol/alg/molck.hh>
 
 using namespace ost::conop;
@@ -36,7 +36,7 @@ EntityHandle ost::mol::alg::MapNonStandardResidues(EntityHandle& ent, CompoundLi
            continue;
         } 
         ResidueHandle dest_res = new_edi.AppendResidue(new_chain,OneLetterCodeToResidueName(compound->GetOneLetterCode()),r->GetNumber());
-        CopyResidue(*r,dest_res,new_edi,lib);
+        ost::mol::alg::CopyResidue(*r,dest_res,new_edi,lib);
       }   
     }        
   }

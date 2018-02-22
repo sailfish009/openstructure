@@ -20,6 +20,7 @@ set(OST_MOL_ALG_HEADERS
   similarity_matrix.hh
   accessibility.hh
   sec_struct.hh
+  nonstandard.hh
   molck.hh
 )
 
@@ -44,6 +45,7 @@ set(OST_MOL_ALG_SOURCES
   similarity_matrix.cc
   accessibility.cc
   sec_struct.cc
+  nonstandard.cc
   molck.cc
 )
 
@@ -60,7 +62,7 @@ if (ENABLE_IMG)
     entity_to_density.cc
   )
 
-  set(MOL_ALG_DEPS ${MOL_ALG_DEPS} ost_img ost_img_alg ost_seq_alg)
+  set(MOL_ALG_DEPS ${MOL_ALG_DEPS} ost_img ost_img_alg ost_seq_alg ost_conop)
 endif()
 
 executable(NAME lddt SOURCES lddt.cc 

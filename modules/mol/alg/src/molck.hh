@@ -27,7 +27,8 @@ struct MolckSettings{
 
 };
 
-ost::mol::EntityHandle MapNonStandardResidues(ost::mol::EntityHandle& ent, ost::conop::CompoundLibPtr lib);
+ost::mol::EntityHandle MapNonStandardResidues(ost::mol::EntityHandle& ent,
+                                              ost::conop::CompoundLibPtr lib);
 
 void RemoveAtoms(ost::mol::EntityHandle& ent,
                  ost::conop::CompoundLibPtr lib,
@@ -38,9 +39,12 @@ void RemoveAtoms(ost::mol::EntityHandle& ent,
                  bool rm_zero_occ_atoms,
                  bool colored=true);
 
-void CleanUpElementColumn(ost::mol::EntityHandle& ent, ost::conop::CompoundLibPtr lib);
+void CleanUpElementColumn(ost::mol::EntityHandle& ent,
+                          ost::conop::CompoundLibPtr lib);
 
-void Molck(ost::mol::EntityHandle& ent, ost::conop::CompoundLibPtr lib, const MolckSettings& settings);
+void Molck(ost::mol::EntityHandle& ent,
+           ost::conop::CompoundLibPtr lib,
+           const MolckSettings& settings);
 
 
 }}} // namespace
