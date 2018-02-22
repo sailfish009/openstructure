@@ -1,98 +1,14 @@
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/convenience.hpp>
-#include <ost/base.hh>
-#include <ost/boost_filesystem_helper.hh>
+#include <ost/mol/xcs_editor.hh>
 #include <ost/conop/model_check.hh>
-#include <ost/conop/conop.hh>
 #include <ost/conop/amino_acids.hh>
-#include <ost/io/mol/pdb_reader.hh>
-#include <ost/io/mol/mmcif_reader.hh>
 #include <ost/conop/nonstandard.hh>
 #include <ost/mol/alg/molck.hh>
 
 using namespace ost::conop;
 using namespace ost::mol;
-using namespace ost::io;
-
-namespace fs=boost::filesystem;
 
 
-EntityHandle ost::mol::alg::molck::load_x(const String& file, const IOProfile& profile)
-{
-  try {
-    EntityHandle ent = CreateEntity();
-    if(file.compare(file.length() - 6, 6, ".mmcif") == 0 ||
-       file.compare(file.length() - 4, 4, ".cif") == 0){
-      MMCifReader reader(file,ent,profile);
-      reader.Parse();
-      return ent;
-    }
-    //if its not mmcif, we assume the file to be in pdb format without even
-    //looking at the filename
-    else{
-      PDBReader reader(file, profile);
-      if (reader.HasNext()) {
-        reader.Import(ent);
-        return ent;
-      }
-      std::cerr << "ERROR: '" << file << "' does not contain any ATOM records. "
-              << "Are you sure this is a PDB file?" << std::endl;
-      return EntityHandle();
-    }
-  } catch (std::exception& e) {
-    std::cerr << "ERROR: " << e.what() << std::endl;
-    return EntityHandle();
-  }
-}
-
-// load compound library, exiting if it could not be found...
-CompoundLibPtr ost::mol::alg::molck::load_compound_lib(const String& custom_path)
-{
-  if (custom_path!="") {
-    if (fs::exists(custom_path)) {  
-      return CompoundLib::Load(custom_path);
-    } else {
-      std::cerr << "Could not find compounds.chemlib at the provided location, trying other options" << std::endl;
-    }
-  } 
-  if (fs::exists("compounds.chemlib")) {
-    return CompoundLib::Load("compounds.chemlib");
-  }
-  char result[ 1024 ]; 
-  CompoundLibPtr lib;
-  String exe_path; 
-  #if defined(__APPLE__)
-  uint32_t size=1023;
-  if (!_NSGetExecutablePath(result, &size)) {
-    exe_path=String(result); 
-  }
-  #else 
-  ssize_t count = readlink( "/proc/self/exe", result, 1024 );
-  exe_path = std::string( result, (count > 0) ? count : 0 );
-  #endif
-  if (exe_path.empty()) { 
-    std::cerr << "Could not determine the path of the molck executable. Will only "
-       "look for compounds.chemlib in the current working directory" << std::endl;
-  } else {
-    fs::path path_and_exe(exe_path);
-    fs::path path_only=path_and_exe.branch_path();
-    fs::path share_path = path_only.branch_path();
-    share_path = share_path / "share" / "openstructure" / "compounds.chemlib";
-
-    String share_path_string=BFPathToString(share_path);
-      
-    if (fs::exists(share_path_string)) {
-      return CompoundLib::Load(share_path_string);
-    }  
-  }
-  if (!lib) {
-    std::cerr << "Could not load compounds.chemlib" << std::endl;
-    exit(-1);
-  }
-  return CompoundLibPtr();
-}
-
-EntityHandle ost::mol::alg::molck::MapNonStandardResidues(EntityHandle& ent, CompoundLibPtr lib) {
+EntityHandle ost::mol::alg::MapNonStandardResidues(EntityHandle& ent, CompoundLibPtr lib) {
   EntityHandle new_ent=CreateEntity();  
   ChainHandleList chains=ent.GetChainList();
   XCSEditor new_edi=new_ent.EditXCS();
@@ -127,7 +43,7 @@ EntityHandle ost::mol::alg::molck::MapNonStandardResidues(EntityHandle& ent, Com
   return new_ent;
 }
 
-void ost::mol::alg::molck::RemoveAtoms(
+void ost::mol::alg::RemoveAtoms(
                  EntityHandle& ent,
                  CompoundLibPtr lib,
                  bool rm_unk_atoms,
@@ -201,7 +117,7 @@ void ost::mol::alg::molck::RemoveAtoms(
   }
 }
 
-void ost::mol::alg::molck::CleanUpElementColumn(EntityHandle& ent, CompoundLibPtr lib){
+void ost::mol::alg::CleanUpElementColumn(EntityHandle& ent, CompoundLibPtr lib){
   ChainHandleList chains=ent.GetChainList();
   for (ChainHandleList::const_iterator c=chains.begin();c!=chains.end();++c) {
     ResidueHandleList residues = c->GetResidueList();
@@ -226,14 +142,14 @@ void ost::mol::alg::molck::CleanUpElementColumn(EntityHandle& ent, CompoundLibPt
   }
 }
 
-void ost::mol::alg::molck::Molck(
+void ost::mol::alg::Molck(
            ost::mol::EntityHandle& ent,
            ost::conop::CompoundLibPtr lib,
-           const ost::mol::alg::molck::MolckSettings& settings=ost::mol::alg::molck::MolckSettings()){
+           const ost::mol::alg::MolckSettings& settings=ost::mol::alg::MolckSettings()){
   if (settings.map_nonstd_res)  {
-    ent = ost::mol::alg::molck::MapNonStandardResidues(ent, lib);
+    ent = ost::mol::alg::MapNonStandardResidues(ent, lib);
   }
-  ost::mol::alg::molck::RemoveAtoms(ent, 
+  ost::mol::alg::RemoveAtoms(ent, 
               lib, 
               settings.rm_unk_atoms,
               settings.rm_non_std,
@@ -242,35 +158,6 @@ void ost::mol::alg::molck::Molck(
               settings.rm_zero_occ_atoms,
               settings.colored);
   if (settings.assign_elem)  {
-    ost::mol::alg::molck::CleanUpElementColumn(ent, lib);
+    ost::mol::alg::CleanUpElementColumn(ent, lib);
   }          
 }
-
-// ost::mol::EntityHandle ost::mol::alg::molck::Molck(
-//            String& file,
-//            ost::conop::CompoundLibPtr lib,
-//            const ost::mol::alg::molck::MolckSettings& settings=ost::mol::alg::molck::MolckSettings()){
-//   IOProfile prof;
-//   prof.fault_tolerant=true;
-//   EntityHandle ent = ost::mol::alg::molck::load_x(file, prof);
-//   if (!ent.IsValid()) {
-//     throw std::runtime_error("Entity is invalid!");
-//   }
-
-//   if (settings.map_nonstd_res)  {
-//     ent = ost::mol::alg::molck::MapNonStandardResidues(ent, lib);
-//   }
-//   ost::mol::alg::molck::RemoveAtoms(ent, 
-//               lib, 
-//               settings.rm_unk_atoms,
-//               settings.rm_non_std,
-//               settings.rm_hyd_atoms,
-//               settings.rm_oxt_atoms,
-//               settings.rm_zero_occ_atoms,
-//               settings.colored);
-//   if (settings.assign_elem)  {
-//     ost::mol::alg::molck::CleanUpElementColumn(ent, lib);
-//   }
-
-//   return ent;          
-// }

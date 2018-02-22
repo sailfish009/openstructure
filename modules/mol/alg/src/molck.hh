@@ -1,8 +1,7 @@
 #include <ost/mol/entity_handle.hh>
-#include <ost/io/io_profile.hh>
 #include <ost/conop/compound_lib.hh>
 
-namespace ost { namespace mol{ namespace alg{ namespace molck {
+namespace ost { namespace mol{ namespace alg {
 
 struct MolckSettings;
 
@@ -28,10 +27,6 @@ struct MolckSettings{
 
 };
 
-ost::mol::EntityHandle load_x(const String& file, const ost::io::IOProfile& profile);
-
-ost::conop::CompoundLibPtr load_compound_lib(const String& custom_path);
-
 ost::mol::EntityHandle MapNonStandardResidues(ost::mol::EntityHandle& ent, ost::conop::CompoundLibPtr lib);
 
 void RemoveAtoms(ost::mol::EntityHandle& ent,
@@ -46,9 +41,6 @@ void RemoveAtoms(ost::mol::EntityHandle& ent,
 void CleanUpElementColumn(ost::mol::EntityHandle& ent, ost::conop::CompoundLibPtr lib);
 
 void Molck(ost::mol::EntityHandle& ent, ost::conop::CompoundLibPtr lib, const MolckSettings& settings);
-// void Molck(ost::mol::EntityHandle& ent, String& custom_path, const MolckSettings& settings);
-// ost::mol::EntityHandle Molck(String& file, ost::conop::CompoundLibPtr lib, const MolckSettings& settings);
-// ost::mol::EntityHandle Molck(String& file, String& custom_path, const MolckSettings& settings);
 
 
-}}}} // namespace
+}}} // namespace

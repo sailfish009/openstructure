@@ -22,9 +22,8 @@ using namespace boost::python;
 
 #include <ost/mol/alg/molck.hh>
 
-using namespace ost::mol::alg::molck;
-
 void export_Molck()
 {
-  def("load_compound_lib", &load_compound_lib, (arg("custom_path")));
+  // def("load_compound_lib", &ost::mol::alg::load_compound_lib, 
+  //     (arg("custom_path")));
 }
