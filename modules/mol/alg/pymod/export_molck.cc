@@ -117,8 +117,21 @@ void export_Molck()
     .def_readwrite("rm_zero_occ_atoms", &MolckSettings::rm_zero_occ_atoms)
     .def_readwrite("colored", &MolckSettings::colored)
     .def_readwrite("map_nonstd_res", &MolckSettings::map_nonstd_res)
-    .def_readwrite("assign_elem", &MolckSettings::assign_elem)
-  ;
+    .def_readwrite("assign_elem", &MolckSettings::assign_elem);
+
+  def("MapNonStandardResidues", &MapNonStandardResidues, (arg("ent"),
+                                                          arg("lib")));
+
+  def("RemoveAtoms", &RemoveAtoms, (arg("ent"),
+                                    arg("lib"),
+                                    arg("rm_unk_atoms")=false,
+                                    arg("rm_non_std")=false,
+                                    arg("rm_hyd_atoms")=true,
+                                    arg("rm_oxt_atoms")=false,
+                                    arg("rm_zero_occ_atoms")=false,
+                                    arg("colored")=false));
+
+  def("CleanUpElementColumn", &CleanUpElementColumn, (arg("ent"), arg("lib")));
 
   def("Molck", &Molck, (arg("ent"), arg("lib"), arg("settings")));
 }
