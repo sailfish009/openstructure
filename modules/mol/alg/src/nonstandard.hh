@@ -17,8 +17,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#ifndef OST_CONOP_NONSTANDARD_HH
-#define OST_CONOP_NONSTANDARD_HH
+#ifndef OST_MOL_ALG_NONSTANDARD_HH
+#define OST_MOL_ALG_NONSTANDARD_HH
 /*
   Author: Marco Biasini, Juergen Haas
  */
@@ -33,12 +33,12 @@ namespace ost { namespace mol { namespace alg {
 /// \brief copies all atom of src_res to dst_res, gets compound lib from builder
 
                              
-bool DLLEXPORT_OST_CONOP CopyResidue(ost::mol::ResidueHandle src_res,
+bool DLLEXPORT_OST_MOL_ALG CopyResidue(ost::mol::ResidueHandle src_res,
                                      ost::mol::ResidueHandle dst_res,
                                      ost::mol::XCSEditor& edi);
 
 /// \brief copies all atom of src_res to dst_res, requires a compound lib 
-bool DLLEXPORT_OST_CONOP CopyResidue(ost::mol::ResidueHandle src_res,
+bool DLLEXPORT_OST_MOL_ALG CopyResidue(ost::mol::ResidueHandle src_res,
                                      ost::mol::ResidueHandle dst_res,
                                      ost::mol::XCSEditor& edi,
                                      ost::conop::CompoundLibPtr lib);
@@ -50,7 +50,7 @@ bool DLLEXPORT_OST_CONOP CopyResidue(ost::mol::ResidueHandle src_res,
 /// \param edi
 /// \param has_cbeta will be set to true if the src_res has a cbeta and the
 ///      dst_residue is not a glycine                             
-bool DLLEXPORT_OST_CONOP CopyIdentical(ost::mol::ResidueHandle src_res,
+bool DLLEXPORT_OST_MOL_ALG CopyIdentical(ost::mol::ResidueHandle src_res,
                                        ost::mol::ResidueHandle dst_res,
                                        ost::mol::XCSEditor& edi,
                                        bool& has_cbeta);
@@ -64,7 +64,7 @@ bool DLLEXPORT_OST_CONOP CopyIdentical(ost::mol::ResidueHandle src_res,
 
 
                              
-bool DLLEXPORT_OST_CONOP CopyConserved(ost::mol::ResidueHandle src_res, 
+bool DLLEXPORT_OST_MOL_ALG CopyConserved(ost::mol::ResidueHandle src_res, 
                                        ost::mol::ResidueHandle dst_res,
                                        ost::mol::XCSEditor& edi,
                                        bool& has_cbeta,
@@ -79,7 +79,7 @@ bool DLLEXPORT_OST_CONOP CopyConserved(ost::mol::ResidueHandle src_res,
 
 
                              
-bool DLLEXPORT_OST_CONOP CopyConserved(ost::mol::ResidueHandle src_res, 
+bool DLLEXPORT_OST_MOL_ALG CopyConserved(ost::mol::ResidueHandle src_res, 
                                        ost::mol::ResidueHandle dst_res,
                                        ost::mol::XCSEditor& edi,
                                        bool& has_cbeta);
@@ -91,14 +91,14 @@ bool DLLEXPORT_OST_CONOP CopyConserved(ost::mol::ResidueHandle src_res,
 /// only copied if dst_res is not equal to glycine.
 
 
-bool DLLEXPORT_OST_CONOP CopyNonConserved(ost::mol::ResidueHandle src_res, 
+bool DLLEXPORT_OST_MOL_ALG CopyNonConserved(ost::mol::ResidueHandle src_res, 
                                           ost::mol::ResidueHandle dst_res,
                                           ost::mol::XCSEditor& edi,
                                           bool& has_cbeta);
 
 /// \brief construct dst_res from src_res when src_res is an MSE
 
-bool DLLEXPORT_OST_CONOP CopyMSE(ost::mol::ResidueHandle src_res, 
+bool DLLEXPORT_OST_MOL_ALG CopyMSE(ost::mol::ResidueHandle src_res, 
                                  ost::mol::ResidueHandle dst_res,
                                  ost::mol::XCSEditor& edi,
                                  bool& has_cbeta);
@@ -106,7 +106,7 @@ bool DLLEXPORT_OST_CONOP CopyMSE(ost::mol::ResidueHandle src_res,
 /// \brief construct a dst_res with only atoms matching the standard aminoacid
 /// from src_res when src_res is an is modified
                             
-bool DLLEXPORT_OST_CONOP CopyModified(ost::mol::ResidueHandle src_res, 
+bool DLLEXPORT_OST_MOL_ALG CopyModified(ost::mol::ResidueHandle src_res, 
                                       ost::mol::ResidueHandle dst_res,
                                       ost::mol::XCSEditor& edi,
                                       bool& has_cbeta,
