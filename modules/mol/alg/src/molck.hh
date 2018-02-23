@@ -69,7 +69,7 @@ struct MolckSettings{
 
 };
 
-ost::mol::EntityHandle MapNonStandardResidues(ost::mol::EntityHandle& ent,
+void MapNonStandardResidues(ost::mol::EntityHandle& ent,
                                               ost::conop::CompoundLibPtr lib);
 
 void RemoveAtoms(ost::mol::EntityHandle& ent,

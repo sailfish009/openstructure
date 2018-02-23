@@ -8,7 +8,8 @@ using namespace ost::conop;
 using namespace ost::mol;
 
 
-EntityHandle ost::mol::alg::MapNonStandardResidues(EntityHandle& ent, CompoundLibPtr lib) {
+void ost::mol::alg::MapNonStandardResidues(EntityHandle& ent, CompoundLibPtr lib) {
+  // TODO: Maybe it is possible to make it in-place operation
   EntityHandle new_ent=CreateEntity();  
   ChainHandleList chains=ent.GetChainList();
   XCSEditor new_edi=new_ent.EditXCS();
@@ -40,7 +41,7 @@ EntityHandle ost::mol::alg::MapNonStandardResidues(EntityHandle& ent, CompoundLi
       }   
     }        
   }
-  return new_ent;
+  ent = new_ent;
 }
 
 void ost::mol::alg::RemoveAtoms(
@@ -147,7 +148,7 @@ void ost::mol::alg::Molck(
            ost::conop::CompoundLibPtr lib,
            const ost::mol::alg::MolckSettings& settings=ost::mol::alg::MolckSettings()){
   if (settings.map_nonstd_res)  {
-    ent = ost::mol::alg::MapNonStandardResidues(ent, lib);
+    ost::mol::alg::MapNonStandardResidues(ent, lib);
   }
   ost::mol::alg::RemoveAtoms(ent, 
               lib, 
