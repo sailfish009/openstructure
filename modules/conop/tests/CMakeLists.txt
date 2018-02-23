@@ -9,8 +9,7 @@ set(OST_CONOP_UNIT_TESTS
 
 if (COMPOUND_LIB)
   list(APPEND OST_CONOP_UNIT_TESTS test_compound.py
-                                   test_cleanup.py
-                                   test_nonstandard.py)
+                                   test_cleanup.py)
 endif()
 
 ost_unittest(MODULE conop
