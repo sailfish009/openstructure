@@ -1249,3 +1249,178 @@ to standard amino acids.
     whether the Cbeta atom was inserted into the ``dst_res``.
 
 
+Molecular Checker (Molck)
+--------------------------------------------------------------------------------
+
+Programmatic usage
+##################
+
+Molecular Checker (Molck) could be called directly from the code using Molck
+function:
+
+.. code-block:: python
+
+  #! /bin/env python
+
+  """Run Molck with Python API.
+
+
+  This is an exemplary procedure on how to run Molck using Python API which is
+  equivalent to the command line:
+
+  molck <PDB PATH> --rm=hyd,oxt,nonstd,unk \
+                   --fix-ele --out=<OUTPUT PATH> \
+                   --complib=<PATH TO compounds.chemlib>
+  """
+
+  from ost.io import LoadPDB, SavePDB
+  from ost.mol.alg import MolckSettings, Molck
+                         
+  from ost.conop import CompoundLib
+
+
+  pdbid = "<PDB PATH>"
+  lib = CompoundLib.Load("<PATH TO compounds.chemlib>")
+
+  # Using Molck function
+  ent = LoadPDB(pdbid)
+  ms = MolckSettings(rm_unk_atoms=True,
+                     rm_non_std=True,
+                     rm_hyd_atoms=True,
+                     rm_oxt_atoms=True,
+                     rm_zero_occ_atoms=False,
+                     colored=False,
+                     map_nonstd_res=False,
+                     assign_elem=True)
+  Molck(ent, lib, ms)
+  SavePDB(ent, "<OUTPUT PATH>", profile="SLOPPY")
+
+It can also be split into subsequent commands for greater controll:
+
+.. code-block:: python
+
+  #! /bin/env python
+
+  """Run Molck with Python API.
+
+
+  This is an exemplary procedure on how to run Molck using Python API which is
+  equivalent to the command line:
+
+  molck <PDB PATH> --rm=hyd,oxt,nonstd,unk \
+                   --fix-ele --out=<OUTPUT PATH> \
+                   --complib=<PATH TO compounds.chemlib>
+  """
+
+  from ost.io import LoadPDB, SavePDB
+  from ost.mol.alg import (RemoveAtoms, MapNonStandardResidues,
+                           CleanUpElementColumn)
+  from ost.conop import CompoundLib
+
+
+  pdbid = "<PDB PATH>"
+  lib = CompoundLib.Load("<PATH TO compounds.chemlib>")
+  map_nonstd = False
+
+  # Using function chain
+  ent = LoadPDB(pdbid)
+  if map_nonstd:
+      MapNonStandardResidues(lib=lib, ent=ent)
+
+  RemoveAtoms(lib=lib,
+              ent=ent,
+              rm_unk_atoms=True,
+              rm_non_std=True,
+              rm_hyd_atoms=True,
+              rm_oxt_atoms=True,
+              rm_zero_occ_atoms=False,
+              colored=False)
+
+  CleanUpElementColumn(lib=lib, ent=ent)
+  SavePDB(ent, "<OUTPUT PATH>", profile="SLOPPY")
+
+API
+###
+
+
+.. class:: MolckSettings
+
+  Stores settings used for Molecular Checker.
+
+  .. method:: __init__(rm_unk_atoms=False,rm_non_std=False,rm_hyd_atoms=True,rm_oxt_atoms=False, rm_zero_occ_atoms=False,colored=False,map_nonstd_res=True, assign_elem=True)
+    
+    Initializes MolckSettings.
+
+    :param rm_unk_atoms: Remove unknown and atoms not following the nomenclature
+    :type rm_unk_atoms: :class:`bool`
+    :param rm_non_std: Remove all residues not one of the 20 standard amino acids
+    :type rm_non_std: :class:`bool`
+    :param rm_hyd_atoms: Remove hydrogen atoms
+    :type rm_hyd_atoms: :class:`bool`
+    :param rm_oxt_atoms: Remove terminal oxygens
+    :type rm_oxt_atoms: :class:`bool`
+    :param rm_zero_occ_atoms: Remove atoms with zero occupancy
+    :type rm_zero_occ_atoms: :class:`bool`
+    :param colored: Whether output should be colored
+    :type colored: :class:`bool`
+    :param map_nonstd_res: Maps modified residues back to the parent amino acid, for example
+        MSE -> MET, SEP -> SER
+    :type map_nonstd_res: :class:`bool`
+    :param assign_elem: Clean up element column
+    :type assign_elem: :class:`bool`
+
+  .. method:: ToString()
+
+    String representation of the MolckSettings.
+
+
+.. function:: Molck(ent, lib, settings)
+
+  Runs Molck on provided entity.
+
+  :param ent: Structure to check
+  :type ent: :class:`~ost.mol.EntityHandle`
+  :param lib: Compound library
+  :type lib: :class:`~ost.conop.CompoundLib`
+  :param settings: Molck settings
+  :type settings: :class:`MolckSettings`
+
+
+.. function:: MapNonStandardResidues(ent, lib)
+
+  Maps modified residues back to the parent amino acid, for example MSE -> MET.
+
+  :param ent: Structure to check
+  :type ent: :class:`~ost.mol.EntityHandle`
+  :param lib: Compound library
+  :type lib: :class:`~ost.conop.CompoundLib`
+
+.. function:: RemoveAtoms(ent,lib,rm_unk_atoms=False,rm_non_std=False,rm_hyd_atoms=True,rm_oxt_atoms=False,rm_zero_occ_atoms=False,colored=False)
+
+  Removes atoms and residues according to some criteria.
+
+  :param ent: Structure to check
+  :type ent: :class:`~ost.mol.EntityHandle`
+  :param lib: Compound library
+  :type lib: :class:`~ost.conop.CompoundLib`
+  :param rm_unk_atoms: Remove unknown and atoms not following the nomenclature
+  :type rm_unk_atoms: :class:`bool`
+  :param rm_non_std: Remove all residues not one of the 20 standard amino acids
+  :type rm_non_std: :class:`bool`
+  :param rm_hyd_atoms: Remove hydrogen atoms
+  :type rm_hyd_atoms: :class:`bool`
+  :param rm_oxt_atoms: Remove terminal oxygens
+  :type rm_oxt_atoms: :class:`bool`
+  :param rm_zero_occ_atoms: Remove atoms with zero occupancy
+  :type rm_zero_occ_atoms: :class:`bool`
+  :param colored: Whether output should be colored
+  :type colored: :class:`bool`
+
+.. function:: CleanUpElementColumn(ent, lib)
+
+  Clean up element column.
+
+  :param ent: Structure to check
+  :type ent: :class:`~ost.mol.EntityHandle`
+  :param lib: Compound library
+  :type lib: :class:`~ost.conop.CompoundLib`
