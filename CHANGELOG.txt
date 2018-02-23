@@ -1,3 +1,13 @@
+Changes in Release 1.
+--------------------------------------------------------------------------------
+
+  * nonstandard C++ module was moved from ost.conop to ost.mol.alg. This implies
+    change in the API. Mapping functions CopyResidue, CopyConserved and
+    CopyNonConserved that were previousely imported from ost.conop are now
+    to be imported from ost.mol.alg.
+  * Added Molck API to the ost.mol.alg module.
+
+
 Changes in Release 1.7
 --------------------------------------------------------------------------------
 
