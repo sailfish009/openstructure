@@ -557,6 +557,8 @@ void StarParser::Parse()
       case 'g':
         if (tline.length()>=7 && StringRef("global_", 7)==tline.substr(0, 7)) {
           this->ParseGlobal();
+        } else {
+          throw IOException("Missing 'global_' control structure");
         }
         break;
       case '#':

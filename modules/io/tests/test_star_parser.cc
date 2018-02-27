@@ -396,6 +396,13 @@ BOOST_AUTO_TEST_CASE(star_broken_data)
   BOOST_CHECK_THROW(star_p.Parse(), IOException);
 }
 
+BOOST_AUTO_TEST_CASE(star_broken_global)
+{
+  std::ifstream s("testfiles/broken_global.cif");
+  LoopTestParser star_p(s);
+  BOOST_CHECK_THROW(star_p.Parse(), IOException);
+}
+
 BOOST_AUTO_TEST_CASE(star_missing_data)
 {
   std::ifstream s("testfiles/missing_data.cif");
