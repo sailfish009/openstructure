@@ -550,6 +550,8 @@ void StarParser::Parse()
       case 'd':
         if (tline.length()>=5 && StringRef("data_", 5)==tline.substr(0, 5)) {
           this->ParseData();
+        } else {
+          throw IOException("Missing 'data_' control structure");
         }
         break;
       case 'g':
