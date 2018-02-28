@@ -311,39 +311,20 @@ int main (int argc, char **argv)
   // if the reference file is a comma-separated list of files, switches to multi-
   // reference mode
   GlobalRDMap glob_dist_list; 
-  String ref_file=files.back();    
+  String ref_file=files.back();
   ost::StringRef ref_file_sr(ref_file.c_str(),ref_file.length());
   std::vector<StringRef> ref_file_split_sr=ref_file_sr.split(',');
-  if (ref_file_split_sr.size()==1) { 
-    std::cout << "Multi-reference mode: Off" << std::endl;  
-    String ref_filename = ref_file_split_sr[0].str();  
+  for (std::vector<StringRef>::const_iterator ref_file_split_sr_it = ref_file_split_sr.begin();
+       ref_file_split_sr_it != ref_file_split_sr.end();++ref_file_split_sr_it) {
+    String ref_filename = ref_file_split_sr_it->str();
     EntityHandle ref=load(ref_filename, profile);
     if (!ref) {
       exit(-1);
-    }  
-    EntityView refview=ref.GetChainList()[0].Select("peptide=true");
-    ref_list.push_back(refview);
-    glob_dist_list = CreateDistanceList(refview,radius);
-  } else {
-    std::cout << "Multi-reference mode: On" << std::endl;  
-    for (std::vector<StringRef>::const_iterator ref_file_split_sr_it = ref_file_split_sr.begin();
-         ref_file_split_sr_it != ref_file_split_sr.end();++ref_file_split_sr_it) {
-      String ref_filename = ref_file_split_sr_it->str();  
-      EntityHandle ref=load(ref_filename, profile);
-      if (!ref) {
-        exit(-1);
-      }
-      if (! ref_list.empty()) {
-        if (ref_list[0].GetChainList()[0].GetName()!=ref.GetChainList()[0].GetName()) {
-          std::cout << "ERROR: First chains in the reference structures have different names" << std::endl;
-          exit(-1);  
-        }    
-      }
-      EntityView refview=ref.GetChainList()[0].Select("peptide=true");
-      ref_list.push_back(ref.CreateFullView());
-    } 
-    glob_dist_list = CreateDistanceListFromMultipleReferences (ref_list,cutoffs,sequence_separation,radius);  
-  }         
+    }
+    ref_list.push_back(ref.CreateFullView());
+  }
+  CleanlDDTReferences(ref_list);
+  glob_dist_list = PreparelDDTGlobalRDMap(ref_list,cutoffs,sequence_separation,radius);
   files.pop_back();
 
   // prints out parameters used in the lddt calculation

@@ -135,6 +135,15 @@ void DLLEXPORT_OST_MOL_ALG PrintResidueRDMap(const ResidueRDMap& res_dist_list);
 // circular dependencies
 bool DLLEXPORT_OST_MOL_ALG IsStandardResidue(String rn);
 
+void DLLEXPORT_OST_MOL_ALG CleanlDDTReferences(std::vector<EntityView>& ref_list);
+
+// Prepare GlobalRDMap from reference list
+GlobalRDMap DLLEXPORT_OST_MOL_ALG PreparelDDTGlobalRDMap(
+    const std::vector<EntityView>& ref_list,
+    std::vector<Real>& cutoff_list,
+    int sequence_separation,
+    Real max_dist);
+
 }}}
 
 #endif

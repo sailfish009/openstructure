@@ -536,6 +536,36 @@ Real LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list, int sequence_sep
     return static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
 }
 
+
+void CleanlDDTReferences(std::vector<EntityView>& ref_list){
+  for (int i=0;i<ref_list.size();i++) {
+      if (ref_list[0].GetChainList()[0].GetName()!=ref_list[i].GetChainList()[0].GetName()) {
+        std::cout << "ERROR: First chains in the reference structures have different names" << std::endl;
+        exit(-1);
+    }
+    ref_list[i] = ref_list[i].GetChainList()[0].Select("peptide=true");
+  }
+}
+
+GlobalRDMap PreparelDDTGlobalRDMap(const std::vector<EntityView>& ref_list,
+                                   std::vector<Real>& cutoff_list,
+                                   int sequence_separation,
+                                   Real max_dist){
+  GlobalRDMap glob_dist_list;
+  if (ref_list.size()==1) {
+    std::cout << "Multi-reference mode: Off" << std::endl;
+    glob_dist_list = CreateDistanceList(ref_list[0], max_dist);
+  } else {
+    std::cout << "Multi-reference mode: On" << std::endl;
+    glob_dist_list = CreateDistanceListFromMultipleReferences(ref_list,
+                                                              cutoff_list,
+                                                              sequence_separation,
+                                                              max_dist);
+  }
+
+  return glob_dist_list;
+}
+
 // debugging code
 /*
 Real OldStyleLDDTHA(EntityView& v, const GlobalRDMap& global_dist_list)
