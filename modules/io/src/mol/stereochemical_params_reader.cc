@@ -46,7 +46,7 @@ namespace {
 namespace ost { namespace io {
 
 StereoChemicalParamsReader::StereoChemicalParamsReader() {
-  filename = ost::GetSharedDataPath() + "/stereo_chemical_propsd.txt";
+  filename = ost::GetSharedDataPath() + "/stereo_chemical_props.txt";
 }
 
 StereoChemicalParamsReader::StereoChemicalParamsReader(const String& init_filename): filename(init_filename) {}
