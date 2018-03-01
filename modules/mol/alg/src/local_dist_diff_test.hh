@@ -25,6 +25,30 @@
 #include <ost/mol/alg/filter_clashes.hh>
 
 namespace ost { namespace mol { namespace alg {
+
+
+struct lDDTSettings {
+  Real bond_tolerance;
+  Real angle_tolerance;
+  Real radius; 
+  int sequence_separation;
+  String sel;
+  String parameter_file_path;
+  bool structural_checks;
+  bool consistency_checks;
+  std::vector<Real> cutoffs;
+
+  lDDTSettings();
+  lDDTSettings(Real init_bond_tolerance,
+               Real init_angle_tolerance,
+               Real init_radius, 
+               int init_sequence_separation,
+               String init_sel,
+               String init_parameter_file_path,
+               bool init_structural_checks,
+               bool init_consistency_checks,
+               std::vector<Real> init_cutoffs);
+};
   
 /// \brief Calculates number of distances conserved in a model, given a list of distances to check and a model
 ///
@@ -74,6 +98,12 @@ Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
                                          Real cutoff, 
                                          Real max_dist,
                                          const String& local_ldt_property_string="");
+/// TODO document me
+Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
+                                         const std::vector<EntityView>& targets,
+                                         const lDDTSettings& settings,
+                                         const String& local_ldt_property_string="");
+
 /// \brief Calculates the Local Distance Difference Test score for a given model starting from an alignment between a reference structure and the model. 
 ///
 /// Calculates the Local Distance Difference Test score given an alignment between a model and a taget structure.

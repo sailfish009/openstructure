@@ -1,6 +1,7 @@
 #include <iomanip>
 #include <ost/log.hh>
 #include <ost/mol/mol.hh>
+#include <ost/platform.hh>
 #include "local_dist_diff_test.hh"
 #include <boost/concept_check.hpp>
 
@@ -338,6 +339,45 @@ bool IsStandardResidue(String rn)
   return false;
 }  
 
+lDDTSettings::lDDTSettings(): bond_tolerance(12.0),
+                              angle_tolerance(12.0),
+                              radius(15.0), 
+                              sequence_separation(0),
+                              sel(""),
+                              structural_checks(false),
+                              consistency_checks(true) {
+    cutoffs.push_back(0.5);
+    cutoffs.push_back(1.0);
+    cutoffs.push_back(2.0);
+    cutoffs.push_back(4.0);
+    try {
+      parameter_file_path = ost::GetSharedDataPath() + "/stereo_chemical_props.txt";
+    } catch (std::runtime_error& e) {
+      std::cerr << "WARNING: " << e.what();
+    }
+    // if ((! boost::filesystem::exists(parameter_file_path)) || parameter_file_path == "") {  
+    //   std::cerr << "WARNING: Could not find stereo_chemical_props.txt at the provided location." << std::endl;
+    // }
+  }
+
+lDDTSettings::lDDTSettings(Real init_bond_tolerance,
+                           Real init_angle_tolerance,
+                           Real init_radius, 
+                           int init_sequence_separation,
+                           String init_sel,
+                           String init_parameter_file_path,
+                           bool init_structural_checks,
+                           bool init_consistency_checks,
+                           std::vector<Real> init_cutoffs): 
+                    bond_tolerance(init_bond_tolerance),
+                    angle_tolerance(init_angle_tolerance),
+                    radius(init_radius), 
+                    sequence_separation(init_sequence_separation),
+                    sel(init_sel),
+                    parameter_file_path(init_parameter_file_path),
+                    structural_checks(init_structural_checks),
+                    consistency_checks(init_consistency_checks) {}
+
 
 GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist)
 {
@@ -539,7 +579,7 @@ Real LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list, int sequence_sep
 
 
 void CleanlDDTReferences(std::vector<EntityView>& ref_list){
-  for (int i=0;i<ref_list.size();i++) {
+  for (unsigned int i=0;i<ref_list.size();i++) {
       if (ref_list[0].GetChainList()[0].GetName()!=ref_list[i].GetChainList()[0].GetName()) {
         std::cout << "ERROR: First chains in the reference structures have different names" << std::endl;
         exit(-1);

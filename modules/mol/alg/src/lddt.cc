@@ -190,22 +190,15 @@ int main (int argc, char **argv)
 {
   // sets some default values for parameters
   String version = OST_VERSION_STRING;
-  Real bond_tolerance = 12.0;
-  Real angle_tolerance = 12.0;
-  Real radius=15.0; 
-  int sequence_separation = 0;
-
+  lDDTSettings settings;
   // creates the required loading profile
   IOProfile profile;
   // parses options
-  String sel;
   String custom_path;
-  bool structural_checks=false;
-  bool consistency_checks=true;
   po::options_description desc("Options");
   desc.add_options()
     ("calpha,c", "consider only calpha atoms")
-    ("sel,s", po::value<String>(&sel)->default_value(""), "selection performed on reference structure")
+    ("sel,s", po::value<String>(&settings.sel)->default_value(""), "selection performed on reference structure")
     ("tolerant,t", "fault tolerant mode")
     ("structural-checks,f", "perform stereo-chemical and clash checks")
     ("ignore-consistency-checks,x", "ignore residue name consistency checks")
@@ -254,18 +247,18 @@ int main (int argc, char **argv)
     profile.calpha_only=true;
   }
   if (vm.count("structural-checks")) {
-    structural_checks=true;
+    settings.structural_checks=true;
   }
   if (vm.count("ignore-consistency-checks")) {
-    consistency_checks=false;
+    settings.consistency_checks=false;
   }
   if (vm.count("tolerant")) {
     profile.fault_tolerant=true;
   }
-  String parameter_filename;
+
   if (vm.count("parameter-file")) {
-      parameter_filename=vm["parameter-file"].as<String>();
-    } else if (structural_checks==true) {
+      settings.parameter_file_path=vm["parameter-file"].as<String>();
+    } else if (settings.structural_checks==true) {
     std::cout << "Please specify a stereo-chemical parameter file" << std::endl;
     exit(-1);
   }
@@ -288,23 +281,17 @@ int main (int argc, char **argv)
   Logger::Instance().PushVerbosityLevel(ost_verbosity_level);
 
   if (vm.count("bond_tolerance")) {
-    bond_tolerance=vm["bond_tolerance"].as<Real>();
+    settings.bond_tolerance=vm["bond_tolerance"].as<Real>();
   }
   if (vm.count("angle_tolerance")) {
-    angle_tolerance=vm["angle_tolerance"].as<Real>();
+    settings.angle_tolerance=vm["angle_tolerance"].as<Real>();
   }
   if (vm.count("inclusion_radius")) {
-    radius=vm["inclusion_radius"].as<Real>();
+    settings.radius=vm["inclusion_radius"].as<Real>();
   }
   if (vm.count("sequence_separation")) {
-    sequence_separation=vm["sequence_separation"].as<int>();
+    settings.sequence_separation=vm["sequence_separation"].as<int>();
   }
-    
-  std::vector<Real> cutoffs;
-  cutoffs.push_back(0.5);
-  cutoffs.push_back(1.0);
-  cutoffs.push_back(2.0);
-  cutoffs.push_back(4.0);
 
   std::vector<EntityView> ref_list;  
     
@@ -325,23 +312,23 @@ int main (int argc, char **argv)
     ref_list.push_back(ref.CreateFullView());
   }
   CleanlDDTReferences(ref_list);
-  glob_dist_list = PreparelDDTGlobalRDMap(ref_list,cutoffs,sequence_separation,radius);
+  glob_dist_list = PreparelDDTGlobalRDMap(ref_list,settings.cutoffs,settings.sequence_separation,settings.radius);
   files.pop_back();
 
   // prints out parameters used in the lddt calculation
   std::cout << "Verbosity level: " << verbosity_level << std::endl;
-  if (structural_checks) {
+  if (settings.structural_checks) {
     std::cout << "Stereo-chemical and steric clash checks: On " << std::endl;
   } else {
     std::cout << "Stereo-chemical and steric clash checks: Off " << std::endl;
   }
-  std::cout << "Inclusion Radius: " << radius << std::endl;
+  std::cout << "Inclusion Radius: " << settings.radius << std::endl;
 
-  std::cout << "Sequence separation: " << sequence_separation << std::endl;
-  if (structural_checks) {
-    std::cout << "Parameter filename: " << parameter_filename << std::endl;
-    std::cout << "Tolerance in stddevs for bonds: " << bond_tolerance << std::endl;
-    std::cout << "Tolerance in stddevs for angles: " << angle_tolerance << std::endl;
+  std::cout << "Sequence separation: " << settings.sequence_separation << std::endl;
+  if (settings.structural_checks) {
+    std::cout << "Parameter filename: " << settings.parameter_file_path << std::endl;
+    std::cout << "Tolerance in stddevs for bonds: " << settings.bond_tolerance << std::endl;
+    std::cout << "Tolerance in stddevs for angles: " << settings.angle_tolerance << std::endl;
     LOG_INFO("Log entries format:");
     LOG_INFO("BOND INFO FORMAT:  Chain  Residue  ResNum  Bond  Min  Max  Observed  Z-score  Status");
     LOG_INFO("ANGLE INFO FORMAT:  Chain  Residue  ResNum  Angle  Min  Max  Observed  Z-score  Status");
@@ -368,9 +355,9 @@ int main (int argc, char **argv)
     EntityView outv=model.GetChainList()[0].Select("peptide=true");
     for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
          ref_list_it != ref_list.end(); ++ref_list_it) {
-      bool cons_check = ResidueNamesMatch(v,*ref_list_it,consistency_checks);
+      bool cons_check = ResidueNamesMatch(v,*ref_list_it,settings.consistency_checks);
       if (cons_check==false) {
-        if (consistency_checks==true) {
+        if (settings.consistency_checks==true) {
           LOG_ERROR("Residue names in model: " << files[i] << " and in reference structure(s) are inconsistent.");
           exit(-1);            
         } else {
@@ -390,8 +377,8 @@ int main (int argc, char **argv)
       std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
     }
 
-    if (structural_checks) {
-      StereoChemicalParamsReader stereochemical_params(parameter_filename);
+    if (settings.structural_checks) {
+      StereoChemicalParamsReader stereochemical_params(settings.parameter_file_path);
       try {
         stereochemical_params.Read(true);
       } catch (std::exception& e) {
@@ -404,8 +391,8 @@ int main (int argc, char **argv)
                        stereochemical_params.bond_table,
                        stereochemical_params.angle_table,
                        stereochemical_params.nonbonded_table,
-                       bond_tolerance,
-                       angle_tolerance);
+                       settings.bond_tolerance,
+                       settings.angle_tolerance);
       } catch (std::exception& e) {
         std::cout << e.what() << std::endl;
         exit(-1);
@@ -419,14 +406,14 @@ int main (int argc, char **argv)
 
     // computes the lddt score   
     String label="localldt";
-    std::pair<int,int> total_ov=alg::LocalDistDiffTest(v, glob_dist_list, cutoffs, sequence_separation, label);
+    std::pair<int,int> total_ov=alg::LocalDistDiffTest(v, glob_dist_list, settings.cutoffs, settings.sequence_separation, label);
     Real lddt = static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
     std::cout << "Global LDDT score: " << std::setprecision(4) << lddt << std::endl;
     std::cout << "(" << std::fixed << total_ov.first << " conserved distances out of " << total_ov.second
-              << " checked, over " << cutoffs.size() << " thresholds)" << std::endl;
+              << " checked, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
 
     // prints the residue-by-residue statistics  
-    if (structural_checks) {
+    if (settings.structural_checks) {
       std::cout << "Local LDDT Scores:" << std::endl;
       std::cout << "(A 'Yes' in the 'Quality Problems' column stands for problems" << std::endl;
       std::cout << "in the side-chain of a residue, while a 'Yes+' for problems" << std::endl;
@@ -434,10 +421,10 @@ int main (int argc, char **argv)
     } else {
       std::cout << "Local LDDT Scores:" << std::endl;
     }
-    if (structural_checks) {
-      std::cout << "Chain\tResName\tResNum\tAsses.\tQ.Prob.\tScore\t(Conserved/Total, over " << cutoffs.size() << " thresholds)" << std::endl;
+    if (settings.structural_checks) {
+      std::cout << "Chain\tResName\tResNum\tAsses.\tQ.Prob.\tScore\t(Conserved/Total, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
     } else {
-      std::cout << "Chain\tResName\tResNum\tAsses.\tScore\t(Conserved/Total, over " << cutoffs.size() << " thresholds)" << std::endl;
+      std::cout << "Chain\tResName\tResNum\tAsses.\tScore\t(Conserved/Total, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
     }
     for (ChainViewList::const_iterator ci = outv.GetChainList().begin(),
          ce = outv.GetChainList().end(); ci != ce; ++ci) {
@@ -486,7 +473,7 @@ int main (int argc, char **argv)
             dist_string="(0/0)";
           }
         }
-        if (structural_checks) {
+        if (settings.structural_checks) {
           std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << quality_problems_string << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
         } else {
           std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
