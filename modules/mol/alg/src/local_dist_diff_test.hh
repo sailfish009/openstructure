@@ -22,6 +22,7 @@
 #include <ost/mol/alg/module_config.hh>
 #include <ost/seq/alignment_handle.hh>
 #include <ost/mol/alg/distance_test_common.hh>
+#include <ost/mol/alg/filter_clashes.hh>
 
 namespace ost { namespace mol { namespace alg {
   
@@ -143,6 +144,13 @@ GlobalRDMap DLLEXPORT_OST_MOL_ALG PreparelDDTGlobalRDMap(
     std::vector<Real>& cutoff_list,
     int sequence_separation,
     Real max_dist);
+
+void DLLEXPORT_OST_MOL_ALG CheckStructure(EntityView& ent,
+                                          StereoChemicalParams& bond_table,
+                                          StereoChemicalParams& angle_table,
+                                          ClashingDistances& nonbonded_table,
+                                          Real bond_tolerance,
+                                          Real angle_tolerance);
 
 }}}
 

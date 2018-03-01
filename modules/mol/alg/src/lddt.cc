@@ -32,6 +32,7 @@
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/io_exception.hh>
+#include <ost/io/stereochemical_params_reader.hh>
 #include <ost/conop/conop.hh>
 #include <ost/conop/compound_lib.hh>
 #include <ost/string_ref.hh>
@@ -390,74 +391,27 @@ int main (int argc, char **argv)
     }
 
     if (structural_checks) {
-      // reads in parameter files   
-      boost::filesystem::path loc(parameter_filename);
-      boost::filesystem::ifstream infile(loc);
-      if (!infile) {
-        std::cout << "Could not find " << parameter_filename << std::endl;
-        exit(-1);
-      }
-      std::vector<String> stereo_chemical_props;
-      String line;
-      while (std::getline(infile, line))
-      {
-        std::stringstream line_stream(line);
-        stereo_chemical_props.push_back(line);
-      }
-      StereoChemicalParams bond_table = FillStereoChemicalParams("Bond",stereo_chemical_props);
-      if (bond_table.IsEmpty()) {
-        std::cout << "Error reading the Bond section of the stereo-chemical parameter file." << std::endl;
-        exit(-1);
-      }
-      StereoChemicalParams angle_table = FillStereoChemicalParams("Angle",stereo_chemical_props);
-      if (angle_table.IsEmpty()) {
-        std::cout << "Error reading the Angles section of the stereo-chemical parameter file." << std::endl;
-        exit(-1);
-      }
-
-      ClashingDistances nonbonded_table = FillClashingDistances(stereo_chemical_props);
-
-      if (nonbonded_table.IsEmpty()) {
-        std::cout << "Error reading the Clashing section of the stereo-chemical parameter file." << std::endl;
-        exit(-1);
-      }
-      // performs structural checks and filters the structure
-      StereoChemistryInfo stereo_chemistry_info;
-      try { 
-        std::pair<EntityView,StereoChemistryInfo> csc_result = alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
-        v = csc_result.first;
-        stereo_chemistry_info = csc_result.second;
-      } catch (std::exception& e) {       
-        std::cout << "An error occurred during the structure quality checks, stage 1:" << std::endl;    
-        std::cout << e.what() << std::endl;
-        exit(-1);
-      }
-      std::cout << "Average Z-Score for bond lengths: " << std::fixed << std::setprecision(5) << stereo_chemistry_info.GetAvgZscoreBonds() << std::endl;
-      std::cout << "Bonds outside of tolerance range: " << stereo_chemistry_info.GetBadBondCount() << " out of " << stereo_chemistry_info.GetBondCount() << std::endl;
-      std::cout << "Bond\tAvg Length\tAvg zscore\tNum Bonds" << std::endl;
-      std::map<String,BondLengthInfo> avg_bond_length_info = stereo_chemistry_info.GetAvgBondLengthInfo();
-      for (std::map<String,BondLengthInfo>::const_iterator abli_it=avg_bond_length_info.begin();abli_it!=avg_bond_length_info.end();++abli_it) {
-        String key = (*abli_it).first;
-        BondLengthInfo bond_length_info = (*abli_it).second;
-        std::cout << key << "\t" << std::fixed << std::setprecision(5) << std::left << std::setw(10) <<
-                     bond_length_info.GetAvgLength() << "\t" << std::left << std::setw(10) << bond_length_info.GetAvgZscore() << "\t" << bond_length_info.GetCount()  << std::endl;
-      }
-      std::cout << "Average Z-Score angle widths: " << std::fixed << std::setprecision(5) << stereo_chemistry_info.GetAvgZscoreAngles() << std::endl;
-      std::cout << "Angles outside of tolerance range: " << stereo_chemistry_info.GetBadAngleCount() << " out of " << stereo_chemistry_info.GetAngleCount() << std::endl;
-      ClashingInfo clash_info;
+      StereoChemicalParamsReader stereochemical_params(parameter_filename);
       try {
-        std::pair<EntityView,ClashingInfo> fc_result = alg::FilterClashes(v,nonbonded_table);
-        v = fc_result.first;
-        clash_info = fc_result.second;
-      } catch (std::exception& e) {       
-        std::cout << "An error occurred during the structure quality checks, stage 2:" << std::endl;    
+        stereochemical_params.Read(true);
+      } catch (std::exception& e) {
         std::cout << e.what() << std::endl;
         exit(-1);
       }
-      std::cout << clash_info.GetClashCount() << " non-bonded short-range distances shorter than tolerance distance" << std::endl;
-      std::cout << "Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << clash_info.GetAverageOffset() << std::endl;
-
+      
+      try {
+        CheckStructure(v,
+                       stereochemical_params.bond_table,
+                       stereochemical_params.angle_table,
+                       stereochemical_params.nonbonded_table,
+                       bond_tolerance,
+                       angle_tolerance);
+      } catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
+        exit(-1);
+      }
     }
+
     if (cov.first==0) {
       std::cout << "Global LDDT score: 0.0" << std::endl;
       return 0;
