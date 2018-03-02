@@ -102,30 +102,6 @@ void usage()
 
 }
 
-// computes coverage
-std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob_dist_list)
-{
-  int second=0;
-  int first=0;
-  if (v.GetResidueList().size()==0) {
-    if (glob_dist_list.size()==0) {
-      return std::make_pair(0,-1);
-    } else {    
-      return std::make_pair(0,glob_dist_list.size());
-    }  
-  }
-  ChainView vchain=v.GetChainList()[0];
-  for (GlobalRDMap::const_iterator i=glob_dist_list.begin();i!=glob_dist_list.end();++i)
-  {
-    ResNum rnum = (*i).first;
-    second++;
-    if (vchain.FindResidue(rnum)) {
-      first++;
-    }
-  }
-  return std::make_pair(first,second);
-}
-
 CompoundLibPtr load_compound_lib(const String& custom_path)
 {
   if (custom_path!="") {
@@ -174,16 +150,6 @@ CompoundLibPtr load_compound_lib(const String& custom_path)
     exit(-1);
   }
   return CompoundLibPtr();
-}
-bool is_resnum_in_globalrdmap(const ResNum& resnum, const GlobalRDMap& glob_dist_list)
-{
-  for (GlobalRDMap::const_iterator i=glob_dist_list.begin(), e=glob_dist_list.end(); i!=e; ++i) {
-    ResNum rn = i->first;
-    if (rn==resnum) {
-      return true;
-    }
-  }
-  return false;
 }
 
 int main (int argc, char **argv)
@@ -317,18 +283,8 @@ int main (int argc, char **argv)
 
   // prints out parameters used in the lddt calculation
   std::cout << "Verbosity level: " << verbosity_level << std::endl;
+  settings.PrintParameters();
   if (settings.structural_checks) {
-    std::cout << "Stereo-chemical and steric clash checks: On " << std::endl;
-  } else {
-    std::cout << "Stereo-chemical and steric clash checks: Off " << std::endl;
-  }
-  std::cout << "Inclusion Radius: " << settings.radius << std::endl;
-
-  std::cout << "Sequence separation: " << settings.sequence_separation << std::endl;
-  if (settings.structural_checks) {
-    std::cout << "Parameter filename: " << settings.parameter_file_path << std::endl;
-    std::cout << "Tolerance in stddevs for bonds: " << settings.bond_tolerance << std::endl;
-    std::cout << "Tolerance in stddevs for angles: " << settings.angle_tolerance << std::endl;
     LOG_INFO("Log entries format:");
     LOG_INFO("BOND INFO FORMAT:  Chain  Residue  ResNum  Bond  Min  Max  Observed  Z-score  Status");
     LOG_INFO("ANGLE INFO FORMAT:  Chain  Residue  ResNum  Angle  Min  Max  Observed  Z-score  Status");
@@ -351,31 +307,11 @@ int main (int argc, char **argv)
       }
       continue;
     }
-    EntityView v=model.GetChainList()[0].Select("peptide=true");
-    EntityView outv=model.GetChainList()[0].Select("peptide=true");
-    for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
-         ref_list_it != ref_list.end(); ++ref_list_it) {
-      bool cons_check = ResidueNamesMatch(v,*ref_list_it,settings.consistency_checks);
-      if (cons_check==false) {
-        if (settings.consistency_checks==true) {
-          LOG_ERROR("Residue names in model: " << files[i] << " and in reference structure(s) are inconsistent.");
-          exit(-1);            
-        } else {
-          LOG_WARNING("Residue names in model: " << files[i] << " and in reference structure(s) are inconsistent.");
-        }   
-      } 
-    }
+    EntityView model_view = model.GetChainList()[0].Select("peptide=true");
 
     boost::filesystem::path pathstring(files[i]);
-
     String filestring=BFPathToString(pathstring);
-    std::cout << "File: " << files[i] << std::endl; 
-    std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
-    if (cov.second == -1) {
-      std::cout << "Coverage: 0 (0 out of 0 residues)" << std::endl;
-    } else {
-      std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
-    }
+    std::cout << "File: " << files[i] << std::endl;
 
     if (settings.structural_checks) {
       StereoChemicalParamsReader stereochemical_params(settings.parameter_file_path);
@@ -387,7 +323,7 @@ int main (int argc, char **argv)
       }
       
       try {
-        CheckStructure(v,
+        CheckStructure(model_view,
                        stereochemical_params.bond_table,
                        stereochemical_params.angle_table,
                        stereochemical_params.nonbonded_table,
@@ -399,88 +335,11 @@ int main (int argc, char **argv)
       }
     }
 
-    if (cov.first==0) {
-      std::cout << "Global LDDT score: 0.0" << std::endl;
-      return 0;
-    }
-
     // computes the lddt score   
-    String label="localldt";
-    std::pair<int,int> total_ov=alg::LocalDistDiffTest(v, glob_dist_list, settings.cutoffs, settings.sequence_separation, label);
-    Real lddt = static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
-    std::cout << "Global LDDT score: " << std::setprecision(4) << lddt << std::endl;
-    std::cout << "(" << std::fixed << total_ov.first << " conserved distances out of " << total_ov.second
-              << " checked, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
+    Real lddt = LocalDistDiffTest(model_view, ref_list, glob_dist_list, settings);
 
-    // prints the residue-by-residue statistics  
-    if (settings.structural_checks) {
-      std::cout << "Local LDDT Scores:" << std::endl;
-      std::cout << "(A 'Yes' in the 'Quality Problems' column stands for problems" << std::endl;
-      std::cout << "in the side-chain of a residue, while a 'Yes+' for problems" << std::endl;
-      std::cout << "in the backbone)" << std::endl;
-    } else {
-      std::cout << "Local LDDT Scores:" << std::endl;
-    }
-    if (settings.structural_checks) {
-      std::cout << "Chain\tResName\tResNum\tAsses.\tQ.Prob.\tScore\t(Conserved/Total, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
-    } else {
-      std::cout << "Chain\tResName\tResNum\tAsses.\tScore\t(Conserved/Total, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
-    }
-    for (ChainViewList::const_iterator ci = outv.GetChainList().begin(),
-         ce = outv.GetChainList().end(); ci != ce; ++ci) {
-      for (ResidueViewList::const_iterator rit = ci->GetResidueList().begin(),
-           re = ci->GetResidueList().end(); rit != re; ++rit) {
-     
-        ResidueView ritv=*rit;
-        ResNum rnum = ritv.GetNumber();
-        bool assessed = false;
-        String assessed_string="No";
-        String quality_problems_string="No";
-        Real lddt_local = -1;
-        String lddt_local_string="-";
-        int conserved_dist = -1;
-        int total_dist = -1;
-        String dist_string = "-";
-        if (is_resnum_in_globalrdmap(rnum,glob_dist_list)) {
-          assessed = true;
-          assessed_string="Yes";
-        }
-        if (ritv.HasProp("stereo_chemical_violation_sidechain") || 
-            ritv.HasProp("steric_clash_sidechain")) {
-          quality_problems_string="Yes";
-        }
-        if (ritv.HasProp("stereo_chemical_violation_backbone") || 
-            ritv.HasProp("steric_clash_backbone")) {
-          quality_problems_string="Yes+";
-        }
-
-        if (assessed==true) {
-          if (ritv.HasProp(label)) {
-            lddt_local=ritv.GetFloatProp(label);
-            std::stringstream stkeylddt;
-            stkeylddt <<  std::fixed << std::setprecision(4) << lddt_local;
-            lddt_local_string=stkeylddt.str();
-            conserved_dist=ritv.GetIntProp(label+"_conserved");
-            total_dist=ritv.GetIntProp(label+"_total");
-            std::stringstream stkeydist;
-            stkeydist << "("<< conserved_dist << "/" << total_dist << ")";
-            dist_string=stkeydist.str();
-          } else {
-            lddt_local = 0;
-            lddt_local_string="0.0000";
-            conserved_dist = 0;
-            total_dist = 0;
-            dist_string="(0/0)";
-          }
-        }
-        if (settings.structural_checks) {
-          std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << quality_problems_string << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
-        } else {
-          std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
-        }
-      }
-    }
-    std::cout << std::endl;
+    // prints the residue-by-residue statistics
+    PrintlDDTPerResidueStats(model, glob_dist_list, settings);
   }
   return 0;
 }

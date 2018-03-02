@@ -1,9 +1,11 @@
 #include <iomanip>
+#include <sstream>
 #include <ost/log.hh>
 #include <ost/mol/mol.hh>
 #include <ost/platform.hh>
 #include "local_dist_diff_test.hh"
 #include <boost/concept_check.hpp>
+#include <ost/mol/alg/consistency_checks.hh>
 
 namespace ost { namespace mol { namespace alg {
 
@@ -309,6 +311,42 @@ void merge_distance_lists(GlobalRDMap& ref_dist_map, const GlobalRDMap& new_dist
 
 }
 
+// Computes coverage
+std::pair<int,int> ComputeCoverage(const EntityView& v,const GlobalRDMap& glob_dist_list)
+{
+  int second=0;
+  int first=0;
+  if (v.GetResidueList().size()==0) {
+    if (glob_dist_list.size()==0) {
+      return std::make_pair(0,-1);
+    } else {    
+      return std::make_pair(0,glob_dist_list.size());
+    }  
+  }
+  ChainView vchain=v.GetChainList()[0];
+  for (GlobalRDMap::const_iterator i=glob_dist_list.begin();i!=glob_dist_list.end();++i)
+  {
+    ResNum rnum = (*i).first;
+    second++;
+    if (vchain.FindResidue(rnum)) {
+      first++;
+    }
+  }
+  return std::make_pair(first,second);
+}
+
+bool IsResnumInGlobalRDMap(const ResNum& resnum, const GlobalRDMap& glob_dist_list)
+{
+  for (GlobalRDMap::const_iterator i=glob_dist_list.begin(), e=glob_dist_list.end(); i!=e; ++i) {
+    ResNum rn = i->first;
+    if (rn==resnum) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
 // helper function
 bool IsStandardResidue(String rn)
 {
@@ -345,7 +383,9 @@ lDDTSettings::lDDTSettings(): bond_tolerance(12.0),
                               sequence_separation(0),
                               sel(""),
                               structural_checks(false),
-                              consistency_checks(true) {
+                              consistency_checks(true),
+                              print_stats(true),
+                              label("localldt") {
     cutoffs.push_back(0.5);
     cutoffs.push_back(1.0);
     cutoffs.push_back(2.0);
@@ -368,7 +408,9 @@ lDDTSettings::lDDTSettings(Real init_bond_tolerance,
                            String init_parameter_file_path,
                            bool init_structural_checks,
                            bool init_consistency_checks,
-                           std::vector<Real> init_cutoffs): 
+                           std::vector<Real>& init_cutoffs,
+                           bool init_print_stats,
+                           String init_label): 
                     bond_tolerance(init_bond_tolerance),
                     angle_tolerance(init_angle_tolerance),
                     radius(init_radius), 
@@ -376,7 +418,33 @@ lDDTSettings::lDDTSettings(Real init_bond_tolerance,
                     sel(init_sel),
                     parameter_file_path(init_parameter_file_path),
                     structural_checks(init_structural_checks),
-                    consistency_checks(init_consistency_checks) {}
+                    consistency_checks(init_consistency_checks),
+                    print_stats(init_print_stats),
+                    label(init_label) {}
+
+std::string lDDTSettings::ToString() {
+  std::ostringstream rep;
+  if (structural_checks) {
+    rep << "Stereo-chemical and steric clash checks: On \n";
+  } else {
+    rep << "Stereo-chemical and steric clash checks: Off \n";
+  }
+  rep << "Inclusion Radius: " << radius << "\n";
+
+  rep << "Sequence separation: " << sequence_separation << "\n";
+  if (structural_checks) {
+    rep << "Parameter filename: " + parameter_file_path + "\n";
+    rep << "Tolerance in stddevs for bonds: " << bond_tolerance << "\n";
+    rep << "Tolerance in stddevs for angles: " << angle_tolerance << "\n";
+  }
+  rep << "Residue properties label: " << label << "\n";
+
+  return rep.str();
+}
+
+void lDDTSettings::PrintParameters() {
+  std::cout << ToString();
+}
 
 
 GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist)
@@ -514,6 +582,42 @@ Real LocalDistDiffTest(const EntityView& mdl, const EntityView& target, Real cut
    return static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
 }
 
+Real LocalDistDiffTest(const EntityView& v,
+                       std::vector<EntityView>& ref_list,
+                       const GlobalRDMap& glob_dist_list,
+                       lDDTSettings& settings) {
+
+  for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
+       ref_list_it != ref_list.end(); ++ref_list_it) {
+    bool cons_check = ResidueNamesMatch(v,*ref_list_it,settings.consistency_checks);
+    if (cons_check==false) {
+      if (settings.consistency_checks==true) {
+        throw std::runtime_error("Residue names in model and in reference structure(s) are inconsistent.");            
+      } else {
+        LOG_WARNING("Residue names in model and in reference structure(s) are inconsistent.");
+      }   
+    } 
+  }
+
+  std::pair<int,int> cov = ComputeCoverage(v,glob_dist_list);
+  if (cov.second == -1) {
+    std::cout << "Coverage: 0 (0 out of 0 residues)" << std::endl;
+  } else {
+    std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
+  }
+
+  if (cov.first==0) {
+    std::cout << "Global LDDT score: 0.0" << std::endl;
+    return 0.0;
+  }
+
+  std::pair<int,int> total_ov=alg::LocalDistDiffTest(v, glob_dist_list, settings.cutoffs, settings.sequence_separation, settings.label);
+  Real lddt = static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
+  std::cout << "Global LDDT score: " << std::setprecision(4) << lddt << std::endl;
+  std::cout << "(" << std::fixed << total_ov.first << " conserved distances out of " << total_ov.second
+            << " checked, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
+  return lddt;
+}
 
 Real LocalDistDiffTest(const ost::seq::AlignmentHandle& aln,
                    Real cutoff, Real max_dist, int ref_index, int mdl_index)
@@ -648,6 +752,79 @@ void CheckStructure(EntityView& ent,
   }
   std::cout << clash_info.GetClashCount() << " non-bonded short-range distances shorter than tolerance distance" << std::endl;
   std::cout << "Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << clash_info.GetAverageOffset() << std::endl;
+}
+
+void PrintlDDTPerResidueStats(EntityHandle& model, GlobalRDMap& glob_dist_list, lDDTSettings& settings){
+  EntityView outv = model.GetChainList()[0].Select("peptide=true");
+  if (settings.structural_checks) {
+    std::cout << "Local LDDT Scores:" << std::endl;
+    std::cout << "(A 'Yes' in the 'Quality Problems' column stands for problems" << std::endl;
+    std::cout << "in the side-chain of a residue, while a 'Yes+' for problems" << std::endl;
+    std::cout << "in the backbone)" << std::endl;
+  } else {
+    std::cout << "Local LDDT Scores:" << std::endl;
+  }
+  if (settings.structural_checks) {
+    std::cout << "Chain\tResName\tResNum\tAsses.\tQ.Prob.\tScore\t(Conserved/Total, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
+  } else {
+    std::cout << "Chain\tResName\tResNum\tAsses.\tScore\t(Conserved/Total, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
+  }
+  for (ChainViewList::const_iterator ci = outv.GetChainList().begin(),
+       ce = outv.GetChainList().end(); ci != ce; ++ci) {
+    for (ResidueViewList::const_iterator rit = ci->GetResidueList().begin(),
+         re = ci->GetResidueList().end(); rit != re; ++rit) {
+   
+      ResidueView ritv=*rit;
+      ResNum rnum = ritv.GetNumber();
+      bool assessed = false;
+      String assessed_string="No";
+      String quality_problems_string="No";
+      Real lddt_local = -1;
+      String lddt_local_string="-";
+      int conserved_dist = -1;
+      int total_dist = -1;
+      String dist_string = "-";
+      if (IsResnumInGlobalRDMap(rnum,glob_dist_list)) {
+        assessed = true;
+        assessed_string="Yes";
+      }
+      if (ritv.HasProp("stereo_chemical_violation_sidechain") || 
+          ritv.HasProp("steric_clash_sidechain")) {
+        quality_problems_string="Yes";
+      }
+      if (ritv.HasProp("stereo_chemical_violation_backbone") || 
+          ritv.HasProp("steric_clash_backbone")) {
+        quality_problems_string="Yes+";
+      }
+
+      if (assessed==true) {
+        if (ritv.HasProp(settings.label)) {
+          lddt_local=ritv.GetFloatProp(settings.label);
+          std::stringstream stkeylddt;
+          stkeylddt <<  std::fixed << std::setprecision(4) << lddt_local;
+          lddt_local_string=stkeylddt.str();
+          conserved_dist=ritv.GetIntProp(settings.label+"_conserved");
+          total_dist=ritv.GetIntProp(settings.label+"_total");
+          std::stringstream stkeydist;
+          stkeydist << "("<< conserved_dist << "/" << total_dist << ")";
+          dist_string=stkeydist.str();
+        } else {
+          std::cout << settings.label << std::endl;
+          lddt_local = 0;
+          lddt_local_string="0.0000";
+          conserved_dist = 0;
+          total_dist = 0;
+          dist_string="(0/0)";
+        }
+      }
+      if (settings.structural_checks) {
+        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << quality_problems_string << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
+      } else {
+        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
+      }
+    }
+  }
+  std::cout << std::endl;
 }
 
 // debugging code

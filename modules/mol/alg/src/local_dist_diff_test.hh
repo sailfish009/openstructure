@@ -26,7 +26,6 @@
 
 namespace ost { namespace mol { namespace alg {
 
-
 struct lDDTSettings {
   Real bond_tolerance;
   Real angle_tolerance;
@@ -37,6 +36,8 @@ struct lDDTSettings {
   bool structural_checks;
   bool consistency_checks;
   std::vector<Real> cutoffs;
+  bool print_stats;
+  String label;
 
   lDDTSettings();
   lDDTSettings(Real init_bond_tolerance,
@@ -47,8 +48,16 @@ struct lDDTSettings {
                String init_parameter_file_path,
                bool init_structural_checks,
                bool init_consistency_checks,
-               std::vector<Real> init_cutoffs);
+               std::vector<Real>& init_cutoffs,
+               bool init_print_stats,
+               String init_label);
+  void PrintParameters();
+  std::string ToString();
 };
+
+std::pair<int,int> DLLEXPORT_OST_MOL_ALG ComputeCoverage(const EntityView& v,const GlobalRDMap& glob_dist_list);
+
+bool DLLEXPORT_OST_MOL_ALG IsResnumInGlobalRDMap(const ResNum& resnum, const GlobalRDMap& glob_dist_list);
   
 /// \brief Calculates number of distances conserved in a model, given a list of distances to check and a model
 ///
@@ -99,10 +108,10 @@ Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
                                          Real max_dist,
                                          const String& local_ldt_property_string="");
 /// TODO document me
-Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
-                                         const std::vector<EntityView>& targets,
-                                         const lDDTSettings& settings,
-                                         const String& local_ldt_property_string="");
+Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& v,
+                       std::vector<EntityView>& ref_list,
+                       const GlobalRDMap& glob_dist_list,
+                       lDDTSettings& settings);
 
 /// \brief Calculates the Local Distance Difference Test score for a given model starting from an alignment between a reference structure and the model. 
 ///
@@ -181,6 +190,10 @@ void DLLEXPORT_OST_MOL_ALG CheckStructure(EntityView& ent,
                                           ClashingDistances& nonbonded_table,
                                           Real bond_tolerance,
                                           Real angle_tolerance);
+
+void PrintlDDTPerResidueStats(EntityHandle& model,
+                              GlobalRDMap& glob_dist_list,
+                              lDDTSettings& settings);
 
 }}}
 
