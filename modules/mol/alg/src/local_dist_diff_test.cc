@@ -5,11 +5,24 @@
 #include <ost/platform.hh>
 #include "local_dist_diff_test.hh"
 #include <boost/concept_check.hpp>
+#include <boost/filesystem/convenience.hpp>
 #include <ost/mol/alg/consistency_checks.hh>
 
 namespace ost { namespace mol { namespace alg {
 
 namespace {
+
+// helper_function
+String vector_to_string(std::vector<Real> vec) {
+  std::ostringstream str;
+  for (unsigned int i = 0; i < vec.size(); ++i) {
+      str << vec[i];
+      if (i+1 != vec.size()) {
+          str << ", ";
+      }
+  }
+  return str.str();
+}
 
 // helper function
 bool within_tolerance(Real mdl_dist, const std::pair<Real,Real>& values, Real tol)
@@ -382,22 +395,14 @@ lDDTSettings::lDDTSettings(): bond_tolerance(12.0),
                               radius(15.0), 
                               sequence_separation(0),
                               sel(""),
-                              structural_checks(false),
+                              structural_checks(true),
                               consistency_checks(true),
-                              print_stats(true),
                               label("localldt") {
     cutoffs.push_back(0.5);
     cutoffs.push_back(1.0);
     cutoffs.push_back(2.0);
     cutoffs.push_back(4.0);
-    try {
-      parameter_file_path = ost::GetSharedDataPath() + "/stereo_chemical_props.txt";
-    } catch (std::runtime_error& e) {
-      std::cerr << "WARNING: " << e.what();
-    }
-    // if ((! boost::filesystem::exists(parameter_file_path)) || parameter_file_path == "") {  
-    //   std::cerr << "WARNING: Could not find stereo_chemical_props.txt at the provided location." << std::endl;
-    // }
+    SetStereoChemicalParamsPath();
   }
 
 lDDTSettings::lDDTSettings(Real init_bond_tolerance,
@@ -409,18 +414,42 @@ lDDTSettings::lDDTSettings(Real init_bond_tolerance,
                            bool init_structural_checks,
                            bool init_consistency_checks,
                            std::vector<Real>& init_cutoffs,
-                           bool init_print_stats,
                            String init_label): 
                     bond_tolerance(init_bond_tolerance),
                     angle_tolerance(init_angle_tolerance),
                     radius(init_radius), 
                     sequence_separation(init_sequence_separation),
                     sel(init_sel),
-                    parameter_file_path(init_parameter_file_path),
                     structural_checks(init_structural_checks),
                     consistency_checks(init_consistency_checks),
-                    print_stats(init_print_stats),
-                    label(init_label) {}
+                    cutoffs(init_cutoffs),
+                    label(init_label) {
+  SetStereoChemicalParamsPath(init_parameter_file_path);
+}
+
+void lDDTSettings::SetStereoChemicalParamsPath(const String& path) {
+  if (path == ""){
+    try {
+      std::cerr << "Setting default stereochemical parameters file path." << std::endl;
+      parameter_file_path = ost::GetSharedDataPath() + "/stereo_chemical_props.txt";
+      if (! structural_checks) {
+        std::cerr << "WARNING: Stereochemical parameters file is set but structural checks are disabled" << std::endl;
+      }
+    } catch (std::runtime_error& e) {
+      std::cerr << "WARNING: " << e.what() << std::endl;
+      std::cerr << "WARNING: Parameter file setting failed - structural check will be disabled" << std::endl;
+      structural_checks = false;
+      parameter_file_path = "";
+    }
+  } else if (! boost::filesystem::exists(path)) {
+    std::cerr << "WARNING: Parameter file does not exist - structural check will be disabled" << std::endl;
+    structural_checks = false;
+    parameter_file_path = "";
+  } else {
+    parameter_file_path = path;
+    structural_checks = true;
+  }
+}
 
 std::string lDDTSettings::ToString() {
   std::ostringstream rep;
@@ -429,9 +458,11 @@ std::string lDDTSettings::ToString() {
   } else {
     rep << "Stereo-chemical and steric clash checks: Off \n";
   }
-  rep << "Inclusion Radius: " << radius << "\n";
 
+  rep << "Inclusion Radius: " << radius << "\n";
   rep << "Sequence separation: " << sequence_separation << "\n";
+  rep << "Cutoffs: " << vector_to_string(cutoffs) << "\n";
+
   if (structural_checks) {
     rep << "Parameter filename: " + parameter_file_path + "\n";
     rep << "Tolerance in stddevs for bonds: " << bond_tolerance << "\n";
@@ -586,7 +617,6 @@ Real LocalDistDiffTest(const EntityView& v,
                        std::vector<EntityView>& ref_list,
                        const GlobalRDMap& glob_dist_list,
                        lDDTSettings& settings) {
-
   for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
        ref_list_it != ref_list.end(); ++ref_list_it) {
     bool cons_check = ResidueNamesMatch(v,*ref_list_it,settings.consistency_checks);
@@ -693,19 +723,17 @@ void CleanlDDTReferences(std::vector<EntityView>& ref_list){
 }
 
 GlobalRDMap PreparelDDTGlobalRDMap(const std::vector<EntityView>& ref_list,
-                                   std::vector<Real>& cutoff_list,
-                                   int sequence_separation,
-                                   Real max_dist){
+                                   lDDTSettings& settings){
   GlobalRDMap glob_dist_list;
   if (ref_list.size()==1) {
     std::cout << "Multi-reference mode: Off" << std::endl;
-    glob_dist_list = CreateDistanceList(ref_list[0], max_dist);
+    glob_dist_list = CreateDistanceList(ref_list[0], settings.radius);
   } else {
     std::cout << "Multi-reference mode: On" << std::endl;
     glob_dist_list = CreateDistanceListFromMultipleReferences(ref_list,
-                                                              cutoff_list,
-                                                              sequence_separation,
-                                                              max_dist);
+                                                              settings.cutoffs,
+                                                              settings.sequence_separation,
+                                                              settings.radius);
   }
 
   return glob_dist_list;

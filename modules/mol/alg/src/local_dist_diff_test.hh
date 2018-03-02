@@ -36,7 +36,6 @@ struct lDDTSettings {
   bool structural_checks;
   bool consistency_checks;
   std::vector<Real> cutoffs;
-  bool print_stats;
   String label;
 
   lDDTSettings();
@@ -49,8 +48,8 @@ struct lDDTSettings {
                bool init_structural_checks,
                bool init_consistency_checks,
                std::vector<Real>& init_cutoffs,
-               bool init_print_stats,
                String init_label);
+  void SetStereoChemicalParamsPath(const String& path="");
   void PrintParameters();
   std::string ToString();
 };
@@ -180,9 +179,7 @@ void DLLEXPORT_OST_MOL_ALG CleanlDDTReferences(std::vector<EntityView>& ref_list
 // Prepare GlobalRDMap from reference list
 GlobalRDMap DLLEXPORT_OST_MOL_ALG PreparelDDTGlobalRDMap(
     const std::vector<EntityView>& ref_list,
-    std::vector<Real>& cutoff_list,
-    int sequence_separation,
-    Real max_dist);
+    lDDTSettings& settings);
 
 void DLLEXPORT_OST_MOL_ALG CheckStructure(EntityView& ent,
                                           StereoChemicalParams& bond_table,

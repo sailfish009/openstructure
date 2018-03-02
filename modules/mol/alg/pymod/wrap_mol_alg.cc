@@ -50,6 +50,7 @@ namespace {
   
 std::pair<long int,long int> (*lddt_a)(const mol::EntityView&, const mol::alg::GlobalRDMap& , std::vector<Real>, int, const String&)=&mol::alg::LocalDistDiffTest;
 Real (*lddt_c)(const mol::EntityView&, const mol::EntityView& , Real, Real, const String&)=&mol::alg::LocalDistDiffTest;
+// Real (*lddt_d)(const mol::EntityView&, std::vector<mol::EntityView>&, const mol::alg::GlobalRDMap&, mol::alg::lDDTSettings&)=&mol::alg::LocalDistDiffTest;
 Real (*lddt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistDiffTest;
 std::pair<mol::EntityView,mol::alg::ClashingInfo> (*fc_a)(const mol::EntityView&, const mol::alg::ClashingDistances&,bool)=&mol::alg::FilterClashes;
 std::pair<mol::EntityView,mol::alg::ClashingInfo> (*fc_b)(const mol::EntityHandle&, const mol::alg::ClashingDistances&, bool)=&mol::alg::FilterClashes;
@@ -57,6 +58,18 @@ std::pair<mol::EntityView,mol::alg::StereoChemistryInfo> (*csc_a)(const mol::Ent
 std::pair<mol::EntityView,mol::alg::StereoChemistryInfo> (*csc_b)(const mol::EntityHandle&, const mol::alg::StereoChemicalParams&, const mol::alg::StereoChemicalParams&, Real, Real, bool)=&mol::alg::CheckStereoChemistry;
 mol::CoordGroupHandle (*superpose_frames1)(mol::CoordGroupHandle&, mol::EntityView&, int, int, int)=&mol::alg::SuperposeFrames;
 mol::CoordGroupHandle (*superpose_frames2)(mol::CoordGroupHandle&,  mol::EntityView&, mol::EntityView&, int, int)=&mol::alg::SuperposeFrames;
+
+
+Real local_dist_diff_test_wrapper(const mol::EntityView& v, list& ref_list, const mol::alg::GlobalRDMap& glob_dist_list, mol::alg::lDDTSettings& settings){
+  int ref_list_length = boost::python::extract<int>(ref_list.attr("__len__")());
+  std::vector<ost::mol::EntityView> ref_list_vector(ref_list_length);
+  
+  for (int i=0; i<ref_list_length; i++) {
+    ref_list_vector[i] = boost::python::extract<ost::mol::EntityView>(ref_list[i]);
+  }
+
+  return LocalDistDiffTest(v, ref_list_vector, glob_dist_list, settings);
+}
 
 ost::mol::alg::StereoChemicalParams fill_stereochemical_params_wrapper (const String& header, const list& stereo_chemical_props_file)  
 {
@@ -100,6 +113,126 @@ ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const l
   return ost::mol::alg::CreateDistanceListFromMultipleReferences(ref_list_vector, cutoff_list_vector, sequence_separation, max_dist);  	
 }
 
+object lDDTSettingsInitWrapper(tuple args, dict kwargs){
+
+  object self = args[0];
+  args = tuple(args.slice(1,_));
+
+  Real bond_tolerance = 12;
+  if(kwargs.contains("bond_tolerance")){
+    bond_tolerance = extract<bool>(kwargs["bond_tolerance"]);
+    kwargs["bond_tolerance"].del();
+  }
+
+  Real angle_tolerance = 12;
+  if(kwargs.contains("angle_tolerance")){
+    angle_tolerance = extract<bool>(kwargs["angle_tolerance"]);
+    kwargs["angle_tolerance"].del();
+  }
+
+  Real radius = 15;
+  if(kwargs.contains("radius")){
+    radius = extract<bool>(kwargs["radius"]);
+    kwargs["radius"].del();
+  }
+
+  int sequence_separation = 0;
+  if(kwargs.contains("sequence_separation")){
+    sequence_separation = extract<bool>(kwargs["sequence_separation"]);
+    kwargs["sequence_separation"].del();
+  }
+
+  String sel = "";
+  if(kwargs.contains("sel")){
+    sel = extract<bool>(kwargs["sel"]);
+    kwargs["sel"].del();
+  }
+
+  String parameter_file_path = "";
+  if(kwargs.contains("parameter_file_path")){
+    parameter_file_path = extract<bool>(kwargs["parameter_file_path"]);
+    kwargs["parameter_file_path"].del();
+  }
+
+  bool structural_checks = true;
+  if(kwargs.contains("structural_checks")){
+    structural_checks = extract<bool>(kwargs["structural_checks"]);
+    kwargs["structural_checks"].del();
+  }
+
+  bool consistency_checks = true;
+  if(kwargs.contains("consistency_checks")){
+    consistency_checks = extract<bool>(kwargs["consistency_checks"]);
+    kwargs["consistency_checks"].del();
+  }
+
+  std::vector<Real> cutoffs;
+  if(kwargs.contains("cutoffs")){
+    list cutoff_list = extract<list>(kwargs["cutoffs"]);
+    int cutoff_list_length = boost::python::extract<int>(cutoff_list.attr("__len__")());
+    for (int i=0; i<cutoff_list_length; i++) {
+      cutoffs.push_back(boost::python::extract<Real>(cutoff_list[i]));
+    }
+    kwargs["cutoffs"].del();
+  } else {
+    cutoffs.push_back(0.5);
+    cutoffs.push_back(1.0);
+    cutoffs.push_back(2.0);
+    cutoffs.push_back(4.0);
+  }
+
+  String label = "localldt";
+  if(kwargs.contains("label")){
+    label = extract<bool>(kwargs["label"]);
+    kwargs["label"].del();
+  }
+
+  if(len(kwargs) > 0){
+    std::stringstream ss;
+    ss << "Invalid keywords observed when setting up MolckSettings! ";
+    ss << "Or did you pass the same keyword twice? ";
+    ss << "Valid keywords are: bond_tolerance, angle_tolerance, radius, ";
+    ss << "sequence_separation, sel, parameter_file_path, structural_checks, ";
+    ss << "consistency_checks, cutoffs, label!";
+    throw std::invalid_argument(ss.str());
+  }
+
+  return self.attr("__init__")(bond_tolerance,
+                               angle_tolerance,
+                               radius, 
+                               sequence_separation,
+                               sel,
+                               parameter_file_path,
+                               structural_checks,
+                               consistency_checks,
+                               cutoffs,
+                               label);
+}
+
+
+void clean_lddt_references_wrapper(const list& ref_list)
+{
+  int ref_list_length = boost::python::extract<int>(ref_list.attr("__len__")());
+  std::vector<ost::mol::EntityView> ref_list_vector(ref_list_length);
+  
+  for (int i=0; i<ref_list_length; i++) {
+    ref_list_vector[i] = boost::python::extract<ost::mol::EntityView>(ref_list[i]);
+  }
+ 
+ return ost::mol::alg::CleanlDDTReferences(ref_list_vector);
+}
+
+ost::mol::alg::GlobalRDMap prepare_lddt_global_rdmap_wrapper(const list& ref_list, mol::alg::lDDTSettings settings)
+{
+  int ref_list_length = boost::python::extract<int>(ref_list.attr("__len__")());
+  std::vector<ost::mol::EntityView> ref_list_vector(ref_list_length);
+  
+  for (int i=0; i<ref_list_length; i++) {
+    ref_list_vector[i] = boost::python::extract<ost::mol::EntityView>(ref_list[i]);
+  }
+ 
+ return mol::alg::PreparelDDTGlobalRDMap(ref_list_vector, settings);
+}
 
 }
 
@@ -120,6 +253,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("LocalDistDiffTest", lddt_a, (arg("sequence_separation")=0,arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_c, (arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_b, (arg("ref_index")=0, arg("mdl_index")=1));
+  def("LocalDistDiffTest", &local_dist_diff_test_wrapper, (arg("v"), arg("ref_list"), ("glob_dist_list"), arg("settings")));
   def("FilterClashes", fc_a, (arg("ent"), arg("clashing_distances"), arg("always_remove_bb")=false));
   def("FilterClashes", fc_b, (arg("ent"), arg("clashing_distances"), arg("always_remove_bb")=false));
   def("CheckStereoChemistry", csc_a, (arg("ent"), arg("bonds"), arg("angles"), arg("bond_tolerance"), arg("angle_tolerance"), arg("always_remove_bb")=false));
@@ -161,13 +295,44 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
     .def("GetResidueName",&mol::alg::UniqueAtomIdentifier::GetResidueName)
     .def("GetAtomName",&mol::alg::UniqueAtomIdentifier::GetAtomName)
     .def("GetQualifiedAtomName",&mol::alg::UniqueAtomIdentifier::GetQualifiedAtomName)
-  ;    
+  ;
+
+  class_<mol::alg::lDDTSettings>("lDDTSettings", no_init)
+    .def("__init__", raw_function(lDDTSettingsInitWrapper))
+    .def(init<Real, Real, Real,  int, String, String, bool, bool, std::vector<Real>&, String>())
+    .def("ToString", &mol::alg::lDDTSettings::ToString)
+    .def("SetStereoChemicalParamsPath", &mol::alg::lDDTSettings::SetStereoChemicalParamsPath)
+    .def("PrintParameters", &mol::alg::lDDTSettings::PrintParameters)
+    .def("__repr__", &mol::alg::lDDTSettings::ToString)
+    .def("__str__", &mol::alg::lDDTSettings::ToString)
+    .def_readwrite("bond_tolerance", &mol::alg::lDDTSettings::bond_tolerance)
+    .def_readwrite("angle_tolerance", &mol::alg::lDDTSettings::angle_tolerance)
+    .def_readwrite("radius", &mol::alg::lDDTSettings::radius)
+    .def_readwrite("sequence_separation", &mol::alg::lDDTSettings::sequence_separation)
+    .def_readwrite("sel", &mol::alg::lDDTSettings::sel)
+    .def_readwrite("parameter_file_path", &mol::alg::lDDTSettings::parameter_file_path)
+    .def_readwrite("structural_checks", &mol::alg::lDDTSettings::structural_checks)
+    .def_readwrite("consistency_checks", &mol::alg::lDDTSettings::consistency_checks)
+    .def_readwrite("cutoffs", &mol::alg::lDDTSettings::cutoffs)
+    .def_readwrite("label", &mol::alg::lDDTSettings::label);
   
   def("FillClashingDistances",&fill_clashing_distances_wrapper);
   def("FillStereoChemicalParams",&fill_stereochemical_params_wrapper);
   def("IsStandardResidue",&mol::alg::IsStandardResidue);
   def("PrintGlobalRDMap",&mol::alg::PrintGlobalRDMap);
   def("PrintResidueRDMap",&mol::alg::PrintResidueRDMap);
+  def("CleanlDDTReferences", &clean_lddt_references_wrapper);
+  def("PreparelDDTGlobalRDMap",
+      &prepare_lddt_global_rdmap_wrapper,
+      (arg("ref_list"), arg("settings")));
+  def("CheckStructure",
+      &mol::alg::CheckStructure,
+      (arg("ent"), arg("bond_table"), arg("angle_table"), arg("nonbonded_table"),
+       arg("bond_tolerance"), arg("angle_tolerance")));
+  def("PrintlDDTPerResidueStats",
+      &mol::alg::PrintlDDTPerResidueStats,
+      (arg("model"), arg("glob_dist_list"), arg("settings")));
+
  
   class_<mol::alg::PDBize>("PDBize",
                            init<int>(arg("min_polymer_size")=10))

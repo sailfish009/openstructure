@@ -157,6 +157,7 @@ int main (int argc, char **argv)
   // sets some default values for parameters
   String version = OST_VERSION_STRING;
   lDDTSettings settings;
+  settings.structural_checks=false;
   // creates the required loading profile
   IOProfile profile;
   // parses options
@@ -278,7 +279,7 @@ int main (int argc, char **argv)
     ref_list.push_back(ref.CreateFullView());
   }
   CleanlDDTReferences(ref_list);
-  glob_dist_list = PreparelDDTGlobalRDMap(ref_list,settings.cutoffs,settings.sequence_separation,settings.radius);
+  glob_dist_list = PreparelDDTGlobalRDMap(ref_list, settings);
   files.pop_back();
 
   // prints out parameters used in the lddt calculation
