@@ -477,6 +477,55 @@ void lDDTSettings::PrintParameters() {
   std::cout << ToString();
 }
 
+// Default constructor is neccessary for boost exposure
+lDDTLocalScore::lDDTLocalScore(): cname(""),
+                                  rname(""),
+                                  rnum(-1),
+                                  is_assessed(""),
+                                  quality_problems(""),
+                                  local_lddt(-1.0),
+                                  conserved_dist(-1),
+                                  total_dist(-1) {}
+
+lDDTLocalScore::lDDTLocalScore(String init_cname,
+                               String init_rname,
+                               int init_rnum,
+                               String init_is_assessed,
+                               String init_quality_problems,
+                               Real init_local_lddt,
+                               int init_conserved_dist,
+                               int init_total_dist): 
+                                       cname(init_cname),
+                                       rname(init_rname),
+                                       rnum(init_rnum),
+                                       is_assessed(init_is_assessed),
+                                       quality_problems(init_quality_problems),
+                                       local_lddt(init_local_lddt),
+                                       conserved_dist(init_conserved_dist),
+                                       total_dist(init_total_dist) {}
+
+String lDDTLocalScore::ToString(bool structural_checks) const {
+  std::stringstream stkeylddt;
+  std::stringstream outstr;
+  stkeylddt << "(" << conserved_dist << "/" << total_dist << ")";
+  String dist_string = stkeylddt.str();
+  if (structural_checks) {
+    outstr << cname << "\t" << rname << "\t" << rnum << '\t' << is_assessed  << '\t' << quality_problems << '\t' << local_lddt << "\t" << dist_string;
+  } else {
+    outstr << cname << "\t" << rname << "\t" << rnum << '\t' << is_assessed  << '\t' << local_lddt << "\t" << dist_string;
+  }
+  return outstr.str();
+}
+
+String lDDTLocalScore::GetHeader(bool structural_checks, int cutoffs_length) {
+  std::stringstream outstr;
+  if (structural_checks) {
+    outstr << "Chain\tResName\tResNum\tAsses.\tQ.Prob.\tScore\t(Conserved/Total, over " << cutoffs_length << " thresholds)";
+  } else {
+    outstr << "Chain\tResName\tResNum\tAsses.\tScore\t(Conserved/Total, over " << cutoffs_length << " thresholds)";
+  }
+  return outstr.str();
+}
 
 GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist)
 {
@@ -782,36 +831,28 @@ void CheckStructure(EntityView& ent,
   std::cout << "Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << clash_info.GetAverageOffset() << std::endl;
 }
 
-void PrintlDDTPerResidueStats(EntityHandle& model, GlobalRDMap& glob_dist_list, lDDTSettings& settings){
+std::vector<lDDTLocalScore> GetlDDTPerResidueStats(EntityHandle& model, GlobalRDMap& glob_dist_list, lDDTSettings& settings){
+  std::vector<lDDTLocalScore> scores;
   EntityView outv = model.GetChainList()[0].Select("peptide=true");
-  if (settings.structural_checks) {
-    std::cout << "Local LDDT Scores:" << std::endl;
-    std::cout << "(A 'Yes' in the 'Quality Problems' column stands for problems" << std::endl;
-    std::cout << "in the side-chain of a residue, while a 'Yes+' for problems" << std::endl;
-    std::cout << "in the backbone)" << std::endl;
-  } else {
-    std::cout << "Local LDDT Scores:" << std::endl;
-  }
-  if (settings.structural_checks) {
-    std::cout << "Chain\tResName\tResNum\tAsses.\tQ.Prob.\tScore\t(Conserved/Total, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
-  } else {
-    std::cout << "Chain\tResName\tResNum\tAsses.\tScore\t(Conserved/Total, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
-  }
   for (ChainViewList::const_iterator ci = outv.GetChainList().begin(),
        ce = outv.GetChainList().end(); ci != ce; ++ci) {
     for (ResidueViewList::const_iterator rit = ci->GetResidueList().begin(),
          re = ci->GetResidueList().end(); rit != re; ++rit) {
-   
+
       ResidueView ritv=*rit;
       ResNum rnum = ritv.GetNumber();
       bool assessed = false;
       String assessed_string="No";
-      String quality_problems_string="No";
+      String quality_problems_string;
+      if (settings.structural_checks) {
+        quality_problems_string="No";
+      } else {
+        quality_problems_string="NA";
+      }
       Real lddt_local = -1;
       String lddt_local_string="-";
       int conserved_dist = -1;
       int total_dist = -1;
-      String dist_string = "-";
       if (IsResnumInGlobalRDMap(rnum,glob_dist_list)) {
         assessed = true;
         assessed_string="Yes";
@@ -833,24 +874,42 @@ void PrintlDDTPerResidueStats(EntityHandle& model, GlobalRDMap& glob_dist_list, 
           lddt_local_string=stkeylddt.str();
           conserved_dist=ritv.GetIntProp(settings.label+"_conserved");
           total_dist=ritv.GetIntProp(settings.label+"_total");
-          std::stringstream stkeydist;
-          stkeydist << "("<< conserved_dist << "/" << total_dist << ")";
-          dist_string=stkeydist.str();
         } else {
           std::cout << settings.label << std::endl;
           lddt_local = 0;
           lddt_local_string="0.0000";
           conserved_dist = 0;
           total_dist = 0;
-          dist_string="(0/0)";
         }
       }
-      if (settings.structural_checks) {
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << quality_problems_string << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
-      } else {
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
-      }
+      // std::tuple<String, String, int, String, String, Real, int, int>
+      lDDTLocalScore row(ritv.GetChain().GetName(),
+                         ritv.GetName(),
+                         ritv.GetNumber().GetNum(),
+                         assessed_string,
+                         quality_problems_string,
+                         lddt_local,
+                         conserved_dist,
+                         total_dist);
+      scores.push_back(row);
     }
+  }
+
+  return scores;
+}
+
+void PrintlDDTPerResidueStats(std::vector<lDDTLocalScore>& scores, lDDTSettings& settings){
+  if (settings.structural_checks) {
+    std::cout << "Local LDDT Scores:" << std::endl;
+    std::cout << "(A 'Yes' in the 'Quality Problems' column stands for problems" << std::endl;
+    std::cout << "in the side-chain of a residue, while a 'Yes+' for problems" << std::endl;
+    std::cout << "in the backbone)" << std::endl;
+  } else {
+    std::cout << "Local LDDT Scores:" << std::endl;
+  }
+  std::cout << lDDTLocalScore::GetHeader(settings.structural_checks, settings.cutoffs.size()) << std::endl;
+  for (std::vector<lDDTLocalScore>::const_iterator sit = scores.begin(); sit != scores.end(); ++sit) {
+    std::cout << sit->ToString(settings.structural_checks) << std::endl;
   }
   std::cout << std::endl;
 }

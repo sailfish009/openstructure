@@ -54,6 +54,32 @@ struct lDDTSettings {
   std::string ToString();
 };
 
+struct lDDTLocalScore {
+  String cname;
+  String rname;
+  int rnum;
+  String is_assessed;
+  String quality_problems;
+  Real local_lddt;
+  int conserved_dist;
+  int total_dist;
+
+  lDDTLocalScore();
+
+  lDDTLocalScore(String init_cname,
+                 String init_rname,
+                 int init_rnum,
+                 String init_is_assessed,
+                 String init_quality_problems,
+                 Real init_local_lddt,
+                 int init_conserved_dist,
+                 int init_total_dist);
+
+  String ToString(bool structural_checks) const;
+
+  static String GetHeader(bool structural_checks, int cutoffs_length);
+};
+
 std::pair<int,int> DLLEXPORT_OST_MOL_ALG ComputeCoverage(const EntityView& v,const GlobalRDMap& glob_dist_list);
 
 bool DLLEXPORT_OST_MOL_ALG IsResnumInGlobalRDMap(const ResNum& resnum, const GlobalRDMap& glob_dist_list);
@@ -188,9 +214,12 @@ void DLLEXPORT_OST_MOL_ALG CheckStructure(EntityView& ent,
                                           Real bond_tolerance,
                                           Real angle_tolerance);
 
-void PrintlDDTPerResidueStats(EntityHandle& model,
-                              GlobalRDMap& glob_dist_list,
-                              lDDTSettings& settings);
+std::vector<lDDTLocalScore> DLLEXPORT_OST_MOL_ALG GetlDDTPerResidueStats(EntityHandle& model,
+                                              GlobalRDMap& glob_dist_list,
+                                              lDDTSettings& settings);
+
+void DLLEXPORT_OST_MOL_ALG PrintlDDTPerResidueStats(std::vector<lDDTLocalScore>& scores,
+                                                    lDDTSettings& settings);
 
 }}}
 

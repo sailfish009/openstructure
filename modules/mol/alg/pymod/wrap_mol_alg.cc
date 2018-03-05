@@ -234,6 +234,28 @@ ost::mol::alg::GlobalRDMap prepare_lddt_global_rdmap_wrapper(const list& ref_lis
  return mol::alg::PreparelDDTGlobalRDMap(ref_list_vector, settings);
 }
 
+list get_lddt_per_residue_stats_wrapper(mol::EntityHandle& model,
+                                        ost::mol::alg::GlobalRDMap& glob_dist_list,
+                                        ost::mol::alg::lDDTSettings& settings) {
+  std::vector<mol::alg::lDDTLocalScore> scores = GetlDDTPerResidueStats(model, glob_dist_list, settings);
+  list local_scores_list;
+  for (std::vector<mol::alg::lDDTLocalScore>::const_iterator sit = scores.begin(); sit != scores.end(); ++sit) {
+    local_scores_list.append(*sit);
+  }
+  return local_scores_list;
+}
+
+void print_lddt_per_residue_stats_wrapper(list& scores, mol::alg::lDDTSettings settings){
+  int scores_length = boost::python::extract<int>(scores.attr("__len__")());
+  std::vector<mol::alg::lDDTLocalScore> scores_vector(scores_length);
+  
+  for (int i=0; i<scores_length; i++) {
+    scores_vector[i] = boost::python::extract<mol::alg::lDDTLocalScore>(scores[i]);
+  }
+ 
+ return mol::alg::PrintlDDTPerResidueStats(scores_vector, settings);
+}
+  
 }
 
 
@@ -315,6 +337,18 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
     .def_readwrite("consistency_checks", &mol::alg::lDDTSettings::consistency_checks)
     .def_readwrite("cutoffs", &mol::alg::lDDTSettings::cutoffs)
     .def_readwrite("label", &mol::alg::lDDTSettings::label);
+
+  class_<mol::alg::lDDTLocalScore>("lDDTLocalScore", init<String, String, int, String, String, Real, int, int>())
+    .def("ToString", &mol::alg::lDDTLocalScore::ToString)
+    .def("GetHeader", &mol::alg::lDDTLocalScore::GetHeader)
+    .def_readwrite("cname", &mol::alg::lDDTLocalScore::cname)
+    .def_readwrite("rname", &mol::alg::lDDTLocalScore::rname)
+    .def_readwrite("rnum", &mol::alg::lDDTLocalScore::rnum)
+    .def_readwrite("is_assessed", &mol::alg::lDDTLocalScore::is_assessed)
+    .def_readwrite("quality_problems", &mol::alg::lDDTLocalScore::quality_problems)
+    .def_readwrite("local_lddt", &mol::alg::lDDTLocalScore::local_lddt)
+    .def_readwrite("conserved_dist", &mol::alg::lDDTLocalScore::conserved_dist)
+    .def_readwrite("total_dist", &mol::alg::lDDTLocalScore::total_dist);
   
   def("FillClashingDistances",&fill_clashing_distances_wrapper);
   def("FillStereoChemicalParams",&fill_stereochemical_params_wrapper);
@@ -329,9 +363,12 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
       &mol::alg::CheckStructure,
       (arg("ent"), arg("bond_table"), arg("angle_table"), arg("nonbonded_table"),
        arg("bond_tolerance"), arg("angle_tolerance")));
-  def("PrintlDDTPerResidueStats",
-      &mol::alg::PrintlDDTPerResidueStats,
+  def("GetlDDTPerResidueStats",
+      &get_lddt_per_residue_stats_wrapper,
       (arg("model"), arg("glob_dist_list"), arg("settings")));
+  def("PrintlDDTPerResidueStats",
+      &print_lddt_per_residue_stats_wrapper,
+      (arg("scores"), arg("settings")));
 
  
   class_<mol::alg::PDBize>("PDBize",
