@@ -42,6 +42,9 @@
 #include <QAction>
 #include <QComboBox>
 #include <QDebug>
+#include <QMimeData>
+#include <QDrag>
+
 /*
   Author: Marco Biasini, Stefan Scheuber
  */

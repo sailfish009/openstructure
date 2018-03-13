@@ -19,16 +19,15 @@
 #
 # Authors: Stefan Bienert 
 #
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5 import QtCore, QtGui, QtWidgets
 from ost.mol.alg import Superpose
 from ost import mol
 
-class ChainComboBox(QComboBox):
+class ChainComboBox(QtWidgets.QComboBox):
   def __init__(self, ent, gfx, parent=None):
     # class variables
     self.all_chains = 'All'
-    QComboBox.__init__(self, parent)
+    QtWidgets.QComboBox.__init__(self, parent)
     self.entity = ent
     self.addItem(self.all_chains)
     for chain in self.entity.chains:
@@ -37,9 +36,7 @@ class ChainComboBox(QComboBox):
       self.setCurrentIndex(0)
     if gfx:
       self.gfx = gfx
-      QObject.connect(self,
-                      SIGNAL('highlighted (const QString&)'),
-                      self._HighlightChain)
+      self.highlighted.connect(self._HighlightChain)
     else:
       self.gfx = None
 
@@ -82,7 +79,7 @@ class ChainComboBox(QComboBox):
         break
   selected_chain = property(_GetSelectedChain, _SetSelectedChain)
 
-class SuperpositionDialog(QDialog):
+class SuperpositionDialog(QtWidgets.QDialog):
   """
   Provides a graphical user interface to structurally superpose two entities.
   Uses function :func:`~ost.mol.alg.Superpose`. The RMSD of two superposed
@@ -132,7 +129,7 @@ class SuperpositionDialog(QDialog):
     self.gfx_two = None
     self.gfx_select_one = None
     self.gfx_select_two = None
-    QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     self.setWindowTitle('Superpose structures')
     if not isinstance(ent_one, mol.EntityHandle) and \
        not isinstance(ent_one, mol.EntityView):
@@ -183,9 +180,7 @@ class SuperpositionDialog(QDialog):
     layout.addWidget(self._chain_two, grow, 1)
     grow += 1
     # link chain and reference selection
-    QObject.connect(self._reference,
-                    SIGNAL('currentIndexChanged(int)'),
-                    self._ChangeChainSelection)
+    self._reference.currentIndexChanged.connect(self._ChangeChainSelection)
     # match methods
     self._methods = self._MatchMethods()
     layout.addWidget(QLabel('match residues by'), grow, 0)
@@ -205,14 +200,14 @@ class SuperpositionDialog(QDialog):
     grow += 1
     # buttons
     ok_button = QPushButton("Superpose")
-    QObject.connect(ok_button, SIGNAL('clicked()'), self.accept)
+    ok_button.clicked.connect(self.accept)
     cancel_button = QPushButton("Cancel")
     hbox_layout = QHBoxLayout()
     hbox_layout.addStretch(1)
     layout.addLayout(hbox_layout, grow, 0, 1, 2)
     grow += 1
-    QObject.connect(cancel_button, SIGNAL('clicked()'), self.reject)
-    QObject.connect(self, SIGNAL('accepted()'), self._Superpose)
+    cancel_button.clicked.connect(self.reject)
+    self.accepted.connect(self._Superpose)
     hbox_layout.addWidget(cancel_button, 0)
     hbox_layout.addWidget(ok_button, 0)
     ok_button.setDefault(True)
@@ -260,7 +255,7 @@ class SuperpositionDialog(QDialog):
     vbox_layout.addWidget(bt3)
     vbox_layout.addWidget(custom_rbutton)
     vbox_layout.addWidget(self._atoms)
-    QObject.connect(custom_rbutton, SIGNAL('toggled(bool)'), self._toggle_atoms)
+    custom_rbutton.toggled.connect(self._toggle_atoms)
     box = QGroupBox("atom selection")
     box.setLayout(vbox_layout)
     return box, group
@@ -340,7 +335,7 @@ class SuperpositionDialog(QDialog):
     vbox_layout.addWidget(distance_label)
     vbox_layout.addWidget(distance_in)
     vbox_layout.addSpacing(50)
-    QObject.connect(bt1, SIGNAL('toggled(bool)'), self._toggle_iterative)
+    bt1.toggled.connect(self._toggle_iterative)
     box = QGroupBox("Iterative")
     box.setLayout(vbox_layout)
     return box,iteration_in, distance_in

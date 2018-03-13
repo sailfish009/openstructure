@@ -32,10 +32,10 @@
 #include <vector>
 #include <iostream>
 
-#include <QDomElement>
-#include <QDomDocument>
-#include <QDomAttr>
-#include <QDomText>
+#include <QtXml/QDomElement>
+#include <QtXml/QDomDocument>
+#include <QtXml/QDomAttr>
+#include <QtXml/QDomText>
 
 #include <ost/base.hh>
 #include <ost/geom/geom.hh>

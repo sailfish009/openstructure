@@ -20,7 +20,6 @@
 
 from ost import info
 from ost import gfx
-from PyQt4 import QtGui
 
 class RenderOp:
   RENDERMODE_ATTRIBUTE_NAME = "RenderMode"

@@ -443,8 +443,8 @@ if (APPLE)
 endif()
 set(QT_USE_QTOPENGL 1)
 set(QT_USE_QTNETWORK 1)
-include(${QT_USE_FILE})
-qt4_wrap_cpp(OST_GUI_MOCS "${HEADERS_TO_BE_MOCCED}" 
+
+qt5_wrap_cpp(OST_GUI_MOCS "${HEADERS_TO_BE_MOCCED}" 
              OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED
                      -DBOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
@@ -458,24 +458,28 @@ module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
                ${OST_GUI_DATA_VIEWER_HEADERS}
                ${OST_GUI_HEADERS}
        DEPENDS_ON ost_gfx ost_io ost_mol_alg ost_seq_alg
-       LINK ${QT_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES}
+       LINK Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport
+            ${PYTHON_LIBRARIES} 
+            ${BOOST_PYTHON_LIBRARIES}
             ${SPNAV_LIBRARIES}
         NO_STATIC)
-            
+
+
+   
 if (ADDITIONAL_LIBRARIES)
   target_link_libraries(ost_gui "${ADDITIONAL_LIBRARIES}")
 endif()
 
 include_directories(${PYTHON_INCLUDE_PATH})
-qt4_add_resources(OST_QT_RESOURCE dngr.qrc)
-qt4_wrap_cpp(OST_GOSTY_MOC "gosty.hh"
+qt5_add_resources(OST_QT_RESOURCE dngr.qrc)
+qt5_wrap_cpp(OST_GOSTY_MOC "gosty.hh"
              OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED
                      -DBOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 
-set(LINK LINK ${BOOST_PROGRAM_OPTIONS_LIBRARIES})
+set(LINK LINK Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport ${BOOST_PROGRAM_OPTIONS_LIBRARIES})
 
-executable_libexec(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC} ${OST_QT_RESOURCE} 
-           DEPENDS_ON ost_gui ${LINK})
+executable_libexec(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC}
+                   ${OST_QT_RESOURCE} DEPENDS_ON ost_gui ${LINK})
            
 file(GLOB MOC_CXX_FILES moc_*.cxx)
 

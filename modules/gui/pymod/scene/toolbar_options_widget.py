@@ -21,36 +21,35 @@
 import sys
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 
-class ToolBarOptionsWidget(QtGui.QWidget):
+class ToolBarOptionsWidget(QtWidgets.QWidget):
   """QWidget with a ToolBar and a show area.
     
    This abstract QWidget has a toolbar and a show area. Whenever a button of the tool bar is pressed, the Widget corresponding to the button's value is shown in the show area.  
   """
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     
     #Setup ui_
     self.parent_=parent
     self.resize(400, 300)
     self.setMinimumSize(QtCore.QSize(250, 200))
-    self.gridLayout = QtGui.QGridLayout(self)
+    self.gridLayout = QtWidgets.QGridLayout(self)
     self.gridLayout.setHorizontalSpacing(0)
     self.gridLayout.setVerticalSpacing(0)
     self.gridLayout.setContentsMargins(0,0,0,0)
-    self.gridLayout.setMargin(0)
     self.gridLayout.setSpacing(0)    
-    self.tool_bar_ = QtGui.QToolBar(self)
+    self.tool_bar_ = QtWidgets.QToolBar(self)
     self.tool_bar_.setIconSize(QtCore.QSize(16, 16))
     self.gridLayout.addWidget(self.tool_bar_, 0, 0, 1, 1)
-    self.stackedWidget = QtGui.QStackedWidget(self)
+    self.stackedWidget = QtWidgets.QStackedWidget(self)
     self.gridLayout.addWidget(self.stackedWidget, 1, 0, 1, 1)
 
     self.current_action_ = None
     self.actions_ = list()
     
-    QtCore.QObject.connect(self.tool_bar_, QtCore.SIGNAL("actionTriggered(QAction*)"), self.ChangeSelectedItem)
+    self.tool_bar_.actionTriggered.connect(self.ChangeSelectedItem)
     
     self.setEnabled(False)
            
@@ -74,13 +73,13 @@ class ToolBarOptionsWidget(QtGui.QWidget):
      the old widget will be removed and the new widget gets the identifier.
      Returns True, if widget is added. Otherwise it returns False
     """
-    if isinstance(widget, QtGui.QWidget) and ident is not None:
+    if isinstance(widget, QtWidgets.QWidget) and ident is not None:
       if text is not None:
-        string = QtCore.QString(text)
+        string = text
       elif hasattr(widget, "GetText"):
-        string = QtCore.QString(widget.GetText())
+        string = widget.GetText()
       else:
-        string = QtCore.QString(ident)
+        string = ident
       
       self.stackedWidget.addWidget(widget)
       action = self.tool_bar_.addAction(ident)
@@ -124,7 +123,7 @@ class ToolBarOptionsWidget(QtGui.QWidget):
         self.current_action_.setChecked(False)
     else:
        self.current_action_ = action
-    widget = action.data().toPyObject()[1]
+    widget = action.data()[1]
     self.stackedWidget.setCurrentWidget(widget)
     if hasattr(widget, "Update"): 
       widget.Update()
@@ -139,5 +138,5 @@ class ToolBarOptionsWidget(QtGui.QWidget):
 
   #Overwritten Methods
   def setEnabled(self, bool):
-    QtGui.QWidget.setEnabled(self, bool)
+    QtWidgets.QWidget.setEnabled(self, bool)
 

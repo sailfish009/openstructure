@@ -58,59 +58,33 @@ gl_canvas_(NULL)
   
   if(try_stereo) {
     LOG_VERBOSE("GLCanvas: trying stereo visuals first");
-    for(int format_id=4;format_id>=0;--format_id) {
-      QGLFormat format=GLWin::CreateFormat(format_id);
-      if (try_stereo) {
-        format.setStereo(true);
-      }
-      gl_canvas_=new GLCanvas(this, main, format);
-      if(gl_canvas_->isValid() && gl_canvas_->format().stereo()) {
-        break; // format is fine
-      } else {
-        delete gl_canvas_; // delete this canvas and try a less sophisticated format
-        gl_canvas_=0;
-      }
-    }
+    QSurfaceFormat format=QSurfaceFormat::defaultFormat();
+    format.setStereo(true);
+    gl_canvas_=new GLCanvas(this, main, format);
   }
   if(!gl_canvas_) {
     if(try_stereo) {
       LOG_VERBOSE("GLCanvas: no stereo visual found, trying normal ones");
-    }
-    for(int format_id=4;format_id>=0;--format_id) {
-      QGLFormat format=GLWin::CreateFormat(format_id);
-      gl_canvas_=new GLCanvas(this, main, format);
-      if(gl_canvas_->isValid()) {
-        break; // format is fine
-      } else {
-        delete gl_canvas_; // delete this canvas and try a less sophisticated format
-        gl_canvas_=0;
-      }
-    }
-  }
-
-  if(!gl_canvas_ || !gl_canvas_->isValid()) {
-    LOG_ERROR("GLCanvas: no valid GL context found, this is pretty fatal");
-    return;
+    }  
+    gl_canvas_=new GLCanvas(this, main);
   }
 
   this->SetInternalWidget(main);
   gfx::Scene::Instance().AttachObserver(this);
-  QGLFormat format = gl_canvas_->format();
-
+  QSurfaceFormat format = gl_canvas_->format();
 
   LOG_VERBOSE("GLCanvas: using " << format.redBufferSize() << "." 
                               << format.greenBufferSize() << "."
                               << format.blueBufferSize() << "."
                               << format.alphaBufferSize() << " RGBA bits, " 
                               << format.depthBufferSize() << " depth bits, "
-                              << format.accumBufferSize() << " accum bits, and "
                               << format.stencilBufferSize() << " stencil bits")
   if(gl_canvas_->format().stereo()) {
     LOG_VERBOSE("GLCanvas: using stereo visual");
   } else {
     LOG_VERBOSE("GLCanvas: no stereo visual found");
   }
-  if(format.sampleBuffers()) {
+  if(format.samples() > 1) {
     LOG_VERBOSE("GLCanvas: using multisampling with " << format.samples() << " samples per pixel");
   } else {
     LOG_VERBOSE("GLCanvas: no multisampling");
@@ -126,58 +100,16 @@ gl_canvas_(NULL)
 #if OST_IMG_ENABLED
   ToolManager::Instance().AddTool(new MapTool);
 #endif
+
+  if(!gl_canvas_ || !gl_canvas_->isValid()) {
+    LOG_ERROR("GLCanvas: no valid GL context found, this is pretty fatal");
+    return;
+  }
 }
 
 void GLWin::ActiveToolChanged(Tool* t)
 {
   gfx::Scene::Instance().RequestRedraw();
-}
-
-QGLFormat GLWin::CreateFormat(int fid)
-{
-  QGLFormat format = QGLFormat::defaultFormat();
-  if(fid==4) {
-    format.setDepthBufferSize(24);
-    format.setRedBufferSize(8);
-    format.setGreenBufferSize(8);
-    format.setBlueBufferSize(8);
-    format.setAlpha(true);
-    format.setAlphaBufferSize(8);
-    format.setAccum(true);
-    format.setStencil(true);
-    format.setSampleBuffers(true);
-  } else if(fid==3) {
-    format.setDepthBufferSize(24);
-    format.setRedBufferSize(8);
-    format.setGreenBufferSize(8);
-    format.setBlueBufferSize(8);
-    format.setAlpha(true);
-    format.setAlphaBufferSize(8);
-    format.setAccum(true);
-    format.setSampleBuffers(true);
-  } else if(fid==2) {
-    format.setDepthBufferSize(12);
-    format.setRedBufferSize(8);
-    format.setGreenBufferSize(8);
-    format.setBlueBufferSize(8);
-    format.setAlpha(true);
-    format.setAlphaBufferSize(8);
-    format.setAccum(true);
-    format.setSampleBuffers(true);
-  } else if(fid==1) {
-    format.setDepthBufferSize(12);
-    format.setRedBufferSize(8);
-    format.setGreenBufferSize(8);
-    format.setBlueBufferSize(8);
-    format.setAlpha(true);
-    format.setAlphaBufferSize(8);
-  } else {
-    format.setDepthBufferSize(6);
-    format.setRedBufferSize(4);
-    format.setGreenBufferSize(4);
-    format.setBlueBufferSize(4);
-  }
-  return format;  
 }
 
 GLWin::~GLWin()

@@ -28,7 +28,7 @@ try:
 except ImportError:
   _img_present=False
   pass
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 from scene_selection_helper import SelHelper
 from combo_options_widget import ComboOptionsWidget
 from custom_widget import CustomWidget
@@ -47,11 +47,11 @@ class RenderOptionsWidget(ComboOptionsWidget):
     #Title
     self.text_ = "Render Options"
     
-    self.keep_action_ = QtGui.QAction("K",self)
+    self.keep_action_ = QtWidgets.QAction("K",self)
     self.keep_action_.setCheckable(True);
     self.keep_action_.setChecked(False)
     self.keep_action_.setToolTip("Keep rendermodes and add current")
-    self.keep_button_ = QtGui.QToolButton(self)
+    self.keep_button_ = QtWidgets.QToolButton(self)
     self.keep_button_.setDefaultAction(self.keep_action_)
     
     self.grid_layout_.addWidget(self.keep_button_, 0, 1, 1, 1)
@@ -157,19 +157,19 @@ class RenderOptionsWidget(ComboOptionsWidget):
   def GetText(self):
     return self.text_
         
-class EmptyMode(QtGui.QWidget):
+class EmptyMode(QtWidgets.QWidget):
   def __init__(self, text="", render_mode=None, parent=None):
-    QtGui.QLabel.__init__(self, parent)
+    QtWidgets.QLabel.__init__(self, parent)
     self.setMinimumSize(250,30)
     self.text = text
     self.render_mode = render_mode
     if(render_mode):
-      text_label = QtGui.QLabel(text)
+      text_label = QtWidgets.QLabel(text)
       font = text_label.font()
       font.setBold(True)
-      grid = QtGui.QGridLayout()
+      grid = QtWidgets.QGridLayout()
       grid.addWidget(text_label,0,0,1,1)
-      grid.addWidget(QtGui.QLabel("No Settings available"), 1, 0, 1, 3)
+      grid.addWidget(QtWidgets.QLabel("No Settings available"), 1, 0, 1, 3)
       grid.setRowStretch(2,1)
       self.setLayout(grid)
       self.setMinimumSize(250,60)

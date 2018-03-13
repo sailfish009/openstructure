@@ -21,7 +21,7 @@ import sip
 
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore
 from ost.gui.scene.inspector_widget import InspectorDialog
   
 def _InitInspector(app):

@@ -1,6 +1,6 @@
 import platform
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 
 import sip
 
@@ -13,52 +13,52 @@ from ost.seq import alg
 import ost
 from ost.gui.scene.query_editor import QueryEditorWidget,QueryDialog
 
-class SelectRefDialog(QtGui.QDialog):
+class SelectRefDialog(QtWidgets.QDialog):
   def __init__(self, ent_list, parent=None):
-    QtGui.QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     self.ent_list_ = ent_list
-    vb = QtGui.QVBoxLayout()
+    vb = QtWidgets.QVBoxLayout()
     self.setLayout(vb)
     self.setWindowTitle("Select Reference Object")
-    self.label = QtGui.QLabel("Please Select the Reference Object")
-    self.list = QtGui.QTableWidget(self)
+    self.label = QtWidgets.QLabel("Please Select the Reference Object")
+    self.list = QtWidgets.QTableWidget(self)
     self.list.horizontalHeader().setStretchLastSection(True)
     self.list.setColumnCount(2)
     self.list.verticalHeader().setVisible(False)
     self.list.horizontalHeader().setVisible(False)
-    self.list.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-    self.list.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+    self.list.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+    self.list.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
     vb.addWidget(self.label)
     vb.addWidget(self.list)
-    self.show_scores = QtGui.QCheckBox(self)
+    self.show_scores = QtWidgets.QCheckBox(self)
     self.show_scores.setText("Show Scores")
     self.show_scores.setChecked(True)
     vb.addWidget(self.show_scores)
-    self.show_alignment = QtGui.QCheckBox(self)
+    self.show_alignment = QtWidgets.QCheckBox(self)
     self.show_alignment.setText("Display Alignment")
     self.show_alignment.setChecked(False)
     vb.addWidget(self.show_alignment)
-    hb = QtGui.QHBoxLayout()
-    hb.setDirection(QtGui.QBoxLayout.LeftToRight)
-    cancel_btn = QtGui.QPushButton("Cancel", self)
-    load_btn = QtGui.QPushButton("Select", self)
+    hb = QtWidgets.QHBoxLayout()
+    hb.setDirection(QtWidgets.QBoxLayout.LeftToRight)
+    cancel_btn = QtWidgets.QPushButton("Cancel", self)
+    load_btn = QtWidgets.QPushButton("Select", self)
     hb.addStretch(1)
     hb.addWidget(cancel_btn)
     hb.addWidget(load_btn)
     vb.addItem(hb)
     load_btn.setDefault(True)
-    QtCore.QObject.connect(load_btn, QtCore.SIGNAL("clicked()"), self.Select)
-    QtCore.QObject.connect(cancel_btn, QtCore.SIGNAL("clicked()"), self.reject)
+    load_btn.clicked.connect(self.Select)
+    cancel_btn.clicked.connect(self.reject)
 
     row = 0
     for ent in self.ent_list_:
       variant = QtCore.QVariant(ent)
       self.list.insertRow(row)
-      new_item = QtGui.QTableWidgetItem("%i"%(row+1))
+      new_item = QtWidgets.QTableWidgetItem("%i"%(row+1))
       new_item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsEnabled)
       new_item.setData(QtCore.Qt.UserRole,variant)
       self.list.setItem(row, 0, new_item)
-      new_item = QtGui.QTableWidgetItem(ent.GetName())
+      new_item = QtWidgets.QTableWidgetItem(ent.GetName())
       new_item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsEnabled)
       self.list.setItem(row, 1, new_item)
       row += 1  
@@ -83,103 +83,103 @@ class SelectRefDialog(QtGui.QDialog):
   def GetEntities(self):
     return self.ent_list_
 
-class ShowResultDialog(QtGui.QDialog):
+class ShowResultDialog(QtWidgets.QDialog):
   def __init__(self, ent_list, res_list, parent=None):
-    QtGui.QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     self.ent_list_ = ent_list
-    vb = QtGui.QVBoxLayout()
+    vb = QtWidgets.QVBoxLayout()
     self.setLayout(vb)
     self.setWindowTitle("Alignment result")
-    self.label = QtGui.QLabel("Alignment results with %s as reference"%ent_list[0].GetName())
-    self.list = QtGui.QTableWidget(self)
+    self.label = QtWidgets.QLabel("Alignment results with %s as reference"%ent_list[0].GetName())
+    self.list = QtWidgets.QTableWidget(self)
     self.list.horizontalHeader().setStretchLastSection(True)
     self.list.setColumnCount(4)
     self.list.verticalHeader().setVisible(False)
     self.list.setHorizontalHeaderLabels (["Name","RMSD","TMScore",""])
-    self.list.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+    self.list.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
     vb.addWidget(self.label)
     vb.addWidget(self.list)
-    hb = QtGui.QHBoxLayout()
-    hb.setDirection(QtGui.QBoxLayout.LeftToRight)
-    ok_btn = QtGui.QPushButton("OK", self)
+    hb = QtWidgets.QHBoxLayout()
+    hb.setDirection(QtWidgets.QBoxLayout.LeftToRight)
+    ok_btn = QtWidgets.QPushButton("OK", self)
     hb.addStretch(1)
     hb.addWidget(ok_btn)
     vb.addItem(hb)
     ok_btn.setDefault(True)
-    QtCore.QObject.connect(ok_btn, QtCore.SIGNAL("clicked()"), self.accept)
+    ok_btn.clicked.connect(self.accept)
 
     for i in range(0, len(res_list)):
       self.list.insertRow(i)
-      new_item = QtGui.QTableWidgetItem(ent_list[i+1].GetName())
+      new_item = QtWidgets.QTableWidgetItem(ent_list[i+1].GetName())
       new_item.setFlags(QtCore.Qt.ItemIsEnabled)
       self.list.setItem(i, 0, new_item)
-      new_item = QtGui.QTableWidgetItem("%.2f"%res_list[i].rmsd)
+      new_item = QtWidgets.QTableWidgetItem("%.2f"%res_list[i].rmsd)
       new_item.setFlags(QtCore.Qt.ItemIsEnabled)
       self.list.setItem(i, 1, new_item)
-      new_item = QtGui.QTableWidgetItem("%i"%res_list[i].tm_score)
+      new_item = QtWidgets.QTableWidgetItem("%i"%res_list[i].tm_score)
       new_item.setFlags(QtCore.Qt.ItemIsEnabled)
       self.list.setItem(i, 2, new_item)
-      new_item = QtGui.QTableWidgetItem()
+      new_item = QtWidgets.QTableWidgetItem()
       new_item.setFlags(QtCore.Qt.ItemIsEnabled)
       self.list.setItem(i, 3, new_item)
           
     self.list.resizeColumnsToContents()
 
-class CalculateSurfaceSettingsDialog(QtGui.QDialog):
+class CalculateSurfaceSettingsDialog(QtWidgets.QDialog):
   def __init__(self, executable, parent=None):
-    QtGui.QDialog.__init__(self, parent)
-    vb = QtGui.QGridLayout()
+    QtWidgets.QDialog.__init__(self, parent)
+    vb = QtWidgets.QGridLayout()
     self.setLayout(vb)
     self.setWindowTitle("MSMS Surface Settings")
-    msmsexe_label=QtGui.QLabel("executable")
-    self.msmsexe_field=QtGui.QLineEdit()
+    msmsexe_label=QtWidgets.QLabel("executable")
+    self.msmsexe_field=QtWidgets.QLineEdit()
     self.msmsexe_field.setText(executable)
-    msmsexe_browsebutton=QtGui.QPushButton("Browse")
+    msmsexe_browsebutton=QtWidgets.QPushButton("Browse")
     vb.addWidget(msmsexe_label, 0, 0)
     vb.addWidget(self.msmsexe_field, 0, 1)
     vb.addWidget(msmsexe_browsebutton, 0, 2)
-    surfname_label=QtGui.QLabel("surface name")
-    self.surfname_field=QtGui.QLineEdit()
+    surfname_label=QtWidgets.QLabel("surface name")
+    self.surfname_field=QtWidgets.QLineEdit()
     self.surfname_field.setText("surface")
     vb.addWidget(surfname_label, 1, 0)
     vb.addWidget(self.surfname_field, 1, 1, 1, 2)
-    density_label=QtGui.QLabel("density")
-    self.density_spinbox=QtGui.QSpinBox()
+    density_label=QtWidgets.QLabel("density")
+    self.density_spinbox=QtWidgets.QSpinBox()
     self.density_spinbox.setRange(1, 10)
     self.density_spinbox.setValue(4)
     vb.addWidget(density_label, 2, 0)
     vb.addWidget(self.density_spinbox, 2, 1, 1, 2)
-    probe_label=QtGui.QLabel("probe radius")
-    self.probe_spinbox=QtGui.QDoubleSpinBox()
+    probe_label=QtWidgets.QLabel("probe radius")
+    self.probe_spinbox=QtWidgets.QDoubleSpinBox()
     self.probe_spinbox.setDecimals(1)
     self.probe_spinbox.setSingleStep(0.1)
     self.probe_spinbox.setRange(0.3, 5.0)
     self.probe_spinbox.setValue(1.4)
     vb.addWidget(probe_label, 3, 0)
     vb.addWidget(self.probe_spinbox, 3, 1, 1, 2)
-    selection_label=QtGui.QLabel("selection")
-    self.selection_field=QtGui.QLineEdit()
+    selection_label=QtWidgets.QLabel("selection")
+    self.selection_field=QtWidgets.QLineEdit()
     self.selection_field.setText("")
     vb.addWidget(selection_label, 4, 0)
     vb.addWidget(self.selection_field, 4, 1, 1, 2)
-    self.noh_box=QtGui.QCheckBox("no hydrogens")
+    self.noh_box=QtWidgets.QCheckBox("no hydrogens")
     vb.addWidget(self.noh_box, 5, 0)
-    self.nohet_box=QtGui.QCheckBox("no hetatoms")
+    self.nohet_box=QtWidgets.QCheckBox("no hetatoms")
     vb.addWidget(self.nohet_box, 5, 1)
-    self.nowat_box=QtGui.QCheckBox("no waters")
+    self.nowat_box=QtWidgets.QCheckBox("no waters")
     vb.addWidget(self.nowat_box, 5, 2)
     
-    cancel_btn = QtGui.QPushButton("Cancel", self)
-    ok_btn = QtGui.QPushButton("OK", self)
+    cancel_btn = QtWidgets.QPushButton("Cancel", self)
+    ok_btn = QtWidgets.QPushButton("OK", self)
     vb.addWidget(cancel_btn, 6, 1)
     vb.addWidget(ok_btn, 6, 2)
     
-    QtCore.QObject.connect(msmsexe_browsebutton, QtCore.SIGNAL("clicked()"), self.GetPath)
-    QtCore.QObject.connect(ok_btn, QtCore.SIGNAL("clicked()"), self.accept)
-    QtCore.QObject.connect(cancel_btn, QtCore.SIGNAL("clicked()"), self.reject)
+    msmsexe_browsebutton.clicked.connect(self.GetPath)
+    ok_btn.clicked.connect(self.accept)
+    cancel_btn.clicked.connect(self.reject)
     
   def GetPath(self):
-    path=QtGui.QFileDialog().getOpenFileName(self, "Choose MSMS Executable")
+    path=QtWidgets.QFileDialog().getOpenFileName(self, "Choose MSMS Executable")
     if path!='':
       self.msmsexe_field.setText(path)
 
@@ -191,9 +191,8 @@ class SurfaceContextMenu(QtCore.QObject):
     except settings.FileNotFound:
       self.executable=""
     QtCore.QObject.__init__(self, context_menu.qobject)
-    self.action = QtGui.QAction("Calculate Surface", self)
-    QtCore.QObject.connect(self.action, QtCore.SIGNAL("triggered()"),
-                           self.CalculateSurface)
+    self.action = QtWidgets.QAction("Calculate Surface", self)
+    self.action.triggered.connect(self.CalculateSurface)
     context_menu.AddAction(self.action, gui.ContextActionType.ENTITY)
     
   def CalculateSurface(self):
@@ -251,8 +250,8 @@ class AlignmentContextMenu(QtCore.QObject):
       settings.Locate(settings_name)
       QtCore.QObject.__init__(self, context_menu.qobject)
 
-      self.action = QtGui.QAction("Align", self)
-      QtCore.QObject.connect(self.action,QtCore.SIGNAL("triggered()"), self.Align)
+      self.action = QtWidgets.QAction("Align", self)
+      self.action.triggered.connect(self.Align)
       context_menu.AddAction(self.action, gui.ContextActionType.ENTITY | gui.ContextActionType.MULTI)
       self.seq_viewer = None
     except settings.FileNotFound:
@@ -311,17 +310,14 @@ class AlignmentContextMenu(QtCore.QObject):
 class SelectMenuPoints(QtCore.QObject):
   def __init__(self, context_menu):
     QtCore.QObject.__init__(self, context_menu.qobject)
-    action=QtGui.QAction("Select...", self)
-    QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'),
-                           self._Select)
+    action=QtWidgets.QAction("Select...", self)
+    action.triggered.connect(self._Select)
     context_menu.AddAction(action, gui.ENTITY)
-    action=QtGui.QAction("Copy Selection...", self)
-    QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'),
-                           self._CopyViews)
+    action=QtWidgets.QAction("Copy Selection...", self)
+    action.triggered.connect(self._CopyViews)
     context_menu.AddAction(action, gui.ENTITY)
-    action=QtGui.QAction('Select...', self)
-    QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'),
-                           self._SelectViewsSameEntity)
+    action=QtWidgets.QAction('Select...', self)
+    action.triggered.connect(self._SelectViewsSameEntity)
     context_menu.AddAction(action, gui.ENTITY_VIEW|gui.VIEWS_SAME_OBJECT)    
   def _Select(self):
     scene_selection=gui.SceneSelection.Instance()

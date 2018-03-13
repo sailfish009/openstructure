@@ -24,7 +24,7 @@
 #include <QMainWindow>
 #include <QSyntaxHighlighter>
 #include <QTextEdit>
-#include <QtGui>
+#include <QVBoxLayout>
 
 namespace ost { namespace gui {
 

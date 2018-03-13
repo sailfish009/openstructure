@@ -52,8 +52,8 @@ namespace ost { namespace gui {
 
 using gfx::Scene;
 
-GLCanvas::GLCanvas(GLWin* gl_win,  QWidget* parent, const QGLFormat& f):
-  QGLWidget(f,parent),
+GLCanvas::GLCanvas(GLWin* gl_win,  QWidget* parent, const QSurfaceFormat& f):
+  QOpenGLWidget(parent),
   glwin_(gl_win),
   mouse_key_mask_(),
   refresh_(true),
@@ -64,12 +64,13 @@ GLCanvas::GLCanvas(GLWin* gl_win,  QWidget* parent, const QGLFormat& f):
   show_beacon_(false),
   angular_speed_(0.0)
 {
-  if(!isValid()) return;
+  this->setFormat(f);
   master_timer_.start(10,this);
   setFocusPolicy(Qt::StrongFocus);
   setMouseTracking(true);
   scene_menu_=new SceneMenu();
   this->setContextMenuPolicy(Qt::CustomContextMenu);
+  this->setAutoFillBackground(false);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this,
           SLOT(RequestContextMenu(const QPoint&)));
 #if QT_VERSION >= 0x040600
@@ -84,7 +85,7 @@ bool GLCanvas::event(QEvent* event)
     return this->GestureEvent(static_cast<QGestureEvent*>(event));
   }
 #endif
-  return QGLWidget::event(event);
+  return QOpenGLWidget::event(event);
 }
 
 
@@ -176,7 +177,7 @@ void GLCanvas::wheelEvent(QWheelEvent* event)
 }
 bool GLCanvas::IsToolEvent(QInputEvent* event) const
 {
-  return event->modifiers() & Qt::ControlModifier;
+  return (event->modifiers() & Qt::ControlModifier) == Qt::ControlModifier;
 }
 
 MouseEvent::Buttons GLCanvas::TranslateButtons(Qt::MouseButtons buttons) const
@@ -464,7 +465,7 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* event)
     emit ReleaseFocus();
     return;
   }
-  QGLWidget::keyReleaseEvent(event);
+  QOpenGLWidget::keyReleaseEvent(event);
 }
 
 #ifndef _MSC_VER
@@ -500,7 +501,7 @@ void GLCanvas::timerEvent(QTimerEvent * event)
   if(refresh_ || bench_flag_) {
     refresh_=false;
     master_timer_.stop();
-    this->updateGL();
+    this->update();
     master_timer_.start(10,this);
   }
 

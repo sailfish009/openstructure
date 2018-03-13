@@ -38,10 +38,10 @@ template <class O> object get_py_qobject(O* cpp_object)
 {
   if (cpp_object != NULL){
     static object sip_module=import("sip");
-    static object pyqt4_module=import("PyQt4.QtCore");
+    static object pyqt5_module=import("PyQt5.QtCore");
     QObject* qobject = qobject_cast<QObject*>(cpp_object);
     unsigned long addr = reinterpret_cast<unsigned long>(qobject);
-    object py_qobject = pyqt4_module.attr("QObject");
+    object py_qobject = pyqt5_module.attr("QObject");
     object object = sip_module.attr("wrapinstance")(addr, py_qobject);
     return object;
   }

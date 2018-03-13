@@ -198,7 +198,7 @@ if (WIN32)
 endif()
 
 if (ENABLE_INFO)        
-  find_package(Qt4 4.5.0 REQUIRED)
+  find_package(Qt5Xml REQUIRED)
 endif()
 
 if (OPTIMIZE)
@@ -233,7 +233,7 @@ else()
 endif()
 
 find_package(Eigen 3.2.0 REQUIRED)
-find_package(Python 2.4 REQUIRED)
+find_package(Python 2.7 REQUIRED)
 
 if(USE_NUMPY)
   find_package(Numpy REQUIRED)
@@ -269,8 +269,11 @@ if (ENABLE_STATIC)
 endif()
 
 if (ENABLE_GUI)
+  find_package(Qt5Widgets REQUIRED)
+  find_package(Qt5OpenGL REQUIRED)
+  find_package(Qt5PrintSupport REQUIRED)
   ost_find_python_module(sip)
-  ost_find_python_module(PyQt4)
+  ost_find_python_module(PyQt5)
 endif()
 
 if (ENABLE_SPNAV)

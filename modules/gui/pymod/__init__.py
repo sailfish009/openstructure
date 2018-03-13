@@ -42,8 +42,9 @@ def ClearMessageWidget():
       gosty.message_widget.Clear()
 
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 from ost import gfx
 
 def PickColor(default=gfx.WHITE):
@@ -135,8 +136,7 @@ def AddMenuAction(*args, **kwargs):
       self.predicate=predicate
       self.action=action
       app=GostyApp.Instance()
-      QObject.connect(app.scene_win.qobject, SIGNAL('ActiveNodesChanged()'),
-                      self.TestEnable)
+      app.scene_win.qobject.ActiveNodesChanged.connect(self.TestEnable)
       self.TestEnable()
 
     def TestEnable(self):
@@ -168,7 +168,7 @@ def AddMenuAction(*args, **kwargs):
       enabler=MenuActionEnabler(kwargs['enabled'], action)
     else:
       action.setEnabled(kwargs['enabled'])
-  QObject.connect(action, SIGNAL('triggered()'), function)
+  action.triggered.connect(function)
   return action
 
 

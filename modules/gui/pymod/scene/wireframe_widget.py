@@ -20,7 +20,7 @@
 
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 try: 
   from ost import img
   _img_present=True
@@ -30,9 +30,9 @@ except ImportError:
 from scene_selection_helper import SelHelper
 
 #Wireframe Options
-class WireframeWidget(QtGui.QWidget):
+class WireframeWidget(QtWidgets.QWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     
     #Title
     self.text_ = "Wireframe"
@@ -45,21 +45,21 @@ class WireframeWidget(QtGui.QWidget):
     self.mode_ = gfx.RenderMode.SIMPLE
         
     #Create Ui elements
-    self.aa_rendering_cb_ = QtGui.QCheckBox()
+    self.aa_rendering_cb_ = QtWidgets.QCheckBox()
   
-    self.radius_spinbox_ = QtGui.QDoubleSpinBox()
+    self.radius_spinbox_ = QtWidgets.QDoubleSpinBox()
     self.radius_spinbox_.setRange(min_line_width, max_line_width)
     self.radius_spinbox_.setDecimals(2)
     self.radius_spinbox_.setSingleStep(0.1)
 
-    simple_label = QtGui.QLabel("Wireframe Settings")
+    simple_label = QtWidgets.QLabel("Wireframe Settings")
     font = simple_label.font()
     font.setBold(True)
     
-    radius_label = QtGui.QLabel("Line Width")
-    aa_label = QtGui.QLabel("AA-Lines")
+    radius_label = QtWidgets.QLabel("Line Width")
+    aa_label = QtWidgets.QLabel("AA-Lines")
 
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.addWidget(simple_label,0,0,1,3)
     grid.addWidget(aa_label, 1, 0, 1, 3)
     grid.addWidget(self.aa_rendering_cb_, 1, 2, 1, 1)
@@ -68,8 +68,8 @@ class WireframeWidget(QtGui.QWidget):
     grid.setRowStretch(5,1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.radius_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateLineWidth)
-    QtCore.QObject.connect(self.aa_rendering_cb_, QtCore.SIGNAL("stateChanged(int)"), self.UpdateAA)  
+    self.radius_spinbox_.valueChanged.connect(self.UpdateLineWidth)
+    self.aa_rendering_cb_.stateChanged.connect(self.UpdateAA)  
     
     self.setMinimumSize(250,100)
     

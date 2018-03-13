@@ -15,7 +15,7 @@ except ImportError:
 
 import httplib
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ost.gui.scene.init_inspector import _InitInspector
 from ost.gui.init_menubar import _InitMenuBar
 from ost.gui.init_spacenav import _InitSpaceNav
@@ -26,7 +26,7 @@ from ost.gui.dng import superpositiondialog
 from ost.gui.scene.remote import RemoteLoader
 
 import ost.gui.dng.menu
-from PyQt4.QtGui import *
+from PyQt5.QtGui import *
 def _my_exit(code):
   QtGui.QApplication.instance().quit()
   gui.GostyApp.Instance().ProcessEvents()
@@ -49,7 +49,7 @@ _InitRuleBasedProcessor()
 
 def _CheckRestore():
   settings = QtCore.QSettings()
-  restore = settings.value("restore_settings",QtCore.QVariant(False)).toBool()
+  restore = settings.value("restore_settings",QtCore.QVariant(False))
   if not restore:
     settings.clear()
   settings.setValue("restore_settings",QtCore.QVariant(True))

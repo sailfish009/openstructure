@@ -20,7 +20,7 @@
 
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 from render_mode_widget import RenderModeWidget
 
 #Custom Render Options
@@ -49,46 +49,46 @@ class CustomWidget(RenderModeWidget):
         
     #Create Ui elements
     
-    self.sphere_spinbox_ = QtGui.QSpinBox()
+    self.sphere_spinbox_ = QtWidgets.QSpinBox()
     self.sphere_spinbox_.setRange(min_sphere_detail, max_sphere_detail)
     
-    self.arc_spinbox_ = QtGui.QSpinBox()
+    self.arc_spinbox_ = QtWidgets.QSpinBox()
     self.arc_spinbox_.setRange(min_arc_detail, max_arc_detail)
   
     #Bond Radius
-    radius_bond_label = QtGui.QLabel("Bond Radius")
+    radius_bond_label = QtWidgets.QLabel("Bond Radius")
     
-    self.radius_bond_spinbox_ = QtGui.QDoubleSpinBox()
+    self.radius_bond_spinbox_ = QtWidgets.QDoubleSpinBox()
     self.radius_bond_spinbox_.setRange(min_rad, max_bond_rad)
     self.radius_bond_spinbox_.setDecimals(2)
     self.radius_bond_spinbox_.setSingleStep(0.05)
     
-    self.radius_bond_slider_ = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+    self.radius_bond_slider_ = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
     self.radius_bond_slider_.setRange(min_rad*100.0, max_bond_rad*100.0)
-    self.radius_bond_slider_.setTickPosition(QtGui.QSlider.NoTicks)
+    self.radius_bond_slider_.setTickPosition(QtWidgets.QSlider.NoTicks)
     self.radius_bond_slider_.setTickInterval(5)
     
     
     #Sphere Radius
-    radius_sphere_label = QtGui.QLabel("Sphere Radius")
+    radius_sphere_label = QtWidgets.QLabel("Sphere Radius")
     
-    self.radius_sphere_spinbox_ = QtGui.QDoubleSpinBox()
+    self.radius_sphere_spinbox_ = QtWidgets.QDoubleSpinBox()
     self.radius_sphere_spinbox_.setRange(min_rad, max_sphere_rad)
     self.radius_sphere_spinbox_.setDecimals(2)
     self.radius_sphere_spinbox_.setSingleStep(0.05)
     
-    self.radius_sphere_slider_ = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+    self.radius_sphere_slider_ = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
     self.radius_sphere_slider_.setRange(min_rad*100.0, max_sphere_rad*100.0)
-    self.radius_sphere_slider_.setTickPosition(QtGui.QSlider.NoTicks)
+    self.radius_sphere_slider_.setTickPosition(QtWidgets.QSlider.NoTicks)
     self.radius_sphere_slider_.setTickInterval(5)
     
-    custom_label = QtGui.QLabel(self.text_)
+    custom_label = QtWidgets.QLabel(self.text_)
     font = custom_label.font()
     font.setBold(True)
     
-    sphere_label = QtGui.QLabel("Sphere Detail")
-    arc_label = QtGui.QLabel("Arc Detail")
-    grid = QtGui.QGridLayout()
+    sphere_label = QtWidgets.QLabel("Sphere Detail")
+    arc_label = QtWidgets.QLabel("Arc Detail")
+    grid = QtWidgets.QGridLayout()
     grid.addWidget(custom_label,0,0,1,1)
     grid.addWidget(sphere_label, 1, 0, 1, 3)
     grid.addWidget(self.sphere_spinbox_, 1, 2, 1, 1)
@@ -106,22 +106,14 @@ class CustomWidget(RenderModeWidget):
     grid.setRowStretch(3,1)
     self.setLayout(grid)
   
-    QtCore.QObject.connect(self.sphere_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSphereDetail)
-    QtCore.QObject.connect(self.arc_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateArcDetail)
+    self.sphere_spinbox_.valueChanged.connect(self.UpdateSphereDetail)
+    self.arc_spinbox_.valueChanged.connect(self.UpdateArcDetail)
     
-    QtCore.QObject.connect(self.radius_bond_spinbox_, 
-                           QtCore.SIGNAL("valueChanged(double)"), 
-                           self.UpdateBondRadius)
-    QtCore.QObject.connect(self.radius_bond_slider_, 
-                           QtCore.SIGNAL("valueChanged(int)"), 
-                           self.UpdateSliderBondRadius)
+    self.radius_bond_spinbox_.valueChanged.connect(self.UpdateBondRadius)
+    self.radius_bond_slider_.valueChanged.connect(self.UpdateSliderBondRadius)
     
-    QtCore.QObject.connect(self.radius_sphere_spinbox_, 
-                           QtCore.SIGNAL("valueChanged(double)"), 
-                           self.UpdateSphereRadius)
-    QtCore.QObject.connect(self.radius_sphere_slider_, 
-                           QtCore.SIGNAL("valueChanged(int)"), 
-                           self.UpdateSliderSphereRadius)
+    self.radius_sphere_spinbox_.valueChanged.connect(self.UpdateSphereRadius)
+    self.radius_sphere_slider_.valueChanged.connect(self.UpdateSliderSphereRadius)
     
     self.setMinimumSize(250,150)
     

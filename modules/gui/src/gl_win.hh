@@ -25,7 +25,6 @@
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
 
-#include <QGLFormat>
 #include <QActionGroup>
 
 class QStatusBar;
@@ -60,7 +59,6 @@ public slots:
   void StatusMessage(const String& m);
   void ActiveToolChanged(Tool* t);
 private:
-  static QGLFormat CreateFormat(int fid);
   GLCanvas* gl_canvas_;
 
   QAction* edit_rigid_action_;

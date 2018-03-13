@@ -23,7 +23,7 @@ from ost import gfx
 from ost import mol
 from datetime import datetime
 from datetime import datetime
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 from color_select_widget import ColorSelectWidget
 from gradient_preset_widget import GradientPresetWidget
 from gradient_editor_widget import GradientPreview
@@ -41,16 +41,16 @@ from render_op import RenderOp
 from visibility_op import VisibilityOp
 
 #Preset Editor
-class PresetEditor(QtGui.QDialog):
+class PresetEditor(QtWidgets.QDialog):
   def __init__(self, parent=None):
-    QtGui.QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
         
     self.setWindowTitle("Preset Editor")
     
     #Create Ui Elements
-    self.list_view_ = QtGui.QListView()
+    self.list_view_ = QtWidgets.QListView()
     
-    self.combo_box_ = QtGui.QComboBox()
+    self.combo_box_ = QtWidgets.QComboBox()
     
     self.ufcow_=UniformColorOpWidget(self)
     self.glcow_=GradientLevelColorOpWidget(self)
@@ -65,22 +65,22 @@ class PresetEditor(QtGui.QDialog):
     self.combo_box_.addItem("RenderMode Operation", QtCore.QVariant(self.row_))
     self.combo_box_.addItem("Visibility Operation", QtCore.QVariant(self.vow_))
     
-    self.add_button_ = QtGui.QPushButton("Add")
+    self.add_button_ = QtWidgets.QPushButton("Add")
     
     #Create Model
-    self.list_view_.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+    self.list_view_.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
     
     self.list_view_.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    QtCore.QObject.connect(self.list_view_, QtCore.SIGNAL("customContextMenuRequested(const QPoint)"), self.contextMenuEvent)
+    self.list_view_.customContextMenuRequested.connect(self.contextMenuEvent)
     
-    self.hbox_ = QtGui.QHBoxLayout()
-    self.ok_button_ = QtGui.QPushButton("OK")
-    self.cancel_button_ = QtGui.QPushButton("Cancel")
+    self.hbox_ = QtWidgets.QHBoxLayout()
+    self.ok_button_ = QtWidgets.QPushButton("OK")
+    self.cancel_button_ = QtWidgets.QPushButton("Cancel")
     self.hbox_.addWidget(self.ok_button_)
     self.hbox_.addStretch()
     self.hbox_.addWidget(self.cancel_button_)
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
     grid.addWidget(self.combo_box_,0,0,1,1)
     grid.addWidget(self.add_button_,0,1,1,1)
@@ -89,9 +89,9 @@ class PresetEditor(QtGui.QDialog):
     grid.setRowStretch(1, 1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.add_button_, QtCore.SIGNAL("clicked()"), self.Add)
-    QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
-    QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
+    self.add_button_.clicked.connect(self.Add)
+    self.ok_button_.clicked.connect(self.Ok)
+    self.cancel_button_.clicked.connect(self.Cancel)
   
     self.CreateContextMenu()
       
@@ -100,26 +100,26 @@ class PresetEditor(QtGui.QDialog):
     self.list_view_.setModel(self.list_model_)
   
   def CreateContextMenu(self):
-    self.context_menu_ = QtGui.QMenu("Context menu", self)
-    self.edit_ = QtGui.QAction("Edit", self.list_view_)
-    self.remove_ = QtGui.QAction("Remove", self.list_view_)
-    self.moveup_ = QtGui.QAction("Move Up", self.list_view_)
-    self.movedown_ = QtGui.QAction("Move Down", self.list_view_)
+    self.context_menu_ = QtWidgets.QMenu("Context menu", self)
+    self.edit_ = QtWidgets.QAction("Edit", self.list_view_)
+    self.remove_ = QtWidgets.QAction("Remove", self.list_view_)
+    self.moveup_ = QtWidgets.QAction("Move Up", self.list_view_)
+    self.movedown_ = QtWidgets.QAction("Move Down", self.list_view_)
     self.context_menu_.addAction(self.edit_)
     self.context_menu_.addAction(self.remove_)
     self.context_menu_.addAction(self.moveup_)
     self.context_menu_.addAction(self.movedown_)
     #Connect Signals with Slots
-    QtCore.QObject.connect(self.edit_, QtCore.SIGNAL("triggered()"), self.Edit)
-    QtCore.QObject.connect(self.remove_, QtCore.SIGNAL("triggered()"), self.Remove)
-    QtCore.QObject.connect(self.moveup_, QtCore.SIGNAL("triggered()"), self.MoveUp)
-    QtCore.QObject.connect(self.movedown_, QtCore.SIGNAL("triggered()"), self.MoveDown)
+    self.edit_.triggered.connect(self.Edit)
+    self.remove_.triggered.connect(self.Remove)
+    self.moveup_.triggered.connect(self.MoveUp)
+    self.movedown_.triggered.connect(self.MoveDown)
 
   def contextMenuEvent(self, pos):
     #ContextMenu
     index = self.list_view_.indexAt(pos)
     if index.isValid(): 
-        self.context_menu_.popup(QtGui.QCursor.pos())
+        self.context_menu_.popup(QtWidgets.QCursor.pos())
 
   def Add(self):
     dialog = self.combo_box_.itemData(self.combo_box_.currentIndex()).toPyObject()
@@ -180,29 +180,29 @@ class PresetEditor(QtGui.QDialog):
   def Cancel(self):
     self.reject()
 
-class UniformColorOpWidget(QtGui.QDialog):
+class UniformColorOpWidget(QtWidgets.QDialog):
   def __init__(self, parent=None):
-    QtGui.QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     self.query_editor_ = QueryEditorWidget(self)
 
-    detail_label = QtGui.QLabel("Parts")
-    self.detail_selection_cb_ = QtGui.QComboBox()
+    detail_label = QtWidgets.QLabel("Parts")
+    self.detail_selection_cb_ = QtWidgets.QComboBox()
     self.detail_selection_cb_.addItem("Main and Detail",QtCore.QVariant(3))
     self.detail_selection_cb_.addItem("Main",QtCore.QVariant(2))
     self.detail_selection_cb_.addItem("Detail",QtCore.QVariant(1))
     
-    color_label = QtGui.QLabel("Color")
+    color_label = QtWidgets.QLabel("Color")
     self.color_select_widget_ = ColorSelectWidget(30,30,QtGui.QColor("White"))    
     
-    self.hbox_ = QtGui.QHBoxLayout()
-    self.ok_button_ = QtGui.QPushButton("OK")
-    self.cancel_button_ = QtGui.QPushButton("Cancel")
+    self.hbox_ = QtWidgets.QHBoxLayout()
+    self.ok_button_ = QtWidgets.QPushButton("OK")
+    self.cancel_button_ = QtWidgets.QPushButton("Cancel")
     self.hbox_.addWidget(self.ok_button_)
     self.hbox_.addStretch()
     self.hbox_.addWidget(self.cancel_button_)
 
         
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
     grid.addWidget(self.query_editor_, 0, 0, 1, 2)
     grid.addWidget(detail_label, 1, 0, 1, 1)
@@ -213,8 +213,8 @@ class UniformColorOpWidget(QtGui.QDialog):
     grid.setRowStretch(2, 1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
-    QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
+    self.ok_button_.clicked.connect(self.Ok)
+    self.cancel_button_.clicked.connect(self.Cancel)
     
   def GetOp(self):
     qv=mol.QueryViewWrapper(self.query_editor_.GetQuery(),self.query_editor_.GetQueryFlags())
@@ -250,22 +250,22 @@ class UniformColorOpWidget(QtGui.QDialog):
   def Cancel(self):
     self.reject()
 
-class GradientLevelColorOpWidget(QtGui.QDialog):
+class GradientLevelColorOpWidget(QtWidgets.QDialog):
   def __init__(self, parent=None):
-    QtGui.QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     
     self.query_editor_ = QueryEditorWidget(self)
     
-    detail_label = QtGui.QLabel("Parts")
-    self.detail_selection_cb_ = QtGui.QComboBox()
+    detail_label = QtWidgets.QLabel("Parts")
+    self.detail_selection_cb_ = QtWidgets.QComboBox()
     self.detail_selection_cb_.addItem("Main and Detail",QtCore.QVariant(3))
     self.detail_selection_cb_.addItem("Main",QtCore.QVariant(2))
     self.detail_selection_cb_.addItem("Detail",QtCore.QVariant(1))
     
-    property_label = QtGui.QLabel("Property")
-    self.property_edit_ = QtGui.QLineEdit()
+    property_label = QtWidgets.QLabel("Property")
+    self.property_edit_ = QtWidgets.QLineEdit()
 
-    self.prop_combo_box_ = QtGui.QComboBox()
+    self.prop_combo_box_ = QtWidgets.QComboBox()
     self.prop_combo_box_.addItem("atom B-factor",QtCore.QVariant("abfac"))
     self.prop_combo_box_.addItem("average residue B-factor",QtCore.QVariant("rbfac"))
     self.prop_combo_box_.addItem("X-Coordinate",QtCore.QVariant("x"))
@@ -276,42 +276,42 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
     self.prop_combo_box_.addItem("Custom",QtCore.QVariant("custom"))
     
 
-    level_label = QtGui.QLabel("Level")
-    self.combo_box_ = QtGui.QComboBox(self);
+    level_label = QtWidgets.QLabel("Level")
+    self.combo_box_ = QtWidgets.QComboBox(self);
     self.combo_box_.addItem("Atom",QtCore.QVariant(Prop.Level.ATOM))
     self.combo_box_.addItem("Residue",QtCore.QVariant(Prop.Level.RESIDUE))
     self.combo_box_.addItem("Chain",QtCore.QVariant(Prop.Level.CHAIN))
     self.combo_box_.addItem("Unspecified",QtCore.QVariant(Prop.Level.UNSPECIFIED))
         
-    gradient_label = QtGui.QLabel("Gradient")
+    gradient_label = QtWidgets.QLabel("Gradient")
     self.gradient_preview_ = GradientPreview()    
     self.gradient_edit_ = GradientEdit(self.gradient_preview_,self)
     
-    self.minmax_label_ = QtGui.QLabel("Min Max")
-    self.auto_calc_ = QtGui.QCheckBox("Auto calculate")
+    self.minmax_label_ = QtWidgets.QLabel("Min Max")
+    self.auto_calc_ = QtWidgets.QCheckBox("Auto calculate")
     self.auto_calc_.setChecked(True)
     
-    self.minv_label_ = QtGui.QLabel("Min Value")
-    self.maxv_label_ = QtGui.QLabel("Max Value")
+    self.minv_label_ = QtWidgets.QLabel("Min Value")
+    self.maxv_label_ = QtWidgets.QLabel("Max Value")
     
-    self.minv_ = QtGui.QDoubleSpinBox(self)
+    self.minv_ = QtWidgets.QDoubleSpinBox(self)
     self.minv_.setDecimals(2)
     self.minv_.setMinimum(-9999.99)
     self.minv_.setValue(0)
-    self.maxv_ = QtGui.QDoubleSpinBox(self)
+    self.maxv_ = QtWidgets.QDoubleSpinBox(self)
     self.maxv_.setDecimals(2)
     self.maxv_.setValue(1)
     self.maxv_.setMinimum(-9999.99)
     
-    self.hbox_ = QtGui.QHBoxLayout()
-    self.ok_button_ = QtGui.QPushButton("OK")
-    self.cancel_button_ = QtGui.QPushButton("Cancel")
+    self.hbox_ = QtWidgets.QHBoxLayout()
+    self.ok_button_ = QtWidgets.QPushButton("OK")
+    self.cancel_button_ = QtWidgets.QPushButton("Cancel")
     self.hbox_.addWidget(self.ok_button_)
     self.hbox_.addStretch()
     self.hbox_.addWidget(self.cancel_button_)
 
         
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
     grid.addWidget(self.query_editor_, 0, 0, 1, 2)
     grid.addWidget(detail_label, 1, 0, 1, 1)
@@ -335,10 +335,10 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
     grid.setRowStretch(1, 1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.prop_combo_box_, QtCore.SIGNAL("currentIndexChanged(int)"), self.UpdateGui)
-    QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
-    QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
-    QtCore.QObject.connect(self.auto_calc_, QtCore.SIGNAL("stateChanged (int)"), self.UpdateGui)
+    self.prop_combo_box_.currentIndexChanged.connect(self.UpdateGui)
+    self.ok_button_.clicked.connect(self.Ok)
+    self.cancel_button_.clicked.connect(self.Cancel)
+    self.auto_calc_.stateChanged.connect(self.UpdateGui)
     
     self.UpdateGui()
     
@@ -395,7 +395,7 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
     self.UpdateGui()
     
   def UpdateGui(self):
-    prop = self.prop_combo_box_.itemData(self.prop_combo_box_.currentIndex()).toPyObject()
+    prop = str(self.prop_combo_box_.itemData(self.prop_combo_box_.currentIndex()))
     if(prop == "custom"):
       self.combo_box_.setEnabled(True)
       self.property_edit_.setEnabled(True)
@@ -419,25 +419,25 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
   def Update(self):
     pass #Do Nothing
 
-class ByElementColorOpWidget(QtGui.QDialog):
+class ByElementColorOpWidget(QtWidgets.QDialog):
   def __init__(self, parent=None):
-    QtGui.QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     self.query_editor_ = QueryEditorWidget(self)
 
-    detail_label = QtGui.QLabel("Parts")
-    self.detail_selection_cb_ = QtGui.QComboBox()
+    detail_label = QtWidgets.QLabel("Parts")
+    self.detail_selection_cb_ = QtWidgets.QComboBox()
     self.detail_selection_cb_.addItem("Main and Detail",QtCore.QVariant(3))
     self.detail_selection_cb_.addItem("Main",QtCore.QVariant(2))
     self.detail_selection_cb_.addItem("Detail",QtCore.QVariant(1))
   
-    self.hbox_ = QtGui.QHBoxLayout()
-    self.ok_button_ = QtGui.QPushButton("OK")
-    self.cancel_button_ = QtGui.QPushButton("Cancel")
+    self.hbox_ = QtWidgets.QHBoxLayout()
+    self.ok_button_ = QtWidgets.QPushButton("OK")
+    self.cancel_button_ = QtWidgets.QPushButton("Cancel")
     self.hbox_.addWidget(self.ok_button_)
     self.hbox_.addStretch()
     self.hbox_.addWidget(self.cancel_button_)
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
     grid.addWidget(self.query_editor_, 0, 0, 1, 2)
     grid.addWidget(detail_label, 1, 0, 1, 1)
@@ -446,8 +446,8 @@ class ByElementColorOpWidget(QtGui.QDialog):
     grid.setRowStretch(1, 1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
-    QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
+    self.ok_button_.clicked.connect(self.Ok)
+    self.cancel_button_.clicked.connect(self.Cancel)
     
   def GetOp(self):
     detail = self.detail_selection_cb_.itemData(self.detail_selection_cb_.currentIndex()).toPyObject()
@@ -475,25 +475,25 @@ class ByElementColorOpWidget(QtGui.QDialog):
     self.reject()
     
     
-class ByChainColorOpWidget(QtGui.QDialog):
+class ByChainColorOpWidget(QtWidgets.QDialog):
   def __init__(self, parent=None):
-    QtGui.QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     self.query_editor_ = QueryEditorWidget(self)
 
-    detail_label = QtGui.QLabel("Parts")
-    self.detail_selection_cb_ = QtGui.QComboBox()
+    detail_label = QtWidgets.QLabel("Parts")
+    self.detail_selection_cb_ = QtWidgets.QComboBox()
     self.detail_selection_cb_.addItem("Main and Detail",QtCore.QVariant(3))
     self.detail_selection_cb_.addItem("Main",QtCore.QVariant(2))
     self.detail_selection_cb_.addItem("Detail",QtCore.QVariant(1))
   
-    self.hbox_ = QtGui.QHBoxLayout()
-    self.ok_button_ = QtGui.QPushButton("OK")
-    self.cancel_button_ = QtGui.QPushButton("Cancel")
+    self.hbox_ = QtWidgets.QHBoxLayout()
+    self.ok_button_ = QtWidgets.QPushButton("OK")
+    self.cancel_button_ = QtWidgets.QPushButton("Cancel")
     self.hbox_.addWidget(self.ok_button_)
     self.hbox_.addStretch()
     self.hbox_.addWidget(self.cancel_button_)
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
     grid.addWidget(self.query_editor_, 0, 0, 1, 2)
     grid.addWidget(detail_label, 1, 0, 1, 1)
@@ -502,8 +502,8 @@ class ByChainColorOpWidget(QtGui.QDialog):
     grid.setRowStretch(1, 1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
-    QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
+    self.ok_button_.clicked.connect(self.Ok)
+    self.cancel_button_.clicked.connect(self.Cancel)
     
   def GetOp(self):
     detail = self.detail_selection_cb_.itemData(self.detail_selection_cb_.currentIndex()).toPyObject()
@@ -531,16 +531,16 @@ class ByChainColorOpWidget(QtGui.QDialog):
     self.reject()
 
 
-class RenderOpWidget(QtGui.QDialog):
+class RenderOpWidget(QtWidgets.QDialog):
   def __init__(self, parent=None):
-    QtGui.QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     self.query_editor_ = QueryEditorWidget(self)
   
-    self.keep_ = QtGui.QCheckBox("Keep")
+    self.keep_ = QtWidgets.QCheckBox("Keep")
     self.keep_.setChecked(False)
     
-    render_label = QtGui.QLabel("Rendermode")
-    self.render_modes_ = QtGui.QComboBox()
+    render_label = QtWidgets.QLabel("Rendermode")
+    self.render_modes_ = QtWidgets.QComboBox()
     self.render_modes_.addItem("Fast Bonds")
     self.render_modes_.addItem("Ball & Stick")
     self.render_modes_.addItem("Spheres")
@@ -559,14 +559,14 @@ class RenderOpWidget(QtGui.QDialog):
                                gfx.RenderMode.TUBE,
                                gfx.RenderMode.HSC]
     
-    self.hbox_ = QtGui.QHBoxLayout()
-    self.ok_button_ = QtGui.QPushButton("OK")
-    self.cancel_button_ = QtGui.QPushButton("Cancel")
+    self.hbox_ = QtWidgets.QHBoxLayout()
+    self.ok_button_ = QtWidgets.QPushButton("OK")
+    self.cancel_button_ = QtWidgets.QPushButton("Cancel")
     self.hbox_.addWidget(self.ok_button_)
     self.hbox_.addStretch()
     self.hbox_.addWidget(self.cancel_button_)
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
     grid.addWidget(self.query_editor_, 0, 0, 1, 2)
     grid.addWidget(self.keep_, 1, 1, 1, 1)
@@ -576,8 +576,8 @@ class RenderOpWidget(QtGui.QDialog):
     grid.setRowStretch(1, 1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
-    QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
+    self.ok_button_.clicked.connect(self.Ok)
+    self.cancel_button_.clicked.connect(self.Cancel)
     
   def GetOp(self):
     selection = self.query_editor_.GetQueryText()
@@ -606,22 +606,22 @@ class RenderOpWidget(QtGui.QDialog):
   def Cancel(self):
     self.reject()
     
-class VisibilityOpWidget(QtGui.QDialog):
+class VisibilityOpWidget(QtWidgets.QDialog):
   def __init__(self, parent=None):
-    QtGui.QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     self.query_editor_ = QueryEditorWidget(self)
   
-    self.visible_ = QtGui.QCheckBox("Visible")
+    self.visible_ = QtWidgets.QCheckBox("Visible")
     self.visible_.setChecked(True)
     
-    self.hbox_ = QtGui.QHBoxLayout()
-    self.ok_button_ = QtGui.QPushButton("OK")
-    self.cancel_button_ = QtGui.QPushButton("Cancel")
+    self.hbox_ = QtWidgets.QHBoxLayout()
+    self.ok_button_ = QtWidgets.QPushButton("OK")
+    self.cancel_button_ = QtWidgets.QPushButton("Cancel")
     self.hbox_.addWidget(self.ok_button_)
     self.hbox_.addStretch()
     self.hbox_.addWidget(self.cancel_button_)
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
     grid.addWidget(self.query_editor_, 0, 0, 1, 2)
     grid.addWidget(self.visible_, 1, 1, 1, 1)
@@ -629,8 +629,8 @@ class VisibilityOpWidget(QtGui.QDialog):
     grid.setRowStretch(1, 1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
-    QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
+    self.ok_button_.clicked.connect(self.Ok)
+    self.cancel_button_.clicked.connect(self.Cancel)
     
   def GetOp(self):
     selection = self.query_editor_.GetQueryText()

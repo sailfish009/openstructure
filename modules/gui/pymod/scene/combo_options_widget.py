@@ -21,9 +21,9 @@
 import sys
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 
-class ComboOptionsWidget(QtGui.QWidget):
+class ComboOptionsWidget(QtWidgets.QWidget):
   """QWidget with a Combobox and a show area.
     
    This abstract QWidget has a Combobox and a show area. Whenever the value of 
@@ -31,22 +31,21 @@ class ComboOptionsWidget(QtGui.QWidget):
    shown in the show area.  
   """
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     #Setup ui_
     self.parent_ = parent
-    self.grid_layout_ = QtGui.QGridLayout(self)
+    self.grid_layout_ = QtWidgets.QGridLayout(self)
     self.grid_layout_.setHorizontalSpacing(0)
     self.grid_layout_.setVerticalSpacing(0)
     self.grid_layout_.setContentsMargins(0,0,0,0)
-    self.combo_box_ = QtGui.QComboBox(self)
+    self.combo_box_ = QtWidgets.QComboBox(self)
     self.grid_layout_.addWidget(self.combo_box_, 0, 0, 1, 1)
-    self.stacked_widget_ = QtGui.QStackedWidget(self)
+    self.stacked_widget_ = QtWidgets.QStackedWidget(self)
     self.grid_layout_.addWidget(self.stacked_widget_, 1, 0, 1, 1)
 
     self.__UpdateView(self.combo_box_.currentIndex())
     
-    QtCore.QObject.connect(self.combo_box_, QtCore.SIGNAL("activated(int)"), 
-                           self.__UpdateView)
+    self.combo_box_.activated.connect(self.__UpdateView)
     
     self.setEnabled(False)
        
@@ -66,11 +65,11 @@ class ComboOptionsWidget(QtGui.QWidget):
      the old widget will be removed and the new widget gets the identifier.
      Returns True, if widget is added. Otherwise it returns False
     """
-    if isinstance(widget, QtGui.QWidget) and ident is not None:
+    if isinstance(widget, QtWidgets.QWidget) and ident is not None:
       if hasattr(widget, "GetText"):
-        string = QtCore.QString(widget.GetText())
+        string = widget.GetText()
       else:
-        string = QtCore.QString(ident)
+        string = ident
       
       self.RemoveWidget(ident)
       self.stacked_widget_.addWidget(widget)
@@ -82,7 +81,7 @@ class ComboOptionsWidget(QtGui.QWidget):
   def RemoveWidget(self,ident):
     index = self.__GetIndex(ident)
     if(index >= 0):
-      self.stacked_widget_.removeWidget(self.combo_box_.itemData(index).toPyObject()[1])
+      self.stacked_widget_.removeWidget(self.combo_box_.itemData(index)[1])
       self.combo_box_.removeItem(index)
   
   def OnComboChange(self, item):
@@ -137,18 +136,18 @@ class ComboOptionsWidget(QtGui.QWidget):
 
   def __GetIndex(self, ident):
     for i in range(self.combo_box_.count()):
-      pair = self.combo_box_.itemData(i).toPyObject()
+      pair = self.combo_box_.itemData(i)
       if ident == pair[0]:
         return i
     return -1
   
   def __GetCurrentPair(self):
       current_index = self.combo_box_.currentIndex()
-      return self.combo_box_.itemData(current_index).toPyObject()
+      return self.combo_box_.itemData(current_index)
 
   #Overwritten Methods
   def setEnabled(self, bool):
-    QtGui.QWidget.setEnabled(self, bool)
+    QtWidgets.QWidget.setEnabled(self, bool)
     for i in range(self.combo_box_.count()):
-        pair = self.combo_box_.itemData(i).toPyObject()
+        pair = self.combo_box_.itemData(i)
         pair[1].setEnabled(bool)

@@ -1,46 +1,41 @@
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5 import QtCore, QtWidgets
 import threading
 from ost import LogError
 from ost import gui, gfx
 from ost.io.remote import RemoteLoad, REMOTE_REPOSITORIES
 import re
 
-class RemoteLoader(QWidget):
+class RemoteLoader(QtWidgets.QWidget):
   def __init__(self):
-    QWidget.__init__(self)
-    self._line = QLineEdit(self)
-    self._load = QToolButton(self)
-    self._load.setAttribute(Qt.WA_MacSmallSize)
-    QObject.connect(self._line, SIGNAL('returnPressed()'),
-                    self._DoLoad)
-    QObject.connect(self._load, SIGNAL('clicked()'),
-                    self._DoLoad)
-    hbox = QHBoxLayout(self)
+    QtWidgets.QWidget.__init__(self)
+    self._line = QtWidgets.QLineEdit(self)
+    self._load = QtWidgets.QToolButton(self)
+    self._line.returnPressed.connect(self._DoLoad)
+    self._load.clicked.connect(self._DoLoad)
+    hbox = QtWidgets.QHBoxLayout(self)
     hbox.addWidget(self._line,1)
     hbox.addWidget(self._load,0)
     self.setLayout(hbox)
-    hbox.setMargin(3)
+    hbox.setContentsMargins(3,3,3,3)
     hbox.setSpacing(3)
     self._menu = self._RemoteMenu()
     self._load.setMenu(self._menu)
     self._current_repo = 'pdb'
     self._UpdateLoadButton(self._current_repo)
     self.setFixedHeight(self._load.height())
-    self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+    self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
 
   def _RemoteMenu(self):
-    menu = QMenu()
-    action_group = QActionGroup(menu)
+    menu = QtWidgets.QMenu()
+    action_group = QtWidgets.QActionGroup(menu)
     for k,v in REMOTE_REPOSITORIES.iteritems():
       action = menu.addAction(v.name)
       action.setCheckable(True)
       if k == 'pdb':
         action.setChecked(True)
-      action.setData(QVariant(k))
+      action.setData(QtCore.QVariant(k))
       action_group.addAction(action)
-    QObject.connect(menu, SIGNAL('triggered(QAction*)'),
-                    self._ToggleRepo)
+    menu.triggered.connect(self._ToggleRepo)
     return menu
   def _UpdateLoadButton(self, current):
     name = REMOTE_REPOSITORIES[current].name
@@ -72,7 +67,7 @@ class RemoteLoader(QWidget):
 
 remote_loader=RemoteLoader()
 remote_loader_for_panel=gui.Widget(remote_loader)
-remote_loader_for_panel.qobject.setSizePolicy(QSizePolicy.Expanding, 
-                                              QSizePolicy.Fixed)
+remote_loader_for_panel.qobject.setSizePolicy(QtWidgets.QSizePolicy.Expanding, 
+                                              QtWidgets.QSizePolicy.Fixed)
 panels=gui.GostyApp.Instance().perspective.panels
 panels.AddWidgetToPool("Remote Loader",remote_loader_for_panel)

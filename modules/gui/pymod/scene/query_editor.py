@@ -1,36 +1,36 @@
 from ost import mol
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 
-class QueryEditorWidget(QtGui.QWidget):
+class QueryEditorWidget(QtWidgets.QWidget):
   def __init__(self, parent=None): 
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     self.default_font_=QtGui.QTextCharFormat()
     self.default_font_.setForeground(QtGui.QBrush(QtGui.QColor(0,0,0)))
     self.error_font_=QtGui.QTextCharFormat()
     self.error_font_.setForeground(QtGui.QBrush(QtGui.QColor(255,0,0))) 
-    self.selection_edit_=QtGui.QTextEdit(self)
+    self.selection_edit_=QtWidgets.QTextEdit(self)
     self.selection_edit_.setFixedHeight(40)
     self.selection_edit_.updateGeometry()
-    self.status_=QtGui.QLabel(" ",self);
+    self.status_=QtWidgets.QLabel(" ",self);
     self.status_.setWordWrap(True)
     self.status_.setMargin(0)
     self.status_.setAlignment(QtCore.Qt.AlignRight)
-    self.status_.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,
-                                                 QtGui.QSizePolicy.Expanding))
-    vl=QtGui.QVBoxLayout()
+    self.status_.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum,
+                                                 QtWidgets.QSizePolicy.Expanding))
+    vl=QtWidgets.QVBoxLayout()
     vl.addWidget(self.selection_edit_)
-    self.no_bonds_=QtGui.QRadioButton('none')
-    self.ex_bonds_=QtGui.QRadioButton('exclusive')
-    self.in_bonds_=QtGui.QRadioButton('inclusive')
+    self.no_bonds_=QtWidgets.QRadioButton('none')
+    self.ex_bonds_=QtWidgets.QRadioButton('exclusive')
+    self.in_bonds_=QtWidgets.QRadioButton('inclusive')
     self.in_bonds_.setChecked(True)
-    self.match_res_=QtGui.QCheckBox('match residues')
+    self.match_res_=QtWidgets.QCheckBox('match residues')
     
-    vl.setMargin(0)
+    vl.setContentsMargins(0,0,0,0)
     vl.setSpacing(0)
     self.setLayout(vl)
     vl.addWidget(self.status_)
-    hl=QtGui.QHBoxLayout()
-    l=QtGui.QLabel("bonds:")
+    hl=QtWidgets.QHBoxLayout()
+    l=QtWidgets.QLabel("bonds:")
 
     hl.addWidget(l)
     hl.addSpacing(5)
@@ -42,11 +42,9 @@ class QueryEditorWidget(QtGui.QWidget):
     vl.addWidget(self.match_res_)
 
     self.changing_text_=False;
-    self.connect(self.selection_edit_,QtCore.SIGNAL("textChanged()"),
-                 self._StartTimer)
+    self.selection_edit_.textChanged.connect(self._StartTimer)
     self.timer_=QtCore.QTimer()
-    QtCore.QObject.connect(self.timer_, QtCore.SIGNAL('timeout()'),
-                           self._UpdateMessage)
+    self.timer_.timeout.connect(self._UpdateMessage)
     
   def GetQueryFlags(self):
     flags=0
@@ -103,25 +101,25 @@ class QueryEditorWidget(QtGui.QWidget):
         cursor.setCharFormat(self.error_font_)
     self.changing_text_=False
     
-class QueryDialog(QtGui.QDialog):
+class QueryDialog(QtWidgets.QDialog):
   def __init__(self, title, parent=None):
-    QtGui.QDialog.__init__(self, parent)
-    l=QtGui.QVBoxLayout(self)
+    QtWidgets.QDialog.__init__(self, parent)
+    l=QtWidgets.QVBoxLayout(self)
     self.setWindowTitle(title)
     self.editor=QueryEditorWidget(self)
     l.addWidget(self.editor)
     l.addSpacing(10)
-    l3=QtGui.QHBoxLayout()
-    ab=QtGui.QPushButton('OK')
+    l3=QtWidgets.QHBoxLayout()
+    ab=QtWidgets.QPushButton('OK')
     ab.setDefault(True)
-    cb=QtGui.QPushButton('Cancel')
+    cb=QtWidgets.QPushButton('Cancel')
     l3.addStretch(1)
     l3.addWidget(cb, 0)
     l3.addWidget(ab, 0)
     l.addLayout(l3)
-    QtCore.QObject.connect(cb, QtCore.SIGNAL('clicked()'), self.reject)
-    QtCore.QObject.connect(ab, QtCore.SIGNAL('clicked()'), self.accept)
-    self.connect(self.editor.selection_edit_,QtCore.SIGNAL("textChanged()"),self._CheckNewline)
+    cb.clicked.connect(self.reject)
+    ab.clicked.connect(self.accept)
+    self.editor.selection_edit_.textChanged.connect(self._CheckNewline)
 
   @property 
   def query_flags(self):
@@ -135,7 +133,7 @@ class QueryDialog(QtGui.QDialog):
       self.accept()
       return True
     else:
-      return QtGui.QDialog.event(self, e)
+      return QtWidgets.QDialog.event(self, e)
   
   def _CheckNewline(self):
     if self.editor.GetQueryText().endswith("\n"):

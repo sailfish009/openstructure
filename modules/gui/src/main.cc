@@ -50,6 +50,7 @@
 #include <QFile>
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include <QMimeData>
 
 namespace ost { namespace gui {
 

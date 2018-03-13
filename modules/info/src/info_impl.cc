@@ -31,8 +31,7 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include <QFile>
-#include <QtCore>
+#include <QtCore/QFile>
 
 #include "info_error.hh"
 #include "info_impl.hh"

@@ -29,10 +29,17 @@
 
 
 // Qt includes must come last
-#include <QGLWidget>
+#include <QOpenGLWidget>
+#include <QOpenGLContext>
+#include <QOpenGLFunctions>
+#include <QSurfaceFormat>
 #include <QBasicTimer>
 class QMenu;
 class QMouseEvent;
+
+#if QT_VERSION >= 0x040600  
+class QGestureEvent;
+#endif
 
 namespace ost { namespace gui {
 
@@ -40,19 +47,19 @@ class GLCanvas;
 
 class GLWin;
 
-class DLLEXPORT_OST_GUI GLCanvas : public QGLWidget, public gfx::GLWinBase
+class DLLEXPORT_OST_GUI GLCanvas : public QOpenGLWidget, public gfx::GLWinBase
 {  
   Q_OBJECT;
 public:
   GLCanvas(GLWin *gl_win, QWidget* parent,
-           const QGLFormat& f = QGLFormat::defaultFormat());
+           const QSurfaceFormat& f = QSurfaceFormat::defaultFormat());
 
   // gfx::GLWinBase interface
   virtual void MakeActive();
   virtual void DoRefresh();
   virtual void StatusMessage(const String& m);
   virtual bool HasStereo() const {return format().stereo();};
-  virtual bool HasMultisample() const {return format().sampleBuffers();}
+  virtual bool HasMultisample() const {return format().samples() > 1;}
 
   // central point for sending input to the gfx layer
   void OnTransform(gfx::InputCommand, int indx, 
