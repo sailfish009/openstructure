@@ -200,6 +200,7 @@ EOF
 jupyter nbextension enable nglview --py --sys-prefix
 
 # GO HOME AND CLEANUP
+#####################
 apt-get purge -y cmake \
                  wget \
                  git \
@@ -212,7 +213,6 @@ apt-get clean
 apt-get autoremove -y
 
 cd $SRC_FOLDER && rm -rf $SRC_FOLDER/*
-#########
 
 cd /home
 
@@ -221,6 +221,7 @@ cd /home
 # ENVIRONMENT
 ##############################################################################
 export OST_ROOT="/usr/local"
+export OPENSTRUCTURE_VERSION="1.7.1"
 export PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
 export QT_X11_NO_MITSHM=1
@@ -242,17 +243,84 @@ $OST_ROOT/bin/chemdict_tool "$@"
 ##############################################################################
 $OST_ROOT/bin/lddt "$@"
 
+%apphelp lDDT
+The Local Distance Difference Test.
+
+Usage:
+
+    singularity run --app lDDT <IMAGE> [options] <mod1> [mod1 [mod2]] <re1>[,ref2,ref3]
+
+Options:
+   -s         selection performed on ref
+   -c         use Calphas only
+   -f         perform structural checks and filter input data
+   -t         fault tolerant parsing
+   -p <file>  use specified parmeter file. Mandatory
+   -v <level> verbosity level (0=results only,1=problems reported, 2=full report)
+   -b <value> tolerance in stddevs for bonds
+   -a <value> tolerance in stddevs for angles
+   -r <value> distance inclusion radius
+   -i <value> sequence separation
+   -e         print version
+   -x         ignore residue name consistency checks
+
 %apprun Molck
 ##############################################################################
 # MOLCK APP
 ##############################################################################
 $OST_ROOT/bin/molck "$@"
 
+%apphelp Molck
+This is molck - the molecule checker
+
+Usage:
+    singularity run --app Molck <IMAGE> [options] file1.pdb [file2.pdb [...]]
+
+Options:
+  --complib=path    location of the compound library file. If not provided, the 
+    following locations are searched in this order: 
+    1. Working directory, 2. OpenStructure standard library location (if the 
+    executable is part of a standard OpenStructure installation) 
+  --rm=<a>,<b>      remove atoms and residues matching some criteria 
+    zeroocc - Remove atoms with zero occupancy 
+    hyd - Remove hydrogen atoms 
+    oxt - Remove terminal oxygens 
+    nonstd - Remove all residues not one of the 20 standard amino acids 
+    unk - Remove unknown and atoms not following the nomenclature
+  --fix-ele         clean up element column
+  --stdout          write cleaned file(s) to stdout 
+  --out=filename    write cleaned file(s) to disk. % characters in the filename are 
+    replaced with the basename of the input file without extension. 
+    Default: %-molcked.pdb 
+  --color=auto|on|off 
+    whether output should be colored
+  --map-nonstd   maps modified residues back to the parent amino acid, for example
+    MSE -> MET, SEP -> SER.
+
 %apprun OST
 ##############################################################################
 # OST APP
 ##############################################################################
 $OST_ROOT/bin/ost "$@"
+
+%apphelp OST
+The OST app exposes OpenStructure binary and can be used to run interactive shell
+and scripts.
+
+Usage:
+    singularity run --app OST <IMAGE> [ost options] [script to execute] [script parameters]
+
+Options:
+  -i, --interactive     start interpreter interactively (must be first
+                        parameter, ignored otherwise)
+  -h, --help            show this help message and exit
+  -v VLEVEL, --verbosity_level=VLEVEL
+                        sets the verbosity level [default: 2]
+
+If script requires some external files eg. PDBs, they have to be located in the
+path accessible via mounted volumes. By default Singularity mounts $HOME and
+goes to CWD. Thus this sould work as expected out of the box.
+
 
 %appenv IPython
 ##############################################################################
@@ -266,6 +334,17 @@ export DNG_INITDIR=${DNG_ROOT}/lib64/python2.7/site-packages/ost
 # OST IPYTON APP
 ##############################################################################
 . $VIRTUALENV_DIR/bin/activate && ipython -i $DNG_INITDIR/ost_startup.py "$@"
+
+%apphelp IPython
+OST-powered iPython shell.
+
+Usage:
+    
+    singularity run --app IPython <IMAGE> [options]
+
+Detailed help:
+
+    singularity run --app IPython <IMAGE> --help
 
 %appenv Notebook
 ##############################################################################
@@ -281,6 +360,29 @@ export XDG_RUNTIME_DIR=""
 ##############################################################################
 . $VIRTUALENV_DIR/bin/activate && jupyter notebook --NotebookApp.iopub_data_rate_limit=10000000 --no-browser "$@"
 
+%apphelp Notebook
+A Jupyter notebook palyground with OST and nglview.
+
+Usage:
+
+    singularity run --app Notebook <IMAGE> [options]
+
+The Jupyter notebook is run by default with `--NotebookApp.iopub_data_rate_limit=10000000`
+and `--no-browser` options.
+
+Useful options when running on remote server:
+    --ip=<Unicode> (NotebookApp.ip)
+        Default: 'localhost'
+        The IP address the notebook server will listen on.
+    --port=<Integer> (NotebookApp.port)
+        Default: 8888
+        The port the notebook server will listen on.
+
+To list of all available options:
+
+    singularity run --app Notebook <IMAGE> --help
+
+
 %runscript
 ##############################################################################
 # RUNSCRIPT
@@ -294,12 +396,26 @@ This container includes the following apps:
  * Notebook - A Jupyter notebook palyground with OST and nglview
  * lDDT - The Local Distance Difference Test
  * Molck - Molecular checker
+ * ChemdictTool - Creating or update a compound library
 
 To see the help for each individual app run:
 
-   $ singularity run --app APP <IMAGE NAME>
-
-
+    singularity help --app <APP NAME> <IMAGE NAME>
 EOF
+
+%help
+Singularity container for OST $OPENSTRUCTURE_VERSION.
+
+This container includes the following apps:
+ * OST - OpenStructure binary
+ * IPython - OST-powered iPython shell
+ * Notebook - A Jupyter notebook palyground with OST and nglview
+ * lDDT - The Local Distance Difference Test
+ * Molck - Molecular checker
+ * ChemdictTool - Creating or update a compound library
+
+To see the help for each individual app run:
+
+    singularity help --app <APP NAME> <IMAGE NAME>
 
 
