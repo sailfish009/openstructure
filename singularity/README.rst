@@ -1,10 +1,6 @@
 OST Singularity
 ===============
 
-.. note::
-
-  In order to run some singularity commands there might be a need to run them as root (sudo).
-
 Build Singularity image
 -----------------------
 
@@ -13,7 +9,11 @@ In order to build OST Singularity image:
 .. code-block:: bash
 
   cd <OST ROOT>/singularity
-  singularity build ost.img Singularity.1.7.1
+  sudo singularity build ost.img Singularity.1.7.1
+
+.. note::
+
+  Running singularity build command requires root permissions (sudo).
 
 One can chose any name for an image. For the purose of this file we will assume
 that the image name is `ost.img`.
