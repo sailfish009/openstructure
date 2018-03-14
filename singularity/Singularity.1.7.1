@@ -254,6 +254,19 @@ $OST_ROOT/bin/molck "$@"
 ##############################################################################
 $OST_ROOT/bin/ost "$@"
 
+%appenv IPython
+##############################################################################
+# NOTEBOOK ENV
+##############################################################################
+export DNG_ROOT=$OST_ROOT
+export DNG_INITDIR=${DNG_ROOT}/lib64/python2.7/site-packages/ost
+
+%apprun IPython
+##############################################################################
+# OST IPYTON APP
+##############################################################################
+. $VIRTUALENV_DIR/bin/activate && ipython -i $DNG_INITDIR/ost_startup.py "$@"
+
 %appenv Notebook
 ##############################################################################
 # NOTEBOOK ENV
@@ -277,9 +290,10 @@ Singularity container for OST $OPENSTRUCTURE_VERSION.
 
 This container includes the following apps:
  * OST - OpenStructure binary
+ * IPython - OST-powered iPython shell
+ * Notebook - A Jupyter notebook palyground with OST and nglview
  * lDDT - The Local Distance Difference Test
  * Molck - Molecular checker
- * Notebook - A Jupyter notebook palyground with OST and nglview
 
 To see the help for each individual app run:
 
