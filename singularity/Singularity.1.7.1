@@ -378,6 +378,16 @@ Useful options when running on remote server:
         Default: 8888
         The port the notebook server will listen on.
 
+Copy the URL to the browser and launch the notebook with OST kernel. This will
+load all necessary OST components just like in the OST shell. We also enabled
+the nglview widget to interactively view molecular structures and trajectories.
+For more details on how to use nglview see http://nglviewer.org/nglview/latest/.
+
+As the Singularity mounts $HOME by default Jupyter and Ipython config files
+are moved to separate directories. Proper environmental variables are also set.
+In addition, Jupyter is run in a separate virtualenv to not interact with possibly
+installed host version.
+
 To list of all available options:
 
     singularity run --app Notebook <IMAGE> --help
