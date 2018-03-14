@@ -3,7 +3,8 @@ OST Docker
 
 .. note::
 
-  In order to run docker commands there might be a need to run them as root (sudo).
+  For many docker installations it is required to run docker commands as root. As
+  this depends on set up, we skip the `sudo` in all commands.
 
 Build Docker image
 ------------------
