@@ -65,9 +65,9 @@ locale-gen en_US.UTF-8
 
 # INSTALL SOME PYTHON PACKAGES GLOBALY
 ######################################
-pip install --upgrade pip && pip install numpy==1.10.4 \
-                                         scipy==1.0.0 \
-                                         pandas==0.22.0
+pip install --upgrade pip && pip install --no-cache-dir numpy==1.10.4 \
+                                                        scipy==1.0.0 \
+                                                        pandas==0.22.0
 
 
 # SET UP VIRTUALENV
@@ -199,7 +199,19 @@ EOF
 
 jupyter nbextension enable nglview --py --sys-prefix
 
-# GO HOME
+# GO HOME AND CLEANUP
+apt-get purge -y cmake \
+                 wget \
+                 git \
+                 gfortran \
+                 python-pip \
+                 libbz2-dev \
+                 doxygen \
+                 swig
+apt-get clean
+apt-get autoremove -y
+
+cd $SRC_FOLDER && rm -rf $SRC_FOLDER/*
 #########
 
 cd /home
