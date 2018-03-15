@@ -1200,7 +1200,8 @@ The View Classes
   .. method:: GetBondCount()
 
     Get number of bonds
-    :rtype: int
+
+    :rtype: :class:`int`
 
   .. method:: GetBondList()
 
