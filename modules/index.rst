@@ -101,7 +101,7 @@ Varia
 
 **Users**: :doc:`Reporting a problem <users>`
 
-**lDDT**: :doc:`lDDT command line executable<mol/alg/lddt>`
+**lDDT**: :doc:`lDDT command line executable and Python API<mol/alg/lddt>`
 
 Extending OpenStructure
 --------------------------------------------------------------------------------

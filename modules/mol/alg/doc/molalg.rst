@@ -59,6 +59,24 @@ Local Distance Test scores (lDDT, DRMSD)
   :returns: a tuple containing the counts of the conserved distances in the
             model and of all the checked distances
 
+.. function:: LocalDistDiffTest(model, reference_list, distance_list, settings)
+
+  Wrapper around :func:`LocalDistDiffTest` above.
+
+  :param model: the model structure
+  :type model: :class:`~ost.mol.EntityView`
+  :param reference_list: the list of reference structures from which distances were derived
+  :type reference_list: :class:`list` of :class:`~ost.mol.EntityView`
+  :param distance_list: A residue distance map prepared with :func:`PreparelDDTGlobalRDMap`
+    with *reference_list* and *settings* as parameters.
+  :type distance_list:  :class:`~ost.mol.alg.GlobalRDMap`
+  :param settings: lDDT settings
+  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+
+  :returns: the Local Distance Difference Test score (conserved distances
+            divided by all the checked distances)
+  :rtype:   :class:`float`
+
 .. function:: LocalDistDiffTest(model, target, cutoff, max_dist, \
                                 local_lddt_property_string="")
 
@@ -287,7 +305,269 @@ Local Distance Test scores (lDDT, DRMSD)
   
   :returns: :class:`~ost.mol.alg.GlobalRDMap`
 
-  
+
+.. function:: PreparelDDTGlobalRDMap(reference_list, settings)
+
+  A wrapper around :func:`CreateDistanceList` and
+  :func:`CreateDistanceListFromMultipleReferences`. Depending on the length of
+  the ``reference_list`` it calls one or the other.
+
+  :param reference_list: a list of reference structures from which distances are
+    derived
+  :type reference_list:  list of :class:`~ost.mol.EntityView`
+  :param settings: lDDT settings
+  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+
+  :returns: :class:`~ost.mol.alg.GlobalRDMap`
+
+
+.. function:: CleanlDDTReferences(reference_list)
+
+  Prepares references to be used in lDDT calculation. It checks if all references
+  has the same chain name and selects this chain for for further calculations.
+
+  .. warning::
+
+    This function modifies original list.
+
+  :param reference_list: a list of reference structures from which distances are
+    derived
+  :type reference_list:  list of :class:`~ost.mol.EntityView`
+
+
+.. function:: CheckStructure(ent, \
+                             bond_table, \
+                             angle_table, \
+                             nonbonded_table, \
+                             bond_tolerance, \
+                             angle_tolerance)
+
+  Perform structural checks and filters the structure.
+
+  :param ent: Structure to check
+  :type ent: :class:`~ost.mol.EntityView`
+  :param bond_table: List of bond stereo chemical parameters obtained from
+    :class:`~ost.io.StereoChemicalParamsReader` or :func:`FillStereoChemicalParams`
+  :type bond_table: :class:`~ost.mol.alg.StereoChemicalParams`
+  :param angle_table: List of angle stereo chemical parameters obtained from
+    :class:`~ost.io.StereoChemicalParamsReader` or :func:`FillStereoChemicalParams`
+  :type angle_table: :class:`~ost.mol.alg.StereoChemicalParams`
+  :param nonbonded_table: Information about the clashing distances obtained from
+    :class:`~ost.io.StereoChemicalParamsReader` or :func:`FillClashingDistances`
+  :type nonbonded_table: :class:`~ost.mol.alg.ClashingDistances`
+  :param bond_tolerance: Tolerance in stddev for bonds
+  :type bond_tolerance: float
+  :param angle_tolerance: Tolerance in stddev for angles
+  :type angle_tolerance: float
+
+
+.. function:: GetlDDTPerResidueStats(model, distance_list, settings)
+
+  Get the per-residue statistics from the lDDT calculation.
+
+  :param model: The model structure
+  :type model: :class:`~ost.mol.EntityHandle`
+  :param distance_list: The list of distances to check for conservation
+  :type distance_list: :class:`~ost.mol.alg.GlobalRDMap`
+  :param settings: lDDT settings
+  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+  :returns: Per-residue local lDDT scores
+  :rtype: :class:`list` of :class:`~ost.mol.alg.lDDTLocalScore`
+
+
+.. function:: PrintlDDTPerResidueStats(scores, settings)
+
+  Print per-residue statistics from lDDT calculation.
+
+  :param scores: Local lDDT scores
+  :type scores: :class:`list` of :class:`~ost.mol.alg.lDDTLocalScore`
+  :param settings: lDDT settings
+  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+
+
+.. class:: lDDTLocalScore
+
+  Object containing per-residue information about calculated lDDT.
+
+  .. attribute:: cname
+
+    Chain name
+
+  .. attribute:: rname
+
+    Residue name
+
+  .. attribute:: rnum
+
+    Residue number
+
+  .. attribute:: is_assessed
+
+    Is the residue taken into account?
+
+  .. attribute:: quality_problems
+
+    Does the residue has quality problems?
+
+  .. attribute:: local_lddt
+
+    Local lDDT score
+
+  .. attribute:: conserved_dist
+
+    Number of conserved distances
+
+  .. attribute:: total_dist
+
+    Total number of conserved distances
+
+
+  .. method:: lDDTLocalScore(cname, \
+                             rname, \
+                             rnum, \
+                             is_assessed, \
+                             quality_problems, \
+                             local_lddt, \
+                             conserved_dist, \
+                             total_dist)
+
+    Initialize lDDTLocalScore object.
+
+    :param cname: Chain name
+    :type cname: str
+    :param rname: Residue name
+    :type rname: str
+    :param rnum: Residue number
+    :type rnum: int
+    :param is_assessed: Is the residue taken into account? Yes or No
+    :type is_assessed: str
+    :param quality_problems: Does the residue has quality problems?
+      No if there are no problems, NA if the problems were not assessed, Yes if
+      there are sidechain problems and Yes+ if there are backbone problems
+    :type quality_problems: str
+    :param local_lddt: lDDT score for residue
+    :type local_lddt: float
+    :param conserved_dist: Number of conserved distances
+    :type conserved_dist: int
+    :param total_dist: Total number of distances
+    :type total_dist: int
+
+  .. method:: ToString(structural_checks)
+
+    String representation of the lDDTLocalScore object.
+
+    :param structural_checks: Where structural checks applied during calculations?
+    :type structural_checks: bool
+    :returns: String representation of the lDDTLocalScore.
+
+  .. method:: GetHeader(structural_checks, cutoffs_length)
+
+    Get the names of the fields as printed by ToString method.
+
+    :param structural_checks: Where structural checks applied during calculations?
+    :type structural_checks: bool
+    :param cutoffs_length: Length of the cutoffs list used for calculations
+    :type cutoffs_length: int
+
+
+.. class:: lDDTSettings
+
+  Object containing the settings used for lDDT calculations.
+
+  .. attribute:: bond_tolerance
+
+    Tolerance in stddevs for bonds
+
+  .. attribute:: angle_tolerance
+
+    Tolerance in stddevs for angles
+
+  .. attribute:: radius
+
+    Distance inclusion radius
+
+  .. attribute:: sequence_separation
+
+    Sequence separation
+
+  .. attribute:: sel
+
+    Selection performed on reference(s)
+
+  .. attribute:: parameter_file_path
+
+    Path to the stereochemical parameter file
+
+  .. attribute:: structural_checks
+
+    Are structural checks and filter input data on?
+
+  .. attribute:: consistency_checks
+
+    Are consistency checks on?
+
+  .. attribute:: cutoffs
+
+    List of thresholds used to determine distance
+
+  .. attribute:: label
+
+    the base name for the ResidueHandle properties that store the local scores
+
+  .. method:: lDDTSettings(bond_tolerance=12, \
+                           angle_tolerance=12, \
+                           radius=15, \
+                           sequence_separation=0, \
+                           sel=="", \
+                           parameter_file_path="", \
+                           structural_checks=True, \
+                           consistency_checks=True, \
+                           cutoffs=(0.5, 1.0, 2.0, 4.0), \
+                           label="locallddt")
+
+    Initializes lDDTSettings object.
+
+    :param bond_tolerance: tolerance in stddevs for bonds - default 12.0
+    :type bond_tolerance: float
+    :param angle_tolerance: tolerance in stddevs for angles - default 12.0
+    :type angle_tolerance: float
+    :param radius: distance inclusion radius - default 15.0
+    :type radius: float
+    :param sequence_separation: sequence separation - default 0
+    :type sequence_separation: int
+    :param sel: selection performed on reference(s) - default ""
+    :type sel: str
+    :param parameter_file_path: use specified parmeter file - default ""
+    :type parameter_file_path: str
+    :param structural_checks: perform structural checks and filter input data - default True
+    :type structural_checks: bool
+    :param consistency_checks: perform consistency checks - default True
+    :type consistency_checks: bool
+    :param cutoffs: a list of thresholds used to determine distance
+      conservation - default [0.5, 1.0, 2.0, 4.0]
+    :type cutoffs: list of floats
+    :param label: the base name for the ResidueHandle properties that store
+      the local scores- default "locallddt"
+    :type label: str
+
+  .. method:: SetStereoChemicalParamsPath(path)
+
+    Set the path to the stereochemical parameter file.
+
+    :param path: Path to stereochemical parameter file
+    :type path: str
+
+  .. method:: PrintParameters()
+
+    Print settings.
+
+  .. method:: ToString()
+
+    String representation of the lDDTSettings object.
+
+  :returns: str
+
+
 .. class:: UniqueAtomIdentifier
 
   Object containing enough information to uniquely identify an atom in a structure
