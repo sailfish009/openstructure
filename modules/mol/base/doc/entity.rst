@@ -732,6 +732,7 @@ The Handle Classes
   
     The atom's occupancy in the range 0 to 1. Read/write. Also available as 
     :meth:`GetOccupancy`, :meth:`SetOccupancy`.
+
     :type: float
     
   .. attribute:: b_factor
