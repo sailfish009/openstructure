@@ -60,15 +60,15 @@ mol::CoordGroupHandle (*superpose_frames1)(mol::CoordGroupHandle&, mol::EntityVi
 mol::CoordGroupHandle (*superpose_frames2)(mol::CoordGroupHandle&,  mol::EntityView&, mol::EntityView&, int, int)=&mol::alg::SuperposeFrames;
 
 
-Real local_dist_diff_test_wrapper(const mol::EntityView& v, list& ref_list, const mol::alg::GlobalRDMap& glob_dist_list, mol::alg::lDDTSettings& settings){
-  int ref_list_length = boost::python::extract<int>(ref_list.attr("__len__")());
-  std::vector<ost::mol::EntityView> ref_list_vector(ref_list_length);
+Real lddt_d(const mol::EntityView& model, list& reference_list, const mol::alg::GlobalRDMap& distance_list, mol::alg::lDDTSettings& settings){
+  int reference_list_length = boost::python::extract<int>(reference_list.attr("__len__")());
+  std::vector<ost::mol::EntityView> reference_list_vector(reference_list_length);
   
-  for (int i=0; i<ref_list_length; i++) {
-    ref_list_vector[i] = boost::python::extract<ost::mol::EntityView>(ref_list[i]);
+  for (int i=0; i<reference_list_length; i++) {
+    reference_list_vector[i] = boost::python::extract<ost::mol::EntityView>(reference_list[i]);
   }
 
-  return LocalDistDiffTest(v, ref_list_vector, glob_dist_list, settings);
+  return LocalDistDiffTest(model, reference_list_vector, distance_list, settings);
 }
 
 ost::mol::alg::StereoChemicalParams fill_stereochemical_params_wrapper (const String& header, const list& stereo_chemical_props_file)  
@@ -95,13 +95,13 @@ ost::mol::alg::ClashingDistances fill_clashing_distances_wrapper (const list& st
  return ost::mol::alg::FillClashingDistances(stereo_chemical_props_file_vector);
 }
 
-ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const list& ref_list, const list& cutoff_list, int sequence_separation, Real max_dist)
+ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const list& reference_list, const list& cutoff_list, int sequence_separation, Real max_dist)
 {
-  int ref_list_length = boost::python::extract<int>(ref_list.attr("__len__")());
-  std::vector<ost::mol::EntityView> ref_list_vector(ref_list_length);
+  int reference_list_length = boost::python::extract<int>(reference_list.attr("__len__")());
+  std::vector<ost::mol::EntityView> reference_list_vector(reference_list_length);
   
-  for (int i=0; i<ref_list_length; i++) {
-    ref_list_vector[i] = boost::python::extract<ost::mol::EntityView>(ref_list[i]);
+  for (int i=0; i<reference_list_length; i++) {
+    reference_list_vector[i] = boost::python::extract<ost::mol::EntityView>(reference_list[i]);
   }
 
   int cutoff_list_length = boost::python::extract<int>(cutoff_list.attr("__len__")());
@@ -110,7 +110,7 @@ ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const l
   for (int i=0; i<cutoff_list_length; i++) {
     cutoff_list_vector[i] = boost::python::extract<Real>(cutoff_list[i]);
   }
-  return ost::mol::alg::CreateDistanceListFromMultipleReferences(ref_list_vector, cutoff_list_vector, sequence_separation, max_dist);  	
+  return ost::mol::alg::CreateDistanceListFromMultipleReferences(reference_list_vector, cutoff_list_vector, sequence_separation, max_dist);  	
 }
 
 object lDDTSettingsInitWrapper(tuple args, dict kwargs){
@@ -118,39 +118,39 @@ object lDDTSettingsInitWrapper(tuple args, dict kwargs){
   object self = args[0];
   args = tuple(args.slice(1,_));
 
-  Real bond_tolerance = 12;
+  Real bond_tolerance = 12.0;
   if(kwargs.contains("bond_tolerance")){
-    bond_tolerance = extract<bool>(kwargs["bond_tolerance"]);
+    bond_tolerance = extract<Real>(kwargs["bond_tolerance"]);
     kwargs["bond_tolerance"].del();
   }
 
-  Real angle_tolerance = 12;
+  Real angle_tolerance = 12.0;
   if(kwargs.contains("angle_tolerance")){
-    angle_tolerance = extract<bool>(kwargs["angle_tolerance"]);
+    angle_tolerance = extract<Real>(kwargs["angle_tolerance"]);
     kwargs["angle_tolerance"].del();
   }
 
-  Real radius = 15;
+  Real radius = 15.0;
   if(kwargs.contains("radius")){
-    radius = extract<bool>(kwargs["radius"]);
+    radius = extract<Real>(kwargs["radius"]);
     kwargs["radius"].del();
   }
 
   int sequence_separation = 0;
   if(kwargs.contains("sequence_separation")){
-    sequence_separation = extract<bool>(kwargs["sequence_separation"]);
+    sequence_separation = extract<int>(kwargs["sequence_separation"]);
     kwargs["sequence_separation"].del();
   }
 
   String sel = "";
   if(kwargs.contains("sel")){
-    sel = extract<bool>(kwargs["sel"]);
+    sel = extract<String>(kwargs["sel"]);
     kwargs["sel"].del();
   }
 
   String parameter_file_path = "";
   if(kwargs.contains("parameter_file_path")){
-    parameter_file_path = extract<bool>(kwargs["parameter_file_path"]);
+    parameter_file_path = extract<String>(kwargs["parameter_file_path"]);
     kwargs["parameter_file_path"].del();
   }
 
@@ -181,9 +181,9 @@ object lDDTSettingsInitWrapper(tuple args, dict kwargs){
     cutoffs.push_back(4.0);
   }
 
-  String label = "localldt";
+  String label = "locallddt";
   if(kwargs.contains("label")){
-    label = extract<bool>(kwargs["label"]);
+    label = extract<String>(kwargs["label"]);
     kwargs["label"].del();
   }
 
@@ -210,34 +210,34 @@ object lDDTSettingsInitWrapper(tuple args, dict kwargs){
 }
 
 
-void clean_lddt_references_wrapper(const list& ref_list)
+void clean_lddt_references_wrapper(const list& reference_list)
 {
-  int ref_list_length = boost::python::extract<int>(ref_list.attr("__len__")());
-  std::vector<ost::mol::EntityView> ref_list_vector(ref_list_length);
+  int reference_list_length = boost::python::extract<int>(reference_list.attr("__len__")());
+  std::vector<ost::mol::EntityView> reference_list_vector(reference_list_length);
   
-  for (int i=0; i<ref_list_length; i++) {
-    ref_list_vector[i] = boost::python::extract<ost::mol::EntityView>(ref_list[i]);
+  for (int i=0; i<reference_list_length; i++) {
+    reference_list_vector[i] = boost::python::extract<ost::mol::EntityView>(reference_list[i]);
   }
  
- return ost::mol::alg::CleanlDDTReferences(ref_list_vector);
+ return ost::mol::alg::CleanlDDTReferences(reference_list_vector);
 }
 
-ost::mol::alg::GlobalRDMap prepare_lddt_global_rdmap_wrapper(const list& ref_list, mol::alg::lDDTSettings settings)
+ost::mol::alg::GlobalRDMap prepare_lddt_global_rdmap_wrapper(const list& reference_list, mol::alg::lDDTSettings settings)
 {
-  int ref_list_length = boost::python::extract<int>(ref_list.attr("__len__")());
-  std::vector<ost::mol::EntityView> ref_list_vector(ref_list_length);
+  int reference_list_length = boost::python::extract<int>(reference_list.attr("__len__")());
+  std::vector<ost::mol::EntityView> reference_list_vector(reference_list_length);
   
-  for (int i=0; i<ref_list_length; i++) {
-    ref_list_vector[i] = boost::python::extract<ost::mol::EntityView>(ref_list[i]);
+  for (int i=0; i<reference_list_length; i++) {
+    reference_list_vector[i] = boost::python::extract<ost::mol::EntityView>(reference_list[i]);
   }
  
- return mol::alg::PreparelDDTGlobalRDMap(ref_list_vector, settings);
+ return mol::alg::PreparelDDTGlobalRDMap(reference_list_vector, settings);
 }
 
 list get_lddt_per_residue_stats_wrapper(mol::EntityHandle& model,
-                                        ost::mol::alg::GlobalRDMap& glob_dist_list,
+                                        ost::mol::alg::GlobalRDMap& distance_list,
                                         ost::mol::alg::lDDTSettings& settings) {
-  std::vector<mol::alg::lDDTLocalScore> scores = GetlDDTPerResidueStats(model, glob_dist_list, settings);
+  std::vector<mol::alg::lDDTLocalScore> scores = GetlDDTPerResidueStats(model, distance_list, settings);
   list local_scores_list;
   for (std::vector<mol::alg::lDDTLocalScore>::const_iterator sit = scores.begin(); sit != scores.end(); ++sit) {
     local_scores_list.append(*sit);
@@ -275,7 +275,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("LocalDistDiffTest", lddt_a, (arg("sequence_separation")=0,arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_c, (arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_b, (arg("ref_index")=0, arg("mdl_index")=1));
-  def("LocalDistDiffTest", &local_dist_diff_test_wrapper, (arg("v"), arg("ref_list"), ("glob_dist_list"), arg("settings")));
+  def("LocalDistDiffTest", &lddt_d, (arg("model"), arg("reference_list"), ("distance_list"), arg("settings")));
   def("FilterClashes", fc_a, (arg("ent"), arg("clashing_distances"), arg("always_remove_bb")=false));
   def("FilterClashes", fc_b, (arg("ent"), arg("clashing_distances"), arg("always_remove_bb")=false));
   def("CheckStereoChemistry", csc_a, (arg("ent"), arg("bonds"), arg("angles"), arg("bond_tolerance"), arg("angle_tolerance"), arg("always_remove_bb")=false));
@@ -358,14 +358,14 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("CleanlDDTReferences", &clean_lddt_references_wrapper);
   def("PreparelDDTGlobalRDMap",
       &prepare_lddt_global_rdmap_wrapper,
-      (arg("ref_list"), arg("settings")));
+      (arg("reference_list"), arg("settings")));
   def("CheckStructure",
       &mol::alg::CheckStructure,
       (arg("ent"), arg("bond_table"), arg("angle_table"), arg("nonbonded_table"),
        arg("bond_tolerance"), arg("angle_tolerance")));
   def("GetlDDTPerResidueStats",
       &get_lddt_per_residue_stats_wrapper,
-      (arg("model"), arg("glob_dist_list"), arg("settings")));
+      (arg("model"), arg("distance_list"), arg("settings")));
   def("PrintlDDTPerResidueStats",
       &print_lddt_per_residue_stats_wrapper,
       (arg("scores"), arg("settings")));
