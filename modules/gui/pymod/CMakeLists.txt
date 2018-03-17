@@ -118,4 +118,4 @@ install(FILES ${INSPECTOR_ICONS} DESTINATION "share/openstructure/scene/icons")
 set(QT_USE_QTOPENGL 1)
 set(QT_USE_QTNETWORK 1)
 
-target_link_libraries(_ost_gui ${QT_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::PrintSupport Qt5::Core Qt5::Gui Qt5::Widgets Qt5::PrintSupport)
+target_link_libraries(_ost_gui ${QT_LIBRARIES})

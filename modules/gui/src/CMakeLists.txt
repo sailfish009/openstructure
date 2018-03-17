@@ -458,7 +458,7 @@ module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
                ${OST_GUI_DATA_VIEWER_HEADERS}
                ${OST_GUI_HEADERS}
        DEPENDS_ON ost_gfx ost_io ost_mol_alg ost_seq_alg
-       LINK Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport
+       LINK ${QT_LIBRARIES}
             ${PYTHON_LIBRARIES} 
             ${BOOST_PYTHON_LIBRARIES}
             ${SPNAV_LIBRARIES}
@@ -476,7 +476,7 @@ qt5_wrap_cpp(OST_GOSTY_MOC "gosty.hh"
              OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED
                      -DBOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 
-set(LINK LINK Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport ${BOOST_PROGRAM_OPTIONS_LIBRARIES})
+set(LINK LINK ${QT_LIBRARIES} ${BOOST_PROGRAM_OPTIONS_LIBRARIES})
 
 executable_libexec(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC}
                    ${OST_QT_RESOURCE} DEPENDS_ON ost_gui ${LINK})
