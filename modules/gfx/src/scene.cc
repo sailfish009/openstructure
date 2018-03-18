@@ -155,6 +155,9 @@ void Scene::SetFog(bool f)
 {
   fog_flag_=f;
   if(!gl_init_) return;
+
+  this->ActivateGLContext();
+
   if(f) {
     glEnable(GL_FOG);
   } else {
@@ -173,6 +176,9 @@ void Scene::SetFogColor(const Color& c)
   GLfloat fogc[]={c.Red(),c.Green(),c.Blue(),1.0};
   fog_color_=c;
   if(!gl_init_) return;
+
+  this->ActivateGLContext();
+
   glFogfv(GL_FOG_COLOR,fogc);
   RequestRedraw();
 }
@@ -411,6 +417,8 @@ void Scene::InitGL(bool full)
 {
   LOG_VERBOSE("Scene: initializing GL state");
 
+  this->ActivateGLContext();
+
   check_gl_error(); // clear error flag
 
   if(full) {
@@ -592,6 +600,7 @@ void Scene::SetBackground(const Color& c)
   background_=c;
   bg_mode_=0;
   if(gl_init_) {
+    this->ActivateGLContext();
     //glClearColor(c.Red(),c.Green(),c.Blue(),c.Alpha());
     glClearColor(c.Red(),c.Green(),c.Blue(),0.0);
     SetFogColor(c);
@@ -609,6 +618,7 @@ namespace {
 
 void Scene::set_bg()
 {
+  this->ActivateGLContext();
   static std::vector<unsigned char> data;
   static const unsigned int grad_steps=64;
   if(bg_mode_==1) {
@@ -681,6 +691,7 @@ Viewport Scene::GetViewport() const
 {
   Viewport vp;
   if(gl_init_) {
+    this->ActivateGLContext();
     glGetIntegerv(GL_VIEWPORT, reinterpret_cast<GLint*>(&vp));
   }
   return vp;
@@ -692,6 +703,7 @@ void Scene::SetViewport(int w, int h)
   vp_height_=std::max<unsigned int>(1,h);
   aspect_ratio_=static_cast<float>(w)/static_cast<float>(h);
   if(!gl_init_) return;
+  this->ActivateGLContext();
   glViewport(0,0,w,h);
   ResetProjection();
 #if OST_SHADER_SUPPORT_ENABLED
@@ -736,6 +748,9 @@ void Scene::CenterOn(const GfxObjP& go)
 void Scene::RenderText(const TextPrim& t)
 {
   if(!gl_init_) return;
+
+  this->ActivateGLContext();
+
   if(t.str.empty() || t.points<=0.0) return;
   Vec3 ppos = Project(t.position,false);
 
@@ -806,35 +821,9 @@ float Scene::GetDefaultTextSize()
   return def_text_size_;
 }
 
-namespace {
-
-void draw_lightdir(const Vec3& ldir, const geom::Transform& tf)
-{
-  glPushAttrib(GL_ENABLE_BIT);
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
-  geom::Transform tmpt(tf);
-  tmpt.SetRot(Mat3::Identity());
-  glMultMatrix(tmpt.GetTransposedMatrix().Data());
-  glDisable(GL_NORMALIZE);
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_COLOR_MATERIAL);
-  glColor3f(1.0,0.0,1.0);
-  glLineWidth(2.0);
-  glBegin(GL_LINES);
-  glVertex3v(tmpt.GetCenter().Data());
-  glVertex3v((tmpt.GetCenter()-50.0*ldir).Data());
-  glEnd();
-  glPopMatrix();
-  glPopAttrib();
-}
-
-}
-
 void Scene::RenderGL()
 {
+  this->ActivateGLContext();
   check_gl_error(); // clear error flag
   if(auto_autoslab_ || do_autoslab_) {
     do_autoslab();
@@ -1153,6 +1142,9 @@ void Scene::OnInput(const InputEvent& e)
                  0,1,0,0,
                  0,0,1,0,
                  trans[0],trans[1],trans[2],1};
+
+    this->ActivateGLContext();
+
     double pm[16];
     glGetDoublev(GL_PROJECTION_MATRIX,pm);
     GLint vp[4];
@@ -1293,6 +1285,7 @@ void Scene::DetachObserver(SceneObserver* o) {
 Vec3 Scene::Project(const Vec3& v, bool ignore_vp) const
 {
   if(!gl_init_) return Vec3();
+  this->ActivateGLContext();
   GLdouble gl_mmat[16];
   glGetDoublev(GL_MODELVIEW_MATRIX,gl_mmat);
   GLdouble gl_pmat[16];
@@ -1314,6 +1307,7 @@ Vec3 Scene::Project(const Vec3& v, bool ignore_vp) const
 Vec3 Scene::UnProject(const Vec3& v, bool ignore_vp) const
 {
   if(!gl_init_) return Vec3();
+  this->ActivateGLContext();
   GLdouble gl_mmat[16];
   glGetDoublev(GL_MODELVIEW_MATRIX,gl_mmat);
   GLdouble gl_pmat[16];
@@ -1580,6 +1574,7 @@ void Scene::SetLightDir(const Vec3& dir)
   if(Length2(dir)>0.0) {
     light_dir_=Normalize(dir);
     light_rot_=calc_light_rot(light_dir_);
+    this->ActivateGLContext();
     set_light_dir(light_dir_);
     RequestRedraw();
   }
@@ -1592,6 +1587,7 @@ void Scene::SetLightProp(const Color& amb, const Color& diff,
   light_diff_=diff;
   light_spec_=spec;
   if(!gl_init_) return;
+  this->ActivateGLContext();
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_amb_);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diff_);
   glLightfv(GL_LIGHT0, GL_SPECULAR, light_spec_);
@@ -1604,6 +1600,7 @@ void Scene::SetLightProp(float amb, float diff, float spec)
   light_diff_=Color(diff,diff,diff,1.0);
   light_spec_=Color(spec,spec,spec,1.0);
   if(!gl_init_) return;
+  this->ActivateGLContext();
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_amb_);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diff_);
   glLightfv(GL_LIGHT0, GL_SPECULAR, light_spec_);
@@ -1679,13 +1676,11 @@ bool Scene::StartOffscreenMode(unsigned int width, unsigned int height, int max_
 void Scene::StopOffscreenMode()
 {
   if(main_offscreen_buffer_) {
-    if (win_) {
-      win_->MakeActive();
-    }
     delete main_offscreen_buffer_;
     main_offscreen_buffer_=0;
     Scene::Instance().SetViewport(old_vp_[0],old_vp_[1]);
     offscreen_flag_=false;
+    this->ActivateGLContext();
     root_node_->ContextSwitch();
     glDrawBuffer(GL_BACK);
     update_fog();
@@ -1711,6 +1706,8 @@ void Scene::Export(const String& fname, unsigned int width,
     LOG_ERROR("Scene::Export: unknown file format (" << ext << ")");
     return;
   }
+
+  this->ActivateGLContext();
 
   bool of_flag = (main_offscreen_buffer_==0);
 
@@ -1765,6 +1762,9 @@ void Scene::Export(const String& fname, bool transparent)
     LOG_ERROR("Scene: Export without dimensions either requires an interactive session \nor an active offscreen mode (scene.StartOffscreenMode(W,H))");
     return;
   }
+
+  this->ActivateGLContext();
+
   int d_index=fname.rfind('.');
   if (d_index==-1) {
     LOG_ERROR("Scene: no file extension specified");
@@ -1799,6 +1799,7 @@ void Scene::Export(const String& fname, bool transparent)
 
 void Scene::ExportPov(const std::string& fname, const std::string& wdir)
 {
+  this->ActivateGLContext();
   std::string wdir2=wdir;
   if(wdir2=="") wdir2=".";
   PovState pov(fname+".pov",fname+".inc",wdir2+"/");
@@ -1818,6 +1819,7 @@ void Scene::ExportPov(const std::string& fname, const std::string& wdir)
 
 void Scene::Export(Exporter* ex) const
 {
+  this->ActivateGLContext();
   ex->SetupTransform(this);
   ex->SceneStart(this);
   root_node_->Export(ex);
@@ -1834,6 +1836,7 @@ void Scene::SetBlur(uint n)
 {
   blur_count_=std::min(n,3u);
   if(!gl_init_) return;
+  this->ActivateGLContext();
   glClearAccum(0.0,0.0,0.0,0.0);
   glClear(GL_ACCUM_BUFFER_BIT);
   RequestRedraw();
@@ -1843,6 +1846,7 @@ void Scene::BlurSnapshot()
 {
   if(!gl_init_) return;
   if(blur_count_==0) return;
+  this->ActivateGLContext();
   glFinish();
   glAccum(GL_MULT, 0.5);
   glAccum(GL_ACCUM, 0.5);
@@ -1952,6 +1956,7 @@ void Scene::set_far(float f)
 void Scene::update_fog()
 {
   if(gl_init_) {
+    this->ActivateGLContext();
     glFogf(GL_FOG_START,znear_+fnear_);
     glFogf(GL_FOG_END,zfar_+ffar_);
   }
@@ -2013,6 +2018,7 @@ void Scene::SetShowCenter(bool f)
 
 void Scene::prep_glyphs()
 {
+  this->ActivateGLContext();
   glGenTextures(1,&glyph_tex_id_);
   String ost_root =GetSharedDataPath();
   bf::path ost_root_dir(ost_root);
@@ -2054,6 +2060,7 @@ void Scene::prep_glyphs()
 void Scene::prep_blur()
 {
   if(blur_count_==0) return;
+  this->ActivateGLContext();
   glAccum(GL_RETURN, 0.5);
   glFlush();
 }
@@ -2167,6 +2174,7 @@ void Scene::render_bg()
 {
   if(!gl_init_) return;
   if(bg_mode_!=1 && bg_mode_!=2) return;
+  this->ActivateGLContext();
   if(update_bg_) {
     set_bg();
     check_gl_error("set_bg()");
@@ -2193,6 +2201,7 @@ void Scene::render_export_aspect()
 {
   unsigned int a_width=static_cast<int>(static_cast<float>(vp_height_)*export_aspect_);
   if(a_width<vp_width_) {
+    this->ActivateGLContext();
     // need to draw horizontal boundaries
     unsigned int o1=(vp_width_-a_width)>>1;
     unsigned int o2=a_width+o1;
@@ -2212,6 +2221,7 @@ void Scene::render_export_aspect()
     glEnd();
     // vpr dtor does gl cleanup
   } else if(a_width>vp_width_) {
+    this->ActivateGLContext();
     unsigned int a_height=static_cast<int>(static_cast<float>(vp_width_)/export_aspect_);
     // need to draw vertical boundaries
     unsigned int o1=(vp_height_-a_height)>>1;
@@ -2238,6 +2248,8 @@ void Scene::render_export_aspect()
 
 void Scene::render_scene()
 {
+  this->ActivateGLContext();
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glMatrixMode(GL_MODELVIEW);
@@ -2295,6 +2307,7 @@ void Scene::render_scene()
 
 void Scene::render_glow()
 {
+  this->ActivateGLContext();
   glPushAttrib(GL_ALL_ATTRIB_BITS);
   glEnable(GL_COLOR_MATERIAL);
   glShadeModel(GL_FLAT);
@@ -2354,6 +2367,7 @@ namespace {
 void Scene::stereo_projection(int view)
 {
   if(!gl_init_) return;
+  this->ActivateGLContext();
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
@@ -2413,6 +2427,7 @@ void Scene::stereo_projection(int view)
 
 void Scene::render_stereo()
 {
+  this->ActivateGLContext();
   glPushAttrib(GL_ALL_ATTRIB_BITS);
   glPushClientAttrib(GL_ALL_ATTRIB_BITS);
 
@@ -2646,6 +2661,19 @@ void Scene::SetShowExportAspect(bool f)
   if(f!=show_export_aspect_) {
     show_export_aspect_=f;
     RequestRedraw();
+  }
+}
+
+void Scene::ActivateGLContext() const{
+
+  if(!gl_init_) {
+    return;
+  }
+
+  if(offscreen_flag_) {
+    main_offscreen_buffer_->MakeActive();
+  } else {
+    win_->MakeActive();
   }
 }
 

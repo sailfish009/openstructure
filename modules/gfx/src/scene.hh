@@ -549,6 +549,12 @@ private:
   Scene(const Scene&) {}
   Scene& operator=(const Scene&) {return *this;}
 
+  // The GL Context gets typically handled externally, e.g. using QT when
+  // calling InitGL(), RenderGL() etc. However, there is no guarantee that the 
+  // desired GLContext is active when calling gl related functions in other 
+  // occasions. This can be enforced by ActivateGLContext()
+  void ActivateGLContext() const;
+
   GLWinBase*           win_; // target gl window
 
   mutable GfxNodeP     root_node_; // mutable is slightly hackish
