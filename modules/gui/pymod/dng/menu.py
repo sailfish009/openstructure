@@ -146,8 +146,11 @@ class SceneMenu(QMenu):
     qd=ExportSceneDialog()
     if not qd.exec_():
       return
-    filename=QFileDialog.getSaveFileName(None, 'Save Snapshot', 
-                                         'snapshot.png')
+
+    options = QFileDialog.Options()
+    options |= QFileDialog.DontUseNativeDialog
+    filename, _ = QFileDialog.getSaveFileName(self,"Save Snapshot","snapshot.png", "", options=options)
+
     if filename:
       gfx.Scene().Export(str(filename), qd.width, qd.height, qd.transparent)
 
