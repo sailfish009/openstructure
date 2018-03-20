@@ -1,4 +1,4 @@
-Changes in Release 1.
+Changes in Release 1.8
 --------------------------------------------------------------------------------
 
   * nonstandard C++ module was moved from ost.conop to ost.mol.alg. This implies
@@ -7,6 +7,15 @@ Changes in Release 1.
     to be imported from ost.mol.alg.
   * Added Molck API to the ost.mol.alg module.
 
+Changes in Release 1.7.1
+--------------------------------------------------------------------------------
+
+  * Fixed an issue that could cause the star format parser (mmCIF, chemical
+    components dictionary) to enter an infinite loop
+  * Chemical components dictionary was extended by new chemical classes
+    introduced by PDB
+  * Fixed unit tests
+  * Improved documentation
 
 Changes in Release 1.7
 --------------------------------------------------------------------------------
