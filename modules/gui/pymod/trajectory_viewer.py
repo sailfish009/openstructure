@@ -23,8 +23,7 @@ __all__=('TrajWidget','SetTimeUnit','AddTrajectory','RemoveTrajectory','SetSpeed
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #-------------------------------------------------------------------------------
-#from PyQt5.QtCore import *
-#from PyQt5.QtGui import *
+
 import PyQt5 as _PyQt5
 from PyQt5.QtCore import Qt as _Qt
 from PyQt5.QtWidgets import QWidget as _QWidget
@@ -47,22 +46,22 @@ class TrajWidget(_QWidget):
     self.modifiers=None
     for i,go in enumerate(self.golist_):
       self.index_dict[go.name]=i
-    vb=_PyQt5.QtGui.QVBoxLayout()
-    hb=_PyQt5.QtGui.QHBoxLayout()
-    hb1=_PyQt5.QtGui.QHBoxLayout()
-    hb2=_PyQt5.QtGui.QHBoxLayout()
-    hb3=_PyQt5.QtGui.QHBoxLayout()
-    hb4=_PyQt5.QtGui.QHBoxLayout()
+    vb=_PyQt5.QtWidgets.QVBoxLayout()
+    hb=_PyQt5.QtWidgets.QHBoxLayout()
+    hb1=_PyQt5.QtWidgets.QHBoxLayout()
+    hb2=_PyQt5.QtWidgets.QHBoxLayout()
+    hb3=_PyQt5.QtWidgets.QHBoxLayout()
+    hb4=_PyQt5.QtWidgets.QHBoxLayout()
     self.callback=None   
-    self._slider=_PyQt5.QtGui.QSlider(self)
+    self._slider=_PyQt5.QtWidgets.QSlider(self)
     self._slider.setOrientation(_Qt.Horizontal)
-    self._speed_slider=_PyQt5.QtGui.QSlider(self)
+    self._speed_slider=_PyQt5.QtWidgets.QSlider(self)
     self._speed_slider.setOrientation(_Qt.Horizontal)
     self._speedLabel=_QLabel(self)
     self._speedLabel.setText('Speed:')
     self._speedLabel.setAlignment(_Qt.AlignLeft)
-    self._play=_PyQt5.QtGui.QToolButton(self)
-    self._repeat=_PyQt5.QtGui.QCheckBox(self)
+    self._play=_PyQt5.QtWidgets.QToolButton(self)
+    self._repeat=_PyQt5.QtWidgets.QCheckBox(self)
     self._frame=_QLabel(self)
     self._frameNo=_QLabel(self)
     self._frameEnd=_QLabel(self)
@@ -93,11 +92,11 @@ class TrajWidget(_QWidget):
     self._left_arrow=_QPushButton("<")
     self._left_arrow2=_QPushButton("<<")
     self._left_end=_QPushButton("|<")
-    self._align_selection=_PyQt5.QtGui.QLineEdit()
+    self._align_selection=_PyQt5.QtWidgets.QLineEdit()
     self._align=_QPushButton("Align")
     self._align_label=_QLabel(self)
     self._align_label.setText('Selection:')
-    self._ref_entity_selection=_PyQt5.QtGui.QComboBox()
+    self._ref_entity_selection=_PyQt5.QtWidgets.QComboBox()
     for go in self.golist_:self._ref_entity_selection.addItem(go.name)
     self._ref_entity_selection_label=_QLabel(self)
     self._ref_entity_selection_label.setText('Ref. Entity:')
