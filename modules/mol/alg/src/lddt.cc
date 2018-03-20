@@ -276,7 +276,13 @@ int main (int argc, char **argv)
     if (!ref) {
       exit(-1);
     }
-    ref_list.push_back(ref.CreateFullView());
+    if (settings.sel != ""){
+      std::cout << "Performing \"" << settings.sel << "\" selection on reference " << ref_filename << std::endl;
+      ref_list.push_back(ref.Select(settings.sel));
+    }
+    else {
+      ref_list.push_back(ref.CreateFullView());
+    }
   }
   CleanlDDTReferences(ref_list);
   glob_dist_list = PreparelDDTGlobalRDMap(ref_list, settings);
