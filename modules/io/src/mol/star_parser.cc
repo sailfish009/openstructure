@@ -550,11 +550,15 @@ void StarParser::Parse()
       case 'd':
         if (tline.length()>=5 && StringRef("data_", 5)==tline.substr(0, 5)) {
           this->ParseData();
+        } else {
+          throw IOException("Missing 'data_' control structure");
         }
         break;
       case 'g':
         if (tline.length()>=7 && StringRef("global_", 7)==tline.substr(0, 7)) {
           this->ParseGlobal();
+        } else {
+          throw IOException("Missing 'global_' control structure");
         }
         break;
       case '#':
