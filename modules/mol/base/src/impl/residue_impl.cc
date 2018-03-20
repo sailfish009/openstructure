@@ -212,12 +212,12 @@ AtomImplPtr ResidueImpl::GetCentralAtom() const
     for (AtomImplList::const_iterator it=atom_list_.begin();
          it!=atom_list_.end();++it) {
       if((*it)->Name()=="P") return *it;
-    }    
+    }
   } else if (chem_class_.IsPeptideLinking()) {
     for (AtomImplList::const_iterator it=atom_list_.begin();
          it!=atom_list_.end();++it) {
       if((*it)->Name()=="CA") return *it;
-    }    
+    }
   }
 
   return AtomImplPtr();
@@ -266,18 +266,21 @@ geom::Vec3 ResidueImpl::GetCentralNormal() const
   geom::Vec3 nrvo(1,0,0);
   if (chem_class_.IsPeptideLinking()) {
     AtomImplPtr a1 = FindAtom("C");
-    AtomImplPtr a2 = FindAtom("O"); 
+    AtomImplPtr a2 = FindAtom("O");
     if(a1 && a2) {
       nrvo = geom::Normalize(a2->TransformedPos()-a1->TransformedPos());
     } else {
       a1 = FindAtom("CB");
-      a2 = FindAtom("CA"); 
+      a2 = FindAtom("CA");
       if(a1 && a2) {
         nrvo = geom::Normalize(a2->TransformedPos()-a1->TransformedPos());
       } else {
-        geom::Vec3 v0=GetCentralAtom()->TransformedPos();
-        nrvo=geom::Cross(geom::Normalize(v0),
-                         geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
+        AtomImplPtr a0 = GetCentralAtom();
+        if (a0) {
+          geom::Vec3 v0 = a0->TransformedPos();
+          nrvo = geom::Cross(geom::Normalize(v0),
+                             geom::Normalize(geom::Vec3(-v0[2], v0[0], v0[1])));
+        }
         LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
       }
     }
@@ -288,9 +291,12 @@ geom::Vec3 ResidueImpl::GetCentralNormal() const
     if(a1 && a2 && a3) {
       nrvo = geom::Normalize(a1->TransformedPos()-(a2->TransformedPos()+a3->TransformedPos())*.5);
     } else {
-      geom::Vec3 v0=GetCentralAtom()->TransformedPos();
-      nrvo=geom::Cross(geom::Normalize(v0),
-                       geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
+      AtomImplPtr a0 = GetCentralAtom();
+      if (a0) {
+        geom::Vec3 v0 = a0->TransformedPos();
+        nrvo = geom::Cross(geom::Normalize(v0),
+                           geom::Normalize(geom::Vec3(-v0[2], v0[0], v0[1])));
+      }
       LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
     }
   }
