@@ -1,4 +1,4 @@
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 import math
 # remove all objects from scene, just in case
 scene.RemoveAll()
@@ -11,8 +11,7 @@ class Anim(QtCore.QTimer):
         self.angle=0.0
         self.dir=0.01
         self.edi=self.a.view.handle.EditXCS(mol.UNBUFFERED_EDIT)
-        QtCore.QObject.connect(self, QtCore.SIGNAL("timeout()"), self.OnTimer)
-
+        self.timeout.connect(self.OnTimer)
         
     def OnTimer(self):
         self.angle+=self.dir

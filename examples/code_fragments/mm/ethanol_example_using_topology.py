@@ -1,5 +1,5 @@
 from ost.mol.mm import  *
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 from math import sqrt
 from math import sin
 
@@ -28,7 +28,7 @@ class Anim(QtCore.QTimer):
         self.force_constant = param[3]
         self.steps = 0
         self.counter = 0
-        QtCore.QObject.connect(self, QtCore.SIGNAL("timeout()"), self.OnTimer)
+        self.timeout.connect(self.OnTimer)
 
     def OnTimer(self):
         if self.steps % 20 == 0:

@@ -4,15 +4,16 @@
 
 import sys
 import random
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Board(QtGui.QFrame):
+class Board(QtWidgets.QFrame):
   BoardWidth = 10
   BoardHeight = 22
   Speed = 300
+  messageToStatusBar = QtCore.pyqtSignal(str)
 
   def __init__(self, parent=None):
-    QtGui.QFrame.__init__(self, parent)
+    QtWidgets.QFrame.__init__(self, parent)
     self.resize(180, 380)
     self.setMinimumHeight(380)
     self.setMinimumWidth(180)
@@ -31,6 +32,7 @@ class Board(QtGui.QFrame):
     self.clearBoard()
   
     self.nextPiece.setRandomShape()
+
 
   def shapeAt(self, x, y):
     return self.board[(y * Board.BoardWidth) + x]
@@ -52,9 +54,8 @@ class Board(QtGui.QFrame):
     self.isWaitingAfterLine = False
     self.numLinesRemoved = 0
     self.clearBoard()
-  
-    self.emit(QtCore.SIGNAL("messageToStatusbar(QString)"), 
-      str(self.numLinesRemoved))
+
+    self.messageToStatusBar.emit(str(self.numLinesRemoved))
   
     self.newPiece()
     self.timer.start(Board.Speed, self)
@@ -66,12 +67,10 @@ class Board(QtGui.QFrame):
     self.isPaused = not self.isPaused
     if self.isPaused:
       self.timer.stop()
-      self.emit(QtCore.SIGNAL("messageToStatusbar(QString)"), "paused")
+      self.messageToStatusBar.emit("paused")
     else:
       self.timer.start(Board.Speed, self)
-      self.emit(QtCore.SIGNAL("messageToStatusbar(QString)"), 
-      str(self.numLinesRemoved))
-  
+      self.messageToStatusBar.emit(str(self.numLinesRemoved))
     self.update()
 
   def paintEvent(self, event):
@@ -98,7 +97,7 @@ class Board(QtGui.QFrame):
 
   def keyPressEvent(self, event):
     if not self.isStarted or self.curPiece.shape() == Tetrominoes.NoShape:
-      QtGui.QWidget.keyPressEvent(self, event)
+      QtWidgets.QWidget.keyPressEvent(self, event)
       return
 
     key = event.key()
@@ -120,7 +119,7 @@ class Board(QtGui.QFrame):
     elif key == QtCore.Qt.Key_D:
       self.oneLineDown()
     else:
-      QtGui.QWidget.keyPressEvent(self, event)
+      QtWidgets.QWidget.keyPressEvent(self, event)
 
   def timerEvent(self, event):
     if event.timerId() == self.timer.timerId():
@@ -185,8 +184,7 @@ class Board(QtGui.QFrame):
 
     if numFullLines > 0:
       self.numLinesRemoved = self.numLinesRemoved + numFullLines
-      self.emit(QtCore.SIGNAL("messageToStatusbar(QString)"), 
-    str(self.numLinesRemoved))
+      self.messageToStatusBar.emit(str(self.LinesRemoved))
       self.isWaitingAfterLine = True
       self.curPiece.setShape(Tetrominoes.NoShape)
       self.update()
@@ -201,9 +199,7 @@ class Board(QtGui.QFrame):
       self.curPiece.setShape(Tetrominoes.NoShape)
       self.timer.stop()
       self.isStarted = False
-      self.emit(QtCore.SIGNAL("messageToStatusbar(QString)"), "Game over")
-
-
+      self.messageToStatusBar.emit("Game over")
 
   def tryMove(self, newPiece, newX, newY):
     for i in range(4):
@@ -228,11 +224,11 @@ class Board(QtGui.QFrame):
     painter.fillRect(x + 1, y + 1, self.squareWidth() - 2, 
     self.squareHeight() - 2, color)
 
-    painter.setPen(color.light())
+    painter.setPen(color.lighter())
     painter.drawLine(x, y + self.squareHeight() - 1, x, y)
     painter.drawLine(x, y, x + self.squareWidth() - 1, y)
 
-    painter.setPen(color.dark())
+    painter.setPen(color.darker())
     painter.drawLine(x + 1, y + self.squareHeight() - 1,
       x + self.squareWidth() - 1, y + self.squareHeight() - 1)
     painter.drawLine(x + self.squareWidth() - 1, 

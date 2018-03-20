@@ -19,7 +19,7 @@
 
 from ost import gui
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui
 from board import Board
 
 #Get Panels (Class which manages widgets)
