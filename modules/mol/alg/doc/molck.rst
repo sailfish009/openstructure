@@ -57,3 +57,10 @@ please find them following:
       --color=auto|on|off  whether output should be colored
       --map-nonstd         maps modified residues back to the parent amino acid, for example
                            MSE -> MET, SEP -> SER.
+
+================
+Molck Python API
+================
+
+Within OST, one can also call the :func:`~ost.mol.alg.Molck` function directly
+on entities to get the same effect as with the binary.

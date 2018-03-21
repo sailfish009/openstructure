@@ -349,13 +349,16 @@ Stereochemical Parameters
 In order to check the structure for some stereo-chemical and steric clashes
 before computing the lDDT scores it is required to pass parameter file based on
 Engh and Huber parameters, and on the atomic radii as defined in the Cambridge
-Structural Database. lDDT ships with default file called `stereo_chemical_props.txt`
-located in `$OST_ROOT/share/openstructure` directory. A class
-:class:`~ost.io.StereoChemicalParamsReader` is used to read this file.
+Structural Database. OpenStructure ships with default file called
+`stereo_chemical_props.txt` located in `$OST_ROOT/share/openstructure`
+directory. A class :class:`~ost.io.StereoChemicalParamsReader` is used to read
+this file.
 
-.. class:: StereoChemicalParamsReader
+.. class:: StereoChemicalParamsReader(filename="")
 
   Object that holds and reads stereochemical parameters.
+
+  :param filename: Sets :attr:`filename`.
 
   .. attribute:: bond_table
 
@@ -371,24 +374,14 @@ located in `$OST_ROOT/share/openstructure` directory. A class
 
   .. attribute:: filename
 
-    The path to the parameter file that will be used.
+    The path to the parameter file that will be used. If set to "", it reads the
+    default file shipped with OpenStructure.
 
-  .. method:: StereoChemicalParamsReader(filename="")
-
-    Initializes StereoChemicalParamsReader.
-
-    :param filename: Path to the stereochemical parameter file - defaults to "".
-    :type filename: str
+    :type: :class:`str`
 
   .. method:: Read(check=False)
 
     Read the file.
 
-    :param check: Raise an error when any of the resulting tables are empty - 
-      defaults to False
-    :type check: bool
-
-
-
-
-
+    :param check: Raise an error when any of the resulting tables are empty.
+    :type check:  :class:`bool`
