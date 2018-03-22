@@ -620,6 +620,25 @@ The Handle Classes
 
     Residue index (starting at 0) within chain.
 
+  .. attribute:: central_atom
+
+    Central atom used for rendering traces. For peptides, this is usually
+    the CA atom. For nucleotides, this is usually the P atom.
+
+    Also available as :meth:`GetCentralAtom` and :meth:`SetCentralAtom`.
+
+    :type: :class:`AtomHandle`
+
+  .. attribute:: central_normal
+
+    Normal computed for :attr:`central_atom`. Only defined for peptides and
+    nucleotides if all required atoms available. Otherwise, the (1,0,0) vector
+    is returned.
+
+    Read-only. Also available as :meth:`GetCentralNormal`.
+
+    :type: :class:`~ost.geom.Vec3`
+
   .. method:: FindAtom(atom_name)
 
     Get atom by atom name. See also :attr:`atoms`
@@ -664,6 +683,15 @@ The Handle Classes
     See :attr:`chem_type`
 
   .. method:: GetIndex()
+    
+    See :attr:`index`
+
+  .. method:: GetCentralAtom()
+              SetCentralAtom()
+    
+    See :attr:`central_atom`
+
+  .. method:: GetCentralNormal()
     
     See :attr:`index`
   

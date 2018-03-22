@@ -125,4 +125,92 @@ BOOST_AUTO_TEST_CASE(rename_res)
    BOOST_CHECK_EQUAL(rA2B.GetName(), "B");
 }
 
+BOOST_AUTO_TEST_CASE(test_centralatom)
+{
+  // COOK UP ENTITY FOR TEST
+  EntityHandle eh = CreateEntity();
+  XCSEditor e = eh.EditXCS();
+  ChainHandle ch = e.InsertChain("A");
+  // decent peptide with all entries
+  ResidueHandle rp1 = e.AppendResidue(ch, "A");
+  e.InsertAtom(rp1, "CA", geom::Vec3(2, 0, 0));
+  e.InsertAtom(rp1, "CB", geom::Vec3(1, 0, 0));
+  e.InsertAtom(rp1, "C",  geom::Vec3(0, 0, 0));
+  e.InsertAtom(rp1, "O",  geom::Vec3(0, 1, 0));
+  rp1.SetChemClass(ChemClass(ChemClass::PEPTIDE_LINKING));
+  // weird peptide with only CA and CB
+  ResidueHandle rp2 = e.AppendResidue(ch, "B");
+  e.InsertAtom(rp2, "CA", geom::Vec3(3, 0, 0));
+  e.InsertAtom(rp2, "CB", geom::Vec3(3, 1, 0));
+  rp2.SetChemClass(ChemClass(ChemClass::PEPTIDE_LINKING));
+  // CA-only peptide
+  ResidueHandle rp3 = e.AppendResidue(ch, "C");
+  e.InsertAtom(rp3, "CA", geom::Vec3(4, 0, 0));
+  rp3.SetChemClass(ChemClass(ChemClass::PEPTIDE_LINKING));
+  // peptide with custom atoms
+  ResidueHandle rp4 = e.AppendResidue(ch, "D");
+  AtomHandle rp4_ax = e.InsertAtom(rp4, "XX", geom::Vec3(5, 0, 0));
+  rp4.SetChemClass(ChemClass(ChemClass::PEPTIDE_LINKING));
+  // nucleotide with all needed entries
+  ResidueHandle rn1 = e.AppendResidue(ch, "E");
+  e.InsertAtom(rn1, "P", geom::Vec3(6, 0, 0));
+  e.InsertAtom(rn1, "OP1", geom::Vec3(6, 0.5, 0));
+  e.InsertAtom(rn1, "OP2", geom::Vec3(6, 1.5, 0));
+  rn1.SetChemClass(ChemClass(ChemClass::DNA_LINKING));
+  // nucleotide with only P
+  ResidueHandle rn2 = e.AppendResidue(ch, "F");
+  e.InsertAtom(rn2, "P", geom::Vec3(7, 0, 0));
+  rn2.SetChemClass(ChemClass(ChemClass::DNA_LINKING));
+  // nucleotide with custom atoms
+  ResidueHandle rn3 = e.AppendResidue(ch, "G");
+  AtomHandle rn3_ax = e.InsertAtom(rn3, "XX", geom::Vec3(8, 0, 0));
+  rn3.SetChemClass(ChemClass(ChemClass::DNA_LINKING));
+  // unknown chem class
+  ResidueHandle ru = e.AppendResidue(ch, "H");
+  e.InsertAtom(ru, "P",  geom::Vec3(9, 0, 0));
+  e.InsertAtom(ru, "CA", geom::Vec3(9, 1, 0));
+  AtomHandle ru_ax = e.InsertAtom(ru, "XX", geom::Vec3(9, 2, 0));
+  ru.SetChemClass(ChemClass(ChemClass::UNKNOWN));
+
+  // CHECK CENTRAL ATOMS
+  BOOST_CHECK(rp1.GetCentralAtom().IsValid());
+  BOOST_CHECK_EQUAL(rp1.GetCentralAtom().GetQualifiedName(), "A.A1.CA");
+  BOOST_CHECK(rp2.GetCentralAtom().IsValid());
+  BOOST_CHECK_EQUAL(rp2.GetCentralAtom().GetQualifiedName(), "A.B2.CA");
+  BOOST_CHECK(rp3.GetCentralAtom().IsValid());
+  BOOST_CHECK_EQUAL(rp3.GetCentralAtom().GetQualifiedName(), "A.C3.CA");
+  BOOST_CHECK(!rp4.GetCentralAtom().IsValid());
+  BOOST_CHECK(rn1.GetCentralAtom().IsValid());
+  BOOST_CHECK_EQUAL(rn1.GetCentralAtom().GetQualifiedName(), "A.E5.P");
+  BOOST_CHECK(rn2.GetCentralAtom().IsValid());
+  BOOST_CHECK_EQUAL(rn2.GetCentralAtom().GetQualifiedName(), "A.F6.P");
+  BOOST_CHECK(!rn3.GetCentralAtom().IsValid());
+  BOOST_CHECK(!ru.GetCentralAtom().IsValid());
+
+  // CHECK NORMALS
+  BOOST_CHECK_EQUAL(rp1.GetCentralNormal(), geom::Vec3(0, 1, 0));
+  BOOST_CHECK_EQUAL(rp2.GetCentralNormal(), geom::Vec3(0, -1, 0));
+  BOOST_CHECK_EQUAL(rp3.GetCentralNormal(), geom::Vec3(0, 0, 1));
+  BOOST_CHECK_EQUAL(rp4.GetCentralNormal(), geom::Vec3(1, 0, 0));
+  BOOST_CHECK_EQUAL(rn1.GetCentralNormal(), geom::Vec3(0, -1, 0));
+  BOOST_CHECK_EQUAL(rn2.GetCentralNormal(), geom::Vec3(0, 0, 1));
+  BOOST_CHECK_EQUAL(rn3.GetCentralNormal(), geom::Vec3(1, 0, 0));
+  BOOST_CHECK_EQUAL(ru.GetCentralNormal(), geom::Vec3(1, 0, 0));
+
+  // CHECK SETTING CENTRAL ATOMS
+  rp4.SetCentralAtom(rp4_ax);
+  BOOST_CHECK(rp4.GetCentralAtom().IsValid());
+  BOOST_CHECK_EQUAL(rp4.GetCentralAtom().GetQualifiedName(), "A.D4.XX");
+  BOOST_CHECK_EQUAL(rp4.GetCentralNormal(), geom::Vec3(0, 0, 1));
+  rn3.SetCentralAtom(rn3_ax);
+  BOOST_CHECK(rn3.GetCentralAtom().IsValid());
+  BOOST_CHECK_EQUAL(rn3.GetCentralAtom().GetQualifiedName(), "A.G7.XX");
+  BOOST_CHECK_EQUAL(rn3.GetCentralNormal(), geom::Vec3(0, 0, 1));
+  ru.SetCentralAtom(ru_ax);
+  BOOST_CHECK(ru.GetCentralAtom().IsValid());
+  BOOST_CHECK_EQUAL(ru.GetCentralAtom().GetQualifiedName(), "A.H8.XX");
+  // no normal for unknown residues
+  BOOST_CHECK_EQUAL(ru.GetCentralNormal(), geom::Vec3(1, 0, 0));
+}
+
 BOOST_AUTO_TEST_SUITE_END();
