@@ -278,7 +278,12 @@ int main (int argc, char **argv)
     }
     if (settings.sel != ""){
       std::cout << "Performing \"" << settings.sel << "\" selection on reference " << ref_filename << std::endl;
-      ref_list.push_back(ref.Select(settings.sel));
+      try {
+        ref_list.push_back(ref.Select(settings.sel));
+      } catch (const ost::mol::QueryError& e) {
+        std::cerr << "Provided selection argument failed." << std::endl << e.GetFormattedMessage() << std::endl;
+        exit(-1);
+      }
     }
     else {
       ref_list.push_back(ref.CreateFullView());
