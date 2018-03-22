@@ -330,6 +330,7 @@ endif()
 add_subdirectory(modules)
 add_subdirectory(scripts)
 add_subdirectory(tools)
+add_subdirectory(actions)
 # deployment has to come last, to ensure that all install commands are run before deployment
 # magic is done
 add_subdirectory(deployment)
