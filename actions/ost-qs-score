@@ -1,0 +1,117 @@
+"""Calculate Quaternary Structure score (QS-score) between two complexes.
+
+"""
+
+import os
+import sys
+import argparse
+
+import ost
+from ost.io import LoadPDB, LoadMMCIF
+from ost import PushVerbosityLevel
+from ost.mol.alg import qsscoring
+
+
+def _ParseArgs():
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description=__doc__,
+        prog="ost qs-score")
+
+    parser.add_argument(
+        '-v',
+        '--verbosity',
+        type=int,
+        default=3,
+        help="Set verbosity level.")
+    parser.add_argument(
+        "-m",
+        "--model",
+        dest="model",
+        required=True,
+        help=("Path to the model file."))
+    parser.add_argument(
+        "-r",
+        "--reference",
+        dest="reference",
+        required=True,
+        help=("Path to the reference file."))
+    parser.add_argument(
+        "-c",
+        "--chain-mapping",
+        nargs="+",
+        type=lambda x: x.split(":"),
+        dest="chain_mapping",
+        help=("Mapping of chains between the model and the reference. "
+              "Each separate mapping consist of key:value pairs where key "
+              "is the chain name in model and value is the chain name in "
+              "reference."))
+
+    opts = parser.parse_args()
+    if opts.chain_mapping is not None:
+        try:
+            opts.chain_mapping = dict(opts.chain_mapping)
+        except ValueError:
+            raise ValueError("Cannot parse chain mapping into dictionary. The "
+                             "correct format is: key:value.")
+
+    return opts
+
+
+def _ReadStructureFile(path):
+    """Safely read structure file into OST entity.
+
+    The functin can read both PDB and mmCIF files.
+
+    :param path: Path to the file.
+    :type path: :class:`str`
+    :returns: Entity
+    :rtype: :class:`~ost.mol.EntityHandle`
+    """
+    if not os.path.isfile(path):
+        raise IOError("%s is not a file" % path)
+    try:
+        ent = LoadPDB(path, profile="SLOPPY")
+    except IOError:
+        try:
+            ent = LoadMMCIF(path, profile="SLOPPY")
+        except IOError as err:
+            raise err
+
+    return ent
+
+
+def _Main():
+    """Do the magic."""
+
+    opts = _ParseArgs()
+    PushVerbosityLevel(opts.verbosity)
+    #
+    # Read the input files
+    ost.LogInfo("Reading model from %s" % opts.model)
+    model = _ReadStructureFile(opts.model)
+    ost.LogInfo("Reading reference from %s" % opts.reference)
+    reference = _ReadStructureFile(opts.reference)
+
+    #
+    # Perform scoring
+    try:
+        qs_scorer = qsscoring.QSscorer(reference,
+                                       model)
+        if opts.chain_mapping is not None:
+            ost.LogInfo(
+                "Using custom chain mapping: %s" % str(opts.chain_mapping))
+            qs_scorer.chain_mapping = opts.chain_mapping
+        ost.LogScript('QSscore:', str(qs_scorer.global_score))
+        ost.LogScript('Chain mapping used:', str(qs_scorer.chain_mapping))
+    except qsscoring.QSscoreError as ex:
+        # default handling: report failure and set score to 0
+        ost.LogError('QSscore failed:', str(ex))
+
+
+if __name__ == '__main__':
+    # make script 'hot'
+    unbuffered = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    sys.stdout = unbuffered
+    _Main()
