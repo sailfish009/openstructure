@@ -18,6 +18,7 @@ from ost.mol.alg import (qsscoring, Molck, MolckSettings, CleanlDDTReferences,
                          PreparelDDTGlobalRDMap, lDDTSettings, CheckStructure,
                          LocalDistDiffTest)
 from ost.conop import CompoundLib
+from ost.seq.alg.renumber import Renumber
 
 
 class _DefaultStereochemicalParamAction(argparse.Action):
@@ -426,6 +427,7 @@ def _Main():
                 reference.GetName()))
             qs_scorer = qsscoring.QSscorer(reference, model)
             if opts.qs_score:
+                ost.LogInfo("Computing QS-score")
                 try:
                     if opts.chain_mapping is not None:
                         ost.LogInfo(
@@ -457,6 +459,7 @@ def _Main():
                     })
             # Calculate lDDT
             if opts.lddt:
+                ost.LogInfo("Computing lDDT")
                 lddt_settings = lDDTSettings(
                     bond_tolerance=opts.bond_tolerance,
                     angle_tolerance=opts.angle_tolerance,
@@ -470,9 +473,16 @@ def _Main():
                 if opts.verbosity > 3:
                     lddt_settings.PrintParameters()
                 # Perform scoring
-                for mdl_c, ref_c in qs_scorer.chain_mapping.iteritems():
-                    model_view = model.Select("cname=%s" % mdl_c)
-                    reference_view = reference.Select("cname=%s" % ref_c)
+                # Get chains from mapped alignments
+                for aln in qs_scorer.alignments:
+                    # Get chains and renumber according to alignment (for lDDT)
+                    ch_ref = aln.GetSequence(0).GetName()
+                    reference_view = Renumber(
+                        aln.GetSequence(0)).CreateFullView()
+                    ch_mdl = aln.GetSequence(1).GetName()
+                    model_view = Renumber(aln.GetSequence(1)).CreateFullView()
+                    ost.LogInfo(("Computing lDDT between model chain %s and "
+                                 "reference chain %s") % (ch_mdl, ch_ref))
                     _ComputelDDT(model_view, [reference_view], lddt_settings)
 
     if opts.output is not None:
