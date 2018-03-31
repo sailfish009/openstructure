@@ -963,7 +963,10 @@ FindMemParam FindMembrane(ost::mol::EntityView& ent,
   std::vector<geom::Transform> transformations;
   int n_euler_angles = 3;
   int n_transformations = n_euler_angles * n_euler_angles * n_euler_angles;
-  Real euler_angles [n_euler_angles] = {0.0, M_PI/3, 2*M_PI/3};
+  std::vector<Real> euler_angles(n_euler_angles);
+  euler_angles[0] = 0.0;
+  euler_angles[1] = M_PI/3;
+  euler_angles[2] = 2*M_PI/3;
 
   for(int i = 0; i < n_euler_angles; ++i) {
     for(int j = 0; j < n_euler_angles; ++j) {
