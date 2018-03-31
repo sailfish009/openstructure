@@ -20,6 +20,7 @@ set(OST_MOL_ALG_HEADERS
   similarity_matrix.hh
   accessibility.hh
   sec_struct.hh
+  find_membrane.hh
 )
 
 set(OST_MOL_ALG_SOURCES
@@ -43,6 +44,7 @@ set(OST_MOL_ALG_SOURCES
   similarity_matrix.cc
   accessibility.cc
   sec_struct.cc
+  find_membrane.cc
 )
 
 set(MOL_ALG_DEPS ost_mol ost_seq)

@@ -957,6 +957,102 @@ Algorithms on Structures
                         :class:`~ost.mol.EntityHandle`
 
 
+
+.. class:: FindMemParam
+
+  Result object for the membrane detection algorithm described below
+
+  .. attribute:: axis
+
+    initial search axis from which optimal membrane slab could be found
+
+  .. attribute:: tilt_axis
+
+    Axis around which we tilt the membrane starting from the initial axis
+
+  .. attribute:: tilt
+
+    Angle to tilt around tilt axis
+
+  .. attribute:: angle
+
+    After the tilt operation we perform a rotation around the initial axis
+    with this angle to get the final membrane axis
+
+  .. attribute:: membrane_axis
+
+    The result of applying the tilt and rotation procedure described above.
+    The membrane_axis is orthogonal to the membrane plane and has unit length.
+
+  .. attribute:: pos
+
+    Real number that describes the membrane center point. To get the actual
+    position you can do: pos * membrane_axis
+
+  .. attribute:: width
+
+    Total width of the membrane in A
+
+  .. attribute:: energy
+
+    Pseudo energy of the implicit solvation model
+
+  .. attribute:: membrane_representation
+
+    Dummy atoms that represent the membrane. This entity is only valid if
+    the according flag has been set to True when calling FindMembrane.
+
+
+.. method:: FindMembrane(ent, assign_membrane_representation=True, fast=False)
+
+  Estimates the optimal membrane position of a protein by using an implicit 
+  solvation model. The original algorithm and the used energy function are 
+  described in: Lomize AL, Pogozheva ID, Lomize MA, Mosberg HI (2006) 
+  Positioning of proteins in membranes: A computational approach.
+
+  There are some modifications in this implementation and the procedure is
+  as follows:
+
+  * Initial axis are constructed that build the starting point for initial 
+    parameter grid searches.
+
+  * For every axis, the protein is rotated so that the axis builds the z-axis
+
+    * In order to exclude internal hydrophilic pores, only the outermost atoms
+      with respect the the z-axis enter an initial grid search
+    * The width and position of the membrane is optimized for different 
+      combinations of tilt and rotation angles (further described in
+      :class:`FindMemParam`). The top 20 parametrizations 
+      (only top parametrization if *fast* is True) are stored for further 
+      processing.
+
+  * The 20 best membrane parametrizations from the initial grid search 
+    (only the best if *fast* is set to True) enter a final 
+    minimization step using a Levenberg-Marquardt minimizer. 
+
+
+  :param ent:           Entity of a transmembrane protein, you'll get weird 
+                        results if this is not the case. The energy term
+                        of the result is typically a good indicator whether
+                        *ent* is an actual transmembrane protein.
+  :type ent:            :class:`ost.mol.EntityHandle` / :class:`ost.mol.EntityView`
+
+  :param assign_membrane_representation: Whether to construct a membrane 
+                                         representation using dummy atoms
+
+  :type assign_membrane_representation: :class:`bool`
+
+  :param fast:          If set to false, the 20 best results of the initial grid
+                        search undergo a Levenberg-Marquardt minimization and
+                        the parametrization with optimal minimized energy is 
+                        returned. 
+                        If set to yes, only the best result of the initial grid
+                        search is selected and returned after 
+                        Levenberg-Marquardt minimization.
+
+  :returns:             The results object
+  :rtype:               :class:`ost.mol.alg.FindMemParam`
+
 .. _traj-analysis:
 
 Trajectory Analysis
