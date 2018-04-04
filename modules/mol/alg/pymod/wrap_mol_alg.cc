@@ -20,6 +20,7 @@
 #include <boost/python.hpp>
 #include <boost/python/raw_function.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
+#include <ost/log.hh>
 #include <ost/config.hh>
 #include <ost/mol/alg/local_dist_diff_test.hh>
 #include <ost/mol/alg/distance_test_common.hh>
@@ -151,12 +152,6 @@ object lDDTSettingsInitWrapper(tuple args, dict kwargs){
     kwargs["sel"].del();
   }
 
-  String parameter_file_path = "";
-  if(kwargs.contains("parameter_file_path")){
-    parameter_file_path = extract<String>(kwargs["parameter_file_path"]);
-    kwargs["parameter_file_path"].del();
-  }
-
   bool structural_checks = true;
   if(kwargs.contains("structural_checks")){
     structural_checks = extract<bool>(kwargs["structural_checks"]);
@@ -192,7 +187,7 @@ object lDDTSettingsInitWrapper(tuple args, dict kwargs){
 
   if(len(kwargs) > 0){
     std::stringstream ss;
-    ss << "Invalid keywords observed when setting up MolckSettings! ";
+    ss << "Invalid keywords observed when setting up lDDTSettings! ";
     ss << "Or did you pass the same keyword twice? ";
     ss << "Valid keywords are: bond_tolerance, angle_tolerance, radius, ";
     ss << "sequence_separation, sel, parameter_file_path, structural_checks, ";
@@ -205,11 +200,63 @@ object lDDTSettingsInitWrapper(tuple args, dict kwargs){
                                radius, 
                                sequence_separation,
                                sel,
-                               parameter_file_path,
                                structural_checks,
                                consistency_checks,
                                cutoffs,
                                label);
+}
+
+object lDDTScorerInitWrapper(tuple args, dict kwargs){
+
+  object self = args[0];
+  args = tuple(args.slice(1, len(args)));
+
+  std::vector<ost::mol::EntityHandle> reference_list_vector;
+  if(kwargs.contains("references")){
+    list reference_list = boost::python::extract<list>(kwargs["references"]);
+    int reference_list_length = boost::python::extract<int>(reference_list.attr("__len__")());
+    for (int i=0; i<reference_list_length; i++) {
+      reference_list_vector.push_back(boost::python::extract<ost::mol::EntityHandle>(reference_list[i]));
+    }
+    kwargs["references"].del();
+  } else {
+    throw std::invalid_argument("'references' argument is required");
+  }
+
+  ost::mol::EntityHandle model;
+  if(kwargs.contains("model")){
+    model = boost::python::extract<ost::mol::EntityHandle>(kwargs["model"]);
+    kwargs["model"].del();
+  } else {
+    throw std::invalid_argument("'model' argument is required");
+  }
+
+  ost::mol::alg::lDDTSettings settings;
+  if(kwargs.contains("settings")){
+    settings = extract<ost::mol::alg::lDDTSettings>(kwargs["settings"]);
+    kwargs["settings"].del();
+  } else {
+    throw std::invalid_argument("'settings' argument is required");
+  }
+
+  ost::mol::alg::StereoChemicalProps stereochemical_params;
+  if(kwargs.contains("stereochemical_params")){
+    stereochemical_params = extract<ost::mol::alg::StereoChemicalProps>(kwargs["stereochemical_params"]);
+    kwargs["stereochemical_params"].del();
+  }
+
+  if(len(kwargs) > 0){
+    std::stringstream ss;
+    ss << "Invalid keywords observed when setting up lDDTScorer! ";
+    ss << "Or did you pass the same keyword twice? ";
+    ss << "Valid keywords are: settings and stereochemical_params!";
+    throw std::invalid_argument(ss.str());
+  }
+
+  return self.attr("__init__")(reference_list_vector,
+                               model,
+                               settings,
+                               stereochemical_params);
 }
 
 
@@ -225,7 +272,10 @@ void clean_lddt_references_wrapper(const list& reference_list)
  return ost::mol::alg::CleanlDDTReferences(reference_list_vector);
 }
 
-ost::mol::alg::GlobalRDMap prepare_lddt_global_rdmap_wrapper(const list& reference_list, mol::alg::lDDTSettings settings)
+ost::mol::alg::GlobalRDMap prepare_lddt_global_rdmap_wrapper(const list& reference_list,
+                                                             list& cutoff_list,
+                                                             int sequence_separation,
+                                                             Real max_dist)
 {
   int reference_list_length = boost::python::extract<int>(reference_list.attr("__len__")());
   std::vector<ost::mol::EntityView> reference_list_vector(reference_list_length);
@@ -233,14 +283,22 @@ ost::mol::alg::GlobalRDMap prepare_lddt_global_rdmap_wrapper(const list& referen
   for (int i=0; i<reference_list_length; i++) {
     reference_list_vector[i] = boost::python::extract<ost::mol::EntityView>(reference_list[i]);
   }
+
+  int cutoff_list_length = boost::python::extract<int>(cutoff_list.attr("__len__")());
+  std::vector<Real> cutoff_list_vector(cutoff_list_length);
+  
+  for (int i=0; i<cutoff_list_length; i++) {
+    cutoff_list_vector[i] = boost::python::extract<Real>(cutoff_list[i]);
+  }
  
- return mol::alg::PreparelDDTGlobalRDMap(reference_list_vector, settings);
+ return mol::alg::PreparelDDTGlobalRDMap(reference_list_vector, cutoff_list_vector, sequence_separation, max_dist);
 }
 
 list get_lddt_per_residue_stats_wrapper(mol::EntityHandle& model,
                                         ost::mol::alg::GlobalRDMap& distance_list,
-                                        ost::mol::alg::lDDTSettings& settings) {
-  std::vector<mol::alg::lDDTLocalScore> scores = GetlDDTPerResidueStats(model, distance_list, settings);
+                                        bool structural_checks,
+                                        String label) {
+  std::vector<mol::alg::lDDTLocalScore> scores = GetlDDTPerResidueStats(model, distance_list, structural_checks, label);
   list local_scores_list;
   for (std::vector<mol::alg::lDDTLocalScore>::const_iterator sit = scores.begin(); sit != scores.end(); ++sit) {
     local_scores_list.append(*sit);
@@ -248,7 +306,16 @@ list get_lddt_per_residue_stats_wrapper(mol::EntityHandle& model,
   return local_scores_list;
 }
 
-void print_lddt_per_residue_stats_wrapper(list& scores, mol::alg::lDDTSettings settings){
+list get_local_scores_wrapper(mol::alg::lDDTScorer& scorer) {
+  std::vector<mol::alg::lDDTLocalScore> scores = scorer.GetLocalScores();
+  list local_scores_list;
+  for (std::vector<mol::alg::lDDTLocalScore>::const_iterator sit = scores.begin(); sit != scores.end(); ++sit) {
+    local_scores_list.append(*sit);
+  }
+  return local_scores_list;
+}
+
+void print_lddt_per_residue_stats_wrapper(list& scores, bool structural_checks, int cutoffs_size){
   int scores_length = boost::python::extract<int>(scores.attr("__len__")());
   std::vector<mol::alg::lDDTLocalScore> scores_vector(scores_length);
   
@@ -256,7 +323,7 @@ void print_lddt_per_residue_stats_wrapper(list& scores, mol::alg::lDDTSettings s
     scores_vector[i] = boost::python::extract<mol::alg::lDDTLocalScore>(scores[i]);
   }
  
- return mol::alg::PrintlDDTPerResidueStats(scores_vector, settings);
+ return mol::alg::PrintlDDTPerResidueStats(scores_vector, structural_checks, cutoffs_size);
 }
   
 }
@@ -326,9 +393,8 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
 
   class_<mol::alg::lDDTSettings>("lDDTSettings", no_init)
     .def("__init__", raw_function(lDDTSettingsInitWrapper))
-    .def(init<Real, Real, Real,  int, String, String, bool, bool, std::vector<Real>&, String>())
+    .def(init<Real, Real, Real, int, String, bool, bool, std::vector<Real>&, String>())
     .def("ToString", &mol::alg::lDDTSettings::ToString)
-    .def("SetStereoChemicalParamsPath", &mol::alg::lDDTSettings::SetStereoChemicalParamsPath)
     .def("PrintParameters", &mol::alg::lDDTSettings::PrintParameters)
     .def("__repr__", &mol::alg::lDDTSettings::ToString)
     .def("__str__", &mol::alg::lDDTSettings::ToString)
@@ -337,7 +403,6 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
     .def_readwrite("radius", &mol::alg::lDDTSettings::radius)
     .def_readwrite("sequence_separation", &mol::alg::lDDTSettings::sequence_separation)
     .def_readwrite("sel", &mol::alg::lDDTSettings::sel)
-    .def_readwrite("parameter_file_path", &mol::alg::lDDTSettings::parameter_file_path)
     .def_readwrite("structural_checks", &mol::alg::lDDTSettings::structural_checks)
     .def_readwrite("consistency_checks", &mol::alg::lDDTSettings::consistency_checks)
     .def_readwrite("cutoffs", &mol::alg::lDDTSettings::cutoffs)
@@ -346,6 +411,8 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   class_<mol::alg::lDDTLocalScore>("lDDTLocalScore", init<String, String, int, String, String, Real, int, int>())
     .def("ToString", &mol::alg::lDDTLocalScore::ToString)
     .def("GetHeader", &mol::alg::lDDTLocalScore::GetHeader)
+    .def("__str__", &mol::alg::lDDTLocalScore::Repr)
+    .def("__repr__", &mol::alg::lDDTLocalScore::Repr)
     .def_readwrite("cname", &mol::alg::lDDTLocalScore::cname)
     .def_readwrite("rname", &mol::alg::lDDTLocalScore::rname)
     .def_readwrite("rnum", &mol::alg::lDDTLocalScore::rnum)
@@ -354,6 +421,24 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
     .def_readwrite("local_lddt", &mol::alg::lDDTLocalScore::local_lddt)
     .def_readwrite("conserved_dist", &mol::alg::lDDTLocalScore::conserved_dist)
     .def_readwrite("total_dist", &mol::alg::lDDTLocalScore::total_dist);
+
+  class_<mol::alg::lDDTScorer>("lDDTScorer", no_init)
+      .def("__init__", raw_function(lDDTScorerInitWrapper))
+      .def(init<std::vector<mol::EntityHandle>&, mol::EntityHandle&, mol::alg::lDDTSettings&, mol::alg::StereoChemicalProps&>())
+      .add_property("global_score", &mol::alg::lDDTScorer::GetGlobalScore)
+      .add_property("conserved_residues", &mol::alg::lDDTScorer::GetNumConservedResidues)
+      .add_property("total_residues", &mol::alg::lDDTScorer::GetNumTotalResidues)
+      .def("PrintPerResidueStats", &mol::alg::lDDTScorer::PrintPerResidueStats)
+      .add_property("local_scores", &get_local_scores_wrapper)
+      .add_property("is_valid", &mol::alg::lDDTScorer::IsValid);
+
+  class_<mol::alg::StereoChemicalProps>("StereoChemicalProps",
+                           init<mol::alg::StereoChemicalParams&,
+                           mol::alg::StereoChemicalParams&,
+                           mol::alg::ClashingDistances&>())
+    .def_readwrite("bond_table", &mol::alg::StereoChemicalProps::bond_table)
+    .def_readwrite("angle_table", &mol::alg::StereoChemicalProps::angle_table)
+    .def_readwrite("nonbonded_table", &mol::alg::StereoChemicalProps::nonbonded_table);
   
   def("FillClashingDistances",&fill_clashing_distances_wrapper);
   def("FillStereoChemicalParams",&fill_stereochemical_params_wrapper);
@@ -363,17 +448,17 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("CleanlDDTReferences", &clean_lddt_references_wrapper);
   def("PreparelDDTGlobalRDMap",
       &prepare_lddt_global_rdmap_wrapper,
-      (arg("reference_list"), arg("settings")));
+      (arg("reference_list"), arg("cutoffs"), arg("sequence_separation"), arg("radius")));
   def("CheckStructure",
       &mol::alg::CheckStructure,
       (arg("ent"), arg("bond_table"), arg("angle_table"), arg("nonbonded_table"),
        arg("bond_tolerance"), arg("angle_tolerance")));
   def("GetlDDTPerResidueStats",
       &get_lddt_per_residue_stats_wrapper,
-      (arg("model"), arg("distance_list"), arg("settings")));
+      (arg("model"), arg("distance_list"), arg("structural_checks"), arg("label")));
   def("PrintlDDTPerResidueStats",
       &print_lddt_per_residue_stats_wrapper,
-      (arg("scores"), arg("settings")));
+      (arg("scores"), arg("structural_checks"), arg("cutoff_list_length")));
 
  
   class_<mol::alg::PDBize>("PDBize",

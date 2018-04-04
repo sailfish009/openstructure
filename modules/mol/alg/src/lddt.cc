@@ -157,6 +157,7 @@ int main (int argc, char **argv)
   // sets some default values for parameters
   String version = OST_VERSION_STRING;
   lDDTSettings settings;
+  String parameter_file_path;
   settings.structural_checks=false;
   // creates the required loading profile
   IOProfile profile;
@@ -224,7 +225,7 @@ int main (int argc, char **argv)
   }
 
   if (vm.count("parameter-file")) {
-      settings.parameter_file_path=vm["parameter-file"].as<String>();
+      parameter_file_path=vm["parameter-file"].as<String>();
     } else if (settings.structural_checks==true) {
     std::cout << "Please specify a stereo-chemical parameter file" << std::endl;
     exit(-1);
@@ -290,7 +291,10 @@ int main (int argc, char **argv)
     }
   }
   CleanlDDTReferences(ref_list);
-  glob_dist_list = PreparelDDTGlobalRDMap(ref_list, settings);
+  glob_dist_list = PreparelDDTGlobalRDMap(ref_list,
+                                          settings.cutoffs,
+                                          settings.sequence_separation,
+                                          settings.radius);
   files.pop_back();
 
   // prints out parameters used in the lddt calculation
@@ -326,9 +330,9 @@ int main (int argc, char **argv)
     std::cout << "File: " << files[i] << std::endl;
 
     if (settings.structural_checks) {
-      StereoChemicalParamsReader stereochemical_params(settings.parameter_file_path);
+      StereoChemicalProps stereochemical_params;
       try {
-        stereochemical_params.Read(true);
+        stereochemical_params = ost::io::ReadStereoChemicalPropsFile(parameter_file_path, true);
       } catch (std::exception& e) {
         std::cout << e.what() << std::endl;
         exit(-1);
@@ -352,8 +356,8 @@ int main (int argc, char **argv)
 
     // prints the residue-by-residue statistics
     std::vector<lDDTLocalScore> local_scores;
-    local_scores = GetlDDTPerResidueStats(model, glob_dist_list, settings);
-    PrintlDDTPerResidueStats(local_scores, settings);
+    local_scores = GetlDDTPerResidueStats(model, glob_dist_list, settings.structural_checks, settings.label);
+    PrintlDDTPerResidueStats(local_scores, settings.structural_checks, settings.cutoffs.size());
   }
   return 0;
 }

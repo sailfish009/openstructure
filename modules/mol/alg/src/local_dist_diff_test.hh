@@ -20,11 +20,25 @@
 #define OST_MOL_ALG_LOCAL_DIST_TEST_HH
 
 #include <ost/mol/alg/module_config.hh>
+#include <ost/mol/entity_handle.hh>
 #include <ost/seq/alignment_handle.hh>
 #include <ost/mol/alg/distance_test_common.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 
 namespace ost { namespace mol { namespace alg {
+
+struct StereoChemicalProps
+{
+  bool is_valid;
+  ost::mol::alg::StereoChemicalParams bond_table;
+  ost::mol::alg::StereoChemicalParams angle_table;
+  ost::mol::alg::ClashingDistances nonbonded_table;
+
+  StereoChemicalProps();
+  StereoChemicalProps(ost::mol::alg::StereoChemicalParams& init_bond_table,
+                      ost::mol::alg::StereoChemicalParams& init_angle_table,
+                      ost::mol::alg::ClashingDistances& init_nonbonded_table);
+};
 
 struct lDDTSettings {
   Real bond_tolerance;
@@ -32,7 +46,6 @@ struct lDDTSettings {
   Real radius; 
   int sequence_separation;
   String sel;
-  String parameter_file_path;
   bool structural_checks;
   bool consistency_checks;
   std::vector<Real> cutoffs;
@@ -44,12 +57,10 @@ struct lDDTSettings {
                Real init_radius, 
                int init_sequence_separation,
                String init_sel,
-               String init_parameter_file_path,
                bool init_structural_checks,
                bool init_consistency_checks,
                std::vector<Real>& init_cutoffs,
                String init_label);
-  void SetStereoChemicalParamsPath(const String& path="");
   void PrintParameters();
   std::string ToString();
 };
@@ -76,8 +87,51 @@ struct lDDTLocalScore {
                  int init_total_dist);
 
   String ToString(bool structural_checks) const;
+  String Repr() const;
 
   static String GetHeader(bool structural_checks, int cutoffs_length);
+};
+
+class lDDTScorer
+{
+  public:
+    lDDTSettings settings;
+    ost::mol::EntityHandle model;
+    std::vector<EntityHandle> references;
+    EntityView model_view;
+    std::vector<EntityView> references_view;
+    GlobalRDMap glob_dist_list;
+    StereoChemicalProps stereochemical_params;
+
+    lDDTScorer(std::vector<EntityHandle>& init_references,
+               ost::mol::EntityHandle& init_model,
+               lDDTSettings& init_settings);
+    lDDTScorer(std::vector<EntityHandle>& init_references,
+               ost::mol::EntityHandle& init_model,
+               lDDTSettings& init_settings,
+               StereoChemicalProps& init_stereochemical_params);
+    Real GetGlobalScore();
+    std::vector<lDDTLocalScore> GetLocalScores();
+    int GetNumConservedResidues(); // number of conserved distances in the model
+    int GetNumTotalResidues(); // the number of total distances in the reference structure
+    void PrintPerResidueStats();
+    bool IsValid();
+
+  private:
+    bool _score_calculated;
+    bool _score_valid;
+    bool _has_local_scores;
+    // number of conserved distances in the model and
+    // the number of total distances in the reference structure
+    int _num_con_res;
+    int _num_tot_res;
+    Real _global_score;
+    std::vector<lDDTLocalScore> _local_scores;
+    void _ComputelDDT();
+    void _GetLocallDDT();
+    void _CheckConsistency();
+    void _PrepareReferences();
+    void _PrepareGlobalRDMap();
 };
 
 std::pair<int,int> DLLEXPORT_OST_MOL_ALG ComputeCoverage(const EntityView& v,const GlobalRDMap& glob_dist_list);
@@ -205,7 +259,9 @@ void DLLEXPORT_OST_MOL_ALG CleanlDDTReferences(std::vector<EntityView>& ref_list
 // Prepare GlobalRDMap from reference list
 GlobalRDMap DLLEXPORT_OST_MOL_ALG PreparelDDTGlobalRDMap(
     const std::vector<EntityView>& ref_list,
-    lDDTSettings& settings);
+    std::vector<Real>& cutoff_list,
+    int sequence_separation,
+    Real max_dist);
 
 void DLLEXPORT_OST_MOL_ALG CheckStructure(EntityView& ent,
                                           StereoChemicalParams& bond_table,
@@ -216,10 +272,12 @@ void DLLEXPORT_OST_MOL_ALG CheckStructure(EntityView& ent,
 
 std::vector<lDDTLocalScore> DLLEXPORT_OST_MOL_ALG GetlDDTPerResidueStats(EntityHandle& model,
                                               GlobalRDMap& glob_dist_list,
-                                              lDDTSettings& settings);
+                                              bool structural_checks,
+                                              String label);
 
 void DLLEXPORT_OST_MOL_ALG PrintlDDTPerResidueStats(std::vector<lDDTLocalScore>& scores,
-                                                    lDDTSettings& settings);
+                                                    bool structural_checks,
+                                                    int cutoffs_length);
 
 }}}
 

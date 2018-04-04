@@ -20,20 +20,13 @@
 #define OST_IO_STEREOCHEMICAL_PARAMS_READER_H
 
 #include <ost/io/module_config.hh>
-#include <ost/mol/alg/filter_clashes.hh>
+#include <ost/mol/alg/local_dist_diff_test.hh>
 
 namespace ost { namespace io {
 
-struct StereoChemicalParamsReader {
-  String filename;
-  ost::mol::alg::StereoChemicalParams bond_table;
-  ost::mol::alg::StereoChemicalParams angle_table;
-  ost::mol::alg::ClashingDistances nonbonded_table;
-
-  StereoChemicalParamsReader();
-  StereoChemicalParamsReader(const String& filename);
-  void Read(bool check=false);
-};
+ost::mol::alg::StereoChemicalProps ReadStereoChemicalPropsFile(String filename, bool check=false);
+ost::mol::alg::StereoChemicalProps ReadStereoChemicalPropsFile(bool check=false);
+String GetStereoChemicalPropsFile();
 
 }} // ns
 
