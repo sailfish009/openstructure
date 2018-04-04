@@ -527,8 +527,8 @@ lDDTScorer::lDDTScorer(std::vector<EntityHandle>& init_references,
   _score_calculated(false),
   _score_valid(false),
   _has_local_scores(false),
-  _num_con_res(-1),
-  _num_tot_res(-1),
+  _num_cons_con(-1),
+  _num_tot_con(-1),
   _global_score(-1.0)
   {
     model_view = model.GetChainList()[0].Select("peptide=true");
@@ -566,8 +566,8 @@ lDDTScorer::lDDTScorer(std::vector<EntityHandle>& init_references,
   _score_calculated(false),
   _score_valid(false),
   _has_local_scores(false),
-  _num_con_res(-1),
-  _num_tot_res(-1),
+  _num_cons_con(-1),
+  _num_tot_con(-1),
   _global_score(-1.0) {
     model_view = model.GetChainList()[0].Select("peptide=true");
     _PrepareReferences();
@@ -600,18 +600,18 @@ Real lDDTScorer::GetGlobalScore(){
   return _global_score;
 }
 
-int lDDTScorer::GetNumConservedResidues(){
+int lDDTScorer::GetNumConservedContacts(){
   if (!_score_calculated) {
     _ComputelDDT();
   }
-  return _num_con_res;
+  return _num_cons_con;
 }
 
-int lDDTScorer::GetNumTotalResidues(){
+int lDDTScorer::GetNumTotalContacts(){
   if (!_score_calculated) {
     _ComputelDDT();
   }
-  return _num_tot_res;
+  return _num_tot_con;
 }
 
 std::vector<lDDTLocalScore> lDDTScorer::GetLocalScores(){
@@ -685,8 +685,8 @@ void lDDTScorer::_ComputelDDT(){
 
   if (cov.first == 0) {
     std::cout << "Global LDDT score: 0.0" << std::endl;
-    _num_tot_res = 0;
-    _num_con_res = 0;
+    _num_tot_con = 0;
+    _num_cons_con = 0;
     _global_score = 0.0;
     _score_calculated = true;
     _score_valid = false;
@@ -697,8 +697,8 @@ void lDDTScorer::_ComputelDDT(){
   std::cout << "Global LDDT score: " << std::setprecision(4) << lddt << std::endl;
   std::cout << "(" << std::fixed << total_ov.first << " conserved distances out of " << total_ov.second
             << " checked, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
-  _num_tot_res = total_ov.second ? total_ov.second : 1;
-  _num_con_res = total_ov.first;
+  _num_tot_con = total_ov.second ? total_ov.second : 1;
+  _num_cons_con = total_ov.first;
   _global_score = lddt;
   _score_calculated = true;
   _score_valid = true;

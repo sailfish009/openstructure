@@ -112,8 +112,8 @@ class lDDTScorer
                StereoChemicalProps& init_stereochemical_params);
     Real GetGlobalScore();
     std::vector<lDDTLocalScore> GetLocalScores();
-    int GetNumConservedResidues(); // number of conserved distances in the model
-    int GetNumTotalResidues(); // the number of total distances in the reference structure
+    int GetNumConservedContacts(); // number of conserved distances in the model
+    int GetNumTotalContacts(); // the number of total distances in the reference structure
     void PrintPerResidueStats();
     bool IsValid();
 
@@ -123,8 +123,8 @@ class lDDTScorer
     bool _has_local_scores;
     // number of conserved distances in the model and
     // the number of total distances in the reference structure
-    int _num_con_res;
-    int _num_tot_res;
+    int _num_cons_con;
+    int _num_tot_con;
     Real _global_score;
     std::vector<lDDTLocalScore> _local_scores;
     void _ComputelDDT();

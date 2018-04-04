@@ -161,9 +161,6 @@ class QSscorer:
     self._global_score = None
     self._best_score = None
     self._superposition = None
-    self._lddt_score = None
-    self._lddt_mdl = None
-    self._lddt_ref = None
     self._clustalw_bin = None
 
   @property
@@ -435,65 +432,6 @@ class QSscorer:
     return self._superposition
 
   @property
-  def lddt_score(self):
-    """The multi-chain lDDT score.
-
-    .. note::
-
-      lDDT is not considering over-prediction (i.e. extra chains) and hence is
-      not symmetric. Here, we consider :attr:`qs_ent_1` as the reference and
-      :attr:`qs_ent_2` as the model. The alignments from :attr:`alignments` are
-      used to map residue numbers and chains.
-
-    The score is computed with OST's :func:`~ost.mol.alg.LocalDistDiffTest`
-    function with a single distance threshold of 2 A and an inclusion radius of
-    8 A. You can use :attr:`lddt_mdl` and :attr:`lddt_ref` to get entities on
-    which you can call any other lDDT function with any other set of parameters.
-
-    :getter: Computed on first use (cached)
-    :type: :class:`float`
-    """
-    if self._lddt_score is None:
-      self._ComputeLDDT()
-    return self._lddt_score
-
-  @property
-  def lddt_mdl(self):
-    """The model entity used for lDDT scoring (:attr:`lddt_score`) and annotated
-    with local scores.
-
-    Local scores are available as residue properties named 'lddt' and on each
-    atom as a B-factor. Only CA atoms are considered if :attr:`calpha_only` is
-    True, otherwise this is an all-atom score.
-    
-    Since, the lDDT computation requires a single chain with mapped residue
-    numbering, all chains are appended into a single chain X with unique residue
-    numbers according to the column-index in the alignment. The alignments are
-    in the same order as they appear in :attr:`alignments`. Additional residues
-    are appended at the end of the chain with unique residue numbers.
-
-    :getter: Computed on first use (cached)
-    :type: :class:`~ost.mol.EntityHandle`
-    """
-    if self._lddt_mdl is None:
-      self._ComputeLDDT()
-    return self._lddt_mdl
-
-  @property
-  def lddt_ref(self):
-    """The reference entity used for lDDT scoring (:attr:`lddt_score`).
-
-    This is a single chain X with residue numbers matching ones in
-    :attr:`lddt_mdl` where aligned and unique numbers for additional residues.
-
-    :getter: Computed on first use (cached)
-    :type: :class:`~ost.mol.EntityHandle`
-    """
-    if self._lddt_ref is None:
-      self._ComputeLDDT()
-    return self._lddt_ref
-
-  @property
   def clustalw_bin(self):
     """
     Full path to ``clustalw`` or ``clustalw2`` executable to use for multiple
@@ -537,6 +475,8 @@ class QSscorer:
 
   def _ComputeScores(self):
     """Fills cached global_score and best_score."""
+    if self.qs_ent_1.is_monomer or self.qs_ent_2.is_monomer:
+      raise QSscoreError("QS-score is not defined for monomers")
     # get contacts
     if self.calpha_only:
       contacts_1 = self.qs_ent_1.contacts_ca
@@ -553,22 +493,6 @@ class QSscorer:
     LogInfo('QSscore %s, %s: best: %.2f, global: %.2f' \
             % (self.qs_ent_1.GetName(), self.qs_ent_2.GetName(),
                self._best_score, self._global_score))
-
-  def _ComputeLDDT(self):
-    """Fills cached lddt_score, lddt_mdl and lddt_ref."""
-    LogInfo('Computing lDDT score')
-    # check reference and model
-    ref, mdl = self.qs_ent_1.ent, self.qs_ent_2.ent
-    LogInfo('Reference %s has: %s chains' % (ref.GetName(), ref.chain_count))
-    LogInfo('Model %s has: %s chains' % (mdl.GetName(), mdl.chain_count))
-    if mdl.chain_count > ref.chain_count:
-      LogWarning('MODEL contains more chains than REFERENCE, '
-                 'lDDT is not considering them')
-    # get single chain reference and model
-    self._lddt_ref, self._lddt_mdl = \
-      _MergeAlignedChains(self.alignments, ref, mdl, self.calpha_only)
-    # score them (mdl and ref changed) and keep results
-    self._lddt_score = _ComputeLDDTScore(self._lddt_ref, self._lddt_mdl)
 
 
 ###############################################################################
@@ -627,6 +551,7 @@ class QSscoreEntity(object):
   def __init__(self, ent):
     # copy entity and process/clean it
     self.original_name = ent.GetName()
+    self.is_monomer = False
     ent = mol.CreateEntityFromView(ent.Select('ele!=H and aname!=HN'), True)
     if not conop.GetDefaultLib():
       raise RuntimeError("QSscore computation requires a compound library!")
@@ -639,9 +564,9 @@ class QSscoreEntity(object):
                'removing water, ligands and small peptides.')
       self.is_valid = False
     elif self.ent.chain_count == 1:
-      LogError('Structure ' + ent.GetName() + ' is a monomer. '
-               'QSscore is not defined for monomers.')
-      self.is_valid = False
+      LogWarning('Structure ' + ent.GetName() + ' is a monomer.')
+      self.is_valid = True
+      self.is_monomer = True
     else:
       self.is_valid = True
     # init cached stuff
@@ -899,6 +824,24 @@ def GetContacts(entity, calpha_only, dist_thr=12.0):
   return contacts
 
 
+def ComputeOligoLDDT(ref, mdl, alignments, calpha_only):
+  """Fills cached lddt_score, lddt_mdl and lddt_ref."""
+  LogInfo('Computing lDDT score')
+  LogInfo('Reference %s has: %s chains' % (ref.GetName(), ref.chain_count))
+  LogInfo('Model %s has: %s chains' % (mdl.GetName(), mdl.chain_count))
+  if mdl.chain_count > ref.chain_count:
+    LogWarning('MODEL contains more chains than REFERENCE, '
+               'lDDT is not considering them')
+  # get single chain reference and model
+  lddt_ref, lddt_mdl = _MergeAlignedChains(alignments,
+                                           ref,
+                                           mdl,
+                                           calpha_only)
+  # score them (mdl and ref changed) and keep results
+  oligo_lddt_score = _ComputeLDDTScore(lddt_ref, lddt_mdl)
+  return oligo_lddt_score
+
+
 ###############################################################################
 # HELPERS
 ###############################################################################
@@ -1130,8 +1073,8 @@ def _GetChemGroupsMapping(qs_ent_1, qs_ent_2):
   
   # check if we have any chains left
   LogInfo('Chemical chain-groups mapping: ' + str(chem_mapping))
-  if len(mapped_1) < 2 or len(mapped_2) < 2:
-    raise QSscoreError('Less than 2 chains left in chem_mapping.')
+  if len(mapped_1) < 1 or len(mapped_2) < 1:
+    raise QSscoreError('Less than 1 chains left in chem_mapping.')
   return chem_mapping
 
 def _SelectFew(l, max_elements):
@@ -2401,4 +2344,4 @@ def _ComputeLDDTScore(ref, mdl):
 
 # specify public interface
 __all__ = ('QSscoreError', 'QSscorer', 'QSscoreEntity', 'FilterContacts',
-           'GetContacts')
+           'GetContacts', 'ComputeOligoLDDT')

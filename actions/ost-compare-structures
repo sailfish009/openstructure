@@ -380,6 +380,17 @@ def _MolckEntity(entity, options):
     Molck(entity, lib, ms)
 
 
+def _AveragelDDT(scorers):
+    scores = [s.global_score for s in scorers]
+    weights = [s.total_contacts for s in scorers]
+    nominator = sum([s * w for s, w in zip(scores, weights)])
+    denominator = sum(weights)
+    if denominator > 0:
+        return nominator / float(denominator)
+    else:
+        return 0.0
+
+
 def _Main():
     """Do the magic."""
 
@@ -418,21 +429,20 @@ def _Main():
                 model_name,
                 reference_name))
             qs_scorer = qsscoring.QSscorer(reference, model)
+            if opts.chain_mapping is not None:
+                ost.LogInfo(
+                    "Using custom chain mapping: %s" % str(
+                        opts.chain_mapping))
+                qs_scorer.chain_mapping = opts.chain_mapping
             if opts.qs_score:
                 ost.LogInfo("Computing QS-score")
                 try:
-                    if opts.chain_mapping is not None:
-                        ost.LogInfo(
-                            "Using custom chain mapping: %s" % str(
-                                opts.chain_mapping))
-                        qs_scorer.chain_mapping = opts.chain_mapping
                     reference_results["qs_score"] = {
                         "status": "SUCCESS",
                         "error": "",
                         "model_name": model_name,
                         "reference_name": reference_name,
                         "global_score": qs_scorer.global_score,
-                        "oligo_lddt_score": qs_scorer.lddt_score,
                         "best_score": qs_scorer.best_score,
                         "chain_mapping": qs_scorer.chain_mapping
                     }
@@ -445,7 +455,6 @@ def _Main():
                         "model_name": model_name,
                         "reference_name": reference.GetName(),
                         "global_score": 0.0,
-                        "oligo_lddt_score": 0.0,
                         "best_score": 0.0,
                         "chain_mapping": None
                     }
@@ -468,8 +477,9 @@ def _Main():
                     opts.parameter_file)
                 if opts.verbosity > 3:
                     lddt_settings.PrintParameters()
-                # Perform scoring
+                # Perform single chain scoring
                 # Get chains from mapped alignments
+                lddt_scorers = list()
                 for aln in qs_scorer.alignments:
                     # Get chains and renumber according to alignment (for lDDT)
                     ch_ref = aln.GetSequence(0).GetName()
@@ -483,10 +493,54 @@ def _Main():
                         model=model,
                         settings=lddt_settings,
                         stereochemical_params=stereochemical_parameters)
-                    lddt_results["single_chain_lddt"].append({
-                        "model_chain": ch_mdl,
-                        "reference_chain": ch_ref,
-                        "global_score": lddt_scorer.global_score})
+                    try:
+                        lddt_results["single_chain_lddt"].append({
+                            "status": "SUCCESS",
+                            "error": "",
+                            "model_chain": ch_mdl,
+                            "reference_chain": ch_ref,
+                            "global_score": lddt_scorer.global_score,
+                            "conserved_contacts": lddt_scorer.conserved_contacts,
+                            "total_contacts": lddt_scorer.total_contacts})
+                    except Exception as ex:
+                        ost.LogError('Single chain lDDT failed:', str(ex))
+                        lddt_results["single_chain_lddt"].append({
+                            "status": "FAILURE",
+                            "error": str(ex),
+                            "model_chain": ch_mdl,
+                            "reference_chain": ch_ref,
+                            "global_score": 0.0,
+                            "conserved_contacts": 0.0,
+                            "total_contacts": 0.0})
+                    lddt_scorers.append(lddt_scorer)
+                # perform oligo lddt scoring
+                try:
+                    oligo_lddt = qsscoring.ComputeOligoLDDT(
+                        qs_scorer.qs_ent_1.ent,
+                        qs_scorer.qs_ent_2.ent,
+                        qs_scorer.alignments,
+                        qs_scorer.calpha_only)
+                    lddt_results["oligo_lddt"] = {
+                        "status": "SUCCESS",
+                        "error": "",
+                        "global_score": oligo_lddt}
+                except Exception as ex:
+                    ost.LogError('Oligo lDDT failed:', str(ex))
+                    lddt_results["oligo_lddt"] = {
+                        "status": "FAILURE",
+                        "error": str(ex),
+                        "global_score": 0.0}
+                try:
+                    weighted_lddt = _AveragelDDT(lddt_scorers)
+                    lddt_results["weighted_lddt"] = {
+                        "status": "SUCCESS",
+                        "error": "",
+                        "global_score": weighted_lddt}
+                except Exception as ex:
+                    lddt_results["weighted_lddt"] = {
+                        "status": "FAILURE",
+                        "error": str(ex),
+                        "global_score": 0.0}
                 reference_results["lddt"] = lddt_results
             model_results[reference_name] = reference_results
         result["result"][model_name] = model_results
