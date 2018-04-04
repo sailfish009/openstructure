@@ -12,11 +12,10 @@ import argparse
 
 import ost
 from ost.io import (LoadPDB, LoadMMCIF, MMCifInfoBioUnit, MMCifInfo,
-                    MMCifInfoTransOp, StereoChemicalParamsReader)
+                    MMCifInfoTransOp, ReadStereoChemicalPropsFile)
 from ost import PushVerbosityLevel
-from ost.mol.alg import (qsscoring, Molck, MolckSettings, CleanlDDTReferences,
-                         PreparelDDTGlobalRDMap, lDDTSettings, CheckStructure,
-                         LocalDistDiffTest)
+from ost.mol.alg import (qsscoring, Molck, MolckSettings, lDDTSettings,
+                         lDDTScorer)
 from ost.conop import CompoundLib
 from ost.seq.alg.renumber import Renumber
 
@@ -220,7 +219,9 @@ def _ParseArgs():
         dest="sequence_separation",
         type=int,
         default=0,
-        help=("Sequence separation."))
+        help=("Sequence separation. Only distances between residues whose "
+              "separation is higher than the provided parameter are "
+              "considered when computing the score"))
     parser.add_argument(
         "-cc",
         "--consistency-checks",
@@ -363,22 +364,6 @@ def _ReadStructureFile(path):
     return entities
 
 
-def _ComputelDDT(model, references, settings):
-    CleanlDDTReferences(references)
-    rdmap = PreparelDDTGlobalRDMap(references, settings)
-    stereochemical_parameters = StereoChemicalParamsReader(
-        settings.parameter_file_path)
-    stereochemical_parameters.Read()
-    CheckStructure(ent=model,
-                   bond_table=stereochemical_parameters.bond_table,
-                   angle_table=stereochemical_parameters.angle_table,
-                   nonbonded_table=stereochemical_parameters.nonbonded_table,
-                   bond_tolerance=settings.bond_tolerance,
-                   angle_tolerance=settings.angle_tolerance)
-    global_score = LocalDistDiffTest(model, references, rdmap, settings)
-    return global_score
-
-
 def _MolckEntity(entity, options):
     """Molck the entity."""
     lib = CompoundLib.Load(options.compound_library)
@@ -417,14 +402,21 @@ def _Main():
         ost.LogInfo(
             "Multiple complexes detected. All combinations will be tried.")
 
-    result = {"result": []}
+    result = {
+        "result": {},
+        "options": vars(opts)}
+    result["options"]["cwd"] = os.path.abspath(os.getcwd())
     #
     # Perform scoring
     for model in models:
+        model_name = model.GetName()
+        model_results = dict()
         for reference in references:
+            reference_name = reference.GetName()
+            reference_results = dict()
             ost.LogInfo("#\nComparing %s to %s" % (
-                model.GetName(),
-                reference.GetName()))
+                model_name,
+                reference_name))
             qs_scorer = qsscoring.QSscorer(reference, model)
             if opts.qs_score:
                 ost.LogInfo("Computing QS-score")
@@ -434,42 +426,46 @@ def _Main():
                             "Using custom chain mapping: %s" % str(
                                 opts.chain_mapping))
                         qs_scorer.chain_mapping = opts.chain_mapping
-                    result["result"].append({
+                    reference_results["qs_score"] = {
                         "status": "SUCCESS",
                         "error": "",
-                        "model_name": model.GetName(),
-                        "reference_name": reference.GetName(),
+                        "model_name": model_name,
+                        "reference_name": reference_name,
                         "global_score": qs_scorer.global_score,
-                        "lddt_score": qs_scorer.lddt_score,
+                        "oligo_lddt_score": qs_scorer.lddt_score,
                         "best_score": qs_scorer.best_score,
                         "chain_mapping": qs_scorer.chain_mapping
-                    })
+                    }
                 except qsscoring.QSscoreError as ex:
                     # default handling: report failure and set score to 0
                     ost.LogError('QSscore failed:', str(ex))
-                    result["result"].append({
+                    reference_results["qs-score"] = {
                         "status": "FAILURE",
                         "error": str(ex),
-                        "model_name": model.GetName(),
+                        "model_name": model_name,
                         "reference_name": reference.GetName(),
                         "global_score": 0.0,
-                        "lddt_score": 0.0,
+                        "oligo_lddt_score": 0.0,
                         "best_score": 0.0,
                         "chain_mapping": None
-                    })
+                    }
             # Calculate lDDT
             if opts.lddt:
                 ost.LogInfo("Computing lDDT")
+                lddt_results = {
+                    "single_chain_lddt": list()
+                }
                 lddt_settings = lDDTSettings(
                     bond_tolerance=opts.bond_tolerance,
                     angle_tolerance=opts.angle_tolerance,
                     radius=opts.inclusion_radius,
                     sequence_separation=opts.sequence_separation,
                     sel=opts.selection,
-                    parameter_file_path=opts.parameter_file,
                     structural_checks=opts.structural_checks,
                     consistency_checks=opts.consistency_checks,
                     label="lddt")
+                stereochemical_parameters = ReadStereoChemicalPropsFile(
+                    opts.parameter_file)
                 if opts.verbosity > 3:
                     lddt_settings.PrintParameters()
                 # Perform scoring
@@ -477,13 +473,23 @@ def _Main():
                 for aln in qs_scorer.alignments:
                     # Get chains and renumber according to alignment (for lDDT)
                     ch_ref = aln.GetSequence(0).GetName()
-                    reference_view = Renumber(
-                        aln.GetSequence(0)).CreateFullView()
+                    reference = Renumber(aln.GetSequence(0))
                     ch_mdl = aln.GetSequence(1).GetName()
-                    model_view = Renumber(aln.GetSequence(1)).CreateFullView()
+                    model = Renumber(aln.GetSequence(1))
                     ost.LogInfo(("Computing lDDT between model chain %s and "
                                  "reference chain %s") % (ch_mdl, ch_ref))
-                    _ComputelDDT(model_view, [reference_view], lddt_settings)
+                    lddt_scorer = lDDTScorer(
+                        references=[reference],
+                        model=model,
+                        settings=lddt_settings,
+                        stereochemical_params=stereochemical_parameters)
+                    lddt_results["single_chain_lddt"].append({
+                        "model_chain": ch_mdl,
+                        "reference_chain": ch_ref,
+                        "global_score": lddt_scorer.global_score})
+                reference_results["lddt"] = lddt_results
+            model_results[reference_name] = reference_results
+        result["result"][model_name] = model_results
 
     if opts.output is not None:
         with open(opts.output, "w") as outfile:

@@ -159,7 +159,7 @@ def _Main():
                     "model_name": model.GetName(),
                     "reference_name": reference.GetName(),
                     "global_score": qs_scorer.global_score,
-                    "lddt_score": qs_scorer.lddt_score,
+                    "oligo_lddt_score": qs_scorer.lddt_score,
                     "best_score": qs_scorer.best_score,
                     "chain_mapping": qs_scorer.chain_mapping
                 })
@@ -172,7 +172,7 @@ def _Main():
                     "model_name": model.GetName(),
                     "reference_name": reference.GetName(),
                     "global_score": 0.0,
-                    "lddt_score": 0.0,
+                    "oligo_lddt_score": 0.0,
                     "best_score": 0.0,
                     "chain_mapping": None
                 })
