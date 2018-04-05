@@ -475,7 +475,7 @@ class QSscorer:
 
   def _ComputeScores(self):
     """Fills cached global_score and best_score."""
-    if self.qs_ent_1.is_monomer or self.qs_ent_2.is_monomer:
+    if len(self.chain_mapping) < 2:
       raise QSscoreError("QS-score is not defined for monomers")
     # get contacts
     if self.calpha_only:
@@ -551,7 +551,6 @@ class QSscoreEntity(object):
   def __init__(self, ent):
     # copy entity and process/clean it
     self.original_name = ent.GetName()
-    self.is_monomer = False
     ent = mol.CreateEntityFromView(ent.Select('ele!=H and aname!=HN'), True)
     if not conop.GetDefaultLib():
       raise RuntimeError("QSscore computation requires a compound library!")
@@ -566,7 +565,6 @@ class QSscoreEntity(object):
     elif self.ent.chain_count == 1:
       LogWarning('Structure ' + ent.GetName() + ' is a monomer.')
       self.is_valid = True
-      self.is_monomer = True
     else:
       self.is_valid = True
     # init cached stuff
@@ -824,22 +822,51 @@ def GetContacts(entity, calpha_only, dist_thr=12.0):
   return contacts
 
 
-def ComputeOligoLDDT(ref, mdl, alignments, calpha_only):
-  """Fills cached lddt_score, lddt_mdl and lddt_ref."""
-  LogInfo('Computing lDDT score')
-  LogInfo('Reference %s has: %s chains' % (ref.GetName(), ref.chain_count))
-  LogInfo('Model %s has: %s chains' % (mdl.GetName(), mdl.chain_count))
-  if mdl.chain_count > ref.chain_count:
-    LogWarning('MODEL contains more chains than REFERENCE, '
-               'lDDT is not considering them')
-  # get single chain reference and model
-  lddt_ref, lddt_mdl = _MergeAlignedChains(alignments,
-                                           ref,
-                                           mdl,
-                                           calpha_only)
-  # score them (mdl and ref changed) and keep results
-  oligo_lddt_score = _ComputeLDDTScore(lddt_ref, lddt_mdl)
-  return oligo_lddt_score
+class OligoLDDTScorer(object):
+  """A simple class to calculate oligomeric lDDT score."""
+
+  def __init__(self, ref, mdl, alignments, calpha_only):
+    if mdl.chain_count > ref.chain_count:
+      LogWarning('MODEL contains more chains than REFERENCE, '
+                 'lDDT is not considering them')
+    # get single chain reference and model
+    self.ref = ref
+    self.mdl = mdl
+    self.calpha_only = calpha_only
+    self.alignments = alignments
+    self._lddt = None
+    self._lddt_ref = None
+    self._lddt_mdl = None
+
+  @property
+  def lddt_ref(self):
+    if self._lddt_ref is None:
+      self._lddt_ref, self._lddt_mdl = _MergeAlignedChains(self.alignments,
+                                                           self.ref,
+                                                           self.mdl,
+                                                           self.calpha_only)
+    return self._lddt_ref
+
+  @property
+  def lddt_mdl(self):
+    if self._lddt_mdl is None:
+      self._lddt_ref, self._lddt_mdl = _MergeAlignedChains(self.alignments,
+                                                           self.ref,
+                                                           self.mdl,
+                                                           self.calpha_only)
+    return self._lddt_mdl
+
+  @property
+  def lddt(self):
+    """Fills cached lddt_score, lddt_mdl and lddt_ref."""
+    if self._lddt is None:
+      LogInfo('Computing oligomeric lDDT score')
+      LogInfo('Reference %s has: %s chains' % (self.ref.GetName(), self.ref.chain_count))
+      LogInfo('Model %s has: %s chains' % (self.mdl.GetName(), self.mdl.chain_count))
+
+      # score them (mdl and ref changed) and keep results
+      self._lddt = _ComputeLDDTScore(self.lddt_ref, self.lddt_mdl)
+    return self._lddt
 
 
 ###############################################################################
@@ -2344,4 +2371,4 @@ def _ComputeLDDTScore(ref, mdl):
 
 # specify public interface
 __all__ = ('QSscoreError', 'QSscorer', 'QSscoreEntity', 'FilterContacts',
-           'GetContacts', 'ComputeOligoLDDT')
+           'GetContacts', 'OligoLDDTScorer')

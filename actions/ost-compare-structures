@@ -515,7 +515,7 @@ def _Main():
                     lddt_scorers.append(lddt_scorer)
                 # perform oligo lddt scoring
                 try:
-                    oligo_lddt = qsscoring.ComputeOligoLDDT(
+                    oligo_lddt_scorer = qsscoring.OligoLDDTScorer(
                         qs_scorer.qs_ent_1.ent,
                         qs_scorer.qs_ent_2.ent,
                         qs_scorer.alignments,
@@ -523,7 +523,7 @@ def _Main():
                     lddt_results["oligo_lddt"] = {
                         "status": "SUCCESS",
                         "error": "",
-                        "global_score": oligo_lddt}
+                        "global_score": oligo_lddt_scorer.lddt}
                 except Exception as ex:
                     ost.LogError('Oligo lDDT failed:', str(ex))
                     lddt_results["oligo_lddt"] = {
