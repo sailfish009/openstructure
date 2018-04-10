@@ -19,6 +19,7 @@ Authors: Gerardo Tauriello, Martino Bertoni
 from ost import mol, geom, conop, seq, settings
 from ost import LogError, LogWarning, LogScript, LogInfo, LogVerbose, LogDebug
 from ost.bindings.clustalw import ClustalW
+from ost.mol.alg import lDDTScorer
 import numpy as np
 from scipy.misc import factorial
 from scipy.special import binom
@@ -126,7 +127,7 @@ class QSscorer:
 
     :type: :class:`int`
   """
-  def __init__(self, ent_1, ent_2):
+  def __init__(self, ent_1, ent_2, res_num_alignment=False):
     # generate QSscoreEntity objects?
     if isinstance(ent_1, QSscoreEntity):
       self.qs_ent_1 = ent_1
@@ -147,6 +148,7 @@ class QSscorer:
       self.qs_ent_1.SetName(self.qs_ent_1.original_name)
       self.qs_ent_2.SetName(self.qs_ent_2.original_name)
     # set other public attributes
+    self.res_num_alignment = res_num_alignment
     self.calpha_only = self.qs_ent_1.calpha_only or self.qs_ent_2.calpha_only
     self.max_ca_per_chain_for_cm = 100
     # init cached stuff
@@ -361,7 +363,8 @@ class QSscorer:
     if self._alignments is None:
       self._alignments = _GetMappedAlignments(self.qs_ent_1.ent,
                                               self.qs_ent_2.ent,
-                                              self.chain_mapping)
+                                              self.chain_mapping,
+                                              self.res_num_alignment)
     return self._alignments
 
   @property
@@ -825,7 +828,7 @@ def GetContacts(entity, calpha_only, dist_thr=12.0):
 class OligoLDDTScorer(object):
   """A simple class to calculate oligomeric lDDT score."""
 
-  def __init__(self, ref, mdl, alignments, calpha_only):
+  def __init__(self, ref, mdl, alignments, calpha_only, settings, stereochemical_params):
     if mdl.chain_count > ref.chain_count:
       LogWarning('MODEL contains more chains than REFERENCE, '
                  'lDDT is not considering them')
@@ -834,9 +837,16 @@ class OligoLDDTScorer(object):
     self.mdl = mdl
     self.calpha_only = calpha_only
     self.alignments = alignments
+    self.settings = settings
+    self.stereochemical_params = stereochemical_params
     self._lddt = None
     self._lddt_ref = None
     self._lddt_mdl = None
+    self.scorer = lDDTScorer(
+      references=[self.lddt_ref],
+      model=self.lddt_mdl,
+      settings=self.settings,
+      stereochemical_params=self.stereochemical_params)
 
   @property
   def lddt_ref(self):
@@ -865,7 +875,7 @@ class OligoLDDTScorer(object):
       LogInfo('Model %s has: %s chains' % (self.mdl.GetName(), self.mdl.chain_count))
 
       # score them (mdl and ref changed) and keep results
-      self._lddt = _ComputeLDDTScore(self.lddt_ref, self.lddt_mdl)
+      self._lddt = self.scorer.global_score
     return self._lddt
 
 
@@ -2057,7 +2067,7 @@ def _AreValidSymmetries(symm_1, symm_2):
       return False
   return True
 
-def _GetMappedAlignments(ent_1, ent_2, chain_mapping):
+def _GetMappedAlignments(ent_1, ent_2, chain_mapping, res_num_alignment=True):
   """
   :return: Alignments of 2 structures given chain mapping
            (see :attr:`QSscorer.alignments`).
@@ -2067,16 +2077,37 @@ def _GetMappedAlignments(ent_1, ent_2, chain_mapping):
                 Views to this entity attached to second sequence of each aln.
   :param chain_mapping: See :attr:`QSscorer.chain_mapping`
   """
-  alns = []
+  alns = list()
   for ch_1_name in sorted(chain_mapping):
     # get both sequences incl. attached view
     ch_1 = ent_1.FindChain(ch_1_name)
-    seq_1 = seq.SequenceFromChain(ch_1.name, ch_1)
     ch_2 = ent_2.FindChain(chain_mapping[ch_1_name])
-    seq_2 = seq.SequenceFromChain(ch_2.name, ch_2)
-    # align them
-    aln = _AlignAtomSeqs(seq_1, seq_2)
-    if aln: alns.append(aln)
+    if res_num_alignment:
+      max_res_num = max([r.number.GetNum() for r in ch_1.residues] +
+                        [r.number.GetNum() for r in ch_2.residues])
+      ch1_aln = ["-"] * max_res_num
+      ch2_aln = ["-"] * max_res_num
+      for res in ch_1.residues:
+        ch1_aln[res.number.GetNum() - 1] = res.GetOneLetterCode()
+      ch1_aln = "".join(ch1_aln)
+      seq_1 = seq.CreateSequence(ch_1.name, str(ch1_aln))
+      seq_1.AttachView(ch_1.Select(""))
+      for res in ch_2.residues:
+        ch2_aln[res.number.GetNum() - 1] = res.GetOneLetterCode()
+      ch2_aln = "".join(ch2_aln)
+      seq_2 = seq.CreateSequence(ch_2.name, str(ch2_aln))
+      seq_2.AttachView(ch_2.Select(""))
+      # Create alignment
+      aln = seq.CreateAlignment()
+      aln.AddSequence(seq_1)
+      aln.AddSequence(seq_2)
+    else:
+      seq_1 = seq.SequenceFromChain(ch_1.name, ch_1)
+      seq_2 = seq.SequenceFromChain(ch_2.name, ch_2)
+      # align them
+      aln = _AlignAtomSeqs(seq_1, seq_2)
+    if aln:
+      alns.append(aln)
   return alns
 
 def _GetMappedResidues(alns):

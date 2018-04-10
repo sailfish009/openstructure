@@ -129,7 +129,7 @@ def _ParseArgs():
     # QS-score options
     #
     parser.add_argument(
-        "-q",
+        "-qs",
         "--qs-score",
         dest="qs_score",
         default=False,
@@ -145,6 +145,13 @@ def _ParseArgs():
               "Each separate mapping consist of key:value pairs where key "
               "is the chain name in model and value is the chain name in "
               "reference."))
+    parser.add_argument(
+        "-rna",
+        "--residue-number-alignment",
+        dest="residue_number_alignment",
+        default=False,
+        action="store_true",
+        help=("Make alignment based on residue number instead using Clustal."))
     #
     # lDDT options
     #
@@ -428,7 +435,9 @@ def _Main():
             ost.LogInfo("#\nComparing %s to %s" % (
                 model_name,
                 reference_name))
-            qs_scorer = qsscoring.QSscorer(reference, model)
+            qs_scorer = qsscoring.QSscorer(reference,
+                                           model,
+                                           opts.residue_number_alignment)
             if opts.chain_mapping is not None:
                 ost.LogInfo(
                     "Using custom chain mapping: %s" % str(
@@ -449,7 +458,7 @@ def _Main():
                 except qsscoring.QSscoreError as ex:
                     # default handling: report failure and set score to 0
                     ost.LogError('QSscore failed:', str(ex))
-                    reference_results["qs-score"] = {
+                    reference_results["qs_score"] = {
                         "status": "FAILURE",
                         "error": str(ex),
                         "model_name": model_name,
@@ -519,7 +528,9 @@ def _Main():
                         qs_scorer.qs_ent_1.ent,
                         qs_scorer.qs_ent_2.ent,
                         qs_scorer.alignments,
-                        qs_scorer.calpha_only)
+                        qs_scorer.calpha_only,
+                        lddt_settings,
+                        stereochemical_parameters)
                     lddt_results["oligo_lddt"] = {
                         "status": "SUCCESS",
                         "error": "",
