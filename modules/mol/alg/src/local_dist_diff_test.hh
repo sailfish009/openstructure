@@ -96,18 +96,16 @@ class lDDTScorer
 {
   public:
     lDDTSettings settings;
-    ost::mol::EntityHandle model;
-    std::vector<EntityHandle> references;
     EntityView model_view;
     std::vector<EntityView> references_view;
     GlobalRDMap glob_dist_list;
     StereoChemicalProps stereochemical_params;
 
-    lDDTScorer(std::vector<EntityHandle>& init_references,
-               ost::mol::EntityHandle& init_model,
+    lDDTScorer(std::vector<EntityView>& init_references,
+               ost::mol::EntityView& init_model,
                lDDTSettings& init_settings);
-    lDDTScorer(std::vector<EntityHandle>& init_references,
-               ost::mol::EntityHandle& init_model,
+    lDDTScorer(std::vector<EntityView>& init_references,
+               ost::mol::EntityView& init_model,
                lDDTSettings& init_settings,
                StereoChemicalProps& init_stereochemical_params);
     Real GetGlobalScore();
@@ -127,10 +125,11 @@ class lDDTScorer
     int _num_tot_con;
     Real _global_score;
     std::vector<lDDTLocalScore> _local_scores;
+    void _Init();
     void _ComputelDDT();
     void _GetLocallDDT();
     void _CheckConsistency();
-    void _PrepareReferences();
+    void _PrepareReferences(std::vector<EntityHandle>& references);
     void _PrepareGlobalRDMap();
 };
 
@@ -270,7 +269,7 @@ void DLLEXPORT_OST_MOL_ALG CheckStructure(EntityView& ent,
                                           Real bond_tolerance,
                                           Real angle_tolerance);
 
-std::vector<lDDTLocalScore> DLLEXPORT_OST_MOL_ALG GetlDDTPerResidueStats(EntityHandle& model,
+std::vector<lDDTLocalScore> DLLEXPORT_OST_MOL_ALG GetlDDTPerResidueStats(EntityView& model,
                                               GlobalRDMap& glob_dist_list,
                                               bool structural_checks,
                                               String label);

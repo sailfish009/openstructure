@@ -211,21 +211,21 @@ object lDDTScorerInitWrapper(tuple args, dict kwargs){
   object self = args[0];
   args = tuple(args.slice(1, len(args)));
 
-  std::vector<ost::mol::EntityHandle> reference_list_vector;
+  std::vector<ost::mol::EntityView> reference_list_vector;
   if(kwargs.contains("references")){
     list reference_list = boost::python::extract<list>(kwargs["references"]);
     int reference_list_length = boost::python::extract<int>(reference_list.attr("__len__")());
     for (int i=0; i<reference_list_length; i++) {
-      reference_list_vector.push_back(boost::python::extract<ost::mol::EntityHandle>(reference_list[i]));
+      reference_list_vector.push_back(boost::python::extract<ost::mol::EntityView>(reference_list[i]));
     }
     kwargs["references"].del();
   } else {
     throw std::invalid_argument("'references' argument is required");
   }
 
-  ost::mol::EntityHandle model;
+  ost::mol::EntityView model;
   if(kwargs.contains("model")){
-    model = boost::python::extract<ost::mol::EntityHandle>(kwargs["model"]);
+    model = boost::python::extract<ost::mol::EntityView>(kwargs["model"]);
     kwargs["model"].del();
   } else {
     throw std::invalid_argument("'model' argument is required");
@@ -294,7 +294,7 @@ ost::mol::alg::GlobalRDMap prepare_lddt_global_rdmap_wrapper(const list& referen
  return mol::alg::PreparelDDTGlobalRDMap(reference_list_vector, cutoff_list_vector, sequence_separation, max_dist);
 }
 
-list get_lddt_per_residue_stats_wrapper(mol::EntityHandle& model,
+list get_lddt_per_residue_stats_wrapper(mol::EntityView& model,
                                         ost::mol::alg::GlobalRDMap& distance_list,
                                         bool structural_checks,
                                         String label) {
@@ -424,7 +424,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
 
   class_<mol::alg::lDDTScorer>("lDDTScorer", no_init)
       .def("__init__", raw_function(lDDTScorerInitWrapper))
-      .def(init<std::vector<mol::EntityHandle>&, mol::EntityHandle&, mol::alg::lDDTSettings&, mol::alg::StereoChemicalProps&>())
+      .def(init<std::vector<mol::EntityView>&, mol::EntityView&, mol::alg::lDDTSettings&, mol::alg::StereoChemicalProps&>())
       .add_property("global_score", &mol::alg::lDDTScorer::GetGlobalScore)
       .add_property("conserved_contacts", &mol::alg::lDDTScorer::GetNumConservedContacts)
       .add_property("total_contacts", &mol::alg::lDDTScorer::GetNumTotalContacts)

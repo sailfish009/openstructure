@@ -356,7 +356,8 @@ int main (int argc, char **argv)
 
     // prints the residue-by-residue statistics
     std::vector<lDDTLocalScore> local_scores;
-    local_scores = GetlDDTPerResidueStats(model, glob_dist_list, settings.structural_checks, settings.label);
+    EntityView outview = model.GetChainList()[0].Select("peptide=true");
+    local_scores = GetlDDTPerResidueStats(outview, glob_dist_list, settings.structural_checks, settings.label);
     PrintlDDTPerResidueStats(local_scores, settings.structural_checks, settings.cutoffs.size());
   }
   return 0;

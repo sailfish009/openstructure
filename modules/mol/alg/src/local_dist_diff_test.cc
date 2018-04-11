@@ -517,81 +517,56 @@ String lDDTLocalScore::GetHeader(bool structural_checks, int cutoffs_length) {
   return outstr.str();
 }
 
-
-lDDTScorer::lDDTScorer(std::vector<EntityHandle>& init_references,
-                       ost::mol::EntityHandle& init_model,
+lDDTScorer::lDDTScorer(std::vector<EntityView>& init_references,
+                       ost::mol::EntityView& init_model,
                        lDDTSettings& init_settings):
-  references(init_references),
-  model(init_model),
   settings(init_settings),
-  _score_calculated(false),
-  _score_valid(false),
-  _has_local_scores(false),
-  _num_cons_con(-1),
-  _num_tot_con(-1),
-  _global_score(-1.0)
+  references_view(init_references),
+  model_view(init_model)
   {
-    model_view = model.GetChainList()[0].Select("peptide=true");
-    _PrepareReferences();
-    _PrepareGlobalRDMap();
-    if (settings.structural_checks) {
-      if (!stereochemical_params.is_valid) {
-        throw std::runtime_error(
-          "Structural checks are ON. Please provide stereochemical_params to enable structural checks.");
-      }
-      try {
-        CheckStructure(model_view,
-                       stereochemical_params.bond_table,
-                       stereochemical_params.angle_table,
-                       stereochemical_params.nonbonded_table,
-                       settings.bond_tolerance,
-                       settings.angle_tolerance);
-      } catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
-        std::stringstream errstr;
-        errstr << "Structure check failed: " << e.what();
-        throw std::runtime_error(errstr.str());
-      }
-    }   
+    _Init();   
   }
 
-lDDTScorer::lDDTScorer(std::vector<EntityHandle>& init_references,
-                       ost::mol::EntityHandle& init_model,
+lDDTScorer::lDDTScorer(std::vector<EntityView>& init_references,
+                       ost::mol::EntityView& init_model,
                        lDDTSettings& init_settings,
                        StereoChemicalProps& init_stereochemical_params):
-  references(init_references),
-  model(init_model),
   settings(init_settings),
-  stereochemical_params(init_stereochemical_params),
-  _score_calculated(false),
-  _score_valid(false),
-  _has_local_scores(false),
-  _num_cons_con(-1),
-  _num_tot_con(-1),
-  _global_score(-1.0) {
-    model_view = model.GetChainList()[0].Select("peptide=true");
-    _PrepareReferences();
-    _PrepareGlobalRDMap();
-    if (settings.structural_checks) {
-      if (!stereochemical_params.is_valid) {
-        throw std::runtime_error(
-          "Please provide stereochemical_params to enable structural_checks.");
-      }
-      try {
-        CheckStructure(model_view,
-                       stereochemical_params.bond_table,
-                       stereochemical_params.angle_table,
-                       stereochemical_params.nonbonded_table,
-                       settings.bond_tolerance,
-                       settings.angle_tolerance);
-      } catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
-        std::stringstream errstr;
-        errstr << "Structure check failed: " << e.what();
-        throw std::runtime_error(errstr.str());
-      }
-    }    
+  references_view(init_references),
+  model_view(init_model),
+  stereochemical_params(init_stereochemical_params) {
+    _Init(); 
   }
+
+void lDDTScorer::_Init(){
+  _score_calculated = false;
+  _score_valid = false;
+  _has_local_scores = false;
+  _num_cons_con = -1;
+  _num_tot_con = -1;
+  _global_score = -1.0;
+  CleanlDDTReferences(references_view);
+  _PrepareGlobalRDMap();
+  if (settings.structural_checks) {
+    if (!stereochemical_params.is_valid) {
+      throw std::runtime_error(
+        "Please provide stereochemical_params to enable structural_checks.");
+    }
+    try {
+      CheckStructure(model_view,
+                     stereochemical_params.bond_table,
+                     stereochemical_params.angle_table,
+                     stereochemical_params.nonbonded_table,
+                     settings.bond_tolerance,
+                     settings.angle_tolerance);
+    } catch (std::exception& e) {
+      std::cout << e.what() << std::endl;
+      std::stringstream errstr;
+      errstr << "Structure check failed: " << e.what();
+      throw std::runtime_error(errstr.str());
+    }
+  }
+}
 
 Real lDDTScorer::GetGlobalScore(){
   if (!_score_calculated) {
@@ -630,7 +605,7 @@ void lDDTScorer::PrintPerResidueStats(){
                            settings.cutoffs.size());
 }
 
-void lDDTScorer::_PrepareReferences(){
+void lDDTScorer::_PrepareReferences(std::vector<EntityHandle>& references){
   for (unsigned int i = 0; i < references.size(); i++) {
     if (settings.sel != ""){
       std::cout << "Performing \"" << settings.sel << "\" selection on reference " << references[i].GetName() << std::endl;
@@ -646,8 +621,6 @@ void lDDTScorer::_PrepareReferences(){
       references_view.push_back(references[i].CreateFullView());
     }
   }
-
-  CleanlDDTReferences(references_view);
 }
 
 void lDDTScorer::_PrepareGlobalRDMap(){
@@ -708,7 +681,7 @@ void lDDTScorer::_GetLocallDDT(){
   if (!_score_calculated){
     _ComputelDDT();
   }
-  _local_scores = GetlDDTPerResidueStats(model,
+  _local_scores = GetlDDTPerResidueStats(model_view,
                                          glob_dist_list,
                                          settings.structural_checks,
                                          settings.label);
@@ -1022,12 +995,12 @@ void CheckStructure(EntityView& ent,
   std::cout << "Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << clash_info.GetAverageOffset() << std::endl;
 }
 
-std::vector<lDDTLocalScore> GetlDDTPerResidueStats(EntityHandle& model,
+std::vector<lDDTLocalScore> GetlDDTPerResidueStats(EntityView& model,
                                                    GlobalRDMap& glob_dist_list,
                                                    bool structural_checks,
                                                    String label){
   std::vector<lDDTLocalScore> scores;
-  EntityView outv = model.GetChainList()[0].Select("peptide=true");
+  EntityView outv = model;
   for (ChainViewList::const_iterator ci = outv.GetChainList().begin(),
        ce = outv.GetChainList().end(); ci != ce; ++ci) {
     for (ResidueViewList::const_iterator rit = ci->GetResidueList().begin(),

@@ -828,7 +828,7 @@ def GetContacts(entity, calpha_only, dist_thr=12.0):
 class OligoLDDTScorer(object):
   """A simple class to calculate oligomeric lDDT score."""
 
-  def __init__(self, ref, mdl, alignments, calpha_only, settings, stereochemical_params):
+  def __init__(self, ref, mdl, alignments, calpha_only, settings):
     if mdl.chain_count > ref.chain_count:
       LogWarning('MODEL contains more chains than REFERENCE, '
                  'lDDT is not considering them')
@@ -838,15 +838,13 @@ class OligoLDDTScorer(object):
     self.calpha_only = calpha_only
     self.alignments = alignments
     self.settings = settings
-    self.stereochemical_params = stereochemical_params
     self._lddt = None
     self._lddt_ref = None
     self._lddt_mdl = None
     self.scorer = lDDTScorer(
-      references=[self.lddt_ref],
-      model=self.lddt_mdl,
-      settings=self.settings,
-      stereochemical_params=self.stereochemical_params)
+      references=[self.lddt_ref.Select("")],
+      model=self.lddt_mdl.Select(""),
+      settings=self.settings)
 
   @property
   def lddt_ref(self):

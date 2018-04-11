@@ -15,7 +15,7 @@ from ost.io import (LoadPDB, LoadMMCIF, MMCifInfoBioUnit, MMCifInfo,
                     MMCifInfoTransOp, ReadStereoChemicalPropsFile)
 from ost import PushVerbosityLevel
 from ost.mol.alg import (qsscoring, Molck, MolckSettings, lDDTSettings,
-                         lDDTScorer)
+                         lDDTScorer, CheckStructure)
 from ost.conop import CompoundLib
 from ost.seq.alg.renumber import Renumber
 
@@ -407,14 +407,34 @@ def _Main():
     # Read the input files
     ost.LogInfo("Reading model from %s" % opts.model)
     models = _ReadStructureFile(opts.model)
-    if opts.molck:
-        for model in models:
-            _MolckEntity(model, opts)
     ost.LogInfo("Reading reference from %s" % opts.reference)
     references = _ReadStructureFile(opts.reference)
     if opts.molck:
+        for i in range(len(references)):
+            _MolckEntity(references[i], opts)
+            references[i] = references[i].CreateFullView()
+        for i in range(len(models)):
+            _MolckEntity(models[i], opts)
+            models[i] = models[i].CreateFullView()
+    if opts.structural_checks:
+        stereochemical_parameters = ReadStereoChemicalPropsFile(
+            opts.parameter_file)
+        ost.LogInfo("Performing structural checks for reference(s)")
         for reference in references:
-            _MolckEntity(reference, opts)
+            CheckStructure(reference,
+                           stereochemical_parameters.bond_table,
+                           stereochemical_parameters.angle_table,
+                           stereochemical_parameters.nonbonded_table,
+                           opts.bond_tolerance,
+                           opts.angle_tolerance)
+        ost.LogInfo("Performing structural checks for model(s)")
+        for model in models:
+            CheckStructure(model,
+                           stereochemical_parameters.bond_table,
+                           stereochemical_parameters.angle_table,
+                           stereochemical_parameters.nonbonded_table,
+                           opts.bond_tolerance,
+                           opts.angle_tolerance)
 
     if len(models) > 1 or len(references) > 1:
         ost.LogInfo(
@@ -479,11 +499,9 @@ def _Main():
                     radius=opts.inclusion_radius,
                     sequence_separation=opts.sequence_separation,
                     sel=opts.selection,
-                    structural_checks=opts.structural_checks,
+                    structural_checks=False,
                     consistency_checks=opts.consistency_checks,
                     label="lddt")
-                stereochemical_parameters = ReadStereoChemicalPropsFile(
-                    opts.parameter_file)
                 if opts.verbosity > 3:
                     lddt_settings.PrintParameters()
                 # Perform single chain scoring
@@ -492,16 +510,15 @@ def _Main():
                 for aln in qs_scorer.alignments:
                     # Get chains and renumber according to alignment (for lDDT)
                     ch_ref = aln.GetSequence(0).GetName()
-                    reference = Renumber(aln.GetSequence(0))
+                    reference = Renumber(aln.GetSequence(0)).CreateFullView()
                     ch_mdl = aln.GetSequence(1).GetName()
-                    model = Renumber(aln.GetSequence(1))
+                    model = Renumber(aln.GetSequence(1)).CreateFullView()
                     ost.LogInfo(("Computing lDDT between model chain %s and "
                                  "reference chain %s") % (ch_mdl, ch_ref))
                     lddt_scorer = lDDTScorer(
                         references=[reference],
                         model=model,
-                        settings=lddt_settings,
-                        stereochemical_params=stereochemical_parameters)
+                        settings=lddt_settings)
                     try:
                         lddt_results["single_chain_lddt"].append({
                             "status": "SUCCESS",
@@ -529,8 +546,7 @@ def _Main():
                         qs_scorer.qs_ent_2.ent,
                         qs_scorer.alignments,
                         qs_scorer.calpha_only,
-                        lddt_settings,
-                        stereochemical_parameters)
+                        lddt_settings)
                     lddt_results["oligo_lddt"] = {
                         "status": "SUCCESS",
                         "error": "",
