@@ -315,6 +315,16 @@ list get_local_scores_wrapper(mol::alg::lDDTScorer& scorer) {
   return local_scores_list;
 }
 
+list get_references_wrapper(mol::alg::lDDTScorer& scorer) {
+  std::vector<mol::EntityView> references = scorer.GetReferences();
+  list local_references_list;
+  for (std::vector<mol::EntityView>::const_iterator sit = references.begin(); sit != references.end(); ++sit) {
+    local_references_list.append(*sit);
+  }
+  return local_references_list;
+}
+
+
 void print_lddt_per_residue_stats_wrapper(list& scores, bool structural_checks, int cutoffs_size){
   int scores_length = boost::python::extract<int>(scores.attr("__len__")());
   std::vector<mol::alg::lDDTLocalScore> scores_vector(scores_length);
@@ -430,6 +440,8 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
       .add_property("total_contacts", &mol::alg::lDDTScorer::GetNumTotalContacts)
       .def("PrintPerResidueStats", &mol::alg::lDDTScorer::PrintPerResidueStats)
       .add_property("local_scores", &get_local_scores_wrapper)
+      .def_readonly("model", &mol::alg::lDDTScorer::model_view)
+      .add_property("references", &get_references_wrapper)
       .add_property("is_valid", &mol::alg::lDDTScorer::IsValid);
 
   class_<mol::alg::StereoChemicalProps>("StereoChemicalProps",

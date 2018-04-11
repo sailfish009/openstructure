@@ -112,6 +112,7 @@ class lDDTScorer
     std::vector<lDDTLocalScore> GetLocalScores();
     int GetNumConservedContacts(); // number of conserved distances in the model
     int GetNumTotalContacts(); // the number of total distances in the reference structure
+    std::vector<EntityView> GetReferences();
     void PrintPerResidueStats();
     bool IsValid();
 

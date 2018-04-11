@@ -17,7 +17,6 @@ from ost import PushVerbosityLevel
 from ost.mol.alg import (qsscoring, Molck, MolckSettings, lDDTSettings,
                          lDDTScorer, CheckStructure)
 from ost.conop import CompoundLib
-from ost.seq.alg.renumber import Renumber
 
 
 class _DefaultStereochemicalParamAction(argparse.Action):
@@ -504,27 +503,21 @@ def _Main():
                     label="lddt")
                 if opts.verbosity > 3:
                     lddt_settings.PrintParameters()
-                # Perform single chain scoring
-                # Get chains from mapped alignments
-                lddt_scorers = list()
-                for aln in qs_scorer.alignments:
+
+                oligo_lddt_scorer = qsscoring.OligoLDDTScorer(
+                    qs_scorer.qs_ent_1.ent,
+                    qs_scorer.qs_ent_2.ent,
+                    qs_scorer.alignments,
+                    qs_scorer.calpha_only,
+                    lddt_settings)
+                for lddt_scorer in oligo_lddt_scorer.sc_lddt_scorers:
                     # Get chains and renumber according to alignment (for lDDT)
-                    ch_ref = aln.GetSequence(0).GetName()
-                    reference = Renumber(aln.GetSequence(0)).CreateFullView()
-                    ch_mdl = aln.GetSequence(1).GetName()
-                    model = Renumber(aln.GetSequence(1)).CreateFullView()
-                    ost.LogInfo(("Computing lDDT between model chain %s and "
-                                 "reference chain %s") % (ch_mdl, ch_ref))
-                    lddt_scorer = lDDTScorer(
-                        references=[reference],
-                        model=model,
-                        settings=lddt_settings)
                     try:
                         lddt_results["single_chain_lddt"].append({
                             "status": "SUCCESS",
                             "error": "",
-                            "model_chain": ch_mdl,
-                            "reference_chain": ch_ref,
+                            "model_chain": lddt_scorer.model.chains[0].GetName(),
+                            "reference_chain": lddt_scorer.references[0].chains[0].GetName(),
                             "global_score": lddt_scorer.global_score,
                             "conserved_contacts": lddt_scorer.conserved_contacts,
                             "total_contacts": lddt_scorer.total_contacts})
@@ -533,24 +526,17 @@ def _Main():
                         lddt_results["single_chain_lddt"].append({
                             "status": "FAILURE",
                             "error": str(ex),
-                            "model_chain": ch_mdl,
-                            "reference_chain": ch_ref,
+                            "model_chain": lddt_scorer.model.chains[0].GetName(),
+                            "reference_chain": lddt_scorer.references[0].chains[0].GetName(),
                             "global_score": 0.0,
                             "conserved_contacts": 0.0,
                             "total_contacts": 0.0})
-                    lddt_scorers.append(lddt_scorer)
                 # perform oligo lddt scoring
                 try:
-                    oligo_lddt_scorer = qsscoring.OligoLDDTScorer(
-                        qs_scorer.qs_ent_1.ent,
-                        qs_scorer.qs_ent_2.ent,
-                        qs_scorer.alignments,
-                        qs_scorer.calpha_only,
-                        lddt_settings)
                     lddt_results["oligo_lddt"] = {
                         "status": "SUCCESS",
                         "error": "",
-                        "global_score": oligo_lddt_scorer.lddt}
+                        "global_score": oligo_lddt_scorer.oligo_lddt}
                 except Exception as ex:
                     ost.LogError('Oligo lDDT failed:', str(ex))
                     lddt_results["oligo_lddt"] = {
@@ -558,11 +544,10 @@ def _Main():
                         "error": str(ex),
                         "global_score": 0.0}
                 try:
-                    weighted_lddt = _AveragelDDT(lddt_scorers)
                     lddt_results["weighted_lddt"] = {
                         "status": "SUCCESS",
                         "error": "",
-                        "global_score": weighted_lddt}
+                        "global_score": oligo_lddt_scorer.weighted_lddt}
                 except Exception as ex:
                     lddt_results["weighted_lddt"] = {
                         "status": "FAILURE",

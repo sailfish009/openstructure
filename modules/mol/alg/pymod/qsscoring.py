@@ -20,6 +20,7 @@ from ost import mol, geom, conop, seq, settings
 from ost import LogError, LogWarning, LogScript, LogInfo, LogVerbose, LogDebug
 from ost.bindings.clustalw import ClustalW
 from ost.mol.alg import lDDTScorer
+from ost.seq.alg.renumber import Renumber
 import numpy as np
 from scipy.misc import factorial
 from scipy.special import binom
@@ -835,16 +836,17 @@ class OligoLDDTScorer(object):
     # get single chain reference and model
     self.ref = ref
     self.mdl = mdl
-    self.calpha_only = calpha_only
     self.alignments = alignments
+    self.calpha_only = calpha_only
     self.settings = settings
-    self._lddt = None
+    self._sc_lddt = None
+    self._oligo_lddt = None
+    self._weighted_lddt = None
     self._lddt_ref = None
     self._lddt_mdl = None
-    self.scorer = lDDTScorer(
-      references=[self.lddt_ref.Select("")],
-      model=self.lddt_mdl.Select(""),
-      settings=self.settings)
+    self._oligo_lddt_scorer = None
+    self._sc_lddt_scorers = None
+    self._report = dict()
 
   @property
   def lddt_ref(self):
@@ -865,16 +867,69 @@ class OligoLDDTScorer(object):
     return self._lddt_mdl
 
   @property
-  def lddt(self):
+  def oligo_lddt(self):
     """Fills cached lddt_score, lddt_mdl and lddt_ref."""
-    if self._lddt is None:
+    if self._oligo_lddt is None:
       LogInfo('Computing oligomeric lDDT score')
       LogInfo('Reference %s has: %s chains' % (self.ref.GetName(), self.ref.chain_count))
       LogInfo('Model %s has: %s chains' % (self.mdl.GetName(), self.mdl.chain_count))
 
       # score them (mdl and ref changed) and keep results
-      self._lddt = self.scorer.global_score
-    return self._lddt
+      self._oligo_lddt = self.oligo_lddt_scorer.global_score
+    return self._oligo_lddt
+
+  @property
+  def oligo_lddt_scorer(self):
+    if self._oligo_lddt_scorer is None:
+      self._oligo_lddt_scorer = lDDTScorer(
+        references=[self.lddt_ref.Select("")],
+        model=self.lddt_mdl.Select(""),
+        settings=self.settings)
+    return self._oligo_lddt_scorer
+
+  @property
+  def sc_lddt_scorers(self):
+    if self._sc_lddt_scorers is None:
+      for aln in self.alignments:
+        self._sc_lddt_scorers = list()
+        # Get chains and renumber according to alignment (for lDDT)
+        ch_ref = aln.GetSequence(0).GetName()
+        reference = Renumber(aln.GetSequence(0)).CreateFullView()
+        ch_mdl = aln.GetSequence(1).GetName()
+        model = Renumber(aln.GetSequence(1)).CreateFullView()
+        LogInfo(("Computing lDDT between model chain %s and "
+                 "reference chain %s") % (ch_mdl, ch_ref))
+        lddt_scorer = lDDTScorer(
+          references=[reference],
+          model=model,
+          settings=self.settings)
+        self._sc_lddt_scorers.append(lddt_scorer)
+    return self._sc_lddt_scorers
+
+  @property
+  def sc_lddt(self):
+    if self._sc_lddt is None:
+      self._sc_lddt = list()
+      for lddt_scorer in self.sc_lddt_scorers:
+        try:
+          self._sc_lddt.append(lddt_scorer.global_score)
+        except Exception as ex:
+          LogError('Single chain lDDT failed:', str(ex))
+          self._sc_lddt.append(0.0)
+    return self._sc_lddt
+
+  @property
+  def weighted_lddt(self):
+    if self._weighted_lddt is None:
+      scores = [s.global_score for s in self.sc_lddt_scorers]
+      weights = [s.total_contacts for s in self.sc_lddt_scorers]
+      nominator = sum([s * w for s, w in zip(scores, weights)])
+      denominator = sum(weights)
+      if denominator > 0:
+        self._weighted_lddt = nominator / float(denominator)
+      else:
+        self._weighted_lddt = 0.0
+    return self._weighted_lddt
 
 
 ###############################################################################

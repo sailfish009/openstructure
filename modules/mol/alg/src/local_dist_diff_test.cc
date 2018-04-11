@@ -605,6 +605,10 @@ void lDDTScorer::PrintPerResidueStats(){
                            settings.cutoffs.size());
 }
 
+std::vector<EntityView> lDDTScorer::GetReferences(){
+  return references_view;
+}
+
 void lDDTScorer::_PrepareReferences(std::vector<EntityHandle>& references){
   for (unsigned int i = 0; i < references.size(); i++) {
     if (settings.sel != ""){
