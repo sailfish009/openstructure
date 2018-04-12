@@ -1,8 +1,8 @@
 Changes in Release <RELEASE NUMBER>
 --------------------------------------------------------------------------------
   * Removed habit of changing secondary structure of entities when loading
-    from mmCIF files. Before, OST would turn secondary structure 'EEH' into
-    'ECH' to make it look nicer in DNG. Now, 'EEH' stays 'EEH'.
+    from mmCIF PDB files. Before, OST would turn secondary structure 'EEH'
+    into 'ECH' to make it look nicer in DNG. Now, 'EEH' stays 'EEH'.
 
 Changes in Release 1.7.1
 --------------------------------------------------------------------------------
