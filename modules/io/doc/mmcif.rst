@@ -638,7 +638,7 @@ of the annotation available.
 
   .. method:: GetChainIntervalList()
 
-    See :attr:`chainintervalls`
+    See :attr:`chainintervals`
 
   .. method:: GetOperations()
 
