@@ -2,7 +2,64 @@
 
 eg.
 
-ost compare-structures -m 3ia3.pdb -r 3ia3.pdb -o output.json -l -sc -cc -ml  -rm oxt hyd -mn
+  ost compare-structures \
+    -m <MODEL> \
+    -r <REF> \
+    -o output.json \
+    -l \
+    -sc \
+    -cc \
+    -ml \
+    -rm oxt hyd \
+    -mn
+
+CAMEO calls lddt binary as follows:
+
+  lddt \
+    -p <PARAMETER FILE> \
+    -f \
+    -a 15 \
+    -b 15 \
+    -r 15 \
+    <MODEL> \
+    <REF>
+
+Only model structures are "Molck-ed" in CAMEO. The call to molck is as follows:
+
+  molck \
+    --complib=<COMPOUND LIB> \
+    --rm=hyd,oxt,unk \
+    --fix-ele \
+    --map-nonstd <FILEPATH> \
+    --out=<OUTPUT>
+
+To be as much compatible with with CAMEO as possible one should call
+compare-structures as follows:
+
+  ost compare-structures \
+    # General parameters
+    ####################
+    --model <MODEL> \
+    --reference <REF> \
+    --output output.json \
+    # QS-score parameters
+    #####################
+    --qs-score \
+    --residue-number-alignment \
+    # lDDT parameters
+    #################
+    --lddt \
+    --structural-checks \
+    --consistency-checks \
+    --inclusion-radius 15.0 \
+    --bond-tolerance 15.0 \
+    --angle-tolerance 15.0 \
+    # Molck parameters
+    ##################
+    --molck \
+    --remove oxt hyd unk \
+    --clean-element-column \
+    --map-nonstandard-residues
 """
 
 import os
