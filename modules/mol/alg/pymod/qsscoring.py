@@ -890,8 +890,8 @@ class OligoLDDTScorer(object):
   @property
   def sc_lddt_scorers(self):
     if self._sc_lddt_scorers is None:
+      self._sc_lddt_scorers = list()
       for aln in self.alignments:
-        self._sc_lddt_scorers = list()
         # Get chains and renumber according to alignment (for lDDT)
         ch_ref = aln.GetSequence(0).GetName()
         reference = Renumber(aln.GetSequence(0)).CreateFullView()
