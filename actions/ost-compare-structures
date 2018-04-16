@@ -541,7 +541,6 @@ def _Main():
     result["options"]["cwd"] = os.path.abspath(os.getcwd())
     #
     # Perform scoring
-    ost.LogInfo("Performing scoring")
     for model in models:
         model_name = model.GetName()
         model_results = dict()
@@ -561,7 +560,8 @@ def _Main():
                         opts.chain_mapping))
                 qs_scorer.chain_mapping = opts.chain_mapping
             if opts.qs_score:
-                ost.LogInfo("-> Computing QS-score")
+                ost.LogInfo("-" * 80)
+                ost.LogInfo("Computing QS-score")
                 try:
                     reference_results["qs_score"] = {
                         "status": "SUCCESS",
@@ -586,6 +586,8 @@ def _Main():
                     }
             # Calculate lDDT
             if opts.lddt:
+                ost.LogInfo("-" * 80)
+                ost.LogInfo("Computing lDDT scores")
                 lddt_results = {
                     "single_chain_lddt": list()
                 }
@@ -598,9 +600,9 @@ def _Main():
                     structural_checks=False,
                     consistency_checks=opts.consistency_checks,
                     label="lddt")
-                if opts.verbosity > 3:
-                    lddt_settings.PrintParameters()
-
+                ost.LogInfo("lDDT settings: ")
+                ost.LogInfo(str(lddt_settings).rstrip())
+                ost.LogInfo("===")
                 oligo_lddt_scorer = qsscoring.OligoLDDTScorer(
                     qs_scorer.qs_ent_1.ent,
                     qs_scorer.qs_ent_2.ent,
