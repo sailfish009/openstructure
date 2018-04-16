@@ -487,11 +487,15 @@ def _Main():
     PushVerbosityLevel(opts.verbosity)
     #
     # Read the input files
-    ost.LogInfo("Reading model from %s" % opts.model)
+    ost.LogInfo("#" * 80)
+    ost.LogInfo("Reading input files")
+    ost.LogInfo(" --> reading model from %s" % opts.model)
     models = _ReadStructureFile(opts.model)
-    ost.LogInfo("Reading reference from %s" % opts.reference)
+    ost.LogInfo(" --> reading reference from %s" % opts.reference)
     references = _ReadStructureFile(opts.reference)
     if opts.molck:
+        ost.LogInfo("#" * 80)
+        ost.LogInfo("Cleaning up input with Molck")
         for i in range(len(references)):
             _MolckEntity(references[i], opts)
             references[i] = references[i].CreateFullView()
@@ -504,28 +508,32 @@ def _Main():
         for i in range(len(models)):
             models[i] = models[i].CreateFullView()
     if opts.structural_checks:
+        ost.LogInfo("#" * 80)
+        ost.LogInfo("Performing structural checks")
         stereochemical_parameters = ReadStereoChemicalPropsFile(
             opts.parameter_file)
-        ost.LogInfo("Performing structural checks for reference(s)")
+        ost.LogInfo(" --> for reference(s)")
         for reference in references:
+            ost.LogInfo("Checking %s" % reference.GetName())
             CheckStructure(reference,
                            stereochemical_parameters.bond_table,
                            stereochemical_parameters.angle_table,
                            stereochemical_parameters.nonbonded_table,
                            opts.bond_tolerance,
                            opts.angle_tolerance)
-        ost.LogInfo("Performing structural checks for model(s)")
+        ost.LogInfo(" --> for model(s)")
         for model in models:
+            ost.LogInfo("Checking %s" % model.GetName())
             CheckStructure(model,
                            stereochemical_parameters.bond_table,
                            stereochemical_parameters.angle_table,
                            stereochemical_parameters.nonbonded_table,
                            opts.bond_tolerance,
                            opts.angle_tolerance)
-
     if len(models) > 1 or len(references) > 1:
+        ost.LogInfo("#" * 80)
         ost.LogInfo(
-            "Multiple complexes detected. All combinations will be tried.")
+            "Multiple complexes mode ON. All combinations will be tried.")
 
     result = {
         "result": {},
@@ -533,13 +541,15 @@ def _Main():
     result["options"]["cwd"] = os.path.abspath(os.getcwd())
     #
     # Perform scoring
+    ost.LogInfo("Performing scoring")
     for model in models:
         model_name = model.GetName()
         model_results = dict()
         for reference in references:
             reference_name = reference.GetName()
             reference_results = dict()
-            ost.LogInfo("#\nComparing %s to %s" % (
+            ost.LogInfo("#" * 80)
+            ost.LogInfo("Comparing %s to %s" % (
                 model_name,
                 reference_name))
             qs_scorer = qsscoring.QSscorer(reference,
@@ -551,7 +561,7 @@ def _Main():
                         opts.chain_mapping))
                 qs_scorer.chain_mapping = opts.chain_mapping
             if opts.qs_score:
-                ost.LogInfo("Computing QS-score")
+                ost.LogInfo("-> Computing QS-score")
                 try:
                     reference_results["qs_score"] = {
                         "status": "SUCCESS",
@@ -576,7 +586,6 @@ def _Main():
                     }
             # Calculate lDDT
             if opts.lddt:
-                ost.LogInfo("Computing lDDT")
                 lddt_results = {
                     "single_chain_lddt": list()
                 }
@@ -604,14 +613,26 @@ def _Main():
                         model_chain = lddt_scorer.model.chains[0].GetName()
                         reference_chain = \
                             lddt_scorer.references[0].chains[0].GetName()
+                        ost.LogInfo((" --> Computing lDDT between model "
+                                     "chain %s and reference chain %s") % (
+                                         model_chain,
+                                         reference_chain))
                         lddt_results["single_chain_lddt"].append({
                             "status": "SUCCESS",
                             "error": "",
                             "model_chain": model_chain,
                             "reference_chain": reference_chain,
                             "global_score": lddt_scorer.global_score,
-                            "conserved_contacts": lddt_scorer.conserved_contacts,
+                            "conserved_contacts":
+                                lddt_scorer.conserved_contacts,
                             "total_contacts": lddt_scorer.total_contacts})
+                        ost.LogInfo("Global LDDT score: %.4f" %
+                                    lddt_scorer.global_score)
+                        ost.LogInfo(
+                            "(%i conserved distances out of %i checked, over "
+                            "%i thresholds)" % (lddt_scorer.conserved_contacts,
+                                                lddt_scorer.total_contacts,
+                                                len(lddt_settings.cutoffs)))
                     except Exception as ex:
                         ost.LogError('Single chain lDDT failed:', str(ex))
                         lddt_results["single_chain_lddt"].append({
@@ -624,10 +645,14 @@ def _Main():
                             "total_contacts": 0.0})
                 # perform oligo lddt scoring
                 try:
+                    ost.LogInfo(' --> Computing oligomeric lDDT score')
                     lddt_results["oligo_lddt"] = {
                         "status": "SUCCESS",
                         "error": "",
                         "global_score": oligo_lddt_scorer.oligo_lddt}
+                    ost.LogInfo(
+                        "Oligo lDDT score: %.4f" %
+                        oligo_lddt_scorer.oligo_lddt)
                 except Exception as ex:
                     ost.LogError('Oligo lDDT failed:', str(ex))
                     lddt_results["oligo_lddt"] = {
@@ -635,11 +660,16 @@ def _Main():
                         "error": str(ex),
                         "global_score": 0.0}
                 try:
+                    ost.LogInfo(' --> Computing weighted lDDT score')
                     lddt_results["weighted_lddt"] = {
                         "status": "SUCCESS",
                         "error": "",
                         "global_score": oligo_lddt_scorer.weighted_lddt}
+                    ost.LogInfo(
+                        "Weighted lDDT score: %.4f" %
+                        oligo_lddt_scorer.weighted_lddt)
                 except Exception as ex:
+                    ost.LogError('Weighted lDDT failed:', str(ex))
                     lddt_results["weighted_lddt"] = {
                         "status": "FAILURE",
                         "error": str(ex),

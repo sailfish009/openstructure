@@ -291,6 +291,11 @@ int main (int argc, char **argv)
     }
   }
   CleanlDDTReferences(ref_list);
+  if (ref_list.size()==1) {
+    std::cout << "Multi-reference mode: Off" << std::endl;
+  } else {
+    std::cout << "Multi-reference mode: On" << std::endl;
+  }
   glob_dist_list = PreparelDDTGlobalRDMap(ref_list,
                                           settings.cutoffs,
                                           settings.sequence_separation,

@@ -655,13 +655,14 @@ void lDDTScorer::_CheckConsistency(){
 void lDDTScorer::_ComputelDDT(){
   std::pair<int,int> cov = ComputeCoverage(model_view,glob_dist_list);
   if (cov.second == -1) {
-    std::cout << "Coverage: 0 (0 out of 0 residues)" << std::endl;
+    LOG_INFO("Coverage: 0 (0 out of 0 residues)");
   } else {
-    std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
+    std::stringstream sout;
+    sout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)";
+    LOG_INFO(sout.str());
   }
 
   if (cov.first == 0) {
-    std::cout << "Global LDDT score: 0.0" << std::endl;
     _num_tot_con = 0;
     _num_cons_con = 0;
     _global_score = 0.0;
@@ -671,9 +672,6 @@ void lDDTScorer::_ComputelDDT(){
 
   std::pair<int,int> total_ov=alg::LocalDistDiffTest(model_view, glob_dist_list, settings.cutoffs, settings.sequence_separation, settings.label);
   Real lddt = static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
-  std::cout << "Global LDDT score: " << std::setprecision(4) << lddt << std::endl;
-  std::cout << "(" << std::fixed << total_ov.first << " conserved distances out of " << total_ov.second
-            << " checked, over " << settings.cutoffs.size() << " thresholds)" << std::endl;
   _num_tot_con = total_ov.second ? total_ov.second : 1;
   _num_cons_con = total_ov.first;
   _global_score = lddt;
@@ -943,10 +941,8 @@ GlobalRDMap PreparelDDTGlobalRDMap(const std::vector<EntityView>& ref_list,
                                    Real max_dist){
   GlobalRDMap glob_dist_list;
   if (ref_list.size()==1) {
-    std::cout << "Multi-reference mode: Off" << std::endl;
     glob_dist_list = CreateDistanceList(ref_list[0], max_dist);
   } else {
-    std::cout << "Multi-reference mode: On" << std::endl;
     glob_dist_list = CreateDistanceListFromMultipleReferences(ref_list,
                                                               cutoff_list,
                                                               sequence_separation,

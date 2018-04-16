@@ -16,7 +16,7 @@ Scoring of quaternary structures as in Martino's 2017 paper.
 Authors: Gerardo Tauriello, Martino Bertoni
 """
 
-from ost import mol, geom, conop, seq, settings
+from ost import mol, geom, conop, seq, settings, PushVerbosityLevel
 from ost import LogError, LogWarning, LogScript, LogInfo, LogVerbose, LogDebug
 from ost.bindings.clustalw import ClustalW
 from ost.mol.alg import lDDTScorer
@@ -870,7 +870,6 @@ class OligoLDDTScorer(object):
   def oligo_lddt(self):
     """Fills cached lddt_score, lddt_mdl and lddt_ref."""
     if self._oligo_lddt is None:
-      LogInfo('Computing oligomeric lDDT score')
       LogInfo('Reference %s has: %s chains' % (self.ref.GetName(), self.ref.chain_count))
       LogInfo('Model %s has: %s chains' % (self.mdl.GetName(), self.mdl.chain_count))
 
@@ -893,12 +892,8 @@ class OligoLDDTScorer(object):
       self._sc_lddt_scorers = list()
       for aln in self.alignments:
         # Get chains and renumber according to alignment (for lDDT)
-        ch_ref = aln.GetSequence(0).GetName()
         reference = Renumber(aln.GetSequence(0)).CreateFullView()
-        ch_mdl = aln.GetSequence(1).GetName()
         model = Renumber(aln.GetSequence(1)).CreateFullView()
-        LogInfo(("Computing lDDT between model chain %s and "
-                 "reference chain %s") % (ch_mdl, ch_ref))
         lddt_scorer = lDDTScorer(
           references=[reference],
           model=model,
