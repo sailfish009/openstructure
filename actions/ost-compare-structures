@@ -2,64 +2,65 @@
 
 eg.
 
-  ost compare-structures \
-    -m <MODEL> \
-    -r <REF> \
-    -o output.json \
-    -l \
-    -sc \
-    -cc \
-    -ml \
-    -rm oxt hyd \
-    -mn
+  ost compare-structures \\
+      --model <MODEL> \\
+      --reference <REF> \\
+      --output output.json \\
+      --lddt \\
+      --structural-checks \\
+      --consistency-checks \\
+      --molck \\
+      --remove oxt hyd \\
+      --map-nonstandard-residues
 
-CAMEO calls lddt binary as follows:
+If desired one can recreate what CAMEO is calculating. CAMEO calls lddt binary
+as follows:
 
-  lddt \
-    -p <PARAMETER FILE> \
-    -f \
-    -a 15 \
-    -b 15 \
-    -r 15 \
-    <MODEL> \
-    <REF>
+  lddt \\
+      -p <PARAMETER FILE> \\
+      -f \\
+      -a 15 \\
+      -b 15 \\
+      -r 15 \\
+      <MODEL> \\
+      <REF>
 
 Only model structures are "Molck-ed" in CAMEO. The call to molck is as follows:
 
-  molck \
-    --complib=<COMPOUND LIB> \
-    --rm=hyd,oxt,unk \
-    --fix-ele \
-    --map-nonstd <FILEPATH> \
-    --out=<OUTPUT>
+  molck \\
+      --complib=<COMPOUND LIB> \\
+      --rm=hyd,oxt,unk \\
+      --fix-ele \\
+      --map-nonstd <FILEPATH> \\
+      --out=<OUTPUT>
 
 To be as much compatible with with CAMEO as possible one should call
 compare-structures as follows:
 
-  ost compare-structures \
-    # General parameters
-    ####################
-    --model <MODEL> \
-    --reference <REF> \
-    --output output.json \
-    # QS-score parameters
-    #####################
-    --qs-score \
-    --residue-number-alignment \
-    # lDDT parameters
-    #################
-    --lddt \
-    --structural-checks \
-    --consistency-checks \
-    --inclusion-radius 15.0 \
-    --bond-tolerance 15.0 \
-    --angle-tolerance 15.0 \
-    # Molck parameters
-    ##################
-    --molck \
-    --remove oxt hyd unk \
-    --clean-element-column \
-    --map-nonstandard-residues
+  ost compare-structures \\
+      # General parameters
+      ####################
+      --model <MODEL> \\
+      --reference <REF> \\
+      --output output.json \\
+      # QS-score parameters
+      #####################
+      --qs-score \\
+      --residue-number-alignment \\
+      # lDDT parameters
+      #################
+      --lddt \\
+      --structural-checks \\
+      --consistency-checks \\
+      --inclusion-radius 15.0 \\
+      --bond-tolerance 15.0 \\
+      --angle-tolerance 15.0 \\
+      # Molck parameters
+      ##################
+      --molck \\
+      --remove oxt hyd unk \\
+      --clean-element-column \\
+      --map-nonstandard-residues
 """
 
 import os
@@ -154,7 +155,7 @@ def _ParseArgs():
     # General options
     #
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        formatter_class=argparse.RawTextHelpFormatter,
         description=__doc__,
         prog="ost compare-structures")
 
@@ -197,9 +198,9 @@ def _ParseArgs():
         nargs="+",
         type=lambda x: x.split(":"),
         dest="chain_mapping",
-        help=("Mapping of chains between the model and the reference. "
-              "Each separate mapping consist of key:value pairs where key "
-              "is the chain name in model and value is the chain name in "
+        help=("Mapping of chains between the model and the reference.\n"
+              "Each separate mapping consist of key:value pairs where key\n"
+              "is the chain name in model and value is the chain name in\n"
               "reference."))
     parser.add_argument(
         "-rna",
@@ -207,7 +208,7 @@ def _ParseArgs():
         dest="residue_number_alignment",
         default=False,
         action="store_true",
-        help=("Make alignment based on residue number instead of using "
+        help=("Make alignment based on residue number instead of using\n"
               "Clustal."))
     #
     # lDDT options
@@ -251,10 +252,10 @@ def _ParseArgs():
         "--parameter-file",
         dest="parameter_file",
         action=_DefaultStereochemicalParamAction,
-        help=("Location of the stereochemical parameter file "
-              "(stereo_chemical_props.txt). "
-              "If not provided, the following locations are searched in this "
-              "order: 1. Working directory, 2. OpenStructure standard library "
+        help=("Location of the stereochemical parameter file\n"
+              "(stereo_chemical_props.txt).\n"
+              "If not provided, the following locations are searched in this\n"
+              "order: 1. Working directory, 2. OpenStructure standard library\n"
               "location."))
     parser.add_argument(
         "-bt",
@@ -283,8 +284,8 @@ def _ParseArgs():
         dest="sequence_separation",
         type=int,
         default=0,
-        help=("Sequence separation. Only distances between residues whose "
-              "separation is higher than the provided parameter are "
+        help=("Sequence separation. Only distances between residues whose\n"
+              "separation is higher than the provided parameter are\n"
               "considered when computing the score"))
     parser.add_argument(
         "-cc",
@@ -315,10 +316,10 @@ def _ParseArgs():
         "--compound-library",
         dest="compound_library",
         action=_DefaultCompoundLibraryAction,
-        help=("Location of the compound library file (compounds.chemlib). "
-              "If not provided, the following locations are searched in this "
-              "order: 1. Working directory, 2. OpenStructure standard library "
-              "location."))
+        help=("Location of the compound library file (compounds.chemlib).\n"
+              "If not provided, the following locations are searched in this\n"
+              "order: 1. Working directory, 2. OpenStructure standard library"
+              "\nlocation."))
     parser.add_argument(
         "-rm",
         "--remove",
@@ -326,13 +327,13 @@ def _ParseArgs():
         nargs="+",  # *, +, ?, N
         required=False,
         default=["hyd"],
-        help=("Remove atoms and residues matching some criteria: "
-              "zeroocc - Remove atoms with zero occupancy, "
-              "hyd - remove hydrogen atoms, "
-              "oxt - remove terminal oxygens, "
-              "nonstd - remove all residues not one of the 20 "
-              "standard amino acids, "
-              "unk - Remove unknown and atoms not following the nomenclature"))
+        help=("Remove atoms and residues matching some criteria:\n"
+              " * zeroocc - Remove atoms with zero occupancy\n"
+              " * hyd - remove hydrogen atoms\n"
+              " * oxt - remove terminal oxygens\n"
+              " * nonstd - remove all residues not one of the 20\n"
+              " * standard amino acids\n"
+              " * unk - Remove unknown and atoms not following the nomenclature"))
     parser.add_argument(
         "-ce",
         "--clean-element-column",
@@ -346,7 +347,7 @@ def _ParseArgs():
         dest="map_nonstandard_residues",
         default=False,
         action="store_true",
-        help=("Map modified residues back to the parent amino acid, for "
+        help=("Map modified residues back to the parent amino acid, for\n"
               "example MSE -> MET, SEP -> SER."))
 
     # Print full help is no arguments provided
