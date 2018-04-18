@@ -69,7 +69,7 @@ import json
 import argparse
 
 import ost
-from ost.io import (LoadPDB, LoadMMCIF, MMCifInfoBioUnit, MMCifInfo,
+from ost.io import (LoadPDB, LoadMMCIF, SavePDB, MMCifInfoBioUnit, MMCifInfo,
                     MMCifInfoTransOp, ReadStereoChemicalPropsFile)
 from ost import PushVerbosityLevel
 from ost.mol.alg import (qsscoring, Molck, MolckSettings, lDDTSettings,
@@ -182,6 +182,22 @@ def _ParseArgs():
         "--output",
         dest="output",
         help=("Output file name. The output will be saved as a JSON file."))
+    parser.add_argument(
+        "-d",
+        "--dump-structures",
+        dest="dump_structures",
+        default=False,
+        action="store_true",
+        help=("Dump cleaned structures used to calculate all the scores as\n"
+              "PDB files using specified suffix. Files will be dumped to the\n"
+              "same location as original files."))
+    parser.add_argument(
+        "-ds",
+        "--dump-suffix",
+        dest="dump_suffix",
+        default=".compare.structures.pdb",
+        help=("Use this suffix to dump structures.\n"
+              "Defaults to .compare.structures.pdb."))
     #
     # QS-score options
     #
@@ -255,8 +271,8 @@ def _ParseArgs():
         help=("Location of the stereochemical parameter file\n"
               "(stereo_chemical_props.txt).\n"
               "If not provided, the following locations are searched in this\n"
-              "order: 1. Working directory, 2. OpenStructure standard library\n"
-              "location."))
+              "order: 1. Working directory, 2. OpenStructure standard library"
+              "\nlocation."))
     parser.add_argument(
         "-bt",
         "--bond-tolerance",
@@ -333,7 +349,8 @@ def _ParseArgs():
               " * oxt - remove terminal oxygens\n"
               " * nonstd - remove all residues not one of the 20\n"
               " * standard amino acids\n"
-              " * unk - Remove unknown and atoms not following the nomenclature"))
+              " * unk - Remove unknown and atoms not following the"
+              "nomenclature"))
     parser.add_argument(
         "-ce",
         "--clean-element-column",
@@ -617,7 +634,8 @@ def _Main():
                     qs_scorer.alignments,
                     qs_scorer.calpha_only,
                     lddt_settings)
-                for scorer_index, lddt_scorer in enumerate(oligo_lddt_scorer.sc_lddt_scorers):
+                for scorer_index, lddt_scorer in enumerate(
+                        oligo_lddt_scorer.sc_lddt_scorers):
                     # Get chains and renumber according to alignment (for lDDT)
                     try:
                         model_chain = lddt_scorer.model.chains[0].GetName()
@@ -644,12 +662,13 @@ def _Main():
                                 lddt_scorer.conserved_contacts,
                             "total_contacts": lddt_scorer.total_contacts}
                         if opts.save_per_residue_scores:
-                            per_residue_sc = oligo_lddt_scorer.GetPerResidueScores(
-                                scorer_index)
+                            per_residue_sc = \
+                                oligo_lddt_scorer.GetPerResidueScores(
+                                    scorer_index)
                             ost.LogInfo("Per residue local lDDT (reference):")
                             ost.LogInfo("Chain\tResidue Number\tResidue Name"
-                                         "\tlDDT\tConserved Contacts\tTotal "
-                                         "Contacts")
+                                        "\tlDDT\tConserved Contacts\tTotal "
+                                        "Contacts")
                             for prs_scores in per_residue_sc:
                                 ost.LogInfo("%s\t%i\t%s\t%.4f\t%i\t%i" % (
                                     reference_chain,
@@ -658,7 +677,8 @@ def _Main():
                                     prs_scores["lddt"],
                                     prs_scores["conserved_contacts"],
                                     prs_scores["total_contacts"]))
-                            sc_lddt_scores["per_residue_scores"] = per_residue_sc
+                            sc_lddt_scores["per_residue_scores"] = \
+                                per_residue_sc
                         lddt_results["single_chain_lddt"].append(
                             sc_lddt_scores)
                     except Exception as ex:
@@ -704,6 +724,21 @@ def _Main():
                         "global_score": 0.0}
                 reference_results["lddt"] = lddt_results
             model_results[reference_name] = reference_results
+            if opts.dump_structures:
+                ref_output_path = os.path.join(
+                    os.path.dirname(opts.reference),
+                    reference_name + opts.dump_suffix)
+                ost.LogInfo("Saving cleaned up reference to %s" %
+                            ref_output_path)
+                SavePDB(qs_scorer.qs_ent_1.ent,
+                        ref_output_path)
+                mdl_output_path = os.path.join(
+                    os.path.dirname(opts.model),
+                    model_name + opts.dump_suffix)
+                ost.LogInfo("Saving cleaned up reference to %s" %
+                            mdl_output_path)
+                SavePDB(qs_scorer.qs_ent_2.ent,
+                        mdl_output_path)
         result["result"][model_name] = model_results
 
     if opts.output is not None:
