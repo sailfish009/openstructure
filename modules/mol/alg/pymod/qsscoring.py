@@ -839,6 +839,7 @@ class OligoLDDTScorer(object):
     self.alignments = alignments
     self.calpha_only = calpha_only
     self.settings = settings
+    self._old_number_label = "old_num"
     self._sc_lddt = None
     self._oligo_lddt = None
     self._weighted_lddt = None
@@ -892,14 +893,69 @@ class OligoLDDTScorer(object):
       self._sc_lddt_scorers = list()
       for aln in self.alignments:
         # Get chains and renumber according to alignment (for lDDT)
-        reference = Renumber(aln.GetSequence(0)).CreateFullView()
-        model = Renumber(aln.GetSequence(1)).CreateFullView()
+        reference = Renumber(
+          aln.GetSequence(0),
+          old_number_label=self._old_number_label).CreateFullView()
+        refseq = seq.CreateSequence(
+          "reference_renumbered",
+          aln.GetSequence(0).GetString())
+        refseq.AttachView(reference)
+        aln.AddSequence(refseq)
+        model = Renumber(
+          aln.GetSequence(1),
+          old_number_label=self._old_number_label).CreateFullView()
+        modelseq = seq.CreateSequence(
+          "model_renumbered",
+          aln.GetSequence(1).GetString())
+        modelseq.AttachView(model)
+        aln.AddSequence(modelseq)
         lddt_scorer = lDDTScorer(
           references=[reference],
           model=model,
           settings=self.settings)
+        lddt_scorer.alignment = aln  # a bit of a hack
         self._sc_lddt_scorers.append(lddt_scorer)
     return self._sc_lddt_scorers
+
+  def GetPerResidueScores(self, scorer_index):
+    scores = list()
+    assigned_residues = list()
+    # Make sure the score is calculated
+    self.sc_lddt_scorers[scorer_index].global_score
+    for col in self.sc_lddt_scorers[scorer_index].alignment:
+      if col[0] != "-" and col.GetResidue(3).IsValid():
+        ref_res = col.GetResidue(0)
+        mdl_res = col.GetResidue(1)
+        ref_res_renum = col.GetResidue(2)
+        mdl_res_renum = col.GetResidue(3)
+        if ref_res.one_letter_code != ref_res_renum.one_letter_code:
+          raise RuntimeError("Reference residue name mapping inconsistent: %s != %s" %
+                             (ref_res.one_letter_code,
+                              ref_res_renum.one_letter_code))
+        if mdl_res.one_letter_code != mdl_res_renum.one_letter_code:
+          raise RuntimeError("Model residue name mapping inconsistent: %s != %s" %
+                             (mdl_res.one_letter_code,
+                              mdl_res_renum.one_letter_code))
+        if ref_res.GetNumber().num != ref_res_renum.GetIntProp(self._old_number_label):
+          raise RuntimeError("Reference residue number mapping inconsistent: %s != %s" %
+                             (ref_res.GetNumber().num,
+                              ref_res_renum.GetIntProp(self._old_number_label)))
+        if mdl_res.GetNumber().num != mdl_res_renum.GetIntProp(self._old_number_label):
+          raise RuntimeError("Model residue number mapping inconsistent: %s != %s" %
+                             (mdl_res.GetNumber().num,
+                              mdl_res_renum.GetIntProp(self._old_number_label)))
+        if ref_res.qualified_name in assigned_residues:
+          raise RuntimeError("Duplicated residue in reference: " %
+                             (ref_res.qualified_name))
+        else:
+          assigned_residues.append(ref_res.qualified_name)
+        scores.append({
+          "residue_number": ref_res.GetNumber().num,
+          "residue_name": ref_res.name,
+          "lddt": mdl_res_renum.GetFloatProp(self.settings.label),
+          "conserved_contacts": mdl_res_renum.GetFloatProp(self.settings.label + "_conserved"),
+          "total_contacts": mdl_res_renum.GetFloatProp(self.settings.label + "_total")})
+    return scores
 
   @property
   def sc_lddt(self):

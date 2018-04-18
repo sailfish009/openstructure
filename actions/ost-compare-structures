@@ -293,6 +293,13 @@ def _ParseArgs():
         default=False,
         action="store_true",
         help=("Residue name consistency checks."))
+    parser.add_argument(
+        "-spr",
+        "--save-per-residue-scores",
+        dest="save_per_residue_scores",
+        default=False,
+        action="store_true",
+        help=(""))
     #
     # Molck parameters
     #
@@ -609,7 +616,7 @@ def _Main():
                     qs_scorer.alignments,
                     qs_scorer.calpha_only,
                     lddt_settings)
-                for lddt_scorer in oligo_lddt_scorer.sc_lddt_scorers:
+                for scorer_index, lddt_scorer in enumerate(oligo_lddt_scorer.sc_lddt_scorers):
                     # Get chains and renumber according to alignment (for lDDT)
                     try:
                         model_chain = lddt_scorer.model.chains[0].GetName()
@@ -619,15 +626,6 @@ def _Main():
                                      "chain %s and reference chain %s") % (
                                          model_chain,
                                          reference_chain))
-                        lddt_results["single_chain_lddt"].append({
-                            "status": "SUCCESS",
-                            "error": "",
-                            "model_chain": model_chain,
-                            "reference_chain": reference_chain,
-                            "global_score": lddt_scorer.global_score,
-                            "conserved_contacts":
-                                lddt_scorer.conserved_contacts,
-                            "total_contacts": lddt_scorer.total_contacts})
                         ost.LogInfo("Global LDDT score: %.4f" %
                                     lddt_scorer.global_score)
                         ost.LogInfo(
@@ -635,6 +633,33 @@ def _Main():
                             "%i thresholds)" % (lddt_scorer.conserved_contacts,
                                                 lddt_scorer.total_contacts,
                                                 len(lddt_settings.cutoffs)))
+                        sc_lddt_scores = {
+                            "status": "SUCCESS",
+                            "error": "",
+                            "model_chain": model_chain,
+                            "reference_chain": reference_chain,
+                            "global_score": lddt_scorer.global_score,
+                            "conserved_contacts":
+                                lddt_scorer.conserved_contacts,
+                            "total_contacts": lddt_scorer.total_contacts}
+                        if opts.save_per_residue_scores:
+                            per_residue_sc = oligo_lddt_scorer.GetPerResidueScores(
+                                scorer_index)
+                            ost.LogInfo("Per residue local lDDT (reference):")
+                            ost.LogInfo("Chain\tResidue Number\tResidue Name"
+                                         "\tlDDT\tConserved Contacts\tTotal "
+                                         "Contacts")
+                            for prs_scores in per_residue_sc:
+                                ost.LogInfo("%s\t%i\t%s\t%.4f\t%i\t%i" % (
+                                    reference_chain,
+                                    prs_scores["residue_number"],
+                                    prs_scores["residue_name"],
+                                    prs_scores["lddt"],
+                                    prs_scores["conserved_contacts"],
+                                    prs_scores["total_contacts"]))
+                            sc_lddt_scores["per_residue_scores"] = per_residue_sc
+                        lddt_results["single_chain_lddt"].append(
+                            sc_lddt_scores)
                     except Exception as ex:
                         ost.LogError('Single chain lDDT failed:', str(ex))
                         lddt_results["single_chain_lddt"].append({
