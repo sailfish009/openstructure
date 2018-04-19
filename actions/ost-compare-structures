@@ -73,7 +73,7 @@ from ost.io import (LoadPDB, LoadMMCIF, SavePDB, MMCifInfoBioUnit, MMCifInfo,
                     MMCifInfoTransOp, ReadStereoChemicalPropsFile)
 from ost import PushVerbosityLevel
 from ost.mol.alg import (qsscoring, Molck, MolckSettings, lDDTSettings,
-                         CheckStructure)
+                         CheckStructure, ResidueNamesMatch)
 from ost.conop import CompoundLib
 
 
@@ -214,10 +214,10 @@ def _ParseArgs():
         nargs="+",
         type=lambda x: x.split(":"),
         dest="chain_mapping",
-        help=("Mapping of chains between the model and the reference.\n"
+        help=("Mapping of chains between the reference and the model.\n"
               "Each separate mapping consist of key:value pairs where key\n"
-              "is the chain name in model and value is the chain name in\n"
-              "reference."))
+              "is the chain name in reference and value is the chain name in\n"
+              "model."))
     parser.add_argument(
         "-rna",
         "--residue-number-alignment",
@@ -304,12 +304,19 @@ def _ParseArgs():
               "separation is higher than the provided parameter are\n"
               "considered when computing the score"))
     parser.add_argument(
-        "-cc",
-        "--consistency-checks",
-        dest="consistency_checks",
+        "-ic",
+        "--ignore-consistency-checks",
+        dest="ignore_consistency_checks",
         default=False,
         action="store_true",
-        help=("Residue name consistency checks."))
+        help=("Ignore consistency checks. By default residue name\n"
+              "consistency between a model-reference pair would be checked\n"
+              "and an error will be rised if no valid pair is found (For\n"
+              "mmCIF there could be more than one biounit in one file).\n"
+              "The pair that does not conform to the check will be skipped.\n"
+              "If the option is selected consistency checks will also be\n"
+              "performed but only a warning will be shown and the pair will\b"
+              "evaluated."))
     parser.add_argument(
         "-spr",
         "--save-per-residue-scores",
@@ -397,9 +404,15 @@ def _ParseArgs():
 
 
 def _RevertChainNames(ent):
-    """Revert chain names to original names."""
+    """Revert chain names to original names.
+
+    By default the first chain with given name will not have any number
+    attached to it ie. if there are two chains mapping to chain A the resulting
+    chain names will be: A and A2.
+    """
     editor = ent.EditXCS()
     suffix = "_tmp"  # just a suffix for temporary chain name
+    separator = ""  # dot causes selection error
     used_names = dict()
     reverted_chains = dict()
     for chain in ent.chains:
@@ -414,12 +427,13 @@ def _RevertChainNames(ent):
             continue
         new_name = original_name
         if new_name not in used_names:
-            used_names[original_name] = 1
+            used_names[original_name] = 2
             reverted_chains[chain.name] = new_name
             editor.RenameChain(chain, chain.name + suffix)
         else:
-            new_name = "%s_%i" % (original_name,  # dot causes selection error
-                                  used_names[original_name])
+            new_name = "%s%s%i" % (original_name,
+                                   separator,
+                                   used_names[original_name])
             reverted_chains[chain.name] = new_name
             editor.RenameChain(chain, chain.name + suffix)
             used_names[original_name] += 1
@@ -427,6 +441,15 @@ def _RevertChainNames(ent):
         editor.RenameChain(chain, reverted_chains[chain.name[:-len(suffix)]])
     rev_out = ["%s -> %s" % (on, nn) for on, nn in reverted_chains.iteritems()]
     ost.LogInfo("Reverted chains: %s" % ", ".join(rev_out))
+
+
+def _CheckConsistency(reference, model, chain_mapping, log_error):
+    is_cons = True
+    for ref_cname, mdl_cname in chain_mapping.iteritems():
+        ref_chain = reference.Select("cname=%s" % ref_cname)
+        mdl_chain = model.Select("cname=%s" % mdl_cname)
+        is_cons = ResidueNamesMatch(ref_chain, mdl_chain, log_error)
+    return is_cons
 
 
 def _ReadStructureFile(path):
@@ -566,6 +589,7 @@ def _Main():
     result["options"]["cwd"] = os.path.abspath(os.getcwd())
     #
     # Perform scoring
+    skipped = list()
     for model in models:
         model_name = model.GetName()
         model_results = dict()
@@ -584,6 +608,39 @@ def _Main():
                     "Using custom chain mapping: %s" % str(
                         opts.chain_mapping))
                 qs_scorer.chain_mapping = opts.chain_mapping
+            else:
+                qs_scorer.chain_mapping  # just to initialize it
+            ost.LogInfo("-" * 80)
+            ost.LogInfo("Checking consistency between %s and %s" % (
+                        model_name, reference_name))
+            is_cons = _CheckConsistency(
+                reference,
+                model,
+                qs_scorer.chain_mapping,
+                not opts.ignore_consistency_checks)
+            if not opts.ignore_consistency_checks:
+                if not is_cons:
+                    msg = (("Residue names in model %s and in reference "
+                            "%s are inconsistent. Skipping.") % (
+                                model_name,
+                                reference_name))
+                    ost.LogError(msg)
+                    skipped.append(True)
+                    continue
+                else:
+                    ost.LogInfo("Consistency check: OK")
+                    skipped.append(False)
+            else:
+                skipped.append(False)
+                if not is_cons:
+                    msg = (("Residue names in model %s and in reference "
+                            "%s are inconsistent.\nThis might lead to "
+                            "corrupted results.") % (
+                                model_name,
+                                reference_name))
+                    ost.LogWarning(msg)
+                else:
+                    ost.LogInfo("Consistency check: OK")
             if opts.qs_score:
                 ost.LogInfo("-" * 80)
                 ost.LogInfo("Computing QS-score")
@@ -622,8 +679,8 @@ def _Main():
                     radius=opts.inclusion_radius,
                     sequence_separation=opts.sequence_separation,
                     sel=opts.selection,
-                    structural_checks=False,
-                    consistency_checks=opts.consistency_checks,
+                    structural_checks=False,  # These are performed elsewhere
+                    consistency_checks=False,  # These are performed elsewhere
                     label="lddt")
                 ost.LogInfo("lDDT settings: ")
                 ost.LogInfo(str(lddt_settings).rstrip())
@@ -725,6 +782,7 @@ def _Main():
                 reference_results["lddt"] = lddt_results
             model_results[reference_name] = reference_results
             if opts.dump_structures:
+                ost.LogInfo("-" * 80)
                 ref_output_path = os.path.join(
                     os.path.dirname(opts.reference),
                     reference_name + opts.dump_suffix)
@@ -747,7 +805,12 @@ def _Main():
                     ost.LogError("Cannot save model: %s" % str(ex))
         result["result"][model_name] = model_results
 
+    if all(skipped) and len(skipped) > 0:
+        raise RuntimeError("Consistency check failed for all model-reference "
+                           "pairs.")
     if opts.output is not None:
+        ost.LogInfo("#" * 80)
+        ost.LogInfo("Saving output into %s" % opts.output)
         with open(opts.output, "w") as outfile:
             outfile.write(json.dumps(result, indent=4))
 

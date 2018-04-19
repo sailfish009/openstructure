@@ -566,6 +566,9 @@ void lDDTScorer::_Init(){
       throw std::runtime_error(errstr.str());
     }
   }
+  if (settings.consistency_checks) {
+    _CheckConsistency();
+  }
 }
 
 Real lDDTScorer::GetGlobalScore(){
@@ -641,13 +644,9 @@ bool lDDTScorer::IsValid(){
 void lDDTScorer::_CheckConsistency(){
   for (std::vector<EntityView>::const_iterator ref_list_it = references_view.begin();
        ref_list_it != references_view.end(); ++ref_list_it) {
-    bool cons_check = ResidueNamesMatch(model_view, *ref_list_it, settings.consistency_checks);
+    bool cons_check = ResidueNamesMatch(model_view, *ref_list_it, true);
     if (cons_check == false) {
-      if (settings.consistency_checks == true) {
-        throw std::runtime_error("Residue names in model and in reference structure(s) are inconsistent.");
-      } else {
-        LOG_WARNING("Residue names in model and in reference structure(s) are inconsistent.");
-      }   
+      throw std::runtime_error("Residue names in model and in reference structure(s) are inconsistent.");
     } 
   }
 }
