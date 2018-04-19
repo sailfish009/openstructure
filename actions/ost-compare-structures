@@ -466,7 +466,7 @@ def _ReadStructureFile(path):
                 _RevertChainNames(entity)
                 entities.append(entity)
             elif len(cif_info.biounits) > 1:
-                for i, biounit in enumerate(cif_info.biounits):
+                for i, biounit in enumerate(cif_info.biounits, 1):
                     entity = biounit.PDBize(tmp_entity, min_polymer_size=0)
                     if not entity.IsValid():
                         raise IOError(
@@ -730,15 +730,21 @@ def _Main():
                     reference_name + opts.dump_suffix)
                 ost.LogInfo("Saving cleaned up reference to %s" %
                             ref_output_path)
-                SavePDB(qs_scorer.qs_ent_1.ent,
-                        ref_output_path)
+                try:
+                    SavePDB(qs_scorer.qs_ent_1.ent,
+                            ref_output_path)
+                except Exception as ex:
+                    ost.LogError("Cannot save reference: %s" % str(ex))
                 mdl_output_path = os.path.join(
                     os.path.dirname(opts.model),
                     model_name + opts.dump_suffix)
                 ost.LogInfo("Saving cleaned up reference to %s" %
                             mdl_output_path)
-                SavePDB(qs_scorer.qs_ent_2.ent,
-                        mdl_output_path)
+                try:
+                    SavePDB(qs_scorer.qs_ent_2.ent,
+                            mdl_output_path)
+                except Exception as ex:
+                    ost.LogError("Cannot save model: %s" % str(ex))
         result["result"][model_name] = model_results
 
     if opts.output is not None:
