@@ -854,7 +854,7 @@ def _Main():
                 mdl_output_path = os.path.join(
                     os.path.dirname(opts.model),
                     model_name + opts.dump_suffix)
-                ost.LogInfo("Saving cleaned up reference to %s" %
+                ost.LogInfo("Saving cleaned up model to %s" %
                             mdl_output_path)
                 try:
                     SavePDB(qs_scorer.qs_ent_2.ent,
