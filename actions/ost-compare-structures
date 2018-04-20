@@ -450,6 +450,25 @@ def _CheckConsistency(reference, model, chain_mapping, log_error):
     return is_cons
 
 
+def _GetAlignmentsAsFasta(alignments):
+    """Get the alignments as FASTA formated string.
+
+    :param alignments: Alignments
+    :type alignments: list of AlignmentHandle
+    :returns: list of alignments in FASTA format
+    :rtype: list of strings
+    """
+    strings = list()
+    for alignment in alignments:
+        aln_str = ">reference:%s\n%s\n>model:%s\n%s" % (
+            alignment.GetSequence(0).name,
+            alignment.GetSequence(0).GetString(),
+            alignment.GetSequence(1).name,
+            alignment.GetSequence(1).GetString())
+        strings.append(aln_str)
+    return strings
+
+
 def _ReadStructureFile(path):
     """Safely read structure file into OST entity.
 
@@ -618,6 +637,9 @@ def _Main():
                 qs_scorer.chain_mapping,
                 opts.consistency_checks)
             reference_results["info"]["residue_names_consistent"] = is_cons
+            reference_results["info"]["mapping"] = {
+                "chain_mapping": qs_scorer.chain_mapping,
+                "alignments": _GetAlignmentsAsFasta(qs_scorer.alignments)}
             skip_score = False
             if opts.consistency_checks:
                 if not is_cons:
@@ -653,8 +675,7 @@ def _Main():
                         "model_name": model_name,
                         "reference_name": reference_name,
                         "global_score": 0.0,
-                        "best_score": 0.0,
-                        "chain_mapping": qs_scorer.chain_mapping}
+                        "best_score": 0.0}
                 else:
                     ost.LogInfo("Computing QS-score")
                     try:
@@ -664,8 +685,7 @@ def _Main():
                             "model_name": model_name,
                             "reference_name": reference_name,
                             "global_score": qs_scorer.global_score,
-                            "best_score": qs_scorer.best_score,
-                            "chain_mapping": qs_scorer.chain_mapping}
+                            "best_score": qs_scorer.best_score}
                     except qsscoring.QSscoreError as ex:
                         # default handling: report failure and set score to 0
                         ost.LogError('QSscore failed:', str(ex))
@@ -675,8 +695,7 @@ def _Main():
                             "model_name": model_name,
                             "reference_name": reference_name,
                             "global_score": 0.0,
-                            "best_score": 0.0,
-                            "chain_mapping": qs_scorer.chain_mapping}
+                            "best_score": 0.0}
             # Calculate lDDT
             if opts.lddt:
                 ost.LogInfo("-" * 80)
