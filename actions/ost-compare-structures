@@ -304,19 +304,17 @@ def _ParseArgs():
               "separation is higher than the provided parameter are\n"
               "considered when computing the score"))
     parser.add_argument(
-        "-ic",
-        "--ignore-consistency-checks",
-        dest="ignore_consistency_checks",
+        "-cc",
+        "--consistency-checks",
+        dest="consistency_checks",
         default=False,
         action="store_true",
-        help=("Ignore consistency checks. By default residue name\n"
+        help=("Take consistency checks into account. By default residue name\n"
               "consistency between a model-reference pair would be checked\n"
-              "and an error will be rised if no valid pair is found (For\n"
-              "mmCIF there could be more than one biounit in one file).\n"
-              "The pair that does not conform to the check will be skipped.\n"
-              "If the option is selected consistency checks will also be\n"
-              "performed but only a warning will be shown and the pair will\b"
-              "evaluated."))
+              "but only a warning message will be displayed and the script\n"
+              "will continue to calculate scores. If this flag is ON, checks\n"
+              "will not be ignored and if the pair does not pass the test\n"
+              "all the scores for that pair will be marked as a FAILURE."))
     parser.add_argument(
         "-spr",
         "--save-per-residue-scores",
@@ -595,7 +593,8 @@ def _Main():
         model_results = dict()
         for reference in references:
             reference_name = reference.GetName()
-            reference_results = dict()
+            reference_results = {
+                "info": dict()}
             ost.LogInfo("#" * 80)
             ost.LogInfo("Comparing %s to %s" % (
                 model_name,
@@ -617,16 +616,18 @@ def _Main():
                 reference,
                 model,
                 qs_scorer.chain_mapping,
-                not opts.ignore_consistency_checks)
-            if not opts.ignore_consistency_checks:
+                opts.consistency_checks)
+            reference_results["info"]["residue_names_consistent"] = is_cons
+            skip_score = False
+            if opts.consistency_checks:
                 if not is_cons:
                     msg = (("Residue names in model %s and in reference "
-                            "%s are inconsistent. Skipping.") % (
+                            "%s are inconsistent.") % (
                                 model_name,
                                 reference_name))
                     ost.LogError(msg)
-                    skipped.append(True)
-                    continue
+                    skip_score = True
+                    skipped.append(skip_score)
                 else:
                     ost.LogInfo("Consistency check: OK")
                     skipped.append(False)
@@ -643,29 +644,39 @@ def _Main():
                     ost.LogInfo("Consistency check: OK")
             if opts.qs_score:
                 ost.LogInfo("-" * 80)
-                ost.LogInfo("Computing QS-score")
-                try:
-                    reference_results["qs_score"] = {
-                        "status": "SUCCESS",
-                        "error": "",
-                        "model_name": model_name,
-                        "reference_name": reference_name,
-                        "global_score": qs_scorer.global_score,
-                        "best_score": qs_scorer.best_score,
-                        "chain_mapping": qs_scorer.chain_mapping
-                    }
-                except qsscoring.QSscoreError as ex:
-                    # default handling: report failure and set score to 0
-                    ost.LogError('QSscore failed:', str(ex))
+                if skip_score:
+                    ost.LogInfo(
+                        "Skipping QS-score because consistency check failed")
                     reference_results["qs_score"] = {
                         "status": "FAILURE",
-                        "error": str(ex),
+                        "error": "Consistency check failed.",
                         "model_name": model_name,
-                        "reference_name": reference.GetName(),
+                        "reference_name": reference_name,
                         "global_score": 0.0,
                         "best_score": 0.0,
-                        "chain_mapping": qs_scorer.chain_mapping
-                    }
+                        "chain_mapping": qs_scorer.chain_mapping}
+                else:
+                    ost.LogInfo("Computing QS-score")
+                    try:
+                        reference_results["qs_score"] = {
+                            "status": "SUCCESS",
+                            "error": "",
+                            "model_name": model_name,
+                            "reference_name": reference_name,
+                            "global_score": qs_scorer.global_score,
+                            "best_score": qs_scorer.best_score,
+                            "chain_mapping": qs_scorer.chain_mapping}
+                    except qsscoring.QSscoreError as ex:
+                        # default handling: report failure and set score to 0
+                        ost.LogError('QSscore failed:', str(ex))
+                        reference_results["qs_score"] = {
+                            "status": "FAILURE",
+                            "error": str(ex),
+                            "model_name": model_name,
+                            "reference_name": reference_name,
+                            "global_score": 0.0,
+                            "best_score": 0.0,
+                            "chain_mapping": qs_scorer.chain_mapping}
             # Calculate lDDT
             if opts.lddt:
                 ost.LogInfo("-" * 80)
@@ -694,91 +705,119 @@ def _Main():
                 for scorer_index, lddt_scorer in enumerate(
                         oligo_lddt_scorer.sc_lddt_scorers):
                     # Get chains and renumber according to alignment (for lDDT)
-                    try:
-                        model_chain = lddt_scorer.model.chains[0].GetName()
-                        reference_chain = \
-                            lddt_scorer.references[0].chains[0].GetName()
-                        ost.LogInfo((" --> Computing lDDT between model "
-                                     "chain %s and reference chain %s") % (
-                                         model_chain,
-                                         reference_chain))
-                        ost.LogInfo("Global LDDT score: %.4f" %
-                                    lddt_scorer.global_score)
+                    model_chain = lddt_scorer.model.chains[0].GetName()
+                    reference_chain = \
+                        lddt_scorer.references[0].chains[0].GetName()
+                    if skip_score:
                         ost.LogInfo(
-                            "(%i conserved distances out of %i checked, over "
-                            "%i thresholds)" % (lddt_scorer.conserved_contacts,
-                                                lddt_scorer.total_contacts,
-                                                len(lddt_settings.cutoffs)))
-                        sc_lddt_scores = {
-                            "status": "SUCCESS",
-                            "error": "",
-                            "model_chain": model_chain,
-                            "reference_chain": reference_chain,
-                            "global_score": lddt_scorer.global_score,
-                            "conserved_contacts":
-                                lddt_scorer.conserved_contacts,
-                            "total_contacts": lddt_scorer.total_contacts}
-                        if opts.save_per_residue_scores:
-                            per_residue_sc = \
-                                oligo_lddt_scorer.GetPerResidueScores(
-                                    scorer_index)
-                            ost.LogInfo("Per residue local lDDT (reference):")
-                            ost.LogInfo("Chain\tResidue Number\tResidue Name"
-                                        "\tlDDT\tConserved Contacts\tTotal "
-                                        "Contacts")
-                            for prs_scores in per_residue_sc:
-                                ost.LogInfo("%s\t%i\t%s\t%.4f\t%i\t%i" % (
-                                    reference_chain,
-                                    prs_scores["residue_number"],
-                                    prs_scores["residue_name"],
-                                    prs_scores["lddt"],
-                                    prs_scores["conserved_contacts"],
-                                    prs_scores["total_contacts"]))
-                            sc_lddt_scores["per_residue_scores"] = \
-                                per_residue_sc
-                        lddt_results["single_chain_lddt"].append(
-                            sc_lddt_scores)
-                    except Exception as ex:
-                        ost.LogError('Single chain lDDT failed:', str(ex))
+                            " --> Skipping signle chain lDDT because consistency check failed")
                         lddt_results["single_chain_lddt"].append({
                             "status": "FAILURE",
-                            "error": str(ex),
+                            "error": "Consistency check failed.",
                             "model_chain": model_chain,
                             "reference_chain": reference_chain,
                             "global_score": 0.0,
                             "conserved_contacts": 0.0,
                             "total_contacts": 0.0})
+                    else:
+                        try:
+                            ost.LogInfo((" --> Computing lDDT between model "
+                                         "chain %s and reference chain %s") % (
+                                             model_chain,
+                                             reference_chain))
+                            ost.LogInfo("Global LDDT score: %.4f" %
+                                        lddt_scorer.global_score)
+                            ost.LogInfo(
+                                "(%i conserved distances out of %i checked, over "
+                                "%i thresholds)" % (lddt_scorer.conserved_contacts,
+                                                    lddt_scorer.total_contacts,
+                                                    len(lddt_settings.cutoffs)))
+                            sc_lddt_scores = {
+                                "status": "SUCCESS",
+                                "error": "",
+                                "model_chain": model_chain,
+                                "reference_chain": reference_chain,
+                                "global_score": lddt_scorer.global_score,
+                                "conserved_contacts":
+                                    lddt_scorer.conserved_contacts,
+                                "total_contacts": lddt_scorer.total_contacts}
+                            if opts.save_per_residue_scores:
+                                per_residue_sc = \
+                                    oligo_lddt_scorer.GetPerResidueScores(
+                                        scorer_index)
+                                ost.LogInfo("Per residue local lDDT (reference):")
+                                ost.LogInfo("Chain\tResidue Number\tResidue Name"
+                                            "\tlDDT\tConserved Contacts\tTotal "
+                                            "Contacts")
+                                for prs_scores in per_residue_sc:
+                                    ost.LogInfo("%s\t%i\t%s\t%.4f\t%i\t%i" % (
+                                        reference_chain,
+                                        prs_scores["residue_number"],
+                                        prs_scores["residue_name"],
+                                        prs_scores["lddt"],
+                                        prs_scores["conserved_contacts"],
+                                        prs_scores["total_contacts"]))
+                                sc_lddt_scores["per_residue_scores"] = \
+                                    per_residue_sc
+                            lddt_results["single_chain_lddt"].append(
+                                sc_lddt_scores)
+                        except Exception as ex:
+                            ost.LogError('Single chain lDDT failed:', str(ex))
+                            lddt_results["single_chain_lddt"].append({
+                                "status": "FAILURE",
+                                "error": str(ex),
+                                "model_chain": model_chain,
+                                "reference_chain": reference_chain,
+                                "global_score": 0.0,
+                                "conserved_contacts": 0.0,
+                                "total_contacts": 0.0})
                 # perform oligo lddt scoring
-                try:
-                    ost.LogInfo(' --> Computing oligomeric lDDT score')
-                    lddt_results["oligo_lddt"] = {
-                        "status": "SUCCESS",
-                        "error": "",
-                        "global_score": oligo_lddt_scorer.oligo_lddt}
+                if skip_score:
                     ost.LogInfo(
-                        "Oligo lDDT score: %.4f" %
-                        oligo_lddt_scorer.oligo_lddt)
-                except Exception as ex:
-                    ost.LogError('Oligo lDDT failed:', str(ex))
+                        " --> Skipping oligomeric lDDT because consistency check failed")
                     lddt_results["oligo_lddt"] = {
                         "status": "FAILURE",
-                        "error": str(ex),
+                        "error": "Consistency check failed.",
                         "global_score": 0.0}
-                try:
-                    ost.LogInfo(' --> Computing weighted lDDT score')
-                    lddt_results["weighted_lddt"] = {
-                        "status": "SUCCESS",
-                        "error": "",
-                        "global_score": oligo_lddt_scorer.weighted_lddt}
+                else:
+                    try:
+                        ost.LogInfo(' --> Computing oligomeric lDDT score')
+                        lddt_results["oligo_lddt"] = {
+                            "status": "SUCCESS",
+                            "error": "",
+                            "global_score": oligo_lddt_scorer.oligo_lddt}
+                        ost.LogInfo(
+                            "Oligo lDDT score: %.4f" %
+                            oligo_lddt_scorer.oligo_lddt)
+                    except Exception as ex:
+                        ost.LogError('Oligo lDDT failed:', str(ex))
+                        lddt_results["oligo_lddt"] = {
+                            "status": "FAILURE",
+                            "error": str(ex),
+                            "global_score": 0.0}
+                if skip_score:
                     ost.LogInfo(
-                        "Weighted lDDT score: %.4f" %
-                        oligo_lddt_scorer.weighted_lddt)
-                except Exception as ex:
-                    ost.LogError('Weighted lDDT failed:', str(ex))
+                        " --> Skipping weighted lDDT because consistency check failed")
                     lddt_results["weighted_lddt"] = {
                         "status": "FAILURE",
-                        "error": str(ex),
+                        "error": "Consistency check failed.",
                         "global_score": 0.0}
+                else:
+                    try:
+                        ost.LogInfo(' --> Computing weighted lDDT score')
+                        lddt_results["weighted_lddt"] = {
+                            "status": "SUCCESS",
+                            "error": "",
+                            "global_score": oligo_lddt_scorer.weighted_lddt}
+                        ost.LogInfo(
+                            "Weighted lDDT score: %.4f" %
+                            oligo_lddt_scorer.weighted_lddt)
+                    except Exception as ex:
+                        ost.LogError('Weighted lDDT failed:', str(ex))
+                        lddt_results["weighted_lddt"] = {
+                            "status": "FAILURE",
+                            "error": str(ex),
+                            "global_score": 0.0}
                 reference_results["lddt"] = lddt_results
             model_results[reference_name] = reference_results
             if opts.dump_structures:
@@ -806,8 +845,7 @@ def _Main():
         result["result"][model_name] = model_results
 
     if all(skipped) and len(skipped) > 0:
-        raise RuntimeError("Consistency check failed for all model-reference "
-                           "pairs.")
+        ost.LogError("Consistency check failed for all model-reference pairs.")
     if opts.output is not None:
         ost.LogInfo("#" * 80)
         ost.LogInfo("Saving output into %s" % opts.output)
