@@ -520,16 +520,7 @@ void PDBReader::AssignSecStructure(mol::EntityHandle ent)
       continue;
     }
     mol::SecStructure alpha(mol::SecStructure::ALPHA_HELIX);
-    // some PDB files contain helix/strand entries that are adjacent to each 
-    // other. To avoid visual artifacts, we effectively shorten the first of the 
-    // two secondary structure segments to insert one residue of coil 
-    // conformation.
-    mol::ResNum start=i->start, end=i->end;
-    if (helix_list_.end()!=i+1 && (*(i+1)).start.GetNum()<=end.GetNum()+1 &&
-        (*(i+1)).end.GetNum()>end.GetNum()) {
-      end=mol::ResNum((*(i+1)).start.GetNum()-2);
-    }
-    chain.AssignSecondaryStructure(alpha, start, end);
+    chain.AssignSecondaryStructure(alpha, i->start, i->end);
   }
 
   for (HSList::const_iterator i=strand_list_.begin(), e=strand_list_.end();
@@ -540,13 +531,7 @@ void PDBReader::AssignSecStructure(mol::EntityHandle ent)
       continue;
     }
     mol::SecStructure extended(mol::SecStructure::EXTENDED);
-    mol::ResNum start=i->start, end=i->end;
-    // see comment for helix assignment
-    if (strand_list_.end()!=i+1 && (*(i+1)).start.GetNum()<=end.GetNum()+1 &&
-        (*(i+1)).end.GetNum()>end.GetNum()) {
-      end=mol::ResNum((*(i+1)).start.GetNum()-2);
-    }    
-    chain.AssignSecondaryStructure(extended, start, end);
+    chain.AssignSecondaryStructure(extended, i->start, i->end);
   }
 }
 
