@@ -9,7 +9,6 @@ compound.hh
 compound_lib.hh
 module_config.hh
 rule_based.hh
-nonstandard.hh
 minimal_compound_lib.hh
 compound_lib_base.hh
 ring_finder.hh
@@ -27,12 +26,11 @@ rule_based.cc
 model_check.cc
 compound.cc
 compound_lib.cc
-nonstandard.cc
 ring_finder.cc
 )
 
 module(NAME conop SOURCES ${OST_CONOP_SOURCES}
-       HEADERS ${OST_CONOP_HEADERS} DEPENDS_ON ost_mol ost_mol_alg ost_geom ost_db)
+       HEADERS ${OST_CONOP_HEADERS} DEPENDS_ON ost_mol ost_geom ost_db)
 
 
 if (WIN32)

@@ -1,5 +1,5 @@
 import unittest
-from ost import conop, io, mol
+from ost import io, mol
 
 
 class TestNonStandard(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestNonStandard(unittest.TestCase):
     c=ed.InsertChain('A')
     ed.AppendResidue(c, 'SER')
 
-    err, has_cbeta=conop.CopyConserved(tpl.residues[0], new_hdl.residues[0], ed)
+    err, has_cbeta=mol.alg.CopyConserved(tpl.residues[0], new_hdl.residues[0], ed)
     self.assertTrue(err)
     self.assertTrue(has_cbeta)
     residues=new_hdl.residues
@@ -36,16 +36,16 @@ class TestNonStandard(unittest.TestCase):
     ed.AppendResidue(c, 'GLY')
     ed.AppendResidue(c, 'GLY')
     ed.AppendResidue(c, 'HIS')
-    err, has_cbeta=conop.CopyConserved(tpl.residues[0], new_hdl.residues[0], ed)
+    err, has_cbeta=mol.alg.CopyConserved(tpl.residues[0], new_hdl.residues[0], ed)
     self.assertTrue(has_cbeta)
     self.assertTrue(err)
-    err, has_cbeta=conop.CopyConserved(tpl.residues[1], new_hdl.residues[1], ed)
+    err, has_cbeta=mol.alg.CopyConserved(tpl.residues[1], new_hdl.residues[1], ed)
     self.assertFalse(has_cbeta)
     self.assertTrue(err)
-    err, has_cbeta=conop.CopyConserved(tpl.residues[2], new_hdl.residues[2], ed)
+    err, has_cbeta=mol.alg.CopyConserved(tpl.residues[2], new_hdl.residues[2], ed)
     self.assertFalse(has_cbeta)
     self.assertTrue(err)
-    err, has_cbeta=conop.CopyConserved(tpl.residues[3], new_hdl.residues[3], ed)
+    err, has_cbeta=mol.alg.CopyConserved(tpl.residues[3], new_hdl.residues[3], ed)
     self.assertTrue(has_cbeta)
     self.assertTrue(err)
       
@@ -72,28 +72,28 @@ class TestNonStandard(unittest.TestCase):
     ed.AppendResidue(c, 'MET')
     
     # MET to MET
-    err =conop.CopyResidue(tpl.residues[0], new_hdl.residues[0], ed)
+    err =mol.alg.CopyResidue(tpl.residues[0], new_hdl.residues[0], ed)
     self.assertTrue(err)
     #GLY to GLY
-    err =conop.CopyResidue(tpl.residues[1], new_hdl.residues[1], ed)
+    err =mol.alg.CopyResidue(tpl.residues[1], new_hdl.residues[1], ed)
     self.assertTrue(err)
     # GLY to GLY
-    err =conop.CopyResidue(tpl.residues[2], new_hdl.residues[2], ed)
+    err =mol.alg.CopyResidue(tpl.residues[2], new_hdl.residues[2], ed)
     self.assertTrue(err)
     #now we copy a HIS to a HIS
-    err =conop.CopyResidue(tpl.residues[3], new_hdl.residues[3], ed)
+    err =mol.alg.CopyResidue(tpl.residues[3], new_hdl.residues[3], ed)
     self.assertTrue(err)
     # copy a GLY to a HIS
-    err, has_cbeta=conop.CopyNonConserved(tpl.residues[1], new_hdl.residues[4], ed)
+    err, has_cbeta=mol.alg.CopyNonConserved(tpl.residues[1], new_hdl.residues[4], ed)
     self.assertFalse(has_cbeta)
     # copy a MET to a GLY 
-    err =conop.CopyResidue(tpl.residues[0], new_hdl.residues[5], ed)
+    err =mol.alg.CopyResidue(tpl.residues[0], new_hdl.residues[5], ed)
     self.assertFalse(err)
     # copy a MET to a HIS 
-    err =conop.CopyResidue(tpl.residues[0], new_hdl.residues[6], ed)
+    err =mol.alg.CopyResidue(tpl.residues[0], new_hdl.residues[6], ed)
     self.assertFalse(err)
     # copy a GLY to a MET with adding CB
-    err=conop.CopyResidue(tpl.residues[1], new_hdl.residues[7], ed)
+    err=mol.alg.CopyResidue(tpl.residues[1], new_hdl.residues[7], ed)
     self.assertFalse(err)
       
     residues=new_hdl.residues

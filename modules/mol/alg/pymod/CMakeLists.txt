@@ -7,6 +7,8 @@ set(OST_MOL_ALG_PYMOD_SOURCES
   export_contact_overlap.cc
   export_accessibility.cc
   export_sec_structure.cc
+  export_non_standard.cc
+  export_molck.cc
   export_membrane.cc
 )
 
