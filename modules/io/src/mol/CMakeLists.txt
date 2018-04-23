@@ -20,6 +20,7 @@ star_parser.cc
 mmcif_reader.cc
 mmcif_info.cc
 pdb_str.cc
+stereochemical_params_reader.cc
 PARENT_SCOPE
 )
 
@@ -47,5 +48,6 @@ surface_io_handler.hh
 load_surface.hh
 surface_io_msms_handler.hh
 pdb_str.hh
+stereochemical_params_reader.hh
 PARENT_SCOPE
 )

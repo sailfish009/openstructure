@@ -59,6 +59,24 @@ Local Distance Test scores (lDDT, DRMSD)
   :returns: a tuple containing the counts of the conserved distances in the
             model and of all the checked distances
 
+.. function:: LocalDistDiffTest(model, reference_list, distance_list, settings)
+
+  Wrapper around :func:`LocalDistDiffTest` above.
+
+  :param model: the model structure
+  :type model: :class:`~ost.mol.EntityView`
+  :param reference_list: the list of reference structures from which distances were derived
+  :type reference_list: :class:`list` of :class:`~ost.mol.EntityView`
+  :param distance_list: A residue distance map prepared with :func:`PreparelDDTGlobalRDMap`
+    with *reference_list* and *settings* as parameters.
+  :type distance_list:  :class:`~ost.mol.alg.GlobalRDMap`
+  :param settings: lDDT settings
+  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+
+  :returns: the Local Distance Difference Test score (conserved distances
+            divided by all the checked distances)
+  :rtype:   :class:`float`
+
 .. function:: LocalDistDiffTest(model, target, cutoff, max_dist, \
                                 local_lddt_property_string="")
 
@@ -287,22 +305,283 @@ Local Distance Test scores (lDDT, DRMSD)
   
   :returns: :class:`~ost.mol.alg.GlobalRDMap`
 
-  
-.. class:: UniqueAtomIdentifier
 
-  Object containing enough information to uniquely identify an atom in a structure
+.. function:: PreparelDDTGlobalRDMap(reference_list, settings)
 
-  .. method:: UniqueAtomIdentifier(chain,residue_number,residue_name,atom_name)
-    
-    Creates an UniqueAtomIdentifier object starting from relevant atom information
+  A wrapper around :func:`CreateDistanceList` and
+  :func:`CreateDistanceListFromMultipleReferences`. Depending on the length of
+  the ``reference_list`` it calls one or the other.
 
-    :param chain: a string containing the name of the chain to which the atom
-                  belongs
-    :param residue_number: the number of the residue to which the atom belongs
-    :type residue_number:  :class:`~ost.mol.ResNum`
-    :param residue_name: a string containing the name of the residue to which
-                         the atom belongs
-    :param atom_name: a string containing the name of the atom
+  :param reference_list: a list of reference structures from which distances are
+    derived
+  :type reference_list:  list of :class:`~ost.mol.EntityView`
+  :param settings: lDDT settings
+  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+
+  :returns: :class:`~ost.mol.alg.GlobalRDMap`
+
+
+.. function:: CleanlDDTReferences(reference_list)
+
+  Prepares references to be used in lDDT calculation. It checks if all references
+  has the same chain name and selects this chain for for further calculations.
+
+  .. warning::
+
+    This function modifies the passed *reference_list* list.
+
+  :param reference_list: A list of reference structures from which distances are
+                         derived
+  :type reference_list:  :class:`list` of :class:`~ost.mol.EntityView`
+
+
+.. function:: CheckStructure(ent, \
+                             bond_table, \
+                             angle_table, \
+                             nonbonded_table, \
+                             bond_tolerance, \
+                             angle_tolerance)
+
+  Perform structural checks and filters the structure.
+
+  :param ent: Structure to check
+  :type ent: :class:`~ost.mol.EntityView`
+  :param bond_table: List of bond stereo chemical parameters obtained from
+    :class:`~ost.io.StereoChemicalParamsReader` or :func:`FillStereoChemicalParams`
+  :type bond_table: :class:`~ost.mol.alg.StereoChemicalParams`
+  :param angle_table: List of angle stereo chemical parameters obtained from
+    :class:`~ost.io.StereoChemicalParamsReader` or :func:`FillStereoChemicalParams`
+  :type angle_table: :class:`~ost.mol.alg.StereoChemicalParams`
+  :param nonbonded_table: Information about the clashing distances obtained from
+    :class:`~ost.io.StereoChemicalParamsReader` or :func:`FillClashingDistances`
+  :type nonbonded_table: :class:`~ost.mol.alg.ClashingDistances`
+  :param bond_tolerance: Tolerance in stddev for bonds
+  :type bond_tolerance: float
+  :param angle_tolerance: Tolerance in stddev for angles
+  :type angle_tolerance: float
+
+
+.. function:: GetlDDTPerResidueStats(model, distance_list, settings)
+
+  Get the per-residue statistics from the lDDT calculation.
+
+  :param model: The model structure
+  :type model: :class:`~ost.mol.EntityHandle`
+  :param distance_list: The list of distances to check for conservation
+  :type distance_list: :class:`~ost.mol.alg.GlobalRDMap`
+  :param settings: lDDT settings
+  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+  :returns: Per-residue local lDDT scores
+  :rtype: :class:`list` of :class:`~ost.mol.alg.lDDTLocalScore`
+
+
+.. function:: PrintlDDTPerResidueStats(scores, settings)
+
+  Print per-residue statistics from lDDT calculation.
+
+  :param scores: Local lDDT scores
+  :type scores: :class:`list` of :class:`~ost.mol.alg.lDDTLocalScore`
+  :param settings: lDDT settings
+  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+
+
+.. class:: lDDTLocalScore(cname, rname, rnum, is_assessed, quality_problems, \
+                          local_lddt, conserved_dist, total_dist)
+
+  Object containing per-residue information about calculated lDDT.
+
+  :param cname: Sets :attr:`cname`
+  :param rname: Sets :attr:`rname`
+  :param rnum: Sets :attr:`rnum`
+  :param is_assessed: Sets :attr:`is_assessed`
+  :param quality_problems: Sets :attr:`quality_problems`
+  :param local_lddt: Sets :attr:`local_lddt`
+  :param conserved_dist: Sets :attr:`conserved_dist`
+  :param total_dist: Sets :attr:`total_dist`
+
+  .. attribute:: cname
+
+    Chain name.
+
+    :type: :class:`str`
+
+  .. attribute:: rname
+
+    Residue name.
+
+    :type: :class:`str`
+
+  .. attribute:: rnum
+
+    Residue number.
+
+    :type: :class:`int`
+
+  .. attribute:: is_assessed
+
+    Is the residue taken into account? Yes or No.
+
+    :type: :class:`str`
+
+  .. attribute:: quality_problems
+
+    Does the residue have quality problems?
+    No if there are no problems, NA if the problems were not assessed, Yes if
+    there are sidechain problems and Yes+ if there are backbone problems.
+
+    :type: :class:`str`
+
+  .. attribute:: local_lddt
+
+    Local lDDT score for residue.
+
+    :type: :class:`float`
+
+  .. attribute:: conserved_dist
+
+    Number of conserved distances.
+
+    :type: :class:`int`
+
+  .. attribute:: total_dist
+
+    Total number of conserved distances.
+
+    :type: :class:`int`
+
+  .. method:: ToString(structural_checks)
+
+    :return: String representation of the lDDTLocalScore object.
+    :rtype:  :class:`str`
+
+    :param structural_checks: Where structural checks applied during calculations?
+    :type structural_checks: bool
+
+  .. method:: GetHeader(structural_checks, cutoffs_length)
+
+    Get the names of the fields as printed by ToString method.
+
+    :param structural_checks: Where structural checks applied during calculations?
+    :type structural_checks: bool
+    :param cutoffs_length: Length of the cutoffs list used for calculations
+    :type cutoffs_length: int
+
+
+.. class:: lDDTSettings(bond_tolerance=12, \
+                        angle_tolerance=12, \
+                        radius=15, \
+                        sequence_separation=0, \
+                        sel="", \
+                        parameter_file_path="", \
+                        structural_checks=True, \
+                        consistency_checks=True, \
+                        cutoffs=(0.5, 1.0, 2.0, 4.0), \
+                        label="locallddt")
+
+  Object containing the settings used for lDDT calculations.
+
+  :param bond_tolerance: Sets :attr:`bond_tolerance`.
+  :param angle_tolerance: Sets :attr:`angle_tolerance`.
+  :param radius: Sets :attr:`radius`.
+  :param sequence_separation: Sets :attr:`sequence_separation`.
+  :param sel: Sets :attr:`sel`.
+  :param parameter_file_path: Sets :attr:`parameter_file_path`.
+  :param structural_checks: Sets :attr:`structural_checks`.
+  :param consistency_checks: Sets :attr:`consistency_checks`.
+  :param cutoffs: Sets :attr:`cutoffs`.
+  :param label: Sets :attr:`label`.
+
+  .. attribute:: bond_tolerance
+
+    Tolerance in stddevs for bonds.
+
+    :type: :class:`float`
+
+  .. attribute:: angle_tolerance
+
+    Tolerance in stddevs for angles.
+
+    :type: :class:`float`
+
+  .. attribute:: radius
+
+    Distance inclusion radius.
+
+    :type: :class:`float`
+
+  .. attribute:: sequence_separation
+
+    Sequence separation.
+
+    :type: :class:`int`
+
+  .. attribute:: sel
+
+    Selection performed on reference(s).
+
+    :type: :class:`str`
+
+  .. attribute:: parameter_file_path
+
+    Path to the stereochemical parameter file. If set to "", it the default file
+    shipped with OpenStructure is used (see 
+    :class:`~ost.io.StereoChemicalParamsReader`).
+
+    :type: :class:`str`
+
+  .. attribute:: structural_checks
+
+    Are structural checks and filter input data on?
+
+    :type: :class:`bool`
+
+  .. attribute:: consistency_checks
+
+    Are consistency checks on?
+
+    :type: :class:`bool`
+
+  .. attribute:: cutoffs
+
+    List of thresholds used to determine distance conservation.
+
+    :type: :class:`list` of :class:`float`
+
+  .. attribute:: label
+
+    The base name for the ResidueHandle properties that store the local scores.
+
+    :type: :class:`str`
+
+  .. method:: SetStereoChemicalParamsPath(path)
+
+    Set the path to the stereochemical parameter file.
+
+    :param path: Path to stereochemical parameter file
+    :type path: str
+
+  .. method:: PrintParameters()
+
+    Print settings.
+
+  .. method:: ToString()
+
+    :return: String representation of the lDDTSettings object.
+    :rtype:  :class:`str`
+
+
+.. class:: UniqueAtomIdentifier(chain, residue_number, residue_name, atom_name)
+
+  Object containing enough information to uniquely identify an atom in a
+  structure.
+
+  :param chain: A string containing the name of the chain to which the atom
+                belongs
+  :param residue_number: The number of the residue to which the atom belongs
+  :type residue_number:  :class:`~ost.mol.ResNum`
+  :param residue_name: A string containing the name of the residue to which
+                       the atom belongs
+  :param atom_name: A string containing the name of the atom
 
   .. method:: GetChainName() 
 
@@ -1289,6 +1568,8 @@ used to skip frames in the analysis.
 Mapping functions
 --------------------------------------------------------------------------------
 
+.. currentmodule:: ost.mol.alg
+
 The following functions help to convert one residue into another by reusing as
 much as possible from the present atoms. They are mainly meant to map from
 standard amino acid to other standard amino acids or from modified amino acids
@@ -1389,7 +1670,7 @@ function:
                      map_nonstd_res=False,
                      assign_elem=True)
   Molck(ent, lib, ms)
-  SavePDB(ent, "<OUTPUT PATH>", profile="SLOPPY")
+  SavePDB(ent, "<OUTPUT PATH>")
 
 It can also be split into subsequent commands for greater controll:
 
@@ -1433,42 +1714,86 @@ It can also be split into subsequent commands for greater controll:
               colored=False)
 
   CleanUpElementColumn(lib=lib, ent=ent)
-  SavePDB(ent, "<OUTPUT PATH>", profile="SLOPPY")
+  SavePDB(ent, "<OUTPUT PATH>")
 
 API
 ###
 
-
-.. class:: MolckSettings
+.. class:: MolckSettings(rm_unk_atoms=False, rm_non_std=False, \
+                         rm_hyd_atoms=True, rm_oxt_atoms=False, \
+                         rm_zero_occ_atoms=False, colored=False, \
+                         map_nonstd_res=True, assign_elem=True)
 
   Stores settings used for Molecular Checker.
 
-  .. method:: __init__(rm_unk_atoms=False,rm_non_std=False,rm_hyd_atoms=True,rm_oxt_atoms=False, rm_zero_occ_atoms=False,colored=False,map_nonstd_res=True, assign_elem=True)
-    
-    Initializes MolckSettings.
+  :param rm_unk_atoms: Sets :attr:`rm_unk_atoms`.
+  :param rm_non_std: Sets :attr:`rm_non_std`.
+  :param rm_hyd_atoms: Sets :attr:`rm_hyd_atoms`.
+  :param rm_oxt_atoms: Sets :attr:`rm_oxt_atoms`.
+  :param rm_zero_occ_atoms: Sets :attr:`rm_zero_occ_atoms`.
+  :param colored: Sets :attr:`colored`.
+  :param map_nonstd_res: Sets :attr:`map_nonstd_res`.
+  :param assign_elem: Sets :attr:`assign_elem`.
 
-    :param rm_unk_atoms: Remove unknown and atoms not following the nomenclature
-    :type rm_unk_atoms: :class:`bool`
-    :param rm_non_std: Remove all residues not one of the 20 standard amino acids
-    :type rm_non_std: :class:`bool`
-    :param rm_hyd_atoms: Remove hydrogen atoms
-    :type rm_hyd_atoms: :class:`bool`
-    :param rm_oxt_atoms: Remove terminal oxygens
-    :type rm_oxt_atoms: :class:`bool`
-    :param rm_zero_occ_atoms: Remove atoms with zero occupancy
-    :type rm_zero_occ_atoms: :class:`bool`
-    :param colored: Whether output should be colored
-    :type colored: :class:`bool`
-    :param map_nonstd_res: Maps modified residues back to the parent amino acid, for example
-        MSE -> MET, SEP -> SER
-    :type map_nonstd_res: :class:`bool`
-    :param assign_elem: Clean up element column
-    :type assign_elem: :class:`bool`
+  .. attribute:: rm_unk_atoms
+
+    Remove unknown and atoms not following the nomenclature.
+    
+    :type: :class:`bool`
+
+  .. attribute:: rm_non_std
+
+    Remove all residues not one of the 20 standard amino acids
+    
+    :type: :class:`bool`
+
+  .. attribute:: rm_hyd_atoms
+
+    Remove hydrogen atoms
+    
+    :type: :class:`bool`
+
+  .. attribute:: rm_oxt_atoms
+
+    Remove terminal oxygens
+    
+    :type: :class:`bool`
+
+  .. attribute:: rm_zero_occ_atoms
+
+    Remove atoms with zero occupancy
+    
+    :type: :class:`bool`
+
+  .. attribute:: colored
+
+    Whether output should be colored
+    
+    :type: :class:`bool`
+
+  .. attribute:: map_nonstd_res
+
+    Maps modified residues back to the parent amino acid, for example
+    MSE -> MET, SEP -> SER
+    
+    :type: :class:`bool`
+
+  .. attribute:: assign_elem
+
+    Clean up element column
+    
+    :type: :class:`bool`
+
 
   .. method:: ToString()
 
-    String representation of the MolckSettings.
+    :return: String representation of the MolckSettings.
+    :rtype:  :class:`str`
 
+.. warning::
+
+  The API here is set such that the functions modify the passed structure *ent*
+  in-place. If this is not ok, please work on a copy of the structure.
 
 .. function:: Molck(ent, lib, settings)
 
@@ -1491,7 +1816,9 @@ API
   :param lib: Compound library
   :type lib: :class:`~ost.conop.CompoundLib`
 
-.. function:: RemoveAtoms(ent,lib,rm_unk_atoms=False,rm_non_std=False,rm_hyd_atoms=True,rm_oxt_atoms=False,rm_zero_occ_atoms=False,colored=False)
+.. function:: RemoveAtoms(ent, lib, rm_unk_atoms=False, rm_non_std=False, \
+                          rm_hyd_atoms=True, rm_oxt_atoms=False, \
+                          rm_zero_occ_atoms=False, colored=False)
 
   Removes atoms and residues according to some criteria.
 
@@ -1499,18 +1826,12 @@ API
   :type ent: :class:`~ost.mol.EntityHandle`
   :param lib: Compound library
   :type lib: :class:`~ost.conop.CompoundLib`
-  :param rm_unk_atoms: Remove unknown and atoms not following the nomenclature
-  :type rm_unk_atoms: :class:`bool`
-  :param rm_non_std: Remove all residues not one of the 20 standard amino acids
-  :type rm_non_std: :class:`bool`
-  :param rm_hyd_atoms: Remove hydrogen atoms
-  :type rm_hyd_atoms: :class:`bool`
-  :param rm_oxt_atoms: Remove terminal oxygens
-  :type rm_oxt_atoms: :class:`bool`
-  :param rm_zero_occ_atoms: Remove atoms with zero occupancy
-  :type rm_zero_occ_atoms: :class:`bool`
-  :param colored: Whether output should be colored
-  :type colored: :class:`bool`
+  :param rm_unk_atoms: See :attr:`MolckSettings.rm_unk_atoms`
+  :param rm_non_std: See :attr:`MolckSettings.rm_non_std`
+  :param rm_hyd_atoms: See :attr:`MolckSettings.rm_hyd_atoms`
+  :param rm_oxt_atoms: See :attr:`MolckSettings.rm_oxt_atoms`
+  :param rm_zero_occ_atoms: See :attr:`MolckSettings.rm_zero_occ_atoms`
+  :param colored: See :attr:`MolckSettings.colored`
 
 .. function:: CleanUpElementColumn(ent, lib)
 

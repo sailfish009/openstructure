@@ -22,8 +22,67 @@
 #include <ost/mol/alg/module_config.hh>
 #include <ost/seq/alignment_handle.hh>
 #include <ost/mol/alg/distance_test_common.hh>
+#include <ost/mol/alg/filter_clashes.hh>
 
 namespace ost { namespace mol { namespace alg {
+
+struct lDDTSettings {
+  Real bond_tolerance;
+  Real angle_tolerance;
+  Real radius; 
+  int sequence_separation;
+  String sel;
+  String parameter_file_path;
+  bool structural_checks;
+  bool consistency_checks;
+  std::vector<Real> cutoffs;
+  String label;
+
+  lDDTSettings();
+  lDDTSettings(Real init_bond_tolerance,
+               Real init_angle_tolerance,
+               Real init_radius, 
+               int init_sequence_separation,
+               String init_sel,
+               String init_parameter_file_path,
+               bool init_structural_checks,
+               bool init_consistency_checks,
+               std::vector<Real>& init_cutoffs,
+               String init_label);
+  void SetStereoChemicalParamsPath(const String& path="");
+  void PrintParameters();
+  std::string ToString();
+};
+
+struct lDDTLocalScore {
+  String cname;
+  String rname;
+  int rnum;
+  String is_assessed;
+  String quality_problems;
+  Real local_lddt;
+  int conserved_dist;
+  int total_dist;
+
+  lDDTLocalScore();
+
+  lDDTLocalScore(String init_cname,
+                 String init_rname,
+                 int init_rnum,
+                 String init_is_assessed,
+                 String init_quality_problems,
+                 Real init_local_lddt,
+                 int init_conserved_dist,
+                 int init_total_dist);
+
+  String ToString(bool structural_checks) const;
+
+  static String GetHeader(bool structural_checks, int cutoffs_length);
+};
+
+std::pair<int,int> DLLEXPORT_OST_MOL_ALG ComputeCoverage(const EntityView& v,const GlobalRDMap& glob_dist_list);
+
+bool DLLEXPORT_OST_MOL_ALG IsResnumInGlobalRDMap(const ResNum& resnum, const GlobalRDMap& glob_dist_list);
   
 /// \brief Calculates number of distances conserved in a model, given a list of distances to check and a model
 ///
@@ -73,6 +132,12 @@ Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
                                          Real cutoff, 
                                          Real max_dist,
                                          const String& local_ldt_property_string="");
+/// TODO document me
+Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& v,
+                       std::vector<EntityView>& ref_list,
+                       const GlobalRDMap& glob_dist_list,
+                       lDDTSettings& settings);
+
 /// \brief Calculates the Local Distance Difference Test score for a given model starting from an alignment between a reference structure and the model. 
 ///
 /// Calculates the Local Distance Difference Test score given an alignment between a model and a taget structure.
@@ -134,6 +199,27 @@ void DLLEXPORT_OST_MOL_ALG PrintResidueRDMap(const ResidueRDMap& res_dist_list);
 // required by some helper function. Cannot reuse similar functions in other modules without creating
 // circular dependencies
 bool DLLEXPORT_OST_MOL_ALG IsStandardResidue(String rn);
+
+void DLLEXPORT_OST_MOL_ALG CleanlDDTReferences(std::vector<EntityView>& ref_list);
+
+// Prepare GlobalRDMap from reference list
+GlobalRDMap DLLEXPORT_OST_MOL_ALG PreparelDDTGlobalRDMap(
+    const std::vector<EntityView>& ref_list,
+    lDDTSettings& settings);
+
+void DLLEXPORT_OST_MOL_ALG CheckStructure(EntityView& ent,
+                                          StereoChemicalParams& bond_table,
+                                          StereoChemicalParams& angle_table,
+                                          ClashingDistances& nonbonded_table,
+                                          Real bond_tolerance,
+                                          Real angle_tolerance);
+
+std::vector<lDDTLocalScore> DLLEXPORT_OST_MOL_ALG GetlDDTPerResidueStats(EntityHandle& model,
+                                              GlobalRDMap& glob_dist_list,
+                                              lDDTSettings& settings);
+
+void DLLEXPORT_OST_MOL_ALG PrintlDDTPerResidueStats(std::vector<lDDTLocalScore>& scores,
+                                                    lDDTSettings& settings);
 
 }}}
 

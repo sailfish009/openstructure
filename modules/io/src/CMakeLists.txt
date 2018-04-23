@@ -65,7 +65,7 @@ if (ENABLE_IMG)
 endif()
 ####################################
 
-set(OST_IO_DEPENDENCIES ost_base;ost_conop;ost_seq)
+set(OST_IO_DEPENDENCIES ost_base;ost_conop;ost_seq;ost_mol_alg)
 if (ENABLE_IMG)
   set(OST_IO_DEPENDENCIES ${OST_IO_DEPENDENCIES};ost_img;ost_img_alg)
 endif()

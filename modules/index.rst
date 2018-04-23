@@ -30,6 +30,7 @@ OpenStructure documentation
   contributing
   table
   mol/alg/lddt
+  mol/alg/molck
 
 For Starters
 --------------------------------------------------------------------------------
@@ -101,7 +102,9 @@ Varia
 
 **Users**: :doc:`Reporting a problem <users>`
 
-**lDDT**: :doc:`lDDT command line executable<mol/alg/lddt>`
+**lDDT**: :doc:`lDDT command line executable and Python API<mol/alg/lddt>`
+
+**Molck**: :doc:`Molecular Checker<mol/alg/molck>`
 
 Extending OpenStructure
 --------------------------------------------------------------------------------

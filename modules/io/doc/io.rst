@@ -343,3 +343,45 @@ Saving Density Maps
   12
 
 
+Stereochemical Parameters
+--------------------------------------------------------------------------------
+
+In order to check the structure for some stereo-chemical and steric clashes
+before computing the lDDT scores it is required to pass parameter file based on
+Engh and Huber parameters, and on the atomic radii as defined in the Cambridge
+Structural Database. OpenStructure ships with default file called
+`stereo_chemical_props.txt` located in `$OST_ROOT/share/openstructure`
+directory. A class :class:`~ost.io.StereoChemicalParamsReader` is used to read
+this file.
+
+.. class:: StereoChemicalParamsReader(filename="")
+
+  Object that holds and reads stereochemical parameters.
+
+  :param filename: Sets :attr:`filename`.
+
+  .. attribute:: bond_table
+
+    The table containing bond information of type :class:`~ost.mol.alg.StereoChemicalParams`.
+
+  .. attribute:: angle_table
+
+    The table containing angle information of type :class:`~ost.mol.alg.StereoChemicalParams`.
+
+  .. attribute:: nonbonded_table
+
+    The table containing clashes of type :class:`~ost.mol.alg.ClashingDistances`.
+
+  .. attribute:: filename
+
+    The path to the parameter file that will be used. If set to "", it reads the
+    default file shipped with OpenStructure.
+
+    :type: :class:`str`
+
+  .. method:: Read(check=False)
+
+    Read the file.
+
+    :param check: Raise an error when any of the resulting tables are empty.
+    :type check:  :class:`bool`
