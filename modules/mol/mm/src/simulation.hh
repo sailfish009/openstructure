@@ -143,6 +143,7 @@ private:
   Simulation() { } //hidden constructor... 
 
   void Init(const ost::mol::mm::TopologyPtr top, 
+            const ost::mol::EntityHandle& ent,
             const SettingsPtr settings);
 
   int TimeToNextNotification();
@@ -160,6 +161,7 @@ private:
   std::vector<int> time_to_notify_;
   std::map<FuncType,uint> system_force_mapper_;
   ost::mol::EntityHandle ent_;
+  ost::mol::AtomHandleList atom_list_;
 };
 
 }}} //ns

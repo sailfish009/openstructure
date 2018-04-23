@@ -1,4 +1,4 @@
-Changes in Release 1.
+Changes in Release <RELEASE NUMBER>
 --------------------------------------------------------------------------------
 
   * nonstandard C++ module was moved from ost.conop to ost.mol.alg. This implies
@@ -6,7 +6,19 @@ Changes in Release 1.
     CopyNonConserved that were previousely imported from ost.conop are now
     to be imported from ost.mol.alg.
   * Added Molck API to the ost.mol.alg module.
+  * Removed habit of changing secondary structure of entities when loading
+    from mmCIF PDB files. Before, OST would turn secondary structure 'EEH'
+    into 'ECH' to make it look nicer in DNG. Now, 'EEH' stays 'EEH'.
 
+Changes in Release 1.7.1
+--------------------------------------------------------------------------------
+
+  * Fixed an issue that could cause the star format parser (mmCIF, chemical
+    components dictionary) to enter an infinite loop
+  * Chemical components dictionary was extended by new chemical classes
+    introduced by PDB
+  * Fixed unit tests
+  * Improved documentation
 
 Changes in Release 1.7
 --------------------------------------------------------------------------------
