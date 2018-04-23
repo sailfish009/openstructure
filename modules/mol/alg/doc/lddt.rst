@@ -1,6 +1,6 @@
-======
+====
 lDDT
-======
+====
 
 -------------------------------------
 Where can I find the lDDT executable? 
@@ -180,3 +180,69 @@ For example:
 
 WARNING: Verbosity levels 1 and 2 can generate a large amount of output text, 
 especially with large structures and multiple models being evaluated. 
+
+===============
+lDDT Python API
+===============
+
+One can replicate the binary using simple python script:
+
+.. code-block:: python
+
+    #! /bin/env python
+    """Run lDDT from within script."""
+    from ost.io import LoadPDB
+    from ost.mol.alg import (CleanlDDTReferences,
+                             PreparelDDTGlobalRDMap,
+                             lDDTSettings,
+                             CheckStructure,
+                             LocalDistDiffTest,
+                             GetlDDTPerResidueStats,
+                             PrintlDDTPerResidueStats)
+    from ost.io import StereoChemicalParamsReader
+
+    model_path = "Path to your model pdb file"
+    reference_path = "Path to your reference pdb file"
+    #
+    # Load model and prepare its view
+    model = LoadPDB(model_path)
+    model_view = model.GetChainList()[0].Select("peptide=true")
+    #
+    # Prepare references - it should be alist of EntityView(s)
+    references = [LoadPDB(reference_path).CreateFullView()]
+    #
+    # Initialize settings with default parameters and print them
+    settings = lDDTSettings()
+    settings.PrintParameters()
+
+    #
+    # Clean up references
+    CleanlDDTReferences(references)
+    #
+    # Prepare residue map from references
+    rdmap = PreparelDDTGlobalRDMap(references, settings)
+    #
+    # This part is optional and it depends on our settings parameter
+    if settings.structural_checks:
+        stereochemical_parameters = StereoChemicalParamsReader(
+            settings.parameter_file_path)
+        stereochemical_parameters.Read()
+        CheckStructure(ent=model_view,
+                       bond_table=stereochemical_parameters.bond_table,
+                       angle_table=stereochemical_parameters.angle_table,
+                       nonbonded_table=stereochemical_parameters.nonbonded_table,
+                       bond_tolerance=settings.bond_tolerance,
+                       angle_tolerance=settings.angle_tolerance)
+    #
+    # Calculate lDDT
+    LocalDistDiffTest(model_view, references, rdmap, settings)
+    #
+    # Get the local scores
+    local_scores = GetlDDTPerResidueStats(model, rdmap, settings)
+    #
+    # Pring local scores
+    PrintlDDTPerResidueStats(local_scores, settings)
+
+This can be useful when we already have an models and references already read
+in the memory and we do not want run the binary.
+Please refere to specific function documentation for more details.

@@ -118,7 +118,13 @@ The Handle Classes
     an enabled ``USE_NUMPY`` flag (see :ref:`here <cmake-flags>` for details).
 
     :type: :class:`numpy.array`
-  
+
+  .. attribute:: valid
+
+    Validity of handle.
+
+    :type: bool
+
   .. method:: GetName()
 
     :returns: Name associated to this entity.
@@ -327,6 +333,10 @@ The Handle Classes
     :type radius: float
     
     :returns: :class:`AtomHandleList` (list of :class:`AtomHandle`)
+
+  .. method:: IsValid()
+  
+    See :attr:`valid`
     
 .. class:: ChainHandle
 
@@ -424,6 +434,12 @@ The Handle Classes
     :meth:`GetCenterOfAtoms`.
     
     :type: :class:`~ost.geom.Vec3`
+
+  .. attribute:: valid
+
+    Validity of handle.
+
+    :type: bool
     
   .. method:: FindResidue(res_num)
    
@@ -468,6 +484,10 @@ The Handle Classes
   .. method:: GetDescription()
 
     See :attr:`description`
+
+  .. method:: IsValid()
+  
+    See :attr:`valid`
 
 .. class:: ResidueHandle
 
@@ -620,6 +640,43 @@ The Handle Classes
 
     Residue index (starting at 0) within chain.
 
+  .. attribute:: central_atom
+
+    Central atom used for rendering traces. For peptides, this is usually
+    the CA atom. For nucleotides, this is usually the P atom.
+
+    :type: :class:`AtomHandle`
+
+  .. attribute:: central_normal
+
+    Normal computed for :attr:`central_atom`. Only defined for peptides and
+    nucleotides if all required atoms available. Otherwise, the (1,0,0) vector
+    is returned.
+
+    :type: :class:`~ost.geom.Vec3`
+
+  .. attribute:: valid
+
+    Validity of handle.
+
+    :type: bool
+
+  .. attribute:: next
+
+    Residue after this one in the same chain. Invalid handle returned if there
+    is no next residue. Residues are ordered as in :attr:`ChainHandle.residues`
+    independently on whether they are connected or not (see
+    :func:`InSequence` to check for connected residues).
+
+    :type: :class:`ResidueHandle`
+
+  .. attribute:: prev
+
+    Residue before this one in the same chain. Otherwise same behaviour as
+    :attr:`next`.
+
+    :type: :class:`ResidueHandle`
+
   .. method:: FindAtom(atom_name)
 
     Get atom by atom name. See also :attr:`atoms`
@@ -666,7 +723,20 @@ The Handle Classes
   .. method:: GetIndex()
     
     See :attr:`index`
+
+  .. method:: GetCentralAtom()
+              SetCentralAtom()
+    
+    See :attr:`central_atom`
+
+  .. method:: GetCentralNormal()
+    
+    See :attr:`central_normal`
+
+  .. method:: IsValid()
   
+    See :attr:`valid`
+
 
 .. class:: AtomHandle
 
@@ -732,6 +802,7 @@ The Handle Classes
   
     The atom's occupancy in the range 0 to 1. Read/write. Also available as 
     :meth:`GetOccupancy`, :meth:`SetOccupancy`.
+
     :type: float
     
   .. attribute:: b_factor
@@ -781,6 +852,12 @@ The Handle Classes
     :attr:`AtomView.handle`) have the same identifier.
 
     :type: int
+
+  .. attribute:: valid
+
+    Validity of handle.
+
+    :type: bool
 
   .. method:: FindBondToAtom(other_atom)
 
@@ -899,8 +976,7 @@ The Handle Classes
   .. method:: IsValid()
   
     See :attr:`valid`
-  
-    :rtype: bool
+
   
 The View Classes
 --------------------------------------------------------------------------------
@@ -980,6 +1056,12 @@ The View Classes
      available as :meth:`GetHandle`.
      
      :type: :class:`EntityHandle`
+
+  .. attribute:: valid
+
+     Validity of view.
+
+     :type: bool
 
   .. method:: GetName()
 
@@ -1199,7 +1281,8 @@ The View Classes
   .. method:: GetBondCount()
 
     Get number of bonds
-    :rtype: int
+
+    :rtype: :class:`int`
 
   .. method:: GetBondList()
 
@@ -1240,6 +1323,10 @@ The View Classes
   .. method:: GetAtomCount()
     
     See :attr:`atom_count`
+
+  .. method:: IsValid()
+  
+    See :attr:`valid`
 
 .. class:: ChainView
 
@@ -1350,7 +1437,7 @@ The View Classes
 
   .. attribute:: valid
 
-     Validity of handle.
+     Validity of view.
 
      :type: bool
 
@@ -1752,6 +1839,28 @@ Other Entity-Related Functions
 
   :returns: :class:`EntityHandle`
 
+.. function:: InSequence(res, res_next)
+
+  :return: True, if both *res* and *res_next* are :attr:`~ResidueHandle.valid`,
+           *res_next* is the residue following *res* (see 
+           :attr:`ResidueHandle.next`), both residues are linking (i.e.
+           :attr:`~ChemClass.IsPeptideLinking` or
+           :attr:`~ChemClass.IsNucleotideLinking`) and are connected by an
+           appropriate bond.
+  :rtype:  :class:`bool`
+  :param res: First residue to check.
+  :type res:  :class:`ResidueHandle`
+  :param res_next: Second residue to check.
+  :type res_next:  :class:`ResidueHandle`
+
+.. function:: BondExists(atom_a, atom_b)
+
+  :return: True, if *atom_a* and *atom_b* are connected by a bond.
+  :rtype:  :class:`bool`
+  :param atom_a: First atom to check.
+  :type atom_a:  :class:`AtomHandle`
+  :param atom_b: Second atom to check.
+  :type atom_b:  :class:`AtomHandle`
 
 Residue Numbering
 --------------------------------------------------------------------------------

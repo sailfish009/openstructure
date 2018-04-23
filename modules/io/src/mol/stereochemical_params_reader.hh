@@ -16,29 +16,25 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <boost/python.hpp>
-using namespace boost::python;
+#ifndef OST_IO_STEREOCHEMICAL_PARAMS_READER_H
+#define OST_IO_STEREOCHEMICAL_PARAMS_READER_H
 
-//void export_Builder();
-void export_Compound();
-void export_Sanitizer();
-void export_Conop();
-void export_RingFinder();
-void export_AminoAcids();
-void export_processor();
-void export_rule_based();
-void export_heuristic();
-void export_diag();
+#include <ost/io/module_config.hh>
+#include <ost/mol/alg/filter_clashes.hh>
 
-BOOST_PYTHON_MODULE(_ost_conop)
-{
- // export_Builder();
-  export_Conop();
-  export_processor();
-  export_rule_based();
-  export_heuristic();
-  export_Compound();
-  export_RingFinder();
-  export_AminoAcids();
-  export_diag();
-}
+namespace ost { namespace io {
+
+struct StereoChemicalParamsReader {
+  String filename;
+  ost::mol::alg::StereoChemicalParams bond_table;
+  ost::mol::alg::StereoChemicalParams angle_table;
+  ost::mol::alg::ClashingDistances nonbonded_table;
+
+  StereoChemicalParamsReader();
+  StereoChemicalParamsReader(const String& filename);
+  void Read(bool check=false);
+};
+
+}} // ns
+
+#endif

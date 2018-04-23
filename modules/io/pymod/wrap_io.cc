@@ -33,6 +33,7 @@ using namespace boost::python;
 #include <ost/io/mol/entity_io_sdf_handler.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/mol/dcd_io.hh>
+#include <ost/io/stereochemical_params_reader.hh>
 using namespace ost;
 using namespace ost::io;
 
@@ -119,6 +120,15 @@ BOOST_PYTHON_MODULE(_ost_io)
 ;
   def("LoadMAE", &LoadMAE);
   def("LoadPQR", &LoadPQR);
+
+  class_<io::StereoChemicalParamsReader>("StereoChemicalParamsReader",
+                           init<String>(arg("filename")))
+    .def(init<>())
+    .def("Read", &io::StereoChemicalParamsReader::Read, (arg("check")=false))
+    .def_readwrite("filename", &io::StereoChemicalParamsReader::filename)
+    .def_readwrite("bond_table", &io::StereoChemicalParamsReader::bond_table)
+    .def_readwrite("angle_table", &io::StereoChemicalParamsReader::angle_table)
+    .def_readwrite("nonbonded_table", &io::StereoChemicalParamsReader::nonbonded_table);
 
   export_pdb_io();
   export_mmcif_io();
