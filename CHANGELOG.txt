@@ -1,11 +1,16 @@
-Changes in Release 1.8
+Changes in Release <RELEASE NUMBER>
 --------------------------------------------------------------------------------
 
   * nonstandard C++ module was moved from ost.conop to ost.mol.alg. This implies
     change in the API. Mapping functions CopyResidue, CopyConserved and
     CopyNonConserved that were previousely imported from ost.conop are now
     to be imported from ost.mol.alg.
+  * Removed habit of changing secondary structure of entities when loading
+    from mmCIF PDB files. Before, OST would turn secondary structure 'EEH'
+    into 'ECH' to make it look nicer in DNG. Now, 'EEH' stays 'EEH'.
   * Added Molck API to the ost.mol.alg module.
+  * Extended lDDT API in ost.mol.alg module to reproduce functionality of lddt
+    binary.
 
 Changes in Release 1.7.1
 --------------------------------------------------------------------------------

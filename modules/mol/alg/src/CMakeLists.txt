@@ -22,6 +22,7 @@ set(OST_MOL_ALG_HEADERS
   sec_struct.hh
   nonstandard.hh
   molck.hh
+  find_membrane.hh
 )
 
 set(OST_MOL_ALG_SOURCES
@@ -47,6 +48,7 @@ set(OST_MOL_ALG_SOURCES
   sec_struct.cc
   nonstandard.cc
   molck.cc
+  find_membrane.cc
 )
 
 set(MOL_ALG_DEPS ost_mol ost_seq)
