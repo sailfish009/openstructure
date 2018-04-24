@@ -198,8 +198,22 @@ def _ParseArgs():
         default=".compare.structures.pdb",
         help=("Use this suffix to dump structures.\n"
               "Defaults to .compare.structures.pdb."))
+    parser.add_argument(
+        "-ca",
+        "--c-alpha-only",
+        dest="c_alpha_only",
+        default=False,
+        action="store_true",
+        help=("Use C-alpha atoms only."))
+    parser.add_argument(
+        "-ft",
+        "--fault-tolerant",
+        dest="fault_tolerant",
+        default=False,
+        action="store_true",
+        help=("Fault tolerant parsing."))
     #
-    # QS-score options
+    # QS-scorer options
     #
     parser.add_argument(
         "-qs",
@@ -243,26 +257,12 @@ def _ParseArgs():
         default="",
         help=("Selection performed on reference."))
     parser.add_argument(
-        "-ca",
-        "--c-alpha-only",
-        dest="c_alpha_only",
-        default=False,
-        action="store_true",
-        help=("Use C-alpha atoms only."))
-    parser.add_argument(
         "-sc",
         "--structural-checks",
         dest="structural_checks",
         default=False,
         action="store_true",
         help=("Perform structural checks and filter input data."))
-    parser.add_argument(
-        "-ft",
-        "--fault-tolerant",
-        dest="fault_tolerant",
-        default=False,
-        action="store_true",
-        help=("Fault tolerant parsing."))
     parser.add_argument(
         "-p",
         "--parameter-file",
@@ -469,7 +469,7 @@ def _GetAlignmentsAsFasta(alignments):
     return strings
 
 
-def _ReadStructureFile(path):
+def _ReadStructureFile(path, c_alpha_only=False, fault_tolerant=False):
     """Safely read structure file into OST entity.
 
     The functin can read both PDB and mmCIF files.
@@ -479,18 +479,25 @@ def _ReadStructureFile(path):
     :returns: Entity
     :rtype: :class:`~ost.mol.EntityHandle`
     """
+    calpha_messag = "Selecting only C-alpha atoms"
     entities = list()
     if not os.path.isfile(path):
         raise IOError("%s is not a file" % path)
     try:
-        entity = LoadPDB(path)
+        entity = LoadPDB(path, fault_tolerant=fault_tolerant)
         if not entity.IsValid():
             raise IOError("Provided file does not contain valid entity.")
         entity.SetName(os.path.basename(path))
+        if c_alpha_only:
+            ost.LogInfo(calpha_messag)
+            entity = entity.Select("aname=CA")
         entities.append(entity)
     except Exception:
         try:
-            tmp_entity, cif_info = LoadMMCIF(path, info=True)
+            tmp_entity, cif_info = LoadMMCIF(
+                path,
+                info=True,
+                fault_tolerant=fault_tolerant)
             if len(cif_info.biounits) == 0:
                 tbu = MMCifInfoBioUnit()
                 tbu.id = 'ASU of ' + entity.pdb_id
@@ -504,6 +511,9 @@ def _ReadStructureFile(path):
                 entity = tbu.PDBize(tmp_entity, min_polymer_size=0)
                 entity.SetName(os.path.basename(path) + ".au")
                 _RevertChainNames(entity)
+                if c_alpha_only:
+                    ost.LogInfo(calpha_messag)
+                    entity = entity.Select("aname=CA")
                 entities.append(entity)
             elif len(cif_info.biounits) > 1:
                 for i, biounit in enumerate(cif_info.biounits, 1):
@@ -513,6 +523,9 @@ def _ReadStructureFile(path):
                             "Provided file does not contain valid entity.")
                     entity.SetName(os.path.basename(path) + "." + str(i))
                     _RevertChainNames(entity)
+                    if c_alpha_only:
+                        ost.LogInfo(calpha_messag)
+                        entity = entity.Select("aname=CA")
                     entities.append(entity)
             else:
                 biounit = cif_info.biounits[0]
@@ -522,6 +535,9 @@ def _ReadStructureFile(path):
                         "Provided file does not contain valid entity.")
                 entity.SetName(os.path.basename(path))
                 _RevertChainNames(entity)
+                if c_alpha_only:
+                    ost.LogInfo(calpha_messag)
+                    entity = entity.Select("aname=CA")
                 entities.append(entity)
 
         except Exception as exc:
@@ -553,11 +569,18 @@ def _Main():
     #
     # Read the input files
     ost.LogInfo("#" * 80)
-    ost.LogInfo("Reading input files")
+    ost.LogInfo("Reading input files (fault_tolerant=%s)" %
+                str(opts.fault_tolerant))
     ost.LogInfo(" --> reading model from %s" % opts.model)
-    models = _ReadStructureFile(opts.model)
+    models = _ReadStructureFile(
+        opts.model,
+        c_alpha_only=opts.c_alpha_only,
+        fault_tolerant=opts.fault_tolerant)
     ost.LogInfo(" --> reading reference from %s" % opts.reference)
-    references = _ReadStructureFile(opts.reference)
+    references = _ReadStructureFile(
+        opts.reference,
+        c_alpha_only=opts.c_alpha_only,
+        fault_tolerant=opts.fault_tolerant)
     if opts.molck:
         ost.LogInfo("#" * 80)
         ost.LogInfo("Cleaning up input with Molck")
