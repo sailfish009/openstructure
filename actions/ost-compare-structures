@@ -729,7 +729,7 @@ def _Main():
                         lddt_scorer.references[0].chains[0].GetName()
                     if skip_score:
                         ost.LogInfo(
-                            " --> Skipping signle chain lDDT because consistency check failed")
+                            " --> Skipping single chain lDDT because consistency check failed")
                         lddt_results["single_chain_lddt"].append({
                             "status": "FAILURE",
                             "error": "Consistency check failed.",
