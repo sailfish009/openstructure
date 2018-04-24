@@ -9,27 +9,44 @@ OST Docker
 Build Docker image
 ------------------
 
+
 In order to build OST image:
 
 .. code-block:: bash
 
-  cd <OST ROOT>/docker
-  docker build --tag <TAG> .
+  cd <PATH TO OST>/docker
+  docker build --tag <IMAGE NAME> --build-arg OPENSTRUCTURE_VERSION=<VERSION> -f Dockerfile .
 
-One can chose any tag eg. ost.
-
-Run script with OST
--------------------
-
-In order to run OST script do:
+or if you downloaded the Dockerfile directly:
 
 .. code-block:: bash
 
-  docker run [DOCKER OPTIONS] --rm -v <PATH TO SCRIPT DIR>:/home <IMAGE NAME> /home/<SCRIPT NAME> [SCRIPT OPTIONS]
+  docker build --tag <IMAGE NAME> --build-arg OPENSTRUCTURE_VERSION=<VERSION> -f <DOCKERFILE NAME> <PATH TO DOCKERFILE DIR>
 
-.. warning::
+You can chose any image name (tag) eg. ost. The `OPENSTRUCTURE_VERSION`
+build argument is mandatory and image will not built without it. See
+`CHANGELOG <https://git.scicore.unibas.ch/schwede/openstructure/blob/master/CHANGELOG.txt>`_
+for current list of available releases.
 
-  If script requires some external files eg. PDBs, they have to be located in the
+Testing the image
+-----------------
+
+One can find a exemplary script (`test_docker.py`) in the downloaded directory.
+To run it do:
+
+.. code-block::
+
+  cd <PATH TO OST>/docker
+  docker run --rm -v $(pwd):/home <IMAGE NAME> test_docker.py
+
+As the last line you should see `OST is working!`.
+
+Run script and action with OST
+------------------------------
+
+.. note::
+
+  If script or action requires some external files eg. PDBs, they have to be located in the
   path accessible via mounted volume and should be accessed via docker (NOT LOCAL)
   path. Eg. assuming that we have a struc.pdb file in /home/user/pdbs directory and
   a script.py in /home/user we could mount the /home/user to /home in docker as
@@ -45,38 +62,94 @@ In order to run OST script do:
   .. code-block:: bash
 
     docker run --rm -v /home/user:/home <IMAGE NAME> home/script.py /home/pdbs/struct.pdb
+  
+  An easy solution to mount a CWD is to use $(pwd) command in the -v option
+  of the Docker. For an example see the action exemplary run.
+  The same reasoning is valid for the output files.
 
-One can find a exemplary script (`test_docker.py`) in the <OST ROOT>/docker
-directory. To run it do:
+Actions
+#######
+
+To see the list of available actions do:
+
+  .. code-block::
+
+    docker run --rm <IMAGE NAME> -h
+
+To run chosen action do:
+
+  .. code-block::
+
+    docker run --rm <IMAGE NAME> <ACTION NAME>
+
+ 
+Here is an example run of compare-structures action mimicking CAMEO evaluation:
 
 .. code-block::
 
-  cd <OST ROOT>/docker
-  docker run --rm -v <OST ROOT>/docker:/home <IMAGE NAME> test_docker.py
+  docker run --rm -v $(pwd):/home <IMAGE NAME> compare-structures \
+      --model model.pdb \
+      --reference reference.pdb \
+      --output output.json \
+      --qs-score \
+      --residue-number-alignment \
+      --lddt \
+      --structural-checks \
+      --consistency-checks \
+      --inclusion-radius 15.0 \
+      --bond-tolerance 15.0 \
+      --angle-tolerance 15.0 \
+      --molck \
+      --remove oxt hyd unk \
+      --clean-element-column \
+      --map-nonstandard-residues
 
-Run script with utility command
+
+In order to see all available options for this action run:
+
+.. code-block::
+
+  docker run --rm <IMAGE NAME> compare-structures -h
+
+Scripts
+#######
+
+In order to run OST script do:
+
+.. code-block:: bash
+
+  docker run [DOCKER OPTIONS] --rm -v <PATH TO SCRIPT DIR>:/home <IMAGE NAME> /home/<SCRIPT NAME> [SCRIPT OPTIONS]
+
+Run ost with utility command
 ###############################
 
 One can also use provided utility bash script `run_docker_ost` to run basic
-scripts:
+scripts and actions:
 
 .. code-block:: bash
 
-  <OST ROOT>/docker/run_docker_ost <IMAGE_NAME> [<SCRIPT_PATH>] [SCRIPT OPTIONS]
+  <PATH TO OST>/docker/run_docker_ost <IMAGE_NAME> [<SCRIPT_PATH>] [SCRIPT OPTIONS]
 
-One just needs to provide image name and optionally a script and its options. It
-is useful to link the command to the binary directory eg. in linux:
+One just needs to provide image name and optionally a script/action and its
+options. It is useful to link the command to the binary directory eg. in linux:
 
 .. code-block:: bash
 
-  ln -s <OST ROOT>/docker/run_docker_ost /usr/bin/run_docker_ost
+  ln -s <PATH TO OST>/docker/run_docker_ost /usr/bin/run_docker_ost
 
 In order to run an exemplary script (`test_docker.py`) do:
 
 .. code-block::
 
-  cd <OST ROOT>/docker
+  cd <PATH TO OST>/docker
   ./run_docker_ost <IMAGE NAME> test_docker.py
+
+To see the help for compare-structures action run:
+
+.. code-block::
+
+  cd <PATH TO OST>/docker
+  ./run_docker_ost <IMAGE NAME> compare-structures
 
 Run GUI
 -------
