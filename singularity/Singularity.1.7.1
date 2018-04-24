@@ -1,0 +1,431 @@
+BootStrap: docker
+From: ubuntu:16.04
+
+%post
+##############################################################################
+# POST
+##############################################################################
+
+# CHANGE DASH TO BASH
+rm /bin/sh
+ln -sf /bin/bash /bin/sh
+
+# DEFINE SOME ENV VARS USED DURING THE IMAGE BUILD
+##########################
+export SRC_FOLDER="/usr/local/src"
+export CPUS_FOR_MAKE=8
+export PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
+export OPENSTRUCTURE_VERSION="1.7.1"
+export OPENSTRUCTURE_SHARE="/usr/local/share/ost"
+export MSMS_VERSION="2.6.1"
+export OPENMM_VERSION="7.1.1"
+export DSSP_VERSION="2.2.1"
+export OPENMM_INCLUDE_PATH=/usr/local/openmm/include/
+export OPENMM_LIB_PATH=/usr/local/openmm/lib/
+export JUPYTER_CONFIG_DIR="/usr/local/etc/jupyter"
+export JUPYTER_PATH="/usr/local/share/jupyter"
+export JUPYTER_RUNTIME_DIR="$JUPYTER_PATH/runtime"
+export VIRTUALENV_DIR="/usr/local/share/ost_venv"
+
+
+# INSTALL SYSTEM DEPS
+#####################
+apt-get update -y && apt-get install -y cmake \
+										sip-dev \
+										libtiff-dev \
+										libfftw3-dev \
+										libeigen3-dev \
+										libboost-all-dev \
+										libpng-dev \
+										python-all \
+										python2.7 \
+										python-qt4 \
+										qt4-qtconfig \
+										qt4-qmake \
+										libqt4-dev \
+										libpng-dev \
+										wget \
+										git \
+										gfortran \
+										python-pip \
+										tar \
+										libbz2-dev \
+										doxygen \
+										swig \
+										clustalw \
+                                        python-virtualenv \
+                                        locales
+
+# SET LOCALE
+############
+echo "LC_ALL=en_US.UTF-8" >> /etc/environment
+echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+locale-gen en_US.UTF-8
+
+# INSTALL SOME PYTHON PACKAGES GLOBALY
+######################################
+pip install --upgrade pip && pip install --no-cache-dir numpy==1.10.4 \
+                                                        scipy==1.0.0 \
+                                                        pandas==0.22.0
+
+
+# SET UP VIRTUALENV
+###################
+virtualenv --system-site-packages $VIRTUALENV_DIR
+. $VIRTUALENV_DIR/bin/activate
+
+
+# INSTALL REQUIRED PYTHON PACKAGES
+##################################
+pip install jupyter==1.0.0 \
+            nglview==1.0
+
+# DOWNLOAD AND INSTALL MSMS
+##############
+cd ${SRC_FOLDER}
+if [ ! -f msms_i86_64Linux2_${MSMS_VERSION}.tar.gz ]; then
+    mkdir -p msms
+    cd msms
+    wget http://mgltools.scripps.edu/downloads/tars/releases/MSMSRELEASE/REL${MSMS_VERSION}/msms_i86_64Linux2_${MSMS_VERSION}.tar.gz
+    tar -xvzf msms_i86_64Linux2_${MSMS_VERSION}.tar.gz
+    cp -v ${SRC_FOLDER}/msms/msms.x86_64Linux2.${MSMS_VERSION} /usr/local/bin/msms
+    cp -v ${SRC_FOLDER}/msms/pdb_to_xyzr /usr/local/bin/pdb_to_xyzr
+    cp -v ${SRC_FOLDER}/msms/pdb_to_xyzrn /usr/local/bin/pdb_to_xyzrn
+fi
+
+# COMPILE OPENMM FROM SOURCES. INSTALL TO /usr/local
+############################ 
+cd ${SRC_FOLDER}
+if [ ! -f openmm-${OPENMM_VERSION}.tar.gz ]; then
+    wget -O openmm-${OPENMM_VERSION}.tar.gz -nc https://github.com/pandegroup/openmm/archive/${OPENMM_VERSION}.tar.gz
+    mkdir ${SRC_FOLDER}/openmm-${OPENMM_VERSION}
+    tar xf openmm-${OPENMM_VERSION}.tar.gz -C ${SRC_FOLDER}/openmm-${OPENMM_VERSION} --strip-components=1
+    mkdir -p ${SRC_FOLDER}/openmm-${OPENMM_VERSION}/build && cd ${SRC_FOLDER}/openmm-${OPENMM_VERSION}/build
+    cmake .. && make -j $CPUS_FOR_MAKE && make install
+    cd ${SRC_FOLDER}/openmm-${OPENMM_VERSION}/build/python && python setup.py build && python setup.py install
+fi
+
+# COMPILE AND INSTALL DSSP
+##############
+cd ${SRC_FOLDER}
+if [ ! -f dssp-${DSSP_VERSION}.tgz ]; then
+    wget ftp://ftp.cmbi.ru.nl/pub/software/dssp/dssp-${DSSP_VERSION}.tgz
+    tar -xvzf dssp-${DSSP_VERSION}.tgz
+    cd dssp-${DSSP_VERSION}
+    make -j ${CPUS_FOR_MAKE}
+    make install
+fi
+
+# INSTALL OST
+#############
+
+cd ${SRC_FOLDER}
+if [ ! -f openstructure-${OPENSTRUCTURE_VERSION}.tar.gz ]; then
+    # copy ost release
+    wget -O openstructure-${OPENSTRUCTURE_VERSION}.tar.gz -nc https://git.scicore.unibas.ch/schwede/openstructure/repository/${OPENSTRUCTURE_VERSION}/archive.tar.gz
+    mkdir openstructure-${OPENSTRUCTURE_VERSION}
+    tar xf openstructure-${OPENSTRUCTURE_VERSION}.tar.gz -C ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION} --strip-components=1
+    mkdir -p ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}/build && cd ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}/build
+
+    # cmake ost
+    cmake .. -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
+            -DOPTIMIZE=ON \
+            -DENABLE_MM=ON \
+            -DCOMPILE_TMTOOLS=1 \
+            -DUSE_NUMPY=1 \
+            -DOPEN_MM_LIBRARY=$OPENMM_LIB_PATH/libOpenMM.so \
+            -DOPEN_MM_INCLUDE_DIR=$OPENMM_INCLUDE_PATH \
+            -DOPEN_MM_PLUGIN_DIR=$OPENMM_LIB_PATH/plugins \
+            -DENABLE_GFX=ON \
+            -DENABLE_GUI=ON
+
+    # Build chemdict_tool
+    make -j ${CPUS_FOR_MAKE} chemdict_tool
+
+    # get the compound library
+    wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz
+    stage/bin/chemdict_tool create components.cif.gz compounds.chemlib pdb
+    stage/bin/chemdict_tool update modules/conop/data/charmm.cif compounds.chemlib charmm
+    mkdir -p $OPENSTRUCTURE_SHARE
+    chmod a+rw -R $OPENSTRUCTURE_SHARE
+    mv compounds.chemlib $OPENSTRUCTURE_SHARE
+
+    # Build and install OST
+    cmake .. -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
+            -DOPTIMIZE=ON \
+            -DENABLE_MM=ON \
+            -DCOMPILE_TMTOOLS=1 \
+            -DUSE_NUMPY=1 \
+            -DOPEN_MM_LIBRARY=$OPENMM_LIB_PATH/libOpenMM.so \
+            -DOPEN_MM_INCLUDE_DIR=$OPENMM_INCLUDE_PATH \
+            -DOPEN_MM_PLUGIN_DIR=$OPENMM_LIB_PATH/plugins \
+            -DENABLE_GFX=ON \
+            -DENABLE_GUI=ON \
+            -DCOMPOUND_LIB=$OPENSTRUCTURE_SHARE/compounds.chemlib
+
+    # Build chemdict_tool
+    make -j ${CPUS_FOR_MAKE}
+    make check
+    make install
+fi
+
+# SETUP JUPYTER
+###############
+mkdir -p /usr/local/share/ipython
+mkdir -p $JUPYTER_PATH
+mkdir -p $JUPYTER_RUNTIME_DIR
+mkdir -p $JUPYTER_CONFIG_DIR
+mkdir -p $JUPYTER_PATH/kernels/ost-kernel
+chmod a+rw -R /usr/local/share/ipython
+chmod a+rw -R $JUPYTER_PATH
+chmod a+rw -R $JUPYTER_CONFIG_DIR
+chmod a+rw -R $JUPYTER_RUNTIME_DIR
+cat > $JUPYTER_PATH/kernels/ost-kernel/kernel.json <<EOF
+{
+	"display_name": "OST",
+	"language": "python",
+	"argv": [
+		"python",
+		"-m", "ipykernel",
+        "-f", "{connection_file}",
+		"--InteractiveShellApp.exec_PYTHONSTARTUP=False",
+		"--InteractiveShellApp.exec_files=['/usr/local/lib64/python2.7/site-packages/ost/ost_startup.py']"
+	],
+	"env": {
+	}
+}
+EOF
+
+jupyter nbextension enable nglview --py --sys-prefix
+
+# GO HOME AND CLEANUP
+#####################
+apt-get purge -y cmake \
+                 wget \
+                 git \
+                 gfortran \
+                 python-pip \
+                 libbz2-dev \
+                 doxygen \
+                 swig
+apt-get clean
+apt-get autoremove -y
+
+cd $SRC_FOLDER && rm -rf $SRC_FOLDER/*
+
+cd /home
+
+%environment
+##############################################################################
+# ENVIRONMENT
+##############################################################################
+export OST_ROOT="/usr/local"
+export OPENSTRUCTURE_VERSION="1.7.1"
+export PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
+export QT_X11_NO_MITSHM=1
+export IPYTHONDIR="/usr/local/share/ipython"
+export JUPYTER_CONFIG_DIR="/usr/local/etc/jupyter"
+export JUPYTER_PATH="/usr/local/share/jupyter"
+export JUPYTER_RUNTIME_DIR="$JUPYTER_PATH/runtime"
+export VIRTUALENV_DIR="/usr/local/share/ost_venv"
+
+%apprun ChemdictTool
+##############################################################################
+# CHEMDICT TOOL APP
+##############################################################################
+$OST_ROOT/bin/chemdict_tool "$@"
+
+%apprun lDDT
+##############################################################################
+# lDDT APP
+##############################################################################
+$OST_ROOT/bin/lddt "$@"
+
+%apphelp lDDT
+The Local Distance Difference Test.
+
+Usage:
+
+    singularity run --app lDDT <IMAGE> [options] <mod1> [mod1 [mod2]] <re1>[,ref2,ref3]
+
+Options:
+   -s         selection performed on ref
+   -c         use Calphas only
+   -f         perform structural checks and filter input data
+   -t         fault tolerant parsing
+   -p <file>  use specified parmeter file. Mandatory
+   -v <level> verbosity level (0=results only,1=problems reported, 2=full report)
+   -b <value> tolerance in stddevs for bonds
+   -a <value> tolerance in stddevs for angles
+   -r <value> distance inclusion radius
+   -i <value> sequence separation
+   -e         print version
+   -x         ignore residue name consistency checks
+
+%apprun Molck
+##############################################################################
+# MOLCK APP
+##############################################################################
+$OST_ROOT/bin/molck "$@"
+
+%apphelp Molck
+This is molck - the molecule checker
+
+Usage:
+    singularity run --app Molck <IMAGE> [options] file1.pdb [file2.pdb [...]]
+
+Options:
+  --complib=path    location of the compound library file. If not provided, the 
+    following locations are searched in this order: 
+    1. Working directory, 2. OpenStructure standard library location (if the 
+    executable is part of a standard OpenStructure installation) 
+  --rm=<a>,<b>      remove atoms and residues matching some criteria 
+    zeroocc - Remove atoms with zero occupancy 
+    hyd - Remove hydrogen atoms 
+    oxt - Remove terminal oxygens 
+    nonstd - Remove all residues not one of the 20 standard amino acids 
+    unk - Remove unknown and atoms not following the nomenclature
+  --fix-ele         clean up element column
+  --stdout          write cleaned file(s) to stdout 
+  --out=filename    write cleaned file(s) to disk. % characters in the filename are 
+    replaced with the basename of the input file without extension. 
+    Default: %-molcked.pdb 
+  --color=auto|on|off 
+    whether output should be colored
+  --map-nonstd   maps modified residues back to the parent amino acid, for example
+    MSE -> MET, SEP -> SER.
+
+%apprun OST
+##############################################################################
+# OST APP
+##############################################################################
+$OST_ROOT/bin/ost "$@"
+
+%apphelp OST
+The OST app exposes OpenStructure binary and can be used to run interactive shell
+and scripts.
+
+Usage:
+    singularity run --app OST <IMAGE> [ost options] [script to execute] [script parameters]
+
+Options:
+  -i, --interactive     start interpreter interactively (must be first
+                        parameter, ignored otherwise)
+  -h, --help            show this help message and exit
+  -v VLEVEL, --verbosity_level=VLEVEL
+                        sets the verbosity level [default: 2]
+
+If script requires some external files eg. PDBs, they have to be located in the
+path accessible via mounted volumes. By default Singularity mounts $HOME and
+goes to CWD. Thus this sould work as expected out of the box.
+
+
+%appenv IPython
+##############################################################################
+# NOTEBOOK ENV
+##############################################################################
+export DNG_ROOT=$OST_ROOT
+export DNG_INITDIR=${DNG_ROOT}/lib64/python2.7/site-packages/ost
+
+%apprun IPython
+##############################################################################
+# OST IPYTON APP
+##############################################################################
+. $VIRTUALENV_DIR/bin/activate && ipython -i $DNG_INITDIR/ost_startup.py "$@"
+
+%apphelp IPython
+OST-powered iPython shell.
+
+Usage:
+    
+    singularity run --app IPython <IMAGE> [options]
+
+Detailed help:
+
+    singularity run --app IPython <IMAGE> --help
+
+%appenv Notebook
+##############################################################################
+# NOTEBOOK ENV
+##############################################################################
+export BIN_DIR=$OST_ROOT/bin
+export XDG_RUNTIME_DIR=""
+. $OST_ROOT/libexec/openstructure/ost_config
+
+%apprun Notebook
+##############################################################################
+# NOTEBOOK APP
+##############################################################################
+. $VIRTUALENV_DIR/bin/activate && jupyter notebook --NotebookApp.iopub_data_rate_limit=10000000 --no-browser "$@"
+
+%apphelp Notebook
+A Jupyter notebook palyground with OST and nglview.
+
+Usage:
+
+    singularity run --app Notebook <IMAGE> [options]
+
+The Jupyter notebook is run by default with `--NotebookApp.iopub_data_rate_limit=10000000`
+and `--no-browser` options.
+
+Useful options when running on remote server:
+    --ip=<Unicode> (NotebookApp.ip)
+        Default: 'localhost'
+        The IP address the notebook server will listen on.
+    --port=<Integer> (NotebookApp.port)
+        Default: 8888
+        The port the notebook server will listen on.
+
+Copy the URL to the browser and launch the notebook with OST kernel. This will
+load all necessary OST components just like in the OST shell. We also enabled
+the nglview widget to interactively view molecular structures and trajectories.
+For more details on how to use nglview see http://nglviewer.org/nglview/latest/.
+
+As the Singularity mounts $HOME by default Jupyter and Ipython config files
+are moved to separate directories. Proper environmental variables are also set.
+In addition, Jupyter is run in a separate virtualenv to not interact with possibly
+installed host version.
+
+To list of all available options:
+
+    singularity run --app Notebook <IMAGE> --help
+
+
+%runscript
+##############################################################################
+# RUNSCRIPT
+##############################################################################
+cat << EOF
+Singularity container for OST $OPENSTRUCTURE_VERSION.
+
+This container includes the following apps:
+ * OST - OpenStructure binary
+ * IPython - OST-powered iPython shell
+ * Notebook - A Jupyter notebook palyground with OST and nglview
+ * lDDT - The Local Distance Difference Test
+ * Molck - Molecular checker
+ * ChemdictTool - Creating or update a compound library
+
+To see the help for each individual app run:
+
+    singularity help --app <APP NAME> <IMAGE NAME>
+EOF
+
+%help
+Singularity container for OST.
+
+This container includes the following apps:
+ * OST - OpenStructure binary
+ * IPython - OST-powered iPython shell
+ * Notebook - A Jupyter notebook palyground with OST and nglview
+ * lDDT - The Local Distance Difference Test
+ * Molck - Molecular checker
+ * ChemdictTool - Creating or update a compound library
+
+To see the help for each individual app run:
+
+    singularity help --app <APP NAME> <IMAGE NAME>
+
+
