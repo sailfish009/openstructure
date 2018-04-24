@@ -5,10 +5,12 @@ Changes in Release <RELEASE NUMBER>
     change in the API. Mapping functions CopyResidue, CopyConserved and
     CopyNonConserved that were previousely imported from ost.conop are now
     to be imported from ost.mol.alg.
-  * Added Molck API to the ost.mol.alg module.
   * Removed habit of changing secondary structure of entities when loading
     from mmCIF PDB files. Before, OST would turn secondary structure 'EEH'
     into 'ECH' to make it look nicer in DNG. Now, 'EEH' stays 'EEH'.
+  * Added Molck API to the ost.mol.alg module.
+  * Extended lDDT API in ost.mol.alg module to reproduce functionality of lddt
+    binary.
 
 Changes in Release 1.7.1
 --------------------------------------------------------------------------------
@@ -20,7 +22,7 @@ Changes in Release 1.7.1
   * Fixed unit tests
   * Improved documentation
 
-Changes in Release 1.7
+Changes in Release 1.7.0
 --------------------------------------------------------------------------------
 
   * Removed Qt dependency for non-GUI compilation and fixed issues with recent
@@ -36,13 +38,13 @@ Changes in Release 1.7
   * Large updates for documentation
   * Several minor bug fixes, improvements, and speed-ups
 
-Changes in Release 1.6
+Changes in Release 1.6.0
 --------------------------------------------------------------------------------
 
   * Added code to compare structures attached to a multiple seq. aln.
   * Incorporated Antechamber based force-field parameter generation for mm mod.
 
-Changes in Release 1.5
+Changes in Release 1.5.0
 --------------------------------------------------------------------------------
 
   * Added binding to 3DComb (structural alignment)
@@ -62,7 +64,7 @@ Changes in Release 1.5
   * Added a wrapper to HHblits.
   * Removed levenberg_marquardt.h in img/alg
 
-Changes in Release 1.4
+Changes in Release 1.4.0
 --------------------------------------------------------------------------------
 
   * Feasibility check set to off by default, atoms in compounds are now
@@ -150,7 +152,7 @@ Changes in Release 1.2.1
   * lDDT: Updated default angle and bond tolerance parameters from 8 stddev to 12 
     stddev.
 
-Changes in Release 1.2 (since 1.1)
+Changes in Release 1.2.0 (since 1.1.0)
 --------------------------------------------------------------------------------
 
  * added mmCIF parser to enable loading of mmCIF files. The following categories
