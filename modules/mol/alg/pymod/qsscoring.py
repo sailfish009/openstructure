@@ -856,7 +856,6 @@ class OligoLDDTScorer(object):
     self._lddt_mdl = None
     self._oligo_lddt_scorer = None
     self._sc_lddt_scorers = None
-    self._report = dict()
 
   @property
   def lddt_ref(self):
@@ -912,10 +911,17 @@ class OligoLDDTScorer(object):
           aln.GetSequence(1).GetString())
         modelseq.AttachView(model)
         aln.AddSequence(modelseq)
-        lddt_scorer = lDDTScorer(
-          references=[reference],
-          model=model,
-          settings=self.settings)
+        # Filter to CA-only if desired (done after AttachView to not mess it up)
+        if self.calpha_only:
+          lddt_scorer = lDDTScorer(
+            references=[reference.Select('aname=CA')],
+            model=model.Select('aname=CA'),
+            settings=self.settings)
+        else:
+          lddt_scorer = lDDTScorer(
+            references=[reference],
+            model=model,
+            settings=self.settings)
         lddt_scorer.alignment = aln  # a bit of a hack
         self._sc_lddt_scorers.append(lddt_scorer)
     return self._sc_lddt_scorers
@@ -952,12 +958,14 @@ class OligoLDDTScorer(object):
                              (ref_res.qualified_name))
         else:
           assigned_residues.append(ref_res.qualified_name)
-        scores.append({
-          "residue_number": ref_res.GetNumber().num,
-          "residue_name": ref_res.name,
-          "lddt": mdl_res_renum.GetFloatProp(self.settings.label),
-          "conserved_contacts": mdl_res_renum.GetFloatProp(self.settings.label + "_conserved"),
-          "total_contacts": mdl_res_renum.GetFloatProp(self.settings.label + "_total")})
+        # check if property there (may be missing for CA-only)
+        if mdl_res_renum.HasProp(self.settings.label):
+          scores.append({
+            "residue_number": ref_res.GetNumber().num,
+            "residue_name": ref_res.name,
+            "lddt": mdl_res_renum.GetFloatProp(self.settings.label),
+            "conserved_contacts": mdl_res_renum.GetFloatProp(self.settings.label + "_conserved"),
+            "total_contacts": mdl_res_renum.GetFloatProp(self.settings.label + "_total")})
     return scores
 
   @property
