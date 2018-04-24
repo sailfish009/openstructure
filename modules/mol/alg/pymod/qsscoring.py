@@ -448,6 +448,13 @@ class QSscorer:
       self._clustalw_bin = settings.Locate(('clustalw', 'clustalw2'))
     return self._clustalw_bin
 
+  def GetOligoLDDTScorer(self, settings):
+    """
+    :return: :class:`OligoLDDTScorer` object, setup for this QS scoring problem.
+    """
+    return OligoLDDTScorer(self.qs_ent_1.ent, self.qs_ent_2.ent,
+                           self.alignments, self.calpha_only, settings)
+
   ##############################################################################
   # Class internal helpers (anything that doesnt easily work without this class)
   ##############################################################################
@@ -829,11 +836,13 @@ def GetContacts(entity, calpha_only, dist_thr=12.0):
 class OligoLDDTScorer(object):
   """A simple class to calculate oligomeric lDDT score."""
 
+  # TODO: DOCUMENT
+
   def __init__(self, ref, mdl, alignments, calpha_only, settings):
     if mdl.chain_count > ref.chain_count:
       LogWarning('MODEL contains more chains than REFERENCE, '
                  'lDDT is not considering them')
-    # get single chain reference and model
+    # prepare fields
     self.ref = ref
     self.mdl = mdl
     self.alignments = alignments
@@ -852,19 +861,13 @@ class OligoLDDTScorer(object):
   @property
   def lddt_ref(self):
     if self._lddt_ref is None:
-      self._lddt_ref, self._lddt_mdl = _MergeAlignedChains(self.alignments,
-                                                           self.ref,
-                                                           self.mdl,
-                                                           self.calpha_only)
+      self._PrepareOligoEntities()
     return self._lddt_ref
 
   @property
   def lddt_mdl(self):
     if self._lddt_mdl is None:
-      self._lddt_ref, self._lddt_mdl = _MergeAlignedChains(self.alignments,
-                                                           self.ref,
-                                                           self.mdl,
-                                                           self.calpha_only)
+      self._PrepareOligoEntities()
     return self._lddt_mdl
 
   @property
@@ -981,6 +984,17 @@ class OligoLDDTScorer(object):
       else:
         self._weighted_lddt = 0.0
     return self._weighted_lddt
+
+  ##############################################################################
+  # Class internal helpers (anything that doesnt easily work without this class)
+  ##############################################################################
+
+  def _PrepareOligoEntities(self):
+    # simple wrapper to avoid code duplication
+    self._lddt_ref, self._lddt_mdl = _MergeAlignedChains(self.alignments,
+                                                         self.ref,
+                                                         self.mdl,
+                                                         self.calpha_only)
 
 
 ###############################################################################

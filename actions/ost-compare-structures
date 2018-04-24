@@ -738,12 +738,7 @@ def _Main():
                 ost.LogInfo("lDDT settings: ")
                 ost.LogInfo(str(lddt_settings).rstrip())
                 ost.LogInfo("===")
-                oligo_lddt_scorer = qsscoring.OligoLDDTScorer(
-                    qs_scorer.qs_ent_1.ent,
-                    qs_scorer.qs_ent_2.ent,
-                    qs_scorer.alignments,
-                    qs_scorer.calpha_only,
-                    lddt_settings)
+                oligo_lddt_scorer = qs_scorer.GetOligoLDDTScorer(lddt_settings)
                 for scorer_index, lddt_scorer in enumerate(
                         oligo_lddt_scorer.sc_lddt_scorers):
                     # Get chains and renumber according to alignment (for lDDT)

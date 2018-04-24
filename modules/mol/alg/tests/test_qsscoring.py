@@ -380,13 +380,9 @@ class TestQSscore(unittest.TestCase):
     # lDDT is not symmetrical and does not account for overprediction!
     ref = _LoadFile('4br6.1.pdb').Select('cname=A,B')
     mdl = _LoadFile('4br6.1.pdb')
+    lddt_settings = lDDTSettings(structural_checks=False)
     qs_scorer = QSscorer(ref, mdl)
-    lddt_oligo_scorer = OligoLDDTScorer(
-        qs_scorer.qs_ent_1.ent,
-        qs_scorer.qs_ent_2.ent,
-        qs_scorer.alignments,
-        qs_scorer.calpha_only,
-        settings=lDDTSettings(structural_checks=False))
+    lddt_oligo_scorer = qs_scorer.GetOligoLDDTScorer(lddt_settings)
     self.assertAlmostEqual(qs_scorer.global_score, 0.171, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 1.00, 2)
     self.assertAlmostEqual(lddt_oligo_scorer.oligo_lddt, 1.00, 2)
@@ -394,12 +390,7 @@ class TestQSscore(unittest.TestCase):
     qs_scorer2 = QSscorer(qs_scorer.qs_ent_2,
                           qs_scorer.qs_ent_1,
                           res_num_alignment=True)
-    lddt_oligo_scorer2 = OligoLDDTScorer(
-        qs_scorer2.qs_ent_1.ent,
-        qs_scorer2.qs_ent_2.ent,
-        qs_scorer2.alignments,
-        qs_scorer2.calpha_only,
-        settings=lDDTSettings(structural_checks=False))
+    lddt_oligo_scorer2 = qs_scorer2.GetOligoLDDTScorer(lddt_settings)
     self.assertAlmostEqual(qs_scorer2.global_score, 0.171, 2)
     self.assertAlmostEqual(qs_scorer2.best_score, 1.00, 2)
     self.assertAlmostEqual(lddt_oligo_scorer2.oligo_lddt, 0.4496, 2)
