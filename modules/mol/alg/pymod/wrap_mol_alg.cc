@@ -135,12 +135,6 @@ object lDDTSettingsInitWrapper(tuple args, dict kwargs){
     kwargs["sequence_separation"].del();
   }
 
-  String sel = "";
-  if(kwargs.contains("sel")){
-    sel = extract<String>(kwargs["sel"]);
-    kwargs["sel"].del();
-  }
-
   bool consistency_checks = true;
   if(kwargs.contains("consistency_checks")){
     consistency_checks = extract<bool>(kwargs["consistency_checks"]);
@@ -173,14 +167,13 @@ object lDDTSettingsInitWrapper(tuple args, dict kwargs){
     ss << "Invalid keywords observed when setting up lDDTSettings! ";
     ss << "Or did you pass the same keyword twice? ";
     ss << "Valid keywords are: radius, ";
-    ss << "sequence_separation, sel, parameter_file_path, ";
+    ss << "sequence_separation, parameter_file_path, ";
     ss << "consistency_checks, cutoffs, label!";
     throw std::invalid_argument(ss.str());
   }
 
   return self.attr("__init__")(radius, 
                                sequence_separation,
-                               sel,
                                consistency_checks,
                                cutoffs,
                                label);
@@ -384,14 +377,13 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
 
   class_<mol::alg::lDDTSettings>("lDDTSettings", no_init)
     .def("__init__", raw_function(lDDTSettingsInitWrapper))
-    .def(init<Real, int, String, bool, std::vector<Real>&, String>())
+    .def(init<Real, int, bool, std::vector<Real>&, String>())
     .def("ToString", &mol::alg::lDDTSettings::ToString)
     .def("PrintParameters", &mol::alg::lDDTSettings::PrintParameters)
     .def("__repr__", &mol::alg::lDDTSettings::ToString)
     .def("__str__", &mol::alg::lDDTSettings::ToString)
     .def_readwrite("radius", &mol::alg::lDDTSettings::radius)
     .def_readwrite("sequence_separation", &mol::alg::lDDTSettings::sequence_separation)
-    .def_readwrite("sel", &mol::alg::lDDTSettings::sel)
     .def_readwrite("consistency_checks", &mol::alg::lDDTSettings::consistency_checks)
     .def_readwrite("cutoffs", &mol::alg::lDDTSettings::cutoffs)
     .def_readwrite("label", &mol::alg::lDDTSettings::label);

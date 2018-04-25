@@ -161,6 +161,7 @@ int main (int argc, char **argv)
   bool structural_checks = false;
   Real bond_tolerance = 12.0;
   Real angle_tolerance = 12.0;
+  String sel;
   // creates the required loading profile
   IOProfile profile;
   // parses options
@@ -168,7 +169,7 @@ int main (int argc, char **argv)
   po::options_description desc("Options");
   desc.add_options()
     ("calpha,c", "consider only calpha atoms")
-    ("sel,s", po::value<String>(&settings.sel)->default_value(""), "selection performed on reference structure")
+    ("sel,s", po::value<String>(&sel)->default_value(""), "selection performed on reference structure")
     ("tolerant,t", "fault tolerant mode")
     ("structural-checks,f", "perform stereo-chemical and clash checks")
     ("ignore-consistency-checks,x", "ignore residue name consistency checks")
@@ -279,10 +280,10 @@ int main (int argc, char **argv)
     if (!ref) {
       exit(-1);
     }
-    if (settings.sel != ""){
-      std::cout << "Performing \"" << settings.sel << "\" selection on reference " << ref_filename << std::endl;
+    if (sel != ""){
+      std::cout << "Performing \"" << sel << "\" selection on reference " << ref_filename << std::endl;
       try {
-        ref_list.push_back(ref.Select(settings.sel));
+        ref_list.push_back(ref.Select(sel));
       } catch (const ost::mol::QueryError& e) {
         std::cerr << "Provided selection argument failed." << std::endl << e.GetFormattedMessage() << std::endl;
         exit(-1);

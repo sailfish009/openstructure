@@ -742,7 +742,6 @@ def _Main():
                 lddt_settings = lDDTSettings(
                     radius=opts.inclusion_radius,
                     sequence_separation=opts.sequence_separation,
-                    sel="",
                     consistency_checks=False,  # These are performed elsewhere
                     label="lddt")
                 ost.LogInfo("lDDT settings: ")

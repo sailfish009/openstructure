@@ -405,7 +405,6 @@ StereoChemicalProps::StereoChemicalProps(
 
 lDDTSettings::lDDTSettings(): radius(15.0), 
                               sequence_separation(0),
-                              sel(""),
                               consistency_checks(true),
                               label("localldt") {
     cutoffs.push_back(0.5);
@@ -416,13 +415,11 @@ lDDTSettings::lDDTSettings(): radius(15.0),
 
 lDDTSettings::lDDTSettings(Real init_radius, 
                            int init_sequence_separation,
-                           String init_sel,
                            bool init_consistency_checks,
                            std::vector<Real>& init_cutoffs,
                            String init_label):
                     radius(init_radius), 
                     sequence_separation(init_sequence_separation),
-                    sel(init_sel),
                     consistency_checks(init_consistency_checks),
                     cutoffs(init_cutoffs),
                     label(init_label) {}
@@ -571,24 +568,6 @@ void lDDTScorer::PrintPerResidueStats(){
 
 std::vector<EntityView> lDDTScorer::GetReferences(){
   return references_view;
-}
-
-void lDDTScorer::_PrepareReferences(std::vector<EntityHandle>& references){
-  for (unsigned int i = 0; i < references.size(); i++) {
-    if (settings.sel != ""){
-      std::cout << "Performing \"" << settings.sel << "\" selection on reference " << references[i].GetName() << std::endl;
-      try {
-        references_view.push_back(references[i].Select(settings.sel));
-      } catch (const ost::mol::QueryError& e) {
-        std::stringstream errstr;
-        errstr << "Provided selection argument failed." << std::endl << e.GetFormattedMessage();
-        throw std::runtime_error(errstr.str());
-      }
-    }
-    else {
-      references_view.push_back(references[i].CreateFullView());
-    }
-  }
 }
 
 void lDDTScorer::_PrepareGlobalRDMap(){
