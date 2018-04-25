@@ -123,18 +123,6 @@ object lDDTSettingsInitWrapper(tuple args, dict kwargs){
   object self = args[0];
   args = tuple(args.slice(1,_));
 
-  Real bond_tolerance = 12.0;
-  if(kwargs.contains("bond_tolerance")){
-    bond_tolerance = extract<Real>(kwargs["bond_tolerance"]);
-    kwargs["bond_tolerance"].del();
-  }
-
-  Real angle_tolerance = 12.0;
-  if(kwargs.contains("angle_tolerance")){
-    angle_tolerance = extract<Real>(kwargs["angle_tolerance"]);
-    kwargs["angle_tolerance"].del();
-  }
-
   Real radius = 15.0;
   if(kwargs.contains("radius")){
     radius = extract<Real>(kwargs["radius"]);
@@ -151,12 +139,6 @@ object lDDTSettingsInitWrapper(tuple args, dict kwargs){
   if(kwargs.contains("sel")){
     sel = extract<String>(kwargs["sel"]);
     kwargs["sel"].del();
-  }
-
-  bool structural_checks = true;
-  if(kwargs.contains("structural_checks")){
-    structural_checks = extract<bool>(kwargs["structural_checks"]);
-    kwargs["structural_checks"].del();
   }
 
   bool consistency_checks = true;
@@ -190,18 +172,15 @@ object lDDTSettingsInitWrapper(tuple args, dict kwargs){
     std::stringstream ss;
     ss << "Invalid keywords observed when setting up lDDTSettings! ";
     ss << "Or did you pass the same keyword twice? ";
-    ss << "Valid keywords are: bond_tolerance, angle_tolerance, radius, ";
-    ss << "sequence_separation, sel, parameter_file_path, structural_checks, ";
+    ss << "Valid keywords are: radius, ";
+    ss << "sequence_separation, sel, parameter_file_path, ";
     ss << "consistency_checks, cutoffs, label!";
     throw std::invalid_argument(ss.str());
   }
 
-  return self.attr("__init__")(bond_tolerance,
-                               angle_tolerance,
-                               radius, 
+  return self.attr("__init__")(radius, 
                                sequence_separation,
                                sel,
-                               structural_checks,
                                consistency_checks,
                                cutoffs,
                                label);
@@ -405,17 +384,14 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
 
   class_<mol::alg::lDDTSettings>("lDDTSettings", no_init)
     .def("__init__", raw_function(lDDTSettingsInitWrapper))
-    .def(init<Real, Real, Real, int, String, bool, bool, std::vector<Real>&, String>())
+    .def(init<Real, int, String, bool, std::vector<Real>&, String>())
     .def("ToString", &mol::alg::lDDTSettings::ToString)
     .def("PrintParameters", &mol::alg::lDDTSettings::PrintParameters)
     .def("__repr__", &mol::alg::lDDTSettings::ToString)
     .def("__str__", &mol::alg::lDDTSettings::ToString)
-    .def_readwrite("bond_tolerance", &mol::alg::lDDTSettings::bond_tolerance)
-    .def_readwrite("angle_tolerance", &mol::alg::lDDTSettings::angle_tolerance)
     .def_readwrite("radius", &mol::alg::lDDTSettings::radius)
     .def_readwrite("sequence_separation", &mol::alg::lDDTSettings::sequence_separation)
     .def_readwrite("sel", &mol::alg::lDDTSettings::sel)
-    .def_readwrite("structural_checks", &mol::alg::lDDTSettings::structural_checks)
     .def_readwrite("consistency_checks", &mol::alg::lDDTSettings::consistency_checks)
     .def_readwrite("cutoffs", &mol::alg::lDDTSettings::cutoffs)
     .def_readwrite("label", &mol::alg::lDDTSettings::label);

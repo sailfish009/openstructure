@@ -158,7 +158,9 @@ int main (int argc, char **argv)
   String version = OST_VERSION_STRING;
   lDDTSettings settings;
   String parameter_file_path;
-  settings.structural_checks=false;
+  bool structural_checks = false;
+  Real bond_tolerance = 12.0;
+  Real angle_tolerance = 12.0;
   // creates the required loading profile
   IOProfile profile;
   // parses options
@@ -215,7 +217,7 @@ int main (int argc, char **argv)
     profile.calpha_only=true;
   }
   if (vm.count("structural-checks")) {
-    settings.structural_checks=true;
+    structural_checks=true;
   }
   if (vm.count("ignore-consistency-checks")) {
     settings.consistency_checks=false;
@@ -226,7 +228,7 @@ int main (int argc, char **argv)
 
   if (vm.count("parameter-file")) {
       parameter_file_path=vm["parameter-file"].as<String>();
-    } else if (settings.structural_checks==true) {
+    } else if (structural_checks==true) {
     std::cout << "Please specify a stereo-chemical parameter file" << std::endl;
     exit(-1);
   }
@@ -249,10 +251,10 @@ int main (int argc, char **argv)
   Logger::Instance().PushVerbosityLevel(ost_verbosity_level);
 
   if (vm.count("bond_tolerance")) {
-    settings.bond_tolerance=vm["bond_tolerance"].as<Real>();
+    bond_tolerance=vm["bond_tolerance"].as<Real>();
   }
   if (vm.count("angle_tolerance")) {
-    settings.angle_tolerance=vm["angle_tolerance"].as<Real>();
+    angle_tolerance=vm["angle_tolerance"].as<Real>();
   }
   if (vm.count("inclusion_radius")) {
     settings.radius=vm["inclusion_radius"].as<Real>();
@@ -305,7 +307,7 @@ int main (int argc, char **argv)
   // prints out parameters used in the lddt calculation
   std::cout << "Verbosity level: " << verbosity_level << std::endl;
   settings.PrintParameters();
-  if (settings.structural_checks) {
+  if (structural_checks) {
     LOG_INFO("Log entries format:");
     LOG_INFO("BOND INFO FORMAT:  Chain  Residue  ResNum  Bond  Min  Max  Observed  Z-score  Status");
     LOG_INFO("ANGLE INFO FORMAT:  Chain  Residue  ResNum  Angle  Min  Max  Observed  Z-score  Status");
@@ -334,7 +336,7 @@ int main (int argc, char **argv)
     String filestring=BFPathToString(pathstring);
     std::cout << "File: " << files[i] << std::endl;
 
-    if (settings.structural_checks) {
+    if (structural_checks) {
       StereoChemicalProps stereochemical_params;
       try {
         stereochemical_params = ost::io::ReadStereoChemicalPropsFile(parameter_file_path, true);
@@ -348,8 +350,8 @@ int main (int argc, char **argv)
                        stereochemical_params.bond_table,
                        stereochemical_params.angle_table,
                        stereochemical_params.nonbonded_table,
-                       settings.bond_tolerance,
-                       settings.angle_tolerance);
+                       bond_tolerance,
+                       angle_tolerance);
       } catch (std::exception& e) {
         std::cout << e.what() << std::endl;
         exit(-1);
@@ -362,8 +364,8 @@ int main (int argc, char **argv)
     // prints the residue-by-residue statistics
     std::vector<lDDTLocalScore> local_scores;
     EntityView outview = model.GetChainList()[0].Select("peptide=true");
-    local_scores = GetlDDTPerResidueStats(outview, glob_dist_list, settings.structural_checks, settings.label);
-    PrintlDDTPerResidueStats(local_scores, settings.structural_checks, settings.cutoffs.size());
+    local_scores = GetlDDTPerResidueStats(outview, glob_dist_list, structural_checks, settings.label);
+    PrintlDDTPerResidueStats(local_scores, structural_checks, settings.cutoffs.size());
   }
   return 0;
 }

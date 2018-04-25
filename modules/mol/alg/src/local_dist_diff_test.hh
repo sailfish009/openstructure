@@ -41,23 +41,17 @@ struct StereoChemicalProps
 };
 
 struct lDDTSettings {
-  Real bond_tolerance;
-  Real angle_tolerance;
   Real radius; 
   int sequence_separation;
   String sel;
-  bool structural_checks;
   bool consistency_checks;
   std::vector<Real> cutoffs;
   String label;
 
   lDDTSettings();
-  lDDTSettings(Real init_bond_tolerance,
-               Real init_angle_tolerance,
-               Real init_radius, 
+  lDDTSettings(Real init_radius, 
                int init_sequence_separation,
                String init_sel,
-               bool init_structural_checks,
                bool init_consistency_checks,
                std::vector<Real>& init_cutoffs,
                String init_label);

@@ -403,12 +403,9 @@ StereoChemicalProps::StereoChemicalProps(
     nonbonded_table(init_nonbonded_table),
     is_valid(true) {}
 
-lDDTSettings::lDDTSettings(): bond_tolerance(12.0),
-                              angle_tolerance(12.0),
-                              radius(15.0), 
+lDDTSettings::lDDTSettings(): radius(15.0), 
                               sequence_separation(0),
                               sel(""),
-                              structural_checks(true),
                               consistency_checks(true),
                               label("localldt") {
     cutoffs.push_back(0.5);
@@ -417,41 +414,24 @@ lDDTSettings::lDDTSettings(): bond_tolerance(12.0),
     cutoffs.push_back(4.0);
   }
 
-lDDTSettings::lDDTSettings(Real init_bond_tolerance,
-                           Real init_angle_tolerance,
-                           Real init_radius, 
+lDDTSettings::lDDTSettings(Real init_radius, 
                            int init_sequence_separation,
                            String init_sel,
-                           bool init_structural_checks,
                            bool init_consistency_checks,
                            std::vector<Real>& init_cutoffs,
-                           String init_label): 
-                    bond_tolerance(init_bond_tolerance),
-                    angle_tolerance(init_angle_tolerance),
+                           String init_label):
                     radius(init_radius), 
                     sequence_separation(init_sequence_separation),
                     sel(init_sel),
-                    structural_checks(init_structural_checks),
                     consistency_checks(init_consistency_checks),
                     cutoffs(init_cutoffs),
                     label(init_label) {}
 
 std::string lDDTSettings::ToString() {
   std::ostringstream rep;
-  if (structural_checks) {
-    rep << "Stereo-chemical and steric clash checks: On \n";
-  } else {
-    rep << "Stereo-chemical and steric clash checks: Off \n";
-  }
-
   rep << "Inclusion Radius: " << radius << "\n";
   rep << "Sequence separation: " << sequence_separation << "\n";
   rep << "Cutoffs: " << vector_to_string(cutoffs) << "\n";
-
-  if (structural_checks) {
-    rep << "Tolerance in stddevs for bonds: " << bond_tolerance << "\n";
-    rep << "Tolerance in stddevs for angles: " << angle_tolerance << "\n";
-  }
   rep << "Residue properties label: " << label << "\n";
 
   return rep.str();
@@ -547,25 +527,6 @@ void lDDTScorer::_Init(){
   _global_score = -1.0;
   CleanlDDTReferences(references_view);
   _PrepareGlobalRDMap();
-  if (settings.structural_checks) {
-    if (!stereochemical_params.is_valid) {
-      throw std::runtime_error(
-        "Please provide stereochemical_params to enable structural_checks.");
-    }
-    try {
-      CheckStructure(model_view,
-                     stereochemical_params.bond_table,
-                     stereochemical_params.angle_table,
-                     stereochemical_params.nonbonded_table,
-                     settings.bond_tolerance,
-                     settings.angle_tolerance);
-    } catch (std::exception& e) {
-      std::cout << e.what() << std::endl;
-      std::stringstream errstr;
-      errstr << "Structure check failed: " << e.what();
-      throw std::runtime_error(errstr.str());
-    }
-  }
   if (settings.consistency_checks) {
     _CheckConsistency();
   }
@@ -604,7 +565,7 @@ void lDDTScorer::PrintPerResidueStats(){
     _GetLocallDDT();
   }
   PrintlDDTPerResidueStats(_local_scores,
-                           settings.structural_checks,
+                           false,
                            settings.cutoffs.size());
 }
 
@@ -684,7 +645,7 @@ void lDDTScorer::_GetLocallDDT(){
   }
   _local_scores = GetlDDTPerResidueStats(model_view,
                                          glob_dist_list,
-                                         settings.structural_checks,
+                                         false, // do not print structural checks
                                          settings.label);
   _has_local_scores = true;
 }

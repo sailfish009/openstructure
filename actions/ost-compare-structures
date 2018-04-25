@@ -740,12 +740,9 @@ def _Main():
                     "single_chain_lddt": list()
                 }
                 lddt_settings = lDDTSettings(
-                    bond_tolerance=opts.bond_tolerance,
-                    angle_tolerance=opts.angle_tolerance,
                     radius=opts.inclusion_radius,
                     sequence_separation=opts.sequence_separation,
                     sel="",
-                    structural_checks=False,  # These are performed elsewhere
                     consistency_checks=False,  # These are performed elsewhere
                     label="lddt")
                 ost.LogInfo("lDDT settings: ")
@@ -760,7 +757,8 @@ def _Main():
                         lddt_scorer.references[0].chains[0].GetName()
                     if skip_score:
                         ost.LogInfo(
-                            " --> Skipping single chain lDDT because consistency check failed")
+                            " --> Skipping single chain lDDT because "
+                            "consistency check failed")
                         lddt_results["single_chain_lddt"].append({
                             "status": "FAILURE",
                             "error": "Consistency check failed.",
@@ -824,7 +822,8 @@ def _Main():
                 # perform oligo lddt scoring
                 if skip_score:
                     ost.LogInfo(
-                        " --> Skipping oligomeric lDDT because consistency check failed")
+                        " --> Skipping oligomeric lDDT because consistency "
+                        "check failed")
                     lddt_results["oligo_lddt"] = {
                         "status": "FAILURE",
                         "error": "Consistency check failed.",
@@ -847,7 +846,8 @@ def _Main():
                             "global_score": 0.0}
                 if skip_score:
                     ost.LogInfo(
-                        " --> Skipping weighted lDDT because consistency check failed")
+                        " --> Skipping weighted lDDT because consistency "
+                        "check failed")
                     lddt_results["weighted_lddt"] = {
                         "status": "FAILURE",
                         "error": "Consistency check failed.",
