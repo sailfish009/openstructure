@@ -75,6 +75,7 @@ from ost import PushVerbosityLevel
 from ost.mol.alg import (qsscoring, Molck, MolckSettings, lDDTSettings,
                          CheckStructure, ResidueNamesMatch)
 from ost.conop import CompoundLib
+from ost.seq.alg.renumber import Renumber
 
 
 class _DefaultStereochemicalParamAction(argparse.Action):
@@ -449,11 +450,11 @@ def _RevertChainNames(ent):
     ost.LogInfo("Reverted chains: %s" % ", ".join(rev_out))
 
 
-def _CheckConsistency(reference, model, chain_mapping, log_error):
+def _CheckConsistency(alignments, log_error):
     is_cons = True
-    for ref_cname, mdl_cname in chain_mapping.iteritems():
-        ref_chain = reference.Select("cname=%s" % ref_cname)
-        mdl_chain = model.Select("cname=%s" % mdl_cname)
+    for alignment in alignments:
+        ref_chain = Renumber(alignment.GetSequence(0)).CreateFullView()
+        mdl_chain = Renumber(alignment.GetSequence(1)).CreateFullView()
         is_cons = ResidueNamesMatch(ref_chain, mdl_chain, log_error)
     return is_cons
 
@@ -669,9 +670,7 @@ def _Main():
             ost.LogInfo("Checking consistency between %s and %s" % (
                         model_name, reference_name))
             is_cons = _CheckConsistency(
-                reference,
-                model,
-                qs_scorer.chain_mapping,
+                qs_scorer.alignments,
                 opts.consistency_checks)
             reference_results["info"]["residue_names_consistent"] = is_cons
             reference_results["info"]["mapping"] = {
