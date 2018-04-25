@@ -491,11 +491,7 @@ def _ReadStructureFile(path, c_alpha_only=False, fault_tolerant=False,
     """
 
     def _Select(entity):
-        calpha_message = "Selecting only C-alpha atoms"
         selection_message = "Selecting %s" % selection
-        if c_alpha_only:
-            ost.LogInfo(calpha_message)
-            entity = entity.Select("aname=CA")
         if selection:
             ost.LogInfo(selection_message)
             entity = entity.Select(selection)
@@ -505,7 +501,10 @@ def _ReadStructureFile(path, c_alpha_only=False, fault_tolerant=False,
     if not os.path.isfile(path):
         raise IOError("%s is not a file" % path)
     try:
-        entity = LoadPDB(path, fault_tolerant=fault_tolerant)
+        entity = LoadPDB(
+            path,
+            fault_tolerant=fault_tolerant,
+            calpha_only=c_alpha_only)
         if not entity.IsValid():
             raise IOError("Provided file does not contain valid entity.")
         entity.SetName(os.path.basename(path))
@@ -516,7 +515,8 @@ def _ReadStructureFile(path, c_alpha_only=False, fault_tolerant=False,
             tmp_entity, cif_info = LoadMMCIF(
                 path,
                 info=True,
-                fault_tolerant=fault_tolerant)
+                fault_tolerant=fault_tolerant,
+                calpha_only=c_alpha_only)
             if len(cif_info.biounits) == 0:
                 tbu = MMCifInfoBioUnit()
                 tbu.id = 'ASU of ' + entity.pdb_id
