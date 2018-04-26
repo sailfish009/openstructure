@@ -380,7 +380,7 @@ class TestQSscore(unittest.TestCase):
     # lDDT is not symmetrical and does not account for overprediction!
     ref = _LoadFile('4br6.1.pdb').Select('cname=A,B')
     mdl = _LoadFile('4br6.1.pdb')
-    lddt_settings = lDDTSettings(structural_checks=False)
+    lddt_settings = lDDTSettings()
     qs_scorer = QSscorer(ref, mdl)
     lddt_oligo_scorer = qs_scorer.GetOligoLDDTScorer(lddt_settings)
     self.assertAlmostEqual(qs_scorer.global_score, 0.171, 2)
