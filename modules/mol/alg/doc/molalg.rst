@@ -548,11 +548,33 @@ Local Distance Test scores (lDDT, DRMSD)
 
   Object to compute lDDT scores.
   
-  Example usage with pre-prepared references.
+  Example usage.
   
   .. code:: python
   
-    import ost
+    #! /bin/env python
+    """Run lDDT from within script."""
+    from ost.io import LoadPDB
+    from ost.mol.alg import (CleanlDDTReferences,
+    			 lDDTSettings, lDDTScorer)
+    from ost.io import ReadStereoChemicalPropsFile
+
+    ent_full = LoadPDB('3ia3', remote=True)
+    model_view = ent_full.Select('cname=A')
+    references = [ent_full.Select('cname=C')]
+
+    #
+    # Initialize settings with default parameters and print them
+    settings = lDDTSettings()
+    settings.PrintParameters()
+
+    # Clean up references
+    CleanlDDTReferences(references)
+    #
+    # Calculate lDDT
+    scorer = lDDTScorer(references=references, model=model_view, settings=settings)
+    print "Global score:", scorer.global_score
+    scorer.PrintPerResidueStats()
   
   :param references: Sets :attr:`references`
   :param model: Sets :attr:`model`
