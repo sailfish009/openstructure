@@ -205,24 +205,17 @@ object lDDTScorerInitWrapper(tuple args, dict kwargs){
     throw std::invalid_argument("'settings' argument is required");
   }
 
-  ost::mol::alg::StereoChemicalProps stereochemical_params;
-  if(kwargs.contains("stereochemical_params")){
-    stereochemical_params = extract<ost::mol::alg::StereoChemicalProps>(kwargs["stereochemical_params"]);
-    kwargs["stereochemical_params"].del();
-  }
-
   if(len(kwargs) > 0){
     std::stringstream ss;
     ss << "Invalid keywords observed when setting up lDDTScorer! ";
     ss << "Or did you pass the same keyword twice? ";
-    ss << "Valid keywords are: settings and stereochemical_params!";
+    ss << "Valid keywords are: references, model and settings!";
     throw std::invalid_argument(ss.str());
   }
 
   return self.attr("__init__")(reference_list_vector,
                                model,
-                               settings,
-                               stereochemical_params);
+                               settings);
 }
 
 
@@ -396,7 +389,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
 
   class_<mol::alg::lDDTScorer>("lDDTScorer", no_init)
       .def("__init__", raw_function(lDDTScorerInitWrapper))
-      .def(init<std::vector<mol::EntityView>&, mol::EntityView&, mol::alg::lDDTSettings&, mol::alg::StereoChemicalProps&>())
+      .def(init<std::vector<mol::EntityView>&, mol::EntityView&, mol::alg::lDDTSettings&>())
       .add_property("global_score", &mol::alg::lDDTScorer::GetGlobalScore)
       .add_property("conserved_contacts", &mol::alg::lDDTScorer::GetNumConservedContacts)
       .add_property("total_contacts", &mol::alg::lDDTScorer::GetNumTotalContacts)

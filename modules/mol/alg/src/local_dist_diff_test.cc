@@ -498,30 +498,15 @@ lDDTScorer::lDDTScorer(std::vector<EntityView>& init_references,
   references_view(init_references),
   model_view(init_model)
   {
-    _Init();   
+    _score_calculated = false;
+    _score_valid = false;
+    _has_local_scores = false;
+    _num_cons_con = -1;
+    _num_tot_con = -1;
+    _global_score = -1.0;
+    CleanlDDTReferences(references_view);
+    _PrepareGlobalRDMap();  
   }
-
-lDDTScorer::lDDTScorer(std::vector<EntityView>& init_references,
-                       ost::mol::EntityView& init_model,
-                       lDDTSettings& init_settings,
-                       StereoChemicalProps& init_stereochemical_params):
-  settings(init_settings),
-  references_view(init_references),
-  model_view(init_model),
-  stereochemical_params(init_stereochemical_params) {
-    _Init(); 
-  }
-
-void lDDTScorer::_Init(){
-  _score_calculated = false;
-  _score_valid = false;
-  _has_local_scores = false;
-  _num_cons_con = -1;
-  _num_tot_con = -1;
-  _global_score = -1.0;
-  CleanlDDTReferences(references_view);
-  _PrepareGlobalRDMap();
-}
 
 Real lDDTScorer::GetGlobalScore(){
   if (!_score_calculated) {

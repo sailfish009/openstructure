@@ -89,15 +89,10 @@ class lDDTScorer
     EntityView model_view;
     std::vector<EntityView> references_view;
     GlobalRDMap glob_dist_list;
-    StereoChemicalProps stereochemical_params;
 
     lDDTScorer(std::vector<EntityView>& init_references,
                ost::mol::EntityView& init_model,
                lDDTSettings& init_settings);
-    lDDTScorer(std::vector<EntityView>& init_references,
-               ost::mol::EntityView& init_model,
-               lDDTSettings& init_settings,
-               StereoChemicalProps& init_stereochemical_params);
     Real GetGlobalScore();
     std::vector<lDDTLocalScore> GetLocalScores();
     int GetNumConservedContacts(); // number of conserved distances in the model
@@ -116,7 +111,6 @@ class lDDTScorer
     int _num_tot_con;
     Real _global_score;
     std::vector<lDDTLocalScore> _local_scores;
-    void _Init();
     void _ComputelDDT();
     void _GetLocallDDT();
     void _PrepareGlobalRDMap();
@@ -270,5 +264,3 @@ void DLLEXPORT_OST_MOL_ALG PrintlDDTPerResidueStats(std::vector<lDDTLocalScore>&
 }}}
 
 #endif
-
-
