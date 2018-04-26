@@ -405,7 +405,7 @@ StereoChemicalProps::StereoChemicalProps(
 
 lDDTSettings::lDDTSettings(): radius(15.0), 
                               sequence_separation(0),
-                              label("localldt") {
+                              label("locallddt") {
     cutoffs.push_back(0.5);
     cutoffs.push_back(1.0);
     cutoffs.push_back(2.0);
