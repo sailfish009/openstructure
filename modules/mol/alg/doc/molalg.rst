@@ -465,6 +465,33 @@ Local Distance Test scores (lDDT, DRMSD)
     :type structural_checks: bool
     :param cutoffs_length: Length of the cutoffs list used for calculations
     :type cutoffs_length: int
+    
+.. class:: StereoChemicalProps(bond_table, angle_table, nonbonded_table)
+  
+  Object containing the stereo-chemical properties read form stereochmical_props.txt
+  file.
+
+  :param bond_table: Sets :attr:`bond_table`
+  :param angle_table: Sets :attr:`angle_table`
+  :param nonbonded_table: Sets :attr:`nonbonded_table`
+
+  .. attribute:: bond_table
+  
+    Object containing bond parameters
+    
+    :type: :class:`~ost.mol.alg.StereoChemicalParams`
+
+  .. attribute:: angle_table
+    
+    Object containing angle parameters
+    
+    :type: :class:`~ost.mol.alg.StereoChemicalParams`
+
+  .. attribute:: nonbonded_table
+    
+    Object containing clashing distances parameters
+    
+    :type: :class:`~ost.mol.alg.ClashingDistances`
 
 
 .. class:: lDDTSettings(radius=15, \
