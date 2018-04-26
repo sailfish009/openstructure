@@ -37,7 +37,7 @@ future. Optionally, the local scores for lDDT can also be dumped to the output
 file. Additionally, cleaned up structures can be saved to the disk.
 The output file has following format:
 
-.. code-block:: python
+.. code-block:: none
 
   {
       "result": {
