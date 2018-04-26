@@ -718,8 +718,6 @@ def _Main():
                         reference_results["qs_score"] = {
                             "status": "SUCCESS",
                             "error": "",
-                            "model_name": model_name,
-                            "reference_name": reference_name,
                             "global_score": qs_scorer.global_score,
                             "best_score": qs_scorer.best_score}
                     except qsscoring.QSscoreError as ex:
@@ -728,8 +726,6 @@ def _Main():
                         reference_results["qs_score"] = {
                             "status": "FAILURE",
                             "error": str(ex),
-                            "model_name": model_name,
-                            "reference_name": reference_name,
                             "global_score": 0.0,
                             "best_score": 0.0}
             # Calculate lDDT
