@@ -467,41 +467,17 @@ Local Distance Test scores (lDDT, DRMSD)
     :type cutoffs_length: int
 
 
-.. class:: lDDTSettings(bond_tolerance=12, \
-                        angle_tolerance=12, \
-                        radius=15, \
+.. class:: lDDTSettings(radius=15, \
                         sequence_separation=0, \
-                        sel="", \
-                        parameter_file_path="", \
-                        structural_checks=True, \
-                        consistency_checks=True, \
                         cutoffs=(0.5, 1.0, 2.0, 4.0), \
                         label="locallddt")
 
   Object containing the settings used for lDDT calculations.
 
-  :param bond_tolerance: Sets :attr:`bond_tolerance`.
-  :param angle_tolerance: Sets :attr:`angle_tolerance`.
   :param radius: Sets :attr:`radius`.
   :param sequence_separation: Sets :attr:`sequence_separation`.
-  :param sel: Sets :attr:`sel`.
-  :param parameter_file_path: Sets :attr:`parameter_file_path`.
-  :param structural_checks: Sets :attr:`structural_checks`.
-  :param consistency_checks: Sets :attr:`consistency_checks`.
   :param cutoffs: Sets :attr:`cutoffs`.
   :param label: Sets :attr:`label`.
-
-  .. attribute:: bond_tolerance
-
-    Tolerance in stddevs for bonds.
-
-    :type: :class:`float`
-
-  .. attribute:: angle_tolerance
-
-    Tolerance in stddevs for angles.
-
-    :type: :class:`float`
 
   .. attribute:: radius
 
@@ -515,32 +491,6 @@ Local Distance Test scores (lDDT, DRMSD)
 
     :type: :class:`int`
 
-  .. attribute:: sel
-
-    Selection performed on reference(s).
-
-    :type: :class:`str`
-
-  .. attribute:: parameter_file_path
-
-    Path to the stereochemical parameter file. If set to "", it the default file
-    shipped with OpenStructure is used (see 
-    :class:`~ost.io.StereoChemicalParamsReader`).
-
-    :type: :class:`str`
-
-  .. attribute:: structural_checks
-
-    Are structural checks and filter input data on?
-
-    :type: :class:`bool`
-
-  .. attribute:: consistency_checks
-
-    Are consistency checks on?
-
-    :type: :class:`bool`
-
   .. attribute:: cutoffs
 
     List of thresholds used to determine distance conservation.
@@ -552,13 +502,6 @@ Local Distance Test scores (lDDT, DRMSD)
     The base name for the ResidueHandle properties that store the local scores.
 
     :type: :class:`str`
-
-  .. method:: SetStereoChemicalParamsPath(path)
-
-    Set the path to the stereochemical parameter file.
-
-    :param path: Path to stereochemical parameter file
-    :type path: str
 
   .. method:: PrintParameters()
 
