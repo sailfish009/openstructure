@@ -355,8 +355,9 @@ class QSscorer:
     There will be one alignment for each mapped chain and they are ordered by
     their chain names in :attr:`qs_ent_1`.
 
-    The sequences of the alignments have views attached into
-    :attr:`QSscoreEntity.ent` of :attr:`qs_ent_1` and :attr:`qs_ent_2`.
+    The sequences of the alignments are named according to the chain name and
+    have views attached into :attr:`QSscoreEntity.ent` of :attr:`qs_ent_1` and
+    :attr:`qs_ent_2`.
 
     :getter: Computed on first use (cached)
     :type: :class:`list` of :class:`~ost.seq.AlignmentHandle`
@@ -832,6 +833,9 @@ def GetContacts(entity, calpha_only, dist_thr=12.0):
   # DONE
   return contacts
 
+###############################################################################
+# Oligo-lDDT scores
+###############################################################################
 
 class OligoLDDTScorer(object):
   """A simple class to calculate oligomeric lDDT score."""
@@ -855,7 +859,7 @@ class OligoLDDTScorer(object):
     self._lddt_ref = None
     self._lddt_mdl = None
     self._oligo_lddt_scorer = None
-    self._sc_lddt_scorers = None
+    self._mapped_lddt_scorers = None
 
   @property
   def lddt_ref(self):
@@ -890,83 +894,18 @@ class OligoLDDTScorer(object):
     return self._oligo_lddt_scorer
 
   @property
-  def sc_lddt_scorers(self):
-    if self._sc_lddt_scorers is None:
-      self._sc_lddt_scorers = list()
+  def mapped_lddt_scorers(self):
+    if self._mapped_lddt_scorers is None:
+      self._mapped_lddt_scorers = list()
       for aln in self.alignments:
-        # Get chains and renumber according to alignment (for lDDT)
-        reference = Renumber(
-          aln.GetSequence(0),
-          old_number_label=self._old_number_label).CreateFullView()
-        refseq = seq.CreateSequence(
-          "reference_renumbered",
-          aln.GetSequence(0).GetString())
-        refseq.AttachView(reference)
-        aln.AddSequence(refseq)
-        model = Renumber(
-          aln.GetSequence(1),
-          old_number_label=self._old_number_label).CreateFullView()
-        modelseq = seq.CreateSequence(
-          "model_renumbered",
-          aln.GetSequence(1).GetString())
-        modelseq.AttachView(model)
-        aln.AddSequence(modelseq)
-        # Filter to CA-only if desired (done after AttachView to not mess it up)
-        if self.calpha_only:
-          lddt_scorer = lDDTScorer(
-            references=[reference.Select('aname=CA')],
-            model=model.Select('aname=CA'),
-            settings=self.settings)
-        else:
-          lddt_scorer = lDDTScorer(
-            references=[reference],
-            model=model,
-            settings=self.settings)
-        lddt_scorer.alignment = aln  # a bit of a hack
-        self._sc_lddt_scorers.append(lddt_scorer)
-    return self._sc_lddt_scorers
+        mapped_lddt_scorer = MappedLDDTScorer(aln, self.calpha_only,
+                                              self.settings)
+        self._mapped_lddt_scorers.append(mapped_lddt_scorer)
+    return self._mapped_lddt_scorers
 
-  def GetPerResidueScores(self, scorer_index):
-    scores = list()
-    assigned_residues = list()
-    # Make sure the score is calculated
-    self.sc_lddt_scorers[scorer_index].global_score
-    for col in self.sc_lddt_scorers[scorer_index].alignment:
-      if col[0] != "-" and col.GetResidue(3).IsValid():
-        ref_res = col.GetResidue(0)
-        mdl_res = col.GetResidue(1)
-        ref_res_renum = col.GetResidue(2)
-        mdl_res_renum = col.GetResidue(3)
-        if ref_res.one_letter_code != ref_res_renum.one_letter_code:
-          raise RuntimeError("Reference residue name mapping inconsistent: %s != %s" %
-                             (ref_res.one_letter_code,
-                              ref_res_renum.one_letter_code))
-        if mdl_res.one_letter_code != mdl_res_renum.one_letter_code:
-          raise RuntimeError("Model residue name mapping inconsistent: %s != %s" %
-                             (mdl_res.one_letter_code,
-                              mdl_res_renum.one_letter_code))
-        if ref_res.GetNumber().num != ref_res_renum.GetIntProp(self._old_number_label):
-          raise RuntimeError("Reference residue number mapping inconsistent: %s != %s" %
-                             (ref_res.GetNumber().num,
-                              ref_res_renum.GetIntProp(self._old_number_label)))
-        if mdl_res.GetNumber().num != mdl_res_renum.GetIntProp(self._old_number_label):
-          raise RuntimeError("Model residue number mapping inconsistent: %s != %s" %
-                             (mdl_res.GetNumber().num,
-                              mdl_res_renum.GetIntProp(self._old_number_label)))
-        if ref_res.qualified_name in assigned_residues:
-          raise RuntimeError("Duplicated residue in reference: " %
-                             (ref_res.qualified_name))
-        else:
-          assigned_residues.append(ref_res.qualified_name)
-        # check if property there (may be missing for CA-only)
-        if mdl_res_renum.HasProp(self.settings.label):
-          scores.append({
-            "residue_number": ref_res.GetNumber().num,
-            "residue_name": ref_res.name,
-            "lddt": mdl_res_renum.GetFloatProp(self.settings.label),
-            "conserved_contacts": mdl_res_renum.GetFloatProp(self.settings.label + "_conserved"),
-            "total_contacts": mdl_res_renum.GetFloatProp(self.settings.label + "_total")})
-    return scores
+  @property
+  def sc_lddt_scorers(self):
+    return [mls.lddt_scorer for mls in self.mapped_lddt_scorers]
 
   @property
   def sc_lddt(self):
@@ -1004,6 +943,160 @@ class OligoLDDTScorer(object):
                                                          self.mdl,
                                                          self.calpha_only)
 
+
+class MappedLDDTScorer(object):
+  """A simple class to calculate a single-chain lDDT score on a given chain to
+  chain mapping as extracted from :class:`OligoLDDTScorer`.
+
+  :param alignment: Sets :attr:`alignment`
+  :param calpha_only: Sets :attr:`calpha_only`
+  :param settings: Sets :attr:`settings`
+  
+  .. attribute:: alignment
+
+    Alignment with two sequences named according to the mapped chains and with
+    views attached to both sequences (e.g. one of the items of
+    :attr:`QSScorer.alignments`).
+
+    The first sequence is assumed to be the reference and the second one the
+    model. Since the lDDT score is not symmetric (extra residues in model are
+    ignored), the order is important.
+
+    :type: :class:`~ost.seq.AlignmentHandle`
+  
+  .. attribute:: calpha_only
+
+    If true, restricts lDDT score to CA only.
+
+    :type: :class:`bool`
+
+  .. attribute:: settings
+
+    Settings to use for lDDT scoring.
+
+    :type: :class:`~mol.alg.lDDTSettings`
+
+  .. attribute:: lddt_scorer
+
+    lDDT Scorer object for the given chains.
+
+    :type: :class:`~mol.alg.lDDTScorer`
+
+  .. attribute:: reference_chain_name
+
+    Chain name of the reference.
+
+    :type: :class:`str`
+
+  .. attribute:: model_chain_name
+
+    Chain name of the model.
+
+    :type: :class:`str`
+  """
+  def __init__(self, alignment, calpha_only, settings):
+    # prepare fields
+    self.alignment = alignment
+    self.calpha_only = calpha_only
+    self.settings = settings
+    self.lddt_scorer = None # set in _InitScorer
+    self.reference_chain_name = alignment.sequences[0].name
+    self.model_chain_name = alignment.sequences[1].name
+    self._old_number_label = "old_num"
+    self._extended_alignment = None  # set in _InitScorer
+    # initialize lDDT scorer
+    self._InitScorer()
+
+  def GetPerResidueScores(self):
+    """
+    :return: Scores for each residue
+    :rtype:  :class:`list` of :class:`dict` with one item for each residue
+             existing in model and reference:
+
+             - "residue_number": Residue number in reference chain
+             - "residue_name": Residue number in reference chain
+             - "lddt": local lDDT
+             - "conserved_contacts": number of conserved contacts
+             - "total_contacts": total number of contacts
+    """
+    scores = list()
+    assigned_residues = list()
+    # Make sure the score is calculated
+    self.lddt_scorer.global_score
+    for col in self._extended_alignment:
+      if col[0] != "-" and col.GetResidue(3).IsValid():
+        ref_res = col.GetResidue(0)
+        mdl_res = col.GetResidue(1)
+        ref_res_renum = col.GetResidue(2)
+        mdl_res_renum = col.GetResidue(3)
+        if ref_res.one_letter_code != ref_res_renum.one_letter_code:
+          raise RuntimeError("Reference residue name mapping inconsistent: %s != %s" %
+                             (ref_res.one_letter_code,
+                              ref_res_renum.one_letter_code))
+        if mdl_res.one_letter_code != mdl_res_renum.one_letter_code:
+          raise RuntimeError("Model residue name mapping inconsistent: %s != %s" %
+                             (mdl_res.one_letter_code,
+                              mdl_res_renum.one_letter_code))
+        if ref_res.GetNumber().num != ref_res_renum.GetIntProp(self._old_number_label):
+          raise RuntimeError("Reference residue number mapping inconsistent: %s != %s" %
+                             (ref_res.GetNumber().num,
+                              ref_res_renum.GetIntProp(self._old_number_label)))
+        if mdl_res.GetNumber().num != mdl_res_renum.GetIntProp(self._old_number_label):
+          raise RuntimeError("Model residue number mapping inconsistent: %s != %s" %
+                             (mdl_res.GetNumber().num,
+                              mdl_res_renum.GetIntProp(self._old_number_label)))
+        if ref_res.qualified_name in assigned_residues:
+          raise RuntimeError("Duplicated residue in reference: " %
+                             (ref_res.qualified_name))
+        else:
+          assigned_residues.append(ref_res.qualified_name)
+        # check if property there (may be missing for CA-only)
+        if mdl_res_renum.HasProp(self.settings.label):
+          scores.append({
+            "residue_number": ref_res.GetNumber().num,
+            "residue_name": ref_res.name,
+            "lddt": mdl_res_renum.GetFloatProp(self.settings.label),
+            "conserved_contacts": mdl_res_renum.GetFloatProp(self.settings.label + "_conserved"),
+            "total_contacts": mdl_res_renum.GetFloatProp(self.settings.label + "_total")})
+    return scores
+
+  ##############################################################################
+  # Class internal helpers (anything that doesnt easily work without this class)
+  ##############################################################################
+
+  def _InitScorer(self):
+    # Use copy of alignment (extended by 2 extra sequences for renumbering)
+    aln = self.alignment.Copy()
+    # Get chains and renumber according to alignment (for lDDT)
+    reference = Renumber(
+      aln.GetSequence(0),
+      old_number_label=self._old_number_label).CreateFullView()
+    refseq = seq.CreateSequence(
+      "reference_renumbered",
+      aln.GetSequence(0).GetString())
+    refseq.AttachView(reference)
+    aln.AddSequence(refseq)
+    model = Renumber(
+      aln.GetSequence(1),
+      old_number_label=self._old_number_label).CreateFullView()
+    modelseq = seq.CreateSequence(
+      "model_renumbered",
+      aln.GetSequence(1).GetString())
+    modelseq.AttachView(model)
+    aln.AddSequence(modelseq)
+    # Filter to CA-only if desired (done after AttachView to not mess it up)
+    if self.calpha_only:
+      self.lddt_scorer = lDDTScorer(
+        references=[reference.Select('aname=CA')],
+        model=model.Select('aname=CA'),
+        settings=self.settings)
+    else:
+      self.lddt_scorer = lDDTScorer(
+        references=[reference],
+        model=model,
+        settings=self.settings)
+    # Store alignment for later
+    self._extended_alignment = aln
 
 ###############################################################################
 # HELPERS
@@ -2528,4 +2621,4 @@ def _ComputeLDDTScore(ref, mdl):
 
 # specify public interface
 __all__ = ('QSscoreError', 'QSscorer', 'QSscoreEntity', 'FilterContacts',
-           'GetContacts', 'OligoLDDTScorer')
+           'GetContacts', 'OligoLDDTScorer', 'MappedLDDTScorer')
