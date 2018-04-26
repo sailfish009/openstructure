@@ -11,6 +11,7 @@ Changes in Release <RELEASE NUMBER>
   * Added Molck API to the ost.mol.alg module.
   * Extended lDDT API in ost.mol.alg module to reproduce functionality of lddt
     binary.
+  * Added `actions` interface including one action to compare structures.
 
 Changes in Release 1.7.1
 --------------------------------------------------------------------------------
@@ -183,4 +184,3 @@ Changes in Release 1.2.0 (since 1.1.0)
    to lDDT
 
  * new superposition dialog in DNG
-
