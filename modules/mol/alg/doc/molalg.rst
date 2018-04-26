@@ -539,6 +539,78 @@ Local Distance Test scores (lDDT, DRMSD)
     :return: String representation of the lDDTSettings object.
     :rtype:  :class:`str`
 
+.. class:: lDDTScorer(reference, model, settings)
+
+  Object to compute lDDT scores.
+  
+  Example usage with pre-prepared references.
+  
+  .. code:: python
+  
+    import ost
+  
+  :param references: Sets :attr:`references`
+  :param model: Sets :attr:`model`
+  :param settings: Sets :attr:`settings`
+  
+  .. attribute:: references
+  
+    A list of reference structures.
+    
+    :type: list(:class:`~ost.mol.EntityView`)
+  
+  .. attribute:: model
+  
+    A model structure. 
+    
+    :type: :class:`~ost.mol.EntityView`
+    
+  .. attribute:: settings
+  
+    Settings used to calculate lDDT.
+    
+    :type: :class:`~ost.mol.alg.lDDTSettings`
+  
+  .. attribute:: global_dist_list
+  
+    Global map of residue properties.
+    
+    :type: :class:`~ost.mol.alg.GlobalRDMap`
+
+  .. attribute:: global_score
+  
+    Global lDDT score.
+    
+    :type: float
+
+  .. attribute:: conserved_contacts
+  
+    Number of conserved distances.
+  
+    :type: int
+  
+  .. attribute:: total_contacts
+  
+    Number of total distances.
+  
+    :type:
+  
+  .. attribute:: local_scores
+  
+    Local scores.
+  
+    :type: list(:class:`~ost.mol.alg.lDDTLocalScore`)
+  
+  .. attribute:: is_valid
+  
+    Is the calculated score valid?
+  
+    :type: bool
+  
+  .. method:: PrintPerResidueStats
+    
+    Print per-residue statistics.
+
 
 .. class:: UniqueAtomIdentifier(chain, residue_number, residue_name, atom_name)
 
