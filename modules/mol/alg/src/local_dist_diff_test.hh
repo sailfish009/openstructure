@@ -168,7 +168,7 @@ Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
                                          Real cutoff, 
                                          Real max_dist,
                                          const String& local_ldt_property_string="");
-/// TODO document me
+/// \brief Wrapper around LocalDistDiffTest
 Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& v,
                        std::vector<EntityView>& ref_list,
                        const GlobalRDMap& glob_dist_list,

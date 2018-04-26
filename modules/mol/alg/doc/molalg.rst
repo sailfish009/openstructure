@@ -306,7 +306,7 @@ Local Distance Test scores (lDDT, DRMSD)
   :returns: :class:`~ost.mol.alg.GlobalRDMap`
 
 
-.. function:: PreparelDDTGlobalRDMap(reference_list, settings)
+.. function:: PreparelDDTGlobalRDMap(reference_list, cutoff_list, sequence_separation, max_dist)
 
   A wrapper around :func:`CreateDistanceList` and
   :func:`CreateDistanceListFromMultipleReferences`. Depending on the length of
@@ -315,9 +315,12 @@ Local Distance Test scores (lDDT, DRMSD)
   :param reference_list: a list of reference structures from which distances are
     derived
   :type reference_list:  list of :class:`~ost.mol.EntityView`
-  :param settings: lDDT settings
-  :type settings: :class:`~ost.mol.alg.lDDTSettings`
-
+  :param max_dist: the inclusion radius in Angstroms (to determine which
+                   distances are checked for conservation)
+  :type max_dist:  :class:`float`
+  :param sequence_separation: sequence separation parameter ie. maximum distance
+                              between two sequences.
+  :type sequence_separation: :class:`int`
   :returns: :class:`~ost.mol.alg.GlobalRDMap`
 
 
@@ -361,7 +364,7 @@ Local Distance Test scores (lDDT, DRMSD)
   :type angle_tolerance: float
 
 
-.. function:: GetlDDTPerResidueStats(model, distance_list, settings)
+.. function:: GetlDDTPerResidueStats(model, distance_list, structural_checks, label)
 
   Get the per-residue statistics from the lDDT calculation.
 
@@ -369,20 +372,22 @@ Local Distance Test scores (lDDT, DRMSD)
   :type model: :class:`~ost.mol.EntityHandle`
   :param distance_list: The list of distances to check for conservation
   :type distance_list: :class:`~ost.mol.alg.GlobalRDMap`
-  :param settings: lDDT settings
-  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+  :param structural_checks: Where structural checks performed on the model?
+  :type structural_checks: bool
   :returns: Per-residue local lDDT scores
   :rtype: :class:`list` of :class:`~ost.mol.alg.lDDTLocalScore`
 
 
-.. function:: PrintlDDTPerResidueStats(scores, settings)
+.. function:: PrintlDDTPerResidueStats(scores, structural_checks, cutoffs_length)
 
   Print per-residue statistics from lDDT calculation.
 
   :param scores: Local lDDT scores
   :type scores: :class:`list` of :class:`~ost.mol.alg.lDDTLocalScore`
-  :param settings: lDDT settings
-  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+  :param structural_checks: Where structural checks performed on the model?
+  :type structural_checks: bool
+  :param cutoffs_length: Length of the cutoffs list used to calculate lDDT
+  :type cutoffs_length: int
 
 
 .. class:: lDDTLocalScore(cname, rname, rnum, is_assessed, quality_problems, \
