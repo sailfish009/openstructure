@@ -351,37 +351,23 @@ before computing the lDDT scores it is required to pass parameter file based on
 Engh and Huber parameters, and on the atomic radii as defined in the Cambridge
 Structural Database. OpenStructure ships with default file called
 `stereo_chemical_props.txt` located in `$OST_ROOT/share/openstructure`
-directory. A class :class:`~ost.io.StereoChemicalParamsReader` is used to read
-this file.
+directory. A function :function:`~ost.io.ReadStereoChemicalPropsFile` is used to
+read this file.
 
-.. class:: StereoChemicalParamsReader(filename="")
 
-  Object that holds and reads stereochemical parameters.
 
-  :param filename: Sets :attr:`filename`.
+.. function:: ReadStereoChemicalPropsFile(filename="", check=True)
 
-  .. attribute:: bond_table
+  Read stereochemical parameters - if not provided a local version will be used.
 
-    The table containing bond information of type :class:`~ost.mol.alg.StereoChemicalParams`.
+  :param filename: The path to the parameter file that will be used. If set
+                   to "", it reads the default file shipped with OpenStructure.
+  :type filename: :class:`str`
+  :param check: Raise an error when any of the resulting tables are empty.
+  :type check:  :class:`bool`
+  :return: Object containing stereochemical parameters
+  :rtype: :class:`~ost.mol.alg.StereoChemicalProps`
 
-  .. attribute:: angle_table
+.. function:: GetStereoChemicalPropsFile()
 
-    The table containing angle information of type :class:`~ost.mol.alg.StereoChemicalParams`.
-
-  .. attribute:: nonbonded_table
-
-    The table containing clashes of type :class:`~ost.mol.alg.ClashingDistances`.
-
-  .. attribute:: filename
-
-    The path to the parameter file that will be used. If set to "", it reads the
-    default file shipped with OpenStructure.
-
-    :type: :class:`str`
-
-  .. method:: Read(check=False)
-
-    Read the file.
-
-    :param check: Raise an error when any of the resulting tables are empty.
-    :type check:  :class:`bool`
+  Get the default path to the stereochemical paramteres file.
