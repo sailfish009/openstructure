@@ -43,14 +43,12 @@ struct StereoChemicalProps
 struct lDDTSettings {
   Real radius; 
   int sequence_separation;
-  bool consistency_checks;
   std::vector<Real> cutoffs;
   String label;
 
   lDDTSettings();
   lDDTSettings(Real init_radius, 
                int init_sequence_separation,
-               bool init_consistency_checks,
                std::vector<Real>& init_cutoffs,
                String init_label);
   void PrintParameters();
@@ -121,7 +119,6 @@ class lDDTScorer
     void _Init();
     void _ComputelDDT();
     void _GetLocallDDT();
-    void _CheckConsistency();
     void _PrepareGlobalRDMap();
 };
 

@@ -405,7 +405,6 @@ StereoChemicalProps::StereoChemicalProps(
 
 lDDTSettings::lDDTSettings(): radius(15.0), 
                               sequence_separation(0),
-                              consistency_checks(true),
                               label("localldt") {
     cutoffs.push_back(0.5);
     cutoffs.push_back(1.0);
@@ -415,12 +414,10 @@ lDDTSettings::lDDTSettings(): radius(15.0),
 
 lDDTSettings::lDDTSettings(Real init_radius, 
                            int init_sequence_separation,
-                           bool init_consistency_checks,
                            std::vector<Real>& init_cutoffs,
                            String init_label):
                     radius(init_radius), 
                     sequence_separation(init_sequence_separation),
-                    consistency_checks(init_consistency_checks),
                     cutoffs(init_cutoffs),
                     label(init_label) {}
 
@@ -524,9 +521,6 @@ void lDDTScorer::_Init(){
   _global_score = -1.0;
   CleanlDDTReferences(references_view);
   _PrepareGlobalRDMap();
-  if (settings.consistency_checks) {
-    _CheckConsistency();
-  }
 }
 
 Real lDDTScorer::GetGlobalScore(){
@@ -579,16 +573,6 @@ void lDDTScorer::_PrepareGlobalRDMap(){
 
 bool lDDTScorer::IsValid(){
   return _score_valid;
-}
-
-void lDDTScorer::_CheckConsistency(){
-  for (std::vector<EntityView>::const_iterator ref_list_it = references_view.begin();
-       ref_list_it != references_view.end(); ++ref_list_it) {
-    bool cons_check = ResidueNamesMatch(model_view, *ref_list_it, true);
-    if (cons_check == false) {
-      throw std::runtime_error("Residue names in model and in reference structure(s) are inconsistent.");
-    } 
-  }
 }
 
 void lDDTScorer::_ComputelDDT(){
@@ -769,17 +753,6 @@ Real LocalDistDiffTest(const EntityView& v,
                        std::vector<EntityView>& ref_list,
                        const GlobalRDMap& glob_dist_list,
                        lDDTSettings& settings) {
-  for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
-       ref_list_it != ref_list.end(); ++ref_list_it) {
-    bool cons_check = ResidueNamesMatch(v,*ref_list_it,settings.consistency_checks);
-    if (cons_check==false) {
-      if (settings.consistency_checks==true) {
-        throw std::runtime_error("Residue names in model and in reference structure(s) are inconsistent.");            
-      } else {
-        LOG_WARNING("Residue names in model and in reference structure(s) are inconsistent.");
-      }   
-    } 
-  }
 
   std::pair<int,int> cov = ComputeCoverage(v,glob_dist_list);
   if (cov.second == -1) {
@@ -981,7 +954,7 @@ std::vector<lDDTLocalScore> GetlDDTPerResidueStats(EntityView& model,
           conserved_dist=ritv.GetIntProp(label+"_conserved");
           total_dist=ritv.GetIntProp(label+"_total");
         } else {
-          std::cout << label << std::endl;
+          //std::cout << label << std::endl;
           lddt_local = 0;
           lddt_local_string="0.0000";
           conserved_dist = 0;

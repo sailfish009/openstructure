@@ -159,6 +159,7 @@ int main (int argc, char **argv)
   lDDTSettings settings;
   String parameter_file_path;
   bool structural_checks = false;
+  bool ignore_consistency_checks = false;
   Real bond_tolerance = 12.0;
   Real angle_tolerance = 12.0;
   String sel;
@@ -221,7 +222,7 @@ int main (int argc, char **argv)
     structural_checks=true;
   }
   if (vm.count("ignore-consistency-checks")) {
-    settings.consistency_checks=false;
+    ignore_consistency_checks=true;
   }
   if (vm.count("tolerant")) {
     profile.fault_tolerant=true;
@@ -358,6 +359,19 @@ int main (int argc, char **argv)
         exit(-1);
       }
     }
+
+    // Check consistency
+  for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
+       ref_list_it != ref_list.end(); ++ref_list_it) {
+    bool cons_check = ResidueNamesMatch(model_view,*ref_list_it, ignore_consistency_checks);
+    if (cons_check==false) {
+      if (ignore_consistency_checks==false) {
+        throw std::runtime_error("Residue names in model and in reference structure(s) are inconsistent.");            
+      } else {
+        LOG_WARNING("Residue names in model and in reference structure(s) are inconsistent.");
+      }   
+    } 
+  }
 
     // computes the lddt score   
     Real lddt = LocalDistDiffTest(model_view, ref_list, glob_dist_list, settings);
