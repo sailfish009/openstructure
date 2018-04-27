@@ -450,7 +450,7 @@ Local Distance Test scores (lDDT, DRMSD)
 
   .. attribute:: total_dist
 
-    Total number of conserved distances.
+    Total number of distances.
 
     :type: :class:`int`
 
