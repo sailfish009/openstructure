@@ -606,7 +606,8 @@ Local Distance Test scores (lDDT, DRMSD)
 
   .. attribute:: global_score
   
-    Global lDDT score.
+    Global lDDT score. It is calculated as :attr:`conserved_contacts` divided
+    by :attr:`total_contacts`.
     
     :type: float
 
@@ -624,7 +625,8 @@ Local Distance Test scores (lDDT, DRMSD)
   
   .. attribute:: local_scores
   
-    Local scores.
+    Local scores. For each of the residue lDDT is it is calculated as residue
+    conserved contacts divided by residue total contacts.
   
     :type: list(:class:`~ost.mol.alg.lDDTLocalScore`)
   
