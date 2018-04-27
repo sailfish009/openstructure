@@ -377,23 +377,30 @@ class TestQSscore(unittest.TestCase):
   # TEST EXTRA SCORES
   
   def test_lDDT(self):
-    # lDDT is not symmetrical and does not account for overprediction!
+    # check for penalized and unpenalized oligo lDDT
     ref = _LoadFile('4br6.1.pdb').Select('cname=A,B')
     mdl = _LoadFile('4br6.1.pdb')
     lddt_settings = lDDTSettings()
     qs_scorer = QSscorer(ref, mdl)
-    lddt_oligo_scorer = qs_scorer.GetOligoLDDTScorer(lddt_settings)
+    lddt_oligo_scorer = qs_scorer.GetOligoLDDTScorer(lddt_settings, False)
     self.assertAlmostEqual(qs_scorer.global_score, 0.171, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 1.00, 2)
     self.assertAlmostEqual(lddt_oligo_scorer.oligo_lddt, 1.00, 2)
+    # with penalty we account for extra model chains
+    lddt_oligo_scorer_pen = qs_scorer.GetOligoLDDTScorer(lddt_settings, True)
+    self.assertAlmostEqual(lddt_oligo_scorer_pen.oligo_lddt, 0.5213, 2)
     # flip them (use QSscoreEntity to go faster)
     qs_scorer2 = QSscorer(qs_scorer.qs_ent_2,
                           qs_scorer.qs_ent_1,
                           res_num_alignment=True)
-    lddt_oligo_scorer2 = qs_scorer2.GetOligoLDDTScorer(lddt_settings)
+    lddt_oligo_scorer2 = qs_scorer2.GetOligoLDDTScorer(lddt_settings, False)
     self.assertAlmostEqual(qs_scorer2.global_score, 0.171, 2)
     self.assertAlmostEqual(qs_scorer2.best_score, 1.00, 2)
-    self.assertAlmostEqual(lddt_oligo_scorer2.oligo_lddt, 0.4496, 2)
+    # without penalty we don't see extra chains
+    self.assertAlmostEqual(lddt_oligo_scorer2.oligo_lddt, 1.00, 2)
+    # with penalty we account for extra reference chains
+    lddt_oligo_scorer2_pen = qs_scorer2.GetOligoLDDTScorer(lddt_settings, True)
+    self.assertAlmostEqual(lddt_oligo_scorer2_pen.oligo_lddt, 0.4496, 2)
     # check properties
     self.assertFalse(qs_scorer.calpha_only)
     self.assertEqual(qs_scorer.chem_mapping, {('B', 'A'): ('B', 'C', 'D', 'A')})
