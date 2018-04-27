@@ -36,7 +36,7 @@ source "$OST_EXEC_DIR/ost_config"
 ACTION="$1"
 OST_SCRIPT="${OST_EXEC_DIR}/ost-${ACTION}"
 
-IFS="#"
+OLDIFS=$IFS
 if test -e "${OST_SCRIPT}" ; then
     opts=""
     for argument in "${@:2}";do
@@ -46,6 +46,7 @@ if test -e "${OST_SCRIPT}" ; then
         opts="$argument"
       fi
     done
+    IFS="#"
     $pyexec -c "execfile('$DNG_ROOT/@LIBDIR@/python@PYTHON_VERSION@/site-packages/ost/ost_startup.py')" "${OST_SCRIPT}" $opts
 else
     opts=""
@@ -56,7 +57,9 @@ else
         opts="$argument"
       fi
     done
+    IFS="#"
     $pyexec $interactive -c "execfile('$DNG_ROOT/@LIBDIR@/python@PYTHON_VERSION@/site-packages/ost/ost_startup.py')" $opts
     RC=$?
     exit $RC
 fi
+IFS=$OLDIFS
