@@ -10,7 +10,8 @@ using namespace ost::mol;
 
 void ost::mol::alg::MapNonStandardResidues(EntityHandle& ent, CompoundLibPtr lib) {
   // TODO: Maybe it is possible to make it in-place operation
-  EntityHandle new_ent=CreateEntity();  
+  EntityHandle new_ent=CreateEntity();
+  new_ent.SetName(ent.GetName());
   ChainHandleList chains=ent.GetChainList();
   XCSEditor new_edi=new_ent.EditXCS();
   for (ChainHandleList::const_iterator c=chains.begin();c!=chains.end();++c) {
