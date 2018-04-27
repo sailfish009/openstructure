@@ -351,7 +351,7 @@ before computing the lDDT scores it is required to pass parameter file based on
 Engh and Huber parameters, and on the atomic radii as defined in the Cambridge
 Structural Database. OpenStructure ships with default file called
 `stereo_chemical_props.txt` located in `$OST_ROOT/share/openstructure`
-directory. A function :function:`~ost.io.ReadStereoChemicalPropsFile` is used to
+directory. A function :func:`~ost.io.ReadStereoChemicalPropsFile` is used to
 read this file.
 
 

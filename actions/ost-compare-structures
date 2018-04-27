@@ -743,12 +743,11 @@ def _Main():
                 ost.LogInfo(str(lddt_settings).rstrip())
                 ost.LogInfo("===")
                 oligo_lddt_scorer = qs_scorer.GetOligoLDDTScorer(lddt_settings)
-                for scorer_index, lddt_scorer in enumerate(
-                        oligo_lddt_scorer.sc_lddt_scorers):
-                    # Get chains and renumber according to alignment (for lDDT)
-                    model_chain = lddt_scorer.model.chains[0].GetName()
-                    reference_chain = \
-                        lddt_scorer.references[0].chains[0].GetName()
+                for mapped_lddt_scorer in oligo_lddt_scorer.mapped_lddt_scorers:
+                    # Get data
+                    lddt_scorer = mapped_lddt_scorer.lddt_scorer
+                    model_chain = mapped_lddt_scorer.model_chain_name
+                    reference_chain = mapped_lddt_scorer.reference_chain_name
                     if skip_score:
                         ost.LogInfo(
                             " --> Skipping single chain lDDT because "
@@ -785,8 +784,7 @@ def _Main():
                                 "total_contacts": lddt_scorer.total_contacts}
                             if opts.save_per_residue_scores:
                                 per_residue_sc = \
-                                    oligo_lddt_scorer.GetPerResidueScores(
-                                        scorer_index)
+                                    mapped_lddt_scorer.GetPerResidueScores()
                                 ost.LogInfo("Per residue local lDDT (reference):")
                                 ost.LogInfo("Chain\tResidue Number\tResidue Name"
                                             "\tlDDT\tConserved Contacts\tTotal "
