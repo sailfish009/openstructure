@@ -1,5 +1,6 @@
 """
-Scoring of quaternary structures as in Martino's 2017 paper.
+Scoring of quaternary structures (QS). The QS scoring is according to the paper
+by `Bertoni et al. <https://dx.doi.org/10.1038/s41598-017-09654-8>`_.
 
 .. note ::
 
