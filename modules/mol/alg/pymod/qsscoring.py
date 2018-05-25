@@ -1240,6 +1240,28 @@ def _AlignAtomSeqs(seq_1, seq_2):
     LogWarning('%s:  %s' % (seq_2.name, seq_2.string))
   return aln
 
+def _FixSelectChainName(ch_name):
+  """
+  :return: String to be used with Select(cname=<RETURN>). Takes care of putting
+           quotation marks where needed.
+  :rtype:  :class:`str`
+  :param ch_name: Single chain name (:class:`str`).
+  """
+  if ch_name in ['-', '_', ' ']:
+    return '"%c"' % ch_name
+  else:
+    return ch_name
+
+def _FixSelectChainNames(ch_names):
+  """
+  :return: String to be used with Select(cname=<RETURN>). Takes care of joining
+           and putting quotation marks where needed.
+  :rtype:  :class:`str`
+  :param ch_names: Some iterable list of chain names (:class:`str` items).
+  """
+  chain_set = set([_FixSelectChainName(ch_name) for ch_name in ch_names])
+  return ','.join(chain_set)
+
 # QS entity
 
 def _CleanInputEntity(ent):
@@ -1263,13 +1285,7 @@ def _CleanInputEntity(ent):
 
   # remove them from *ent*
   if removed_chains:
-    chain_set = set()
-    for ch_name in removed_chains:
-      if ch_name in ['-', '_', ' ']:
-        chain_set.add('"%c"' % ch_name)
-      else:
-        chain_set.add(ch_name)
-    view = ent.Select('cname!=%s' % ','.join(chain_set))
+    view = ent.Select('cname!=%s' % _FixSelectChainNames(removed_chains))
     ent_new = mol.CreateEntityFromView(view, True)
     ent_new.SetName(ent.GetName())
   else:
@@ -1476,6 +1492,13 @@ def _GetAlignedResidues(qs_ent_1, qs_ent_2, chem_mapping, max_ca_per_chain,
   :param chem_mapping: See :attr:`QSscorer.chem_mapping`
   :param max_ca_per_chain: See :attr:`QSscorer.max_ca_per_chain_for_cm`
   """
+  # make sure name doesn't contain spaces and is unique
+  def _FixName(seq_name, seq_names):
+    # get rid of spaces and make it unique
+    seq_name = seq_name.replace(' ', '-')
+    while seq_name in seq_names:
+      seq_name += '-'
+    return seq_name
   # resulting views into CA entities using CA chain sequences
   ent_view_1 = qs_ent_1.ca_entity.CreateEmptyView()
   ent_view_2 = qs_ent_2.ca_entity.CreateEmptyView()
@@ -1489,12 +1512,12 @@ def _GetAlignedResidues(qs_ent_1, qs_ent_2, chem_mapping, max_ca_per_chain,
     seq_to_empty_view = dict()
     for ch in group_1:
       sequence = ca_chains_1[ch].Copy()
-      sequence.name = qs_ent_1.GetName() + '.' + ch
+      sequence.name = _FixName(qs_ent_1.GetName() + '.' + ch, seq_to_empty_view)
       seq_to_empty_view[sequence.name] = ent_view_1
       seq_list.AddSequence(sequence)
     for ch in group_2:
       sequence = ca_chains_2[ch].Copy()
-      sequence.name = qs_ent_2.GetName() + '.' + ch
+      sequence.name = _FixName(qs_ent_2.GetName() + '.' + ch, seq_to_empty_view)
       seq_to_empty_view[sequence.name] = ent_view_2
       seq_list.AddSequence(sequence)
     alnc = ClustalW(seq_list, clustalw=clustalw_bin)
@@ -1564,8 +1587,8 @@ def _FindSymmetry(qs_ent_1, qs_ent_2, ent_to_cm_1, ent_to_cm_2, chem_mapping):
   for _, symm_1, symm_2 in sorted(best_symm):
     s1 = symm_1[0]
     s2 = symm_2[0]
-    group_1 = ent_to_cm_1.Select('cname=%s' % ','.join(s1))
-    group_2 = ent_to_cm_2.Select('cname=%s' % ','.join(s2))
+    group_1 = ent_to_cm_1.Select('cname=%s' % _FixSelectChainNames(s1))
+    group_2 = ent_to_cm_2.Select('cname=%s' % _FixSelectChainNames(s2))
     # check if by superposing a pair of chains within the symmetry group to
     # superpose all chains within the symmetry group
     # -> if successful, the symmetry groups are compatible
@@ -1944,7 +1967,8 @@ def _GetClosestChainInterface(ent, ref_chain, chains):
   # inaccurate. Also it could be extracted from QSscoreEntity.contacts.
   closest = []
   for ch in chains:
-    iface_view = ent.Select('cname=%s and 10 <> [cname=%s]' % (ref_chain, ch))
+    iface_view = ent.Select('cname="%s" and 10 <> [cname="%s"]' \
+                            % (ref_chain, ch))
     nr_res = iface_view.residue_count
     closest.append((nr_res, ch))
   closest_chain = max(closest)[1]
@@ -2156,8 +2180,8 @@ def _CheckClosedSymmetry(ent_1, ent_2, symm_1, symm_2, chem_mapping,
     #    to superpose the full oligomer (e.g. if some chains are open/closed)
     for c1, c2 in itertools.product(g1, g2):
       # get superposition transformation
-      chain_1 = ent_1.Select('cname=%s' % c1)
-      chain_2 = ent_2.Select('cname=%s' % c2)
+      chain_1 = ent_1.Select('cname="%s"' % c1)
+      chain_2 = ent_2.Select('cname="%s"' % c2)
       res = mol.alg.SuperposeSVD(chain_1, chain_2, apply_transform=False)
       # look for overlaps
       mapping = _GetSuperpositionMapping(ent_1, ent_2, chem_mapping,
@@ -2261,8 +2285,8 @@ def _GetMappedRMSD(ent_1, ent_2, chain_mapping, transformation):
   atoms = []
   for c1, c2 in chain_mapping.iteritems():
     # get views and atom counts
-    chain_1 = ent_1.Select('cname=%s' % c1)
-    chain_2 = ent_2.Select('cname=%s' % c2)
+    chain_1 = ent_1.Select('cname="%s"' % c1)
+    chain_2 = ent_2.Select('cname="%s"' % c2)
     atom_count = chain_1.atom_count
     if atom_count != chain_2.atom_count:
       raise RuntimeError('Chains in _GetMappedRMSD must be perfectly aligned!')
@@ -2294,13 +2318,13 @@ class _CachedRMSD:
   def GetChainView1(self, cname):
     """Get cached view on chain *cname* for :attr:`ent_1`."""
     if cname not in self._chain_views_1:
-      self._chain_views_1[cname] = self.ent_1.Select('cname=%s' % cname)
+      self._chain_views_1[cname] = self.ent_1.Select('cname="%s"' % cname)
     return self._chain_views_1[cname]
 
   def GetChainView2(self, cname):
     """Get cached view on chain *cname* for :attr:`ent_2`."""
     if cname not in self._chain_views_2:
-      self._chain_views_2[cname] = self.ent_2.Select('cname=%s' % cname)
+      self._chain_views_2[cname] = self.ent_2.Select('cname="%s"' % cname)
     return self._chain_views_2[cname]
 
   def GetSuperposition(self, c1, c2):
