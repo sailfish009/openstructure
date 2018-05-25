@@ -71,8 +71,6 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_view_ov,
 ost::mol::alg::StereoChemicalProps (*read_props_a)(String filename, bool check) = &ReadStereoChemicalPropsFile;
 ost::mol::alg::StereoChemicalProps (*read_props_b)(bool check) = &ReadStereoChemicalPropsFile;
 
-
-Real (*lddt_c)(const mol::EntityView&, const mol::EntityView& , Real, Real, const String&)=&mol::alg::LocalDistDiffTest;
 }
 
 void export_pdb_io();

@@ -398,10 +398,10 @@ StereoChemicalProps::StereoChemicalProps(
   ost::mol::alg::StereoChemicalParams& init_bond_table,
   ost::mol::alg::StereoChemicalParams& init_angle_table,
   ost::mol::alg::ClashingDistances& init_nonbonded_table):
+    is_valid(true),
     bond_table(init_bond_table),
     angle_table(init_angle_table),
-    nonbonded_table(init_nonbonded_table),
-    is_valid(true) {}
+    nonbonded_table(init_nonbonded_table) {}
 
 lDDTSettings::lDDTSettings(): radius(15.0), 
                               sequence_separation(0),
@@ -495,8 +495,8 @@ lDDTScorer::lDDTScorer(std::vector<EntityView>& init_references,
                        ost::mol::EntityView& init_model,
                        lDDTSettings& init_settings):
   settings(init_settings),
-  references_view(init_references),
-  model_view(init_model)
+  model_view(init_model),
+  references_view(init_references)
   {
     _score_calculated = false;
     _score_valid = false;

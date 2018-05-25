@@ -374,7 +374,7 @@ int main (int argc, char **argv)
   }
 
     // computes the lddt score   
-    Real lddt = LocalDistDiffTest(model_view, ref_list, glob_dist_list, settings);
+    LocalDistDiffTest(model_view, ref_list, glob_dist_list, settings);
 
     // prints the residue-by-residue statistics
     std::vector<lDDTLocalScore> local_scores;
