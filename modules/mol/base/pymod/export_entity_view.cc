@@ -197,10 +197,10 @@ void export_EntityView()
                   make_function(&EntityView::GetBondList,
                                 return_value_policy<reference_existing_object>()))
     .def("GetChainList", &EntityView::GetChainList,
-         return_value_policy<reference_existing_object>())
+         return_value_policy<copy_const_reference>())
     .add_property("chains",
                   make_function(&EntityView::GetChainList,
-                                return_value_policy<reference_existing_object>()))
+                                return_value_policy<copy_const_reference>()))
     .def(self==self)
     .def(self!=self)
     .def("Dump", &EntityView::Dump)

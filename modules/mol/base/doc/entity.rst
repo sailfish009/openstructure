@@ -1865,7 +1865,7 @@ Other Entity-Related Functions
 Residue Numbering
 --------------------------------------------------------------------------------
 
-.. class:: ResNum(num, ins_code='\0')
+.. class:: ResNum(num, ins_code='\\0')
 
   Number for a residue. The residue number has a numeric part and an (optional)
   insertion-code. You can work with this object as if it was an integer and
