@@ -596,20 +596,20 @@ def _Main():
         c_alpha_only=opts.c_alpha_only,
         fault_tolerant=opts.fault_tolerant,
         selection=opts.reference_selection)
+    # molcking
     if opts.molck:
         ost.LogInfo("#" * 80)
         ost.LogInfo("Cleaning up input with Molck")
-        for i in range(len(references)):
-            _MolckEntity(references[i], opts)
-            references[i] = references[i].CreateFullView()
-        for i in range(len(models)):
-            _MolckEntity(models[i], opts)
-            models[i] = models[i].CreateFullView()
-    else:
-        for i in range(len(references)):
-            references[i] = references[i].CreateFullView()
-        for i in range(len(models)):
-            models[i] = models[i].CreateFullView()
+        for reference in references:
+            _MolckEntity(reference, opts)
+        for model in models:
+            _MolckEntity(model, opts)
+    # restrict to peptides (needed for CheckStructure anyways)
+    for i in range(len(references)):
+        references[i] = references[i].Select("peptide=true")
+    for i in range(len(models)):
+        models[i] = models[i].Select("peptide=true")
+    # structure checking
     if opts.structural_checks:
         ost.LogInfo("#" * 80)
         ost.LogInfo("Performing structural checks")
