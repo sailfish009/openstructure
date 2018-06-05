@@ -22,13 +22,13 @@ lDDT scores between two complexes from the command line with:
   $ ost compare-structures [-h] [-v VERBOSITY] -m MODEL -r REFERENCE
                            [-o OUTPUT] [-d] [-ds DUMP_SUFFIX]
                            [-rs REFERENCE_SELECTION] [-ms MODEL_SELECTION]
-                           [-ca] [-ft] [-qs]
+                           [-ca] [-ft] [-cl COMPOUND_LIBRARY] [-qs]
                            [-c CHAIN_MAPPING [CHAIN_MAPPING ...]] [-rna]
-                           [-l] [-sc] [-p PARAMETER_FILE]
-                           [-bt BOND_TOLERANCE] [-at ANGLE_TOLERANCE]
-                           [-ir INCLUSION_RADIUS] [-ss SEQUENCE_SEPARATION]
-                           [-cc] [-spr] [-ml] [-cl COMPOUND_LIBRARY]
-                           [-rm REMOVE [REMOVE ...]] [-ce] [-mn]
+                           [-l] [-ir INCLUSION_RADIUS]
+                           [-ss SEQUENCE_SEPARATION] [-spr] [-ml]
+                           [-rm REMOVE [REMOVE ...]] [-ce] [-mn] [-sc]
+                           [-p PARAMETER_FILE] [-bt BOND_TOLERANCE]
+                           [-at ANGLE_TOLERANCE] [-cc]
 
 By default the verbosity is set to 3 which will result in the informations
 being shown in the console. The result can be (optionally) saved as JSON file
