@@ -72,11 +72,12 @@ import argparse
 
 import ost
 from ost.io import (LoadPDB, LoadMMCIF, SavePDB, MMCifInfoBioUnit, MMCifInfo,
-                    MMCifInfoTransOp, ReadStereoChemicalPropsFile)
+                    MMCifInfoTransOp, ReadStereoChemicalPropsFile, profiles)
 from ost import PushVerbosityLevel
 from ost.mol.alg import (qsscoring, Molck, MolckSettings, lDDTSettings,
                          CheckStructure, ResidueNamesMatch)
-from ost.conop import CompoundLib
+from ost.conop import (CompoundLib, SetDefaultLib, GetDefaultLib,
+                       RuleBasedProcessor)
 from ost.seq.alg.renumber import Renumber
 
 
@@ -409,6 +410,17 @@ def _ParseArgs():
     return opts
 
 
+def _SetCompoundsChemlib(path_to_chemlib):
+    """Set default compound library for OST."""
+    # NOTE: This is adapted from ProMod3 code and should in the future be doable
+    #       with some shared OST code!
+    compound_lib = CompoundLib.Load(path_to_chemlib)
+    SetDefaultLib(compound_lib)
+    processor = RuleBasedProcessor(compound_lib)
+    for profile_name in profiles:
+        profiles[profile_name].processor = processor.Copy()
+
+
 def _RevertChainNames(ent):
     """Revert chain names to original names.
 
@@ -560,7 +572,7 @@ def _ReadStructureFile(path, c_alpha_only=False, fault_tolerant=False,
 
 def _MolckEntity(entity, options):
     """Molck the entity."""
-    lib = CompoundLib.Load(options.compound_library)
+    lib = GetDefaultLib()
     to_remove = tuple(options.remove)
 
     ms = MolckSettings(rm_unk_atoms="unk" in to_remove,
@@ -576,9 +588,11 @@ def _MolckEntity(entity, options):
 
 def _Main():
     """Do the magic."""
-
+    #
+    # Setup
     opts = _ParseArgs()
     PushVerbosityLevel(opts.verbosity)
+    _SetCompoundsChemlib(opts.compound_library)
     #
     # Read the input files
     ost.LogInfo("#" * 80)
