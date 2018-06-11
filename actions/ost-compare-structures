@@ -240,7 +240,7 @@ def _ParseArgs():
         default=False,
         action="store_true",
         help=("Make alignment based on residue number instead of using\n"
-              "Clustal."))
+              "a global BLOSUM62-based alignment."))
     #
     # lDDT options
     #

@@ -112,6 +112,7 @@ class QSscorer:
   :param ent_2: Second structure to be scored.
   :type ent_2:  :class:`QSscoreEntity`, :class:`~ost.mol.EntityHandle` or
                 :class:`~ost.mol.EntityView`
+  :param res_num_alignment: Sets :attr:`res_num_alignment`
 
   :raises: :class:`QSscoreError` if input structures are invalid or are monomers
            or have issues that make it impossible for a QS score to be computed.
@@ -141,6 +142,13 @@ class QSscorer:
     of symmetries and chain mappings. By default it is set to 100.
 
     :type: :class:`int`
+
+  .. attribute:: res_num_alignment
+
+    Forces each alignment in :attr:`alignments` to be based on residue numbers
+    instead of using a global BLOSUM62-based alignment.
+
+    :type: :class:`bool`
   """
   def __init__(self, ent_1, ent_2, res_num_alignment=False):
     # generate QSscoreEntity objects?
@@ -373,6 +381,11 @@ class QSscorer:
     second one to :attr:`qs_ent_2`. The sequences are named according to the
     mapped chain names and have views attached into :attr:`QSscoreEntity.ent`
     of :attr:`qs_ent_1` and :attr:`qs_ent_2`.
+
+    If :attr:`res_num_alignment` is False, each alignment is performed using a
+    global BLOSUM62-based alignment. Otherwise, the positions in the alignment
+    sequences are simply given by the residue number so that residues with
+    matching numbers are aligned.
 
     :getter: Computed on first use (cached)
     :type: :class:`list` of :class:`~ost.seq.AlignmentHandle`
@@ -1386,7 +1399,7 @@ def _AlignAtomSeqs(seq_1, seq_2):
   """
   :type seq_1: :class:`ost.seq.SequenceHandle`
   :type seq_2: :class:`ost.seq.SequenceHandle`
-  :return: Alignment of two sequences using a global aignment. Views attached
+  :return: Alignment of two sequences using a global alignment. Views attached
            to the input sequences will remain attached in the aln.
   :rtype:  :class:`~ost.seq.AlignmentHandle` or None if it failed.
   """
@@ -2588,7 +2601,7 @@ def _AreValidSymmetries(symm_1, symm_2):
       return False
   return True
 
-def _GetMappedAlignments(ent_1, ent_2, chain_mapping, res_num_alignment=True):
+def _GetMappedAlignments(ent_1, ent_2, chain_mapping, res_num_alignment):
   """
   :return: Alignments of 2 structures given chain mapping
            (see :attr:`QSscorer.alignments`).
@@ -2597,6 +2610,7 @@ def _GetMappedAlignments(ent_1, ent_2, chain_mapping, res_num_alignment=True):
   :param ent_2: Entity containing all chains in *chain_mapping.values()*.
                 Views to this entity attached to second sequence of each aln.
   :param chain_mapping: See :attr:`QSscorer.chain_mapping`
+  :param res_num_alignment: See :attr:`QSscorer.res_num_alignment`
   """
   alns = list()
   for ch_1_name in sorted(chain_mapping):

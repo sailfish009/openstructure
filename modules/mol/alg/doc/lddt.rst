@@ -136,15 +136,13 @@ for bonds and angles respectively.
 
 For steric clashes, the lddt executable recovers atomic radii and clashing 
 tolerance distances from the parameter file, depending on the atomic element under 
-investigation. When an atomic element cannot be determined, the lddt executable 
-uses a default atomic radius of 1.5 Angstrom. This value can be overriden using 
-the -m value, passing a new radius (in Ansgstroms) to the program.
+investigation.
 
 For example:
 
 .. code-block:: bash
 
-    lddt -f -p stereo_chemical_params.txt -b 8 -a 8 -m 1.0 mdl1.pdb ref.pdb
+    lddt -f -p stereo_chemical_params.txt -b 8 -a 8 mdl1.pdb ref.pdb
 
 
 -----------------------------
@@ -227,8 +225,8 @@ One can replicate the binary using simple python script:
     # Prepare residue map from references
     rdmap = PreparelDDTGlobalRDMap(references,
                                    cutoffs=cutoffs,
-                                   sequence_separation=0,
-                                   radius=15)
+                                   sequence_separation=settings.sequence_separation,
+                                   radius=settings.radius)
     #
     # This part is optional and it depends on our settings parameter
     if structural_checks:

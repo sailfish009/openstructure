@@ -359,9 +359,9 @@ Local Distance Test scores (lDDT, DRMSD)
     :class:`~ost.io.StereoChemicalParamsReader` or :func:`FillClashingDistances`
   :type nonbonded_table: :class:`~ost.mol.alg.ClashingDistances`
   :param bond_tolerance: Tolerance in stddev for bonds
-  :type bond_tolerance: float
+  :type bond_tolerance: :class:`float`
   :param angle_tolerance: Tolerance in stddev for angles
-  :type angle_tolerance: float
+  :type angle_tolerance: :class:`float`
 
 
 .. function:: GetlDDTPerResidueStats(model, distance_list, structural_checks, label)
@@ -372,8 +372,11 @@ Local Distance Test scores (lDDT, DRMSD)
   :type model: :class:`~ost.mol.EntityHandle`
   :param distance_list: The list of distances to check for conservation
   :type distance_list: :class:`~ost.mol.alg.GlobalRDMap`
-  :param structural_checks: Where structural checks performed on the model?
-  :type structural_checks: bool
+  :param structural_checks: Were structural checks performed on the model?
+  :type structural_checks: :class:`bool`
+  :param label: Label used for ResidueHandle properties that store the local
+                scores.
+  :type label: :class:`str`
   :returns: Per-residue local lDDT scores
   :rtype: :class:`list` of :class:`~ost.mol.alg.lDDTLocalScore`
 
@@ -385,9 +388,9 @@ Local Distance Test scores (lDDT, DRMSD)
   :param scores: Local lDDT scores
   :type scores: :class:`list` of :class:`~ost.mol.alg.lDDTLocalScore`
   :param structural_checks: Where structural checks performed on the model?
-  :type structural_checks: bool
+  :type structural_checks: :class:`bool`
   :param cutoffs_length: Length of the cutoffs list used to calculate lDDT
-  :type cutoffs_length: int
+  :type cutoffs_length: :class:`int`
 
 
 .. class:: lDDTLocalScore(cname, rname, rnum, is_assessed, quality_problems, \
@@ -1658,8 +1661,10 @@ to standard amino acids.
   :type src_res: :class:`~ost.mol.ResidueHandle`
   :param dst_res: The destination residue
   :type dst_res: :class:`~ost.mol.ResidueHandle`
+  :param editor: Editor used to modify *dst_res*.
+  :type editor: :class:`~ost.mol.XCSEditor`
 
-  :returns: true if the residue could be copied, false if not.
+  :returns: True if the residue could be copied, False if not.
 
 .. function:: CopyConserved(src_res, dst_res, editor)
 
@@ -1679,8 +1684,10 @@ to standard amino acids.
   :type src_res: :class:`~ost.mol.ResidueHandle`
   :param dst_res: The destination residue
   :type dst_res: :class:`~ost.mol.ResidueHandle`
+  :param editor: Editor used to modify *dst_res*.
+  :type editor: :class:`~ost.mol.XCSEditor`
 
-  :returns: a tuple of bools stating whether the residue could be copied and
+  :returns: A tuple of bools stating whether the residue could be copied and
     whether the Cbeta atom was inserted into the ``dst_res``.
 
 .. function:: CopyNonConserved(src_res, dst_res, editor)
@@ -1692,8 +1699,10 @@ to standard amino acids.
   :type src_res: :class:`~ost.mol.ResidueHandle`
   :param dst_res: The destination residue
   :type dst_res: :class:`~ost.mol.ResidueHandle`
+  :param editor: Editor used to modify *dst_res*.
+  :type editor: :class:`~ost.mol.XCSEditor`
 
-  :returns: a tuple of bools stating whether the residue could be copied and
+  :returns: A tuple of bools stating whether the residue could be copied and
     whether the Cbeta atom was inserted into the ``dst_res``.
 
 
