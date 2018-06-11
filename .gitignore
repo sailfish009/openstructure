@@ -74,3 +74,4 @@ modules/gui/src/dngr.qrc.depends
 /compile_commands.json
 /modules/bindings/tests/formatdb.log
 /modules/mol/mm/src/settings.hh
+*.img

@@ -306,7 +306,7 @@ Local Distance Test scores (lDDT, DRMSD)
   :returns: :class:`~ost.mol.alg.GlobalRDMap`
 
 
-.. function:: PreparelDDTGlobalRDMap(reference_list, settings)
+.. function:: PreparelDDTGlobalRDMap(reference_list, cutoff_list, sequence_separation, max_dist)
 
   A wrapper around :func:`CreateDistanceList` and
   :func:`CreateDistanceListFromMultipleReferences`. Depending on the length of
@@ -315,9 +315,12 @@ Local Distance Test scores (lDDT, DRMSD)
   :param reference_list: a list of reference structures from which distances are
     derived
   :type reference_list:  list of :class:`~ost.mol.EntityView`
-  :param settings: lDDT settings
-  :type settings: :class:`~ost.mol.alg.lDDTSettings`
-
+  :param max_dist: the inclusion radius in Angstroms (to determine which
+                   distances are checked for conservation)
+  :type max_dist:  :class:`float`
+  :param sequence_separation: sequence separation parameter ie. maximum distance
+                              between two sequences.
+  :type sequence_separation: :class:`int`
   :returns: :class:`~ost.mol.alg.GlobalRDMap`
 
 
@@ -356,12 +359,12 @@ Local Distance Test scores (lDDT, DRMSD)
     :class:`~ost.io.StereoChemicalParamsReader` or :func:`FillClashingDistances`
   :type nonbonded_table: :class:`~ost.mol.alg.ClashingDistances`
   :param bond_tolerance: Tolerance in stddev for bonds
-  :type bond_tolerance: float
+  :type bond_tolerance: :class:`float`
   :param angle_tolerance: Tolerance in stddev for angles
-  :type angle_tolerance: float
+  :type angle_tolerance: :class:`float`
 
 
-.. function:: GetlDDTPerResidueStats(model, distance_list, settings)
+.. function:: GetlDDTPerResidueStats(model, distance_list, structural_checks, label)
 
   Get the per-residue statistics from the lDDT calculation.
 
@@ -369,20 +372,25 @@ Local Distance Test scores (lDDT, DRMSD)
   :type model: :class:`~ost.mol.EntityHandle`
   :param distance_list: The list of distances to check for conservation
   :type distance_list: :class:`~ost.mol.alg.GlobalRDMap`
-  :param settings: lDDT settings
-  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+  :param structural_checks: Were structural checks performed on the model?
+  :type structural_checks: :class:`bool`
+  :param label: Label used for ResidueHandle properties that store the local
+                scores.
+  :type label: :class:`str`
   :returns: Per-residue local lDDT scores
   :rtype: :class:`list` of :class:`~ost.mol.alg.lDDTLocalScore`
 
 
-.. function:: PrintlDDTPerResidueStats(scores, settings)
+.. function:: PrintlDDTPerResidueStats(scores, structural_checks, cutoffs_length)
 
   Print per-residue statistics from lDDT calculation.
 
   :param scores: Local lDDT scores
   :type scores: :class:`list` of :class:`~ost.mol.alg.lDDTLocalScore`
-  :param settings: lDDT settings
-  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+  :param structural_checks: Where structural checks performed on the model?
+  :type structural_checks: :class:`bool`
+  :param cutoffs_length: Length of the cutoffs list used to calculate lDDT
+  :type cutoffs_length: :class:`int`
 
 
 .. class:: lDDTLocalScore(cname, rname, rnum, is_assessed, quality_problems, \
@@ -445,7 +453,7 @@ Local Distance Test scores (lDDT, DRMSD)
 
   .. attribute:: total_dist
 
-    Total number of conserved distances.
+    Total number of distances.
 
     :type: :class:`int`
 
@@ -465,43 +473,46 @@ Local Distance Test scores (lDDT, DRMSD)
     :type structural_checks: bool
     :param cutoffs_length: Length of the cutoffs list used for calculations
     :type cutoffs_length: int
+    
+.. class:: StereoChemicalProps(bond_table, angle_table, nonbonded_table)
+  
+  Object containing the stereo-chemical properties read form stereochmical_props.txt
+  file.
+
+  :param bond_table: Sets :attr:`bond_table`
+  :param angle_table: Sets :attr:`angle_table`
+  :param nonbonded_table: Sets :attr:`nonbonded_table`
+
+  .. attribute:: bond_table
+  
+    Object containing bond parameters
+    
+    :type: :class:`~ost.mol.alg.StereoChemicalParams`
+
+  .. attribute:: angle_table
+    
+    Object containing angle parameters
+    
+    :type: :class:`~ost.mol.alg.StereoChemicalParams`
+
+  .. attribute:: nonbonded_table
+    
+    Object containing clashing distances parameters
+    
+    :type: :class:`~ost.mol.alg.ClashingDistances`
 
 
-.. class:: lDDTSettings(bond_tolerance=12, \
-                        angle_tolerance=12, \
-                        radius=15, \
+.. class:: lDDTSettings(radius=15, \
                         sequence_separation=0, \
-                        sel="", \
-                        parameter_file_path="", \
-                        structural_checks=True, \
-                        consistency_checks=True, \
                         cutoffs=(0.5, 1.0, 2.0, 4.0), \
                         label="locallddt")
 
   Object containing the settings used for lDDT calculations.
 
-  :param bond_tolerance: Sets :attr:`bond_tolerance`.
-  :param angle_tolerance: Sets :attr:`angle_tolerance`.
   :param radius: Sets :attr:`radius`.
   :param sequence_separation: Sets :attr:`sequence_separation`.
-  :param sel: Sets :attr:`sel`.
-  :param parameter_file_path: Sets :attr:`parameter_file_path`.
-  :param structural_checks: Sets :attr:`structural_checks`.
-  :param consistency_checks: Sets :attr:`consistency_checks`.
   :param cutoffs: Sets :attr:`cutoffs`.
   :param label: Sets :attr:`label`.
-
-  .. attribute:: bond_tolerance
-
-    Tolerance in stddevs for bonds.
-
-    :type: :class:`float`
-
-  .. attribute:: angle_tolerance
-
-    Tolerance in stddevs for angles.
-
-    :type: :class:`float`
 
   .. attribute:: radius
 
@@ -515,32 +526,6 @@ Local Distance Test scores (lDDT, DRMSD)
 
     :type: :class:`int`
 
-  .. attribute:: sel
-
-    Selection performed on reference(s).
-
-    :type: :class:`str`
-
-  .. attribute:: parameter_file_path
-
-    Path to the stereochemical parameter file. If set to "", it the default file
-    shipped with OpenStructure is used (see 
-    :class:`~ost.io.StereoChemicalParamsReader`).
-
-    :type: :class:`str`
-
-  .. attribute:: structural_checks
-
-    Are structural checks and filter input data on?
-
-    :type: :class:`bool`
-
-  .. attribute:: consistency_checks
-
-    Are consistency checks on?
-
-    :type: :class:`bool`
-
   .. attribute:: cutoffs
 
     List of thresholds used to determine distance conservation.
@@ -553,13 +538,6 @@ Local Distance Test scores (lDDT, DRMSD)
 
     :type: :class:`str`
 
-  .. method:: SetStereoChemicalParamsPath(path)
-
-    Set the path to the stereochemical parameter file.
-
-    :param path: Path to stereochemical parameter file
-    :type path: str
-
   .. method:: PrintParameters()
 
     Print settings.
@@ -568,6 +546,102 @@ Local Distance Test scores (lDDT, DRMSD)
 
     :return: String representation of the lDDTSettings object.
     :rtype:  :class:`str`
+
+.. class:: lDDTScorer(reference, model, settings)
+
+  Object to compute lDDT scores.
+  
+  Example usage.
+  
+  .. code:: python
+  
+    #! /bin/env python
+    """Run lDDT from within script."""
+    from ost.io import LoadPDB
+    from ost.mol.alg import (CleanlDDTReferences,
+    			 lDDTSettings, lDDTScorer)
+    from ost.io import ReadStereoChemicalPropsFile
+
+    ent_full = LoadPDB('3ia3', remote=True)
+    model_view = ent_full.Select('cname=A')
+    references = [ent_full.Select('cname=C')]
+
+    #
+    # Initialize settings with default parameters and print them
+    settings = lDDTSettings()
+    settings.PrintParameters()
+
+    # Clean up references
+    CleanlDDTReferences(references)
+    #
+    # Calculate lDDT
+    scorer = lDDTScorer(references=references, model=model_view, settings=settings)
+    print "Global score:", scorer.global_score
+    scorer.PrintPerResidueStats()
+  
+  :param references: Sets :attr:`references`
+  :param model: Sets :attr:`model`
+  :param settings: Sets :attr:`settings`
+  
+  .. attribute:: references
+  
+    A list of reference structures.
+    
+    :type: list(:class:`~ost.mol.EntityView`)
+  
+  .. attribute:: model
+  
+    A model structure. 
+    
+    :type: :class:`~ost.mol.EntityView`
+    
+  .. attribute:: settings
+  
+    Settings used to calculate lDDT.
+    
+    :type: :class:`~ost.mol.alg.lDDTSettings`
+  
+  .. attribute:: global_dist_list
+  
+    Global map of residue properties.
+    
+    :type: :class:`~ost.mol.alg.GlobalRDMap`
+
+  .. attribute:: global_score
+  
+    Global lDDT score. It is calculated as :attr:`conserved_contacts` divided
+    by :attr:`total_contacts`.
+    
+    :type: float
+
+  .. attribute:: conserved_contacts
+  
+    Number of conserved distances.
+  
+    :type: int
+  
+  .. attribute:: total_contacts
+  
+    Number of total distances.
+  
+    :type:
+  
+  .. attribute:: local_scores
+  
+    Local scores. For each of the residue lDDT is it is calculated as residue
+    conserved contacts divided by residue total contacts.
+  
+    :type: list(:class:`~ost.mol.alg.lDDTLocalScore`)
+  
+  .. attribute:: is_valid
+  
+    Is the calculated score valid?
+  
+    :type: bool
+  
+  .. method:: PrintPerResidueStats
+    
+    Print per-residue statistics.
 
 
 .. class:: UniqueAtomIdentifier(chain, residue_number, residue_name, atom_name)
@@ -1587,8 +1661,10 @@ to standard amino acids.
   :type src_res: :class:`~ost.mol.ResidueHandle`
   :param dst_res: The destination residue
   :type dst_res: :class:`~ost.mol.ResidueHandle`
+  :param editor: Editor used to modify *dst_res*.
+  :type editor: :class:`~ost.mol.XCSEditor`
 
-  :returns: true if the residue could be copied, false if not.
+  :returns: True if the residue could be copied, False if not.
 
 .. function:: CopyConserved(src_res, dst_res, editor)
 
@@ -1608,8 +1684,10 @@ to standard amino acids.
   :type src_res: :class:`~ost.mol.ResidueHandle`
   :param dst_res: The destination residue
   :type dst_res: :class:`~ost.mol.ResidueHandle`
+  :param editor: Editor used to modify *dst_res*.
+  :type editor: :class:`~ost.mol.XCSEditor`
 
-  :returns: a tuple of bools stating whether the residue could be copied and
+  :returns: A tuple of bools stating whether the residue could be copied and
     whether the Cbeta atom was inserted into the ``dst_res``.
 
 .. function:: CopyNonConserved(src_res, dst_res, editor)
@@ -1621,8 +1699,10 @@ to standard amino acids.
   :type src_res: :class:`~ost.mol.ResidueHandle`
   :param dst_res: The destination residue
   :type dst_res: :class:`~ost.mol.ResidueHandle`
+  :param editor: Editor used to modify *dst_res*.
+  :type editor: :class:`~ost.mol.XCSEditor`
 
-  :returns: a tuple of bools stating whether the residue could be copied and
+  :returns: A tuple of bools stating whether the residue could be copied and
     whether the Cbeta atom was inserted into the ``dst_res``.
 
 

@@ -157,7 +157,12 @@ int main (int argc, char **argv)
   // sets some default values for parameters
   String version = OST_VERSION_STRING;
   lDDTSettings settings;
-  settings.structural_checks=false;
+  String parameter_file_path;
+  bool structural_checks = false;
+  bool ignore_consistency_checks = false;
+  Real bond_tolerance = 12.0;
+  Real angle_tolerance = 12.0;
+  String sel;
   // creates the required loading profile
   IOProfile profile;
   // parses options
@@ -165,7 +170,7 @@ int main (int argc, char **argv)
   po::options_description desc("Options");
   desc.add_options()
     ("calpha,c", "consider only calpha atoms")
-    ("sel,s", po::value<String>(&settings.sel)->default_value(""), "selection performed on reference structure")
+    ("sel,s", po::value<String>(&sel)->default_value(""), "selection performed on reference structure")
     ("tolerant,t", "fault tolerant mode")
     ("structural-checks,f", "perform stereo-chemical and clash checks")
     ("ignore-consistency-checks,x", "ignore residue name consistency checks")
@@ -214,18 +219,18 @@ int main (int argc, char **argv)
     profile.calpha_only=true;
   }
   if (vm.count("structural-checks")) {
-    settings.structural_checks=true;
+    structural_checks=true;
   }
   if (vm.count("ignore-consistency-checks")) {
-    settings.consistency_checks=false;
+    ignore_consistency_checks=true;
   }
   if (vm.count("tolerant")) {
     profile.fault_tolerant=true;
   }
 
   if (vm.count("parameter-file")) {
-      settings.parameter_file_path=vm["parameter-file"].as<String>();
-    } else if (settings.structural_checks==true) {
+      parameter_file_path=vm["parameter-file"].as<String>();
+    } else if (structural_checks==true) {
     std::cout << "Please specify a stereo-chemical parameter file" << std::endl;
     exit(-1);
   }
@@ -248,10 +253,10 @@ int main (int argc, char **argv)
   Logger::Instance().PushVerbosityLevel(ost_verbosity_level);
 
   if (vm.count("bond_tolerance")) {
-    settings.bond_tolerance=vm["bond_tolerance"].as<Real>();
+    bond_tolerance=vm["bond_tolerance"].as<Real>();
   }
   if (vm.count("angle_tolerance")) {
-    settings.angle_tolerance=vm["angle_tolerance"].as<Real>();
+    angle_tolerance=vm["angle_tolerance"].as<Real>();
   }
   if (vm.count("inclusion_radius")) {
     settings.radius=vm["inclusion_radius"].as<Real>();
@@ -276,10 +281,10 @@ int main (int argc, char **argv)
     if (!ref) {
       exit(-1);
     }
-    if (settings.sel != ""){
-      std::cout << "Performing \"" << settings.sel << "\" selection on reference " << ref_filename << std::endl;
+    if (sel != ""){
+      std::cout << "Performing \"" << sel << "\" selection on reference " << ref_filename << std::endl;
       try {
-        ref_list.push_back(ref.Select(settings.sel));
+        ref_list.push_back(ref.Select(sel));
       } catch (const ost::mol::QueryError& e) {
         std::cerr << "Provided selection argument failed." << std::endl << e.GetFormattedMessage() << std::endl;
         exit(-1);
@@ -290,13 +295,21 @@ int main (int argc, char **argv)
     }
   }
   CleanlDDTReferences(ref_list);
-  glob_dist_list = PreparelDDTGlobalRDMap(ref_list, settings);
+  if (ref_list.size()==1) {
+    std::cout << "Multi-reference mode: Off" << std::endl;
+  } else {
+    std::cout << "Multi-reference mode: On" << std::endl;
+  }
+  glob_dist_list = PreparelDDTGlobalRDMap(ref_list,
+                                          settings.cutoffs,
+                                          settings.sequence_separation,
+                                          settings.radius);
   files.pop_back();
 
   // prints out parameters used in the lddt calculation
   std::cout << "Verbosity level: " << verbosity_level << std::endl;
   settings.PrintParameters();
-  if (settings.structural_checks) {
+  if (structural_checks) {
     LOG_INFO("Log entries format:");
     LOG_INFO("BOND INFO FORMAT:  Chain  Residue  ResNum  Bond  Min  Max  Observed  Z-score  Status");
     LOG_INFO("ANGLE INFO FORMAT:  Chain  Residue  ResNum  Angle  Min  Max  Observed  Z-score  Status");
@@ -325,10 +338,10 @@ int main (int argc, char **argv)
     String filestring=BFPathToString(pathstring);
     std::cout << "File: " << files[i] << std::endl;
 
-    if (settings.structural_checks) {
-      StereoChemicalParamsReader stereochemical_params(settings.parameter_file_path);
+    if (structural_checks) {
+      StereoChemicalProps stereochemical_params;
       try {
-        stereochemical_params.Read(true);
+        stereochemical_params = ost::io::ReadStereoChemicalPropsFile(parameter_file_path, true);
       } catch (std::exception& e) {
         std::cout << e.what() << std::endl;
         exit(-1);
@@ -339,21 +352,35 @@ int main (int argc, char **argv)
                        stereochemical_params.bond_table,
                        stereochemical_params.angle_table,
                        stereochemical_params.nonbonded_table,
-                       settings.bond_tolerance,
-                       settings.angle_tolerance);
+                       bond_tolerance,
+                       angle_tolerance);
       } catch (std::exception& e) {
         std::cout << e.what() << std::endl;
         exit(-1);
       }
     }
 
+    // Check consistency
+  for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
+       ref_list_it != ref_list.end(); ++ref_list_it) {
+    bool cons_check = ResidueNamesMatch(model_view,*ref_list_it, ignore_consistency_checks);
+    if (cons_check==false) {
+      if (ignore_consistency_checks==false) {
+        throw std::runtime_error("Residue names in model and in reference structure(s) are inconsistent.");            
+      } else {
+        LOG_WARNING("Residue names in model and in reference structure(s) are inconsistent.");
+      }   
+    } 
+  }
+
     // computes the lddt score   
-    Real lddt = LocalDistDiffTest(model_view, ref_list, glob_dist_list, settings);
+    LocalDistDiffTest(model_view, ref_list, glob_dist_list, settings);
 
     // prints the residue-by-residue statistics
     std::vector<lDDTLocalScore> local_scores;
-    local_scores = GetlDDTPerResidueStats(model, glob_dist_list, settings);
-    PrintlDDTPerResidueStats(local_scores, settings);
+    EntityView outview = model.GetChainList()[0].Select("peptide=true");
+    local_scores = GetlDDTPerResidueStats(outview, glob_dist_list, structural_checks, settings.label);
+    PrintlDDTPerResidueStats(local_scores, structural_checks, settings.cutoffs.size());
   }
   return 0;
 }

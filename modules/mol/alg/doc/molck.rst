@@ -18,7 +18,7 @@ To check one PDB file (struc1.pdb) with Molck, use the following command:
 
     molck --complib <PATH TO COMPOUND LIB> struc1.pdb
 
-The checked and cleaned file will be saved by default ad struc1-molck.pdb.
+The checked and cleaned file will be saved by default ad struc1-molcked.pdb.
 
 Similarly it is possible to check a list of PDB files:
 

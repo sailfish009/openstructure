@@ -28,9 +28,38 @@ else
   SCRIPT_NAME="$0"
 fi
 BIN_DIR=`dirname "$SCRIPT_NAME"`
+OST_EXEC_DIR=$(cd $BIN_DIR/../@LIBEXEC_PATH@ && pwd)
+export OST_EXEC_DIR
 
-source "$BIN_DIR/../@LIBEXEC_PATH@/ost_config"
+source "$OST_EXEC_DIR/ost_config"
 
-$pyexec $interactive -c "execfile('$DNG_ROOT/@LIBDIR@/python@PYTHON_VERSION@/site-packages/ost/ost_startup.py')" $opts
-RC=$?
-exit $RC
+ACTION="$1"
+OST_SCRIPT="${OST_EXEC_DIR}/ost-${ACTION}"
+
+OLDIFS=$IFS
+if test -e "${OST_SCRIPT}" ; then
+    opts=""
+    for argument in "${@:2}";do
+      if [ -n "$opts" ]; then
+        opts=$opts"#""$argument"
+      else
+        opts="$argument"
+      fi
+    done
+    IFS="#"
+    $pyexec -c "execfile('$DNG_ROOT/@LIBDIR@/python@PYTHON_VERSION@/site-packages/ost/ost_startup.py')" "${OST_SCRIPT}" $opts
+else
+    opts=""
+    for argument in "$@";do
+      if [ -n "$opts" ]; then
+        opts=$opts"#""$argument"
+      else
+        opts="$argument"
+      fi
+    done
+    IFS="#"
+    $pyexec $interactive -c "execfile('$DNG_ROOT/@LIBDIR@/python@PYTHON_VERSION@/site-packages/ost/ost_startup.py')" $opts
+    RC=$?
+    exit $RC
+fi
+IFS=$OLDIFS

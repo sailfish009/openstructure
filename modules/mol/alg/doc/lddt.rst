@@ -136,15 +136,13 @@ for bonds and angles respectively.
 
 For steric clashes, the lddt executable recovers atomic radii and clashing 
 tolerance distances from the parameter file, depending on the atomic element under 
-investigation. When an atomic element cannot be determined, the lddt executable 
-uses a default atomic radius of 1.5 Angstrom. This value can be overriden using 
-the -m value, passing a new radius (in Ansgstroms) to the program.
+investigation.
 
 For example:
 
 .. code-block:: bash
 
-    lddt -f -p stereo_chemical_params.txt -b 8 -a 8 -m 1.0 mdl1.pdb ref.pdb
+    lddt -f -p stereo_chemical_params.txt -b 8 -a 8 mdl1.pdb ref.pdb
 
 
 -----------------------------
@@ -198,11 +196,16 @@ One can replicate the binary using simple python script:
                              CheckStructure,
                              LocalDistDiffTest,
                              GetlDDTPerResidueStats,
-                             PrintlDDTPerResidueStats)
-    from ost.io import StereoChemicalParamsReader
+                             PrintlDDTPerResidueStats,
+                             ResidueNamesMatch)
+    from ost.io import ReadStereoChemicalPropsFile
 
     model_path = "Path to your model pdb file"
     reference_path = "Path to your reference pdb file"
+    structural_checks = True
+    bond_tolerance = 12
+    angle_tolerance = 12
+    cutoffs = [0.5, 1.0, 2.0, 4.0]
     #
     # Load model and prepare its view
     model = LoadPDB(model_path)
@@ -220,29 +223,44 @@ One can replicate the binary using simple python script:
     CleanlDDTReferences(references)
     #
     # Prepare residue map from references
-    rdmap = PreparelDDTGlobalRDMap(references, settings)
+    rdmap = PreparelDDTGlobalRDMap(references,
+                                   cutoffs=cutoffs,
+                                   sequence_separation=settings.sequence_separation,
+                                   radius=settings.radius)
     #
     # This part is optional and it depends on our settings parameter
-    if settings.structural_checks:
-        stereochemical_parameters = StereoChemicalParamsReader(
-            settings.parameter_file_path)
-        stereochemical_parameters.Read()
+    if structural_checks:
+        stereochemical_parameters = ReadStereoChemicalPropsFile()
         CheckStructure(ent=model_view,
                        bond_table=stereochemical_parameters.bond_table,
                        angle_table=stereochemical_parameters.angle_table,
                        nonbonded_table=stereochemical_parameters.nonbonded_table,
-                       bond_tolerance=settings.bond_tolerance,
-                       angle_tolerance=settings.angle_tolerance)
+                       bond_tolerance=bond_tolerance,
+                       angle_tolerance=angle_tolerance)
+    #
+    # Check consistency
+    is_cons = ResidueNamesMatch(model_view, references[0], True)
+    print "Consistency check: ", "OK" if is_cons else "ERROR"
     #
     # Calculate lDDT
-    LocalDistDiffTest(model_view, references, rdmap, settings)
+    LocalDistDiffTest(model_view,
+                      references,
+                      rdmap,
+                      settings)
     #
     # Get the local scores
-    local_scores = GetlDDTPerResidueStats(model, rdmap, settings)
+    local_scores = GetlDDTPerResidueStats(model_view,
+                                          rdmap,
+                                          structural_checks,
+                                          settings.label)
     #
     # Pring local scores
-    PrintlDDTPerResidueStats(local_scores, settings)
+    PrintlDDTPerResidueStats(local_scores, structural_checks, len(cutoffs))
 
-This can be useful when we already have an models and references already read
-in the memory and we do not want run the binary.
+Similar effect could be obtained using lDDTScorer. See :class:`~ost.mol.alg.lDDTScorer`
+for a simple example.
+
+
+The Python API can be useful when we already have an models and references already
+read in the memory and we do not want run the binary.
 Please refere to specific function documentation for more details.

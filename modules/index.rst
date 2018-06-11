@@ -31,6 +31,7 @@ OpenStructure documentation
   table
   mol/alg/lddt
   mol/alg/molck
+  actions
 
 For Starters
 --------------------------------------------------------------------------------
@@ -105,6 +106,8 @@ Varia
 **lDDT**: :doc:`lDDT command line executable and Python API<mol/alg/lddt>`
 
 **Molck**: :doc:`Molecular Checker<mol/alg/molck>`
+
+**Actions**: :doc:`OST Actions<actions>`
 
 Extending OpenStructure
 --------------------------------------------------------------------------------

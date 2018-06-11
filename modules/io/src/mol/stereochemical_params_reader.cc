@@ -18,47 +18,50 @@
 //------------------------------------------------------------------------------
 #include <boost/filesystem/fstream.hpp>
 #include <ost/platform.hh>
-#include <ost/mol/alg/filter_clashes.hh>
 #include <ost/io/stereochemical_params_reader.hh>
 
 
-namespace {
-  std::vector<String> ReadStereoChemicalFile(const String& filename){
-    boost::filesystem::path loc(filename);
-    boost::filesystem::ifstream infile(loc);
-    if (!infile) {
-      std::stringstream serr;
-      serr << "Could not find " << filename;   
-      throw ost::Error(serr.str());
-    }
-    std::vector<String> stereo_chemical_props;
-    String line;
-    while (std::getline(infile, line))
-    {
-      std::stringstream line_stream(line);
-      stereo_chemical_props.push_back(line);
-    }
-
-    return stereo_chemical_props;
-  }
-}
-
 namespace ost { namespace io {
 
-StereoChemicalParamsReader::StereoChemicalParamsReader() {
-  filename = ost::GetSharedDataPath() + "/stereo_chemical_props.txt";
-}
+ost::mol::alg::StereoChemicalProps ReadStereoChemicalPropsFile(String filename, bool check){
+  boost::filesystem::path loc(filename);
+  boost::filesystem::ifstream infile(loc);
+  if (!infile) {
+    std::stringstream serr;
+    serr << "Could not find parameter file '" << filename << "'";   
+    throw ost::Error(serr.str());
+  }
+  std::vector<String> stereo_chemical_props;
+  String line;
+  while (std::getline(infile, line))
+  {
+    std::stringstream line_stream(line);
+    stereo_chemical_props.push_back(line);
+  }
 
-StereoChemicalParamsReader::StereoChemicalParamsReader(const String& init_filename): filename(init_filename) {}
+  ost::mol::alg::StereoChemicalParams bond_table;
+  ost::mol::alg::StereoChemicalParams angle_table;
+  ost::mol::alg::ClashingDistances nonbonded_table;
 
-void StereoChemicalParamsReader::Read(bool check) {
-  std::vector<String> stereo_chemical_props = ReadStereoChemicalFile(filename);
-  // Bonds
   bond_table = ost::mol::alg::FillStereoChemicalParams("Bond", stereo_chemical_props, check);
   // Angles
   angle_table = ost::mol::alg::FillStereoChemicalParams("Angle", stereo_chemical_props, check);
   // Not bonded
   nonbonded_table = ost::mol::alg::FillClashingDistances(stereo_chemical_props, check);
+
+  return ost::mol::alg::StereoChemicalProps(bond_table, angle_table, nonbonded_table);
 }
+
+ost::mol::alg::StereoChemicalProps ReadStereoChemicalPropsFile(bool check) {
+  String filename = GetStereoChemicalPropsFile();
+  return ReadStereoChemicalPropsFile(filename, check);
+}
+
+String GetStereoChemicalPropsFile() {
+  String filename;
+  filename = ost::GetSharedDataPath() + "/stereo_chemical_props.txt";
+  return filename;
+}
+
 }} // ns
 

@@ -7,6 +7,7 @@
 #include <boost/concept_check.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <ost/mol/alg/consistency_checks.hh>
+#include <ost/io/stereochemical_params_reader.hh>
 
 namespace ost { namespace mol { namespace alg {
 
@@ -388,86 +389,43 @@ bool IsStandardResidue(String rn)
     return true;
   }  
   return false;
-}  
+}
 
-lDDTSettings::lDDTSettings(): bond_tolerance(12.0),
-                              angle_tolerance(12.0),
-                              radius(15.0), 
+StereoChemicalProps::StereoChemicalProps():
+    is_valid(false) {}
+
+StereoChemicalProps::StereoChemicalProps(
+  ost::mol::alg::StereoChemicalParams& init_bond_table,
+  ost::mol::alg::StereoChemicalParams& init_angle_table,
+  ost::mol::alg::ClashingDistances& init_nonbonded_table):
+    is_valid(true),
+    bond_table(init_bond_table),
+    angle_table(init_angle_table),
+    nonbonded_table(init_nonbonded_table) {}
+
+lDDTSettings::lDDTSettings(): radius(15.0), 
                               sequence_separation(0),
-                              sel(""),
-                              structural_checks(true),
-                              consistency_checks(true),
-                              label("localldt") {
+                              label("locallddt") {
     cutoffs.push_back(0.5);
     cutoffs.push_back(1.0);
     cutoffs.push_back(2.0);
     cutoffs.push_back(4.0);
-    SetStereoChemicalParamsPath();
   }
 
-lDDTSettings::lDDTSettings(Real init_bond_tolerance,
-                           Real init_angle_tolerance,
-                           Real init_radius, 
+lDDTSettings::lDDTSettings(Real init_radius, 
                            int init_sequence_separation,
-                           String init_sel,
-                           String init_parameter_file_path,
-                           bool init_structural_checks,
-                           bool init_consistency_checks,
                            std::vector<Real>& init_cutoffs,
-                           String init_label): 
-                    bond_tolerance(init_bond_tolerance),
-                    angle_tolerance(init_angle_tolerance),
+                           String init_label):
                     radius(init_radius), 
                     sequence_separation(init_sequence_separation),
-                    sel(init_sel),
-                    structural_checks(init_structural_checks),
-                    consistency_checks(init_consistency_checks),
                     cutoffs(init_cutoffs),
-                    label(init_label) {
-  SetStereoChemicalParamsPath(init_parameter_file_path);
-}
-
-void lDDTSettings::SetStereoChemicalParamsPath(const String& path) {
-  if (path == ""){
-    try {
-      std::cerr << "Setting default stereochemical parameters file path." << std::endl;
-      parameter_file_path = ost::GetSharedDataPath() + "/stereo_chemical_props.txt";
-      if (! structural_checks) {
-        std::cerr << "WARNING: Stereochemical parameters file is set but structural checks are disabled" << std::endl;
-      }
-    } catch (std::runtime_error& e) {
-      std::cerr << "WARNING: " << e.what() << std::endl;
-      std::cerr << "WARNING: Parameter file setting failed - structural check will be disabled" << std::endl;
-      structural_checks = false;
-      parameter_file_path = "";
-    }
-  } else if (! boost::filesystem::exists(path)) {
-    std::cerr << "WARNING: Parameter file does not exist - structural check will be disabled" << std::endl;
-    structural_checks = false;
-    parameter_file_path = "";
-  } else {
-    parameter_file_path = path;
-    structural_checks = true;
-  }
-}
+                    label(init_label) {}
 
 std::string lDDTSettings::ToString() {
   std::ostringstream rep;
-  if (structural_checks) {
-    rep << "Stereo-chemical and steric clash checks: On \n";
-  } else {
-    rep << "Stereo-chemical and steric clash checks: Off \n";
-  }
-
   rep << "Inclusion Radius: " << radius << "\n";
   rep << "Sequence separation: " << sequence_separation << "\n";
   rep << "Cutoffs: " << vector_to_string(cutoffs) << "\n";
-
-  if (structural_checks) {
-    rep << "Parameter filename: " + parameter_file_path + "\n";
-    rep << "Tolerance in stddevs for bonds: " << bond_tolerance << "\n";
-    rep << "Tolerance in stddevs for angles: " << angle_tolerance << "\n";
-  }
   rep << "Residue properties label: " << label << "\n";
 
   return rep.str();
@@ -517,6 +475,12 @@ String lDDTLocalScore::ToString(bool structural_checks) const {
   return outstr.str();
 }
 
+String lDDTLocalScore::Repr() const {
+  std::stringstream outstr;
+  outstr << "<lDDTLocalScore " << cname << "." << rname << "." << rnum << ">";
+  return outstr.str();
+}
+
 String lDDTLocalScore::GetHeader(bool structural_checks, int cutoffs_length) {
   std::stringstream outstr;
   if (structural_checks) {
@@ -526,6 +490,114 @@ String lDDTLocalScore::GetHeader(bool structural_checks, int cutoffs_length) {
   }
   return outstr.str();
 }
+
+lDDTScorer::lDDTScorer(std::vector<EntityView>& init_references,
+                       ost::mol::EntityView& init_model,
+                       lDDTSettings& init_settings):
+  settings(init_settings),
+  model_view(init_model),
+  references_view(init_references)
+  {
+    _score_calculated = false;
+    _score_valid = false;
+    _has_local_scores = false;
+    _num_cons_con = -1;
+    _num_tot_con = -1;
+    _global_score = -1.0;
+    CleanlDDTReferences(references_view);
+    _PrepareGlobalRDMap();  
+  }
+
+Real lDDTScorer::GetGlobalScore(){
+  if (!_score_calculated) {
+    _ComputelDDT();
+  }
+  return _global_score;
+}
+
+int lDDTScorer::GetNumConservedContacts(){
+  if (!_score_calculated) {
+    _ComputelDDT();
+  }
+  return _num_cons_con;
+}
+
+int lDDTScorer::GetNumTotalContacts(){
+  if (!_score_calculated) {
+    _ComputelDDT();
+  }
+  return _num_tot_con;
+}
+
+std::vector<lDDTLocalScore> lDDTScorer::GetLocalScores(){
+  if (!_has_local_scores) {
+    _GetLocallDDT();
+  }
+  return _local_scores;
+}
+
+void lDDTScorer::PrintPerResidueStats(){
+  if (!_has_local_scores) {
+    _GetLocallDDT();
+  }
+  PrintlDDTPerResidueStats(_local_scores,
+                           false,
+                           settings.cutoffs.size());
+}
+
+std::vector<EntityView> lDDTScorer::GetReferences(){
+  return references_view;
+}
+
+void lDDTScorer::_PrepareGlobalRDMap(){
+  glob_dist_list = PreparelDDTGlobalRDMap(references_view,
+                                          settings.cutoffs,
+                                          settings.sequence_separation,
+                                          settings.radius);
+}
+
+bool lDDTScorer::IsValid(){
+  return _score_valid;
+}
+
+void lDDTScorer::_ComputelDDT(){
+  std::pair<int,int> cov = ComputeCoverage(model_view,glob_dist_list);
+  if (cov.second == -1) {
+    LOG_INFO("Coverage: 0 (0 out of 0 residues)");
+  } else {
+    std::stringstream sout;
+    sout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)";
+    LOG_INFO(sout.str());
+  }
+
+  if (cov.first == 0) {
+    _num_tot_con = 0;
+    _num_cons_con = 0;
+    _global_score = 0.0;
+    _score_calculated = true;
+    _score_valid = false;
+  }
+
+  std::pair<int,int> total_ov=alg::LocalDistDiffTest(model_view, glob_dist_list, settings.cutoffs, settings.sequence_separation, settings.label);
+  Real lddt = static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
+  _num_tot_con = total_ov.second ? total_ov.second : 1;
+  _num_cons_con = total_ov.first;
+  _global_score = lddt;
+  _score_calculated = true;
+  _score_valid = true;
+}
+
+void lDDTScorer::_GetLocallDDT(){
+  if (!_score_calculated){
+    _ComputelDDT();
+  }
+  _local_scores = GetlDDTPerResidueStats(model_view,
+                                         glob_dist_list,
+                                         false, // do not print structural checks
+                                         settings.label);
+  _has_local_scores = true;
+}
+
 
 GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist)
 {
@@ -666,17 +738,6 @@ Real LocalDistDiffTest(const EntityView& v,
                        std::vector<EntityView>& ref_list,
                        const GlobalRDMap& glob_dist_list,
                        lDDTSettings& settings) {
-  for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
-       ref_list_it != ref_list.end(); ++ref_list_it) {
-    bool cons_check = ResidueNamesMatch(v,*ref_list_it,settings.consistency_checks);
-    if (cons_check==false) {
-      if (settings.consistency_checks==true) {
-        throw std::runtime_error("Residue names in model and in reference structure(s) are inconsistent.");            
-      } else {
-        LOG_WARNING("Residue names in model and in reference structure(s) are inconsistent.");
-      }   
-    } 
-  }
 
   std::pair<int,int> cov = ComputeCoverage(v,glob_dist_list);
   if (cov.second == -1) {
@@ -772,17 +833,17 @@ void CleanlDDTReferences(std::vector<EntityView>& ref_list){
 }
 
 GlobalRDMap PreparelDDTGlobalRDMap(const std::vector<EntityView>& ref_list,
-                                   lDDTSettings& settings){
+                                   std::vector<Real>& cutoff_list,
+                                   int sequence_separation,
+                                   Real max_dist){
   GlobalRDMap glob_dist_list;
   if (ref_list.size()==1) {
-    std::cout << "Multi-reference mode: Off" << std::endl;
-    glob_dist_list = CreateDistanceList(ref_list[0], settings.radius);
+    glob_dist_list = CreateDistanceList(ref_list[0], max_dist);
   } else {
-    std::cout << "Multi-reference mode: On" << std::endl;
     glob_dist_list = CreateDistanceListFromMultipleReferences(ref_list,
-                                                              settings.cutoffs,
-                                                              settings.sequence_separation,
-                                                              settings.radius);
+                                                              cutoff_list,
+                                                              sequence_separation,
+                                                              max_dist);
   }
 
   return glob_dist_list;
@@ -831,9 +892,12 @@ void CheckStructure(EntityView& ent,
   std::cout << "Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << clash_info.GetAverageOffset() << std::endl;
 }
 
-std::vector<lDDTLocalScore> GetlDDTPerResidueStats(EntityHandle& model, GlobalRDMap& glob_dist_list, lDDTSettings& settings){
+std::vector<lDDTLocalScore> GetlDDTPerResidueStats(EntityView& model,
+                                                   GlobalRDMap& glob_dist_list,
+                                                   bool structural_checks,
+                                                   String label){
   std::vector<lDDTLocalScore> scores;
-  EntityView outv = model.GetChainList()[0].Select("peptide=true");
+  EntityView outv = model;
   for (ChainViewList::const_iterator ci = outv.GetChainList().begin(),
        ce = outv.GetChainList().end(); ci != ce; ++ci) {
     for (ResidueViewList::const_iterator rit = ci->GetResidueList().begin(),
@@ -844,7 +908,7 @@ std::vector<lDDTLocalScore> GetlDDTPerResidueStats(EntityHandle& model, GlobalRD
       bool assessed = false;
       String assessed_string="No";
       String quality_problems_string;
-      if (settings.structural_checks) {
+      if (structural_checks) {
         quality_problems_string="No";
       } else {
         quality_problems_string="NA";
@@ -867,15 +931,15 @@ std::vector<lDDTLocalScore> GetlDDTPerResidueStats(EntityHandle& model, GlobalRD
       }
 
       if (assessed==true) {
-        if (ritv.HasProp(settings.label)) {
-          lddt_local=ritv.GetFloatProp(settings.label);
+        if (ritv.HasProp(label)) {
+          lddt_local=ritv.GetFloatProp(label);
           std::stringstream stkeylddt;
           stkeylddt <<  std::fixed << std::setprecision(4) << lddt_local;
           lddt_local_string=stkeylddt.str();
-          conserved_dist=ritv.GetIntProp(settings.label+"_conserved");
-          total_dist=ritv.GetIntProp(settings.label+"_total");
+          conserved_dist=ritv.GetIntProp(label+"_conserved");
+          total_dist=ritv.GetIntProp(label+"_total");
         } else {
-          std::cout << settings.label << std::endl;
+          //std::cout << label << std::endl;
           lddt_local = 0;
           lddt_local_string="0.0000";
           conserved_dist = 0;
@@ -898,8 +962,8 @@ std::vector<lDDTLocalScore> GetlDDTPerResidueStats(EntityHandle& model, GlobalRD
   return scores;
 }
 
-void PrintlDDTPerResidueStats(std::vector<lDDTLocalScore>& scores, lDDTSettings& settings){
-  if (settings.structural_checks) {
+void PrintlDDTPerResidueStats(std::vector<lDDTLocalScore>& scores, bool structural_checks, int cutoffs_length){
+  if (structural_checks) {
     std::cout << "Local LDDT Scores:" << std::endl;
     std::cout << "(A 'Yes' in the 'Quality Problems' column stands for problems" << std::endl;
     std::cout << "in the side-chain of a residue, while a 'Yes+' for problems" << std::endl;
@@ -907,9 +971,9 @@ void PrintlDDTPerResidueStats(std::vector<lDDTLocalScore>& scores, lDDTSettings&
   } else {
     std::cout << "Local LDDT Scores:" << std::endl;
   }
-  std::cout << lDDTLocalScore::GetHeader(settings.structural_checks, settings.cutoffs.size()) << std::endl;
+  std::cout << lDDTLocalScore::GetHeader(structural_checks, cutoffs_length) << std::endl;
   for (std::vector<lDDTLocalScore>::const_iterator sit = scores.begin(); sit != scores.end(); ++sit) {
-    std::cout << sit->ToString(settings.structural_checks) << std::endl;
+    std::cout << sit->ToString(structural_checks) << std::endl;
   }
   std::cout << std::endl;
 }

@@ -1,4 +1,4 @@
-import sys, os, platform
+import sys, os, platform, glob
 import optparse
 
 def show_help(option, opt, value, parser):
@@ -11,7 +11,22 @@ def interactive_flag(option, opt, value, parser):
 def stop():
   sys.exit(0)
 
-usage = 'usage: ost [ost options] [script to execute] [script parameters]'
+usage = """
+
+    ost [ost options] [script to execute] [script parameters]
+
+or
+    ost [action name] [action options]
+
+"""
+
+action_path = os.path.abspath(os.environ.get("OST_EXEC_DIR", ""))
+
+usage += 'Following actions are available:\n'
+for action in sorted(glob.glob(os.path.join(action_path, 'ost-*'))):
+    usage += "  %s\n" % action[len(action_path)+5:]
+usage += '\nEach action should respond to "--help".\n'
+
 class OstOptionParser(optparse.OptionParser):
   def __init__(self, **kwargs):
     optparse.OptionParser.__init__(self, **kwargs)

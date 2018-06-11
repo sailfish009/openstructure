@@ -68,6 +68,9 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_handle_ov,
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_view_ov,
                                 save_ent_view, 2, 3)
 
+ost::mol::alg::StereoChemicalProps (*read_props_a)(String filename, bool check) = &ReadStereoChemicalPropsFile;
+ost::mol::alg::StereoChemicalProps (*read_props_b)(bool check) = &ReadStereoChemicalPropsFile;
+
 }
 
 void export_pdb_io();
@@ -121,14 +124,11 @@ BOOST_PYTHON_MODULE(_ost_io)
   def("LoadMAE", &LoadMAE);
   def("LoadPQR", &LoadPQR);
 
-  class_<io::StereoChemicalParamsReader>("StereoChemicalParamsReader",
-                           init<String>(arg("filename")))
-    .def(init<>())
-    .def("Read", &io::StereoChemicalParamsReader::Read, (arg("check")=false))
-    .def_readwrite("filename", &io::StereoChemicalParamsReader::filename)
-    .def_readwrite("bond_table", &io::StereoChemicalParamsReader::bond_table)
-    .def_readwrite("angle_table", &io::StereoChemicalParamsReader::angle_table)
-    .def_readwrite("nonbonded_table", &io::StereoChemicalParamsReader::nonbonded_table);
+  def("ReadStereoChemicalPropsFile", read_props_a,
+    (arg("filename"), arg("check")=true)); 
+  def("ReadStereoChemicalPropsFile", read_props_b,
+    (arg("check")=true));
+  def("GetStereoChemicalPropsFile", &GetStereoChemicalPropsFile);
 
   export_pdb_io();
   export_mmcif_io();

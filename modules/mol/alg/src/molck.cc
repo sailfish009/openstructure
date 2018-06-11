@@ -2,6 +2,7 @@
 #include <ost/mol/alg/nonstandard.hh>
 #include <ost/conop/model_check.hh>
 #include <ost/conop/amino_acids.hh>
+#include <ost/conop/rule_based.hh>
 #include <ost/mol/alg/molck.hh>
 
 using namespace ost::conop;
@@ -10,7 +11,8 @@ using namespace ost::mol;
 
 void ost::mol::alg::MapNonStandardResidues(EntityHandle& ent, CompoundLibPtr lib) {
   // TODO: Maybe it is possible to make it in-place operation
-  EntityHandle new_ent=CreateEntity();  
+  EntityHandle new_ent=CreateEntity();
+  new_ent.SetName(ent.GetName());
   ChainHandleList chains=ent.GetChainList();
   XCSEditor new_edi=new_ent.EditXCS();
   for (ChainHandleList::const_iterator c=chains.begin();c!=chains.end();++c) {
@@ -38,10 +40,13 @@ void ost::mol::alg::MapNonStandardResidues(EntityHandle& ent, CompoundLibPtr lib
         } 
         ResidueHandle dest_res = new_edi.AppendResidue(new_chain,OneLetterCodeToResidueName(compound->GetOneLetterCode()),r->GetNumber());
         ost::mol::alg::CopyResidue(*r,dest_res,new_edi,lib);
-      }   
-    }        
+      }
+    }
   }
   ent = new_ent;
+  // Since we didn't do it in-place: reprocess the new entity
+  RuleBasedProcessor pr(lib);
+  pr.Process(ent);
 }
 
 void ost::mol::alg::RemoveAtoms(

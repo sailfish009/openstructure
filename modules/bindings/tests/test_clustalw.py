@@ -63,11 +63,13 @@ class TestClustalWBindings(unittest.TestCase):
            "Pairwise alignment with modified gap penalties differs from precomputed one"
 
   def testUniqueIdentifier(self):
-    seq1 = seq.CreateSequence('heelloo','AWESOME')
-    seq2 = seq.CreateSequence('heelloo','AWESOME')
-
-    self.assertRaises(ValueError,clustalw.ClustalW,seq1,seq2)
-
+    # common case
+    seq1 = seq.CreateSequence('heelloo', 'AWESOME')
+    seq2 = seq.CreateSequence('heelloo', 'AWESOME')
+    self.assertRaises(ValueError, clustalw.ClustalW, seq1, seq2)
+    # nasty case with spaces
+    seq2 = seq.CreateSequence('heelloo dear', 'AWESOME')
+    self.assertRaises(ValueError, clustalw.ClustalW, seq1, seq2)
 
 if __name__ == "__main__":
   # test if clustalw package is available on system, otherwise ignore tests
