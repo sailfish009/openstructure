@@ -939,7 +939,10 @@ class OligoLDDTScorer(object):
     :attr:`QSscorer.chem_mapping`. Used to find "chem-mapped" chains in
     :attr:`ref` for unmapped chains in :attr:`mdl` when penalizing scores.
     Each unmapped model chain can add extra reference-contacts according to the
-    average total contacts of each single "chem-mapped" reference chain.
+    average total contacts of each single "chem-mapped" reference chain. If
+    there is no "chem-mapped" reference chain, a warning is shown and the model
+    chain is ignored.
+
 
     Only relevant if :attr:`penalize_extra_chains` is True.
 
