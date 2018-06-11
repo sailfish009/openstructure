@@ -92,7 +92,20 @@ class QSscorer:
     -> weight_extra_mapped = sum(w(d)) for all mapped but non-shared
     -> weight_extra_all = sum(w(d)) for all non-shared
     -> w(d) = 1 if d <= 5, exp(-2 * ((d-5.0)/4.28)^2) else
+  
+  In the formulas above:
 
+  * "d": CA/CB-CA/CB distance of an "inter-chain contact" ("d1", "d2" for
+    "shared" contacts).
+  * "mapped": we could map chains of two structures and align residues in
+    :attr:`alignments`.
+  * "shared": pairs of residues which are "mapped" and have
+    "inter-chain contact" in both structures.
+  * "inter-chain contact": CB-CB pairs (CA for GLY) with distance <= 12 A
+    (fallback to CA-CA if :attr:`calpha_only` is True).
+  * "w(d)": weighting function (prob. of 2 res. to interact given CB distance)
+    from `Xu et al. 2009 <https://dx.doi.org/10.1016%2Fj.jmb.2008.06.002>`_.
+  
   :param ent_1: First structure to be scored.
   :type ent_1:  :class:`QSscoreEntity`, :class:`~ost.mol.EntityHandle` or
                 :class:`~ost.mol.EntityView`
@@ -356,9 +369,10 @@ class QSscorer:
     There will be one alignment for each mapped chain and they are ordered by
     their chain names in :attr:`qs_ent_1`.
 
-    The sequences of the alignments are named according to the chain name and
-    have views attached into :attr:`QSscoreEntity.ent` of :attr:`qs_ent_1` and
-    :attr:`qs_ent_2`.
+    The first sequence of each alignment belongs to :attr:`qs_ent_1` and the
+    second one to :attr:`qs_ent_2`. The sequences are named according to the
+    mapped chain names and have views attached into :attr:`QSscoreEntity.ent`
+    of :attr:`qs_ent_1` and :attr:`qs_ent_2`.
 
     :getter: Computed on first use (cached)
     :type: :class:`list` of :class:`~ost.seq.AlignmentHandle`
@@ -453,8 +467,9 @@ class QSscorer:
   def GetOligoLDDTScorer(self, settings, penalize_extra_chains=True):
     """
     :return: :class:`OligoLDDTScorer` object, setup for this QS scoring problem.
+    :param settings: Passed to :class:`OligoLDDTScorer` constructor.
+    :param penalize_extra_chains: Passed to :class:`OligoLDDTScorer` constructor.
     """
-    # TODO: DOCUMENT PARAMS
     if penalize_extra_chains:
       return OligoLDDTScorer(self.qs_ent_1.ent, self.qs_ent_2.ent,
                              self.alignments, self.calpha_only, settings,
@@ -846,12 +861,81 @@ def GetContacts(entity, calpha_only, dist_thr=12.0):
 ###############################################################################
 
 class OligoLDDTScorer(object):
-  """A simple class to calculate oligomeric lDDT score."""
+  """Helper class to calculate oligomeric lDDT scores.
 
-  # TODO: DOCUMENT
-  # -> make sure to mention assumption on sequence naming in alignments
+  This class can be used independently, but commonly it will be created by
+  calling :func:`QSscorer.GetOligoLDDTScorer`.
 
-  # TODO: one could also allow computation of both penalized and unpenalized
+  .. note::
+
+    By construction, lDDT scores are not symmetric and hence it matters which
+    structure is the reference (:attr:`ref`) and which one is the model
+    (:attr:`mdl`). Extra residues in the model are generally not considered.
+    Extra chains in both model and reference can be considered by setting the
+    :attr:`penalize_extra_chains` flag to True.
+
+  :param ref: Sets :attr:`ref`
+  :param mdl: Sets :attr:`mdl`
+  :param alignments: Sets :attr:`alignments`
+  :param calpha_only: Sets :attr:`calpha_only`
+  :param settings: Sets :attr:`settings`
+  :param penalize_extra_chains: Sets :attr:`penalize_extra_chains`
+  :param chem_mapping: Sets :attr:`chem_mapping`. Must be given if
+                       *penalize_extra_chains* is True.
+  
+  .. attribute:: ref
+                 mdl
+
+    Full reference/model entity to be scored. The entity must contain all chains
+    mapped in :attr:`alignments` and may also contain additional ones which are
+    considered if :attr:`penalize_extra_chains` is True.
+
+    :type: :class:`~ost.mol.EntityHandle`
+  
+  .. attribute:: alignments
+
+    One alignment for each mapped chain of :attr:`ref`/:attr:`mdl` as defined in
+    :attr:`QSscorer.alignments`. The first sequence of each alignment belongs to
+    :attr:`ref` and the second one to :attr:`mdl`. Sequences must have sequence
+    naming and attached views as defined in :attr:`QSscorer.alignments`.
+
+    :type: :class:`list` of :class:`~ost.seq.AlignmentHandle`
+
+  .. attribute:: calpha_only
+
+    If True, restricts lDDT score to CA only.
+
+    :type: :class:`bool`
+
+  .. attribute:: settings
+
+    Settings to use for lDDT scoring.
+
+    :type: :class:`~ost.mol.alg.lDDTSettings`
+
+  .. attribute:: penalize_extra_chains
+
+    If True, extra chains in both :attr:`ref` and :attr:`mdl` will penalize the
+    lDDT scores.
+
+    :type: :class:`bool`
+
+  .. attribute:: chem_mapping
+
+    Inter-complex mapping of chemical groups as defined in
+    :attr:`QSscorer.chem_mapping`. Used to find "chem-mapped" chains in
+    :attr:`ref` for unmapped chains in :attr:`mdl` when penalizing scores.
+    Each unmapped model chain can add extra reference-contacts according to the
+    average total contacts of each single "chem-mapped" reference chain.
+
+    Only relevant if :attr:`penalize_extra_chains` is True.
+
+    :type: :class:`dict` with key = :class:`tuple` of chain names in
+           :attr:`ref` and value = :class:`tuple` of chain names in
+           :attr:`mdl`.
+  """
+
+  # NOTE: one could also allow computation of both penalized and unpenalized
   #       in same object -> must regenerate lddt_ref / lddt_mdl though
 
   def __init__(self, ref, mdl, alignments, calpha_only, settings,
@@ -894,23 +978,28 @@ class OligoLDDTScorer(object):
     self._model_penalty = None
 
   @property
-  def lddt_ref(self):
-    if self._lddt_ref is None:
-      self._PrepareOligoEntities()
-    return self._lddt_ref
-
-  @property
-  def lddt_mdl(self):
-    if self._lddt_mdl is None:
-      self._PrepareOligoEntities()
-    return self._lddt_mdl
-
-  @property
   def oligo_lddt(self):
-    """Fills cached lddt_score, lddt_mdl and lddt_ref."""
+    """Oligomeric lDDT score.
+
+    The score is computed as conserved contacts divided by the total contacts
+    in the reference using the :attr:`oligo_lddt_scorer`, which uses the full
+    complex as reference/model structure. If :attr:`penalize_extra_chains` is
+    True, the reference/model complexes contain all chains (otherwise only the
+    mapped ones) and additional contacts are added to the reference's total
+    contacts for unmapped model chains according to the :attr:`chem_mapping`.
+
+    The main difference with :attr:`weighted_lddt` is that the lDDT scorer
+    "sees" the full complex here (incl. inter-chain contacts), while the
+    weighted single chain score looks at each chain separately.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`float`
+    """
     if self._oligo_lddt is None:
-      LogInfo('Reference %s has: %s chains' % (self.ref.GetName(), self.ref.chain_count))
-      LogInfo('Model %s has: %s chains' % (self.mdl.GetName(), self.mdl.chain_count))
+      LogInfo('Reference %s has: %s chains' \
+              % (self.ref.GetName(), self.ref.chain_count))
+      LogInfo('Model %s has: %s chains' \
+              % (self.mdl.GetName(), self.mdl.chain_count))
 
       # score with or w/o extra-chain penalty
       if self.penalize_extra_chains:
@@ -927,42 +1016,21 @@ class OligoLDDTScorer(object):
     return self._oligo_lddt
 
   @property
-  def oligo_lddt_scorer(self):
-    if self._oligo_lddt_scorer is None:
-      self._oligo_lddt_scorer = lDDTScorer(
-        references=[self.lddt_ref.Select("")],
-        model=self.lddt_mdl.Select(""),
-        settings=self.settings)
-    return self._oligo_lddt_scorer
-
-  @property
-  def mapped_lddt_scorers(self):
-    if self._mapped_lddt_scorers is None:
-      self._mapped_lddt_scorers = list()
-      for aln in self.alignments:
-        mapped_lddt_scorer = MappedLDDTScorer(aln, self.calpha_only,
-                                              self.settings)
-        self._mapped_lddt_scorers.append(mapped_lddt_scorer)
-    return self._mapped_lddt_scorers
-
-  @property
-  def sc_lddt_scorers(self):
-    return [mls.lddt_scorer for mls in self.mapped_lddt_scorers]
-
-  @property
-  def sc_lddt(self):
-    if self._sc_lddt is None:
-      self._sc_lddt = list()
-      for lddt_scorer in self.sc_lddt_scorers:
-        try:
-          self._sc_lddt.append(lddt_scorer.global_score)
-        except Exception as ex:
-          LogError('Single chain lDDT failed:', str(ex))
-          self._sc_lddt.append(0.0)
-    return self._sc_lddt
-
-  @property
   def weighted_lddt(self):
+    """Weighted average of single chain lDDT scores.
+
+    The score is computed as a weighted average of single chain lDDT scores
+    (see :attr:`sc_lddt_scorers`) using the total contacts of each single
+    reference chain as weights. If :attr:`penalize_extra_chains` is True,
+    unmapped chains are added with a 0 score and total contacts taken from
+    the actual reference chains or (for unmapped model chains) using the
+    :attr:`chem_mapping`.
+
+    See :attr:`oligo_lddt` for a comparison of the two scores.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`float`
+    """
     if self._weighted_lddt is None:
       scores = [s.global_score for s in self.sc_lddt_scorers]
       weights = [s.total_contacts for s in self.sc_lddt_scorers]
@@ -979,8 +1047,101 @@ class OligoLDDTScorer(object):
         self._weighted_lddt = 0.0
     return self._weighted_lddt
 
+  @property
+  def lddt_ref(self):
+    """The reference entity used for oligomeric lDDT scoring
+    (:attr:`oligo_lddt` / :attr:`oligo_lddt_scorer`).
+    
+    Since the lDDT computation requires a single chain with mapped residue
+    numbering, all chains of :attr:`ref` are appended into a single chain X with
+    unique residue numbers according to the column-index in the alignment. The
+    alignments are in the same order as they appear in :attr:`alignments`.
+    Additional residues are appended at the end of the chain with unique residue
+    numbers. Unmapped chains are only added if :attr:`penalize_extra_chains` is
+    True. Only CA atoms are considered if :attr:`calpha_only` is True.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`~ost.mol.EntityHandle`
+    """
+    if self._lddt_ref is None:
+      self._PrepareOligoEntities()
+    return self._lddt_ref
+
+  @property
+  def lddt_mdl(self):
+    """The model entity used for oligomeric lDDT scoring
+    (:attr:`oligo_lddt` / :attr:`oligo_lddt_scorer`).
+
+    Like :attr:`lddt_ref`, this is a single chain X containing all chains of
+    :attr:`mdl`. The residue numbers match the ones in :attr:`lddt_ref` where
+    aligned and have unique numbers for additional residues.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`~ost.mol.EntityHandle`
+    """
+    if self._lddt_mdl is None:
+      self._PrepareOligoEntities()
+    return self._lddt_mdl
+
+  @property
+  def oligo_lddt_scorer(self):
+    """lDDT Scorer object for :attr:`lddt_ref` and :attr:`lddt_mdl`.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`~ost.mol.alg.lDDTScorer`
+    """
+    if self._oligo_lddt_scorer is None:
+      self._oligo_lddt_scorer = lDDTScorer(
+        references=[self.lddt_ref.Select("")],
+        model=self.lddt_mdl.Select(""),
+        settings=self.settings)
+    return self._oligo_lddt_scorer
+
+  @property
+  def mapped_lddt_scorers(self):
+    """List of scorer objects for each chain mapped in :attr:`alignments`.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`list` of :class:`MappedLDDTScorer`
+    """
+    if self._mapped_lddt_scorers is None:
+      self._mapped_lddt_scorers = list()
+      for aln in self.alignments:
+        mapped_lddt_scorer = MappedLDDTScorer(aln, self.calpha_only,
+                                              self.settings)
+        self._mapped_lddt_scorers.append(mapped_lddt_scorer)
+    return self._mapped_lddt_scorers
+
+  @property
+  def sc_lddt_scorers(self):
+    """List of lDDT scorer objects extracted from :attr:`mapped_lddt_scorers`.
+
+    :type: :class:`list` of :class:`~ost.mol.alg.lDDTScorer`
+    """
+    return [mls.lddt_scorer for mls in self.mapped_lddt_scorers]
+
+  @property
+  def sc_lddt(self):
+    """List of global scores extracted from :attr:`sc_lddt_scorers`.
+
+    If scoring for a mapped chain fails, an error is displayed and a score of 0
+    is assigned.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`list` of :class:`float`
+    """
+    if self._sc_lddt is None:
+      self._sc_lddt = list()
+      for lddt_scorer in self.sc_lddt_scorers:
+        try:
+          self._sc_lddt.append(lddt_scorer.global_score)
+        except Exception as ex:
+          LogError('Single chain lDDT failed:', str(ex))
+          self._sc_lddt.append(0.0)
+    return self._sc_lddt
+
   ##############################################################################
-  # Class internal helpers (anything that doesnt easily work without this class)
+  # Class internal helpers
   ##############################################################################
 
   def _PrepareOligoEntities(self):
@@ -989,8 +1150,8 @@ class OligoLDDTScorer(object):
       self.alignments, self.ref, self.mdl, self.calpha_only,
       self.penalize_extra_chains)
 
-  def _GetUnmappedMdlChains(self, mdl, alignments):
-    # TODO: maybe move out of class since it doesn't need self
+  @staticmethod
+  def _GetUnmappedMdlChains(mdl, alignments):
     # assume model is second sequence in alignment and is named by chain
     mdl_chains = set(ch.name for ch in mdl.chains)
     mapped_mdl_chains = set(aln.GetSequence(1).GetName() for aln in alignments)
@@ -1073,7 +1234,7 @@ class MappedLDDTScorer(object):
 
     Alignment with two sequences named according to the mapped chains and with
     views attached to both sequences (e.g. one of the items of
-    :attr:`QSScorer.alignments`).
+    :attr:`QSscorer.alignments`).
 
     The first sequence is assumed to be the reference and the second one the
     model. Since the lDDT score is not symmetric (extra residues in model are
@@ -1083,7 +1244,7 @@ class MappedLDDTScorer(object):
   
   .. attribute:: calpha_only
 
-    If true, restricts lDDT score to CA only.
+    If True, restricts lDDT score to CA only.
 
     :type: :class:`bool`
 
@@ -1091,13 +1252,13 @@ class MappedLDDTScorer(object):
 
     Settings to use for lDDT scoring.
 
-    :type: :class:`~mol.alg.lDDTSettings`
+    :type: :class:`~ost.mol.alg.lDDTSettings`
 
   .. attribute:: lddt_scorer
 
     lDDT Scorer object for the given chains.
 
-    :type: :class:`~mol.alg.lDDTScorer`
+    :type: :class:`~ost.mol.alg.lDDTScorer`
 
   .. attribute:: reference_chain_name
 
