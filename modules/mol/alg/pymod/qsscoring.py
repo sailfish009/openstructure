@@ -2915,29 +2915,6 @@ def _MergeAlignedChains(alns, ent_1, ent_2, calpha_only, penalize_extra_chains):
   ed_2.UpdateICS()
   return ent_ren_1, ent_ren_2
 
-def _ComputeLDDTScore(ref, mdl):
-  """
-  :return: lDDT of *mdl* vs *ref* (see :attr:`QSscorer.lddt_score`).
-  :param mdl: Reference entity (see :attr:`QSscorer.lddt_mdl`)
-  :param ref: Model entity (see :attr:`QSscorer.lddt_ref`)
-  """
-  # check input
-  LogInfo('Reference %s has: %s residues' % (ref.GetName(), ref.residue_count))
-  LogInfo('Model %s has: %s residues' % (mdl.GetName(), mdl.residue_count))
-  # get lddt score with fixed settings
-  lddt_score = mol.alg.LocalDistDiffTest(mdl.Select(''), ref.Select(''),
-                                         2., 8., 'lddt')
-  LogInfo('lDDT score: %.3f' % lddt_score)
-  # add lDDT as B-factor to model
-  for r in mdl.residues:
-    if r.HasProp('lddt'):
-      for a in r.atoms:
-        a.SetBFactor(r.GetFloatProp('lddt'))
-    else:
-      for a in r.atoms:
-        a.SetBFactor(0.0)
-  
-  return lddt_score
 
 # specify public interface
 __all__ = ('QSscoreError', 'QSscorer', 'QSscoreEntity', 'FilterContacts',
