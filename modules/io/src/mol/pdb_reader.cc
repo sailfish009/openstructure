@@ -629,7 +629,9 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   }
   String aname(atom_name.str());
   if (!curr_residue_.IsValid()) {
-    if (profile_.fault_tolerant || profile_.calpha_only) {
+    if (profile_.fault_tolerant || 
+        profile_.calpha_only || 
+        profile_.no_hetatms) {
       return;
     } 
     const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";
@@ -639,6 +641,7 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   if (!atom.IsValid()) {
     if (profile_.fault_tolerant ||
         profile_.calpha_only  ||
+        profile_.no_hetatms ||
         warned_name_mismatch_) {
       return;
     }
