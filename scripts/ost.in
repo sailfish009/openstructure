@@ -48,6 +48,7 @@ if test -e "${OST_SCRIPT}" ; then
     done
     IFS="#"
     $pyexec -c "execfile('$DNG_ROOT/@LIBDIR@/python@PYTHON_VERSION@/site-packages/ost/ost_startup.py')" "${OST_SCRIPT}" $opts
+    RC=$?
 else
     opts=""
     for argument in "$@";do
@@ -60,6 +61,6 @@ else
     IFS="#"
     $pyexec $interactive -c "execfile('$DNG_ROOT/@LIBDIR@/python@PYTHON_VERSION@/site-packages/ost/ost_startup.py')" $opts
     RC=$?
-    exit $RC
 fi
 IFS=$OLDIFS
+exit $RC
