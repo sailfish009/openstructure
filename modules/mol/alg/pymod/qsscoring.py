@@ -1470,7 +1470,7 @@ def _CleanInputEntity(ent):
 
   # check if CA only
   calpha_only = False
-  if ent_new.Select('aname=CB').atom_count == 0:
+  if ent_new.atom_count > 0 and ent_new.Select('aname=CB').atom_count == 0:
     LogInfo('Structure %s is a CA only structure!' % ent_new.GetName())
     calpha_only = True
 
@@ -2337,7 +2337,7 @@ def _CheckClosedSymmetry(ent_1, ent_2, symm_1, symm_2, chem_mapping,
                     overlapped for overlap to be sufficient.
   :type sup_fract:  :class:`float`
   :param find_best: If True, we look for best mapping according to
-                    :func:`_ChainRMSD`. Otherwise, we return first suitable
+                    :func:`_GetMappedRMSD`. Otherwise, we return first suitable
                     mapping.
   :type find_best:  :class:`bool`
 

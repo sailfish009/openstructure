@@ -234,6 +234,14 @@ def _ParseArgs():
               "is the chain name in reference and value is the chain name in\n"
               "model."))
     parser.add_argument(
+        "--qs-rmsd",
+        dest="qs_rmsd",
+        default=False,
+        action="store_true",
+        help=("Calculate CA RMSD between shared CA atoms of mapped chains.\n"
+              "This uses a superposition using all mapped chains which\n"
+              "minimizes the CA RMSD."))
+    parser.add_argument(
         "-rna",
         "--residue-number-alignment",
         dest="residue_number_alignment",
@@ -714,6 +722,26 @@ def _Main():
                     ost.LogWarning(msg)
                 else:
                     ost.LogInfo("Consistency check: OK")
+            if opts.qs_rmsd:
+                ost.LogInfo("-" * 80)
+                if skip_score:
+                    ost.LogInfo(
+                        "Skipping QS-RMSD because consistency check failed")
+                    reference_results["qs_rmsd"] = {
+                        "status": "FAILURE",
+                        "error": "Consistency check failed."}
+                else:
+                    ost.LogInfo("Computing QS-RMSD")
+                    try:
+                        reference_results["qs_rmsd"] = {
+                            "status": "SUCCESS",
+                            "error": "",
+                            "ca_rmsd": qs_scorer.superposition.rmsd}
+                    except qsscoring.QSscoreError as ex:
+                        ost.LogError('QS-RMSD failed:', str(ex))
+                        reference_results["qs_rmsd"] = {
+                            "status": "FAILURE",
+                            "error": str(ex)}
             if opts.qs_score:
                 ost.LogInfo("-" * 80)
                 if skip_score:
@@ -722,8 +750,6 @@ def _Main():
                     reference_results["qs_score"] = {
                         "status": "FAILURE",
                         "error": "Consistency check failed.",
-                        "model_name": model_name,
-                        "reference_name": reference_name,
                         "global_score": 0.0,
                         "best_score": 0.0}
                 else:
