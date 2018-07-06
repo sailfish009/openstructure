@@ -1109,8 +1109,8 @@ The View Classes
 
     :param chain_handle: The chain handle to be added.
     :type  chain_handle: :class:`ChainHandle`
-    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
-    :type view_add_flags: :class:`int` / :class:`ViewAddFlags`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlag`
+    :type view_add_flags: :class:`int` / :class:`ViewAddFlag`
     :rtype: :class:`ChainView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
@@ -1118,12 +1118,12 @@ The View Classes
     Add residue to view. If the residue's chain is not already part of the
     view, it will be added. By default, only the residue is added, but not its
     atoms. This behaviour can be modified by passing in an appropriate
-    combination of :class:`ViewAddFlags`.
+    combination of :class:`ViewAddFlag`.
 
     :param residue_handle: The residue handle to be added
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
-    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlag`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlag`
     :rtype: :class:`ResidueView`
 
   .. method:: AddAtom(atom_handle[, view_add_flags])
@@ -1133,8 +1133,8 @@ The View Classes
     
     :param atom_handle: The atom handle
     :type  atom_handle: :class:`AtomHandle`
-    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
-    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlag`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlag`
     :rtype: :class:`AtomView`
 
   .. method:: AddBond(bond_handle)
@@ -1449,8 +1449,8 @@ The View Classes
     
     :param atom_handle: The atom to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
-    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlag`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlag`
     :rtype: :class:`AtomView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
@@ -1458,12 +1458,12 @@ The View Classes
     Add residue to the view. If the atom does not belong to chain, the result is
     undefined. By default, only the residue, but no atoms are added to the
     view. To change the behavior, pass in a suitable combination of
-    :class:`ViewAddFlags`.
+    :class:`ViewAddFlag`.
     
     :param residue_handle: The residue handle to be added.
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
-    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlag`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlag`
     :rtype: :class:`ResidueView`
 
   .. method:: FindAtom(res_num, atom_name)
@@ -1714,8 +1714,8 @@ The View Classes
 
     :param atom_handle: Atom handle to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param flags: An ORed together combination of :class:`ViewAddFlags`
-    :type  flags: :class:`int` / :class:`ViewAddFlags`
+    :param flags: An ORed together combination of :class:`ViewAddFlag`
+    :type  flags: :class:`int` / :class:`ViewAddFlag`
     :rtype: :class:`AtomView`
 
   .. method:: GetCenterOfAtoms()
@@ -1943,10 +1943,10 @@ here.
    :returns: :class:`str`
 
 
-ViewAddFlags
+ViewAddFlag
 --------------------------------------------------------------------------------
 
-.. class:: ViewAddFlags
+.. class:: ViewAddFlag
 
   Defines flags controlling behaviour of routines adding handles to views:
 
@@ -1958,6 +1958,8 @@ ViewAddFlags
   * ``CHECK_DUPLICATES`` - If set, it will be checked that no duplicates are
     created when adding a new handle
 
+  Flags can be ORed to combine them.
+  
 
 SecStructure
 --------------------------------------------------------------------------------
