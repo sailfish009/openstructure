@@ -37,17 +37,18 @@ bool compare_files(const String& test, const String& gold_standard)
   }
   String test_line, gold_line;
   while (true) {
-    bool test_end = !std::getline(test_stream, test_line);
-    bool gold_end = !std::getline(gold_stream, gold_line);
-    if (!(test_end || gold_end)) {
+    bool test_read = std::getline(test_stream, test_line);
+    bool gold_read = std::getline(gold_stream, gold_line);
+    if (!test_read && !gold_read) {
+      // nothing to read anymore in any of the files
       return true;
     }
-    if (!test_end) {
+    if (gold_read && !test_read) {
       std::cerr << gold_standard << " contains additional line(s):"
                 << std::endl << gold_line << std::endl;
       return false;
     }
-    if (!gold_end) {
+    if (test_read && !gold_read) {
       std::cerr << test << " contains additional line(s):"
                 << std::endl << test_line << std::endl;
       return false;
