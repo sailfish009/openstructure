@@ -8,7 +8,6 @@ set(OST_CONOP_PYMOD_SOURCES
   export_conop.cc
   export_diag.cc
   export_rule_based.cc
-  export_non_standard.cc
   export_ring_finder.cc
 )
 

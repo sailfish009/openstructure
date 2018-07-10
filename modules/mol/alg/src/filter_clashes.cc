@@ -201,7 +201,7 @@ bool StereoChemicalParams::IsEmpty() const
   return false;
 }  
 
-StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<String>& stereo_chemical_props_file)
+StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<String>& stereo_chemical_props_file, bool check)
 {
   StereoChemicalParams table;
   bool found=false;
@@ -276,11 +276,18 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
   if (found==false) {
     std::cout << "Could not find the relevant section in the stereo-chemical parameter file" << std::endl;
     return StereoChemicalParams();
-  };    
+  };
+  if (check) {
+    if (table.IsEmpty()) {
+      std::stringstream serr;
+      serr << "Error reading the " << header << " section of the stereo-chemical parameter file.";   
+      throw ost::Error(serr.str());
+    }
+  }  
   return table;
 };  
 
-ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_props_file)
+ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_props_file, bool check)
 {
   ClashingDistances table;
   bool found=false;
@@ -340,7 +347,14 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
   if (found==false) {
     std::cout << "Could not find the relevant section in the stereo-chemical parameter file" << std::endl;
     return ClashingDistances();
-  } 
+  }
+  if (check) {
+    if (table.IsEmpty()) {
+      std::stringstream serr;
+      serr << "Error reading the Clashing section of the stereo-chemical parameter file.";   
+      throw ost::Error(serr.str());
+    }
+  }
   return table;
 }  
 

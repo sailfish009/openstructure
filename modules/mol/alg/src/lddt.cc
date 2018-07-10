@@ -32,6 +32,7 @@
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/io_exception.hh>
+#include <ost/io/stereochemical_params_reader.hh>
 #include <ost/conop/conop.hh>
 #include <ost/conop/compound_lib.hh>
 #include <ost/string_ref.hh>
@@ -101,30 +102,6 @@ void usage()
 
 }
 
-// computes coverage
-std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob_dist_list)
-{
-  int second=0;
-  int first=0;
-  if (v.GetResidueList().size()==0) {
-    if (glob_dist_list.size()==0) {
-      return std::make_pair(0,-1);
-    } else {    
-      return std::make_pair(0,glob_dist_list.size());
-    }  
-  }
-  ChainView vchain=v.GetChainList()[0];
-  for (GlobalRDMap::const_iterator i=glob_dist_list.begin();i!=glob_dist_list.end();++i)
-  {
-    ResNum rnum = (*i).first;
-    second++;
-    if (vchain.FindResidue(rnum)) {
-      first++;
-    }
-  }
-  return std::make_pair(first,second);
-}
-
 CompoundLibPtr load_compound_lib(const String& custom_path)
 {
   if (custom_path!="") {
@@ -174,33 +151,22 @@ CompoundLibPtr load_compound_lib(const String& custom_path)
   }
   return CompoundLibPtr();
 }
-bool is_resnum_in_globalrdmap(const ResNum& resnum, const GlobalRDMap& glob_dist_list)
-{
-  for (GlobalRDMap::const_iterator i=glob_dist_list.begin(), e=glob_dist_list.end(); i!=e; ++i) {
-    ResNum rn = i->first;
-    if (rn==resnum) {
-      return true;
-    }
-  }
-  return false;
-}
 
 int main (int argc, char **argv)
 {
   // sets some default values for parameters
   String version = OST_VERSION_STRING;
+  lDDTSettings settings;
+  String parameter_file_path;
+  bool structural_checks = false;
+  bool ignore_consistency_checks = false;
   Real bond_tolerance = 12.0;
   Real angle_tolerance = 12.0;
-  Real radius=15.0; 
-  int sequence_separation = 0;
-
+  String sel;
   // creates the required loading profile
   IOProfile profile;
   // parses options
-  String sel;
   String custom_path;
-  bool structural_checks=false;
-  bool consistency_checks=true;
   po::options_description desc("Options");
   desc.add_options()
     ("calpha,c", "consider only calpha atoms")
@@ -256,14 +222,14 @@ int main (int argc, char **argv)
     structural_checks=true;
   }
   if (vm.count("ignore-consistency-checks")) {
-    consistency_checks=false;
+    ignore_consistency_checks=true;
   }
   if (vm.count("tolerant")) {
     profile.fault_tolerant=true;
   }
-  String parameter_filename;
+
   if (vm.count("parameter-file")) {
-      parameter_filename=vm["parameter-file"].as<String>();
+      parameter_file_path=vm["parameter-file"].as<String>();
     } else if (structural_checks==true) {
     std::cout << "Please specify a stereo-chemical parameter file" << std::endl;
     exit(-1);
@@ -293,17 +259,11 @@ int main (int argc, char **argv)
     angle_tolerance=vm["angle_tolerance"].as<Real>();
   }
   if (vm.count("inclusion_radius")) {
-    radius=vm["inclusion_radius"].as<Real>();
+    settings.radius=vm["inclusion_radius"].as<Real>();
   }
   if (vm.count("sequence_separation")) {
-    sequence_separation=vm["sequence_separation"].as<int>();
+    settings.sequence_separation=vm["sequence_separation"].as<int>();
   }
-    
-  std::vector<Real> cutoffs;
-  cutoffs.push_back(0.5);
-  cutoffs.push_back(1.0);
-  cutoffs.push_back(2.0);
-  cutoffs.push_back(4.0);
 
   std::vector<EntityView> ref_list;  
     
@@ -311,55 +271,45 @@ int main (int argc, char **argv)
   // if the reference file is a comma-separated list of files, switches to multi-
   // reference mode
   GlobalRDMap glob_dist_list; 
-  String ref_file=files.back();    
+  String ref_file=files.back();
   ost::StringRef ref_file_sr(ref_file.c_str(),ref_file.length());
   std::vector<StringRef> ref_file_split_sr=ref_file_sr.split(',');
-  if (ref_file_split_sr.size()==1) { 
-    std::cout << "Multi-reference mode: Off" << std::endl;  
-    String ref_filename = ref_file_split_sr[0].str();  
+  for (std::vector<StringRef>::const_iterator ref_file_split_sr_it = ref_file_split_sr.begin();
+       ref_file_split_sr_it != ref_file_split_sr.end();++ref_file_split_sr_it) {
+    String ref_filename = ref_file_split_sr_it->str();
     EntityHandle ref=load(ref_filename, profile);
     if (!ref) {
       exit(-1);
-    }  
-    EntityView refview=ref.GetChainList()[0].Select("peptide=true");
-    ref_list.push_back(refview);
-    glob_dist_list = CreateDistanceList(refview,radius);
-  } else {
-    std::cout << "Multi-reference mode: On" << std::endl;  
-    for (std::vector<StringRef>::const_iterator ref_file_split_sr_it = ref_file_split_sr.begin();
-         ref_file_split_sr_it != ref_file_split_sr.end();++ref_file_split_sr_it) {
-      String ref_filename = ref_file_split_sr_it->str();  
-      EntityHandle ref=load(ref_filename, profile);
-      if (!ref) {
+    }
+    if (sel != ""){
+      std::cout << "Performing \"" << sel << "\" selection on reference " << ref_filename << std::endl;
+      try {
+        ref_list.push_back(ref.Select(sel));
+      } catch (const ost::mol::QueryError& e) {
+        std::cerr << "Provided selection argument failed." << std::endl << e.GetFormattedMessage() << std::endl;
         exit(-1);
       }
-      if (! ref_list.empty()) {
-        if (ref_list[0].GetChainList()[0].GetName()!=ref.GetChainList()[0].GetName()) {
-          std::cout << "ERROR: First chains in the reference structures have different names" << std::endl;
-          exit(-1);  
-        }    
-      }
-      EntityView refview=ref.GetChainList()[0].Select("peptide=true");
+    }
+    else {
       ref_list.push_back(ref.CreateFullView());
-    } 
-    glob_dist_list = CreateDistanceListFromMultipleReferences (ref_list,cutoffs,sequence_separation,radius);  
-  }         
+    }
+  }
+  CleanlDDTReferences(ref_list);
+  if (ref_list.size()==1) {
+    std::cout << "Multi-reference mode: Off" << std::endl;
+  } else {
+    std::cout << "Multi-reference mode: On" << std::endl;
+  }
+  glob_dist_list = PreparelDDTGlobalRDMap(ref_list,
+                                          settings.cutoffs,
+                                          settings.sequence_separation,
+                                          settings.radius);
   files.pop_back();
 
   // prints out parameters used in the lddt calculation
   std::cout << "Verbosity level: " << verbosity_level << std::endl;
+  settings.PrintParameters();
   if (structural_checks) {
-    std::cout << "Stereo-chemical and steric clash checks: On " << std::endl;
-  } else {
-    std::cout << "Stereo-chemical and steric clash checks: Off " << std::endl;
-  }
-  std::cout << "Inclusion Radius: " << radius << std::endl;
-
-  std::cout << "Sequence separation: " << sequence_separation << std::endl;
-  if (structural_checks) {
-    std::cout << "Parameter filename: " << parameter_filename << std::endl;
-    std::cout << "Tolerance in stddevs for bonds: " << bond_tolerance << std::endl;
-    std::cout << "Tolerance in stddevs for angles: " << angle_tolerance << std::endl;
     LOG_INFO("Log entries format:");
     LOG_INFO("BOND INFO FORMAT:  Chain  Residue  ResNum  Bond  Min  Max  Observed  Z-score  Status");
     LOG_INFO("ANGLE INFO FORMAT:  Chain  Residue  ResNum  Angle  Min  Max  Observed  Z-score  Status");
@@ -382,183 +332,55 @@ int main (int argc, char **argv)
       }
       continue;
     }
-    EntityView v=model.GetChainList()[0].Select("peptide=true");
-    EntityView outv=model.GetChainList()[0].Select("peptide=true");
-    for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
-         ref_list_it != ref_list.end(); ++ref_list_it) {
-      bool cons_check = ResidueNamesMatch(v,*ref_list_it,consistency_checks);
-      if (cons_check==false) {
-        if (consistency_checks==true) {
-          LOG_ERROR("Residue names in model: " << files[i] << " and in reference structure(s) are inconsistent.");
-          exit(-1);            
-        } else {
-          LOG_WARNING("Residue names in model: " << files[i] << " and in reference structure(s) are inconsistent.");
-        }   
-      } 
-    }
+    EntityView model_view = model.GetChainList()[0].Select("peptide=true");
 
     boost::filesystem::path pathstring(files[i]);
-
     String filestring=BFPathToString(pathstring);
-    std::cout << "File: " << files[i] << std::endl; 
-    std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
-    if (cov.second == -1) {
-      std::cout << "Coverage: 0 (0 out of 0 residues)" << std::endl;
-    } else {
-      std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
-    }
+    std::cout << "File: " << files[i] << std::endl;
 
     if (structural_checks) {
-      // reads in parameter files   
-      boost::filesystem::path loc(parameter_filename);
-      boost::filesystem::ifstream infile(loc);
-      if (!infile) {
-        std::cout << "Could not find " << parameter_filename << std::endl;
-        exit(-1);
-      }
-      std::vector<String> stereo_chemical_props;
-      String line;
-      while (std::getline(infile, line))
-      {
-        std::stringstream line_stream(line);
-        stereo_chemical_props.push_back(line);
-      }
-      StereoChemicalParams bond_table = FillStereoChemicalParams("Bond",stereo_chemical_props);
-      if (bond_table.IsEmpty()) {
-        std::cout << "Error reading the Bond section of the stereo-chemical parameter file." << std::endl;
-        exit(-1);
-      }
-      StereoChemicalParams angle_table = FillStereoChemicalParams("Angle",stereo_chemical_props);
-      if (angle_table.IsEmpty()) {
-        std::cout << "Error reading the Angles section of the stereo-chemical parameter file." << std::endl;
-        exit(-1);
-      }
-
-      ClashingDistances nonbonded_table = FillClashingDistances(stereo_chemical_props);
-
-      if (nonbonded_table.IsEmpty()) {
-        std::cout << "Error reading the Clashing section of the stereo-chemical parameter file." << std::endl;
-        exit(-1);
-      }
-      // performs structural checks and filters the structure
-      StereoChemistryInfo stereo_chemistry_info;
-      try { 
-        std::pair<EntityView,StereoChemistryInfo> csc_result = alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
-        v = csc_result.first;
-        stereo_chemistry_info = csc_result.second;
-      } catch (std::exception& e) {       
-        std::cout << "An error occurred during the structure quality checks, stage 1:" << std::endl;    
-        std::cout << e.what() << std::endl;
-        exit(-1);
-      }
-      std::cout << "Average Z-Score for bond lengths: " << std::fixed << std::setprecision(5) << stereo_chemistry_info.GetAvgZscoreBonds() << std::endl;
-      std::cout << "Bonds outside of tolerance range: " << stereo_chemistry_info.GetBadBondCount() << " out of " << stereo_chemistry_info.GetBondCount() << std::endl;
-      std::cout << "Bond\tAvg Length\tAvg zscore\tNum Bonds" << std::endl;
-      std::map<String,BondLengthInfo> avg_bond_length_info = stereo_chemistry_info.GetAvgBondLengthInfo();
-      for (std::map<String,BondLengthInfo>::const_iterator abli_it=avg_bond_length_info.begin();abli_it!=avg_bond_length_info.end();++abli_it) {
-        String key = (*abli_it).first;
-        BondLengthInfo bond_length_info = (*abli_it).second;
-        std::cout << key << "\t" << std::fixed << std::setprecision(5) << std::left << std::setw(10) <<
-                     bond_length_info.GetAvgLength() << "\t" << std::left << std::setw(10) << bond_length_info.GetAvgZscore() << "\t" << bond_length_info.GetCount()  << std::endl;
-      }
-      std::cout << "Average Z-Score angle widths: " << std::fixed << std::setprecision(5) << stereo_chemistry_info.GetAvgZscoreAngles() << std::endl;
-      std::cout << "Angles outside of tolerance range: " << stereo_chemistry_info.GetBadAngleCount() << " out of " << stereo_chemistry_info.GetAngleCount() << std::endl;
-      ClashingInfo clash_info;
+      StereoChemicalProps stereochemical_params;
       try {
-        std::pair<EntityView,ClashingInfo> fc_result = alg::FilterClashes(v,nonbonded_table);
-        v = fc_result.first;
-        clash_info = fc_result.second;
-      } catch (std::exception& e) {       
-        std::cout << "An error occurred during the structure quality checks, stage 2:" << std::endl;    
+        stereochemical_params = ost::io::ReadStereoChemicalPropsFile(parameter_file_path, true);
+      } catch (std::exception& e) {
         std::cout << e.what() << std::endl;
         exit(-1);
       }
-      std::cout << clash_info.GetClashCount() << " non-bonded short-range distances shorter than tolerance distance" << std::endl;
-      std::cout << "Distances shorter than tolerance are on average shorter by: " << std::fixed << std::setprecision(5) << clash_info.GetAverageOffset() << std::endl;
+      
+      try {
+        CheckStructure(model_view,
+                       stereochemical_params.bond_table,
+                       stereochemical_params.angle_table,
+                       stereochemical_params.nonbonded_table,
+                       bond_tolerance,
+                       angle_tolerance);
+      } catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
+        exit(-1);
+      }
+    }
 
-    }
-    if (cov.first==0) {
-      std::cout << "Global LDDT score: 0.0" << std::endl;
-      return 0;
-    }
+    // Check consistency
+  for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
+       ref_list_it != ref_list.end(); ++ref_list_it) {
+    bool cons_check = ResidueNamesMatch(model_view,*ref_list_it, ignore_consistency_checks);
+    if (cons_check==false) {
+      if (ignore_consistency_checks==false) {
+        throw std::runtime_error("Residue names in model and in reference structure(s) are inconsistent.");            
+      } else {
+        LOG_WARNING("Residue names in model and in reference structure(s) are inconsistent.");
+      }   
+    } 
+  }
 
     // computes the lddt score   
-    String label="localldt";
-    std::pair<int,int> total_ov=alg::LocalDistDiffTest(v, glob_dist_list, cutoffs, sequence_separation, label);
-    Real lddt = static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
-    std::cout << "Global LDDT score: " << std::setprecision(4) << lddt << std::endl;
-    std::cout << "(" << std::fixed << total_ov.first << " conserved distances out of " << total_ov.second
-              << " checked, over " << cutoffs.size() << " thresholds)" << std::endl;
+    LocalDistDiffTest(model_view, ref_list, glob_dist_list, settings);
 
-    // prints the residue-by-residue statistics  
-    if (structural_checks) {
-      std::cout << "Local LDDT Scores:" << std::endl;
-      std::cout << "(A 'Yes' in the 'Quality Problems' column stands for problems" << std::endl;
-      std::cout << "in the side-chain of a residue, while a 'Yes+' for problems" << std::endl;
-      std::cout << "in the backbone)" << std::endl;
-    } else {
-      std::cout << "Local LDDT Scores:" << std::endl;
-    }
-    if (structural_checks) {
-      std::cout << "Chain\tResName\tResNum\tAsses.\tQ.Prob.\tScore\t(Conserved/Total, over " << cutoffs.size() << " thresholds)" << std::endl;
-    } else {
-      std::cout << "Chain\tResName\tResNum\tAsses.\tScore\t(Conserved/Total, over " << cutoffs.size() << " thresholds)" << std::endl;
-    }
-    for (ChainViewList::const_iterator ci = outv.GetChainList().begin(),
-         ce = outv.GetChainList().end(); ci != ce; ++ci) {
-      for (ResidueViewList::const_iterator rit = ci->GetResidueList().begin(),
-           re = ci->GetResidueList().end(); rit != re; ++rit) {
-     
-        ResidueView ritv=*rit;
-        ResNum rnum = ritv.GetNumber();
-        bool assessed = false;
-        String assessed_string="No";
-        String quality_problems_string="No";
-        Real lddt_local = -1;
-        String lddt_local_string="-";
-        int conserved_dist = -1;
-        int total_dist = -1;
-        String dist_string = "-";
-        if (is_resnum_in_globalrdmap(rnum,glob_dist_list)) {
-          assessed = true;
-          assessed_string="Yes";
-        }
-        if (ritv.HasProp("stereo_chemical_violation_sidechain") || 
-            ritv.HasProp("steric_clash_sidechain")) {
-          quality_problems_string="Yes";
-        }
-        if (ritv.HasProp("stereo_chemical_violation_backbone") || 
-            ritv.HasProp("steric_clash_backbone")) {
-          quality_problems_string="Yes+";
-        }
-
-        if (assessed==true) {
-          if (ritv.HasProp(label)) {
-            lddt_local=ritv.GetFloatProp(label);
-            std::stringstream stkeylddt;
-            stkeylddt <<  std::fixed << std::setprecision(4) << lddt_local;
-            lddt_local_string=stkeylddt.str();
-            conserved_dist=ritv.GetIntProp(label+"_conserved");
-            total_dist=ritv.GetIntProp(label+"_total");
-            std::stringstream stkeydist;
-            stkeydist << "("<< conserved_dist << "/" << total_dist << ")";
-            dist_string=stkeydist.str();
-          } else {
-            lddt_local = 0;
-            lddt_local_string="0.0000";
-            conserved_dist = 0;
-            total_dist = 0;
-            dist_string="(0/0)";
-          }
-        }
-        if (structural_checks) {
-          std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << quality_problems_string << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
-        } else {
-          std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << assessed_string  << '\t' << lddt_local_string << "\t" << dist_string << std::endl;
-        }
-      }
-    }
-    std::cout << std::endl;
+    // prints the residue-by-residue statistics
+    std::vector<lDDTLocalScore> local_scores;
+    EntityView outview = model.GetChainList()[0].Select("peptide=true");
+    local_scores = GetlDDTPerResidueStats(outview, glob_dist_list, structural_checks, settings.label);
+    PrintlDDTPerResidueStats(local_scores, structural_checks, settings.cutoffs.size());
   }
   return 0;
 }

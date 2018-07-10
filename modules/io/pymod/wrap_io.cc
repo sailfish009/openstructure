@@ -33,6 +33,7 @@ using namespace boost::python;
 #include <ost/io/mol/entity_io_sdf_handler.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/mol/dcd_io.hh>
+#include <ost/io/stereochemical_params_reader.hh>
 using namespace ost;
 using namespace ost::io;
 
@@ -66,6 +67,9 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_handle_ov,
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_view_ov,
                                 save_ent_view, 2, 3)
+
+ost::mol::alg::StereoChemicalProps (*read_props_a)(String filename, bool check) = &ReadStereoChemicalPropsFile;
+ost::mol::alg::StereoChemicalProps (*read_props_b)(bool check) = &ReadStereoChemicalPropsFile;
 
 }
 
@@ -119,6 +123,12 @@ BOOST_PYTHON_MODULE(_ost_io)
 ;
   def("LoadMAE", &LoadMAE);
   def("LoadPQR", &LoadPQR);
+
+  def("ReadStereoChemicalPropsFile", read_props_a,
+    (arg("filename"), arg("check")=true)); 
+  def("ReadStereoChemicalPropsFile", read_props_b,
+    (arg("check")=true));
+  def("GetStereoChemicalPropsFile", &GetStereoChemicalPropsFile);
 
   export_pdb_io();
   export_mmcif_io();

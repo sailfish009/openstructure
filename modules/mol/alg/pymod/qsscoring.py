@@ -1,5 +1,6 @@
 """
-Scoring of quaternary structures as in Martino's 2017 paper.
+Scoring of quaternary structures (QS). The QS scoring is according to the paper
+by `Bertoni et al. <https://dx.doi.org/10.1038/s41598-017-09654-8>`_.
 
 .. note ::
 
@@ -16,9 +17,11 @@ Scoring of quaternary structures as in Martino's 2017 paper.
 Authors: Gerardo Tauriello, Martino Bertoni
 """
 
-from ost import mol, geom, conop, seq, settings
+from ost import mol, geom, conop, seq, settings, PushVerbosityLevel
 from ost import LogError, LogWarning, LogScript, LogInfo, LogVerbose, LogDebug
 from ost.bindings.clustalw import ClustalW
+from ost.mol.alg import lDDTScorer
+from ost.seq.alg.renumber import Renumber
 import numpy as np
 from scipy.misc import factorial
 from scipy.special import binom
@@ -89,13 +92,27 @@ class QSscorer:
     -> weight_extra_mapped = sum(w(d)) for all mapped but non-shared
     -> weight_extra_all = sum(w(d)) for all non-shared
     -> w(d) = 1 if d <= 5, exp(-2 * ((d-5.0)/4.28)^2) else
+  
+  In the formulas above:
 
+  * "d": CA/CB-CA/CB distance of an "inter-chain contact" ("d1", "d2" for
+    "shared" contacts).
+  * "mapped": we could map chains of two structures and align residues in
+    :attr:`alignments`.
+  * "shared": pairs of residues which are "mapped" and have
+    "inter-chain contact" in both structures.
+  * "inter-chain contact": CB-CB pairs (CA for GLY) with distance <= 12 A
+    (fallback to CA-CA if :attr:`calpha_only` is True).
+  * "w(d)": weighting function (prob. of 2 res. to interact given CB distance)
+    from `Xu et al. 2009 <https://dx.doi.org/10.1016%2Fj.jmb.2008.06.002>`_.
+  
   :param ent_1: First structure to be scored.
   :type ent_1:  :class:`QSscoreEntity`, :class:`~ost.mol.EntityHandle` or
                 :class:`~ost.mol.EntityView`
   :param ent_2: Second structure to be scored.
   :type ent_2:  :class:`QSscoreEntity`, :class:`~ost.mol.EntityHandle` or
                 :class:`~ost.mol.EntityView`
+  :param res_num_alignment: Sets :attr:`res_num_alignment`
 
   :raises: :class:`QSscoreError` if input structures are invalid or are monomers
            or have issues that make it impossible for a QS score to be computed.
@@ -125,8 +142,15 @@ class QSscorer:
     of symmetries and chain mappings. By default it is set to 100.
 
     :type: :class:`int`
+
+  .. attribute:: res_num_alignment
+
+    Forces each alignment in :attr:`alignments` to be based on residue numbers
+    instead of using a global BLOSUM62-based alignment.
+
+    :type: :class:`bool`
   """
-  def __init__(self, ent_1, ent_2):
+  def __init__(self, ent_1, ent_2, res_num_alignment=False):
     # generate QSscoreEntity objects?
     if isinstance(ent_1, QSscoreEntity):
       self.qs_ent_1 = ent_1
@@ -147,6 +171,7 @@ class QSscorer:
       self.qs_ent_1.SetName(self.qs_ent_1.original_name)
       self.qs_ent_2.SetName(self.qs_ent_2.original_name)
     # set other public attributes
+    self.res_num_alignment = res_num_alignment
     self.calpha_only = self.qs_ent_1.calpha_only or self.qs_ent_2.calpha_only
     self.max_ca_per_chain_for_cm = 100
     # init cached stuff
@@ -161,9 +186,6 @@ class QSscorer:
     self._global_score = None
     self._best_score = None
     self._superposition = None
-    self._lddt_score = None
-    self._lddt_mdl = None
-    self._lddt_ref = None
     self._clustalw_bin = None
 
   @property
@@ -355,8 +377,15 @@ class QSscorer:
     There will be one alignment for each mapped chain and they are ordered by
     their chain names in :attr:`qs_ent_1`.
 
-    The sequences of the alignments have views attached into
-    :attr:`QSscoreEntity.ent` of :attr:`qs_ent_1` and :attr:`qs_ent_2`.
+    The first sequence of each alignment belongs to :attr:`qs_ent_1` and the
+    second one to :attr:`qs_ent_2`. The sequences are named according to the
+    mapped chain names and have views attached into :attr:`QSscoreEntity.ent`
+    of :attr:`qs_ent_1` and :attr:`qs_ent_2`.
+
+    If :attr:`res_num_alignment` is False, each alignment is performed using a
+    global BLOSUM62-based alignment. Otherwise, the positions in the alignment
+    sequences are simply given by the residue number so that residues with
+    matching numbers are aligned.
 
     :getter: Computed on first use (cached)
     :type: :class:`list` of :class:`~ost.seq.AlignmentHandle`
@@ -364,7 +393,8 @@ class QSscorer:
     if self._alignments is None:
       self._alignments = _GetMappedAlignments(self.qs_ent_1.ent,
                                               self.qs_ent_2.ent,
-                                              self.chain_mapping)
+                                              self.chain_mapping,
+                                              self.res_num_alignment)
     return self._alignments
 
   @property
@@ -435,65 +465,6 @@ class QSscorer:
     return self._superposition
 
   @property
-  def lddt_score(self):
-    """The multi-chain lDDT score.
-
-    .. note::
-
-      lDDT is not considering over-prediction (i.e. extra chains) and hence is
-      not symmetric. Here, we consider :attr:`qs_ent_1` as the reference and
-      :attr:`qs_ent_2` as the model. The alignments from :attr:`alignments` are
-      used to map residue numbers and chains.
-
-    The score is computed with OST's :func:`~ost.mol.alg.LocalDistDiffTest`
-    function with a single distance threshold of 2 A and an inclusion radius of
-    8 A. You can use :attr:`lddt_mdl` and :attr:`lddt_ref` to get entities on
-    which you can call any other lDDT function with any other set of parameters.
-
-    :getter: Computed on first use (cached)
-    :type: :class:`float`
-    """
-    if self._lddt_score is None:
-      self._ComputeLDDT()
-    return self._lddt_score
-
-  @property
-  def lddt_mdl(self):
-    """The model entity used for lDDT scoring (:attr:`lddt_score`) and annotated
-    with local scores.
-
-    Local scores are available as residue properties named 'lddt' and on each
-    atom as a B-factor. Only CA atoms are considered if :attr:`calpha_only` is
-    True, otherwise this is an all-atom score.
-    
-    Since, the lDDT computation requires a single chain with mapped residue
-    numbering, all chains are appended into a single chain X with unique residue
-    numbers according to the column-index in the alignment. The alignments are
-    in the same order as they appear in :attr:`alignments`. Additional residues
-    are appended at the end of the chain with unique residue numbers.
-
-    :getter: Computed on first use (cached)
-    :type: :class:`~ost.mol.EntityHandle`
-    """
-    if self._lddt_mdl is None:
-      self._ComputeLDDT()
-    return self._lddt_mdl
-
-  @property
-  def lddt_ref(self):
-    """The reference entity used for lDDT scoring (:attr:`lddt_score`).
-
-    This is a single chain X with residue numbers matching ones in
-    :attr:`lddt_mdl` where aligned and unique numbers for additional residues.
-
-    :getter: Computed on first use (cached)
-    :type: :class:`~ost.mol.EntityHandle`
-    """
-    if self._lddt_ref is None:
-      self._ComputeLDDT()
-    return self._lddt_ref
-
-  @property
   def clustalw_bin(self):
     """
     Full path to ``clustalw`` or ``clustalw2`` executable to use for multiple
@@ -505,6 +476,21 @@ class QSscorer:
     if self._clustalw_bin is None:
       self._clustalw_bin = settings.Locate(('clustalw', 'clustalw2'))
     return self._clustalw_bin
+
+  def GetOligoLDDTScorer(self, settings, penalize_extra_chains=True):
+    """
+    :return: :class:`OligoLDDTScorer` object, setup for this QS scoring problem.
+    :param settings: Passed to :class:`OligoLDDTScorer` constructor.
+    :param penalize_extra_chains: Passed to :class:`OligoLDDTScorer` constructor.
+    """
+    if penalize_extra_chains:
+      return OligoLDDTScorer(self.qs_ent_1.ent, self.qs_ent_2.ent,
+                             self.alignments, self.calpha_only, settings,
+                             True, self.chem_mapping)
+    else:
+      return OligoLDDTScorer(self.qs_ent_1.ent, self.qs_ent_2.ent,
+                             self.alignments, self.calpha_only, settings, False)
+
 
   ##############################################################################
   # Class internal helpers (anything that doesnt easily work without this class)
@@ -537,6 +523,8 @@ class QSscorer:
 
   def _ComputeScores(self):
     """Fills cached global_score and best_score."""
+    if len(self.chain_mapping) < 2:
+      raise QSscoreError("QS-score is not defined for monomers")
     # get contacts
     if self.calpha_only:
       contacts_1 = self.qs_ent_1.contacts_ca
@@ -553,22 +541,6 @@ class QSscorer:
     LogInfo('QSscore %s, %s: best: %.2f, global: %.2f' \
             % (self.qs_ent_1.GetName(), self.qs_ent_2.GetName(),
                self._best_score, self._global_score))
-
-  def _ComputeLDDT(self):
-    """Fills cached lddt_score, lddt_mdl and lddt_ref."""
-    LogInfo('Computing lDDT score')
-    # check reference and model
-    ref, mdl = self.qs_ent_1.ent, self.qs_ent_2.ent
-    LogInfo('Reference %s has: %s chains' % (ref.GetName(), ref.chain_count))
-    LogInfo('Model %s has: %s chains' % (mdl.GetName(), mdl.chain_count))
-    if mdl.chain_count > ref.chain_count:
-      LogWarning('MODEL contains more chains than REFERENCE, '
-                 'lDDT is not considering them')
-    # get single chain reference and model
-    self._lddt_ref, self._lddt_mdl = \
-      _MergeAlignedChains(self.alignments, ref, mdl, self.calpha_only)
-    # score them (mdl and ref changed) and keep results
-    self._lddt_score = _ComputeLDDTScore(self._lddt_ref, self._lddt_mdl)
 
 
 ###############################################################################
@@ -639,9 +611,8 @@ class QSscoreEntity(object):
                'removing water, ligands and small peptides.')
       self.is_valid = False
     elif self.ent.chain_count == 1:
-      LogError('Structure ' + ent.GetName() + ' is a monomer. '
-               'QSscore is not defined for monomers.')
-      self.is_valid = False
+      LogWarning('Structure ' + ent.GetName() + ' is a monomer.')
+      self.is_valid = True
     else:
       self.is_valid = True
     # init cached stuff
@@ -898,6 +869,528 @@ def GetContacts(entity, calpha_only, dist_thr=12.0):
   # DONE
   return contacts
 
+###############################################################################
+# Oligo-lDDT scores
+###############################################################################
+
+class OligoLDDTScorer(object):
+  """Helper class to calculate oligomeric lDDT scores.
+
+  This class can be used independently, but commonly it will be created by
+  calling :func:`QSscorer.GetOligoLDDTScorer`.
+
+  .. note::
+
+    By construction, lDDT scores are not symmetric and hence it matters which
+    structure is the reference (:attr:`ref`) and which one is the model
+    (:attr:`mdl`). Extra residues in the model are generally not considered.
+    Extra chains in both model and reference can be considered by setting the
+    :attr:`penalize_extra_chains` flag to True.
+
+  :param ref: Sets :attr:`ref`
+  :param mdl: Sets :attr:`mdl`
+  :param alignments: Sets :attr:`alignments`
+  :param calpha_only: Sets :attr:`calpha_only`
+  :param settings: Sets :attr:`settings`
+  :param penalize_extra_chains: Sets :attr:`penalize_extra_chains`
+  :param chem_mapping: Sets :attr:`chem_mapping`. Must be given if
+                       *penalize_extra_chains* is True.
+  
+  .. attribute:: ref
+                 mdl
+
+    Full reference/model entity to be scored. The entity must contain all chains
+    mapped in :attr:`alignments` and may also contain additional ones which are
+    considered if :attr:`penalize_extra_chains` is True.
+
+    :type: :class:`~ost.mol.EntityHandle`
+  
+  .. attribute:: alignments
+
+    One alignment for each mapped chain of :attr:`ref`/:attr:`mdl` as defined in
+    :attr:`QSscorer.alignments`. The first sequence of each alignment belongs to
+    :attr:`ref` and the second one to :attr:`mdl`. Sequences must have sequence
+    naming and attached views as defined in :attr:`QSscorer.alignments`.
+
+    :type: :class:`list` of :class:`~ost.seq.AlignmentHandle`
+
+  .. attribute:: calpha_only
+
+    If True, restricts lDDT score to CA only.
+
+    :type: :class:`bool`
+
+  .. attribute:: settings
+
+    Settings to use for lDDT scoring.
+
+    :type: :class:`~ost.mol.alg.lDDTSettings`
+
+  .. attribute:: penalize_extra_chains
+
+    If True, extra chains in both :attr:`ref` and :attr:`mdl` will penalize the
+    lDDT scores.
+
+    :type: :class:`bool`
+
+  .. attribute:: chem_mapping
+
+    Inter-complex mapping of chemical groups as defined in
+    :attr:`QSscorer.chem_mapping`. Used to find "chem-mapped" chains in
+    :attr:`ref` for unmapped chains in :attr:`mdl` when penalizing scores.
+    Each unmapped model chain can add extra reference-contacts according to the
+    average total contacts of each single "chem-mapped" reference chain. If
+    there is no "chem-mapped" reference chain, a warning is shown and the model
+    chain is ignored.
+
+
+    Only relevant if :attr:`penalize_extra_chains` is True.
+
+    :type: :class:`dict` with key = :class:`tuple` of chain names in
+           :attr:`ref` and value = :class:`tuple` of chain names in
+           :attr:`mdl`.
+  """
+
+  # NOTE: one could also allow computation of both penalized and unpenalized
+  #       in same object -> must regenerate lddt_ref / lddt_mdl though
+
+  def __init__(self, ref, mdl, alignments, calpha_only, settings,
+               penalize_extra_chains=False, chem_mapping=None):
+    # sanity checks
+    if chem_mapping is None and penalize_extra_chains:
+      raise RuntimeError("Must provide chem_mapping when requesting penalty "
+                         "for extra chains!")
+    if not penalize_extra_chains:
+      # warn for unmapped model chains
+      unmapped_mdl_chains = self._GetUnmappedMdlChains(mdl, alignments)
+      if unmapped_mdl_chains:
+        LogWarning('MODEL contains chains unmapped to REFERENCE, '
+                   'lDDT is not considering MODEL chains %s' \
+                   % str(list(unmapped_mdl_chains)))
+      # warn for unmapped reference chains
+      ref_chains = set(ch.name for ch in ref.chains)
+      mapped_ref_chains = set(aln.GetSequence(0).GetName() for aln in alignments)
+      unmapped_ref_chains = (ref_chains - mapped_ref_chains)
+      if unmapped_ref_chains:
+        LogWarning('REFERENCE contains chains unmapped to MODEL, '
+                   'lDDT is not considering REFERENCE chains %s' \
+                   % str(list(unmapped_ref_chains)))
+    # prepare fields
+    self.ref = ref
+    self.mdl = mdl
+    self.alignments = alignments
+    self.calpha_only = calpha_only
+    self.settings = settings
+    self.penalize_extra_chains = penalize_extra_chains
+    self.chem_mapping = chem_mapping
+    self._sc_lddt = None
+    self._oligo_lddt = None
+    self._weighted_lddt = None
+    self._lddt_ref = None
+    self._lddt_mdl = None
+    self._oligo_lddt_scorer = None
+    self._mapped_lddt_scorers = None
+    self._ref_scorers = None
+    self._model_penalty = None
+
+  @property
+  def oligo_lddt(self):
+    """Oligomeric lDDT score.
+
+    The score is computed as conserved contacts divided by the total contacts
+    in the reference using the :attr:`oligo_lddt_scorer`, which uses the full
+    complex as reference/model structure. If :attr:`penalize_extra_chains` is
+    True, the reference/model complexes contain all chains (otherwise only the
+    mapped ones) and additional contacts are added to the reference's total
+    contacts for unmapped model chains according to the :attr:`chem_mapping`.
+
+    The main difference with :attr:`weighted_lddt` is that the lDDT scorer
+    "sees" the full complex here (incl. inter-chain contacts), while the
+    weighted single chain score looks at each chain separately.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`float`
+    """
+    if self._oligo_lddt is None:
+      LogInfo('Reference %s has: %s chains' \
+              % (self.ref.GetName(), self.ref.chain_count))
+      LogInfo('Model %s has: %s chains' \
+              % (self.mdl.GetName(), self.mdl.chain_count))
+
+      # score with or w/o extra-chain penalty
+      if self.penalize_extra_chains:
+        denominator = self.oligo_lddt_scorer.total_contacts
+        denominator += self._GetModelPenalty()
+        if denominator > 0:
+          oligo_lddt = self.oligo_lddt_scorer.conserved_contacts \
+                     / float(denominator)
+        else:
+          oligo_lddt = 0.0
+      else:
+        oligo_lddt = self.oligo_lddt_scorer.global_score
+      self._oligo_lddt = oligo_lddt
+    return self._oligo_lddt
+
+  @property
+  def weighted_lddt(self):
+    """Weighted average of single chain lDDT scores.
+
+    The score is computed as a weighted average of single chain lDDT scores
+    (see :attr:`sc_lddt_scorers`) using the total contacts of each single
+    reference chain as weights. If :attr:`penalize_extra_chains` is True,
+    unmapped chains are added with a 0 score and total contacts taken from
+    the actual reference chains or (for unmapped model chains) using the
+    :attr:`chem_mapping`.
+
+    See :attr:`oligo_lddt` for a comparison of the two scores.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`float`
+    """
+    if self._weighted_lddt is None:
+      scores = [s.global_score for s in self.sc_lddt_scorers]
+      weights = [s.total_contacts for s in self.sc_lddt_scorers]
+      nominator = sum([s * w for s, w in zip(scores, weights)])
+      if self.penalize_extra_chains:
+        ref_scorers = self._GetRefScorers()
+        denominator = sum(s.total_contacts for s in ref_scorers.values())
+        denominator += self._GetModelPenalty()
+      else:
+        denominator = sum(weights)
+      if denominator > 0:
+        self._weighted_lddt = nominator / float(denominator)
+      else:
+        self._weighted_lddt = 0.0
+    return self._weighted_lddt
+
+  @property
+  def lddt_ref(self):
+    """The reference entity used for oligomeric lDDT scoring
+    (:attr:`oligo_lddt` / :attr:`oligo_lddt_scorer`).
+    
+    Since the lDDT computation requires a single chain with mapped residue
+    numbering, all chains of :attr:`ref` are appended into a single chain X with
+    unique residue numbers according to the column-index in the alignment. The
+    alignments are in the same order as they appear in :attr:`alignments`.
+    Additional residues are appended at the end of the chain with unique residue
+    numbers. Unmapped chains are only added if :attr:`penalize_extra_chains` is
+    True. Only CA atoms are considered if :attr:`calpha_only` is True.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`~ost.mol.EntityHandle`
+    """
+    if self._lddt_ref is None:
+      self._PrepareOligoEntities()
+    return self._lddt_ref
+
+  @property
+  def lddt_mdl(self):
+    """The model entity used for oligomeric lDDT scoring
+    (:attr:`oligo_lddt` / :attr:`oligo_lddt_scorer`).
+
+    Like :attr:`lddt_ref`, this is a single chain X containing all chains of
+    :attr:`mdl`. The residue numbers match the ones in :attr:`lddt_ref` where
+    aligned and have unique numbers for additional residues.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`~ost.mol.EntityHandle`
+    """
+    if self._lddt_mdl is None:
+      self._PrepareOligoEntities()
+    return self._lddt_mdl
+
+  @property
+  def oligo_lddt_scorer(self):
+    """lDDT Scorer object for :attr:`lddt_ref` and :attr:`lddt_mdl`.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`~ost.mol.alg.lDDTScorer`
+    """
+    if self._oligo_lddt_scorer is None:
+      self._oligo_lddt_scorer = lDDTScorer(
+        references=[self.lddt_ref.Select("")],
+        model=self.lddt_mdl.Select(""),
+        settings=self.settings)
+    return self._oligo_lddt_scorer
+
+  @property
+  def mapped_lddt_scorers(self):
+    """List of scorer objects for each chain mapped in :attr:`alignments`.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`list` of :class:`MappedLDDTScorer`
+    """
+    if self._mapped_lddt_scorers is None:
+      self._mapped_lddt_scorers = list()
+      for aln in self.alignments:
+        mapped_lddt_scorer = MappedLDDTScorer(aln, self.calpha_only,
+                                              self.settings)
+        self._mapped_lddt_scorers.append(mapped_lddt_scorer)
+    return self._mapped_lddt_scorers
+
+  @property
+  def sc_lddt_scorers(self):
+    """List of lDDT scorer objects extracted from :attr:`mapped_lddt_scorers`.
+
+    :type: :class:`list` of :class:`~ost.mol.alg.lDDTScorer`
+    """
+    return [mls.lddt_scorer for mls in self.mapped_lddt_scorers]
+
+  @property
+  def sc_lddt(self):
+    """List of global scores extracted from :attr:`sc_lddt_scorers`.
+
+    If scoring for a mapped chain fails, an error is displayed and a score of 0
+    is assigned.
+
+    :getter: Computed on first use (cached)
+    :type: :class:`list` of :class:`float`
+    """
+    if self._sc_lddt is None:
+      self._sc_lddt = list()
+      for lddt_scorer in self.sc_lddt_scorers:
+        try:
+          self._sc_lddt.append(lddt_scorer.global_score)
+        except Exception as ex:
+          LogError('Single chain lDDT failed:', str(ex))
+          self._sc_lddt.append(0.0)
+    return self._sc_lddt
+
+  ##############################################################################
+  # Class internal helpers
+  ##############################################################################
+
+  def _PrepareOligoEntities(self):
+    # simple wrapper to avoid code duplication
+    self._lddt_ref, self._lddt_mdl = _MergeAlignedChains(
+      self.alignments, self.ref, self.mdl, self.calpha_only,
+      self.penalize_extra_chains)
+
+  @staticmethod
+  def _GetUnmappedMdlChains(mdl, alignments):
+    # assume model is second sequence in alignment and is named by chain
+    mdl_chains = set(ch.name for ch in mdl.chains)
+    mapped_mdl_chains = set(aln.GetSequence(1).GetName() for aln in alignments)
+    return (mdl_chains - mapped_mdl_chains)
+
+  def _GetRefScorers(self):
+    # single chain lddt scorers for each reference chain (key = chain name)
+    if self._ref_scorers is None:
+      # collect from mapped_lddt_scorers
+      ref_scorers = dict()
+      for mapped_lddt_scorer in self.mapped_lddt_scorers:
+        ref_ch_name = mapped_lddt_scorer.reference_chain_name
+        ref_scorers[ref_ch_name] = mapped_lddt_scorer.lddt_scorer
+      # add new ones where needed
+      for ch in self.ref.chains:
+        if ch.name not in ref_scorers:
+          if self.calpha_only:
+            ref_chain = ch.Select('aname=CA')
+          else:
+            ref_chain = ch.Select('')
+          ref_scorers[ch.name] = lDDTScorer(
+            references=[ref_chain],
+            model=ref_chain,
+            settings=self.settings)
+      # store in cache
+      self._ref_scorers = ref_scorers
+    # fetch from cache
+    return self._ref_scorers
+
+  def _GetModelPenalty(self):
+    # extra value to add to total number of distances for extra model chains
+    # -> estimated from chem-mapped reference chains
+    if self._model_penalty is None:
+      # sanity check
+      if self.chem_mapping is None:
+        raise RuntimeError("Must provide chem_mapping when requesting penalty "
+                           "for extra model chains!")
+      # get cached ref_scorers
+      ref_scorers = self._GetRefScorers()
+      # get unmapped model chains
+      unmapped_mdl_chains = self._GetUnmappedMdlChains(self.mdl, self.alignments)
+      # map extra chains to ref. chains
+      model_penalty = 0
+      for ch_name_mdl in sorted(unmapped_mdl_chains):
+        # get penalty for chain
+        cur_penalty = None
+        for cm_ref, cm_mdl in self.chem_mapping.iteritems():
+          if ch_name_mdl in cm_mdl:
+            # penalize by an average of the chem. mapped ref. chains
+            cur_penalty = 0
+            for ch_name_ref in cm_ref:
+              # assumes that total_contacts is cached (for speed)
+              cur_penalty += ref_scorers[ch_name_ref].total_contacts
+            cur_penalty /= float(len(cm_ref))
+            break
+        # report penalty
+        if cur_penalty is None:
+          LogWarning('Extra MODEL chain %s could not be chemically mapped to '
+                     'any chain in REFERENCE, lDDT cannot consider it!' \
+                     % ch_name_mdl)
+        else:
+          LogScript('Extra MODEL chain %s added to lDDT score by considering '
+                    'chemically mapped chains in REFERENCE.' % ch_name_mdl)
+          model_penalty += cur_penalty
+      # store in cache
+      self._model_penalty = model_penalty
+    # fetch from cache
+    return self._model_penalty
+
+
+class MappedLDDTScorer(object):
+  """A simple class to calculate a single-chain lDDT score on a given chain to
+  chain mapping as extracted from :class:`OligoLDDTScorer`.
+
+  :param alignment: Sets :attr:`alignment`
+  :param calpha_only: Sets :attr:`calpha_only`
+  :param settings: Sets :attr:`settings`
+  
+  .. attribute:: alignment
+
+    Alignment with two sequences named according to the mapped chains and with
+    views attached to both sequences (e.g. one of the items of
+    :attr:`QSscorer.alignments`).
+
+    The first sequence is assumed to be the reference and the second one the
+    model. Since the lDDT score is not symmetric (extra residues in model are
+    ignored), the order is important.
+
+    :type: :class:`~ost.seq.AlignmentHandle`
+  
+  .. attribute:: calpha_only
+
+    If True, restricts lDDT score to CA only.
+
+    :type: :class:`bool`
+
+  .. attribute:: settings
+
+    Settings to use for lDDT scoring.
+
+    :type: :class:`~ost.mol.alg.lDDTSettings`
+
+  .. attribute:: lddt_scorer
+
+    lDDT Scorer object for the given chains.
+
+    :type: :class:`~ost.mol.alg.lDDTScorer`
+
+  .. attribute:: reference_chain_name
+
+    Chain name of the reference.
+
+    :type: :class:`str`
+
+  .. attribute:: model_chain_name
+
+    Chain name of the model.
+
+    :type: :class:`str`
+  """
+  def __init__(self, alignment, calpha_only, settings):
+    # prepare fields
+    self.alignment = alignment
+    self.calpha_only = calpha_only
+    self.settings = settings
+    self.lddt_scorer = None # set in _InitScorer
+    self.reference_chain_name = alignment.sequences[0].name
+    self.model_chain_name = alignment.sequences[1].name
+    self._old_number_label = "old_num"
+    self._extended_alignment = None  # set in _InitScorer
+    # initialize lDDT scorer
+    self._InitScorer()
+
+  def GetPerResidueScores(self):
+    """
+    :return: Scores for each residue
+    :rtype:  :class:`list` of :class:`dict` with one item for each residue
+             existing in model and reference:
+
+             - "residue_number": Residue number in reference chain
+             - "residue_name": Residue number in reference chain
+             - "lddt": local lDDT
+             - "conserved_contacts": number of conserved contacts
+             - "total_contacts": total number of contacts
+    """
+    scores = list()
+    assigned_residues = list()
+    # Make sure the score is calculated
+    self.lddt_scorer.global_score
+    for col in self._extended_alignment:
+      if col[0] != "-" and col.GetResidue(3).IsValid():
+        ref_res = col.GetResidue(0)
+        mdl_res = col.GetResidue(1)
+        ref_res_renum = col.GetResidue(2)
+        mdl_res_renum = col.GetResidue(3)
+        if ref_res.one_letter_code != ref_res_renum.one_letter_code:
+          raise RuntimeError("Reference residue name mapping inconsistent: %s != %s" %
+                             (ref_res.one_letter_code,
+                              ref_res_renum.one_letter_code))
+        if mdl_res.one_letter_code != mdl_res_renum.one_letter_code:
+          raise RuntimeError("Model residue name mapping inconsistent: %s != %s" %
+                             (mdl_res.one_letter_code,
+                              mdl_res_renum.one_letter_code))
+        if ref_res.GetNumber().num != ref_res_renum.GetIntProp(self._old_number_label):
+          raise RuntimeError("Reference residue number mapping inconsistent: %s != %s" %
+                             (ref_res.GetNumber().num,
+                              ref_res_renum.GetIntProp(self._old_number_label)))
+        if mdl_res.GetNumber().num != mdl_res_renum.GetIntProp(self._old_number_label):
+          raise RuntimeError("Model residue number mapping inconsistent: %s != %s" %
+                             (mdl_res.GetNumber().num,
+                              mdl_res_renum.GetIntProp(self._old_number_label)))
+        if ref_res.qualified_name in assigned_residues:
+          raise RuntimeError("Duplicated residue in reference: " %
+                             (ref_res.qualified_name))
+        else:
+          assigned_residues.append(ref_res.qualified_name)
+        # check if property there (may be missing for CA-only)
+        if mdl_res_renum.HasProp(self.settings.label):
+          scores.append({
+            "residue_number": ref_res.GetNumber().num,
+            "residue_name": ref_res.name,
+            "lddt": mdl_res_renum.GetFloatProp(self.settings.label),
+            "conserved_contacts": mdl_res_renum.GetFloatProp(self.settings.label + "_conserved"),
+            "total_contacts": mdl_res_renum.GetFloatProp(self.settings.label + "_total")})
+    return scores
+
+  ##############################################################################
+  # Class internal helpers (anything that doesnt easily work without this class)
+  ##############################################################################
+
+  def _InitScorer(self):
+    # Use copy of alignment (extended by 2 extra sequences for renumbering)
+    aln = self.alignment.Copy()
+    # Get chains and renumber according to alignment (for lDDT)
+    reference = Renumber(
+      aln.GetSequence(0),
+      old_number_label=self._old_number_label).CreateFullView()
+    refseq = seq.CreateSequence(
+      "reference_renumbered",
+      aln.GetSequence(0).GetString())
+    refseq.AttachView(reference)
+    aln.AddSequence(refseq)
+    model = Renumber(
+      aln.GetSequence(1),
+      old_number_label=self._old_number_label).CreateFullView()
+    modelseq = seq.CreateSequence(
+      "model_renumbered",
+      aln.GetSequence(1).GetString())
+    modelseq.AttachView(model)
+    aln.AddSequence(modelseq)
+    # Filter to CA-only if desired (done after AttachView to not mess it up)
+    if self.calpha_only:
+      self.lddt_scorer = lDDTScorer(
+        references=[reference.Select('aname=CA')],
+        model=model.Select('aname=CA'),
+        settings=self.settings)
+    else:
+      self.lddt_scorer = lDDTScorer(
+        references=[reference],
+        model=model,
+        settings=self.settings)
+    # Store alignment for later
+    self._extended_alignment = aln
 
 ###############################################################################
 # HELPERS
@@ -909,7 +1402,7 @@ def _AlignAtomSeqs(seq_1, seq_2):
   """
   :type seq_1: :class:`ost.seq.SequenceHandle`
   :type seq_2: :class:`ost.seq.SequenceHandle`
-  :return: Alignment of two sequences using a global aignment. Views attached
+  :return: Alignment of two sequences using a global alignment. Views attached
            to the input sequences will remain attached in the aln.
   :rtype:  :class:`~ost.seq.AlignmentHandle` or None if it failed.
   """
@@ -923,6 +1416,28 @@ def _AlignAtomSeqs(seq_1, seq_2):
     LogWarning('%s:  %s' % (seq_1.name, seq_1.string))
     LogWarning('%s:  %s' % (seq_2.name, seq_2.string))
   return aln
+
+def _FixSelectChainName(ch_name):
+  """
+  :return: String to be used with Select(cname=<RETURN>). Takes care of putting
+           quotation marks where needed.
+  :rtype:  :class:`str`
+  :param ch_name: Single chain name (:class:`str`).
+  """
+  if ch_name in ['-', '_', ' ']:
+    return '"%c"' % ch_name
+  else:
+    return ch_name
+
+def _FixSelectChainNames(ch_names):
+  """
+  :return: String to be used with Select(cname=<RETURN>). Takes care of joining
+           and putting quotation marks where needed.
+  :rtype:  :class:`str`
+  :param ch_names: Some iterable list of chain names (:class:`str` items).
+  """
+  chain_set = set([_FixSelectChainName(ch_name) for ch_name in ch_names])
+  return ','.join(chain_set)
 
 # QS entity
 
@@ -947,13 +1462,7 @@ def _CleanInputEntity(ent):
 
   # remove them from *ent*
   if removed_chains:
-    chain_set = set()
-    for ch_name in removed_chains:
-      if ch_name in ['-', '_', ' ']:
-        chain_set.add('"%c"' % ch_name)
-      else:
-        chain_set.add(ch_name)
-    view = ent.Select('cname!=%s' % ','.join(chain_set))
+    view = ent.Select('cname!=%s' % _FixSelectChainNames(removed_chains))
     ent_new = mol.CreateEntityFromView(view, True)
     ent_new.SetName(ent.GetName())
   else:
@@ -961,7 +1470,7 @@ def _CleanInputEntity(ent):
 
   # check if CA only
   calpha_only = False
-  if ent_new.Select('aname=CB').atom_count == 0:
+  if ent_new.atom_count > 0 and ent_new.Select('aname=CB').atom_count == 0:
     LogInfo('Structure %s is a CA only structure!' % ent_new.GetName())
     calpha_only = True
 
@@ -1130,8 +1639,8 @@ def _GetChemGroupsMapping(qs_ent_1, qs_ent_2):
   
   # check if we have any chains left
   LogInfo('Chemical chain-groups mapping: ' + str(chem_mapping))
-  if len(mapped_1) < 2 or len(mapped_2) < 2:
-    raise QSscoreError('Less than 2 chains left in chem_mapping.')
+  if len(mapped_1) < 1 or len(mapped_2) < 1:
+    raise QSscoreError('Less than 1 chains left in chem_mapping.')
   return chem_mapping
 
 def _SelectFew(l, max_elements):
@@ -1160,6 +1669,13 @@ def _GetAlignedResidues(qs_ent_1, qs_ent_2, chem_mapping, max_ca_per_chain,
   :param chem_mapping: See :attr:`QSscorer.chem_mapping`
   :param max_ca_per_chain: See :attr:`QSscorer.max_ca_per_chain_for_cm`
   """
+  # make sure name doesn't contain spaces and is unique
+  def _FixName(seq_name, seq_names):
+    # get rid of spaces and make it unique
+    seq_name = seq_name.replace(' ', '-')
+    while seq_name in seq_names:
+      seq_name += '-'
+    return seq_name
   # resulting views into CA entities using CA chain sequences
   ent_view_1 = qs_ent_1.ca_entity.CreateEmptyView()
   ent_view_2 = qs_ent_2.ca_entity.CreateEmptyView()
@@ -1173,12 +1689,12 @@ def _GetAlignedResidues(qs_ent_1, qs_ent_2, chem_mapping, max_ca_per_chain,
     seq_to_empty_view = dict()
     for ch in group_1:
       sequence = ca_chains_1[ch].Copy()
-      sequence.name = qs_ent_1.GetName() + '.' + ch
+      sequence.name = _FixName(qs_ent_1.GetName() + '.' + ch, seq_to_empty_view)
       seq_to_empty_view[sequence.name] = ent_view_1
       seq_list.AddSequence(sequence)
     for ch in group_2:
       sequence = ca_chains_2[ch].Copy()
-      sequence.name = qs_ent_2.GetName() + '.' + ch
+      sequence.name = _FixName(qs_ent_2.GetName() + '.' + ch, seq_to_empty_view)
       seq_to_empty_view[sequence.name] = ent_view_2
       seq_list.AddSequence(sequence)
     alnc = ClustalW(seq_list, clustalw=clustalw_bin)
@@ -1248,8 +1764,8 @@ def _FindSymmetry(qs_ent_1, qs_ent_2, ent_to_cm_1, ent_to_cm_2, chem_mapping):
   for _, symm_1, symm_2 in sorted(best_symm):
     s1 = symm_1[0]
     s2 = symm_2[0]
-    group_1 = ent_to_cm_1.Select('cname=%s' % ','.join(s1))
-    group_2 = ent_to_cm_2.Select('cname=%s' % ','.join(s2))
+    group_1 = ent_to_cm_1.Select('cname=%s' % _FixSelectChainNames(s1))
+    group_2 = ent_to_cm_2.Select('cname=%s' % _FixSelectChainNames(s2))
     # check if by superposing a pair of chains within the symmetry group to
     # superpose all chains within the symmetry group
     # -> if successful, the symmetry groups are compatible
@@ -1628,7 +2144,8 @@ def _GetClosestChainInterface(ent, ref_chain, chains):
   # inaccurate. Also it could be extracted from QSscoreEntity.contacts.
   closest = []
   for ch in chains:
-    iface_view = ent.Select('cname=%s and 10 <> [cname=%s]' % (ref_chain, ch))
+    iface_view = ent.Select('cname="%s" and 10 <> [cname="%s"]' \
+                            % (ref_chain, ch))
     nr_res = iface_view.residue_count
     closest.append((nr_res, ch))
   closest_chain = max(closest)[1]
@@ -1820,7 +2337,7 @@ def _CheckClosedSymmetry(ent_1, ent_2, symm_1, symm_2, chem_mapping,
                     overlapped for overlap to be sufficient.
   :type sup_fract:  :class:`float`
   :param find_best: If True, we look for best mapping according to
-                    :func:`_ChainRMSD`. Otherwise, we return first suitable
+                    :func:`_GetMappedRMSD`. Otherwise, we return first suitable
                     mapping.
   :type find_best:  :class:`bool`
 
@@ -1840,8 +2357,8 @@ def _CheckClosedSymmetry(ent_1, ent_2, symm_1, symm_2, chem_mapping,
     #    to superpose the full oligomer (e.g. if some chains are open/closed)
     for c1, c2 in itertools.product(g1, g2):
       # get superposition transformation
-      chain_1 = ent_1.Select('cname=%s' % c1)
-      chain_2 = ent_2.Select('cname=%s' % c2)
+      chain_1 = ent_1.Select('cname="%s"' % c1)
+      chain_2 = ent_2.Select('cname="%s"' % c2)
       res = mol.alg.SuperposeSVD(chain_1, chain_2, apply_transform=False)
       # look for overlaps
       mapping = _GetSuperpositionMapping(ent_1, ent_2, chem_mapping,
@@ -1945,8 +2462,8 @@ def _GetMappedRMSD(ent_1, ent_2, chain_mapping, transformation):
   atoms = []
   for c1, c2 in chain_mapping.iteritems():
     # get views and atom counts
-    chain_1 = ent_1.Select('cname=%s' % c1)
-    chain_2 = ent_2.Select('cname=%s' % c2)
+    chain_1 = ent_1.Select('cname="%s"' % c1)
+    chain_2 = ent_2.Select('cname="%s"' % c2)
     atom_count = chain_1.atom_count
     if atom_count != chain_2.atom_count:
       raise RuntimeError('Chains in _GetMappedRMSD must be perfectly aligned!')
@@ -1978,13 +2495,13 @@ class _CachedRMSD:
   def GetChainView1(self, cname):
     """Get cached view on chain *cname* for :attr:`ent_1`."""
     if cname not in self._chain_views_1:
-      self._chain_views_1[cname] = self.ent_1.Select('cname=%s' % cname)
+      self._chain_views_1[cname] = self.ent_1.Select('cname="%s"' % cname)
     return self._chain_views_1[cname]
 
   def GetChainView2(self, cname):
     """Get cached view on chain *cname* for :attr:`ent_2`."""
     if cname not in self._chain_views_2:
-      self._chain_views_2[cname] = self.ent_2.Select('cname=%s' % cname)
+      self._chain_views_2[cname] = self.ent_2.Select('cname="%s"' % cname)
     return self._chain_views_2[cname]
 
   def GetSuperposition(self, c1, c2):
@@ -2087,7 +2604,7 @@ def _AreValidSymmetries(symm_1, symm_2):
       return False
   return True
 
-def _GetMappedAlignments(ent_1, ent_2, chain_mapping):
+def _GetMappedAlignments(ent_1, ent_2, chain_mapping, res_num_alignment):
   """
   :return: Alignments of 2 structures given chain mapping
            (see :attr:`QSscorer.alignments`).
@@ -2096,17 +2613,39 @@ def _GetMappedAlignments(ent_1, ent_2, chain_mapping):
   :param ent_2: Entity containing all chains in *chain_mapping.values()*.
                 Views to this entity attached to second sequence of each aln.
   :param chain_mapping: See :attr:`QSscorer.chain_mapping`
+  :param res_num_alignment: See :attr:`QSscorer.res_num_alignment`
   """
-  alns = []
+  alns = list()
   for ch_1_name in sorted(chain_mapping):
     # get both sequences incl. attached view
     ch_1 = ent_1.FindChain(ch_1_name)
-    seq_1 = seq.SequenceFromChain(ch_1.name, ch_1)
     ch_2 = ent_2.FindChain(chain_mapping[ch_1_name])
-    seq_2 = seq.SequenceFromChain(ch_2.name, ch_2)
-    # align them
-    aln = _AlignAtomSeqs(seq_1, seq_2)
-    if aln: alns.append(aln)
+    if res_num_alignment:
+      max_res_num = max([r.number.GetNum() for r in ch_1.residues] +
+                        [r.number.GetNum() for r in ch_2.residues])
+      ch1_aln = ["-"] * max_res_num
+      ch2_aln = ["-"] * max_res_num
+      for res in ch_1.residues:
+        ch1_aln[res.number.GetNum() - 1] = res.GetOneLetterCode()
+      ch1_aln = "".join(ch1_aln)
+      seq_1 = seq.CreateSequence(ch_1.name, str(ch1_aln))
+      seq_1.AttachView(ch_1.Select(""))
+      for res in ch_2.residues:
+        ch2_aln[res.number.GetNum() - 1] = res.GetOneLetterCode()
+      ch2_aln = "".join(ch2_aln)
+      seq_2 = seq.CreateSequence(ch_2.name, str(ch2_aln))
+      seq_2.AttachView(ch_2.Select(""))
+      # Create alignment
+      aln = seq.CreateAlignment()
+      aln.AddSequence(seq_1)
+      aln.AddSequence(seq_2)
+    else:
+      seq_1 = seq.SequenceFromChain(ch_1.name, ch_1)
+      seq_2 = seq.SequenceFromChain(ch_2.name, ch_2)
+      # align them
+      aln = _AlignAtomSeqs(seq_1, seq_2)
+    if aln:
+      alns.append(aln)
   return alns
 
 def _GetMappedResidues(alns):
@@ -2301,7 +2840,7 @@ def _AddResidue(edi, res, rnum, chain, calpha_only):
     for atom in res.atoms:
       edi.InsertAtom(new_res, atom.name, atom.pos)
 
-def _MergeAlignedChains(alns, ent_1, ent_2, calpha_only):
+def _MergeAlignedChains(alns, ent_1, ent_2, calpha_only, penalize_extra_chains):
   """
   Create two new entities (based on the alignments attached views) where all
   residues have same numbering (when they're aligned) and they are all pushed to
@@ -2321,6 +2860,9 @@ def _MergeAlignedChains(alns, ent_1, ent_2, calpha_only):
   :type ent_2:  :class:`~ost.mol.EntityHandle`
   :param calpha_only: If True, we only include CA atoms instead of all.
   :type calpha_only:  :class:`bool`
+  :param penalize_extra_chains: If True, extra chains are added to model and
+                                reference. Otherwise, only mapped ones.
+  :type penalize_extra_chains:  :class:`bool`
 
   :return: Tuple of two single chain entities (from *ent_1* and from *ent_2*)
   :rtype:  :class:`tuple` of :class:`~ost.mol.EntityHandle`
@@ -2349,19 +2891,20 @@ def _MergeAlignedChains(alns, ent_1, ent_2, calpha_only):
       res_2 = col.GetResidue(1)
       if res_2.IsValid():
         _AddResidue(ed_2, res_2, rnum, new_chain_2, calpha_only)
-  # extra chains
-  for chain in ent_1.chains:
-    if chain.name in chain_done_1:
-      continue
-    for res in chain.residues:
-      rnum += 1
-      _AddResidue(ed_1, res, rnum, new_chain_1, calpha_only)
-  for chain in ent_2.chains:
-    if chain.name in chain_done_2:
-      continue
-    for res in chain.residues:
-      rnum += 1
-      _AddResidue(ed_2, res, rnum, new_chain_2, calpha_only)
+  # extra chains?
+  if penalize_extra_chains:
+    for chain in ent_1.chains:
+      if chain.name in chain_done_1:
+        continue
+      for res in chain.residues:
+        rnum += 1
+        _AddResidue(ed_1, res, rnum, new_chain_1, calpha_only)
+    for chain in ent_2.chains:
+      if chain.name in chain_done_2:
+        continue
+      for res in chain.residues:
+        rnum += 1
+        _AddResidue(ed_2, res, rnum, new_chain_2, calpha_only)
   # get entity names
   ent_ren_1.SetName(aln.GetSequence(0).GetAttachedView().GetName())
   ent_ren_2.SetName(aln.GetSequence(1).GetAttachedView().GetName())
@@ -2375,30 +2918,7 @@ def _MergeAlignedChains(alns, ent_1, ent_2, calpha_only):
   ed_2.UpdateICS()
   return ent_ren_1, ent_ren_2
 
-def _ComputeLDDTScore(ref, mdl):
-  """
-  :return: lDDT of *mdl* vs *ref* (see :attr:`QSscorer.lddt_score`).
-  :param mdl: Reference entity (see :attr:`QSscorer.lddt_mdl`)
-  :param ref: Model entity (see :attr:`QSscorer.lddt_ref`)
-  """
-  # check input
-  LogInfo('Reference %s has: %s residues' % (ref.GetName(), ref.residue_count))
-  LogInfo('Model %s has: %s residues' % (mdl.GetName(), mdl.residue_count))
-  # get lddt score with fixed settings
-  lddt_score = mol.alg.LocalDistDiffTest(mdl.Select(''), ref.Select(''),
-                                         2., 8., 'lddt')
-  LogInfo('lDDT score: %.3f' % lddt_score)
-  # add lDDT as B-factor to model
-  for r in mdl.residues:
-    if r.HasProp('lddt'):
-      for a in r.atoms:
-        a.SetBFactor(r.GetFloatProp('lddt'))
-    else:
-      for a in r.atoms:
-        a.SetBFactor(0.0)
-  
-  return lddt_score
 
 # specify public interface
 __all__ = ('QSscoreError', 'QSscorer', 'QSscoreEntity', 'FilterContacts',
-           'GetContacts')
+           'GetContacts', 'OligoLDDTScorer', 'MappedLDDTScorer')

@@ -24,14 +24,15 @@ struct Cube {
 };
 
 struct CubeGrid {
-  CubeGrid(Real cel, int x_cubes, int y_cubes, int z_cubes,
+  CubeGrid(Real cel, int x_c, int y_c, int z_c,
            Real x_min, Real y_min, Real z_min): cube_edge_length(cel),
-                                                   x_cubes(x_cubes),
-                                                   y_cubes(y_cubes),
-                                                   z_cubes(z_cubes),
-                                                   x_min(x_min),
-                                                   y_min(y_min),
-                                                   z_min(z_min) {
+                                                x_min(x_min),
+                                                y_min(y_min),
+                                                z_min(z_min) {
+
+    x_cubes = std::max(1, x_c);
+    y_cubes = std::max(1, y_c);
+    z_cubes = std::max(1, z_c);
     int num_cubes = x_cubes * y_cubes * z_cubes;
     cubes = new Cube*[num_cubes];
     // assign NULL to each cube
@@ -49,11 +50,18 @@ struct CubeGrid {
     delete [] cubes;
   }
 
+  int GetCubeIdx(Real x, Real y, Real z) {
+    int x_cube = std::min(static_cast<int>((x - x_min) / cube_edge_length), 
+                          x_cubes - 1);
+    int y_cube = std::min(static_cast<int>((y - y_min) / cube_edge_length), 
+                          y_cubes - 1);
+    int z_cube = std::min(static_cast<int>((z - z_min) / cube_edge_length), 
+                          z_cubes - 1);    
+    return x_cube * y_cubes * z_cubes + y_cube * z_cubes + z_cube;
+  }
+
   void AddIndex(Real x, Real y, Real z, int idx) {
-    int x_cube = (x - x_min) / cube_edge_length;
-    int y_cube = (y - y_min) / cube_edge_length;
-    int z_cube = (z - z_min) / cube_edge_length;
-    int cube_idx = x_cube * y_cubes * z_cubes + y_cube * z_cubes + z_cube;
+    int cube_idx = this->GetCubeIdx(x, y, z);
     if(cubes[cube_idx] == NULL) cubes[cube_idx] = new Cube; 
     cubes[cube_idx]->AddIndex(idx);
   }
@@ -203,6 +211,11 @@ Real GetAtomAccessibilityNACCESS(Real x_pos, Real y_pos, Real z_pos,
     Real a = x_pos - x[i];
     Real b = y_pos - y[i];  
     Real c = a*a + b*b;
+
+    if(c == Real(0.0)) {
+      return 0.0;
+    }
+
     dx[i] = a;
     dy[i] = b;
     dsqr[i] = c;
