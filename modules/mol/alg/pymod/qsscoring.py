@@ -208,9 +208,8 @@ class QSscorer:
            :attr:`qs_ent_1` and value = :class:`tuple` of chain names in
            :attr:`qs_ent_2`.
 
-    :raises: :class:`QSscoreError` if we end up having less than 2 chains for
-             either entity in the mapping (can happen if chains do not have CA
-             atoms).
+    :raises: :class:`QSscoreError` if we end up having no chains for either
+             entity in the mapping (can happen if chains do not have CA atoms).
     """
     if self._chem_mapping is None:
       self._chem_mapping = _GetChemGroupsMapping(self.qs_ent_1, self.qs_ent_2)
@@ -389,8 +388,7 @@ class QSscorer:
 
     :getter: Computed with :attr:`chain_mapping` on first use (cached)
     :type: :class:`str`
-    :raises: :class:`QSscoreError` if there are too many combinations to check
-             to find a chain mapping.
+    :raises: :class:`QSscoreError` as in :attr:`chain_mapping`.
     """
     if self._chain_mapping_scheme is None:
       # default: user provided
@@ -455,6 +453,7 @@ class QSscorer:
 
     :getter: Computed on first use (cached)
     :type: :class:`float`
+    :raises: :class:`QSscoreError` if only one chain is mapped
     """
     if self._global_score is None:
       self._ComputeScores()
@@ -470,6 +469,7 @@ class QSscorer:
 
     :getter: Computed on first use (cached)
     :type: :class:`float`
+    :raises: :class:`QSscoreError` if only one chain is mapped
     """
     if self._best_score is None:
       self._ComputeScores()
@@ -1339,7 +1339,7 @@ class MappedLDDTScorer(object):
              existing in model and reference:
 
              - "residue_number": Residue number in reference chain
-             - "residue_name": Residue number in reference chain
+             - "residue_name": Residue name in reference chain
              - "lddt": local lDDT
              - "conserved_contacts": number of conserved contacts
              - "total_contacts": total number of contacts
