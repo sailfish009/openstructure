@@ -1861,8 +1861,8 @@ def _GetChainMapping(ent_1, ent_2, symm_1, symm_2, chem_mapping):
   LogInfo('Inter Symmetry-group mappings to check: %s' \
           % count['inter']['mappings'])
   nr_mapp = count['intra']['mappings'] + count['inter']['mappings']
-  if nr_mapp > 100000: # 322560 is octamer vs octamer
-    raise QSscoreError('Too many possible mappings: %s' % nr_mapp)
+  # if nr_mapp > 100000: # 322560 is octamer vs octamer
+  #   raise QSscoreError('Too many possible mappings: %s' % nr_mapp)
 
   # to speed up the computations we cache chain views and RMSDs
   cached_rmsd = _CachedRMSD(ent_1, ent_2)
