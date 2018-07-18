@@ -251,8 +251,8 @@ In the example above the output file looks as follows:
 
   {
       "result": {
-          "": {
-              "": {
+          "model.pdb": {
+              "reference.pdb": {
                   "info": {
                       "residue_names_consistent": true, 
                       "mapping": {
@@ -350,7 +350,8 @@ calculate eg. QS-score directly:
 
 .. code:: console
 
-  $OST_ROOT/bin/ost compare-structures --model model.pdb --reference reference.pdb --output output_qs.json --qs-score --residue-number-alignment
+  $ $OST_ROOT/bin/ost compare-structures --model model.pdb --reference reference.pdb --output output_qs.json --qs-score --residue-number-alignment
+
   ################################################################################
   Reading input files (fault_tolerant=False)
    --> reading model from model.pdb
@@ -359,7 +360,6 @@ calculate eg. QS-score directly:
   imported 3 chains, 408 residues, 3011 atoms; with 0 helices and 0 strands
   ################################################################################
   Comparing model.pdb to reference.pdb
-  Chains removed from reference.pdb: _
   Chains in reference.pdb: AB
   Chains in model.pdb: AB
   Chemically equivalent chain-groups in reference.pdb: [['B', 'A']]
