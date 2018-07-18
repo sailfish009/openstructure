@@ -697,6 +697,7 @@ def _Main():
             reference_results["info"]["residue_names_consistent"] = is_cons
             reference_results["info"]["mapping"] = {
                 "chain_mapping": qs_scorer.chain_mapping,
+                "chain_mapping_scheme": qs_scorer.chain_mapping_scheme,
                 "alignments": _GetAlignmentsAsFasta(qs_scorer.alignments)}
             skip_score = False
             if opts.consistency_checks:

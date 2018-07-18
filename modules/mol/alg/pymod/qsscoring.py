@@ -181,6 +181,7 @@ class QSscorer:
     self._symm_1 = None
     self._symm_2 = None
     self._chain_mapping = None
+    self._chain_mapping_scheme = None
     self._alignments = None
     self._mapped_residues = None
     self._global_score = None
@@ -364,11 +365,41 @@ class QSscorer:
              to find a chain mapping.
     """
     if self._chain_mapping is None:
-      self._chain_mapping = _GetChainMapping(self.ent_to_cm_1, self.ent_to_cm_2,
-                                             self.symm_1, self.symm_2,
-                                             self.chem_mapping)
+      self._chain_mapping, self._chain_mapping_scheme = \
+        _GetChainMapping(self.ent_to_cm_1, self.ent_to_cm_2, self.symm_1,
+                         self.symm_2, self.chem_mapping)
       LogInfo('Mapping found: %s' % str(self._chain_mapping))
     return self._chain_mapping
+
+  @property
+  def chain_mapping_scheme(self):
+    """Mapping scheme used to get :attr:`chain_mapping`.
+
+    Possible values:
+
+    - 'strict': 80% overlap needed within 4 Angstrom (overlap based mapping).
+    - 'tolerant': 40% overlap needed within 6 Angstrom (overlap based mapping).
+    - 'permissive': 20% overlap needed within 8 Angstrom (overlap based
+      mapping). It's best if you check mapping manually!
+    - 'extensive': Extensive search used for mapping detection (fallback). This
+      approach has known limitations and may be removed in future versions.
+      Mapping should be checked manually!
+    - 'user': :attr:`chain_mapping` was set by user before first use of this
+      attribute.
+
+    :getter: Computed with :attr:`chain_mapping` on first use (cached)
+    :type: :class:`str`
+    :raises: :class:`QSscoreError` if there are too many combinations to check
+             to find a chain mapping.
+    """
+    if self._chain_mapping_scheme is None:
+      # default: user provided
+      self._chain_mapping_scheme = 'user'
+      # get chain mapping and make sure internal variable is set
+      # -> will not compute and only update _chain_mapping if user provided
+      # -> will compute and overwrite _chain_mapping_scheme else
+      self._chain_mapping = self.chain_mapping
+    return self._chain_mapping_scheme
 
   @property
   def alignments(self):
@@ -1782,7 +1813,9 @@ def _FindSymmetry(qs_ent_1, qs_ent_2, ent_to_cm_1, ent_to_cm_2, chem_mapping):
 
 def _GetChainMapping(ent_1, ent_2, symm_1, symm_2, chem_mapping):
   """
-  :return: Mapping from *ent_1* to *ent_2* (see :attr:`QSscorer.chain_mapping`)  
+  :return: Tuple with mapping from *ent_1* to *ent_2* (see
+           :attr:`QSscorer.chain_mapping`) and scheme used (see
+           :attr:`QSscorer.chain_mapping_scheme`)
 
   :param ent_1: See :attr:`QSscorer.ent_to_cm_1`
   :param ent_2: See :attr:`QSscorer.ent_to_cm_2`
@@ -1808,7 +1841,7 @@ def _GetChainMapping(ent_1, ent_2, symm_1, symm_2, chem_mapping):
       if scheme == 'permissive':
         LogWarning('Permissive thresholds used for overlap based mapping ' + \
                    'detection: check mapping manually: %s' % mapping)
-      return mapping
+      return mapping, scheme
   
   # NOTE that what follows below is sub-optimal:
   # - if the two structures don't fit at all, we may map chains rather randomly
@@ -1908,7 +1941,7 @@ def _GetChainMapping(ent_1, ent_2, symm_1, symm_2, chem_mapping):
   LogWarning('Extensive search used for mapping detection (fallback). This ' + \
              'approach has known limitations. Check mapping manually: %s' \
              % mapping)
-  return mapping
+  return mapping, 'extensive'
 
 
 def _GetSymmetrySubgroups(qs_ent, ent, chem_groups):
