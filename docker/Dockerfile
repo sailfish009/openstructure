@@ -95,7 +95,7 @@ RUN cd ${SRC_FOLDER} && \
 # COMPILE AND INSTALL DSSP
 ##########################
 RUN cd ${SRC_FOLDER} && \
-    wget ftp://ftp.cmbi.ru.nl/pub/software/dssp/dssp-${DSSP_VERSION}.tgz && \
+    wget ftp://ftp.cmbi.umcn.nl/pub/molbio/software/dssp-2/dssp-${DSSP_VERSION}.tgz && \
     tar -xvzf dssp-${DSSP_VERSION}.tgz && \
     cd dssp-${DSSP_VERSION} && \
     make -j ${CPUS_FOR_MAKE} && \
