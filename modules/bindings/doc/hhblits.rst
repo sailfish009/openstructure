@@ -109,20 +109,7 @@ so one may want to extract them:
 Binding API
 --------------------------------------------------------------------------------
 
-.. autoclass:: ost.bindings.hhblits.HHblits
+.. automodule:: ost.bindings.hhblits
    :members:
 
-.. autoclass:: ost.bindings.hhblits.HHblitsHit
-
-.. autoclass:: ost.bindings.hhblits.HHblitsHeader
-
-.. autofunction:: ost.bindings.hhblits.ParseHHblitsOutput
-
-.. autofunction:: ost.bindings.hhblits.ParseA3M
-
-.. autofunction:: ost.bindings.hhblits.ParseHeaderLine
-
-.. autofunction:: ost.bindings.hhblits.ParseHHM
-
-.. autofunction:: ost.bindings.hhblits.EstimateMemConsumption
 ..  LocalWords:  HHblits homologs

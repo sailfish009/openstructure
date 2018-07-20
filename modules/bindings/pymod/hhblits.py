@@ -1,4 +1,4 @@
-'''HHblits wrapper.
+'''HHblits wrapper classes and functions.
 '''
 
 import subprocess
@@ -124,8 +124,8 @@ def ParseHeaderLine(line):
     :param line: Line from the output header.
     :type line: :class:`str`
 
-    :return: Hit information
-    :rtype: :class:`HHblitsHit`
+    :return: Hit information and query/template offsets
+    :rtype: (:class:`HHblitsHit`, (:class:`int`, :class:`int`))
     '''
     for i in range(0, len(line)):
         if line[i].isdigit():
@@ -147,15 +147,14 @@ def ParseHeaderLine(line):
 
 def ParseHHblitsOutput(output):
     """
-    Parses the HHblits output and returns a tuple of :class:`HHblitsHeader` and
-    a list of :class:`HHblitsHit` instances.
+    Parses the HHblits output as produced by :meth:`HHblits.Search` and returns
+    the header of the search results and a list of hits.
 
-    :param output: output of a :meth:`HHblits.Search`, needs to be iteratable,
-                   e.g. an open file handle
-    :type output: :class:`file`/ iteratable
+    :param output: Iterable containing the lines of the HHblits output file
+    :type output: iterable (e.g. an open file handle)
 
     :return: a tuple of the header of the search results and the hits
-    :rtype: (:class:`HHblitsHeader`, :class:`HHblitsHit`)
+    :rtype: (:class:`HHblitsHeader`, :class:`list` of :class:`HHblitsHit`)
     """
     lines = iter(output)
     def _ParseHeaderSection(lines):
@@ -271,10 +270,10 @@ def ParseHHblitsOutput(output):
 def ParseA3M(a3m_file):
     '''
     Parse secondary structure information and the multiple sequence alignment 
-    out of an A3M file.
+    out of an A3M file as produced by :meth:`HHblits.BuildQueryMSA`.
     
-    :param a3m_file: Iteratable containing the lines of the A3M file
-    :type a3m_file: iteratable, e.g. an opened file
+    :param a3m_file: Iterable containing the lines of the A3M file
+    :type a3m_file: iterable (e.g. an open file handle)
     
     :return: Dictionary containing "ss_pred" (:class:`list`), "ss_conf"
              (:class:`list`) and "msa" (:class:`~ost.seq.AlignmentHandle`).
@@ -323,36 +322,36 @@ def ParseA3M(a3m_file):
         t = msa_seq[0]
         al = seq.AlignmentList()
         for i in range(1, len(msa_seq)):
-          qs = ''
-          ts = ''
-          k = 0
-          for c in msa_seq[i]:
-            if c.islower():
-              qs += '-'
-              ts += c.upper()
-            else:
-              qs += t[k]
-              ts += c
-              k += 1
-          nl = seq.CreateAlignment(seq.CreateSequence(msa_head[0], qs), 
-                                 seq.CreateSequence(msa_head[i], ts))
-          al.append(nl)
+            qs = ''
+            ts = ''
+            k = 0
+            for c in msa_seq[i]:
+                if c.islower():
+                    qs += '-'
+                    ts += c.upper()
+                else:
+                    qs += t[k]
+                    ts += c
+                    k += 1
+            nl = seq.CreateAlignment(seq.CreateSequence(msa_head[0], qs), 
+                                     seq.CreateSequence(msa_head[i], ts))
+            al.append(nl)
         profile_dict['msa'] = seq.alg.MergePairwiseAlignments(\
-                                                al,
-                                                seq.CreateSequence(msa_head[0],
-                                                                   t))
+            al, seq.CreateSequence(msa_head[0], t))
     return profile_dict
 
 
 def ParseHHM(profile):
-    '''Parse secondary structure information and the MSA out of an HHM profile.
+    '''
+    Parse secondary structure information and the MSA out of an HHM profile as
+    produced by :meth:`HHblits.A3MToProfile`.
 
     :param profile: Opened file handle holding the profile.
     :type profile: :class:`file`
 
     :return: Dictionary containing "ss_pred" (:class:`list`), "ss_conf"
              (:class:`list`), "msa" (:class:`~ost.seq.AlignmentHandle`) and
-             "consensus" (~ost.seq.SequenceHandle).
+             "consensus" (:class:`~ost.seq.SequenceHandle`).
     '''
     profile_dict = dict()
     state = 'NONE'
@@ -423,9 +422,8 @@ def ParseHHM(profile):
                                      seq.CreateSequence(msa_head[i], ts))
             al.append(nl)
         profile_dict['msa'] = seq.alg.MergePairwiseAlignments(\
-                                            al,
-                                            seq.CreateSequence(msa_head[0], t))
-      #print profile_dict['msa'].ToString(80)
+            al, seq.CreateSequence(msa_head[0], t))
+        #print profile_dict['msa'].ToString(80)
     # Consensus
     profile_dict['consensus'] = seq.CreateSequence('Consensus', consensus_txt)
 
@@ -501,28 +499,23 @@ class HHblits:
                 self.working_dir = tmp_dir.dirname
                 self.filename = tmp_dir.files[0]
 
-    def Cleanup(self):
-        """Delete temporary data.
-
-        Delete temporary data if no working dir was given. Controlled by
-        :attr:`needs_cleanup`.
-        """
-        if self.needs_cleanup and os.path.exists(self.working_dir):
-            shutil.rmtree(self.working_dir)
-
     def BuildQueryMSA(self, nrdb, iterations=1, mact=None, cpu=1):
-        """Builds the MSA for the query sequence
+        """Builds the MSA for the query sequence.
 
-        This function directly uses hhblits of hhtools. While in theory it
-        would be possible to do this by PSI-blasting on our own, hhblits is
-        supposed to be faster. Also it is supposed to prevent alignment
-        corruption. The alignment corruption is caused by low-scoring terminal
-        alignments that draw the sequences found by PSI-blast away from the
-        optimum. By removing these low scoring ends, part of the alignment
-        corruption can be suppressed. hhblits does **not** call PSIPRED on the
-        MSA to predict the secondary structure of the query sequence. This is
-        done by addss.pl of hhtools. The predicted secondary structure is
-        stored together with the sequences identified by hhblits.
+        This function directly uses hhblits of hhtools. While in theory it would
+        be possible to do this by PSI-blasting on our own, hhblits is supposed
+        to be faster. Also it is supposed to prevent alignment corruption. The
+        alignment corruption is caused by low-scoring terminal alignments that
+        draw the sequences found by PSI-blast away from the optimum. By removing
+        these low scoring ends, part of the alignment corruption can be
+        suppressed.
+
+        hhblits does **not** call PSIPRED on the MSA to predict the secondary
+        structure of the query sequence. This is done by addss.pl of hhtools.
+        The predicted secondary structure is stored together with the sequences
+        identified by hhblits.
+
+        The produced A3M file can be parsed by :func:`ParseA3M`.
 
         :param nrdb: Database to be align against; has to be an hhblits database
         :type nrdb: :class:`str`
@@ -536,7 +529,7 @@ class HHblits:
         :param cpu: ``-cpu`` of hhblits
         :type cpu: :class:`int`
 
-        :return: the path to the MSA file
+        :return: The path to the A3M file containing the MSA
         :rtype: :class:`str`
         """
         a3m_file = '%s.a3m' % os.path.splitext(self.filename)[0]
@@ -588,13 +581,15 @@ class HHblits:
         Converts the A3M alignment file to a hhm profile. If hhm_file is not
         given, the output file will be set to <:attr:`a3m_file`-basename>.hhm.
 
-        :param a3m_file: input MSA
+        The produced A3M file can be parsed by :func:`ParseA3M`.
+
+        :param a3m_file: Path to input MSA as produced by :meth:`BuildQueryMSA`
         :type a3m_file: :class:`str`
 
-        :param hhm_file: output file name 
+        :param hhm_file: Desired output file name 
         :type hhm_file: :class:`str`
 
-        :return: the path to the profile
+        :return: Path to the profile file
         :rtype: :class:`str`
         """
         hhmake = os.path.join(self.bin_dir, 'hhmake')
@@ -608,7 +603,6 @@ class HHblits:
                            shell=True):
             raise IOError('could not convert a3m to hhm file')
         return hhm_file
-
 
     def A3MToCS(self, a3m_file, cs_file=None, options={}):
         """
@@ -657,8 +651,19 @@ class HHblits:
         ost.LogWarning('Creating column state sequence file (%s) failed' % \
                        cs_file)
 
+    def Cleanup(self):
+        """Delete temporary data.
+
+        Delete temporary data if no working dir was given. Controlled by
+        :attr:`needs_cleanup`.
+        """
+        if self.needs_cleanup and os.path.exists(self.working_dir):
+            shutil.rmtree(self.working_dir)
+
     def CleanupFailed(self):
         '''In case something went wrong, call to make sure everything is clean.
+
+        This will delete the working dir independently of :attr:`needs_cleanup`.
         '''
         store_needs_cleanup = self.needs_cleanup
         self.needs_cleanup = True
@@ -667,11 +672,10 @@ class HHblits:
 
     def Search(self, a3m_file, database, options={}, prefix=''):
         """
-        Searches for templates in the given database. Before running the
-        search, the hhm file is copied. This makes it possible to launch
-        several hhblits instances at once. Upon success, the filename of the
-        result file is returned. This file may be parsed with
-        :func:`ParseHHblitsOutput`.
+        Searches for templates in the given database. Before running the search,
+        the hhm file is copied. This makes it possible to launch several hhblits
+        instances at once. Upon success, the filename of the result file is
+        returned. This file may be parsed with :func:`ParseHHblitsOutput`.
 
         :param a3m_file: input MSA file
         :type a3m_file: :class:`str`
@@ -708,7 +712,7 @@ class HHblits:
         base = os.path.basename(os.path.splitext(a3m_file)[0])
         hhr_file = '%s%s_%s.hhr' % (prefix, base, opt_str)
         hhr_file = os.path.join(self.working_dir, hhr_file)
-        search_cmd = '%s %s -e 0.001 -Z 10000 -B 10000 -i %s -o %s -d %s'%(
+        search_cmd = '%s %s -e 0.001 -Z 10000 -B 10000 -i %s -o %s -d %s' % (
             self.hhblits_bin,
             opt_cmd, os.path.abspath(a3m_file),
             hhr_file,
@@ -730,12 +734,12 @@ class HHblits:
         return hhr_file
 
 
-__all__ = ['HHblits', 'HHblitsHit', 'HHblitsHeader', 'ParseHeaderLine',
+__all__ = ['HHblits', 'HHblitsHit', 'HHblitsHeader',
            'ParseHHblitsOutput', 'ParseA3M', 'ParseHHM',
-           'EstimateMemConsumption']
+           'ParseHeaderLine', 'EstimateMemConsumption']
 
 #  LocalWords:  HHblits MSA hhblits hhtools PSIPRED addss param nrdb str mact
 #  LocalWords:  cpu hhm func ParseHHblitsOutput ss pred conf msa hhsuite dir
 #  LocalWords:  attr basename rtype cstranslate tuple HHblitsHeader meth aln
-#  LocalWords:  HHblitsHit iteratable evalue pvalue neff hmms datetime
+#  LocalWords:  HHblitsHit iterable evalue pvalue neff hmms datetime
 #  LocalWords:  whitespace whitespaces
