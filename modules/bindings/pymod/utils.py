@@ -29,7 +29,7 @@ def SaveToTempDir(objects, seq_format='fasta', structure_format='pdb'):
       file_names.append(name)
       continue
     if isinstance(obj, mol.EntityView) or isinstance(obj, mol.EntityHandle):
-      name=os.path.join(tmp_dir_name, tmp_dir_name, 'mol%02d.pdb' % (index+1))
+      name=os.path.join(tmp_dir_name, 'mol%02d.pdb' % (index+1))
       io.SaveEntity(obj, name, structure_format)
       file_names.append(name)
       continue
