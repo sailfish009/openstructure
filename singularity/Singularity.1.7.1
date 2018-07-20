@@ -65,7 +65,7 @@ locale-gen en_US.UTF-8
 
 # INSTALL SOME PYTHON PACKAGES GLOBALY
 ######################################
-pip install --upgrade pip && pip install --no-cache-dir numpy==1.10.4 \
+pip install --no-cache-dir numpy==1.10.4 \
                                                         scipy==1.0.0 \
                                                         pandas==0.22.0
 
@@ -110,7 +110,7 @@ fi
 ##############
 cd ${SRC_FOLDER}
 if [ ! -f dssp-${DSSP_VERSION}.tgz ]; then
-    wget ftp://ftp.cmbi.ru.nl/pub/software/dssp/dssp-${DSSP_VERSION}.tgz
+    wget ftp://ftp.cmbi.umcn.nl/pub/molbio/software/dssp-2/dssp-${DSSP_VERSION}.tgz
     tar -xvzf dssp-${DSSP_VERSION}.tgz
     cd dssp-${DSSP_VERSION}
     make -j ${CPUS_FOR_MAKE}
