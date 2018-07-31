@@ -1,9 +1,6 @@
 :mod:`~ost.bindings.hhblits` - Search related sequences in databases
 ================================================================================
 
-.. module:: ost.bindings.hhblits
-  :synopsis: Search related sequences in databases
-
 Introduction
 --------------------------------------------------------------------------------
 
@@ -15,7 +12,7 @@ one is provided, queried with a sequence profile. The latter one needs to be
 calculated before the actual search. In very simple words, HHblits is using
 per-sequence scoring functions to be more sensitive, in this particular case
 Hidden Markov models. The software suite needed for HHblits can be found
-`here <http://toolkit.tuebingen.mpg.de/hhblits>`_.
+`here <http://wwwuser.gwdg.de/~compbiol/data/hhsuite/releases/all/>`_.
 
 
 Examples
@@ -110,6 +107,7 @@ Binding API
 --------------------------------------------------------------------------------
 
 .. automodule:: ost.bindings.hhblits
+   :synopsis: Search related sequences in databases
    :members:
 
 ..  LocalWords:  HHblits homologs

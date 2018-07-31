@@ -460,6 +460,8 @@ class HHblits:
             self.hhblits_bin = settings.Locate('hhblits',
                                                explicit_file_name=hhblits_bin)
             self.bin_dir = os.path.dirname(self.hhblits_bin)
+            # guess root folder (note: this may fail in future)
+            self.hhsuite_root = os.path.dirname(self.bin_dir)
         self.hhlib_dir = os.path.join(self.hhsuite_root, 'lib', 'hh')
         if working_dir:
             self.needs_cleanup = False
@@ -487,7 +489,8 @@ class HHblits:
                 self.working_dir = tmp_dir.dirname
                 self.filename = tmp_dir.files[0]
 
-    def BuildQueryMSA(self, nrdb, iterations=1, mact=None, cpu=1):
+    def BuildQueryMSA(self, nrdb, iterations=1, mact=None, cpu=1, cov=None,
+                      show_all=False, a3m_file=None):
         """Builds the MSA for the query sequence.
 
         This function directly uses hhblits of hhtools. While in theory it would
@@ -503,24 +506,33 @@ class HHblits:
         The predicted secondary structure is stored together with the sequences
         identified by hhblits.
 
-        The produced A3M file can be parsed by :func:`ParseA3M`.
+        The produced A3M file can be parsed by :func:`ParseA3M`. If the file was
+        already produced, hhblits is not called again and the existing file path
+        is returned.
 
         :param nrdb: Database to be align against; has to be an hhblits database
         :type nrdb: :class:`str`
-
         :param iterations: Number of hhblits iterations
         :type iterations: :class:`int`
-
         :param mact: ``-mact`` of hhblits
         :type mact: :class:`float`
-
         :param cpu: ``-cpu`` of hhblits
         :type cpu: :class:`int`
+        :param cov: '-cov' of hhblits
+        :type cov: :class:`int`
+        :param show_all: '-all' of hhblits
+        :type show_all: :class:`bool`
+        :param a3m_file: a path of a3m_file to be used, optional
+        :type a3m_file: :class:`str`
 
         :return: The path to the A3M file containing the MSA
         :rtype: :class:`str`
         """
-        a3m_file = '%s.a3m' % os.path.splitext(self.filename)[0]
+        if a3m_file is None:
+            a3m_file = '%s.a3m' % os.path.splitext(self.filename)[0]
+        if os.path.exists(a3m_file):
+            ost.LogInfo('Reusing already existing query alignment (%s)' % a3m_file)
+            return a3m_file
         ost.LogInfo('Using hhblits from "%s"' % self.hhsuite_root)
         full_nrdb = os.path.join(os.path.abspath(os.path.split(nrdb)[0]),
                                  os.path.split(nrdb)[1])
@@ -530,15 +542,16 @@ class HHblits:
                        full_nrdb, iterations)
         if mact:
             hhblits_cmd += '-mact %f' % mact
+        if cov is not None:
+            hhblits_cmd += ' -cov %i' % cov
+        if show_all:
+            hhblits_cmd += ' -all'
         job = subprocess.Popen(hhblits_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, _ = job.communicate()
-        #lines = sout.splitlines()
-        #for l in lines:
-        #    print l.strip()
-        #lines = serr.splitlines()
-        #for l in lines:
-        #    print l.strip()
+        lines = sout.splitlines()
+        for l in lines:
+            print l.strip()
         if not os.path.exists(a3m_file):
             ost.LogWarning('Building query profile failed, no output')
             return a3m_file
@@ -561,7 +574,7 @@ class HHblits:
             if 'error' in line.lower():
                 ost.LogWarning('Predicting secondary structure for MSA '+
                                '(%s) failed, on command: %s' % (a3m_file, line))
-            return a3m_file
+                return a3m_file
         return a3m_file
 
     def A3MToProfile(self, a3m_file, hhm_file=None):
@@ -569,7 +582,10 @@ class HHblits:
         Converts the A3M alignment file to a hhm profile. If hhm_file is not
         given, the output file will be set to <:attr:`a3m_file`-basename>.hhm.
 
-        The produced A3M file can be parsed by :func:`ParseA3M`.
+        The produced A3M file can be parsed by :func:`ParseHHM`.
+
+        If the file was already produced, the existing file path is returned
+        without recomputing it.
 
         :param a3m_file: Path to input MSA as produced by :meth:`BuildQueryMSA`
         :type a3m_file: :class:`str`
@@ -598,17 +614,20 @@ class HHblits:
         cs_file is not given, the output file will be set to
         <:attr:`a3m_file`-basename>.seq219.
 
-        :param a3m_file: A3M file to be converted
+        If the file was already produced, the existing file path is returned
+        without recomputing it.
+
+        :param a3m_file: Path to input MSA as produced by :meth:`BuildQueryMSA`
         :type a3m_file: :class:`str`
 
-        :param cs_file: output file name (may be omitted)
+        :param cs_file: Output file name (may be omitted)
         :type cs_file: :class:`str`
 
-        :param options: dictionary of options to *cstranslate*, must come with
+        :param options: Dictionary of options to *cstranslate*, must come with
                         the right amount of '-' in front.
         :type options: :class:`dict`
 
-        :return: the path to the column state sequence file
+        :return: Path to the column state sequence file
         :rtype: :class:`str`
         """
         cstranslate = os.path.join(self.hhlib_dir, 'bin', 'cstranslate')
@@ -624,17 +643,18 @@ class HHblits:
             else:
                 opt_cmd.append('%s %s' % (str(k), str(val)))
         opt_cmd = ' '.join(opt_cmd)
-        cs_cmd = '%s -i %s -o %s %s' % (cstranslate, a3m_file, cs_file, opt_cmd)
+        cs_cmd = '%s -i %s -o %s %s' % (
+            cstranslate,
+            os.path.abspath(a3m_file),
+            os.path.abspath(cs_file),
+            opt_cmd)
         ost.LogVerbose('converting %s to %s' % (a3m_file, cs_file))
-        job = subprocess.Popen(cs_cmd, shell=True,
+        job = subprocess.Popen(cs_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, _ = job.communicate()
-        #lines = serr.splitlines()
-        #for l in lines:
-        #    print l
         lines = sout.splitlines()
         for line in lines:
-            if line in 'Wrote abstract state sequence to %s' % cs_file:
+            if 'Wrote abstract state sequence to' in line:
                 return cs_file
         ost.LogWarning('Creating column state sequence file (%s) failed' % \
                        cs_file)
@@ -665,21 +685,21 @@ class HHblits:
         instances at once. Upon success, the filename of the result file is
         returned. This file may be parsed with :func:`ParseHHblitsOutput`.
 
-        :param a3m_file: input MSA file
+        :param a3m_file: Path to input MSA as produced by :meth:`BuildQueryMSA`
         :type a3m_file: :class:`str`
 
-        :param database: search database, needs to be the common prefix of the
+        :param database: Search database, needs to be the common prefix of the
                          database files
         :type database: :class:`str`
 
-        :param options: dictionary of options, must come with the right amount
+        :param options: Dictionary of options, must come with the right amount
                         of '-' in front.
         :type options: :class:`dict`
 
-        :param prefix: prefix to the result file
+        :param prefix: Prefix to the result file
         :type prefix: :class:`str`
 
-        :return: the path to the result file
+        :return: The path to the result file
         :rtype: :class:`str`
         """
         opts = {'cpu' : 1, # no. of cpus used
@@ -702,7 +722,8 @@ class HHblits:
         hhr_file = os.path.join(self.working_dir, hhr_file)
         search_cmd = '%s %s -e 0.001 -Z 10000 -B 10000 -i %s -o %s -d %s' % (
             self.hhblits_bin,
-            opt_cmd, os.path.abspath(a3m_file),
+            opt_cmd,
+            os.path.abspath(a3m_file),
             hhr_file,
             os.path.join(os.path.abspath(os.path.split(database)[0]),
                          os.path.split(database)[1]))
