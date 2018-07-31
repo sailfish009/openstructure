@@ -429,17 +429,6 @@ def ParseHHM(profile):
 
     return profile_dict
 
-def EstimateMemConsumption():
-    """
-    Estimate the memory needed by HHblits. By default it uses not more than 3G.
-    Also for small sequences it already uses quite some memnmory (46AA, 1.48G).
-    And since the memory consumption could depend on the iterative search runs,
-    how many hits are found in each step, we just go with 4G, here.
-
-    :return: Assumed memory consumtion
-    :rtype: (:class:`float`, :class:`str`)
-    """
-    return 4.0, 'G'
 
 class HHblits:
     """
@@ -459,7 +448,6 @@ class HHblits:
     :param working_dir: Directory for temporary files. Will be created if not
                         present but **not** automatically deleted.
     :type working_dir: :class:`str`
-
     """
     OUTPUT_PREFIX = 'query_hhblits'
     def __init__(self, query, hhsuite_root, hhblits_bin=None, working_dir=None):
@@ -736,7 +724,7 @@ class HHblits:
 
 __all__ = ['HHblits', 'HHblitsHit', 'HHblitsHeader',
            'ParseHHblitsOutput', 'ParseA3M', 'ParseHHM',
-           'ParseHeaderLine', 'EstimateMemConsumption']
+           'ParseHeaderLine']
 
 #  LocalWords:  HHblits MSA hhblits hhtools PSIPRED addss param nrdb str mact
 #  LocalWords:  cpu hhm func ParseHHblitsOutput ss pred conf msa hhsuite dir
