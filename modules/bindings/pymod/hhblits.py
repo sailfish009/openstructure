@@ -550,8 +550,8 @@ class HHblits:
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, _ = job.communicate()
         lines = sout.splitlines()
-        for l in lines:
-            print l.strip()
+        for line in lines:
+            ost.LogVerbose(line.strip())
         if not os.path.exists(a3m_file):
             ost.LogWarning('Building query profile failed, no output')
             return a3m_file
@@ -735,10 +735,10 @@ class HHblits:
         if job.returncode != 0:
             lines = sout.splitlines()
             for line in lines:
-                print line.strip()
+                ost.LogError(line.strip())
             lines = serr.splitlines()
             for line in lines:
-                print line.strip()
+                ost.LogError(line.strip())
             return None
         return hhr_file
 
