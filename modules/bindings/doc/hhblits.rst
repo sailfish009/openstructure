@@ -84,6 +84,9 @@ Very similar going by file:
   for hit in hits:
       print hit.aln
 
+  # cleanup
+  hh.Cleanup()
+
 The alignments produced by HHblits are sometimes slightly better than by BLAST,
 so one may want to extract them:
 
@@ -104,6 +107,9 @@ so one may want to extract them:
   output = hhblits.ParseA3M(open(a3m_file))
 
   print output['msa']
+
+  # cleanup
+  hh.Cleanup()
 
 
 Binding API
