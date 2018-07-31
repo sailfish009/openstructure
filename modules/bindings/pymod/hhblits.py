@@ -489,8 +489,7 @@ class HHblits:
                 self.working_dir = tmp_dir.dirname
                 self.filename = tmp_dir.files[0]
 
-    def BuildQueryMSA(self, nrdb, iterations=1, mact=None, cpu=1, cov=None,
-                      show_all=False, a3m_file=None):
+    def BuildQueryMSA(self, nrdb, options={}, a3m_file=None):
         """Builds the MSA for the query sequence.
 
         This function directly uses hhblits of hhtools. While in theory it would
@@ -512,16 +511,13 @@ class HHblits:
 
         :param nrdb: Database to be align against; has to be an hhblits database
         :type nrdb: :class:`str`
-        :param iterations: Number of hhblits iterations
-        :type iterations: :class:`int`
-        :param mact: ``-mact`` of hhblits
-        :type mact: :class:`float`
-        :param cpu: ``-cpu`` of hhblits
-        :type cpu: :class:`int`
-        :param cov: '-cov' of hhblits
-        :type cov: :class:`int`
-        :param show_all: '-all' of hhblits
-        :type show_all: :class:`bool`
+
+        :param options: Dictionary of options to *hhblits*, one "-" is added in
+                        front of every key. Boolean True values add flag without
+                        value. Merged with default options {'cpu': 1, 'n': 1},
+                        where 'n' defines the number of iterations.
+        :type options: :class:`dict`
+
         :param a3m_file: a path of a3m_file to be used, optional
         :type a3m_file: :class:`str`
 
@@ -537,15 +533,13 @@ class HHblits:
         full_nrdb = os.path.join(os.path.abspath(os.path.split(nrdb)[0]),
                                  os.path.split(nrdb)[1])
         # create MSA
-        hhblits_cmd = '%s -e 0.001 -cpu %d -i %s -oa3m %s -d %s -n %d' % \
-                      (self.hhblits_bin, cpu, self.filename, a3m_file,
-                       full_nrdb, iterations)
-        if mact:
-            hhblits_cmd += '-mact %f' % mact
-        if cov is not None:
-            hhblits_cmd += ' -cov %i' % cov
-        if show_all:
-            hhblits_cmd += ' -all'
+        opts = {'cpu' : 1, # no. of cpus used
+                'n'   : 1}   # no. of iterations
+        opts.update(options)
+        opt_cmd, _ = _ParseOptions(opts)
+        hhblits_cmd = '%s -e 0.001 -i %s -oa3m %s -d %s %s' % \
+                      (self.hhblits_bin, self.filename, a3m_file, full_nrdb,
+                       opt_cmd)
         job = subprocess.Popen(hhblits_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, _ = job.communicate()
@@ -623,8 +617,9 @@ class HHblits:
         :param cs_file: Output file name (may be omitted)
         :type cs_file: :class:`str`
 
-        :param options: Dictionary of options to *cstranslate*, must come with
-                        the right amount of '-' in front.
+        :param options: Dictionary of options to *cstranslate*, one "-" is added
+                        in front of every key. Boolean True values add flag
+                        without value.
         :type options: :class:`dict`
 
         :return: Path to the column state sequence file
@@ -635,14 +630,7 @@ class HHblits:
             cs_file = '%s.seq219' % os.path.splitext(a3m_file)[0]
         if os.path.exists(cs_file):
             return cs_file
-        opt_cmd = list()
-        for k, val in options.iteritems():
-            if type(val) == type(True):
-                if val == True:
-                    opt_cmd.append('%s' % str(k))
-            else:
-                opt_cmd.append('%s %s' % (str(k), str(val)))
-        opt_cmd = ' '.join(opt_cmd)
+        opt_cmd, _ = _ParseOptions(options)
         cs_cmd = '%s -i %s -o %s %s' % (
             cstranslate,
             os.path.abspath(a3m_file),
@@ -692,8 +680,10 @@ class HHblits:
                          database files
         :type database: :class:`str`
 
-        :param options: Dictionary of options, must come with the right amount
-                        of '-' in front.
+        :param options: Dictionary of options to *hhblits*, one "-" is added in
+                        front of every key. Boolean True values add flag without
+                        value. Merged with default options {'cpu': 1, 'n': 1},
+                        where 'n' defines the number of iterations.
         :type options: :class:`dict`
 
         :param prefix: Prefix to the result file
@@ -705,18 +695,7 @@ class HHblits:
         opts = {'cpu' : 1, # no. of cpus used
                 'n'   : 1}   # no. of iterations
         opts.update(options)
-        opt_cmd = []
-        opt_str = []
-        for k, val in opts.iteritems():
-            if type(val) == type(True):
-                if val == True:
-                    opt_cmd.append('-%s' % str(k))
-                    opt_str.append(str(k))
-            else:
-                opt_cmd.append('-%s %s' % (str(k), str(val)))
-                opt_str.append('%s%s' % (str(k), str(val)))
-        opt_cmd = ' '.join(opt_cmd)
-        opt_str = '_'.join(opt_str)
+        opt_cmd, opt_str = _ParseOptions(opts)
         base = os.path.basename(os.path.splitext(a3m_file)[0])
         hhr_file = '%s%s_%s.hhr' % (prefix, base, opt_str)
         hhr_file = os.path.join(self.working_dir, hhr_file)
@@ -743,11 +722,35 @@ class HHblits:
         return hhr_file
 
 
+def _ParseOptions(opts):
+    """
+    :return: Tuple of strings (opt_cmd, opt_str), where opt_cmd can be
+             passed to command ("-" added in front of keys, options
+             separated by space) and opt_str (options separated by "_")
+             can be used for filenames.
+    :param opts: Dictionary of options, one "-" is added in front of every
+                 key. Boolean True values add flag without value.
+    """
+    opt_cmd = list()
+    opt_str = list()
+    for k, val in opts.iteritems():
+        if type(val) == type(True):
+            if val == True:
+                opt_cmd.append('-%s' % str(k))
+                opt_str.append(str(k))
+        else:
+            opt_cmd.append('-%s %s' % (str(k), str(val)))
+            opt_str.append('%s%s' % (str(k), str(val)))
+    opt_cmd = ' '.join(opt_cmd)
+    opt_str = '_'.join(opt_str)
+    return opt_cmd, opt_str
+
+
 __all__ = ['HHblits', 'HHblitsHit', 'HHblitsHeader',
            'ParseHHblitsOutput', 'ParseA3M', 'ParseHHM',
            'ParseHeaderLine']
 
-#  LocalWords:  HHblits MSA hhblits hhtools PSIPRED addss param nrdb str mact
+#  LocalWords:  HHblits MSA hhblits hhtools PSIPRED addss param nrdb str
 #  LocalWords:  cpu hhm func ParseHHblitsOutput ss pred conf msa hhsuite dir
 #  LocalWords:  attr basename rtype cstranslate tuple HHblitsHeader meth aln
 #  LocalWords:  HHblitsHit iterable evalue pvalue neff hmms datetime

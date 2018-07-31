@@ -56,6 +56,9 @@ First query by sequence:
   for hit in hits:
       print hit.aln
 
+  # cleanup
+  hh.Cleanup()
+
 Very similar going by file:
 
 .. code-block:: python

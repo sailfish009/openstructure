@@ -196,7 +196,7 @@ class TestHHblitsBindings(unittest.TestCase):
         _, self.tmpfile = tempfile.mkstemp(suffix='.seq219')
         os.remove(self.tmpfile)
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
-                                 cs_file=self.tmpfile, options={'--alphabet' :
+                                 cs_file=self.tmpfile, options={'-alphabet' :
                                                 os.path.join(self.hh.hhlib_dir,
                                                              'data',
                                                              'cs219.lib')})
@@ -211,7 +211,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
-                                 options={'--alphabet' :
+                                 options={'-alphabet' :
                                           os.path.join(self.hh.hhlib_dir,
                                                        'data',
                                                        'cs219.lib')})
@@ -228,7 +228,7 @@ class TestHHblitsBindings(unittest.TestCase):
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
                                  cs_file='testfiles/test.seq219',
-                                 options={'--alphabet' :
+                                 options={'-alphabet' :
                                           os.path.join(self.hh.hhlib_dir,
                                                        'data',
                                                        'cs219.lib')})

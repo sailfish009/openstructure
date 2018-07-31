@@ -12,6 +12,7 @@ Changes in Release <RELEASE NUMBER>
   * Extended lDDT API in ost.mol.alg module to reproduce functionality of lddt
     binary.
   * Added `actions` interface including one action to compare structures.
+  * Updated HHblits binding (minor changes for optional arguments).
 
 Changes in Release 1.7.1
 --------------------------------------------------------------------------------
