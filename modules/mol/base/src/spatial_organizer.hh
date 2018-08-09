@@ -215,9 +215,9 @@ private:
   Index max_;
 
   Index gen_index(const VEC& pos) const {
-    Index nrvo(static_cast<int>(round_real(pos[0]/delta_)),
-               static_cast<int>(round_real(pos[1]/delta_)),
-               static_cast<int>(round_real(pos[2]/delta_)));
+    Index nrvo(static_cast<int>(round(pos[0]/delta_)),
+               static_cast<int>(round(pos[1]/delta_)),
+               static_cast<int>(round(pos[2]/delta_)));
     return nrvo;
   }
 

@@ -508,7 +508,7 @@ namespace {
   unsigned int col_to_index(float* c)
   {
     // don't look too closely - I am lacking sufficient caffeine to do this more elegantly
-    int ret= std::max(0,std::min<int>(511,static_cast<int>(round_real(c[0]*7.0f))*64+static_cast<int>(round_real(c[1]*7.0f))*8+static_cast<unsigned int>(round_real(c[2]*7.0f))));
+    int ret= std::max(0,std::min<int>(511,static_cast<int>(round(c[0]*7.0f))*64+static_cast<int>(round(c[1]*7.0f))*8+static_cast<unsigned int>(round(c[2]*7.0f))));
     return static_cast<unsigned int>(ret);
   }
 }

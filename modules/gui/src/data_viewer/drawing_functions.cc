@@ -64,7 +64,7 @@ void DrawEllipse(QPainter& pnt, const QPoint& center, Real rx, Real ry, Real ang
     Real ang=static_cast<Real>(j)/static_cast<Real>(numpoints)*2.0*M_PI;
     Real dx=rx*cos(ang);
     Real dy=ry*sin(ang);
-    qpoly << QPoint(static_cast<int>(round_real(center.x()+dx*cos(-angle)+dy*sin(-angle))),static_cast<int>(round_real(center.y()-dx*sin(-angle)+dy*cos(-angle))));
+    qpoly << QPoint(static_cast<int>(round(center.x()+dx*cos(-angle)+dy*sin(-angle))),static_cast<int>(round(center.y()-dx*sin(-angle)+dy*cos(-angle))));
   }
   pnt.drawPolyline(qpoly);
 }
@@ -86,13 +86,13 @@ void DrawHyperbola(QPainter& pnt, const QSize& size, const geom::Vec2& center, R
       x=sqrt((y*y/ry/ry-1.0)*rx*rx);
     }
     geom::Vec2 pos=Rotate(Vec2(x,y),-angle)+center;
-    p1=QPoint(static_cast<int>(round_real(pos[0])),static_cast<int>(round_real(pos[1])));
+    p1=QPoint(static_cast<int>(round(pos[0])),static_cast<int>(round(pos[1])));
     pos=Rotate(Vec2(x,-y),-angle)+center;
-    p2=QPoint(static_cast<int>(round_real(pos[0])),static_cast<int>(round_real(pos[1])));
+    p2=QPoint(static_cast<int>(round(pos[0])),static_cast<int>(round(pos[1])));
     pos=Rotate(Vec2(-x,y),-angle)+center;
-    p3=QPoint(static_cast<int>(round_real(pos[0])),static_cast<int>(round_real(pos[1])));
+    p3=QPoint(static_cast<int>(round(pos[0])),static_cast<int>(round(pos[1])));
     pos=Rotate(Vec2(-x,-y),-angle)+center;
-    p4=QPoint(static_cast<int>(round_real(pos[0])),static_cast<int>(round_real(pos[1])));
+    p4=QPoint(static_cast<int>(round(pos[0])),static_cast<int>(round(pos[1])));
     if(orientation){
       if(flagp1){
         points1.push_back(p1);
@@ -150,7 +150,7 @@ void DrawHalfEllipse(QPainter& pnt, const QPoint& center, Real rx, Real ry, Real
     Real ang=j/static_cast<Real>(numpoints)*M_PI+M_PI;
     Real dx=rx*cos(ang);
     Real dy=ry*sin(ang);
-    qpoly << QPoint(static_cast<int>(round_real(center.x()+dx*cos(-angle)+dy*sin(-angle))),static_cast<int>(round_real(center.y()-dx*sin(-angle)+dy*cos(-angle))));
+    qpoly << QPoint(static_cast<int>(round(center.x()+dx*cos(-angle)+dy*sin(-angle))),static_cast<int>(round(center.y()-dx*sin(-angle)+dy*cos(-angle))));
   }
   pnt.drawPolyline(qpoly);
 }

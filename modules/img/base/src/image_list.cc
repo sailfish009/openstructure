@@ -43,9 +43,9 @@ ImageHandle ImageList::GetGallery(unsigned int columns,bool border)
       bsize=1;
     }
     if(columns==0){
-        columns=static_cast<int>(round_real(sqrt(static_cast<Real>(size()))));
+        columns=static_cast<int>(round(sqrt(static_cast<Real>(size()))));
     }
-    unsigned int rows=static_cast<int>(round_real(static_cast<Real>(size())/static_cast<Real>(columns)));
+    unsigned int rows=static_cast<int>(round(static_cast<Real>(size())/static_cast<Real>(columns)));
     Size s=get_max_size_();
     DataType datatype=get_data_type_();
     if(s[2]>1){

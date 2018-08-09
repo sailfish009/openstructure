@@ -307,9 +307,9 @@ public:
 
             geom::Vec3 adjusted_coord  = coord-map_start;
             geom::Vec3 pixel_coord=is.CoordToIndex(coord);
-            img::Point rounded_pixel_coord(round_real(pixel_coord[0]),
-                                            round_real(pixel_coord[1]),
-                                            round_real(pixel_coord[2]));
+            img::Point rounded_pixel_coord(round(pixel_coord[0]),
+                                            round(pixel_coord[1]),
+                                            round(pixel_coord[2]));
 
             uint x_limit = ceil(2.0*four_sigma/sampling[0])+1;
             uint y_limit = ceil(2.0*four_sigma/sampling[1])+1;

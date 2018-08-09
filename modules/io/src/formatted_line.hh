@@ -88,7 +88,7 @@ struct LPaddedFloat {
         len = snprintf(data, sizeof(data), "%.3f", val);
         break;
       default:
-        Real rounded_val=round_real(val*pow(Real(10), prec))*pow(Real(0.1), prec);
+        Real rounded_val=round(val*pow(Real(10), prec))*pow(Real(0.1), prec);
         size_t curr=0;
         bool minus=rounded_val<0;
         rounded_val=std::abs(rounded_val);

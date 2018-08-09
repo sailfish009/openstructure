@@ -118,7 +118,7 @@ std::pair<Real,Real> ClashingDistances::GetClashingDistance(const String& ele1,c
   std::map <String,std::pair<Real,Real> >::const_iterator find_ci= min_distance_.find(key);
   if (find_ci == min_distance_.end()) {
       std::stringstream serr;
-      serr << "Entry for distance " << key <<  " not found in the parameter table";   
+      serr << "Entry for distance " << key <<  " not found in the parameter table";
       throw Error(serr.str());
   }    
   return find_ci->second;
