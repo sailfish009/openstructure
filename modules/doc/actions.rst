@@ -44,8 +44,10 @@ The output file has following format:
           "<MODEL NAME>": { # Model name extracted from the file name
               "<REFERENCE NAME>": { # Reference name extracted from the file name
                   "info": {
-                      "residue_names_consistent": <Are the residue numbers consistent? true or false>, 
-                      "mapping": <Mapping of chains eg. {"A": "B", "B": "A"}>, 
+                      "residue_names_consistent": <Are the residue numbers consistent? true or false>,
+                      "mapping": {
+                          "chain_mapping": <Mapping of chains eg. {"A": "B", "B": "A"}>,
+                          "chain_mapping_scheme": <Scheme used to get mapping, check mapping manually if "permissive" or "extensive">,
                           "alignments": <list of chain-chain alignments in FASTA format>
                       }
                   }, 
@@ -72,10 +74,10 @@ The output file has following format:
                               "per_residue_scores": [  # per-residue lDDT scores - calculated when --save-per-residue-scores (-spr) option is selected
                                   {
                                       "total_contacts": <total number of contacts between model and reference>, 
-                                      "residue_name": <three letter code of the residue>, 
+                                      "residue_name": <three letter code of the residue in reference chain>, 
                                       "lddt": <residue lDDT score>, 
                                       "conserved_contacts": <number of conserved contacts between model and reference for given residue>, 
-                                      "residue_number": <total number of contacts between model and reference for given residue>
+                                      "residue_number": <residue number in reference chain>
                                   },
                                   .
                                   .
@@ -164,51 +166,57 @@ Example usage:
   ################################################################################
   Performing structural checks
    --> for reference(s)
-  Checking 
+  Checking reference.pdb
   Checking stereo-chemistry
-  Average Z-Score for bond lengths: -nan
-  Bonds outside of tolerance range: 0 out of 0
+  Average Z-Score for bond lengths: 0.13694
+  Bonds outside of tolerance range: 0 out of 2654
   Bond  Avg Length  Avg zscore  Num Bonds
-  Average Z-Score angle widths: 0.00000
-  Angles outside of tolerance range: 0 out of 1
+  C-C 1.50876     0.09299     1501
+  C-N 1.42978     0.17690     635
+  C-O 1.25079     0.21528     518
+  Average Z-Score angle widths: 0.07562
+  Angles outside of tolerance range: 0 out of 2941
   Filtering non-bonded clashes
   0 non-bonded short-range distances shorter than tolerance distance
   Distances shorter than tolerance are on average shorter by: 0.00000
    --> for model(s)
-  Checking 
+  Checking model.pdb
   Checking stereo-chemistry
-  Average Z-Score for bond lengths: -nan
-  Bonds outside of tolerance range: 0 out of 0
+  Average Z-Score for bond lengths: -0.22524
+  Bonds outside of tolerance range: 0 out of 2774
   Bond  Avg Length  Avg zscore  Num Bonds
-  Average Z-Score angle widths: 0.00000
-  Angles outside of tolerance range: 0 out of 1
+  C-C 1.50225     -0.20158    1558
+  C-N 1.42294     -0.12261    666
+  C-O 1.24232     -0.42115    546
+  C-S 1.80215     0.20858     4
+  Average Z-Score angle widths: -0.06767
+  Angles outside of tolerance range: 0 out of 3079
   Filtering non-bonded clashes
   0 non-bonded short-range distances shorter than tolerance distance
   Distances shorter than tolerance are on average shorter by: 0.00000
   ################################################################################
-  Comparing  to 
-  Chains removed from : _
-  Chains in : AB
-  Chains in : AB
-  Chemically equivalent chain-groups in pdb_1: [['B', 'A']]
-  Chemically equivalent chain-groups in pdb_2: [['A', 'B']]
+  Comparing model.pdb to reference.pdb
+  Chains in reference.pdb: AB
+  Chains in model.pdb: AB
+  Chemically equivalent chain-groups in reference.pdb: [['B', 'A']]
+  Chemically equivalent chain-groups in model.pdb: [['A', 'B']]
   Chemical chain-groups mapping: {('B', 'A'): ('A', 'B')}
   Identifying Symmetry Groups...
-  Symmetry threshold 0.1 used for angles of pdb_1
-  Symmetry threshold 0.1 used for axis of pdb_1
-  Symmetry threshold 0.1 used for angles of pdb_2
-  Symmetry threshold 0.1 used for axis of pdb_2
+  Symmetry threshold 0.1 used for angles of reference.pdb
+  Symmetry threshold 0.1 used for axis of reference.pdb
+  Symmetry threshold 0.1 used for angles of model.pdb
+  Symmetry threshold 0.1 used for axis of model.pdb
   Selecting Symmetry Groups...
-  Symmetry-groups used in pdb_1: [('B',), ('A',)]
-  Symmetry-groups used in pdb_2: [('A',), ('B',)]
+  Symmetry-groups used in reference.pdb: [('B',), ('A',)]
+  Symmetry-groups used in model.pdb: [('A',), ('B',)]
   Closed Symmetry with strict parameters
   Mapping found: {'A': 'B', 'B': 'A'}
   --------------------------------------------------------------------------------
-  Checking consistency between  and 
+  Checking consistency between model.pdb and reference.pdb
   Consistency check: OK
   --------------------------------------------------------------------------------
   Computing QS-score
-  QSscore pdb_1, pdb_2: best: 0.90, global: 0.90
+  QSscore reference.pdb, model.pdb: best: 0.90, global: 0.90
   --------------------------------------------------------------------------------
   Computing lDDT scores
   lDDT settings: 
@@ -226,8 +234,8 @@ Example usage:
   Global LDDT score: 0.7854
   (904568 conserved distances out of 1151664 checked, over 4 thresholds)
    --> Computing oligomeric lDDT score
-  Reference pdb_1 has: 2 chains
-  Model pdb_2 has: 2 chains
+  Reference reference.pdb has: 2 chains
+  Model model.pdb has: 2 chains
   Coverage: 1 (384 out of 384 residues)
   Oligo lDDT score: 0.8025
    --> Computing weighted lDDT score
@@ -243,8 +251,8 @@ In the example above the output file looks as follows:
 
   {
       "result": {
-          "": {
-              "": {
+          "model.pdb": {
+              "reference.pdb": {
                   "info": {
                       "residue_names_consistent": true, 
                       "mapping": {
@@ -252,6 +260,7 @@ In the example above the output file looks as follows:
                               "A": "B", 
                               "B": "A"
                           }, 
+                          "chain_mapping_scheme": "strict", 
                           "alignments": [
                               ">reference:A\n-PGLFLTLEGLDGSGKTTQARRLAAFLEAQGRPVLLTREPGGGLPEVRSL---QELSPEAEYLLFSADRAEHVRKVILPGLAAGKVVISDRYLDSSLAYQGYGRGLPLPWLREVAREATRGLKPRLTFLLDLPPEAALRRVR-------LGLEFFRRVREGYLALARAEPGRFVVLDATLPEEEIARAIQAHLRPLLP\n>model:B\nMPGLFLTLEGLDGSGKTTQARRLAAFLEAQGRPVLLTREPGGGLPEVRSLLLTQELSPEAEYLLFSADRAEHVRKVILPGLAAGKVVISDRYLDSSLAYQGYGRGLPLPWLREVAREATRGLKPRLTFLLDLPPEAALRRVRRPDRLEGLGLEFFRRVREGYLALARAEPGRFVVLDATLPEEEIARAIQAHLRPLLP", 
                               ">reference:B\n-PGLFLTLEGLDGSGKTTQARRLAAFLEAQGRPVLLTREPGGGLPEVRSLLLTQELSPEAEYLLFSADRAEHVRKVILPGLAAGKVVISDRYLDSSLAYQGYGRGLPLPWLREVAREATRGLKPRLTFLLDLPPEAALRRVRRPDRLEGLGLEFFRRVREGYLALARAEPGRFVVLDATLPEEEIARAIQAHLRPLLP\n>model:A\nMPGLFLTLEGLDGSGKTTQARRLAAFLEAQGRPVLLTREPGGGLPEVRSLLLTQELSPEAEYLLFSADRAEHVRKVILPGLAAGKVVISDRYLDSSLAYQGYGRGLPLPWLREVAREATRGLKPRLTFLLDLPPEAALRRVRRPDRLEGLGLEFFRRVREGYLALARAEPGRFVVLDATLPEEEIARAIQAHLRPLLP"
@@ -261,7 +270,7 @@ In the example above the output file looks as follows:
                   "lddt": {
                       "oligo_lddt": {
                           "status": "SUCCESS", 
-                          "global_score": 0.8025223016738892, 
+                          "global_score": 0.8025223275721413, 
                           "error": ""
                       }, 
                       "weighted_lddt": {
@@ -311,6 +320,7 @@ In the example above the output file looks as follows:
           "save_per_residue_scores": false, 
           "fault_tolerant": false, 
           "reference_selection": "", 
+          "qs_rmsd": false, 
           "cwd": "CWD", 
           "inclusion_radius": 15.0, 
           "angle_tolerance": 15.0, 
@@ -340,7 +350,8 @@ calculate eg. QS-score directly:
 
 .. code:: console
 
-  $OST_ROOT/bin/ost compare-structures --model model.pdb --reference reference.pdb --output output_qs.json --qs-score --residue-number-alignment
+  $ $OST_ROOT/bin/ost compare-structures --model model.pdb --reference reference.pdb --output output_qs.json --qs-score --residue-number-alignment
+
   ################################################################################
   Reading input files (fault_tolerant=False)
    --> reading model from model.pdb
@@ -349,7 +360,6 @@ calculate eg. QS-score directly:
   imported 3 chains, 408 residues, 3011 atoms; with 0 helices and 0 strands
   ################################################################################
   Comparing model.pdb to reference.pdb
-  Chains removed from reference.pdb: _
   Chains in reference.pdb: AB
   Chains in model.pdb: AB
   Chemically equivalent chain-groups in reference.pdb: [['B', 'A']]
