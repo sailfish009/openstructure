@@ -215,6 +215,12 @@ def ParseHHblitsOutput(output):
             return seq.CreateAlignment(s1, s2)
         try:
             while True:
+                # Lines which we are interested in:
+                # - "Done!" -> end of list
+                # - "No ..." -> next item in list
+                # - "T <hit_id> <start> <data> <end>"
+                # - "Q <query_id> <start> <data> <end>"
+                # -> rest is to be skipped
                 line = lines.next()
                 if len(line.strip()) == 0:
                     continue
@@ -238,19 +244,30 @@ def ParseHHblitsOutput(output):
                     lines.next()
                     continue
                 assert entry_index != None
+                # Skip all "T ..." and "Q ..." lines besides the one we want
                 if line[1:].startswith(' Consensus'):
                     continue
                 if line[1:].startswith(' ss_pred'):
                     continue
                 if line[1:].startswith(' ss_conf'):
                     continue
+                if line[1:].startswith(' ss_dssp'):
+                    continue
                 if line.startswith('T '):
                     end_pos = line.find(' ', 22)
-                    assert end_pos != -1
+                    # this can fail if we didn't skip all other "T ..." lines
+                    if end_pos == -1:
+                        error_str = "Unparsable line '%s' for entry No %d" \
+                                    % (line.strip(), entry_index + 1)
+                        raise AssertionError(error_str)
                     templ_str += line[22:end_pos]
                 if line.startswith('Q '):
                     end_pos = line.find(' ', 22)
-                    assert end_pos != -1
+                    # this can fail if we didn't skip all other "Q ..." lines
+                    if end_pos == -1:
+                        error_str = "Unparsable line '%s' for entry No %d" \
+                                    % (line.strip(), entry_index + 1)
+                        raise AssertionError(error_str)
                     query_str += line[22:end_pos]
         except StopIteration:
             if len(query_str) > 0:
