@@ -207,7 +207,7 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
   bool found=false;
   std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
   while (line_iter!=stereo_chemical_props_file.end()) {
-    if ((*line_iter).length()!=0 && (*line_iter).length()!=1) {
+    if ((*line_iter).length() > 1) {
       StringRef line_string_ref(line_iter->data(),(*line_iter).length());
       std::vector<StringRef> line_str_vec = line_string_ref.split();
       if (line_str_vec[0].str()==header) {
@@ -220,7 +220,7 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
             if (second_line_str_vec.size()!=4) {
               std::cout << "The number of elements in one of the lines is wrong" << std::endl;
               return StereoChemicalParams();
-            } 
+            }
             StringRef item = second_line_str_vec[0];
             String res = second_line_str_vec[1].str();          
             std::pair<bool,float> parse_value = second_line_str_vec[2].to_float();
@@ -231,13 +231,13 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
             } else {
               std::cout << "One of the values in the third column is not a number" << std::endl;
               return StereoChemicalParams();
-            };
+            }
             if (parse_stddev.first==true) {
               stddev=static_cast<Real>(parse_stddev.second);
             } else {
               std::cout << "One of the values in the fourth column is not a number" << std::endl;
               return StereoChemicalParams();
-            };
+            }
             std::vector<StringRef> split_item = item.split('-');
             String rearranged_item;
             if (split_item.size() == 2) {
@@ -264,10 +264,10 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
             } else {
               std::cout << "One of the strings describing the parameter has the wrong format" << std::endl;
               return StereoChemicalParams();
-            }            
+            }
             table.SetParam(rearranged_item,res,value,stddev);
-            line_iter++;
-            }  
+          }
+          line_iter++;
         }
       }  
     }
@@ -293,7 +293,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
   bool found=false;
   std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
   while (line_iter!=stereo_chemical_props_file.end()) {
-    if ((*line_iter).length()!=0 && (*line_iter).length()!=1) {
+    if ((*line_iter).length() > 1) {
       StringRef line_string_ref(line_iter->data(),(*line_iter).length());
       std::vector<StringRef> line_str_vec = line_string_ref.split();
       if (line_str_vec[0].str()=="Non-bonded") {
@@ -306,7 +306,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
             if (second_line_str_vec.size()!=3) {
               std::cout << "The number of elements in one of the lines is wrong" << std::endl;
               return ClashingDistances();
-            } 
+            }
             String item = second_line_str_vec[0].str();
 
             std::pair<bool,float> parse_value = second_line_str_vec[1].to_float();
@@ -317,7 +317,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
             } else {
               std::cout << "One of the distance values is not a number" << std::endl;
               return ClashingDistances();
-            };
+            }
             if (parse_stddev.first==true) {
               stddev=static_cast<Real>(parse_stddev.second);
             } else {
@@ -329,16 +329,16 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
             if (itemsr.size() != 3) {
               std::cout << "One of the strings describing the interacting atoms has the wrong format" << std::endl;
               return ClashingDistances();
-            }  
+            }
             String ele1=eles[0].str();
             String ele2=eles[1].str();
             if (ele2 < ele1) {
               table.SetClashingDistance(ele2,ele1,value,stddev);
             } else {
               table.SetClashingDistance(ele1,ele2,value,stddev);
-            }  
-            line_iter++;
-          }  
+            }
+          }
+          line_iter++;
         }
       }  
     }
