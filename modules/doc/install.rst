@@ -299,16 +299,8 @@ from source.
 
 On some Linux distributions, there are issues with Qt4 and hence it may not be
 possible to build OpenStructure with GUI support at all. This is for instance
-known to be an issue with boost versions >= 1.62.
-
-An additional problem arises for gcc versions >= 6. There an extra flag is
-required to use the C++98 standard:
-
-.. code-block:: bash
-
-  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
-
-We hope to support Qt5 and C++11 in the next OpenStructure release.
+known to be an issue with boost versions >= 1.62. We hope to support Qt5 in the
+next OpenStructure release.
 
 
 **Ubuntu 16.04 with GUI**
@@ -342,12 +334,11 @@ All the dependencies can be installed from the package manager as follows:
   sudo dnf install cmake eigen3-devel boost-devel libpng-devel python2-devel \
                    fftw-devel libtiff-devel
 
-Fedora 26 has gcc 7 and boost 1.63 by default. Hence, we will need to disable
-Qt4, the GUI and add the extra flag described above:
+Here, we compile a version without GUI as follows:
 
 .. code-block:: bash
 
-  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
+  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF
 
 
 **macOS with Homebrew without GUI**
