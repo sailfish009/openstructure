@@ -19,6 +19,7 @@
 #include <limits>
 #include <ost/log.hh>
 #include <ost/profile.hh>
+#include <ost/message.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/bond_handle.hh>
 #include <ost/mol/torsion_handle.hh>
@@ -29,8 +30,6 @@
 #include "conop.hh"
 
 namespace ost { namespace conop {
-
-
 
 void RuleBasedProcessor::DoProcess(DiagnosticsPtr diags, 
                                    mol::EntityHandle ent) const
@@ -199,6 +198,11 @@ String RuleBasedProcessor::ToString() const {
   return ss.str();
 }
 
-
+void RuleBasedProcessor::_CheckLib() const {
+  if (!lib_) {
+    throw Error("Cannot initialize RuleBasedProcessor without a valid "
+                "CompoundLib object!");
+  }
+}
 
 }}
