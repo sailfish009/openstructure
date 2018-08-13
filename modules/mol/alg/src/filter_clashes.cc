@@ -421,10 +421,15 @@ std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityView&
               remove_sc=true;
               if (always_remove_bb==true) {
                 remove_bb=true;
-              }
-              String name=atom.GetName();
-              if (name=="CA" || name=="N" || name=="O" || name=="C") {
-                remove_bb=true;
+              } else {
+                // we need to check both atom names since the order is random!
+                // -> for angles and clashes this is not needed
+                String name1 = atom.GetName();
+                String name2 = other_atom.GetName();
+                if (name1=="CA" || name1=="N" || name1=="O" || name1=="C" ||
+                    name2=="CA" || name2=="N" || name2=="O" || name2=="C") {
+                  remove_bb=true;
+                }
               }
             } else {
               LOG_VERBOSE("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "PASS")
@@ -629,7 +634,7 @@ std::pair<EntityView,ClashingInfo> FilterClashes(const EntityView& ent, const Cl
     
     if (remove_bb) {
       LOG_VERBOSE("ACTION: removing whole residue " << res);
-      res.SetBoolProp("steric_clash",true);
+      res.SetBoolProp("steric_clash_backbone", true);
       continue;
     }
     if (remove_sc) {
@@ -642,7 +647,7 @@ std::pair<EntityView,ClashingInfo> FilterClashes(const EntityView& ent, const Cl
          filtered.AddAtom(atom);
        }
       }
-      res.SetBoolProp("steric_clash",true);
+      res.SetBoolProp("steric_clash_sidechain", true);
       continue;
     }
     filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
