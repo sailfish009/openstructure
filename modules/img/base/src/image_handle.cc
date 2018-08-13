@@ -153,7 +153,7 @@ void ImageHandle::Reset(const Extent &e, DataType type,DataDomain dom)
 
 bool ImageHandle::IsValid() const
 {
-  return impl_;
+  return static_cast<bool>(impl_);
 }
 
 long ImageHandle::MemSize() const

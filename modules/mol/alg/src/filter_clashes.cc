@@ -118,7 +118,7 @@ std::pair<Real,Real> ClashingDistances::GetClashingDistance(const String& ele1,c
   std::map <String,std::pair<Real,Real> >::const_iterator find_ci= min_distance_.find(key);
   if (find_ci == min_distance_.end()) {
       std::stringstream serr;
-      serr << "Entry for distance " << stkey <<  " not found in the parameter table";   
+      serr << "Entry for distance " << key <<  " not found in the parameter table";
       throw Error(serr.str());
   }    
   return find_ci->second;
@@ -220,7 +220,7 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
             if (second_line_str_vec.size()!=4) {
               std::cout << "The number of elements in one of the lines is wrong" << std::endl;
               return StereoChemicalParams();
-            } 
+            }
             StringRef item = second_line_str_vec[0];
             String res = second_line_str_vec[1].str();          
             std::pair<bool,float> parse_value = second_line_str_vec[2].to_float();
@@ -231,13 +231,13 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
             } else {
               std::cout << "One of the values in the third column is not a number" << std::endl;
               return StereoChemicalParams();
-            };
+            }
             if (parse_stddev.first==true) {
               stddev=static_cast<Real>(parse_stddev.second);
             } else {
               std::cout << "One of the values in the fourth column is not a number" << std::endl;
               return StereoChemicalParams();
-            };
+            }
             std::vector<StringRef> split_item = item.split('-');
             String rearranged_item;
             if (split_item.size() == 2) {
@@ -264,7 +264,7 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
             } else {
               std::cout << "One of the strings describing the parameter has the wrong format" << std::endl;
               return StereoChemicalParams();
-            }            
+            }
             table.SetParam(rearranged_item,res,value,stddev);
           }
           line_iter++;
@@ -306,7 +306,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
             if (second_line_str_vec.size()!=3) {
               std::cout << "The number of elements in one of the lines is wrong" << std::endl;
               return ClashingDistances();
-            } 
+            }
             String item = second_line_str_vec[0].str();
 
             std::pair<bool,float> parse_value = second_line_str_vec[1].to_float();
@@ -317,7 +317,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
             } else {
               std::cout << "One of the distance values is not a number" << std::endl;
               return ClashingDistances();
-            };
+            }
             if (parse_stddev.first==true) {
               stddev=static_cast<Real>(parse_stddev.second);
             } else {
@@ -329,7 +329,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
             if (itemsr.size() != 3) {
               std::cout << "One of the strings describing the interacting atoms has the wrong format" << std::endl;
               return ClashingDistances();
-            }  
+            }
             String ele1=eles[0].str();
             String ele2=eles[1].str();
             if (ele2 < ele1) {
@@ -340,7 +340,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
           }
           line_iter++;
         }
-      }
+      }  
     }
     line_iter++;    
   }

@@ -70,7 +70,7 @@ public:
   // flip normals
   void Invert();
 
-  bool IsValid() const {return impl_;}
+  bool IsValid() const {return static_cast<bool>(impl_);}
 
   bool operator==(const SurfaceHandle& ref) const { return impl_==ref.impl_; }
 

@@ -24,9 +24,13 @@
   Author: Andreas Schenk
 */
 
+#ifndef Q_MOC_RUN
+
 #include <ost/gui/module_config.hh>
 #include <ost/img/data_observer.hh>
 #include "data_viewer_panel_base.hh"
+
+#endif
 
 namespace ost { namespace img { namespace gui {
 
