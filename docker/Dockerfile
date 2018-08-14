@@ -168,7 +168,6 @@ WORKDIR /home
 # ENVIRONMENT
 ##############################################################################
 ENV OST_ROOT="/usr/local"
-ENV OPENSTRUCTURE_VERSION="1.7.1"
 ENV PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
 ENV QT_X11_NO_MITSHM=1
