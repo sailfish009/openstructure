@@ -143,7 +143,7 @@ To get the new action recognised by ``make`` to be placed in
 :file:`stage/libexec/openstructure`, it has to be registered with ``cmake`` in
 :file:`actions/CMakeLists.txt`:
 
-.. code-block:: console
+.. code-block:: cmake
   :linenos:
 
    add_custom_target(actions ALL)
@@ -165,10 +165,10 @@ directory. There are only two really important points:
   environment your action is running in. Actions are called by :file:`ost`,
   that's enough to get everything just right.
 
-* The action of your action happens in the ost branch of the script.
+* The code of your action belongs in the :attr:`__main__` branch of the script.
   Your action will have own function definitions, variables and all the bells
-  and whistles. Hiding behind ost keeps everything separated and makes
-  things easier when it gets to debugging. So just after
+  and whistles. Hiding behind :attr:`__main__` keeps everything separated and
+  makes things easier when it gets to debugging. So just after
 
   .. code-block:: python
 
