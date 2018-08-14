@@ -109,7 +109,12 @@ Example usage:
 
   $ curl https://www.cameo3d.org/static/data/modeling/2018.03.03/5X7J_B/bu_target_01.pdb > reference.pdb
   $ curl https://www.cameo3d.org/static/data/modeling/2018.03.03/5X7J_B/servers/server11/oligo_model-1/superposed_oligo_model-1.pdb > model.pdb
-  $ $OST_ROOT/bin/ost compare-structures --model model.pdb --reference reference.pdb --output output.json --qs-score --residue-number-alignment --lddt --structural-checks --consistency-checks --inclusion-radius 15.0 --bond-tolerance 15.0 --angle-tolerance 15.0 --molck --remove oxt hyd unk --clean-element-column --map-nonstandard-residues
+  $ $OST_ROOT/bin/ost compare-structures \
+        --model model.pdb --reference reference.pdb --output output.json \
+        --qs-score --residue-number-alignment --lddt --structural-checks \
+        --consistency-checks --inclusion-radius 15.0 --bond-tolerance 15.0 \
+        --angle-tolerance 15.0 --molck --remove oxt hyd unk \
+        --clean-element-column --map-nonstandard-residues
 
   ################################################################################
   Reading input files (fault_tolerant=False)
@@ -345,7 +350,7 @@ In the example above the output file looks as follows:
       }
   }
 
-If only all the structures are clean one can omit all the checking steps and
+If all the structures are clean one can omit all the checking steps and
 calculate eg. QS-score directly:
 
 .. code:: console
