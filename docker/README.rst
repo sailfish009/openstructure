@@ -4,7 +4,7 @@ OST Docker
 .. note::
 
   For many docker installations it is required to run docker commands as root. As
-  this depends on set up, we skip the `sudo` in all commands.
+  this depends on set up, we skip the ``sudo`` in all commands.
 
 Build Docker image
 ------------------
@@ -23,15 +23,19 @@ or if you downloaded the Dockerfile directly:
 
   docker build --tag <IMAGE NAME> --build-arg OPENSTRUCTURE_VERSION=<VERSION> -f <DOCKERFILE NAME> <PATH TO DOCKERFILE DIR>
 
-You can chose any image name (tag) eg. ost. The `OPENSTRUCTURE_VERSION`
+You can chose any image name (tag) eg. ost. The ``OPENSTRUCTURE_VERSION``
 build argument is mandatory and image will not built without it. See
 `CHANGELOG <https://git.scicore.unibas.ch/schwede/openstructure/blob/master/CHANGELOG.txt>`_
-for current list of available releases.
+for current list of available releases. This is not expected to work for
+versions which are much older than the most recent one since the dependencies
+might have changed, but it should work for a few versions. If you need the
+recipe for an older version, we suggest to get an older recipe from the git
+history.
 
 Testing the image
 -----------------
 
-One can find a exemplary script (`test_docker.py`) in the downloaded directory.
+One can find a exemplary script (``test_docker.py``) in the downloaded directory.
 To run it do:
 
 .. code-block::
@@ -39,7 +43,7 @@ To run it do:
   cd <PATH TO OST>/docker
   docker run --rm -v $(pwd):/home <IMAGE NAME> test_docker.py
 
-As the last line you should see `OST is working!`.
+As the last line you should see ``OST is working!``.
 
 Run script and action with OST
 ------------------------------
@@ -61,7 +65,7 @@ Run script and action with OST
 
   .. code-block:: bash
 
-    docker run --rm -v /home/user:/home <IMAGE NAME> home/script.py /home/pdbs/struct.pdb
+    docker run --rm -v /home/user:/home <IMAGE NAME> /home/script.py /home/pdbs/struct.pdb
   
   An easy solution to mount a CWD is to use $(pwd) command in the -v option
   of the Docker. For an example see the action exemplary run.
@@ -83,7 +87,7 @@ To run chosen action do:
     docker run --rm <IMAGE NAME> <ACTION NAME>
 
  
-Here is an example run of compare-structures action mimicking CAMEO evaluation:
+Here is an example run of the compare-structures action:
 
 .. code-block::
 
@@ -123,7 +127,7 @@ In order to run OST script do:
 Run ost with utility command
 ###############################
 
-One can also use provided utility bash script `run_docker_ost` to run basic
+One can also use provided utility bash script ``run_docker_ost`` to run basic
 scripts and actions:
 
 .. code-block:: bash
@@ -137,7 +141,7 @@ options. It is useful to link the command to the binary directory eg. in linux:
 
   ln -s <PATH TO OST>/docker/run_docker_ost /usr/bin/run_docker_ost
 
-In order to run an exemplary script (`test_docker.py`) do:
+In order to run an exemplary script (``test_docker.py``) do:
 
 .. code-block::
 
@@ -170,13 +174,13 @@ the entrypoint:
 
 .. code-block::
 
-  sudo docker run --rm -ti --entrypoint <COMMAND> <IMAGE NAME> [COMMAND OPTIONS]
+  docker run --rm -ti --entrypoint <COMMAND> <IMAGE NAME> [COMMAND OPTIONS]
 
 Eg. to run molck type:
 
 .. code-block::
 
-  sudo docker run --rm -ti --entrypoint molck <IMAGE NAME> --help
+  docker run --rm -ti --entrypoint molck <IMAGE NAME> --help
 
 .. note::
 

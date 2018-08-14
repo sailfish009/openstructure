@@ -4,14 +4,22 @@ Installing OpenStructure From Source
 Brief Overview
 --------------------------------------------------------------------------------
 
-Compiling OpenStructure consists of several steps that are described below in
-more detail. In essence, these steps are:
+For a simple and portable way to use OpenStructure we recommend using a
+container solution. We provide recipes to build images for
+`Docker <https://www.docker.com/>`_ and
+`Singularity <https://www.sylabs.io/guides/2.5.1/user-guide>`_.
+The latest recipes and instructions can be found on our GitLab site
+(`Docker instructions <https://git.scicore.unibas.ch/schwede/openstructure/tree/develop/docker>`_ and
+`Singularity instructions <https://git.scicore.unibas.ch/schwede/openstructure/tree/develop/singularity>`_).
+
+If you wish to compile OpenStructure outside of a container, you need to follow
+the steps which we describe in detail below. In essence, these steps are:
 
 * Installing the Dependencies
 * Checking out the source code from GIT
 * Configuring the build with cmake
 * Compiling an Linking
- 
+
 
 Installing the Dependencies
 --------------------------------------------------------------------------------

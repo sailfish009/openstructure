@@ -16,7 +16,12 @@ In order to build OST Singularity image:
   Running singularity build command requires root permissions (sudo).
 
 One can chose any name for an image. For the purose of this file we will assume
-that the image name is `ost.img`.
+that the image name is ``ost.img``.
+
+Here we only keep the recipe for the most recent version of OpenStructure. To
+build an image for a different version, you can either adapt the
+``OPENSTRUCTURE_VERSION`` variable in the recipe or look in the git history for
+an older recipe.
 
 Available apps
 --------------
@@ -58,5 +63,5 @@ Then (in the same terminal window) to invoke IPython app one can just type:
 
   ost_ipython
 
-To make the alias permanent put it into your `.bashrc` file or whatever file you
-use to store the aliases.
+To make the alias permanent put it into your ``.bashrc`` file or whatever file
+you use to store the aliases.

@@ -1,7 +1,7 @@
 Changes in Release <RELEASE NUMBER>
 --------------------------------------------------------------------------------
 
-  * Introduced recipes to generate Docker and Singularity containers.
+  * Introduced recipes to generate Docker and Singularity images.
   * Moved "nonstandard" functions from ost.conop to ost.mol.alg. Mapping
     functions CopyResidue, CopyConserved and CopyNonConserved that were
     previousely imported from ost.conop are now to be imported from ost.mol.alg.
