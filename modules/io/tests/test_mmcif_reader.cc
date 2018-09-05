@@ -598,6 +598,7 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
   BOOST_CHECK_EQUAL(cit.GetID(), String("Foo"));
   BOOST_CHECK_EQUAL(cit.GetYear(), 1979);
   BOOST_CHECK_EQUAL(cit.GetPublishedIn(), String("The Guide"));
+  BOOST_CHECK_EQUAL(cit.IsCitationTypeBook(), true);
 
   // ensure that we override book_title if not properly given
   columns.pop_back();
@@ -609,8 +610,7 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
   BOOST_CHECK_EQUAL(tmmcif_p.GetInfo().GetCitations().back().GetPublishedIn(),
                     String("Hitch"));
 
-  // ensure that we override book_title if journal given
-  // (def. behavior on RCSB webpage)
+  // ensure that we override journal if book_title given
   columns.pop_back();
   columns.pop_back();
   columns.push_back(StringRef("The Guide", 9));
@@ -618,7 +618,7 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
 
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
   BOOST_CHECK_EQUAL(tmmcif_p.GetInfo().GetCitations().back().GetPublishedIn(),
-                    String("Hitch"));
+                    String("The Guide"));
 
   BOOST_TEST_MESSAGE("  done.");
 }

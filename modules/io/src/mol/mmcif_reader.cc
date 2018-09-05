@@ -797,31 +797,25 @@ void MMCifReader::ParseCitation(const std::vector<StringRef>& columns)
       cit.SetISBN(columns[indices_[BOOK_ID_ISBN]].str());
     }
   }
+  if (indices_[JOURNAL_ABBREV] != -1) {
+    if ((columns[indices_[JOURNAL_ABBREV]] != StringRef(".", 1)) &&
+        (columns[indices_[JOURNAL_ABBREV]][0] != '?')) {
+          cit.SetPublishedIn(columns[indices_[JOURNAL_ABBREV]].str());
+          cit.SetCitationTypeJournal();
+        }
+  }
   if (indices_[BOOK_TITLE] != -1) {
     // this is only set in few PDB entries and RCSB overrides it with
     // the journal_abbrev for their citations
     // -> as of August 1, 2017, 5 entries known: 5b1j, 5b1k, 5fax, 5fbz, 5ffn
     //    -> all those have journal_abbrev set
     if ((columns[indices_[BOOK_TITLE]] != StringRef(".", 1)) &&
-        (columns[indices_[BOOK_TITLE]][0]!='?')) {
+        (columns[indices_[BOOK_TITLE]][0] != '?')) {
+      // This will override published_in if already set by journal_abbrev. We
+      // consider this OK for now since usually the book title is copied to
+      // the journal_abbrev attribute.
       cit.SetPublishedIn(columns[indices_[BOOK_TITLE]].str());
-    }
-  }
-  if (indices_[JOURNAL_ABBREV] != -1) {
-    if (columns[indices_[JOURNAL_ABBREV]] != StringRef(".", 1)) {
-      const String journal_abbrev = columns[indices_[JOURNAL_ABBREV]].str();
-      const String published_in = cit.GetPublishedIn();
-      if (published_in.length() > 0 && published_in != journal_abbrev) {
-        LOG_WARNING(this->FormatDiagnostic(STAR_DIAG_WARNING,
-                                           "The 'published_in' field was "
-                                           "already set by citation.book_title "
-                                           "'" + published_in + "'! "
-                                           "This will be overwritten by "
-                                           "citation.journal_abbrev '" +
-                                           journal_abbrev + "'.",
-                                           this->GetCurrentLinenum()));
-      }
-      cit.SetPublishedIn(journal_abbrev);
+      cit.SetCitationTypeBook();
     }
   }
   if (indices_[JOURNAL_VOLUME] != -1) {
