@@ -390,6 +390,13 @@ private:
 
 class DLLEXPORT_OST_IO MMCifInfoCitation {
 public:
+  /// \enum types of citations
+  typedef enum {
+    JOURNAL,
+    BOOK,
+    UNKNOWN
+  } MMCifInfoCType;
+
   /// \brief Create a citation.
   MMCifInfoCitation(): id_(""), where_(UNKNOWN), cas_(""), published_in_(""),
     volume_(""), page_first_(""), page_last_(""), doi_(""), pubmed_(0),
@@ -506,6 +513,54 @@ public:
   /// \return title
   String GetTitle() const { return title_; }
 
+  /// \brief Set the type of a publication
+  ///
+  /// \param publication_type
+  void SetCitationType(MMCifInfoCType publication_type) {
+    where_ = publication_type;
+  }
+
+  /// \brief Set the type of a publication to journal
+  void SetCitationTypeJournal() {
+    where_ = MMCifInfoCitation::JOURNAL;
+  }
+
+  /// \brief Set the type of a publication to book
+  void SetCitationTypeBook() {
+    where_ = MMCifInfoCitation::BOOK;
+  }
+
+  /// \brief Set the type of a publication to unknown
+  void SetCitationTypeUnknown() {
+    where_ = MMCifInfoCitation::UNKNOWN;
+  }
+
+  /// \brief Get the type of a publication
+  ///
+  /// \return citation type
+  MMCifInfoCType GetCitationType() const { return where_; }
+
+  /// \brief Check a citation to be published in a journal
+  ///
+  /// \return true or false
+  bool IsCitationTypeJournal() const {
+    return where_ == MMCifInfoCitation::JOURNAL;
+  }
+
+  /// \brief Check a citation to be published in a book
+  ///
+  /// \return true or false
+  bool IsCitationTypeBook() const {
+    return where_ == MMCifInfoCitation::BOOK;
+  }
+
+  /// \brief Check if the citation type is unknow
+  ///
+  /// \return true or false
+  bool IsCitationTypeUnknown() const {
+    return where_ == MMCifInfoCitation::UNKNOWN;
+  }
+
   /// \brief Set the list of authors
   ///
   /// \param list
@@ -574,13 +629,6 @@ public:
   }
 
 private:
-  /// \enum types of citations
-  typedef enum {
-    JOURNAL,
-    BOOK,
-    UNKNOWN
-  } MMCifInfoCType;
-
   String              id_;           ///< internal identifier
   MMCifInfoCType      where_;        ///< journal or book?
   String              cas_;          ///< CAS identifier
