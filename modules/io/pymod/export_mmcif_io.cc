@@ -49,6 +49,12 @@ void export_mmcif_io()
                                    return_value_policy<copy_const_reference>()))
     ;
 
+  enum_<MMCifInfoCitation::MMCifInfoCType>("MMCifInfoCType")
+    .value("Journal", MMCifInfoCitation::JOURNAL)
+    .value("Book", MMCifInfoCitation::BOOK)
+    .value("Unknown", MMCifInfoCitation::UNKNOWN)
+  ;
+ 
   class_<MMCifInfoCitation>("MMCifInfoCitation", init<>())
     .def("SetID", &MMCifInfoCitation::SetID)
     .def("GetID", &MMCifInfoCitation::GetID)
@@ -72,6 +78,14 @@ void export_mmcif_io()
     .def("GetYear", &MMCifInfoCitation::GetYear)
     .def("SetTitle", &MMCifInfoCitation::SetTitle)
     .def("GetTitle", &MMCifInfoCitation::GetTitle)
+    .def("SetCitationType", &MMCifInfoCitation::SetCitationType)
+    .def("SetCitationTypeJournal", &MMCifInfoCitation::SetCitationTypeJournal)
+    .def("SetCitationTypeBook", &MMCifInfoCitation::SetCitationTypeBook)
+    .def("SetCitationTypeUnknown", &MMCifInfoCitation::SetCitationTypeUnknown)
+    .def("GetCitationType", &MMCifInfoCitation::GetCitationType)
+    .def("IsCitationTypeJournal", &MMCifInfoCitation::IsCitationTypeJournal)
+    .def("IsCitationTypeBook", &MMCifInfoCitation::IsCitationTypeBook)
+    .def("IsCitationTypeUnknown", &MMCifInfoCitation::IsCitationTypeUnknown)
     .def("SetAuthorList", &MMCifInfoCitation::SetAuthorList)
     .def("GetAuthorList", make_function(&MMCifInfoCitation::GetAuthorList,
                                    return_value_policy<copy_const_reference>()))
@@ -94,6 +108,8 @@ void export_mmcif_io()
                   &MMCifInfoCitation::SetYear)
     .add_property("title", &MMCifInfoCitation::GetTitle,
                   &MMCifInfoCitation::SetTitle)
+    .add_property("citation_type", &MMCifInfoCitation::GetCitationType,
+                  &MMCifInfoCitation::SetCitationType)
     .add_property("authors", make_function(&MMCifInfoCitation::GetAuthorList,
                                    return_value_policy<copy_const_reference>()),
                   &MMCifInfoCitation::SetAuthorList)
