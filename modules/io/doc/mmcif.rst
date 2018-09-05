@@ -373,6 +373,18 @@ of the annotation available.
     Also available as :meth:`GetTitle`. May also be modified by
     :meth:`SetTitle`.
 
+  .. attribute:: citation_type
+
+     Defines where a citation was published. Either journal, book or unknown.
+
+     Also available as :meth:`GetCitationType`. May also be modified by
+     :meth:`SetCitationType` with values from :class:`MMCifInfoCType`. For
+     conveinience setters :meth:`SetCitationTypeJournal`,
+     :meth:`SetCitationTypeBook` and :meth:`SetCitationTypeUnknown` exist.
+
+     For checking the type of a citation, :meth:`IsCitationTypeJournal`,
+     :meth:`IsCitationTypeBook` and :meth:`IsCitationTypeUnknown` can be used.
+
   .. attribute:: authors
 
     Stores a :class:`~ost.StringList` of authors.
@@ -460,6 +472,38 @@ of the annotation available.
 
     See :attr:`title`
 
+  .. method:: GetCitationType()
+
+    See :attr:`citation_type`
+
+  .. method:: SetCitationType(publication_type)
+
+    See :attr:`citation_type`
+
+  .. method:: SetCitationTypeJournal()
+
+    See :attr:`citation_type`
+
+  .. method:: SetCitationTypeBook()
+
+    See :attr:`citation_type`
+
+  .. method:: SetCitationTypeUnknown()
+
+    See :attr:`citation_type`
+
+  .. method:: IsCitationTypeJournal()
+
+    See :attr:`citation_type`
+
+  .. method:: IsCitationTypeBook()
+
+    See :attr:`citation_type`
+
+  .. method:: IsCitationTypeUnknown()
+
+    See :attr:`citation_type`
+ 
   .. method:: GetAuthorList()
 
     See :attr:`authors`
