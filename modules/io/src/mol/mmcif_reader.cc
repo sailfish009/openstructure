@@ -509,6 +509,9 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
 
   if(!curr_residue_) { // unit test
     update_residue=true;
+    subst_res_id_ = cif_chain_name +
+                    columns[indices_[AUTH_SEQ_ID]].str() +
+                    columns[indices_[PDBX_PDB_INS_CODE]].str();
   } else if (!valid_res_num) {
     if (indices_[AUTH_SEQ_ID] != -1 &&
         indices_[PDBX_PDB_INS_CODE] != -1) {
