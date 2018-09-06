@@ -122,6 +122,8 @@ void export_mmcif_io()
     .add_property("authors", make_function(&MMCifInfoCitation::GetAuthorList,
                                    return_value_policy<copy_const_reference>()),
                   &MMCifInfoCitation::SetAuthorList)
+    .def("__eq__", &MMCifInfoCitation::operator==) 
+    .def("__ne__", &MMCifInfoCitation::operator!=)
   ;
 
   class_<std::vector<MMCifInfoCitation> >("MMCifInfoCitationList", init<>())
