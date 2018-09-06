@@ -72,6 +72,8 @@ BOOST_AUTO_TEST_CASE(mmcif_info_citation)
   cit.SetPubMed(815);
   cit.SetYear(815);
   cit.SetTitle("Foo");
+  cit.SetBookPublisher("Brackelmann and Sons");
+  cit.SetBookPublisherCity("Stenkelfeld");
   cit.SetAuthorList(author_list);
   cit.SetCitationType(MMCifInfoCitation::JOURNAL);
   author_list.clear();
@@ -87,6 +89,8 @@ BOOST_AUTO_TEST_CASE(mmcif_info_citation)
   BOOST_CHECK(cit.GetPubMed() == 815);
   BOOST_CHECK(cit.GetYear() == 815);
   BOOST_CHECK(cit.GetTitle() == "Foo");
+  BOOST_CHECK(cit.GetBookPublisher() == "Brackelmann and Sons");
+  BOOST_CHECK(cit.GetBookPublisherCity() == "Stenkelfeld");
   BOOST_CHECK(cit.GetCitationType() == MMCifInfoCitation::JOURNAL);
   BOOST_CHECK(cit.IsCitationTypeJournal() == true);
   BOOST_CHECK(cit.IsCitationTypeBook() == false);

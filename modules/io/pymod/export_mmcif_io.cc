@@ -78,6 +78,10 @@ void export_mmcif_io()
     .def("GetYear", &MMCifInfoCitation::GetYear)
     .def("SetTitle", &MMCifInfoCitation::SetTitle)
     .def("GetTitle", &MMCifInfoCitation::GetTitle)
+    .def("SetBookPublisher", &MMCifInfoCitation::SetBookPublisher)
+    .def("GetBookPublisher", &MMCifInfoCitation::GetBookPublisher)
+    .def("SetBookPublisherCity", &MMCifInfoCitation::SetBookPublisherCity)
+    .def("GetBookPublisherCity", &MMCifInfoCitation::GetBookPublisherCity)
     .def("SetCitationType", &MMCifInfoCitation::SetCitationType)
     .def("SetCitationTypeJournal", &MMCifInfoCitation::SetCitationTypeJournal)
     .def("SetCitationTypeBook", &MMCifInfoCitation::SetCitationTypeBook)
@@ -108,6 +112,11 @@ void export_mmcif_io()
                   &MMCifInfoCitation::SetYear)
     .add_property("title", &MMCifInfoCitation::GetTitle,
                   &MMCifInfoCitation::SetTitle)
+    .add_property("book_publisher", &MMCifInfoCitation::GetBookPublisher,
+                  &MMCifInfoCitation::SetBookPublisher)
+    .add_property("book_publisher_city",
+                  &MMCifInfoCitation::GetBookPublisherCity,
+                  &MMCifInfoCitation::SetBookPublisherCity)
     .add_property("citation_type", &MMCifInfoCitation::GetCitationType,
                   &MMCifInfoCitation::SetCitationType)
     .add_property("authors", make_function(&MMCifInfoCitation::GetAuthorList,
