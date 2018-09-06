@@ -373,6 +373,21 @@ of the annotation available.
     Also available as :meth:`GetTitle`. May also be modified by
     :meth:`SetTitle`.
 
+  .. attribute:: book_publisher
+
+    Name of publisher of the citation, relevant for books and book chapters.
+
+    Also available as :meth:`GetBookPublisher` and :meth:`SetBookPublisher`.
+
+  .. attribute:: book_publisher_city
+
+    City of the publisher of the citation, relevant for books and book
+    chapters.
+
+    Also available as :meth:`GetBookPublisherCity` and
+    :meth:`SetBookPublisherCity`.
+
+ 
   .. attribute:: citation_type
 
      Defines where a citation was published. Either journal, book or unknown.
@@ -471,6 +486,22 @@ of the annotation available.
   .. method:: SetTitle(title)
 
     See :attr:`title`
+
+  .. method:: GetBookPublisher
+
+    See :attr:`book_publisher`
+
+  .. method:: SetBookPublisher
+
+    See :attr:`book_publisher`
+
+  .. method:: GetBookPublisherCity
+
+    See :attr:`book_publisher_city`
+
+  .. method:: SetBookPublisherCity
+
+    See :attr:`book_publisher_city`
 
   .. method:: GetCitationType()
 
