@@ -191,6 +191,8 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     indices_[ABSTRACT_ID_CAS]         = header.GetIndex("abstract_id_CAS");
     indices_[BOOK_ID_ISBN]            = header.GetIndex("book_id_ISBN");
     indices_[BOOK_TITLE]              = header.GetIndex("book_title");
+    indices_[BOOK_PUBLISHER]          = header.GetIndex("book_publisher");
+    indices_[BOOK_PUBLISHER_CITY]     = header.GetIndex("book_publisher_city");
     indices_[JOURNAL_ABBREV]          = header.GetIndex("journal_abbrev");
     indices_[YEAR]                    = header.GetIndex("year");
     indices_[TITLE]                   = header.GetIndex("title");
@@ -816,6 +818,16 @@ void MMCifReader::ParseCitation(const std::vector<StringRef>& columns)
       // the journal_abbrev attribute.
       cit.SetPublishedIn(columns[indices_[BOOK_TITLE]].str());
       cit.SetCitationTypeBook();
+      
+      // In theory, book_publisher and book_publisher_city are only set for
+      // books and book chapters, so we only try to fetch them if the citation
+      // type points to book.
+      if (indices_[BOOK_PUBLISHER] != -1) {
+        cit.SetBookPublisher(columns[indices_[BOOK_PUBLISHER]].str());
+      }
+      if (indices_[BOOK_PUBLISHER_CITY] != -1) {
+        cit.SetBookPublisherCity(columns[indices_[BOOK_PUBLISHER_CITY]].str());
+      }
     }
   }
   if (indices_[JOURNAL_VOLUME] != -1) {

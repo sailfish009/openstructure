@@ -583,14 +583,18 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
   tmmcif_h.SetCategory(StringRef("citation", 8));
   tmmcif_h.Add(StringRef("id", 2));
   tmmcif_h.Add(StringRef("year", 4));
+  tmmcif_h.Add(StringRef("book_publisher_city", 19));
   tmmcif_h.Add(StringRef("book_title", 10));
+  tmmcif_h.Add(StringRef("book_publisher", 14));
   tmmcif_h.Add(StringRef("journal_abbrev", 14));
   tmmcif_p.OnBeginLoop(tmmcif_h);
 
   // ensure that we use book_title if no journal given (no RCSB use of this)
   columns.push_back(StringRef("Foo", 3));
   columns.push_back(StringRef("1979", 4));
+  columns.push_back(StringRef("The restaurant", 14));
   columns.push_back(StringRef("The Guide", 9));
+  columns.push_back(StringRef("Doug", 4));
   columns.push_back(StringRef(".", 1));
 
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
@@ -598,12 +602,16 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
   BOOST_CHECK_EQUAL(cit.GetID(), String("Foo"));
   BOOST_CHECK_EQUAL(cit.GetYear(), 1979);
   BOOST_CHECK_EQUAL(cit.GetPublishedIn(), String("The Guide"));
+  BOOST_CHECK_EQUAL(cit.GetBookPublisher(), String("Doug"));
+  BOOST_CHECK_EQUAL(cit.GetBookPublisherCity(), String("The restaurant"));
   BOOST_CHECK_EQUAL(cit.IsCitationTypeBook(), true);
 
   // ensure that we override book_title if not properly given
   columns.pop_back();
   columns.pop_back();
+  columns.pop_back();
   columns.push_back(StringRef(".", 1));
+  columns.push_back(StringRef("Doug", 4));
   columns.push_back(StringRef("Hitch", 5));
 
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
@@ -613,7 +621,9 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
   // ensure that we override journal if book_title given
   columns.pop_back();
   columns.pop_back();
+  columns.pop_back();
   columns.push_back(StringRef("The Guide", 9));
+  columns.push_back(StringRef("Doug", 4));
   columns.push_back(StringRef("Hitch", 5));
 
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
