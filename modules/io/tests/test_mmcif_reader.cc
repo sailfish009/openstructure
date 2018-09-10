@@ -51,7 +51,6 @@ public:
 
   using MMCifReader::OnBeginLoop;
   using MMCifReader::OnEndData;
-  using MMCifReader::IsValidPDBIdent;
   using MMCifReader::ParseAtomIdent;
   using MMCifReader::ParseAndAddAtom;
   using MMCifReader::ParseEntity;
@@ -112,29 +111,6 @@ conop::CompoundLibPtr SetDefaultCompoundLib() {
 }
 
 BOOST_AUTO_TEST_SUITE( io );
-
-BOOST_AUTO_TEST_CASE(mmcif_isvalidpdbident)
-{
-  mol::EntityHandle eh=mol::CreateEntity();
-
-  // on changing the tests for a PDB id in mmcif files, extend this unit test
-  BOOST_TEST_MESSAGE("  Running mmcif_isvalidpdbident tests...");
-  std::ifstream s("testfiles/mmcif/atom_site.mmcif");
-  TestMMCifReaderProtected tmmcif_p(s, eh);
-  StringRef id = StringRef("1FOO", 4);
-  BOOST_TEST_MESSAGE("    Testing valid id ('"+ id.str() +"')...");
-  BOOST_CHECK(tmmcif_p.IsValidPDBIdent(id));
-  BOOST_TEST_MESSAGE("    done.");
-  id = StringRef("this is to long for a PDB id", 28);
-  BOOST_TEST_MESSAGE("    Testing oversized PDB id ('"+ id.str() +"')...");
-  BOOST_CHECK(!tmmcif_p.IsValidPDBIdent(id));
-  BOOST_TEST_MESSAGE("    done.");
-  id = StringRef("nFOO", 4);
-  BOOST_TEST_MESSAGE("    Testing PDB id with missing number ('"
-                     + id.str() + "')...");
-  BOOST_CHECK(!tmmcif_p.IsValidPDBIdent(id));
-  BOOST_TEST_MESSAGE("    done.");
-}
 
 BOOST_AUTO_TEST_CASE(mmcif_trystoreidx)
 {
