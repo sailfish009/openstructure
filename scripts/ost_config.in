@@ -76,15 +76,6 @@ fi
 
 set -o noglob
 
-opts=""
-for argument in "$@";do
-  if [ -n "$opts" ]; then
-    opts=$opts"#""$argument"
-  else
-    opts="$argument"
-  fi
-done
-
 # decide whether to start interactively or not
 # interactive mode can be forced by setting -i as a iplt option
 interactive=""
@@ -95,6 +86,3 @@ else
     interactive="-i"
   fi
 fi
-
-
-IFS="#"

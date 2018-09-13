@@ -59,6 +59,24 @@ Local Distance Test scores (lDDT, DRMSD)
   :returns: a tuple containing the counts of the conserved distances in the
             model and of all the checked distances
 
+.. function:: LocalDistDiffTest(model, reference_list, distance_list, settings)
+
+  Wrapper around :func:`LocalDistDiffTest` above.
+
+  :param model: the model structure
+  :type model: :class:`~ost.mol.EntityView`
+  :param reference_list: the list of reference structures from which distances were derived
+  :type reference_list: :class:`list` of :class:`~ost.mol.EntityView`
+  :param distance_list: A residue distance map prepared with :func:`PreparelDDTGlobalRDMap`
+    with *reference_list* and *settings* as parameters.
+  :type distance_list:  :class:`~ost.mol.alg.GlobalRDMap`
+  :param settings: lDDT settings
+  :type settings: :class:`~ost.mol.alg.lDDTSettings`
+
+  :returns: the Local Distance Difference Test score (conserved distances
+            divided by all the checked distances)
+  :rtype:   :class:`float`
+
 .. function:: LocalDistDiffTest(model, target, cutoff, max_dist, \
                                 local_lddt_property_string="")
 
@@ -287,22 +305,356 @@ Local Distance Test scores (lDDT, DRMSD)
   
   :returns: :class:`~ost.mol.alg.GlobalRDMap`
 
-  
-.. class:: UniqueAtomIdentifier
 
-  Object containing enough information to uniquely identify an atom in a structure
+.. function:: PreparelDDTGlobalRDMap(reference_list, cutoff_list, sequence_separation, max_dist)
 
-  .. method:: UniqueAtomIdentifier(chain,residue_number,residue_name,atom_name)
+  A wrapper around :func:`CreateDistanceList` and
+  :func:`CreateDistanceListFromMultipleReferences`. Depending on the length of
+  the ``reference_list`` it calls one or the other.
+
+  :param reference_list: a list of reference structures from which distances are
+    derived
+  :type reference_list:  list of :class:`~ost.mol.EntityView`
+  :param max_dist: the inclusion radius in Angstroms (to determine which
+                   distances are checked for conservation)
+  :type max_dist:  :class:`float`
+  :param sequence_separation: sequence separation parameter ie. maximum distance
+                              between two sequences.
+  :type sequence_separation: :class:`int`
+  :returns: :class:`~ost.mol.alg.GlobalRDMap`
+
+
+.. function:: CleanlDDTReferences(reference_list)
+
+  Prepares references to be used in lDDT calculation. It checks if all references
+  has the same chain name and selects this chain for for further calculations.
+
+  .. warning::
+
+    This function modifies the passed *reference_list* list.
+
+  :param reference_list: A list of reference structures from which distances are
+                         derived
+  :type reference_list:  :class:`list` of :class:`~ost.mol.EntityView`
+
+
+.. function:: CheckStructure(ent, \
+                             bond_table, \
+                             angle_table, \
+                             nonbonded_table, \
+                             bond_tolerance, \
+                             angle_tolerance)
+
+  Perform structural checks and filters the structure.
+
+  :param ent: Structure to check
+  :type ent: :class:`~ost.mol.EntityView`
+  :param bond_table: List of bond stereo chemical parameters obtained from
+    :class:`~ost.io.StereoChemicalParamsReader` or :func:`FillStereoChemicalParams`
+  :type bond_table: :class:`~ost.mol.alg.StereoChemicalParams`
+  :param angle_table: List of angle stereo chemical parameters obtained from
+    :class:`~ost.io.StereoChemicalParamsReader` or :func:`FillStereoChemicalParams`
+  :type angle_table: :class:`~ost.mol.alg.StereoChemicalParams`
+  :param nonbonded_table: Information about the clashing distances obtained from
+    :class:`~ost.io.StereoChemicalParamsReader` or :func:`FillClashingDistances`
+  :type nonbonded_table: :class:`~ost.mol.alg.ClashingDistances`
+  :param bond_tolerance: Tolerance in stddev for bonds
+  :type bond_tolerance: :class:`float`
+  :param angle_tolerance: Tolerance in stddev for angles
+  :type angle_tolerance: :class:`float`
+
+
+.. function:: GetlDDTPerResidueStats(model, distance_list, structural_checks, label)
+
+  Get the per-residue statistics from the lDDT calculation.
+
+  :param model: The model structure
+  :type model: :class:`~ost.mol.EntityHandle`
+  :param distance_list: The list of distances to check for conservation
+  :type distance_list: :class:`~ost.mol.alg.GlobalRDMap`
+  :param structural_checks: Were structural checks performed on the model?
+  :type structural_checks: :class:`bool`
+  :param label: Label used for ResidueHandle properties that store the local
+                scores.
+  :type label: :class:`str`
+  :returns: Per-residue local lDDT scores
+  :rtype: :class:`list` of :class:`~ost.mol.alg.lDDTLocalScore`
+
+
+.. function:: PrintlDDTPerResidueStats(scores, structural_checks, cutoffs_length)
+
+  Print per-residue statistics from lDDT calculation.
+
+  :param scores: Local lDDT scores
+  :type scores: :class:`list` of :class:`~ost.mol.alg.lDDTLocalScore`
+  :param structural_checks: Where structural checks performed on the model?
+  :type structural_checks: :class:`bool`
+  :param cutoffs_length: Length of the cutoffs list used to calculate lDDT
+  :type cutoffs_length: :class:`int`
+
+
+.. class:: lDDTLocalScore(cname, rname, rnum, is_assessed, quality_problems, \
+                          local_lddt, conserved_dist, total_dist)
+
+  Object containing per-residue information about calculated lDDT.
+
+  :param cname: Sets :attr:`cname`
+  :param rname: Sets :attr:`rname`
+  :param rnum: Sets :attr:`rnum`
+  :param is_assessed: Sets :attr:`is_assessed`
+  :param quality_problems: Sets :attr:`quality_problems`
+  :param local_lddt: Sets :attr:`local_lddt`
+  :param conserved_dist: Sets :attr:`conserved_dist`
+  :param total_dist: Sets :attr:`total_dist`
+
+  .. attribute:: cname
+
+    Chain name.
+
+    :type: :class:`str`
+
+  .. attribute:: rname
+
+    Residue name.
+
+    :type: :class:`str`
+
+  .. attribute:: rnum
+
+    Residue number.
+
+    :type: :class:`int`
+
+  .. attribute:: is_assessed
+
+    Is the residue taken into account? Yes or No.
+
+    :type: :class:`str`
+
+  .. attribute:: quality_problems
+
+    Does the residue have quality problems?
+    No if there are no problems, NA if the problems were not assessed, Yes if
+    there are sidechain problems and Yes+ if there are backbone problems.
+
+    :type: :class:`str`
+
+  .. attribute:: local_lddt
+
+    Local lDDT score for residue.
+
+    :type: :class:`float`
+
+  .. attribute:: conserved_dist
+
+    Number of conserved distances.
+
+    :type: :class:`int`
+
+  .. attribute:: total_dist
+
+    Total number of distances.
+
+    :type: :class:`int`
+
+  .. method:: ToString(structural_checks)
+
+    :return: String representation of the lDDTLocalScore object.
+    :rtype:  :class:`str`
+
+    :param structural_checks: Where structural checks applied during calculations?
+    :type structural_checks: bool
+
+  .. method:: GetHeader(structural_checks, cutoffs_length)
+
+    Get the names of the fields as printed by ToString method.
+
+    :param structural_checks: Where structural checks applied during calculations?
+    :type structural_checks: bool
+    :param cutoffs_length: Length of the cutoffs list used for calculations
+    :type cutoffs_length: int
     
-    Creates an UniqueAtomIdentifier object starting from relevant atom information
+.. class:: StereoChemicalProps(bond_table, angle_table, nonbonded_table)
+  
+  Object containing the stereo-chemical properties read form stereochmical_props.txt
+  file.
 
-    :param chain: a string containing the name of the chain to which the atom
-                  belongs
-    :param residue_number: the number of the residue to which the atom belongs
-    :type residue_number:  :class:`~ost.mol.ResNum`
-    :param residue_name: a string containing the name of the residue to which
-                         the atom belongs
-    :param atom_name: a string containing the name of the atom
+  :param bond_table: Sets :attr:`bond_table`
+  :param angle_table: Sets :attr:`angle_table`
+  :param nonbonded_table: Sets :attr:`nonbonded_table`
+
+  .. attribute:: bond_table
+  
+    Object containing bond parameters
+    
+    :type: :class:`~ost.mol.alg.StereoChemicalParams`
+
+  .. attribute:: angle_table
+    
+    Object containing angle parameters
+    
+    :type: :class:`~ost.mol.alg.StereoChemicalParams`
+
+  .. attribute:: nonbonded_table
+    
+    Object containing clashing distances parameters
+    
+    :type: :class:`~ost.mol.alg.ClashingDistances`
+
+
+.. class:: lDDTSettings(radius=15, \
+                        sequence_separation=0, \
+                        cutoffs=(0.5, 1.0, 2.0, 4.0), \
+                        label="locallddt")
+
+  Object containing the settings used for lDDT calculations.
+
+  :param radius: Sets :attr:`radius`.
+  :param sequence_separation: Sets :attr:`sequence_separation`.
+  :param cutoffs: Sets :attr:`cutoffs`.
+  :param label: Sets :attr:`label`.
+
+  .. attribute:: radius
+
+    Distance inclusion radius.
+
+    :type: :class:`float`
+
+  .. attribute:: sequence_separation
+
+    Sequence separation.
+
+    :type: :class:`int`
+
+  .. attribute:: cutoffs
+
+    List of thresholds used to determine distance conservation.
+
+    :type: :class:`list` of :class:`float`
+
+  .. attribute:: label
+
+    The base name for the ResidueHandle properties that store the local scores.
+
+    :type: :class:`str`
+
+  .. method:: PrintParameters()
+
+    Print settings.
+
+  .. method:: ToString()
+
+    :return: String representation of the lDDTSettings object.
+    :rtype:  :class:`str`
+
+.. class:: lDDTScorer(reference, model, settings)
+
+  Object to compute lDDT scores.
+  
+  Example usage.
+  
+  .. code:: python
+  
+    #! /bin/env python
+    """Run lDDT from within script."""
+    from ost.io import LoadPDB
+    from ost.mol.alg import (CleanlDDTReferences,
+                             lDDTSettings, lDDTScorer)
+
+    ent_full = LoadPDB('3ia3', remote=True)
+    model_view = ent_full.Select('cname=A')
+    references = [ent_full.Select('cname=C')]
+
+    #
+    # Initialize settings with default parameters and print them
+    settings = lDDTSettings()
+    settings.PrintParameters()
+
+    # Clean up references
+    CleanlDDTReferences(references)
+    #
+    # Calculate lDDT
+    scorer = lDDTScorer(references=references, model=model_view, settings=settings)
+    print "Global score:", scorer.global_score
+    scorer.PrintPerResidueStats()
+  
+  :param references: Sets :attr:`references`
+  :param model: Sets :attr:`model`
+  :param settings: Sets :attr:`settings`
+  
+  .. attribute:: references
+  
+    A list of reference structures.
+    
+    :type: list(:class:`~ost.mol.EntityView`)
+  
+  .. attribute:: model
+  
+    A model structure. 
+    
+    :type: :class:`~ost.mol.EntityView`
+    
+  .. attribute:: settings
+  
+    Settings used to calculate lDDT.
+    
+    :type: :class:`~ost.mol.alg.lDDTSettings`
+  
+  .. attribute:: global_dist_list
+  
+    Global map of residue properties.
+    
+    :type: :class:`~ost.mol.alg.GlobalRDMap`
+
+  .. attribute:: global_score
+  
+    Global lDDT score. It is calculated as :attr:`conserved_contacts` divided
+    by :attr:`total_contacts`.
+    
+    :type: float
+
+  .. attribute:: conserved_contacts
+  
+    Number of conserved distances.
+  
+    :type: int
+  
+  .. attribute:: total_contacts
+  
+    Number of total distances.
+  
+    :type:
+  
+  .. attribute:: local_scores
+  
+    Local scores. For each of the residue lDDT is it is calculated as residue
+    conserved contacts divided by residue total contacts.
+  
+    :type: list(:class:`~ost.mol.alg.lDDTLocalScore`)
+  
+  .. attribute:: is_valid
+  
+    Is the calculated score valid?
+  
+    :type: bool
+  
+  .. method:: PrintPerResidueStats
+    
+    Print per-residue statistics.
+
+
+.. class:: UniqueAtomIdentifier(chain, residue_number, residue_name, atom_name)
+
+  Object containing enough information to uniquely identify an atom in a
+  structure.
+
+  :param chain: A string containing the name of the chain to which the atom
+                belongs
+  :param residue_number: The number of the residue to which the atom belongs
+  :type residue_number:  :class:`~ost.mol.ResNum`
+  :param residue_name: A string containing the name of the residue to which
+                       the atom belongs
+  :param atom_name: A string containing the name of the atom
 
   .. method:: GetChainName() 
 
@@ -957,6 +1309,102 @@ Algorithms on Structures
                         :class:`~ost.mol.EntityHandle`
 
 
+
+.. class:: FindMemParam
+
+  Result object for the membrane detection algorithm described below
+
+  .. attribute:: axis
+
+    initial search axis from which optimal membrane slab could be found
+
+  .. attribute:: tilt_axis
+
+    Axis around which we tilt the membrane starting from the initial axis
+
+  .. attribute:: tilt
+
+    Angle to tilt around tilt axis
+
+  .. attribute:: angle
+
+    After the tilt operation we perform a rotation around the initial axis
+    with this angle to get the final membrane axis
+
+  .. attribute:: membrane_axis
+
+    The result of applying the tilt and rotation procedure described above.
+    The membrane_axis is orthogonal to the membrane plane and has unit length.
+
+  .. attribute:: pos
+
+    Real number that describes the membrane center point. To get the actual
+    position you can do: pos * membrane_axis
+
+  .. attribute:: width
+
+    Total width of the membrane in A
+
+  .. attribute:: energy
+
+    Pseudo energy of the implicit solvation model
+
+  .. attribute:: membrane_representation
+
+    Dummy atoms that represent the membrane. This entity is only valid if
+    the according flag has been set to True when calling FindMembrane.
+
+
+.. method:: FindMembrane(ent, assign_membrane_representation=True, fast=False)
+
+  Estimates the optimal membrane position of a protein by using an implicit 
+  solvation model. The original algorithm and the used energy function are 
+  described in: Lomize AL, Pogozheva ID, Lomize MA, Mosberg HI (2006) 
+  Positioning of proteins in membranes: A computational approach.
+
+  There are some modifications in this implementation and the procedure is
+  as follows:
+
+  * Initial axis are constructed that build the starting point for initial 
+    parameter grid searches.
+
+  * For every axis, the protein is rotated so that the axis builds the z-axis
+
+    * In order to exclude internal hydrophilic pores, only the outermost atoms
+      with respect the the z-axis enter an initial grid search
+    * The width and position of the membrane is optimized for different 
+      combinations of tilt and rotation angles (further described in
+      :class:`FindMemParam`). The top 20 parametrizations 
+      (only top parametrization if *fast* is True) are stored for further 
+      processing.
+
+  * The 20 best membrane parametrizations from the initial grid search 
+    (only the best if *fast* is set to True) enter a final 
+    minimization step using a Levenberg-Marquardt minimizer. 
+
+
+  :param ent:           Entity of a transmembrane protein, you'll get weird 
+                        results if this is not the case. The energy term
+                        of the result is typically a good indicator whether
+                        *ent* is an actual transmembrane protein.
+  :type ent:            :class:`ost.mol.EntityHandle` / :class:`ost.mol.EntityView`
+
+  :param assign_membrane_representation: Whether to construct a membrane 
+                                         representation using dummy atoms
+
+  :type assign_membrane_representation: :class:`bool`
+
+  :param fast:          If set to false, the 20 best results of the initial grid
+                        search undergo a Levenberg-Marquardt minimization and
+                        the parametrization with optimal minimized energy is 
+                        returned. 
+                        If set to yes, only the best result of the initial grid
+                        search is selected and returned after 
+                        Levenberg-Marquardt minimization.
+
+  :returns:             The results object
+  :rtype:               :class:`ost.mol.alg.FindMemParam`
+
 .. _traj-analysis:
 
 Trajectory Analysis
@@ -1187,3 +1635,288 @@ used to skip frames in the analysis.
 .. automodule:: ost.mol.alg.structure_analysis
    :members:
 
+
+.. _mapping-functions:
+
+Mapping functions
+--------------------------------------------------------------------------------
+
+.. currentmodule:: ost.mol.alg
+
+The following functions help to convert one residue into another by reusing as
+much as possible from the present atoms. They are mainly meant to map from
+standard amino acid to other standard amino acids or from modified amino acids
+to standard amino acids.
+
+.. function:: CopyResidue(src_res, dst_res, editor)
+
+  Copies the atoms of ``src_res`` to ``dst_res`` using the residue names
+  as guide to decide which of the atoms should be copied. If ``src_res`` and
+  ``dst_res`` have the same name, or ``src_res`` is a modified version of
+  ``dst_res`` (i.e. have the same single letter code), CopyConserved will be
+  called, otherwise CopyNonConserved will be called.
+
+  :param src_res: The source residue
+  :type src_res: :class:`~ost.mol.ResidueHandle`
+  :param dst_res: The destination residue
+  :type dst_res: :class:`~ost.mol.ResidueHandle`
+  :param editor: Editor used to modify *dst_res*.
+  :type editor: :class:`~ost.mol.XCSEditor`
+
+  :returns: True if the residue could be copied, False if not.
+
+.. function:: CopyConserved(src_res, dst_res, editor)
+
+  Copies the atoms of ``src_res`` to ``dst_res`` assuming that the parent
+  amino acid of ``src_res`` (or ``src_res`` itself) are identical to ``dst_res``.
+
+  If ``src_res`` and ``dst_res`` are identical, all heavy atoms are copied
+  to ``dst_res``. If ``src_res`` is a modified version of ``dst_res`` and the
+  modification is a pure addition (e.g. the phosphate group of phosphoserine),
+  the modification is stripped off and all other heavy atoms are copied to
+  ``dst_res``. If the modification is not a pure addition, only the backbone
+  heavy atoms are copied to ``dst_res``.
+
+  Additionally, the selenium atom of ``MSE`` is converted to sulphur.
+
+  :param src_res: The source residue
+  :type src_res: :class:`~ost.mol.ResidueHandle`
+  :param dst_res: The destination residue
+  :type dst_res: :class:`~ost.mol.ResidueHandle`
+  :param editor: Editor used to modify *dst_res*.
+  :type editor: :class:`~ost.mol.XCSEditor`
+
+  :returns: A tuple of bools stating whether the residue could be copied and
+    whether the Cbeta atom was inserted into the ``dst_res``.
+
+.. function:: CopyNonConserved(src_res, dst_res, editor)
+
+  Copies the heavy backbone atoms and Cbeta (except for ``GLY``) of ``src_res``
+  to ``dst_res``.
+
+  :param src_res: The source residue
+  :type src_res: :class:`~ost.mol.ResidueHandle`
+  :param dst_res: The destination residue
+  :type dst_res: :class:`~ost.mol.ResidueHandle`
+  :param editor: Editor used to modify *dst_res*.
+  :type editor: :class:`~ost.mol.XCSEditor`
+
+  :returns: A tuple of bools stating whether the residue could be copied and
+    whether the Cbeta atom was inserted into the ``dst_res``.
+
+
+Molecular Checker (Molck)
+--------------------------------------------------------------------------------
+
+Programmatic usage
+##################
+
+Molecular Checker (Molck) could be called directly from the code using Molck
+function:
+
+.. code-block:: python
+
+  #! /bin/env python
+
+  """Run Molck with Python API.
+
+
+  This is an exemplary procedure on how to run Molck using Python API which is
+  equivalent to the command line:
+
+  molck <PDB PATH> --rm=hyd,oxt,nonstd,unk \
+                   --fix-ele --out=<OUTPUT PATH> \
+                   --complib=<PATH TO compounds.chemlib>
+  """
+
+  from ost.io import LoadPDB, SavePDB
+  from ost.mol.alg import MolckSettings, Molck
+                         
+  from ost.conop import CompoundLib
+
+
+  pdbid = "<PDB PATH>"
+  lib = CompoundLib.Load("<PATH TO compounds.chemlib>")
+
+  # Using Molck function
+  ent = LoadPDB(pdbid)
+  ms = MolckSettings(rm_unk_atoms=True,
+                     rm_non_std=True,
+                     rm_hyd_atoms=True,
+                     rm_oxt_atoms=True,
+                     rm_zero_occ_atoms=False,
+                     colored=False,
+                     map_nonstd_res=False,
+                     assign_elem=True)
+  Molck(ent, lib, ms)
+  SavePDB(ent, "<OUTPUT PATH>")
+
+It can also be split into subsequent commands for greater controll:
+
+.. code-block:: python
+
+  #! /bin/env python
+
+  """Run Molck with Python API.
+
+
+  This is an exemplary procedure on how to run Molck using Python API which is
+  equivalent to the command line:
+
+  molck <PDB PATH> --rm=hyd,oxt,nonstd,unk \
+                   --fix-ele --out=<OUTPUT PATH> \
+                   --complib=<PATH TO compounds.chemlib>
+  """
+
+  from ost.io import LoadPDB, SavePDB
+  from ost.mol.alg import (RemoveAtoms, MapNonStandardResidues,
+                           CleanUpElementColumn)
+  from ost.conop import CompoundLib
+
+
+  pdbid = "<PDB PATH>"
+  lib = CompoundLib.Load("<PATH TO compounds.chemlib>")
+  map_nonstd = False
+
+  # Using function chain
+  ent = LoadPDB(pdbid)
+  if map_nonstd:
+      MapNonStandardResidues(lib=lib, ent=ent)
+
+  RemoveAtoms(lib=lib,
+              ent=ent,
+              rm_unk_atoms=True,
+              rm_non_std=True,
+              rm_hyd_atoms=True,
+              rm_oxt_atoms=True,
+              rm_zero_occ_atoms=False,
+              colored=False)
+
+  CleanUpElementColumn(lib=lib, ent=ent)
+  SavePDB(ent, "<OUTPUT PATH>")
+
+API
+###
+
+.. class:: MolckSettings(rm_unk_atoms=False, rm_non_std=False, \
+                         rm_hyd_atoms=True, rm_oxt_atoms=False, \
+                         rm_zero_occ_atoms=False, colored=False, \
+                         map_nonstd_res=True, assign_elem=True)
+
+  Stores settings used for Molecular Checker.
+
+  :param rm_unk_atoms: Sets :attr:`rm_unk_atoms`.
+  :param rm_non_std: Sets :attr:`rm_non_std`.
+  :param rm_hyd_atoms: Sets :attr:`rm_hyd_atoms`.
+  :param rm_oxt_atoms: Sets :attr:`rm_oxt_atoms`.
+  :param rm_zero_occ_atoms: Sets :attr:`rm_zero_occ_atoms`.
+  :param colored: Sets :attr:`colored`.
+  :param map_nonstd_res: Sets :attr:`map_nonstd_res`.
+  :param assign_elem: Sets :attr:`assign_elem`.
+
+  .. attribute:: rm_unk_atoms
+
+    Remove unknown and atoms not following the nomenclature.
+    
+    :type: :class:`bool`
+
+  .. attribute:: rm_non_std
+
+    Remove all residues not one of the 20 standard amino acids
+    
+    :type: :class:`bool`
+
+  .. attribute:: rm_hyd_atoms
+
+    Remove hydrogen atoms
+    
+    :type: :class:`bool`
+
+  .. attribute:: rm_oxt_atoms
+
+    Remove terminal oxygens
+    
+    :type: :class:`bool`
+
+  .. attribute:: rm_zero_occ_atoms
+
+    Remove atoms with zero occupancy
+    
+    :type: :class:`bool`
+
+  .. attribute:: colored
+
+    Whether output should be colored
+    
+    :type: :class:`bool`
+
+  .. attribute:: map_nonstd_res
+
+    Maps modified residues back to the parent amino acid, for example
+    MSE -> MET, SEP -> SER
+    
+    :type: :class:`bool`
+
+  .. attribute:: assign_elem
+
+    Clean up element column
+    
+    :type: :class:`bool`
+
+
+  .. method:: ToString()
+
+    :return: String representation of the MolckSettings.
+    :rtype:  :class:`str`
+
+.. warning::
+
+  The API here is set such that the functions modify the passed structure *ent*
+  in-place. If this is not ok, please work on a copy of the structure.
+
+.. function:: Molck(ent, lib, settings)
+
+  Runs Molck on provided entity.
+
+  :param ent: Structure to check
+  :type ent: :class:`~ost.mol.EntityHandle`
+  :param lib: Compound library
+  :type lib: :class:`~ost.conop.CompoundLib`
+  :param settings: Molck settings
+  :type settings: :class:`MolckSettings`
+
+
+.. function:: MapNonStandardResidues(ent, lib)
+
+  Maps modified residues back to the parent amino acid, for example MSE -> MET.
+
+  :param ent: Structure to check
+  :type ent: :class:`~ost.mol.EntityHandle`
+  :param lib: Compound library
+  :type lib: :class:`~ost.conop.CompoundLib`
+
+.. function:: RemoveAtoms(ent, lib, rm_unk_atoms=False, rm_non_std=False, \
+                          rm_hyd_atoms=True, rm_oxt_atoms=False, \
+                          rm_zero_occ_atoms=False, colored=False)
+
+  Removes atoms and residues according to some criteria.
+
+  :param ent: Structure to check
+  :type ent: :class:`~ost.mol.EntityHandle`
+  :param lib: Compound library
+  :type lib: :class:`~ost.conop.CompoundLib`
+  :param rm_unk_atoms: See :attr:`MolckSettings.rm_unk_atoms`
+  :param rm_non_std: See :attr:`MolckSettings.rm_non_std`
+  :param rm_hyd_atoms: See :attr:`MolckSettings.rm_hyd_atoms`
+  :param rm_oxt_atoms: See :attr:`MolckSettings.rm_oxt_atoms`
+  :param rm_zero_occ_atoms: See :attr:`MolckSettings.rm_zero_occ_atoms`
+  :param colored: See :attr:`MolckSettings.colored`
+
+.. function:: CleanUpElementColumn(ent, lib)
+
+  Clean up element column.
+
+  :param ent: Structure to check
+  :type ent: :class:`~ost.mol.EntityHandle`
+  :param lib: Compound library
+  :type lib: :class:`~ost.conop.CompoundLib`

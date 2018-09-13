@@ -74,7 +74,7 @@ void InfoHandle::Export(const String& file) const
 
 bool InfoHandle::IsValid() const
 {
-  return impl_;
+  return static_cast<bool>(impl_);
 }
 
 

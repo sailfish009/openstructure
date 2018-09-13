@@ -1,6 +1,6 @@
 from ost import seq, mol
 
-def _RenumberSeq(seq_handle):
+def _RenumberSeq(seq_handle, old_number_label=None):
   if not seq_handle.HasAttachedView():
     raise RuntimeError("Sequence Handle has no attached view")
   ev = seq_handle.attached_view.CreateEmptyView()
@@ -11,11 +11,13 @@ def _RenumberSeq(seq_handle):
       if r.IsValid():
           ev.AddResidue(r, mol.INCLUDE_ALL)
           new_numbers.append(pos+1)
+          if old_number_label is not None:
+            r.SetIntProp(old_number_label, r.number.GetNum())
       else:
         raise RuntimeError('Error: renumbering failed at position %s' % pos)
   return ev, new_numbers
 
-def _RenumberAln(aln, seq_index):
+def _RenumberAln(aln, seq_index, old_number_label=None):
   if not aln.sequences[seq_index].HasAttachedView():
     raise RuntimeError("Sequence Handle has no attached view")
   counter=0
@@ -34,11 +36,13 @@ def _RenumberAln(aln, seq_index):
                            % (counter))
       ev.AddResidue(r, mol.INCLUDE_ALL)
       new_numbers.append(counter+1)
+      if old_number_label is not None:
+        r.SetIntProp(old_number_label, r.number.GetNum())
     counter += 1
   return ev, new_numbers
 
 
-def Renumber(seq_handle, sequence_number_with_attached_view=1):
+def Renumber(seq_handle, sequence_number_with_attached_view=1, old_number_label=None):
   """
   Function to renumber an entity according to an alignment between the model
   sequence and the full-length target sequence. The aligned model sequence or
@@ -70,9 +74,9 @@ def Renumber(seq_handle, sequence_number_with_attached_view=1):
   """
   if isinstance(seq_handle, seq.SequenceHandle) \
      or isinstance(seq_handle, seq.ConstSequenceHandle):
-    ev, new_numbers = _RenumberSeq(seq_handle)
+    ev, new_numbers = _RenumberSeq(seq_handle, old_number_label)
   elif isinstance(seq_handle, seq.AlignmentHandle):
-    ev, new_numbers = _RenumberAln(seq_handle, sequence_number_with_attached_view)
+    ev, new_numbers = _RenumberAln(seq_handle, sequence_number_with_attached_view, old_number_label)
   else:
     raise RuntimeError("Unknown input type " + str(type(seq_handle)))
 

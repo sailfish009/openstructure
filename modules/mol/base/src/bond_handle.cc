@@ -47,7 +47,7 @@ BondHandle::operator bool() const
 }
 
 bool BondHandle::IsValid() const {
-  return impl_;
+  return static_cast<bool>(impl_);
 }
 
 AtomHandle BondHandle::GetFirst() const

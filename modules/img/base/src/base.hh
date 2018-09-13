@@ -44,19 +44,9 @@
 #pragma warning(disable:4231)
 #endif
 
-
 #ifdef IRIX
-inline Real round(Real x) {return rint(x);}
-inline float roundf(float x) {return (float)rint((Real)x);}
 using  std::cos;
 using  std::sin;
-#endif
-
-#ifndef round_function
-#define round_function
-#ifndef round
-inline int round(Real x) {return floor(x+0.5);}
-#endif
 #endif
 
 namespace ost { namespace img {

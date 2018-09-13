@@ -6,7 +6,7 @@ import subprocess
 def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False, 
              clustalw_option_string=False):
   '''
-  Runs a clustalw multiple sequence alignment. The results are returned as a
+  Runs a ClustalW multiple sequence alignment. The results are returned as a
   :class:`~ost.seq.AlignmentHandle` instance.
   
   There are two ways to use this function:
@@ -36,17 +36,25 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False,
       parameter (`seq1`). The second parameter (`seq2`) must be :class:`None`.
       
        
-  :param clustalw: path to clustalw executable (used in :func:`~ost.settings.Locate`)
+  :param clustalw: path to ClustalW executable (used in :func:`~ost.settings.Locate`)
   :type clustalw: :class:`str`
   :param nopgap: turn residue-specific gaps off
   :type nopgap: :class:`bool`
-  :param clustalw_option_string: additional clustalw flags (see http://toolkit.tuebingen.mpg.de/clustalw/help_params)
+  :param clustalw_option_string: additional ClustalW flags (see http://www.clustal.org/download/clustalw_help.txt)
   :type clustalw_option_string: :class:`str`
   :param keep_files: do not delete temporary files
   :type keep_files: :class:`bool`
 
-  Note: ClustalW will convert lowercase to uppercase, and change all '.' to '-'. 
-  OST will convert and '?' to 'X' before aligning sequences with Clustalw.
+  .. note ::
+   
+    - In the passed sequences ClustalW will convert lowercase to uppercase, and
+      change all '.' to '-'. OST will convert and '?' to 'X' before aligning
+      sequences with ClustalW.
+    - If a :attr:`sequence name <ost.seq.SequenceHandle.name>` contains spaces,
+      only the part before the space is considered as sequence name. To avoid
+      surprises, you should remove spaces from the sequence name.
+    - Sequence names must be unique (:class:`ValueError` exception raised
+      otherwise).
 
   ClustalW will accept only IUB/IUPAC amino acid and nucleic acid codes:
 
@@ -94,7 +102,8 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False,
 
   sequence_names = set()
   for s in seq_list:
-    sequence_names.add(s.GetName())
+    # we cut out anything after a space to be consistent with ClustalW behaviour
+    sequence_names.add(s.GetName().split(' ')[0])
   if len(sequence_names) < len(seq_list):
     raise ValueError("ClustalW can only process sequences with unique identifiers!")
 

@@ -50,9 +50,24 @@ CompoundLibPtr load_lib()
 
 BOOST_AUTO_TEST_SUITE(conop);
 
+BOOST_AUTO_TEST_CASE(rule_based_init_check)
+{
+  CompoundLibPtr lib; // null ptr is return value when library loading failed
+  BOOST_CHECK_THROW(RuleBasedProcessor rbc1(lib), ost::Error);
+  BOOST_CHECK_THROW(RuleBasedProcessor rbc2(lib, true, false, CONOP_WARN,
+                                            CONOP_WARN, false, true, true, true,
+                                            CONOP_WARN), ost::Error);
+  lib = load_lib();
+  if (!lib) { return; }
+  BOOST_CHECK_NO_THROW(RuleBasedProcessor rbc3(lib));
+  BOOST_CHECK_NO_THROW(RuleBasedProcessor rbc4(lib, true, false, CONOP_WARN,
+                                               CONOP_WARN, false, true, true,
+                                               true, CONOP_WARN));
+}
+
 BOOST_AUTO_TEST_CASE(rule_based_set_get_flags)
 {
-   CompoundLibPtr lib=load_lib(); 
+   CompoundLibPtr lib = load_lib();
    if (!lib) { return; }
    RuleBasedProcessor rbc(lib);
    // check the defaults
@@ -76,7 +91,7 @@ BOOST_AUTO_TEST_CASE(rule_based_set_get_flags)
 
 BOOST_AUTO_TEST_CASE(rule_based_connect)
 {
-  CompoundLibPtr lib=load_lib();
+  CompoundLibPtr lib = load_lib();
   if (!lib) { return; }
   RuleBasedProcessor rbc(lib);
   EntityHandle ent = CreateEntity();
@@ -94,7 +109,7 @@ BOOST_AUTO_TEST_CASE(rule_based_connect)
 
 BOOST_AUTO_TEST_CASE(rule_based_unk_atoms)
 {
-  CompoundLibPtr lib = load_lib(); 
+  CompoundLibPtr lib = load_lib();
   if (!lib) { return; }
   RuleBasedProcessor rbc(lib);
   EntityHandle ent = CreateEntity();
@@ -125,7 +140,7 @@ BOOST_AUTO_TEST_CASE(rule_based_unk_atoms)
 
 BOOST_AUTO_TEST_CASE(guesses_elements_of_unknown_atoms)
 {
-  CompoundLibPtr lib = load_lib(); 
+  CompoundLibPtr lib = load_lib();
   if (!lib) { return; }
   RuleBasedProcessor rbc(lib);
   EntityHandle ent = CreateEntity();
@@ -142,7 +157,7 @@ BOOST_AUTO_TEST_CASE(guesses_elements_of_unknown_atoms)
 
 BOOST_AUTO_TEST_CASE(fills_properties_of_unknown_residues)
 {
-  CompoundLibPtr lib = load_lib(); 
+  CompoundLibPtr lib = load_lib();
   if (!lib) { return; }
   RuleBasedProcessor rbc(lib);
   EntityHandle ent = CreateEntity();
@@ -160,7 +175,7 @@ BOOST_AUTO_TEST_CASE(fills_properties_of_unknown_residues)
 BOOST_AUTO_TEST_CASE(connects_atoms_of_unknown_residues_based_on_distance) 
 {
 
-  CompoundLibPtr lib = load_lib(); 
+  CompoundLibPtr lib = load_lib();
   if (!lib) { return; }
   RuleBasedProcessor rbc(lib);
   EntityHandle ent = CreateEntity();
@@ -177,7 +192,7 @@ BOOST_AUTO_TEST_CASE(connects_atoms_of_unknown_residues_based_on_distance)
 
 BOOST_AUTO_TEST_CASE(rule_based_unk_res)
 {
-  CompoundLibPtr lib = load_lib(); 
+  CompoundLibPtr lib = load_lib();
   if (!lib) { return; }
   RuleBasedProcessor rbc(lib);
   EntityHandle ent = CreateEntity();

@@ -1097,7 +1097,7 @@ bool Scene::HasNode(const String& name) const
 {
   FindNode fn(name);
   this->Apply(fn);
-  return fn.node;
+  return static_cast<bool>(fn.node);
 }
 
 void Scene::Apply(const InputEvent& e, bool request_redraw)

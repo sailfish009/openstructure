@@ -196,7 +196,7 @@ class TestHHblitsBindings(unittest.TestCase):
         _, self.tmpfile = tempfile.mkstemp(suffix='.seq219')
         os.remove(self.tmpfile)
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
-                                 cs_file=self.tmpfile, options={'--alphabet' :
+                                 cs_file=self.tmpfile, options={'-alphabet' :
                                                 os.path.join(self.hh.hhlib_dir,
                                                              'data',
                                                              'cs219.lib')})
@@ -211,7 +211,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
-                                 options={'--alphabet' :
+                                 options={'-alphabet' :
                                           os.path.join(self.hh.hhlib_dir,
                                                        'data',
                                                        'cs219.lib')})
@@ -228,7 +228,7 @@ class TestHHblitsBindings(unittest.TestCase):
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
                                  cs_file='testfiles/test.seq219',
-                                 options={'--alphabet' :
+                                 options={'-alphabet' :
                                           os.path.join(self.hh.hhlib_dir,
                                                        'data',
                                                        'cs219.lib')})
@@ -304,6 +304,17 @@ class TestHHblitsBindings(unittest.TestCase):
                          'HHHHHHHHHHHHHHCCCCHHHHHHHHHHHHHHHHHHCCCCCCHHHHHHHHH'+
                          'HHHHHHHHHHHHCC')
         self.assertEqual(prof['msa'].GetCount(), 253)
+
+    def fastParseHeader(self):
+        header_line = '  1 814cbc1899f35c872169524af30fc2 100.0  5E-100' + \
+                      '  5E-104  710.5  34.1  277    3-293     2-280 (281)'
+        hit, offset = hhblits.ParseHeaderLine(header_line)
+        self.assertEqual(hit.hit_id, '814cbc1899f35c872169524af30fc2')
+        self.assertAlmostEqual(hit.evalue, 0)
+        self.assertAlmostEqual(hit.prob, 100.0)
+        self.assertAlmostEqual(hit.pvalue, 0)
+        self.assertAlmostEqual(hit.score, 710.5)
+        self.assertAlmostEqual(hit.ss_score, 34.1)
 
     def testParseHHblitsOutput(self):
         header, hits = hhblits.ParseHHblitsOutput(open("testfiles/test.hhr"))
@@ -384,8 +395,6 @@ class TestHHblitsBindings(unittest.TestCase):
         self.assertEqual(str(hits[3].aln),
                          'Test                VDPVNFKLLSHCLLVTLAAHL\ne69e1ac0'+
                          'a4b2554d... ATPEQAQLVHKEIRKIVKDTC\n')
-
-# ParseHHblitsOutput
 
 if __name__ == "__main__":
     hhsuite_root_dir =  os.getenv('EBROOTHHMINSUITE')

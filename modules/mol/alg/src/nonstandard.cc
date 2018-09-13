@@ -32,7 +32,7 @@ using namespace ost::mol;
 using namespace ost;
 using namespace ost::conop;
 
-namespace ost { namespace conop {
+namespace ost { namespace mol { namespace alg {
 
 
 bool CopyResidue(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi)
@@ -234,4 +234,4 @@ bool CopyNonConserved(ResidueHandle src_res, ResidueHandle dst_res,
 
 
 
-}}
+}}}

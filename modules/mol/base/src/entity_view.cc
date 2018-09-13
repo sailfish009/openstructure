@@ -322,7 +322,7 @@ EntityView EntityView::Select(const Query& query, QueryFlags flags) const
       tribool c=qs.EvalChain(src_chain.Impl());
       if (c==true) {
         // add everything , i.e. all residues and atoms of this chain.
-        // We can't use AddChain(chain, AddViewFlags::INCLUDE_ALL) since we need
+        // We can't use AddChain(chain, ViewAddFlag::INCLUDE_ALL) since we need
         // to keep track of all atoms added to get the bonds right.
         ChainView dst_chain=view.AddChain(src_chain.GetHandle());
         const ResidueViewList& residues=src_chain.GetResidueList();

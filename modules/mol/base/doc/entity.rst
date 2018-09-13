@@ -118,7 +118,13 @@ The Handle Classes
     an enabled ``USE_NUMPY`` flag (see :ref:`here <cmake-flags>` for details).
 
     :type: :class:`numpy.array`
-  
+
+  .. attribute:: valid
+
+    Validity of handle.
+
+    :type: bool
+
   .. method:: GetName()
 
     :returns: Name associated to this entity.
@@ -327,6 +333,10 @@ The Handle Classes
     :type radius: float
     
     :returns: :class:`AtomHandleList` (list of :class:`AtomHandle`)
+
+  .. method:: IsValid()
+  
+    See :attr:`valid`
     
 .. class:: ChainHandle
 
@@ -424,6 +434,12 @@ The Handle Classes
     :meth:`GetCenterOfAtoms`.
     
     :type: :class:`~ost.geom.Vec3`
+
+  .. attribute:: valid
+
+    Validity of handle.
+
+    :type: bool
     
   .. method:: FindResidue(res_num)
    
@@ -468,6 +484,10 @@ The Handle Classes
   .. method:: GetDescription()
 
     See :attr:`description`
+
+  .. method:: IsValid()
+  
+    See :attr:`valid`
 
 .. class:: ResidueHandle
 
@@ -620,6 +640,43 @@ The Handle Classes
 
     Residue index (starting at 0) within chain.
 
+  .. attribute:: central_atom
+
+    Central atom used for rendering traces. For peptides, this is usually
+    the CA atom. For nucleotides, this is usually the P atom.
+
+    :type: :class:`AtomHandle`
+
+  .. attribute:: central_normal
+
+    Normal computed for :attr:`central_atom`. Only defined for peptides and
+    nucleotides if all required atoms available. Otherwise, the (1,0,0) vector
+    is returned.
+
+    :type: :class:`~ost.geom.Vec3`
+
+  .. attribute:: valid
+
+    Validity of handle.
+
+    :type: bool
+
+  .. attribute:: next
+
+    Residue after this one in the same chain. Invalid handle returned if there
+    is no next residue. Residues are ordered as in :attr:`ChainHandle.residues`
+    independently on whether they are connected or not (see
+    :func:`InSequence` to check for connected residues).
+
+    :type: :class:`ResidueHandle`
+
+  .. attribute:: prev
+
+    Residue before this one in the same chain. Otherwise same behaviour as
+    :attr:`next`.
+
+    :type: :class:`ResidueHandle`
+
   .. method:: FindAtom(atom_name)
 
     Get atom by atom name. See also :attr:`atoms`
@@ -666,7 +723,20 @@ The Handle Classes
   .. method:: GetIndex()
     
     See :attr:`index`
+
+  .. method:: GetCentralAtom()
+              SetCentralAtom()
+    
+    See :attr:`central_atom`
+
+  .. method:: GetCentralNormal()
+    
+    See :attr:`central_normal`
+
+  .. method:: IsValid()
   
+    See :attr:`valid`
+
 
 .. class:: AtomHandle
 
@@ -732,6 +802,7 @@ The Handle Classes
   
     The atom's occupancy in the range 0 to 1. Read/write. Also available as 
     :meth:`GetOccupancy`, :meth:`SetOccupancy`.
+
     :type: float
     
   .. attribute:: b_factor
@@ -781,6 +852,12 @@ The Handle Classes
     :attr:`AtomView.handle`) have the same identifier.
 
     :type: int
+
+  .. attribute:: valid
+
+    Validity of handle.
+
+    :type: bool
 
   .. method:: FindBondToAtom(other_atom)
 
@@ -899,8 +976,7 @@ The Handle Classes
   .. method:: IsValid()
   
     See :attr:`valid`
-  
-    :rtype: bool
+
   
 The View Classes
 --------------------------------------------------------------------------------
@@ -981,6 +1057,12 @@ The View Classes
      
      :type: :class:`EntityHandle`
 
+  .. attribute:: valid
+
+     Validity of view.
+
+     :type: bool
+
   .. method:: GetName()
 
     :returns: :func:`~EntityHandle.GetName` of entity :attr:`handle`.
@@ -1027,8 +1109,8 @@ The View Classes
 
     :param chain_handle: The chain handle to be added.
     :type  chain_handle: :class:`ChainHandle`
-    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
-    :type view_add_flags: :class:`int` / :class:`ViewAddFlags`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlag`
+    :type view_add_flags: :class:`int` / :class:`ViewAddFlag`
     :rtype: :class:`ChainView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
@@ -1036,12 +1118,12 @@ The View Classes
     Add residue to view. If the residue's chain is not already part of the
     view, it will be added. By default, only the residue is added, but not its
     atoms. This behaviour can be modified by passing in an appropriate
-    combination of :class:`ViewAddFlags`.
+    combination of :class:`ViewAddFlag`.
 
     :param residue_handle: The residue handle to be added
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
-    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlag`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlag`
     :rtype: :class:`ResidueView`
 
   .. method:: AddAtom(atom_handle[, view_add_flags])
@@ -1051,8 +1133,8 @@ The View Classes
     
     :param atom_handle: The atom handle
     :type  atom_handle: :class:`AtomHandle`
-    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
-    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlag`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlag`
     :rtype: :class:`AtomView`
 
   .. method:: AddBond(bond_handle)
@@ -1199,7 +1281,8 @@ The View Classes
   .. method:: GetBondCount()
 
     Get number of bonds
-    :rtype: int
+
+    :rtype: :class:`int`
 
   .. method:: GetBondList()
 
@@ -1240,6 +1323,10 @@ The View Classes
   .. method:: GetAtomCount()
     
     See :attr:`atom_count`
+
+  .. method:: IsValid()
+  
+    See :attr:`valid`
 
 .. class:: ChainView
 
@@ -1350,7 +1437,7 @@ The View Classes
 
   .. attribute:: valid
 
-     Validity of handle.
+     Validity of view.
 
      :type: bool
 
@@ -1362,8 +1449,8 @@ The View Classes
     
     :param atom_handle: The atom to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
-    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlag`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlag`
     :rtype: :class:`AtomView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
@@ -1371,12 +1458,12 @@ The View Classes
     Add residue to the view. If the atom does not belong to chain, the result is
     undefined. By default, only the residue, but no atoms are added to the
     view. To change the behavior, pass in a suitable combination of
-    :class:`ViewAddFlags`.
+    :class:`ViewAddFlag`.
     
     :param residue_handle: The residue handle to be added.
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags: An ORed together combination of :class:`ViewAddFlags`
-    :type  view_add_flags: :class:`int` / :class:`ViewAddFlags`
+    :param view_add_flags: An ORed together combination of :class:`ViewAddFlag`
+    :type  view_add_flags: :class:`int` / :class:`ViewAddFlag`
     :rtype: :class:`ResidueView`
 
   .. method:: FindAtom(res_num, atom_name)
@@ -1627,8 +1714,8 @@ The View Classes
 
     :param atom_handle: Atom handle to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param flags: An ORed together combination of :class:`ViewAddFlags`
-    :type  flags: :class:`int` / :class:`ViewAddFlags`
+    :param flags: An ORed together combination of :class:`ViewAddFlag`
+    :type  flags: :class:`int` / :class:`ViewAddFlag`
     :rtype: :class:`AtomView`
 
   .. method:: GetCenterOfAtoms()
@@ -1752,11 +1839,33 @@ Other Entity-Related Functions
 
   :returns: :class:`EntityHandle`
 
+.. function:: InSequence(res, res_next)
+
+  :return: True, if both *res* and *res_next* are :attr:`~ResidueHandle.valid`,
+           *res_next* is the residue following *res* (see 
+           :attr:`ResidueHandle.next`), both residues are linking (i.e.
+           :attr:`~ChemClass.IsPeptideLinking` or
+           :attr:`~ChemClass.IsNucleotideLinking`) and are connected by an
+           appropriate bond.
+  :rtype:  :class:`bool`
+  :param res: First residue to check.
+  :type res:  :class:`ResidueHandle`
+  :param res_next: Second residue to check.
+  :type res_next:  :class:`ResidueHandle`
+
+.. function:: BondExists(atom_a, atom_b)
+
+  :return: True, if *atom_a* and *atom_b* are connected by a bond.
+  :rtype:  :class:`bool`
+  :param atom_a: First atom to check.
+  :type atom_a:  :class:`AtomHandle`
+  :param atom_b: Second atom to check.
+  :type atom_b:  :class:`AtomHandle`
 
 Residue Numbering
 --------------------------------------------------------------------------------
 
-.. class:: ResNum(num, ins_code='\0')
+.. class:: ResNum(num, ins_code='\\0')
 
   Number for a residue. The residue number has a numeric part and an (optional)
   insertion-code. You can work with this object as if it was an integer and
@@ -1834,10 +1943,10 @@ here.
    :returns: :class:`str`
 
 
-ViewAddFlags
+ViewAddFlag
 --------------------------------------------------------------------------------
 
-.. class:: ViewAddFlags
+.. class:: ViewAddFlag
 
   Defines flags controlling behaviour of routines adding handles to views:
 
@@ -1849,6 +1958,8 @@ ViewAddFlags
   * ``CHECK_DUPLICATES`` - If set, it will be checked that no duplicates are
     created when adding a new handle
 
+  Flags can be ORed to combine them.
+  
 
 SecStructure
 --------------------------------------------------------------------------------

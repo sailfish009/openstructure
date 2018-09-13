@@ -1362,7 +1362,7 @@ void IndexedVertexArray::draw_aalines()
       {e3[0],e3[1],e3[2]},
       {ve0.c[0],ve0.c[1],ve0.c[2],ve0.c[3]},
       {ve1.c[0],ve1.c[1],ve1.c[2],ve1.c[3]},
-      -0.5*(q0[2]+q1[2])};
+      -0.5f*(q0[2]+q1[2])};
     line_list.push_back(le);
   }
 

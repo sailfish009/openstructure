@@ -9,6 +9,7 @@ except ImportError:
         "Ignoring test_qsscoring.py tests."
   sys.exit(0)
 
+from ost.mol.alg import lDDTSettings
 
 def _LoadFile(file_name):
   """Helper to avoid repeating input path over and over."""
@@ -92,17 +93,17 @@ class TestQSscore(unittest.TestCase):
     ent_empty = ent.CreateEmptyView()
     qs_ent_invalid = QSscoreEntity(ent_empty)
     self.assertFalse(qs_ent_invalid.is_valid)
-    # monomer
+    # monomer - should be valid
     ent_mono = ent.Select('cname=A')
-    qs_ent_invalid = QSscoreEntity(ent_mono)
-    self.assertFalse(qs_ent_invalid.is_valid)
+    qs_ent_mono = QSscoreEntity(ent_mono)
+    self.assertTrue(qs_ent_mono.is_valid)
     # short chain removed
     ent_short = ent.Select('cname=A or rnum<20')
-    qs_ent_invalid = QSscoreEntity(ent_short)
-    self.assertFalse(qs_ent_invalid.is_valid)
-    self.assertEqual(sorted(qs_ent_invalid.removed_chains), ['B', '_'])
+    qs_ent_mono = QSscoreEntity(ent_short)
+    self.assertTrue(qs_ent_mono.is_valid)
+    self.assertEqual(sorted(qs_ent_mono.removed_chains), ['B', '_'])
     # non-AA chain removal
-    ent_non_AA = ent_extra.Select('cname=A,C,D')
+    ent_non_AA = ent_extra.Select('cname=C,D')
     qs_ent_invalid = QSscoreEntity(ent_non_AA)
     self.assertFalse(qs_ent_invalid.is_valid)
     self.assertEqual(sorted(qs_ent_invalid.removed_chains), ['C', 'D'])
@@ -376,20 +377,30 @@ class TestQSscore(unittest.TestCase):
   # TEST EXTRA SCORES
   
   def test_lDDT(self):
-    # lDDT is not symmetrical and does not account for overprediction!
+    # check for penalized and unpenalized oligo lDDT
     ref = _LoadFile('4br6.1.pdb').Select('cname=A,B')
     mdl = _LoadFile('4br6.1.pdb')
+    lddt_settings = lDDTSettings()
     qs_scorer = QSscorer(ref, mdl)
+    lddt_oligo_scorer = qs_scorer.GetOligoLDDTScorer(lddt_settings, False)
     self.assertAlmostEqual(qs_scorer.global_score, 0.171, 2)
     self.assertAlmostEqual(qs_scorer.best_score, 1.00, 2)
-    self.assertAlmostEqual(qs_scorer.lddt_score, 1.00, 2)
-    self._CheckScorerLDDT(qs_scorer)
+    self.assertAlmostEqual(lddt_oligo_scorer.oligo_lddt, 1.00, 2)
+    # with penalty we account for extra model chains
+    lddt_oligo_scorer_pen = qs_scorer.GetOligoLDDTScorer(lddt_settings, True)
+    self.assertAlmostEqual(lddt_oligo_scorer_pen.oligo_lddt, 0.5213, 2)
     # flip them (use QSscoreEntity to go faster)
-    qs_scorer2 = QSscorer(qs_scorer.qs_ent_2, qs_scorer.qs_ent_1)
+    qs_scorer2 = QSscorer(qs_scorer.qs_ent_2,
+                          qs_scorer.qs_ent_1,
+                          res_num_alignment=True)
+    lddt_oligo_scorer2 = qs_scorer2.GetOligoLDDTScorer(lddt_settings, False)
     self.assertAlmostEqual(qs_scorer2.global_score, 0.171, 2)
     self.assertAlmostEqual(qs_scorer2.best_score, 1.00, 2)
-    self.assertAlmostEqual(qs_scorer2.lddt_score, 0.483, 2)
-    self._CheckScorerLDDT(qs_scorer)
+    # without penalty we don't see extra chains
+    self.assertAlmostEqual(lddt_oligo_scorer2.oligo_lddt, 1.00, 2)
+    # with penalty we account for extra reference chains
+    lddt_oligo_scorer2_pen = qs_scorer2.GetOligoLDDTScorer(lddt_settings, True)
+    self.assertAlmostEqual(lddt_oligo_scorer2_pen.oligo_lddt, 0.4496, 2)
     # check properties
     self.assertFalse(qs_scorer.calpha_only)
     self.assertEqual(qs_scorer.chem_mapping, {('B', 'A'): ('B', 'C', 'D', 'A')})
@@ -661,33 +672,6 @@ class TestQSscore(unittest.TestCase):
     self.assertLessEqual(qs_scorer.best_score, 1.0)
     self.assertGreaterEqual(qs_scorer.global_score, 0.0)
     self.assertLessEqual(qs_scorer.global_score, 1.0)
-
-
-  def _CheckScorerLDDT(self, qs_scorer):
-    # check if we live up to our promises (assume: we did global and lddt score)
-    self._CheckScorer(qs_scorer)
-    # check lddt_mdl and lddt_ref
-    self.assertEqual(qs_scorer.lddt_mdl.chain_count, 1)
-    self.assertEqual(qs_scorer.lddt_ref.chain_count, 1)
-    # unique resnum?
-    resnum_mdl = [r.number.num for r in qs_scorer.lddt_mdl.residues]
-    resnum_mdl_set = set(resnum_mdl)
-    self.assertEqual(len(resnum_mdl), len(resnum_mdl_set))
-    resnum_ref = [r.number.num for r in qs_scorer.lddt_ref.residues]
-    resnum_ref_set = set(resnum_ref)
-    self.assertEqual(len(resnum_ref), len(resnum_ref_set))
-    # independent shared residues count from mapped_residues
-    num_shared = sum(len(v) for _,v in qs_scorer.mapped_residues.iteritems())
-    shared_set = resnum_ref_set.intersection(resnum_mdl_set)
-    self.assertEqual(len(shared_set), num_shared)
-    # "lddt" prop on residues and B-factors?
-    for r in qs_scorer.lddt_mdl.residues:
-      if r.number.num in shared_set:
-        self.assertTrue(r.HasProp('lddt'))
-        r_lddt = r.GetFloatProp('lddt')
-      else:
-        r_lddt = 0
-      self.assertTrue(all([a.b_factor == r_lddt for a in r.atoms]))
 
 
 if __name__ == "__main__":
