@@ -17,7 +17,7 @@ export CPUS_FOR_MAKE=8
 export PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
 # When changing OPENSTRUCTURE_VERSION make sure to change it also in the
 # environment section of singularity recipe (this file).
-export OPENSTRUCTURE_VERSION="1.7.1"
+export OPENSTRUCTURE_VERSION="1.8.0"
 export OPENSTRUCTURE_SHARE="/usr/local/share/ost"
 export MSMS_VERSION="2.6.1"
 export OPENMM_VERSION="7.1.1"
@@ -223,7 +223,7 @@ cd /home
 # ENVIRONMENT
 ##############################################################################
 export OST_ROOT="/usr/local"
-export OPENSTRUCTURE_VERSION="1.7.1"
+export OPENSTRUCTURE_VERSION="1.8.0"
 export PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
 export QT_X11_NO_MITSHM=1

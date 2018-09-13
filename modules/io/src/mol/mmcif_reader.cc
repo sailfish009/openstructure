@@ -97,26 +97,12 @@ void MMCifReader::SetRestrictChains(const String& restrict_chains)
   restrict_chains_ = restrict_chains;
 }
 
-bool MMCifReader::IsValidPDBIdent(const StringRef& pdbid)
-{
-  if (pdbid.length() == PDBID_LEN && isdigit(pdbid[0])) {
-    return true;
-  }
-  return false;
-}
-
 bool MMCifReader::OnBeginData(const StringRef& data_name) 
 {
   LOG_DEBUG("MCIFFReader: " << profile_);
   Profile profile_import("MMCifReader::OnBeginData");
 
-  // check for PDB id
-  if (!this->IsValidPDBIdent(data_name)) {
-    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
-                         "No valid PDB id found for data block, read instead \'"
-                                             + data_name.str() + "\'",
-                                             this->GetCurrentLinenum()));
-  }
+  // IDs in mmCIF files can be any string, so no restrictions here
 
   this->ClearState();
 

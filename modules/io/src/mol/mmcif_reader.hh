@@ -187,13 +187,6 @@ protected:
      }
   } // tested
 
-  /// \brief Check a PDB id to be of length 4 and start with a digit
-  ///
-  /// \param pdbid putative PDB id
-  ///
-  /// \return true for a valid id, false otherwise
-  bool IsValidPDBIdent(const StringRef& pdbid);
-
   /// \brief fetch values identifying atoms
   ///
   /// \param[in]  columns data row
@@ -353,8 +346,7 @@ protected:
 private:
   /// \enum magic numbers of this class
   typedef enum {
-    PDBID_LEN=4,         ///< length of a PDB id
-    MAX_ITEMS_IN_ROW=18, ///< count for possible items in a loop row
+    MAX_ITEMS_IN_ROW=18 ///< count for possible items in a loop row
   } MMCifMagicNos;
 
   /// \enum items of the atom_site category

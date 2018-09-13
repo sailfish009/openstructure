@@ -9,7 +9,7 @@ In order to build OST Singularity image:
 .. code-block:: bash
 
   cd <OST ROOT>/singularity
-  sudo singularity build ost.img Singularity.1.7.1
+  sudo singularity build ost.img Singularity.1.8.0
 
 .. note::
 
@@ -29,7 +29,7 @@ Available apps
 This container includes the following apps:
  * **OST** - OpenStructure binary
  * **IPython** - OST-powered iPython shell
- * **Notebook** - A Jupyter notebook palyground with OST and nglview
+ * **Notebook** - A Jupyter notebook playground with OST and nglview
  * **lDDT** - The Local Distance Difference Test
  * **Molck** - Molecular checker
  * **ChemdictTool** - Creating or update a compound library
