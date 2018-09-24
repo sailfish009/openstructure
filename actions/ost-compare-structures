@@ -307,8 +307,8 @@ def _ParseArgs():
               " * oxt - remove terminal oxygens\n"
               " * nonstd - remove all residues not one of the 20\n"
               " * standard amino acids\n"
-              " * unk - Remove unknown and atoms not following the"
-              "nomenclature"))
+              " * unk - Remove unknown and atoms not following the\n"
+              "         nomenclature"))
     parser.add_argument(
         "-ce",
         "--clean-element-column",
