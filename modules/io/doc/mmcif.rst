@@ -373,6 +373,33 @@ of the annotation available.
     Also available as :meth:`GetTitle`. May also be modified by
     :meth:`SetTitle`.
 
+  .. attribute:: book_publisher
+
+    Name of publisher of the citation, relevant for books and book chapters.
+
+    Also available as :meth:`GetBookPublisher` and :meth:`SetBookPublisher`.
+
+  .. attribute:: book_publisher_city
+
+    City of the publisher of the citation, relevant for books and book
+    chapters.
+
+    Also available as :meth:`GetBookPublisherCity` and
+    :meth:`SetBookPublisherCity`.
+
+ 
+  .. attribute:: citation_type
+
+     Defines where a citation was published. Either journal, book or unknown.
+
+     Also available as :meth:`GetCitationType`. May also be modified by
+     :meth:`SetCitationType` with values from :class:`MMCifInfoCType`. For
+     conveinience setters :meth:`SetCitationTypeJournal`,
+     :meth:`SetCitationTypeBook` and :meth:`SetCitationTypeUnknown` exist.
+
+     For checking the type of a citation, :meth:`IsCitationTypeJournal`,
+     :meth:`IsCitationTypeBook` and :meth:`IsCitationTypeUnknown` can be used.
+
   .. attribute:: authors
 
     Stores a :class:`~ost.StringList` of authors.
@@ -460,6 +487,54 @@ of the annotation available.
 
     See :attr:`title`
 
+  .. method:: GetBookPublisher
+
+    See :attr:`book_publisher`
+
+  .. method:: SetBookPublisher
+
+    See :attr:`book_publisher`
+
+  .. method:: GetBookPublisherCity
+
+    See :attr:`book_publisher_city`
+
+  .. method:: SetBookPublisherCity
+
+    See :attr:`book_publisher_city`
+
+  .. method:: GetCitationType()
+
+    See :attr:`citation_type`
+
+  .. method:: SetCitationType(publication_type)
+
+    See :attr:`citation_type`
+
+  .. method:: SetCitationTypeJournal()
+
+    See :attr:`citation_type`
+
+  .. method:: SetCitationTypeBook()
+
+    See :attr:`citation_type`
+
+  .. method:: SetCitationTypeUnknown()
+
+    See :attr:`citation_type`
+
+  .. method:: IsCitationTypeJournal()
+
+    See :attr:`citation_type`
+
+  .. method:: IsCitationTypeBook()
+
+    See :attr:`citation_type`
+
+  .. method:: IsCitationTypeUnknown()
+
+    See :attr:`citation_type`
+ 
   .. method:: GetAuthorList()
 
     See :attr:`authors`

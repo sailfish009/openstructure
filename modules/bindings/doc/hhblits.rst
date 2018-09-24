@@ -1,9 +1,6 @@
 :mod:`~ost.bindings.hhblits` - Search related sequences in databases
 ================================================================================
 
-.. module:: ost.bindings.hhblits
-  :synopsis: Search related sequences in databases
-
 Introduction
 --------------------------------------------------------------------------------
 
@@ -15,7 +12,7 @@ one is provided, queried with a sequence profile. The latter one needs to be
 calculated before the actual search. In very simple words, HHblits is using
 per-sequence scoring functions to be more sensitive, in this particular case
 Hidden Markov models. The software suite needed for HHblits can be found
-`here <http://toolkit.tuebingen.mpg.de/hhblits>`_.
+`here <http://wwwuser.gwdg.de/~compbiol/data/hhsuite/releases/all/>`_.
 
 
 Examples
@@ -59,6 +56,9 @@ First query by sequence:
   for hit in hits:
       print hit.aln
 
+  # cleanup
+  hh.Cleanup()
+
 Very similar going by file:
 
 .. code-block:: python
@@ -84,6 +84,9 @@ Very similar going by file:
   for hit in hits:
       print hit.aln
 
+  # cleanup
+  hh.Cleanup()
+
 The alignments produced by HHblits are sometimes slightly better than by BLAST,
 so one may want to extract them:
 
@@ -105,24 +108,15 @@ so one may want to extract them:
 
   print output['msa']
 
+  # cleanup
+  hh.Cleanup()
+
 
 Binding API
 --------------------------------------------------------------------------------
 
-.. autoclass:: ost.bindings.hhblits.HHblits
+.. automodule:: ost.bindings.hhblits
+   :synopsis: Search related sequences in databases
    :members:
 
-.. autoclass:: ost.bindings.hhblits.HHblitsHit
-
-.. autoclass:: ost.bindings.hhblits.HHblitsHeader
-
-.. autofunction:: ost.bindings.hhblits.ParseHHblitsOutput
-
-.. autofunction:: ost.bindings.hhblits.ParseA3M
-
-.. autofunction:: ost.bindings.hhblits.ParseHeaderLine
-
-.. autofunction:: ost.bindings.hhblits.ParseHHM
-
-.. autofunction:: ost.bindings.hhblits.EstimateMemConsumption
 ..  LocalWords:  HHblits homologs

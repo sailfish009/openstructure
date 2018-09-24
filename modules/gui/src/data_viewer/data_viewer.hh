@@ -25,6 +25,8 @@
 #ifndef IMG_GUI_DATA_VIEWER_H
 #define IMG_GUI_DATA_VIEWER_H
 
+#ifndef Q_MOC_RUN
+
 #include <map>
 
 #include <ost/base.hh>
@@ -41,6 +43,9 @@
 #include "info_panel.hh"
 #include "fft_panel.hh"
 #include <ost/gui/module_config.hh>
+
+#endif
+
 
 //fw decl
 class QLabel;

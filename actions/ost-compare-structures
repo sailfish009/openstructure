@@ -13,8 +13,10 @@ eg.
       --remove oxt hyd \\
       --map-nonstandard-residues
 
-If desired one can recreate what CAMEO is calculating. CAMEO calls lddt binary
-as follows:
+Here we describe how the parameters can be set to mimick a CAMEO evaluation
+(as of August 2018).
+
+CAMEO calls the lddt binary as follows:
 
   lddt \\
       -p <PARAMETER FILE> \\

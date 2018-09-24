@@ -4,14 +4,22 @@ Installing OpenStructure From Source
 Brief Overview
 --------------------------------------------------------------------------------
 
-Compiling OpenStructure consists of several steps that are described below in
-more detail. In essence, these steps are:
+For a simple and portable way to use OpenStructure we recommend using a
+container solution. We provide recipes to build images for
+`Docker <https://www.docker.com/>`_ and
+`Singularity <https://www.sylabs.io/guides/2.5.1/user-guide>`_.
+The latest recipes and instructions can be found on our GitLab site
+(`Docker instructions <https://git.scicore.unibas.ch/schwede/openstructure/tree/develop/docker>`_ and
+`Singularity instructions <https://git.scicore.unibas.ch/schwede/openstructure/tree/develop/singularity>`_).
+
+If you wish to compile OpenStructure outside of a container, you need to follow
+the steps which we describe in detail below. In essence, these steps are:
 
 * Installing the Dependencies
 * Checking out the source code from GIT
 * Configuring the build with cmake
 * Compiling an Linking
- 
+
 
 Installing the Dependencies
 --------------------------------------------------------------------------------
@@ -299,16 +307,8 @@ from source.
 
 On some Linux distributions, there are issues with Qt4 and hence it may not be
 possible to build OpenStructure with GUI support at all. This is for instance
-known to be an issue with boost versions >= 1.62.
-
-An additional problem arises for gcc versions >= 6. There an extra flag is
-required to use the C++98 standard:
-
-.. code-block:: bash
-
-  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
-
-We hope to support Qt5 and C++11 in the next OpenStructure release.
+known to be an issue with boost versions >= 1.62. We hope to support Qt5 in the
+next OpenStructure release.
 
 
 **Ubuntu 16.04 with GUI**
@@ -342,12 +342,11 @@ All the dependencies can be installed from the package manager as follows:
   sudo dnf install cmake eigen3-devel boost-devel libpng-devel python2-devel \
                    fftw-devel libtiff-devel
 
-Fedora 26 has gcc 7 and boost 1.63 by default. Hence, we will need to disable
-Qt4, the GUI and add the extra flag described above:
+Here, we compile a version without GUI as follows:
 
 .. code-block:: bash
 
-  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
+  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF
 
 
 **macOS with Homebrew without GUI**

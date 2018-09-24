@@ -15,7 +15,9 @@ ln -sf /bin/bash /bin/sh
 export SRC_FOLDER="/usr/local/src"
 export CPUS_FOR_MAKE=8
 export PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
-export OPENSTRUCTURE_VERSION="1.7.1"
+# When changing OPENSTRUCTURE_VERSION make sure to change it also in the
+# environment section of singularity recipe (this file).
+export OPENSTRUCTURE_VERSION="1.8.0"
 export OPENSTRUCTURE_SHARE="/usr/local/share/ost"
 export MSMS_VERSION="2.6.1"
 export OPENMM_VERSION="7.1.1"
@@ -65,7 +67,7 @@ locale-gen en_US.UTF-8
 
 # INSTALL SOME PYTHON PACKAGES GLOBALY
 ######################################
-pip install --upgrade pip && pip install --no-cache-dir numpy==1.10.4 \
+pip install --no-cache-dir numpy==1.10.4 \
                                                         scipy==1.0.0 \
                                                         pandas==0.22.0
 
@@ -79,7 +81,7 @@ virtualenv --system-site-packages $VIRTUALENV_DIR
 # INSTALL REQUIRED PYTHON PACKAGES
 ##################################
 pip install jupyter==1.0.0 \
-            nglview==1.0
+            nglview==1.1.6
 
 # DOWNLOAD AND INSTALL MSMS
 ##############
@@ -110,7 +112,7 @@ fi
 ##############
 cd ${SRC_FOLDER}
 if [ ! -f dssp-${DSSP_VERSION}.tgz ]; then
-    wget ftp://ftp.cmbi.ru.nl/pub/software/dssp/dssp-${DSSP_VERSION}.tgz
+    wget ftp://ftp.cmbi.umcn.nl/pub/molbio/software/dssp-2/dssp-${DSSP_VERSION}.tgz
     tar -xvzf dssp-${DSSP_VERSION}.tgz
     cd dssp-${DSSP_VERSION}
     make -j ${CPUS_FOR_MAKE}
@@ -221,7 +223,7 @@ cd /home
 # ENVIRONMENT
 ##############################################################################
 export OST_ROOT="/usr/local"
-export OPENSTRUCTURE_VERSION="1.7.1"
+export OPENSTRUCTURE_VERSION="1.8.0"
 export PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
 export QT_X11_NO_MITSHM=1

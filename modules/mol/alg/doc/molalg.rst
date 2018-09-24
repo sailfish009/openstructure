@@ -559,8 +559,7 @@ Local Distance Test scores (lDDT, DRMSD)
     """Run lDDT from within script."""
     from ost.io import LoadPDB
     from ost.mol.alg import (CleanlDDTReferences,
-    			 lDDTSettings, lDDTScorer)
-    from ost.io import ReadStereoChemicalPropsFile
+                             lDDTSettings, lDDTScorer)
 
     ent_full = LoadPDB('3ia3', remote=True)
     model_view = ent_full.Select('cname=A')

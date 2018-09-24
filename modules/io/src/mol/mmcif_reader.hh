@@ -187,13 +187,6 @@ protected:
      }
   } // tested
 
-  /// \brief Check a PDB id to be of length 4 and start with a digit
-  ///
-  /// \param pdbid putative PDB id
-  ///
-  /// \return true for a valid id, false otherwise
-  bool IsValidPDBIdent(const StringRef& pdbid);
-
   /// \brief fetch values identifying atoms
   ///
   /// \param[in]  columns data row
@@ -353,8 +346,7 @@ protected:
 private:
   /// \enum magic numbers of this class
   typedef enum {
-    PDBID_LEN=4,         ///< length of a PDB id
-    MAX_ITEMS_IN_ROW=18, ///< count for possible items in a loop row
+    MAX_ITEMS_IN_ROW=18 ///< count for possible items in a loop row
   } MMCifMagicNos;
 
   /// \enum items of the atom_site category
@@ -400,6 +392,8 @@ private:
     ABSTRACT_ID_CAS,              ///< CAS identifier
     BOOK_ID_ISBN,                 ///< ISBN code assigned, if book cited
     BOOK_TITLE,                   ///< title of book storing the citation
+    BOOK_PUBLISHER,               ///< name of publisher f a book
+    BOOK_PUBLISHER_CITY,          ///< location of a publisher of a book
     JOURNAL_ABBREV,               ///< abbreviated journal title for articles
     JOURNAL_VOLUME,               ///< volume of cited journal
     PAGE_FIRST,                   ///< first page of citation

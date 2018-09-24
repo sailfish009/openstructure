@@ -1,17 +1,21 @@
-Changes in Release <RELEASE NUMBER>
+Changes in Release 1.8.0
 --------------------------------------------------------------------------------
 
-  * nonstandard C++ module was moved from ost.conop to ost.mol.alg. This implies
-    change in the API. Mapping functions CopyResidue, CopyConserved and
-    CopyNonConserved that were previousely imported from ost.conop are now
-    to be imported from ost.mol.alg.
+  * Introduced recipes to generate Docker and Singularity images.
+  * Moved "nonstandard" functions from ost.conop to ost.mol.alg. Mapping
+    functions CopyResidue, CopyConserved and CopyNonConserved that were
+    previousely imported from ost.conop are now to be imported from ost.mol.alg.
   * Removed habit of changing secondary structure of entities when loading
     from mmCIF PDB files. Before, OST would turn secondary structure 'EEH'
     into 'ECH' to make it look nicer in DNG. Now, 'EEH' stays 'EEH'.
   * Added Molck API to the ost.mol.alg module.
   * Extended lDDT API in ost.mol.alg module to reproduce functionality of lddt
-    binary.
+    binary and fixed issues in stereo chemistry checks there.
   * Added `actions` interface including one action to compare structures.
+  * Updated HHblits binding (minor changes for optional arguments).
+  * Added functionality to find optimal membrane position of protein.
+  * Support for recent compilers which use C++-11 by default.
+  * Several minor bug fixes, improvements, and speed-ups.
 
 Changes in Release 1.7.1
 --------------------------------------------------------------------------------

@@ -142,8 +142,8 @@ Loading sequence or alignment files
     myseq = io.LoadSequence('seq.fasta')
     # for obtaining a SequenceList
     seqlist = io.LoadSequenceList('seqs.fasta')
-    # or for multiple aligned fasta files use
-    aln = io.LoadAlignment('algnm.aln',format="clustal")
+    # or for multiple alignments (here from CLUSTAL)
+    aln = io.LoadAlignment('algnm.aln', format="clustal")
     
   For a list of file formats supported by :func:`LoadSequence` see
   :doc:`sequence_formats`.
@@ -212,11 +212,11 @@ Saving Sequence Data
   .. code-block:: python
 
     # recognizes FASTA file by file extension
-    io.SaveSequence(myseq,'seq.fasta')
+    io.SaveSequence(myseq, 'seq.fasta')
     # for saving a SequenceList
-    io.SaveSequenceList(seqlist,'seqlist.fasta')
-    # or multiple aligned fasta files
-    io.SaveAlignment(aln,'algnm.aln',format="clustal")
+    io.SaveSequenceList(seqlist, 'seqlist.fasta')
+    # or for multiple alignments (here in FASTA format)
+    io.SaveAlignment(aln, 'aln.fasta')
     
   For a list of file formats supported by :func:`SaveSequence` see
   :doc:`sequence_formats`.

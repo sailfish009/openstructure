@@ -40,13 +40,19 @@ public:
     lib_(compound_lib), fix_element_(true), strict_hydrogens_(false), 
     unk_res_treatment_(CONOP_WARN), unk_atom_treatment_(CONOP_WARN)
   {
+    _CheckLib();
   }
 
-  RuleBasedProcessor(CompoundLibPtr compound_lib, bool fe, bool sh, ConopAction ur, 
-                     ConopAction ua, bool bf, bool at, bool cn, bool aa, ConopAction zo): 
+  RuleBasedProcessor(CompoundLibPtr compound_lib, bool fe, bool sh,
+                     ConopAction ur, ConopAction ua, bool bf, bool at, bool cn,
+                     bool aa, ConopAction zo): 
     Processor(bf, at, cn, aa, zo), lib_(compound_lib), fix_element_(fe), 
     strict_hydrogens_(sh), unk_res_treatment_(ur), 
-    unk_atom_treatment_(ua) {}
+    unk_atom_treatment_(ua)
+  {
+    _CheckLib();
+  }
+
   ConopAction GetUnkResidueTreatment() const {
     return unk_res_treatment_;
   }
@@ -91,6 +97,8 @@ protected:
   virtual void DoProcess(DiagnosticsPtr diags, 
                          mol::EntityHandle ent) const;
 private:
+  void _CheckLib() const;
+
   CompoundLibPtr lib_;
   bool fix_element_;
   bool strict_hydrogens_;

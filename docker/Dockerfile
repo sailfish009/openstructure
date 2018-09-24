@@ -95,7 +95,7 @@ RUN cd ${SRC_FOLDER} && \
 # COMPILE AND INSTALL DSSP
 ##########################
 RUN cd ${SRC_FOLDER} && \
-    wget ftp://ftp.cmbi.ru.nl/pub/software/dssp/dssp-${DSSP_VERSION}.tgz && \
+    wget ftp://ftp.cmbi.umcn.nl/pub/molbio/software/dssp-2/dssp-${DSSP_VERSION}.tgz && \
     tar -xvzf dssp-${DSSP_VERSION}.tgz && \
     cd dssp-${DSSP_VERSION} && \
     make -j ${CPUS_FOR_MAKE} && \
@@ -168,7 +168,6 @@ WORKDIR /home
 # ENVIRONMENT
 ##############################################################################
 ENV OST_ROOT="/usr/local"
-ENV OPENSTRUCTURE_VERSION="1.7.1"
 ENV PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
 ENV QT_X11_NO_MITSHM=1
