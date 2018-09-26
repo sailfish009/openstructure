@@ -224,8 +224,9 @@ cd /home
 ##############################################################################
 export OST_ROOT="/usr/local"
 export OPENSTRUCTURE_VERSION="1.8.0"
+export OPENMM_LIB_PATH=/usr/local/openmm/lib/
 export PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64:${OPENMM_LIB_PATH}"
 export QT_X11_NO_MITSHM=1
 export IPYTHONDIR="/usr/local/share/ipython"
 export JUPYTER_CONFIG_DIR="/usr/local/etc/jupyter"
