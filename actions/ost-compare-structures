@@ -541,7 +541,7 @@ def _ReadStructureFile(path, c_alpha_only=False, fault_tolerant=False,
                 calpha_only=c_alpha_only)
             if len(cif_info.biounits) == 0:
                 tbu = MMCifInfoBioUnit()
-                tbu.id = 'ASU of ' + entity.pdb_id
+                tbu.id = 'ASU'
                 tbu.details = 'asymmetric unit'
                 for chain in tmp_entity.chains:
                     tbu.AddChain(str(chain))
