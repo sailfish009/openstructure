@@ -502,14 +502,14 @@ def _GetAlignmentsAsFasta(alignments):
 
 def _ReadStructureFile(path, c_alpha_only=False, fault_tolerant=False,
                        selection=""):
-    """Safely read structure file into OST entity.
+    """Safely read structure file into OST entities (split by biounit).
 
-    The functin can read both PDB and mmCIF files.
-
+    The function can read both PDB and mmCIF files.
+    
     :param path: Path to the file.
     :type path: :class:`str`
-    :returns: Entity
-    :rtype: :class:`~ost.mol.EntityHandle`
+    :returns: list of entities
+    :rtype: :class:`list` of :class:`~ost.mol.EntityHandle`
     """
 
     def _Select(entity):
