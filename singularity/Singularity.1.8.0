@@ -148,7 +148,7 @@ if [ ! -f openstructure-${OPENSTRUCTURE_VERSION}.tar.gz ]; then
     # get the compound library
     wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz
     stage/bin/chemdict_tool create components.cif.gz compounds.chemlib pdb
-    stage/bin/chemdict_tool update modules/conop/data/charmm.cif compounds.chemlib charmm
+    stage/bin/chemdict_tool update ../modules/conop/data/charmm.cif compounds.chemlib charmm
     mkdir -p $OPENSTRUCTURE_SHARE
     chmod a+rw -R $OPENSTRUCTURE_SHARE
     mv compounds.chemlib $OPENSTRUCTURE_SHARE

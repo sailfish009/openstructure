@@ -129,7 +129,7 @@ RUN cmake .. -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
 
 # get the compound library
 RUN wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz
-RUN stage/bin/chemdict_tool create components.cif.gz compounds.chemlib pdb && stage/bin/chemdict_tool update modules/conop/data/charmm.cif compounds.chemlib charmm
+RUN stage/bin/chemdict_tool create components.cif.gz compounds.chemlib pdb && stage/bin/chemdict_tool update ../modules/conop/data/charmm.cif compounds.chemlib charmm
 RUN mkdir -p $OPENSTRUCTURE_SHARE && chmod a+rw -R $OPENSTRUCTURE_SHARE && mv compounds.chemlib $OPENSTRUCTURE_SHARE
 
 # Build and install OST
