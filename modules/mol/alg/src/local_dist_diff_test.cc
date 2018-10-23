@@ -7,7 +7,6 @@
 #include <boost/concept_check.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <ost/mol/alg/consistency_checks.hh>
-#include <ost/io/stereochemical_params_reader.hh>
 
 namespace ost { namespace mol { namespace alg {
 
