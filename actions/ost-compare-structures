@@ -513,10 +513,10 @@ def _ReadStructureFile(path, c_alpha_only=False, fault_tolerant=False,
     """
 
     def _Select(entity):
-        selection_message = "Selecting %s" % selection
         if selection:
-            ost.LogInfo(selection_message)
-            entity = entity.Select(selection)
+            ost.LogInfo("Selecting %s" % selection)
+            ent_view = entity.Select(selection)
+            entity = mol.CreateEntityFromView(ent_view, False)
         return entity
 
     entities = list()
