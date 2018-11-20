@@ -2033,6 +2033,7 @@ ChemClass
     * ``UNKNOWN``           = 'U'
 
   Python can implicitly convert characters to objects of this type.
+  Note however that only the first character of a :class:`str` is considered!
 
   :param chem_class: Chemical class to set.
   :type chem_class:  :class:`str`
@@ -2072,6 +2073,7 @@ ChemType
     * ``UNKNOWN``          = 'U'
 
   Python can implicitly convert characters to objects of this type.
+  Note however that only the first character of a :class:`str` is considered!
 
   :param chem_type: Chemical type to set.
   :type chem_type:  :class:`str`
