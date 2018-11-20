@@ -13,9 +13,8 @@ by `Bertoni et al. <https://dx.doi.org/10.1038/s41598-017-09654-8>`_.
   - ClustalW must be installed (unless you provide chain mappings)
   - Python modules `numpy` and `scipy` must be installed and available
     (e.g. use ``pip install scipy numpy``)
-
-Authors: Gerardo Tauriello, Martino Bertoni
 """
+# Original authors: Gerardo Tauriello, Martino Bertoni
 
 from ost import mol, geom, conop, seq, settings, PushVerbosityLevel
 from ost import LogError, LogWarning, LogScript, LogInfo, LogVerbose, LogDebug
