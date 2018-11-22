@@ -549,7 +549,8 @@ Local Distance Test scores (lDDT, DRMSD)
 
 .. class:: lDDTScorer(reference, model, settings)
 
-  Object to compute lDDT scores.
+  Object to compute lDDT scores using :func:`LocalDistDiffTest` as in
+  `Mariani et al. <https://dx.doi.org/10.1093/bioinformatics/btt473>`_.
   
   Example usage.
   
