@@ -251,6 +251,19 @@ def _ParseArgs():
         action="store_true",
         help=("Make alignment based on residue number instead of using\n"
               "a global BLOSUM62-based alignment."))
+    parser.add_argument(
+        "--qs-max-mappings-extensive",
+        dest="qs_max_mappings_extensive",
+        type=int,
+        default=1000000,
+        help=("Maximal number of chain mappings to test for 'extensive'\n"
+              "chain mapping scheme which is used as a last resort if\n"
+              "other schemes failed. The extensive chain mapping search\n"
+              "must in the worst case check O(N!) possible mappings for\n"
+              "complexes with N chains. Two octamers without symmetry\n"
+              "would require 322560 mappings to be checked. To limit\n"
+              "computations, no scores are computed if we try more than\n"
+              "the maximal number of chain mappings."))
     #
     # lDDT options
     #
@@ -683,13 +696,19 @@ def _Main():
             qs_scorer = qsscoring.QSscorer(reference,
                                            model,
                                            opts.residue_number_alignment)
+            qs_scorer.max_mappings_extensive = opts.qs_max_mappings_extensive
             if opts.chain_mapping is not None:
                 ost.LogInfo(
                     "Using custom chain mapping: %s" % str(
                         opts.chain_mapping))
                 qs_scorer.chain_mapping = opts.chain_mapping
             else:
-                qs_scorer.chain_mapping  # just to initialize it
+                try:
+                  qs_scorer.chain_mapping  # just to initialize it
+                except qsscoring.QSscoreError as ex:
+                  ost.LogError('Chain mapping failed:', str(ex))
+                  ost.LogError('Skipping comparison')
+                  continue
             ost.LogInfo("-" * 80)
             ost.LogInfo("Checking consistency between %s and %s" % (
                         model_name, reference_name))
