@@ -135,7 +135,7 @@ Local Distance Test scores (lDDT, DRMSD)
 
   This function calculates the Local Distance Difference Test, using the same
   threshold values as the GDT-HA test (the default set of thresholds used for
-  the lDTT score) (See previous functions). The thresholds are 0.5, 1, 2, and 4
+  the lDDT score) (See previous functions). The thresholds are 0.5, 1, 2, and 4
   Angstroms.
 
   The function only compares the input distance list to the first chain of the
@@ -549,7 +549,8 @@ Local Distance Test scores (lDDT, DRMSD)
 
 .. class:: lDDTScorer(reference, model, settings)
 
-  Object to compute lDDT scores.
+  Object to compute lDDT scores using :func:`LocalDistDiffTest` as in
+  `Mariani et al. <https://dx.doi.org/10.1093/bioinformatics/btt473>`_.
   
   Example usage.
   

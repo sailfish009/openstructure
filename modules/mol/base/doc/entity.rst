@@ -2032,7 +2032,9 @@ ChemClass
     * ``WATER``             = 'W'
     * ``UNKNOWN``           = 'U'
 
-  Python can implicitly convert characters to objects of this type.
+  The constants are defined directly within the :mod:`mol` module.
+  Python can implicitly convert characters to objects of this type. Note however
+  that only the first character of a :class:`str` object is considered!
 
   :param chem_class: Chemical class to set.
   :type chem_class:  :class:`str`
@@ -2071,7 +2073,8 @@ ChemType
     * ``WATERS``           = 'W'
     * ``UNKNOWN``          = 'U'
 
-  Python can implicitly convert characters to objects of this type.
+  Python can implicitly convert characters to objects of this type. Note however
+  that only the first character of a :class:`str` object is considered!
 
   :param chem_type: Chemical type to set.
   :type chem_type:  :class:`str`

@@ -33,38 +33,29 @@ Only model structures are "Molck-ed" in CAMEO. The call to molck is as follows:
       --complib=<COMPOUND LIB> \\
       --rm=hyd,oxt,unk \\
       --fix-ele \\
-      --map-nonstd <FILEPATH> \\
-      --out=<OUTPUT>
+      --map-nonstd \\
+      --out=<OUTPUT> \\
+      <FILEPATH>
 
 To be as much compatible with with CAMEO as possible one should call
 compare-structures as follows:
 
   ost compare-structures \\
-      # General parameters
-      ####################
       --model <MODEL> \\
       --reference <REF> \\
       --output output.json \\
-      # QS-score parameters
-      #####################
-      --qs-score \\
-      --residue-number-alignment \\
-      # lDDT parameters
-      #################
-      --lddt \\
-      --inclusion-radius 15.0 \\
-      # Molecular check parameters
-      ############################
       --molck \\
       --remove oxt hyd unk \\
       --clean-element-column \\
       --map-nonstandard-residues \\
-      # Additional checks
-      ###################
       --structural-checks \\
       --bond-tolerance 15.0 \\
       --angle-tolerance 15.0 \\
-      --consistency-checks
+      --residue-number-alignment \\
+      --consistency-checks \\
+      --qs-score \\
+      --lddt \\
+      --inclusion-radius 15.0
 """
 
 import os
@@ -131,38 +122,49 @@ def _GetDefaultCompoundLibraryPath():
 
 def _ParseArgs():
     """Parse command-line arguments."""
-    #
-    # General options
-    #
+
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
         description=__doc__,
         prog="ost compare-structures")
 
-    parser.add_argument(
-        '-v',
-        '--verbosity',
-        type=int,
-        default=3,
-        help="Set verbosity level.")
-    parser.add_argument(
+    #
+    # Required arguments
+    #
+
+    group_required = parser.add_argument_group('required arguments')
+
+    group_required.add_argument(
         "-m",
         "--model",
         dest="model",
         required=True,
         help=("Path to the model file."))
-    parser.add_argument(
+    group_required.add_argument(
         "-r",
         "--reference",
         dest="reference",
         required=True,
         help=("Path to the reference file."))
-    parser.add_argument(
+
+    #
+    # General arguments
+    #
+
+    group_general = parser.add_argument_group('general arguments')
+
+    group_general.add_argument(
+        '-v',
+        '--verbosity',
+        type=int,
+        default=3,
+        help="Set verbosity level. Defaults to 3.")
+    group_general.add_argument(
         "-o",
         "--output",
         dest="output",
         help=("Output file name. The output will be saved as a JSON file."))
-    parser.add_argument(
+    group_general.add_argument(
         "-d",
         "--dump-structures",
         dest="dump_structures",
@@ -171,26 +173,26 @@ def _ParseArgs():
         help=("Dump cleaned structures used to calculate all the scores as\n"
               "PDB files using specified suffix. Files will be dumped to the\n"
               "same location as original files."))
-    parser.add_argument(
+    group_general.add_argument(
         "-ds",
         "--dump-suffix",
         dest="dump_suffix",
         default=".compare.structures.pdb",
         help=("Use this suffix to dump structures.\n"
               "Defaults to .compare.structures.pdb."))
-    parser.add_argument(
+    group_general.add_argument(
         "-rs",
         "--reference-selection",
         dest="reference_selection",
         default="",
         help=("Selection performed on reference structures."))
-    parser.add_argument(
+    group_general.add_argument(
         "-ms",
         "--model-selection",
         dest="model_selection",
         default="",
         help=("Selection performed on model structures."))
-    parser.add_argument(
+    group_general.add_argument(
         "-ca",
         "--c-alpha-only",
         dest="c_alpha_only",
@@ -199,14 +201,14 @@ def _ParseArgs():
         help=("Use C-alpha atoms only. Equivalent of calling the action with\n"
               "'--model-selection=\"aname=CA\" "
               "--reference-selection=\"aname=CA\"'\noptions."))
-    parser.add_argument(
+    group_general.add_argument(
         "-ft",
         "--fault-tolerant",
         dest="fault_tolerant",
         default=False,
         action="store_true",
         help=("Fault tolerant parsing."))
-    parser.add_argument(
+    group_general.add_argument(
         "-cl",
         "--compound-library",
         dest="compound_library",
@@ -215,86 +217,21 @@ def _ParseArgs():
               "If not provided, the following locations are searched in this\n"
               "order: 1. Working directory, 2. OpenStructure standard library"
               "\nlocation."))
+
     #
-    # QS-scorer options
+    # Molecular check arguments
     #
-    parser.add_argument(
-        "-qs",
-        "--qs-score",
-        dest="qs_score",
-        default=False,
-        action="store_true",
-        help=("Calculate QS-score."))
-    parser.add_argument(
-        "-c",
-        "--chain-mapping",
-        nargs="+",
-        type=lambda x: x.split(":"),
-        dest="chain_mapping",
-        help=("Mapping of chains between the reference and the model.\n"
-              "Each separate mapping consist of key:value pairs where key\n"
-              "is the chain name in reference and value is the chain name in\n"
-              "model."))
-    parser.add_argument(
-        "--qs-rmsd",
-        dest="qs_rmsd",
-        default=False,
-        action="store_true",
-        help=("Calculate CA RMSD between shared CA atoms of mapped chains.\n"
-              "This uses a superposition using all mapped chains which\n"
-              "minimizes the CA RMSD."))
-    parser.add_argument(
-        "-rna",
-        "--residue-number-alignment",
-        dest="residue_number_alignment",
-        default=False,
-        action="store_true",
-        help=("Make alignment based on residue number instead of using\n"
-              "a global BLOSUM62-based alignment."))
-    #
-    # lDDT options
-    #
-    parser.add_argument(
-        "-l",
-        "--lddt",
-        dest="lddt",
-        default=False,
-        action="store_true",
-        help=("Calculate lDDT."))
-    parser.add_argument(
-        "-ir",
-        "--inclusion-radius",
-        dest="inclusion_radius",
-        type=float,
-        default=15.0,
-        help=("Distance inclusion radius."))
-    parser.add_argument(
-        "-ss",
-        "--sequence-separation",
-        dest="sequence_separation",
-        type=int,
-        default=0,
-        help=("Sequence separation. Only distances between residues whose\n"
-              "separation is higher than the provided parameter are\n"
-              "considered when computing the score"))
-    parser.add_argument(
-        "-spr",
-        "--save-per-residue-scores",
-        dest="save_per_residue_scores",
-        default=False,
-        action="store_true",
-        help=(""))
-    #
-    # Molecular check parameters
-    #
-    parser.add_argument(
+
+    group_molck = parser.add_argument_group('molecular check arguments')
+
+    group_molck.add_argument(
         "-ml",
         "--molck",
         dest="molck",
         default=False,
         action="store_true",
         help=("Run molecular checker to clean up input."))
-    parser.add_argument(
+    group_molck.add_argument(
         "-rm",
         "--remove",
         dest="remove",
@@ -307,16 +244,17 @@ def _ParseArgs():
               " * oxt - remove terminal oxygens\n"
               " * nonstd - remove all residues not one of the 20\n"
               " * standard amino acids\n"
-              " * unk - Remove unknown and atoms not following the"
-              "nomenclature"))
-    parser.add_argument(
+              " * unk - Remove unknown and atoms not following the\n"
+              "         nomenclature\n"
+              "Defaults to hyd."))
+    group_molck.add_argument(
         "-ce",
         "--clean-element-column",
         dest="clean_element_column",
         default=False,
         action="store_true",
         help=("Clean up element column"))
-    parser.add_argument(
+    group_molck.add_argument(
         "-mn",
         "--map-nonstandard-residues",
         dest="map_nonstandard_residues",
@@ -324,17 +262,21 @@ def _ParseArgs():
         action="store_true",
         help=("Map modified residues back to the parent amino acid, for\n"
               "example MSE -> MET, SEP -> SER."))
+    
     #
-    # Options for various checks
+    # Structural check arguments
     #
-    parser.add_argument(
+
+    group_sc = parser.add_argument_group('structural check arguments')
+
+    group_sc.add_argument(
         "-sc",
         "--structural-checks",
         dest="structural_checks",
         default=False,
         action="store_true",
         help=("Perform structural checks and filter input data."))
-    parser.add_argument(
+    group_sc.add_argument(
         "-p",
         "--parameter-file",
         dest="parameter_file",
@@ -344,21 +286,58 @@ def _ParseArgs():
               "If not provided, the following locations are searched in this\n"
               "order: 1. Working directory, 2. OpenStructure standard library"
               "\nlocation."))
-    parser.add_argument(
+    group_sc.add_argument(
         "-bt",
         "--bond-tolerance",
         dest="bond_tolerance",
         type=float,
         default=12.0,
-        help=("Tolerance in STD for bonds."))
-    parser.add_argument(
+        help=("Tolerance in STD for bonds. Defaults to 12."))
+    group_sc.add_argument(
         "-at",
         "--angle-tolerance",
         dest="angle_tolerance",
         type=float,
         default=12.0,
-        help=("Tolerance in STD for angles."))
-    parser.add_argument(
+        help=("Tolerance in STD for angles. Defaults to 12."))
+
+    #
+    # Chain mapping arguments
+    #
+
+    group_cm = parser.add_argument_group('chain mapping arguments')
+
+    group_cm.add_argument(
+        "-c",
+        "--chain-mapping",
+        nargs="+",
+        type=lambda x: x.split(":"),
+        dest="chain_mapping",
+        help=("Mapping of chains between the reference and the model.\n"
+              "Each separate mapping consist of key:value pairs where key\n"
+              "is the chain name in reference and value is the chain name in\n"
+              "model."))
+    group_cm.add_argument(
+        "--qs-max-mappings-extensive",
+        dest="qs_max_mappings_extensive",
+        type=int,
+        default=1000000,
+        help=("Maximal number of chain mappings to test for 'extensive'\n"
+              "chain mapping scheme which is used as a last resort if\n"
+              "other schemes failed. The extensive chain mapping search\n"
+              "must in the worst case check O(N!) possible mappings for\n"
+              "complexes with N chains. Two octamers without symmetry\n"
+              "would require 322560 mappings to be checked. To limit\n"
+              "computations, no scores are computed if we try more than\n"
+              "the maximal number of chain mappings. Defaults to 1000000."))
+
+    #
+    # Sequence alignment arguments
+    #
+
+    group_aln = parser.add_argument_group('sequence alignment arguments')
+
+    group_aln.add_argument(
         "-cc",
         "--consistency-checks",
         dest="consistency_checks",
@@ -370,6 +349,73 @@ def _ParseArgs():
               "will continue to calculate scores. If this flag is ON, checks\n"
               "will not be ignored and if the pair does not pass the test\n"
               "all the scores for that pair will be marked as a FAILURE."))
+    group_aln.add_argument(
+        "-rna",
+        "--residue-number-alignment",
+        dest="residue_number_alignment",
+        default=False,
+        action="store_true",
+        help=("Make alignment based on residue number instead of using\n"
+              "a global BLOSUM62-based alignment."))
+
+    #
+    # QS score arguments
+    #
+
+    group_qs = parser.add_argument_group('QS score arguments')
+
+    group_qs.add_argument(
+        "-qs",
+        "--qs-score",
+        dest="qs_score",
+        default=False,
+        action="store_true",
+        help=("Calculate QS-score."))
+    group_qs.add_argument(
+        "--qs-rmsd",
+        dest="qs_rmsd",
+        default=False,
+        action="store_true",
+        help=("Calculate CA RMSD between shared CA atoms of mapped chains.\n"
+              "This uses a superposition using all mapped chains which\n"
+              "minimizes the CA RMSD."))
+
+    #
+    # lDDT score arguments
+    #
+
+    group_lddt = parser.add_argument_group('lDDT score arguments')
+
+    group_lddt.add_argument(
+        "-l",
+        "--lddt",
+        dest="lddt",
+        default=False,
+        action="store_true",
+        help=("Calculate lDDT."))
+    group_lddt.add_argument(
+        "-ir",
+        "--inclusion-radius",
+        dest="inclusion_radius",
+        type=float,
+        default=15.0,
+        help=("Distance inclusion radius for lDDT. Defaults to 15 A."))
+    group_lddt.add_argument(
+        "-ss",
+        "--sequence-separation",
+        dest="sequence_separation",
+        type=int,
+        default=0,
+        help=("Sequence separation. Only distances between residues whose\n"
+              "separation is higher than the provided parameter are\n"
+              "considered when computing the score. Defaults to 0."))
+    group_lddt.add_argument(
+        "-spr",
+        "--save-per-residue-scores",
+        dest="save_per_residue_scores",
+        default=False,
+        action="store_true",
+        help=(""))
 
     # Print full help is no arguments provided
     if len(sys.argv) == 1:
@@ -502,21 +548,21 @@ def _GetAlignmentsAsFasta(alignments):
 
 def _ReadStructureFile(path, c_alpha_only=False, fault_tolerant=False,
                        selection=""):
-    """Safely read structure file into OST entity.
+    """Safely read structure file into OST entities (split by biounit).
 
-    The functin can read both PDB and mmCIF files.
-
+    The function can read both PDB and mmCIF files.
+    
     :param path: Path to the file.
     :type path: :class:`str`
-    :returns: Entity
-    :rtype: :class:`~ost.mol.EntityHandle`
+    :returns: list of entities
+    :rtype: :class:`list` of :class:`~ost.mol.EntityHandle`
     """
 
     def _Select(entity):
-        selection_message = "Selecting %s" % selection
         if selection:
-            ost.LogInfo(selection_message)
-            entity = entity.Select(selection)
+            ost.LogInfo("Selecting %s" % selection)
+            ent_view = entity.Select(selection)
+            entity = mol.CreateEntityFromView(ent_view, False)
         return entity
 
     entities = list()
@@ -541,7 +587,7 @@ def _ReadStructureFile(path, c_alpha_only=False, fault_tolerant=False,
                 calpha_only=c_alpha_only)
             if len(cif_info.biounits) == 0:
                 tbu = MMCifInfoBioUnit()
-                tbu.id = 'ASU of ' + entity.pdb_id
+                tbu.id = 'ASU'
                 tbu.details = 'asymmetric unit'
                 for chain in tmp_entity.chains:
                     tbu.AddChain(str(chain))
@@ -683,13 +729,19 @@ def _Main():
             qs_scorer = qsscoring.QSscorer(reference,
                                            model,
                                            opts.residue_number_alignment)
+            qs_scorer.max_mappings_extensive = opts.qs_max_mappings_extensive
             if opts.chain_mapping is not None:
                 ost.LogInfo(
                     "Using custom chain mapping: %s" % str(
                         opts.chain_mapping))
                 qs_scorer.chain_mapping = opts.chain_mapping
             else:
-                qs_scorer.chain_mapping  # just to initialize it
+                try:
+                  qs_scorer.chain_mapping  # just to initialize it
+                except qsscoring.QSscoreError as ex:
+                  ost.LogError('Chain mapping failed:', str(ex))
+                  ost.LogError('Skipping comparison')
+                  continue
             ost.LogInfo("-" * 80)
             ost.LogInfo("Checking consistency between %s and %s" % (
                         model_name, reference_name))
@@ -935,7 +987,7 @@ def _Main():
         ost.LogInfo("#" * 80)
         ost.LogInfo("Saving output into %s" % opts.output)
         with open(opts.output, "w") as outfile:
-            outfile.write(json.dumps(result, indent=4))
+            json.dump(result, outfile, indent=4, sort_keys=True)
 
 
 if __name__ == '__main__':

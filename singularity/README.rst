@@ -9,7 +9,7 @@ In order to build OST Singularity image:
 .. code-block:: bash
 
   cd <OST ROOT>/singularity
-  sudo singularity build ost.img Singularity.1.8.0
+  sudo singularity build ost.img Singularity.1.9.0
 
 .. note::
 

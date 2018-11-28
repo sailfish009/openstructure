@@ -13,9 +13,8 @@ by `Bertoni et al. <https://dx.doi.org/10.1038/s41598-017-09654-8>`_.
   - ClustalW must be installed (unless you provide chain mappings)
   - Python modules `numpy` and `scipy` must be installed and available
     (e.g. use ``pip install scipy numpy``)
-
-Authors: Gerardo Tauriello, Martino Bertoni
 """
+# Original authors: Gerardo Tauriello, Martino Bertoni
 
 from ost import mol, geom, conop, seq, settings, PushVerbosityLevel
 from ost import LogError, LogWarning, LogScript, LogInfo, LogVerbose, LogDebug
@@ -143,6 +142,19 @@ class QSscorer:
 
     :type: :class:`int`
 
+  .. attribute:: max_mappings_extensive
+
+    Maximal number of chain mappings to test for 'extensive'
+    :attr:`chain_mapping_scheme`. The extensive chain mapping search must in the
+    worst case check O(N^2) * O(N!) possible mappings for complexes with N
+    chains. Two octamers without symmetry would require 322560 mappings to be
+    checked. To limit computations, a :class:`QSscoreError` is thrown if we try
+    more than the maximal number of chain mappings.
+    The value must be set before the first use of :attr:`chain_mapping`.
+    By default it is set to 100000.
+
+    :type: :class:`int`
+
   .. attribute:: res_num_alignment
 
     Forces each alignment in :attr:`alignments` to be based on residue numbers
@@ -174,6 +186,7 @@ class QSscorer:
     self.res_num_alignment = res_num_alignment
     self.calpha_only = self.qs_ent_1.calpha_only or self.qs_ent_2.calpha_only
     self.max_ca_per_chain_for_cm = 100
+    self.max_mappings_extensive = 100000
     # init cached stuff
     self._chem_mapping = None
     self._ent_to_cm_1 = None
@@ -361,12 +374,13 @@ class QSscorer:
     :type: :class:`dict` with key / value = :class:`str` (chain names, key
            for :attr:`ent_to_cm_1`, value for :attr:`ent_to_cm_2`)
     :raises: :class:`QSscoreError` if there are too many combinations to check
-             to find a chain mapping.
+             to find a chain mapping (see :attr:`max_mappings_extensive`).
     """
     if self._chain_mapping is None:
       self._chain_mapping, self._chain_mapping_scheme = \
         _GetChainMapping(self.ent_to_cm_1, self.ent_to_cm_2, self.symm_1,
-                         self.symm_2, self.chem_mapping)
+                         self.symm_2, self.chem_mapping,
+                         self.max_mappings_extensive)
       LogInfo('Mapping found: %s' % str(self._chain_mapping))
     return self._chain_mapping
 
@@ -1811,7 +1825,8 @@ def _FindSymmetry(qs_ent_1, qs_ent_2, ent_to_cm_1, ent_to_cm_2, chem_mapping):
   return [], []
 
 
-def _GetChainMapping(ent_1, ent_2, symm_1, symm_2, chem_mapping):
+def _GetChainMapping(ent_1, ent_2, symm_1, symm_2, chem_mapping,
+                     max_mappings_extensive):
   """
   :return: Tuple with mapping from *ent_1* to *ent_2* (see
            :attr:`QSscorer.chain_mapping`) and scheme used (see
@@ -1822,6 +1837,7 @@ def _GetChainMapping(ent_1, ent_2, symm_1, symm_2, chem_mapping):
   :param symm_1: See :attr:`QSscorer.symm_1`
   :param symm_2: See :attr:`QSscorer.symm_2`
   :param chem_mapping: See :attr:`QSscorer.chem_mapping`
+  :param max_mappings_extensive: See :attr:`QSscorer.max_mappings_extensive`
   """
   LogInfo('Symmetry-groups used in %s: %s' % (ent_1.GetName(), str(symm_1)))
   LogInfo('Symmetry-groups used in %s: %s' % (ent_2.GetName(), str(symm_2)))
@@ -1861,7 +1877,7 @@ def _GetChainMapping(ent_1, ent_2, symm_1, symm_2, chem_mapping):
   LogInfo('Inter Symmetry-group mappings to check: %s' \
           % count['inter']['mappings'])
   nr_mapp = count['intra']['mappings'] + count['inter']['mappings']
-  if nr_mapp > 100000: # 322560 is octamer vs octamer
+  if nr_mapp > max_mappings_extensive:
     raise QSscoreError('Too many possible mappings: %s' % nr_mapp)
 
   # to speed up the computations we cache chain views and RMSDs

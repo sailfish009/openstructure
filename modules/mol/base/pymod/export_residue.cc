@@ -68,6 +68,7 @@ void export_Residue()
   class_<ChemClass>("ChemClass", init<char>(args("chem_class")))
     .def(self!=self)
     .def(self==self)
+    .def(self_ns::str(self))
     .def("IsPeptideLinking", &ChemClass::IsPeptideLinking)
     .def("IsNucleotideLinking", &ChemClass::IsNucleotideLinking)
   ;

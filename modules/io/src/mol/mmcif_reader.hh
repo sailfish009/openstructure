@@ -392,6 +392,8 @@ private:
     ABSTRACT_ID_CAS,              ///< CAS identifier
     BOOK_ID_ISBN,                 ///< ISBN code assigned, if book cited
     BOOK_TITLE,                   ///< title of book storing the citation
+    BOOK_PUBLISHER,               ///< name of publisher f a book
+    BOOK_PUBLISHER_CITY,          ///< location of a publisher of a book
     JOURNAL_ABBREV,               ///< abbreviated journal title for articles
     JOURNAL_VOLUME,               ///< volume of cited journal
     PAGE_FIRST,                   ///< first page of citation
