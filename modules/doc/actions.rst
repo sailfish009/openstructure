@@ -38,6 +38,12 @@ In summary it performs the following steps:
   :class:`single chain lDDT scores <ost.mol.alg.lDDTScorer>`,
   :attr:`weighted average of single chain lDDT scores <ost.mol.alg.qsscoring.OligoLDDTScorer.weighted_lddt>`,
   :attr:`lDDT score of oligomer <ost.mol.alg.qsscoring.OligoLDDTScorer.oligo_lddt>`).
+  Note that while the QS score is symmetric (same result when swapping reference
+  and model), the lDDT scores are not. Extra atoms in the model for mapped
+  chains have no effect on the score, while extra atoms in the reference reduce
+  the score. For the oligomeric variants (weighted-lDDT & oligo-lDDT), we do
+  :attr:`penalize for extra chains <ost.mol.alg.qsscoring.OligoLDDTScorer.penalize_extra_chains>`
+  in both reference and model.
 
 .. note ::
 
