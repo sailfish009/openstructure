@@ -126,7 +126,7 @@ void PythonInterpreterWorker::run_command_(std::pair<unsigned int,QString> pair)
         handle_redirector_output(QString::fromStdString(rstring)+"\n");
       }
     } else {
-      bp::exec(bp::str(command.toStdString()),main_namespace_,main_namespace_);
+      bp::exec(command.toStdString().c_str(), main_namespace_, main_namespace_);
     }
     output_redirector_->Flush();
     error_redirector_->Flush();
