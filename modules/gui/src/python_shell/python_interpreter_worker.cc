@@ -119,7 +119,7 @@ void PythonInterpreterWorker::run_command_(std::pair<unsigned int,QString> pair)
     current_id_=pair.first;
     QString command=pair.second;
     if(is_simple_expression(command)){
-      bp::object result=bp::eval(bp::str(command.toStdString()),
+      bp::object result=bp::eval(command.toStdString().c_str(),
                                  main_namespace_, main_namespace_);
       String rstring=bp::extract<String>(repr_(result));
       if(rstring!="None"){
