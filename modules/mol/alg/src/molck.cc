@@ -4,6 +4,7 @@
 #include <ost/conop/amino_acids.hh>
 #include <ost/conop/rule_based.hh>
 #include <ost/mol/alg/molck.hh>
+#include <ost/message.hh>
 
 using namespace ost::conop;
 using namespace ost::mol;
@@ -11,6 +12,11 @@ using namespace ost::mol;
 
 void ost::mol::alg::MapNonStandardResidues(EntityHandle& ent, CompoundLibPtr lib) {
   // TODO: Maybe it is possible to make it in-place operation
+
+  if(!lib) {
+    throw ost::Error("Require valid compound library!");
+  }
+
   EntityHandle new_ent=CreateEntity();
   new_ent.SetName(ent.GetName());
   ChainHandleList chains=ent.GetChainList();
@@ -58,6 +64,11 @@ void ost::mol::alg::RemoveAtoms(
                  bool rm_oxt_atoms,
                  bool rm_zero_occ_atoms,
                  bool colored /*=true*/){
+
+  if(!lib) {
+    throw ost::Error("Require valid compound library!");
+  }
+
   XCSEditor edi=ent.EditXCS();
   Diagnostics diags;
   Checker checker(lib, ent, diags);
@@ -124,6 +135,11 @@ void ost::mol::alg::RemoveAtoms(
 }
 
 void ost::mol::alg::CleanUpElementColumn(EntityHandle& ent, CompoundLibPtr lib){
+
+  if(!lib) {
+    throw ost::Error("Require valid compound library!");
+  }
+
   ChainHandleList chains=ent.GetChainList();
   for (ChainHandleList::const_iterator c=chains.begin();c!=chains.end();++c) {
     ResidueHandleList residues = c->GetResidueList();
@@ -152,6 +168,11 @@ void ost::mol::alg::Molck(
            ost::mol::EntityHandle& ent,
            ost::conop::CompoundLibPtr lib,
            const ost::mol::alg::MolckSettings& settings=ost::mol::alg::MolckSettings()){
+
+  if(!lib) {
+    throw ost::Error("Require valid compound library!");
+  }
+
   if (settings.map_nonstd_res)  {
     ost::mol::alg::MapNonStandardResidues(ent, lib);
   }
@@ -167,3 +188,4 @@ void ost::mol::alg::Molck(
     ost::mol::alg::CleanUpElementColumn(ent, lib);
   }          
 }
+
