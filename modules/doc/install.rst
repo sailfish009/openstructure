@@ -56,15 +56,6 @@ If you would like to use the :mod:`molecular mechanics <ost.mol.mm>` module:
 
 * `OpenMM <https://simtk.org/home/openmm>`_ (6.1)
 
-In case you are compiling under Windows you have to install `Visualstudio
-2008 <http://www.microsoft.com/express/Downloads>`_. to compile the dependencies 
-and OpenStructure. We recommend to compile the dependencies manually. Enter the 
-directories where the dependencies are located in Tools->Options->Projects and 
-Solutions->VC++ directories. Choose 'bin' directories to enter program paths to 
-cmake, qmake and python, 'lib' directories to point to the location(s) of your 
-dependencies.
-
-
 
 Getting the Source Code
 --------------------------------------------------------------------------------
@@ -113,7 +104,6 @@ specific features. To change to a specific branch, use
 Configuring
 --------------------------------------------------------------------------------
 
-
 OpenStructure uses `CMake <http://cmake.org>`_ for compiling and building the
 project. The next required step is to configure the build environment using
 cmake. You can do that by invoking `cmake` in the project directory.
@@ -127,8 +117,6 @@ behaviour, enabling and disabling the compilation of certain modules and options
 that let you tell CMake where to find the dependencies. All of them are passed
 to CMake with via `-D<opt>=<value>`.
 
-On Windows, use Tools -> VisualStudio -> commandline prompt from within
-VisualStudio.
 
 Flag to choose build generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -137,13 +125,6 @@ CMake supports different build generators. On UNIX, i.e. MacOS X and Linux, the
 default build generator is Makefiles, but it is also possible to use other
 programs. For a list of supported build generators on your platform, start cmake
 without parameters.
-
-On Windows you have to explicitly set the build generator to
-"Visual Studio 9 2008" (or a later version):
-
-.. code-block:: bash
-
-  cmake -G"Visual Studio 9 2008"
 
 
 .. _cmake-flags:
@@ -369,10 +350,8 @@ located as they are on linux and hence they must be specified too:
 Building the Project
 --------------------------------------------------------------------------------
 
-Type `make`. If you are using a multi-core machine, you can use the `-j` flag to 
-run multiple jobs at once.
-
-On Windows run 'Build OpenStructure' from the build menu.
+Type ``make``. If you are using a multi-core machine, you can use the `-j` flag
+to run multiple jobs at once.
 
 
 What's next?
