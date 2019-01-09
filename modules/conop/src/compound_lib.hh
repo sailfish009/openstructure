@@ -22,8 +22,7 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 
-// our own local copy of sqlite3
-#include <ost/db/sqlite3.h>
+#include <sqlite3.h>
 
 #include "module_config.hh"
 #include "compound.hh"

@@ -29,7 +29,7 @@
 #include <ost/base.hh>
 #include <ost/message.hh>
 
-#include "sqlite3.h"
+#include <sqlite3.h>
 #include "sqlite_conv.hh"
 
 namespace ost { namespace db {

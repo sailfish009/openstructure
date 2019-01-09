@@ -19,7 +19,7 @@
 #ifndef OST_IO_SQLITE_CONV_HH
 #define OST_IO_SQLITE_CONV_HH
 
-#include "sqlite3.h"
+#include <sqlite3.h>
 
 #include <ost/db/module_config.hh>
 

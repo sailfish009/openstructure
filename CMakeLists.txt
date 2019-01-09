@@ -234,6 +234,7 @@ endif()
 
 find_package(Eigen 3.2.0 REQUIRED)
 find_package(Python 2.4 REQUIRED)
+find_package(SQLite3 REQUIRED)
 
 if(USE_NUMPY)
   find_package(Numpy REQUIRED)
