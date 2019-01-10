@@ -22,8 +22,6 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 
-#include <sqlite3.h>
-
 #include "module_config.hh"
 #include "compound.hh"
 #include "compound_lib_base.hh"
@@ -54,8 +52,9 @@ private:
     void LoadAtomsFromDB(CompoundPtr comp, int pk) const;
     void LoadBondsFromDB(CompoundPtr comp, int pk) const;    
 private:
+  struct Database;
+  Database* db_;
   mutable CompoundMap       compound_cache_;
-  sqlite3*                  conn_;
   bool                      chem_type_available_; // wether pdbx_type is available in db
   bool                      name_available_; // wether name is available in db
   bool                      inchi_available_; //whether inchi is available in db

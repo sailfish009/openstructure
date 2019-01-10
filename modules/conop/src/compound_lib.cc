@@ -28,6 +28,7 @@
 #include "compound_lib.hh"
 #include <ost/version.hh>
 #include <ost/string_ref.hh>
+#include <sqlite3.h>
 
 using boost::format;
 
@@ -105,13 +106,32 @@ const char* INSERT_CHEMLIB_INFO_STATEMENT="insert into chemlib_info             
 
 }
 
+struct CompoundLib::Database {
+
+  Database(): ptr(NULL) { }
+
+  Database(sqlite3* p): ptr(p) { }
+
+  ~Database() {
+    if (ptr) {
+      int retval = sqlite3_close(ptr);
+      if (retval != SQLITE_OK) {
+        LOG_ERROR("Problem while closing SQLite db for CompoundLib: "
+                  << sqlite3_errmsg(ptr));
+      }
+    }
+  }
+
+  sqlite3* ptr;
+};
+
 
 void CompoundLib::SetChemLibInfo(void){
   sqlite3_stmt* stmt=NULL;
-  //~ if (!conn_) {
+  //~ if (!db_->ptr) {
     //~ LOG_ERROR(sqlite3_errmsg("Connection to DB not made"));
   //~ }
-  int retval=sqlite3_prepare_v2(conn_, INSERT_CHEMLIB_INFO_STATEMENT, 
+  int retval=sqlite3_prepare_v2(db_->ptr, INSERT_CHEMLIB_INFO_STATEMENT, 
                                 strlen(INSERT_CHEMLIB_INFO_STATEMENT), &stmt, NULL);
   time_t rawtime;
   struct tm * timeinfo;
@@ -131,10 +151,10 @@ void CompoundLib::SetChemLibInfo(void){
   }
   retval=sqlite3_step(stmt);
   if (SQLITE_DONE!=retval) {
-    if (sqlite3_errcode(conn_)==SQLITE_CONSTRAINT) {
+    if (sqlite3_errcode(db_->ptr)==SQLITE_CONSTRAINT) {
       LOG_ERROR("chemlib info already exists");
     } else {
-      LOG_ERROR(sqlite3_errmsg(conn_));
+      LOG_ERROR(sqlite3_errmsg(db_->ptr));
     }
   }
   sqlite3_finalize(stmt);  
@@ -144,7 +164,7 @@ Date CompoundLib::GetCreationDate(void){
   
   String query="SELECT creation_date FROM chemlib_info";
   sqlite3_stmt* stmt;
-  int retval=sqlite3_prepare_v2(conn_, query.c_str(), 
+  int retval=sqlite3_prepare_v2(db_->ptr, query.c_str(), 
                                 static_cast<int>(query.length()),
                                 &stmt, NULL);
   if (SQLITE_OK==retval) {
@@ -174,7 +194,7 @@ String CompoundLib::GetOSTVersionUsed() {
   sqlite3_stmt* stmt;
   String version;
 
-  int retval=sqlite3_prepare_v2(conn_, query.c_str(), 
+  int retval=sqlite3_prepare_v2(db_->ptr, query.c_str(), 
                                 static_cast<int>(query.length()),
                                 &stmt, NULL);
   if (SQLITE_OK==retval) {
@@ -202,7 +222,7 @@ String CompoundLib::GetOSTVersionUsed() {
 void CompoundLib::AddCompound(const CompoundPtr& compound)
 {
   sqlite3_stmt* stmt=NULL;  
-  int retval=sqlite3_prepare_v2(conn_, INSERT_COMPOUND_STATEMENT, 
+  int retval=sqlite3_prepare_v2(db_->ptr, INSERT_COMPOUND_STATEMENT, 
                                 strlen(INSERT_COMPOUND_STATEMENT), &stmt, NULL);
   String crea_date_str, modi_date_str;
   if (SQLITE_OK==retval) {
@@ -233,27 +253,27 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
     sqlite3_bind_text(stmt, 11, compound->GetInchiKey().c_str(),
                       compound->GetInchiKey().length(), NULL);
   } else {
-    LOG_ERROR(sqlite3_errmsg(conn_));
+    LOG_ERROR(sqlite3_errmsg(db_->ptr));
     sqlite3_finalize(stmt);
     return;
   }
   retval=sqlite3_step(stmt);
   if (SQLITE_DONE!=retval) {
-    if (sqlite3_errcode(conn_)==SQLITE_CONSTRAINT) {
+    if (sqlite3_errcode(db_->ptr)==SQLITE_CONSTRAINT) {
       LOG_ERROR("Compound '" << compound->GetID() << "' already exists for the "
                 << compound->GetDialectAsString() << " dialect.");
     } else {
-      LOG_ERROR(sqlite3_errmsg(conn_));
+      LOG_ERROR(sqlite3_errmsg(db_->ptr));
     }
   }
   sqlite3_finalize(stmt);  
-  sqlite3_int64 compound_id=sqlite3_last_insert_rowid(conn_);
+  sqlite3_int64 compound_id=sqlite3_last_insert_rowid(db_->ptr);
   // insert atoms
   const AtomSpecList& al=compound->GetAtomSpecs();
   std::vector<sqlite3_int64> atom_ids(al.size(), 0);
   for (AtomSpecList::const_iterator i=al.begin(), e=al.end(); i!=e; ++i) {
     const AtomSpec& a=*i;
-    retval=sqlite3_prepare_v2(conn_, INSERT_ATOM_STATEMENT, 
+    retval=sqlite3_prepare_v2(db_->ptr, INSERT_ATOM_STATEMENT, 
                               strlen(INSERT_ATOM_STATEMENT), &stmt, NULL);
     if (SQLITE_OK==retval) {
       sqlite3_bind_int64(stmt, 1, compound_id);
@@ -267,16 +287,16 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
       sqlite3_bind_int(stmt, 8, a.ordinal);
       retval=sqlite3_step(stmt);
       assert(retval==SQLITE_DONE);
-      atom_ids[a.ordinal]=sqlite3_last_insert_rowid(conn_);
+      atom_ids[a.ordinal]=sqlite3_last_insert_rowid(db_->ptr);
     } else {
-      LOG_ERROR(sqlite3_errmsg(conn_));
+      LOG_ERROR(sqlite3_errmsg(db_->ptr));
     }
     sqlite3_finalize(stmt);
   }
   const BondSpecList& bl=compound->GetBondSpecs();
   for (BondSpecList::const_iterator i=bl.begin(), e=bl.end(); i!=e; ++i) {
     const BondSpec& b=*i;
-    retval=sqlite3_prepare_v2(conn_, INSERT_BOND_STATEMENT, 
+    retval=sqlite3_prepare_v2(db_->ptr, INSERT_BOND_STATEMENT, 
                               strlen(INSERT_BOND_STATEMENT), &stmt, NULL);    
     if (SQLITE_OK==retval) {
       sqlite3_bind_int64(stmt, 1, compound_id);
@@ -287,7 +307,7 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
       retval=sqlite3_step(stmt);
       assert(retval==SQLITE_DONE);
     } else {
-      LOG_ERROR(sqlite3_errmsg(conn_));
+      LOG_ERROR(sqlite3_errmsg(db_->ptr));
     }
     sqlite3_finalize(stmt);    
   }
@@ -296,23 +316,23 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
 CompoundLibPtr CompoundLib::Copy(const String& filename) const
 {
   CompoundLibPtr clone=CompoundLibPtr(new CompoundLib);
-  int retval=sqlite3_open(filename.c_str(), &clone->conn_);
+  int retval=sqlite3_open(filename.c_str(), &clone->db_->ptr);
   if (SQLITE_OK==retval) {
     sqlite3_backup* backup;
 
-    backup=sqlite3_backup_init(clone->conn_, "main", conn_, "main");
+    backup=sqlite3_backup_init(clone->db_->ptr, "main", db_->ptr, "main");
     if (backup){
       sqlite3_backup_step(backup, -1);
       sqlite3_backup_finish(backup);
     }
-    int rc=sqlite3_errcode(clone->conn_);
+    int rc=sqlite3_errcode(clone->db_->ptr);
     if (rc!=SQLITE_OK) {
-      LOG_ERROR(sqlite3_errmsg(clone->conn_));
+      LOG_ERROR(sqlite3_errmsg(clone->db_->ptr));
       return CompoundLibPtr();
     }
     return clone;      
   }
-  LOG_ERROR(sqlite3_errmsg(clone->conn_));
+  LOG_ERROR(sqlite3_errmsg(clone->db_->ptr));
   return CompoundLibPtr();
 }
 
@@ -321,18 +341,18 @@ CompoundLibPtr CompoundLib::Copy(const String& filename) const
 CompoundLibPtr CompoundLib::Create(const String& database)
 {
   CompoundLibPtr lib(new CompoundLib);
-  int retval=sqlite3_open(database.c_str(), &lib->conn_);
+  int retval=sqlite3_open(database.c_str(), &lib->db_->ptr);
   if (SQLITE_OK==retval) {
     const char** cmd=CREATE_CMD;
     while (*cmd) {
       sqlite3_stmt* stmt;
-      retval=sqlite3_prepare_v2(lib->conn_, *cmd, strlen(*cmd), &stmt, NULL);
+      retval=sqlite3_prepare_v2(lib->db_->ptr, *cmd, strlen(*cmd), &stmt, NULL);
       if (SQLITE_OK==retval) {
         retval=sqlite3_step(stmt);
         sqlite3_finalize(stmt);        
         assert(SQLITE_DONE==retval);
       } else {
-        LOG_ERROR(sqlite3_errmsg(lib->conn_));
+        LOG_ERROR(sqlite3_errmsg(lib->db_->ptr));
         sqlite3_finalize(stmt);
         return CompoundLibPtr();
       }      
@@ -340,7 +360,7 @@ CompoundLibPtr CompoundLib::Create(const String& database)
     }
     return lib;
   }
-  LOG_ERROR(sqlite3_errmsg(lib->conn_));
+  LOG_ERROR(sqlite3_errmsg(lib->db_->ptr));
   return CompoundLibPtr();  
 }
 
@@ -349,28 +369,28 @@ CompoundLibPtr CompoundLib::Load(const String& database, bool readonly)
 {
   int flags=readonly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE;
   CompoundLibPtr lib(new CompoundLib);
-  int retval=sqlite3_open_v2(database.c_str(), &lib->conn_, flags, NULL);
+  int retval=sqlite3_open_v2(database.c_str(), &lib->db_->ptr, flags, NULL);
   if (SQLITE_OK!=retval) {
-    LOG_ERROR(sqlite3_errmsg(lib->conn_));
+    LOG_ERROR(sqlite3_errmsg(lib->db_->ptr));
     return CompoundLibPtr();
   }
   // check if column chem_type exists in database
   String aq="SELECT chem_type FROM chem_compounds LIMIT 1";
   sqlite3_stmt* stmt;
-  retval=sqlite3_prepare_v2(lib->conn_, aq.c_str(),
+  retval=sqlite3_prepare_v2(lib->db_->ptr, aq.c_str(),
                             static_cast<int>(aq.length()),
                             &stmt, NULL);
   lib->chem_type_available_ = retval==SQLITE_OK;
   sqlite3_finalize(stmt);
   aq="SELECT name FROM chem_compounds LIMIT 1";
-  retval=sqlite3_prepare_v2(lib->conn_, aq.c_str(),
+  retval=sqlite3_prepare_v2(lib->db_->ptr, aq.c_str(),
                             static_cast<int>(aq.length()),
                             &stmt, NULL);
   lib->name_available_ = retval==SQLITE_OK;
   sqlite3_finalize(stmt);
   // check if InChIs are available
   aq="SELECT inchi_code FROM chem_compounds LIMIT 1";
-  retval=sqlite3_prepare_v2(lib->conn_, aq.c_str(),
+  retval=sqlite3_prepare_v2(lib->db_->ptr, aq.c_str(),
                             static_cast<int>(aq.length()),
                             &stmt, NULL);
   lib->inchi_available_ = retval==SQLITE_OK;
@@ -386,7 +406,7 @@ void CompoundLib::LoadAtomsFromDB(CompoundPtr comp, int pk) const {
                        "FROM atoms WHERE compound_id=%d "
                        "ORDER BY ordinal ASC") % pk);  
   sqlite3_stmt* stmt;
-  int retval=sqlite3_prepare_v2(conn_, aq.c_str(), 
+  int retval=sqlite3_prepare_v2(db_->ptr, aq.c_str(), 
                                 static_cast<int>(aq.length()),
                                 &stmt, NULL);
   if (SQLITE_OK==retval) {
@@ -401,7 +421,7 @@ void CompoundLib::LoadAtomsFromDB(CompoundPtr comp, int pk) const {
         comp->AddAtom(atom_sp);
       }
   } else {
-    LOG_ERROR(sqlite3_errmsg(conn_));
+    LOG_ERROR(sqlite3_errmsg(db_->ptr));
   }
   sqlite3_finalize(stmt);
 }
@@ -416,7 +436,7 @@ void CompoundLib::LoadBondsFromDB(CompoundPtr comp, int pk) const {
                        "LEFT JOIN atoms AS a1 ON b.atom_one=a1.id "
                        "LEFT JOIN atoms as a2 ON b.atom_two=a2.id "
                        "WHERE b.compound_id=%d") % pk);
-  int retval=sqlite3_prepare_v2(conn_, aq.c_str(), 
+  int retval=sqlite3_prepare_v2(db_->ptr, aq.c_str(), 
                                 static_cast<int>(aq.length()),
                                 &stmt, NULL);
   if (SQLITE_OK==retval) {
@@ -429,7 +449,7 @@ void CompoundLib::LoadBondsFromDB(CompoundPtr comp, int pk) const {
         comp->AddBond(bond_sp);
       }
   } else {
-    LOG_ERROR(sqlite3_errmsg(conn_));
+    LOG_ERROR(sqlite3_errmsg(db_->ptr));
   } 
   sqlite3_finalize(stmt);
 }
@@ -457,7 +477,7 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
   query+=" FROM chem_compounds"
          " WHERE tlc='"+id+"' AND dialect='"+String(1, char(dialect))+"'";
   sqlite3_stmt* stmt;
-  int retval=sqlite3_prepare_v2(conn_, query.c_str(), 
+  int retval=sqlite3_prepare_v2(db_->ptr, query.c_str(), 
                                 static_cast<int>(query.length()),
                                 &stmt, NULL);
   if (SQLITE_OK==retval) {
@@ -503,7 +523,7 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
     }
     assert(SQLITE_DONE==sqlite3_step(stmt));
   } else {
-    LOG_ERROR("ERROR: " << sqlite3_errmsg(conn_));
+    LOG_ERROR("ERROR: " << sqlite3_errmsg(db_->ptr));
     sqlite3_finalize(stmt);      
     return CompoundPtr();
   }
@@ -513,23 +533,16 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
 
 CompoundLib::CompoundLib():
   CompoundLibBase(),
+  db_(new Database),
   compound_cache_(),
-  conn_(NULL),
   chem_type_available_(false),
   name_available_(),
   inchi_available_(),
   creation_date_(),
-  ost_version_used_()
-{
-}
+  ost_version_used_() { }
 
 CompoundLib::~CompoundLib() {
-  if (conn_) {
-    int retval = sqlite3_close(conn_);
-    if (retval != SQLITE_OK) {
-      LOG_ERROR("Problem while closing SQLite db for CompoundLib: "
-                << sqlite3_errmsg(conn_));
-    }
-  }
+  delete db_;
 }
+
 }}
