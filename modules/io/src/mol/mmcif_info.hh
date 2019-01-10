@@ -390,11 +390,17 @@ private:
 
 class DLLEXPORT_OST_IO MMCifInfoCitation {
 public:
+  /// \enum types of citations
+  typedef enum {
+    JOURNAL,
+    BOOK,
+    UNKNOWN
+  } MMCifInfoCType;
+
   /// \brief Create a citation.
   MMCifInfoCitation(): id_(""), where_(UNKNOWN), cas_(""), published_in_(""),
     volume_(""), page_first_(""), page_last_(""), doi_(""), pubmed_(0),
-    year_(0), title_("") {};
-
+    year_(0), title_(""), book_publisher_(""), book_publisher_city_("") {};
   /// \brief Set ID
   ///
   /// \param id ID
@@ -463,11 +469,34 @@ public:
   /// \return last page
   String GetPageLast() const { return page_last_; }
 
+  /// \brief Set the publisher for a book
+  ///
+  /// \param publisher
+  void SetBookPublisher(String publisher) { book_publisher_ = publisher; }
+
+  /// \brief Get the publisher of a book
+  ///
+  /// \return publisher
+  String GetBookPublisher() const { return book_publisher_; }
+
+  /// \brief Set the publisher city for a book
+  ///
+  /// \param publisher_city
+  void SetBookPublisherCity(String publisher_city) {
+    book_publisher_city_ = publisher_city;
+  }
+
+  /// \brief Get the publisher city of a book
+  ///
+  /// \return publisher_city
+  String GetBookPublisherCity() const { return book_publisher_city_; }
+
+//book_publisher_city_
+
   /// \brief Set the DOI of a document
   ///
   /// \param doi
   void SetDOI(String doi) { doi_ = doi; }
-
 
   /// \brief Get the DOI of a document
   ///
@@ -505,6 +534,54 @@ public:
   ///
   /// \return title
   String GetTitle() const { return title_; }
+
+  /// \brief Set the type of a publication
+  ///
+  /// \param publication_type
+  void SetCitationType(MMCifInfoCType publication_type) {
+    where_ = publication_type;
+  }
+
+  /// \brief Set the type of a publication to journal
+  void SetCitationTypeJournal() {
+    where_ = MMCifInfoCitation::JOURNAL;
+  }
+
+  /// \brief Set the type of a publication to book
+  void SetCitationTypeBook() {
+    where_ = MMCifInfoCitation::BOOK;
+  }
+
+  /// \brief Set the type of a publication to unknown
+  void SetCitationTypeUnknown() {
+    where_ = MMCifInfoCitation::UNKNOWN;
+  }
+
+  /// \brief Get the type of a publication
+  ///
+  /// \return citation type
+  MMCifInfoCType GetCitationType() const { return where_; }
+
+  /// \brief Check a citation to be published in a journal
+  ///
+  /// \return true or false
+  bool IsCitationTypeJournal() const {
+    return where_ == MMCifInfoCitation::JOURNAL;
+  }
+
+  /// \brief Check a citation to be published in a book
+  ///
+  /// \return true or false
+  bool IsCitationTypeBook() const {
+    return where_ == MMCifInfoCitation::BOOK;
+  }
+
+  /// \brief Check if the citation type is unknow
+  ///
+  /// \return true or false
+  bool IsCitationTypeUnknown() const {
+    return where_ == MMCifInfoCitation::UNKNOWN;
+  }
 
   /// \brief Set the list of authors
   ///
@@ -562,6 +639,18 @@ public:
         StringRef(cit.title_.c_str(), cit.title_.length())) {
       return false;
     }
+    if (StringRef(this->book_publisher_.c_str(),
+                  this->book_publisher_.length()) !=
+        StringRef(cit.book_publisher_.c_str(),
+                  cit.book_publisher_.length())) {
+      return false;
+    }
+    if (StringRef(this->book_publisher_city_.c_str(),
+                  this->book_publisher_city_.length()) !=
+        StringRef(cit.book_publisher_city_.c_str(),
+                  cit.book_publisher_city_.length())) {
+      return false;
+    }
     if (this->authors_ != cit.authors_) {
       return false;
     }
@@ -574,26 +663,21 @@ public:
   }
 
 private:
-  /// \enum types of citations
-  typedef enum {
-    JOURNAL,
-    BOOK,
-    UNKNOWN
-  } MMCifInfoCType;
-
-  String              id_;           ///< internal identifier
-  MMCifInfoCType      where_;        ///< journal or book?
-  String              cas_;          ///< CAS identifier
-  String              isbn_;         ///< ISBN no. of medium
-  String              published_in_; ///< book title or full journal name
-  String              volume_;       ///< journal volume
-  String              page_first_;   ///< first page
-  String              page_last_;    ///< last page
-  String              doi_;          ///< DOI identifier
-  int                 pubmed_;       ///< accession no.
-  int                 year_;         ///< year of publication
-  String              title_;        ///< title of the publication
-  std::vector<String> authors_;       ///< author information
+  String              id_;                  ///< internal identifier
+  MMCifInfoCType      where_;               ///< journal or book?
+  String              cas_;                 ///< CAS identifier
+  String              isbn_;                ///< ISBN no. of medium
+  String              published_in_;        ///< book title or journal name
+  String              volume_;              ///< journal volume
+  String              page_first_;          ///< first page
+  String              page_last_;           ///< last page
+  String              doi_;                 ///< DOI identifier
+  int                 pubmed_;              ///< accession no.
+  int                 year_;                ///< year of publication
+  String              title_;               ///< title of the publication
+  String              book_publisher_;      ///< name of publisher
+  String              book_publisher_city_; ///< location of publisher
+  std::vector<String> authors_;             ///< author information
 };
 
 /// \brief container class for information on obsolete entries

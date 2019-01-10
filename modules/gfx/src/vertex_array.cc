@@ -508,7 +508,7 @@ namespace {
   unsigned int col_to_index(float* c)
   {
     // don't look too closely - I am lacking sufficient caffeine to do this more elegantly
-    int ret= std::max(0,std::min<int>(511,static_cast<int>(round_real(c[0]*7.0f))*64+static_cast<int>(round_real(c[1]*7.0f))*8+static_cast<unsigned int>(round_real(c[2]*7.0f))));
+    int ret= std::max(0,std::min<int>(511,static_cast<int>(round(c[0]*7.0f))*64+static_cast<int>(round(c[1]*7.0f))*8+static_cast<unsigned int>(round(c[2]*7.0f))));
     return static_cast<unsigned int>(ret);
   }
 }
@@ -1362,7 +1362,7 @@ void IndexedVertexArray::draw_aalines()
       {e3[0],e3[1],e3[2]},
       {ve0.c[0],ve0.c[1],ve0.c[2],ve0.c[3]},
       {ve1.c[0],ve1.c[1],ve1.c[2],ve1.c[3]},
-      -0.5*(q0[2]+q1[2])};
+      -0.5f*(q0[2]+q1[2])};
     line_list.push_back(le);
   }
 

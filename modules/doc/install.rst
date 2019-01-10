@@ -4,14 +4,22 @@ Installing OpenStructure From Source
 Brief Overview
 --------------------------------------------------------------------------------
 
-Compiling OpenStructure consists of several steps that are described below in
-more detail. In essence, these steps are:
+For a simple and portable way to use OpenStructure we recommend using a
+container solution. We provide recipes to build images for
+`Docker <https://www.docker.com/>`_ and
+`Singularity <https://www.sylabs.io/guides/2.5.1/user-guide>`_.
+The latest recipes and instructions can be found on our GitLab site
+(`Docker instructions <https://git.scicore.unibas.ch/schwede/openstructure/tree/develop/docker>`_ and
+`Singularity instructions <https://git.scicore.unibas.ch/schwede/openstructure/tree/develop/singularity>`_).
+
+If you wish to compile OpenStructure outside of a container, you need to follow
+the steps which we describe in detail below. In essence, these steps are:
 
 * Installing the Dependencies
 * Checking out the source code from GIT
 * Configuring the build with cmake
 * Compiling an Linking
- 
+
 
 Installing the Dependencies
 --------------------------------------------------------------------------------
@@ -47,15 +55,6 @@ If you would like to use the graphical user interface (GUI), also install:
 If you would like to use the :mod:`molecular mechanics <ost.mol.mm>` module:
 
 * `OpenMM <https://simtk.org/home/openmm>`_ (6.1)
-
-In case you are compiling under Windows you have to install `Visualstudio
-2008 <http://www.microsoft.com/express/Downloads>`_. to compile the dependencies 
-and OpenStructure. We recommend to compile the dependencies manually. Enter the 
-directories where the dependencies are located in Tools->Options->Projects and 
-Solutions->VC++ directories. Choose 'bin' directories to enter program paths to 
-cmake, qmake and python, 'lib' directories to point to the location(s) of your 
-dependencies.
-
 
 
 Getting the Source Code
@@ -105,7 +104,6 @@ specific features. To change to a specific branch, use
 Configuring
 --------------------------------------------------------------------------------
 
-
 OpenStructure uses `CMake <http://cmake.org>`_ for compiling and building the
 project. The next required step is to configure the build environment using
 cmake. You can do that by invoking `cmake` in the project directory.
@@ -119,8 +117,6 @@ behaviour, enabling and disabling the compilation of certain modules and options
 that let you tell CMake where to find the dependencies. All of them are passed
 to CMake with via `-D<opt>=<value>`.
 
-On Windows, use Tools -> VisualStudio -> commandline prompt from within
-VisualStudio.
 
 Flag to choose build generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -129,13 +125,6 @@ CMake supports different build generators. On UNIX, i.e. MacOS X and Linux, the
 default build generator is Makefiles, but it is also possible to use other
 programs. For a list of supported build generators on your platform, start cmake
 without parameters.
-
-On Windows you have to explicitly set the build generator to
-"Visual Studio 9 2008" (or a later version):
-
-.. code-block:: bash
-
-  cmake -G"Visual Studio 9 2008"
 
 
 .. _cmake-flags:
@@ -299,16 +288,8 @@ from source.
 
 On some Linux distributions, there are issues with Qt4 and hence it may not be
 possible to build OpenStructure with GUI support at all. This is for instance
-known to be an issue with boost versions >= 1.62.
-
-An additional problem arises for gcc versions >= 6. There an extra flag is
-required to use the C++98 standard:
-
-.. code-block:: bash
-
-  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
-
-We hope to support Qt5 and C++11 in the next OpenStructure release.
+known to be an issue with boost versions >= 1.62. We hope to support Qt5 in the
+next OpenStructure release.
 
 
 **Ubuntu 16.04 with GUI**
@@ -342,12 +323,11 @@ All the dependencies can be installed from the package manager as follows:
   sudo dnf install cmake eigen3-devel boost-devel libpng-devel python2-devel \
                    fftw-devel libtiff-devel
 
-Fedora 26 has gcc 7 and boost 1.63 by default. Hence, we will need to disable
-Qt4, the GUI and add the extra flag described above:
+Here, we compile a version without GUI as follows:
 
 .. code-block:: bash
 
-  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF -DCMAKE_CXX_FLAGS='-std=c++98'
+  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF
 
 
 **macOS with Homebrew without GUI**
@@ -370,10 +350,8 @@ located as they are on linux and hence they must be specified too:
 Building the Project
 --------------------------------------------------------------------------------
 
-Type `make`. If you are using a multi-core machine, you can use the `-j` flag to 
-run multiple jobs at once.
-
-On Windows run 'Build OpenStructure' from the build menu.
+Type ``make``. If you are using a multi-core machine, you can use the `-j` flag
+to run multiple jobs at once.
 
 
 What's next?

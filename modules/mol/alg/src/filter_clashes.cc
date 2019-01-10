@@ -118,7 +118,7 @@ std::pair<Real,Real> ClashingDistances::GetClashingDistance(const String& ele1,c
   std::map <String,std::pair<Real,Real> >::const_iterator find_ci= min_distance_.find(key);
   if (find_ci == min_distance_.end()) {
       std::stringstream serr;
-      serr << "Entry for distance " << key <<  " not found in the parameter table";   
+      serr << "Entry for distance " << key <<  " not found in the parameter table";
       throw Error(serr.str());
   }    
   return find_ci->second;
@@ -201,13 +201,13 @@ bool StereoChemicalParams::IsEmpty() const
   return false;
 }  
 
-StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<String>& stereo_chemical_props_file)
+StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<String>& stereo_chemical_props_file, bool check)
 {
   StereoChemicalParams table;
   bool found=false;
   std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
   while (line_iter!=stereo_chemical_props_file.end()) {
-    if ((*line_iter).length()!=0 && (*line_iter).length()!=1) {
+    if ((*line_iter).length() > 1) {
       StringRef line_string_ref(line_iter->data(),(*line_iter).length());
       std::vector<StringRef> line_str_vec = line_string_ref.split();
       if (line_str_vec[0].str()==header) {
@@ -220,7 +220,7 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
             if (second_line_str_vec.size()!=4) {
               std::cout << "The number of elements in one of the lines is wrong" << std::endl;
               return StereoChemicalParams();
-            } 
+            }
             StringRef item = second_line_str_vec[0];
             String res = second_line_str_vec[1].str();          
             std::pair<bool,float> parse_value = second_line_str_vec[2].to_float();
@@ -231,13 +231,13 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
             } else {
               std::cout << "One of the values in the third column is not a number" << std::endl;
               return StereoChemicalParams();
-            };
+            }
             if (parse_stddev.first==true) {
               stddev=static_cast<Real>(parse_stddev.second);
             } else {
               std::cout << "One of the values in the fourth column is not a number" << std::endl;
               return StereoChemicalParams();
-            };
+            }
             std::vector<StringRef> split_item = item.split('-');
             String rearranged_item;
             if (split_item.size() == 2) {
@@ -264,10 +264,10 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
             } else {
               std::cout << "One of the strings describing the parameter has the wrong format" << std::endl;
               return StereoChemicalParams();
-            }            
+            }
             table.SetParam(rearranged_item,res,value,stddev);
-            line_iter++;
-            }  
+          }
+          line_iter++;
         }
       }  
     }
@@ -276,17 +276,24 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
   if (found==false) {
     std::cout << "Could not find the relevant section in the stereo-chemical parameter file" << std::endl;
     return StereoChemicalParams();
-  };    
+  };
+  if (check) {
+    if (table.IsEmpty()) {
+      std::stringstream serr;
+      serr << "Error reading the " << header << " section of the stereo-chemical parameter file.";   
+      throw ost::Error(serr.str());
+    }
+  }  
   return table;
 };  
 
-ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_props_file)
+ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_props_file, bool check)
 {
   ClashingDistances table;
   bool found=false;
   std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
   while (line_iter!=stereo_chemical_props_file.end()) {
-    if ((*line_iter).length()!=0 && (*line_iter).length()!=1) {
+    if ((*line_iter).length() > 1) {
       StringRef line_string_ref(line_iter->data(),(*line_iter).length());
       std::vector<StringRef> line_str_vec = line_string_ref.split();
       if (line_str_vec[0].str()=="Non-bonded") {
@@ -299,7 +306,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
             if (second_line_str_vec.size()!=3) {
               std::cout << "The number of elements in one of the lines is wrong" << std::endl;
               return ClashingDistances();
-            } 
+            }
             String item = second_line_str_vec[0].str();
 
             std::pair<bool,float> parse_value = second_line_str_vec[1].to_float();
@@ -310,7 +317,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
             } else {
               std::cout << "One of the distance values is not a number" << std::endl;
               return ClashingDistances();
-            };
+            }
             if (parse_stddev.first==true) {
               stddev=static_cast<Real>(parse_stddev.second);
             } else {
@@ -322,16 +329,16 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
             if (itemsr.size() != 3) {
               std::cout << "One of the strings describing the interacting atoms has the wrong format" << std::endl;
               return ClashingDistances();
-            }  
+            }
             String ele1=eles[0].str();
             String ele2=eles[1].str();
             if (ele2 < ele1) {
               table.SetClashingDistance(ele2,ele1,value,stddev);
             } else {
               table.SetClashingDistance(ele1,ele2,value,stddev);
-            }  
-            line_iter++;
-          }  
+            }
+          }
+          line_iter++;
         }
       }  
     }
@@ -340,7 +347,14 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
   if (found==false) {
     std::cout << "Could not find the relevant section in the stereo-chemical parameter file" << std::endl;
     return ClashingDistances();
-  } 
+  }
+  if (check) {
+    if (table.IsEmpty()) {
+      std::stringstream serr;
+      serr << "Error reading the Clashing section of the stereo-chemical parameter file.";   
+      throw ost::Error(serr.str());
+    }
+  }
   return table;
 }  
 
@@ -407,10 +421,15 @@ std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityView&
               remove_sc=true;
               if (always_remove_bb==true) {
                 remove_bb=true;
-              }
-              String name=atom.GetName();
-              if (name=="CA" || name=="N" || name=="O" || name=="C") {
-                remove_bb=true;
+              } else {
+                // we need to check both atom names since the order is random!
+                // -> for angles and clashes this is not needed
+                String name1 = atom.GetName();
+                String name2 = other_atom.GetName();
+                if (name1=="CA" || name1=="N" || name1=="O" || name1=="C" ||
+                    name2=="CA" || name2=="N" || name2=="O" || name2=="C") {
+                  remove_bb=true;
+                }
               }
             } else {
               LOG_VERBOSE("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "PASS")
@@ -615,7 +634,7 @@ std::pair<EntityView,ClashingInfo> FilterClashes(const EntityView& ent, const Cl
     
     if (remove_bb) {
       LOG_VERBOSE("ACTION: removing whole residue " << res);
-      res.SetBoolProp("steric_clash",true);
+      res.SetBoolProp("steric_clash_backbone", true);
       continue;
     }
     if (remove_sc) {
@@ -628,7 +647,7 @@ std::pair<EntityView,ClashingInfo> FilterClashes(const EntityView& ent, const Cl
          filtered.AddAtom(atom);
        }
       }
-      res.SetBoolProp("steric_clash",true);
+      res.SetBoolProp("steric_clash_sidechain", true);
       continue;
     }
     filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);

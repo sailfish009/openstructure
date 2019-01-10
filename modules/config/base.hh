@@ -53,38 +53,13 @@ typedef unsigned short Word;
 
 typedef std::string String;
 
-#ifndef round_real_function
-#define round_real_function
-#ifndef round_real
-inline Real round_real(Real d) 
-{
-  return floor(d+Real(0.5));
-}
-#endif
-#endif
+// NOTE: Before OST 1.8, we used to have round and rint functions defined here
+// -> round and rint are available for any compiler since many years now
+// -> Tested for GCC 4.1.2 - 9.0.0, clang 3.3.0 - 8.0.0, MSVC 2015 - 2017 using
+//    godbolt.org. In all cases: call with float is not casted to double, but
+//    kept as float which is desired behaviour for good performance.
 
-#ifndef round_float_function
-#define round_float_function
-#ifndef round_float
-inline float round_float(float d) 
-{
-  return (float)floor(d+float(0.5));
-}
-#endif
-#endif
-
-#ifndef round_double_function
-#define round_double_function
-#ifndef round_double
-inline double round_double(double d) 
-{
-  return (double)floor(d+double(0.5));
-}
-#endif
-#endif
-
-
-
+// NOTE: OST has not been tested in MSVC for a very long time!
 #if _MSC_VER
 #pragma warning(disable:4251)
 #pragma warning(disable:4275)
@@ -114,7 +89,6 @@ inline double log2( double n )
 # endif
 
 #endif
-
 
 
 #endif

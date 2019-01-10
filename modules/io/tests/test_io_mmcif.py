@@ -40,6 +40,15 @@ class TestMMCifInfo(unittest.TestCase):
     # test title setting/ getting
     c.SetTitle('Foo')
     self.assertEquals(c.GetTitle(), 'Foo')
+    # test book_publisher set & get
+    c.SetBookPublisher("Hugo")
+    self.assertEquals(c.GetBookPublisher(), "Hugo")
+    # test book_publisher_city set & get
+    c.SetBookPublisherCity("Basel")
+    self.assertEquals(c.book_publisher_city, "Basel")
+    # test citation type
+    self.assertTrue(c.IsCitationTypeUnknown())
+    self.assertEquals(c.citation_type, io.MMCifInfoCType.Unknown)
     # test auhtors setting/ getting
     s = ost.StringList()
     s.append('Foo')

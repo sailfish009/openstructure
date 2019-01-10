@@ -929,3 +929,49 @@ macro(setup_boost)
   set(BOOST_THREAD ${Boost_LIBRARIES})
   set(Boost_LIBRARIES)
 endmacro()
+
+
+#-------------------------------------------------------------------------------
+# Synopsis:
+#   ost_action_init()
+#
+# Description:
+#   Initialise cached variables
+#-------------------------------------------------------------------------------
+macro(ost_action_init)
+  set(OST_ACTION_NAMES "" CACHE INTERNAL "" FORCE)
+endmacro(ost_action_init)
+
+#-------------------------------------------------------------------------------
+# Synopsis:
+#   ost_action(ACTION TARGET)
+#
+# Description:
+#   Add a script to actions.
+#   ACTION script to be added (needs to have permissions to be executed)
+#   TARGET make target to add the action to
+#-------------------------------------------------------------------------------
+macro(ost_action ACTION TARGET)
+  copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}"
+                    "${STAGE_DIR}/${LIBEXEC_PATH}" 
+                    "${ACTION}" "TARGETS" ${TARGET})
+  install(FILES "${ACTION}" DESTINATION "${LIBEXEC_PATH}"
+          PERMISSIONS WORLD_EXECUTE GROUP_EXECUTE OWNER_EXECUTE 
+                      WORLD_READ GROUP_READ OWNER_READ)
+  # storing tool names for bash completion
+  string(REGEX REPLACE "^ost-" "" stripped_action ${ACTION})
+  if(DEFINED OST_ACTION_NAMES)
+    if(${OST_ACTION_NAMES} MATCHES "${stripped_action}")
+      set(_ACTION_NAMES "${OST_ACTION_NAMES}")
+    else()
+      if("${OST_ACTION_NAMES}" STREQUAL "")
+        set(_ACTION_NAMES "${stripped_action}")
+      else()
+        set(_ACTION_NAMES "${OST_ACTION_NAMES} ${stripped_action}")
+      endif()
+    endif()
+  else()
+    set(_ACTION_NAMES "${stripped_action}")
+  endif()
+  set(OST_ACTION_NAMES "${_ACTION_NAMES}" CACHE INTERNAL "" FORCE)
+endmacro(ost_action)

@@ -97,26 +97,12 @@ void MMCifReader::SetRestrictChains(const String& restrict_chains)
   restrict_chains_ = restrict_chains;
 }
 
-bool MMCifReader::IsValidPDBIdent(const StringRef& pdbid)
-{
-  if (pdbid.length() == PDBID_LEN && isdigit(pdbid[0])) {
-    return true;
-  }
-  return false;
-}
-
 bool MMCifReader::OnBeginData(const StringRef& data_name) 
 {
   LOG_DEBUG("MCIFFReader: " << profile_);
   Profile profile_import("MMCifReader::OnBeginData");
 
-  // check for PDB id
-  if (!this->IsValidPDBIdent(data_name)) {
-    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
-                         "No valid PDB id found for data block, read instead \'"
-                                             + data_name.str() + "\'",
-                                             this->GetCurrentLinenum()));
-  }
+  // IDs in mmCIF files can be any string, so no restrictions here
 
   this->ClearState();
 
@@ -191,6 +177,8 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     indices_[ABSTRACT_ID_CAS]         = header.GetIndex("abstract_id_CAS");
     indices_[BOOK_ID_ISBN]            = header.GetIndex("book_id_ISBN");
     indices_[BOOK_TITLE]              = header.GetIndex("book_title");
+    indices_[BOOK_PUBLISHER]          = header.GetIndex("book_publisher");
+    indices_[BOOK_PUBLISHER_CITY]     = header.GetIndex("book_publisher_city");
     indices_[JOURNAL_ABBREV]          = header.GetIndex("journal_abbrev");
     indices_[YEAR]                    = header.GetIndex("year");
     indices_[TITLE]                   = header.GetIndex("title");
@@ -509,6 +497,9 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
 
   if(!curr_residue_) { // unit test
     update_residue=true;
+    subst_res_id_ = cif_chain_name +
+                    columns[indices_[AUTH_SEQ_ID]].str() +
+                    columns[indices_[PDBX_PDB_INS_CODE]].str();
   } else if (!valid_res_num) {
     if (indices_[AUTH_SEQ_ID] != -1 &&
         indices_[PDBX_PDB_INS_CODE] != -1) {
@@ -794,31 +785,35 @@ void MMCifReader::ParseCitation(const std::vector<StringRef>& columns)
       cit.SetISBN(columns[indices_[BOOK_ID_ISBN]].str());
     }
   }
+  if (indices_[JOURNAL_ABBREV] != -1) {
+    if ((columns[indices_[JOURNAL_ABBREV]] != StringRef(".", 1)) &&
+        (columns[indices_[JOURNAL_ABBREV]][0] != '?')) {
+          cit.SetPublishedIn(columns[indices_[JOURNAL_ABBREV]].str());
+          cit.SetCitationTypeJournal();
+        }
+  }
   if (indices_[BOOK_TITLE] != -1) {
     // this is only set in few PDB entries and RCSB overrides it with
     // the journal_abbrev for their citations
     // -> as of August 1, 2017, 5 entries known: 5b1j, 5b1k, 5fax, 5fbz, 5ffn
     //    -> all those have journal_abbrev set
     if ((columns[indices_[BOOK_TITLE]] != StringRef(".", 1)) &&
-        (columns[indices_[BOOK_TITLE]][0]!='?')) {
+        (columns[indices_[BOOK_TITLE]][0] != '?')) {
+      // This will override published_in if already set by journal_abbrev. We
+      // consider this OK for now since usually the book title is copied to
+      // the journal_abbrev attribute.
       cit.SetPublishedIn(columns[indices_[BOOK_TITLE]].str());
-    }
-  }
-  if (indices_[JOURNAL_ABBREV] != -1) {
-    if (columns[indices_[JOURNAL_ABBREV]] != StringRef(".", 1)) {
-      const String journal_abbrev = columns[indices_[JOURNAL_ABBREV]].str();
-      const String published_in = cit.GetPublishedIn();
-      if (published_in.length() > 0 && published_in != journal_abbrev) {
-        LOG_WARNING(this->FormatDiagnostic(STAR_DIAG_WARNING,
-                                           "The 'published_in' field was "
-                                           "already set by citation.book_title "
-                                           "'" + published_in + "'! "
-                                           "This will be overwritten by "
-                                           "citation.journal_abbrev '" +
-                                           journal_abbrev + "'.",
-                                           this->GetCurrentLinenum()));
+      cit.SetCitationTypeBook();
+      
+      // In theory, book_publisher and book_publisher_city are only set for
+      // books and book chapters, so we only try to fetch them if the citation
+      // type points to book.
+      if (indices_[BOOK_PUBLISHER] != -1) {
+        cit.SetBookPublisher(columns[indices_[BOOK_PUBLISHER]].str());
       }
-      cit.SetPublishedIn(journal_abbrev);
+      if (indices_[BOOK_PUBLISHER_CITY] != -1) {
+        cit.SetBookPublisherCity(columns[indices_[BOOK_PUBLISHER_CITY]].str());
+      }
     }
   }
   if (indices_[JOURNAL_VOLUME] != -1) {
@@ -1543,17 +1538,7 @@ void MMCifReader::AssignSecStructure(mol::EntityHandle ent)
       continue;
     }
     mol::SecStructure alpha(mol::SecStructure::ALPHA_HELIX);
-    // some PDB files contain helix/strand entries that are adjacent to each 
-    // other. To avoid visual artifacts, we effectively shorten the first of
-    // the two secondary structure segments to insert one residue of coil 
-    // conformation.
-    mol::ResNum start = i->start, end = i->end;
-    if (helix_list_.end() != i+1 && // unit test
-        (*(i+1)).start.GetNum() <= end.GetNum()+1 &&
-        (*(i+1)).end.GetNum() > end.GetNum()) {
-      end = mol::ResNum((*(i+1)).start.GetNum()-2);
-    }
-    chain.AssignSecondaryStructure(alpha, start, end);
+    chain.AssignSecondaryStructure(alpha, i->start, i->end);
   }
 
   for (MMCifHSVector::const_iterator i=strand_list_.begin(),
@@ -1565,14 +1550,7 @@ void MMCifReader::AssignSecStructure(mol::EntityHandle ent)
       continue;
     }
     mol::SecStructure extended(mol::SecStructure::EXTENDED);
-    mol::ResNum start = i->start, end = i->end;
-    // see comment for helix assignment
-    if (strand_list_.end() != i+1 && // unit test
-        (*(i+1)).start.GetNum() <= end.GetNum()+1 &&
-        (*(i+1)).end.GetNum() > end.GetNum()) {
-      end=mol::ResNum((*(i+1)).start.GetNum()-2);
-    }
-    chain.AssignSecondaryStructure(extended, start, end);
+    chain.AssignSecondaryStructure(extended, i->start, i->end);
   }
 }
 

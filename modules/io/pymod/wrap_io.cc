@@ -33,6 +33,7 @@ using namespace boost::python;
 #include <ost/io/mol/entity_io_sdf_handler.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/mol/dcd_io.hh>
+#include <ost/io/stereochemical_params_reader.hh>
 using namespace ost;
 using namespace ost::io;
 
@@ -43,12 +44,6 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(load_mentity_ov,LoadManagedEntity,2,3);
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_surface_ov,LoadSurface,1,2);
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_msurface_ov,LoadManagedSurface,2,3);
-
-BOOST_PYTHON_FUNCTION_OVERLOADS(load_alignment_ov,
-                                LoadAlignment, 1, 2)
-                                
-BOOST_PYTHON_FUNCTION_OVERLOADS(save_alignment_ov,
-                                SaveAlignment, 2, 3)
 
 
 void save_ent_view(const mol::EntityView& en, const String& filename,
@@ -66,6 +61,9 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_handle_ov,
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_view_ov,
                                 save_ent_view, 2, 3)
+
+ost::mol::alg::StereoChemicalProps (*read_props_a)(String filename, bool check) = &ReadStereoChemicalPropsFile;
+ost::mol::alg::StereoChemicalProps (*read_props_b)(bool check) = &ReadStereoChemicalPropsFile;
 
 }
 
@@ -91,25 +89,31 @@ BOOST_PYTHON_MODULE(_ost_io)
       save_entity_handle_ov(args("entity", "filename", "format")));
 
   def("LoadAlignment", &LoadAlignment,
-      load_alignment_ov(args("filename", "format")));
+      (arg("filename"), arg("format")="auto"));
   def("AlignmentFromString", &AlignmentFromString);
   def("AlignmentFromStream", &AlignmentFromStream);
   def("AlignmentToString", &AlignmentToString);
-  def("LoadSequenceList", &LoadSequenceList, arg("format")="auto");
-  def("LoadSequence", &LoadSequence, arg("format")="auto");
+  def("LoadSequenceList", &LoadSequenceList,
+      (arg("filename"), arg("format")="auto"));
+  def("LoadSequence", &LoadSequence,
+      (arg("filename"), arg("format")="auto"));
   def("SequenceListFromString", &SequenceListFromString);
   def("SequenceFromString", &SequenceFromString);  
-  def("SaveAlignment", &SaveAlignment, arg("format")="auto");
+  def("SaveAlignment", &SaveAlignment,
+      (arg("aln"), arg("filename"), arg("format")="auto"));
   
-  def("LoadSequenceProfile", &LoadSequenceProfile, arg("format")="auto");
+  def("LoadSequenceProfile", &LoadSequenceProfile,
+      (arg("filename"), arg("format")="auto"));
 
   def("LoadSurface",LoadSurface,load_surface_ov());
   def("LoadManagedSurface",LoadManagedSurface,load_msurface_ov());
 
   def("SequenceToString", &SequenceToString);
   def("SequenceListToString", &SequenceListToString); 
-  def("SaveSequenceList", &SaveSequenceList, arg("format")="auto");
-  def("SaveSequence", &SaveSequence, arg("format")="auto");
+  def("SaveSequenceList", &SaveSequenceList,
+      (arg("seq_list"), arg("filename"), arg("format")="auto"));
+  def("SaveSequence", &SaveSequence,
+      (arg("sequence"), arg("filename"), arg("format")="auto"));
   def("LoadSDF", &LoadSDF);
 
   def("LoadCRD", &LoadCRD);
@@ -119,6 +123,12 @@ BOOST_PYTHON_MODULE(_ost_io)
 ;
   def("LoadMAE", &LoadMAE);
   def("LoadPQR", &LoadPQR);
+
+  def("ReadStereoChemicalPropsFile", read_props_a,
+    (arg("filename"), arg("check")=true)); 
+  def("ReadStereoChemicalPropsFile", read_props_b,
+    (arg("check")=true));
+  def("GetStereoChemicalPropsFile", &GetStereoChemicalPropsFile);
 
   export_pdb_io();
   export_mmcif_io();

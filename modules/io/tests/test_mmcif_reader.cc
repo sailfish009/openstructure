@@ -51,7 +51,6 @@ public:
 
   using MMCifReader::OnBeginLoop;
   using MMCifReader::OnEndData;
-  using MMCifReader::IsValidPDBIdent;
   using MMCifReader::ParseAtomIdent;
   using MMCifReader::ParseAndAddAtom;
   using MMCifReader::ParseEntity;
@@ -112,29 +111,6 @@ conop::CompoundLibPtr SetDefaultCompoundLib() {
 }
 
 BOOST_AUTO_TEST_SUITE( io );
-
-BOOST_AUTO_TEST_CASE(mmcif_isvalidpdbident)
-{
-  mol::EntityHandle eh=mol::CreateEntity();
-
-  // on changing the tests for a PDB id in mmcif files, extend this unit test
-  BOOST_TEST_MESSAGE("  Running mmcif_isvalidpdbident tests...");
-  std::ifstream s("testfiles/mmcif/atom_site.mmcif");
-  TestMMCifReaderProtected tmmcif_p(s, eh);
-  StringRef id = StringRef("1FOO", 4);
-  BOOST_TEST_MESSAGE("    Testing valid id ('"+ id.str() +"')...");
-  BOOST_CHECK(tmmcif_p.IsValidPDBIdent(id));
-  BOOST_TEST_MESSAGE("    done.");
-  id = StringRef("this is to long for a PDB id", 28);
-  BOOST_TEST_MESSAGE("    Testing oversized PDB id ('"+ id.str() +"')...");
-  BOOST_CHECK(!tmmcif_p.IsValidPDBIdent(id));
-  BOOST_TEST_MESSAGE("    done.");
-  id = StringRef("nFOO", 4);
-  BOOST_TEST_MESSAGE("    Testing PDB id with missing number ('"
-                     + id.str() + "')...");
-  BOOST_CHECK(!tmmcif_p.IsValidPDBIdent(id));
-  BOOST_TEST_MESSAGE("    done.");
-}
 
 BOOST_AUTO_TEST_CASE(mmcif_trystoreidx)
 {
@@ -583,14 +559,18 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
   tmmcif_h.SetCategory(StringRef("citation", 8));
   tmmcif_h.Add(StringRef("id", 2));
   tmmcif_h.Add(StringRef("year", 4));
+  tmmcif_h.Add(StringRef("book_publisher_city", 19));
   tmmcif_h.Add(StringRef("book_title", 10));
+  tmmcif_h.Add(StringRef("book_publisher", 14));
   tmmcif_h.Add(StringRef("journal_abbrev", 14));
   tmmcif_p.OnBeginLoop(tmmcif_h);
 
   // ensure that we use book_title if no journal given (no RCSB use of this)
   columns.push_back(StringRef("Foo", 3));
   columns.push_back(StringRef("1979", 4));
+  columns.push_back(StringRef("The restaurant", 14));
   columns.push_back(StringRef("The Guide", 9));
+  columns.push_back(StringRef("Doug", 4));
   columns.push_back(StringRef(".", 1));
 
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
@@ -598,27 +578,33 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
   BOOST_CHECK_EQUAL(cit.GetID(), String("Foo"));
   BOOST_CHECK_EQUAL(cit.GetYear(), 1979);
   BOOST_CHECK_EQUAL(cit.GetPublishedIn(), String("The Guide"));
+  BOOST_CHECK_EQUAL(cit.GetBookPublisher(), String("Doug"));
+  BOOST_CHECK_EQUAL(cit.GetBookPublisherCity(), String("The restaurant"));
+  BOOST_CHECK_EQUAL(cit.IsCitationTypeBook(), true);
 
   // ensure that we override book_title if not properly given
   columns.pop_back();
   columns.pop_back();
+  columns.pop_back();
   columns.push_back(StringRef(".", 1));
+  columns.push_back(StringRef("Doug", 4));
   columns.push_back(StringRef("Hitch", 5));
 
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
   BOOST_CHECK_EQUAL(tmmcif_p.GetInfo().GetCitations().back().GetPublishedIn(),
                     String("Hitch"));
 
-  // ensure that we override book_title if journal given
-  // (def. behavior on RCSB webpage)
+  // ensure that we override journal if book_title given
+  columns.pop_back();
   columns.pop_back();
   columns.pop_back();
   columns.push_back(StringRef("The Guide", 9));
+  columns.push_back(StringRef("Doug", 4));
   columns.push_back(StringRef("Hitch", 5));
 
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
   BOOST_CHECK_EQUAL(tmmcif_p.GetInfo().GetCitations().back().GetPublishedIn(),
-                    String("Hitch"));
+                    String("The Guide"));
 
   BOOST_TEST_MESSAGE("  done.");
 }
@@ -1327,8 +1313,7 @@ BOOST_AUTO_TEST_CASE(mmcif_test_chain_mappings)
   BOOST_TEST_MESSAGE("  Running mmcif_test_chain_mappings tests...");
   
   // check compound lib
-  bool compound_lib_available = 
-  static_cast<bool>(SetDefaultCompoundLib());
+  bool compound_lib_available = static_cast<bool>(SetDefaultCompoundLib());
 
   // load data
   mol::EntityHandle eh = mol::CreateEntity();

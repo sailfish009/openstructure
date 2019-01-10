@@ -109,3 +109,74 @@ If you got a patch from someone else and would like to use apply it to your repo
 .. code-block:: bash
 
   git am < changeset.diff
+
+Starting Your Own Action
+--------------------------------------------------------------------------------
+In OST we call scripts/ programs 'actions'. They are started by a
+launcher found in your staging directory at :file:`stage/bin/ost`. This little
+guy helps keeping the shell environment in the right mood to carry out your
+job. So usually you will start an action by
+
+.. code-block:: console
+
+   $ stage/bin/ost --help
+
+Starting new action **do** go for a dedicated branch for action-development.
+There you can produce intermediate commits while other branches stay clean in
+case you have to do some work there which needs to get public.
+
+After preparing your repository its time to create a file for the action. That
+is a bit different than for modules. Assuming we are sitting in the
+repository's root:
+
+.. code-block:: console
+
+   $ touch action/ost-awesome-action
+   $ chmod +x action/ost-awesome-action
+
+Two things are important here: actions are prefixed with :file:`ost-`, so they
+are recognised by the :file:`ost` launcher. Secondly, action files need to be
+executable, which does not propagate if you do it **after** the first call to
+``make``.
+
+To get the new action recognised by ``make`` to be placed in
+:file:`stage/libexec/openstructure`, it has to be registered with ``cmake`` in
+:file:`actions/CMakeLists.txt`:
+
+.. code-block:: cmake
+  :linenos:
+
+   add_custom_target(actions ALL)
+
+   ost_action_init()
+   ost_action(ost-awesome-action actions)
+
+Just add your action with its full filename with a call to `ost_action` at
+the end of the file.
+
+Now its time to fill your action with code. Instead of reading a lot more of
+explanations, it should be easy to go by examples from the :file:`actions`
+directory. There are only two really important points:
+
+* No shebang line (``#! /usr/bin/python``) in your action! Also no
+  ``#! /usr/bin/env python`` or anything like this. This may lead to funny side
+  effects, like calling a ``python`` interpreter from outside a virtual
+  environment or calling a different version. Basically it may mess up the
+  environment your action is running in. Actions are called by :file:`ost`,
+  that's enough to get everything just right.
+
+* The code of your action belongs in the :attr:`__main__` branch of the script.
+  Your action will have own function definitions, variables and all the bells
+  and whistles. Hiding behind :attr:`__main__` keeps everything separated and
+  makes things easier when it gets to debugging. So just after
+
+  .. code-block:: python
+
+     import alot
+
+     def functions_specific_to_your_action(...):
+
+     if __name__ == "__main__":
+         <put together what your action should do here>
+
+  start putting your action together.

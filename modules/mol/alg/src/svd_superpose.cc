@@ -113,6 +113,13 @@ Real CalculateRMSD(const mol::EntityView& ev1,
                    const mol::EntityView& ev2,
                    const geom::Mat4& transformation) {
 
+  if(ev1.GetAtomCount() != ev2.GetAtomCount()) {
+    std::stringstream ss;
+    ss << "Number of atoms in input views must be consistent! ";
+    ss << ev1.GetAtomCount() << " vs. " << ev2.GetAtomCount();
+    throw Error(ss.str());
+  }
+
   return calc_rmsd_for_atom_lists(ev1.GetAtomList(), ev2.GetAtomList(), 
                                   transformation);
 }

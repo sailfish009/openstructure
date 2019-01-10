@@ -361,17 +361,20 @@ CompoundLibPtr CompoundLib::Load(const String& database, bool readonly)
                             static_cast<int>(aq.length()),
                             &stmt, NULL);
   lib->chem_type_available_ = retval==SQLITE_OK;
+  sqlite3_finalize(stmt);
   aq="SELECT name FROM chem_compounds LIMIT 1";
   retval=sqlite3_prepare_v2(lib->conn_, aq.c_str(),
                             static_cast<int>(aq.length()),
                             &stmt, NULL);
   lib->name_available_ = retval==SQLITE_OK;
+  sqlite3_finalize(stmt);
   // check if InChIs are available
   aq="SELECT inchi_code FROM chem_compounds LIMIT 1";
   retval=sqlite3_prepare_v2(lib->conn_, aq.c_str(),
                             static_cast<int>(aq.length()),
                             &stmt, NULL);
   lib->inchi_available_ = retval==SQLITE_OK;
+  sqlite3_finalize(stmt);
 
   lib->creation_date_ = lib->GetCreationDate();
   lib->ost_version_used_ = lib->GetOSTVersionUsed();
@@ -428,7 +431,7 @@ void CompoundLib::LoadBondsFromDB(CompoundPtr comp, int pk) const {
   } else {
     LOG_ERROR(sqlite3_errmsg(conn_));
   } 
-  sqlite3_finalize(stmt);  
+  sqlite3_finalize(stmt);
 }
 
 CompoundPtr CompoundLib::FindCompound(const String& id, 
@@ -522,7 +525,11 @@ CompoundLib::CompoundLib():
 
 CompoundLib::~CompoundLib() {
   if (conn_) {
-    sqlite3_close(conn_);
+    int retval = sqlite3_close(conn_);
+    if (retval != SQLITE_OK) {
+      LOG_ERROR("Problem while closing SQLite db for CompoundLib: "
+                << sqlite3_errmsg(conn_));
+    }
   }
 }
 }}

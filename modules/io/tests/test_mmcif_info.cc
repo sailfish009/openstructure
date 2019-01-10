@@ -72,7 +72,10 @@ BOOST_AUTO_TEST_CASE(mmcif_info_citation)
   cit.SetPubMed(815);
   cit.SetYear(815);
   cit.SetTitle("Foo");
+  cit.SetBookPublisher("Brackelmann and Sons");
+  cit.SetBookPublisherCity("Stenkelfeld");
   cit.SetAuthorList(author_list);
+  cit.SetCitationType(MMCifInfoCitation::JOURNAL);
   author_list.clear();
 
   BOOST_CHECK(cit.GetID() == "ID");
@@ -86,8 +89,22 @@ BOOST_AUTO_TEST_CASE(mmcif_info_citation)
   BOOST_CHECK(cit.GetPubMed() == 815);
   BOOST_CHECK(cit.GetYear() == 815);
   BOOST_CHECK(cit.GetTitle() == "Foo");
+  BOOST_CHECK(cit.GetBookPublisher() == "Brackelmann and Sons");
+  BOOST_CHECK(cit.GetBookPublisherCity() == "Stenkelfeld");
+  BOOST_CHECK(cit.GetCitationType() == MMCifInfoCitation::JOURNAL);
+  BOOST_CHECK(cit.IsCitationTypeJournal() == true);
+  BOOST_CHECK(cit.IsCitationTypeBook() == false);
+  BOOST_CHECK(cit.IsCitationTypeUnknown() == false);
   author_list = cit.GetAuthorList();
   BOOST_CHECK(author_list.back() == "Kabel, H.");
+
+  // checking all possible variants of citation type
+  cit.SetCitationTypeJournal();
+  BOOST_CHECK(cit.IsCitationTypeJournal() == true);
+  cit.SetCitationTypeBook();
+  BOOST_CHECK(cit.IsCitationTypeBook() == true);
+  cit.SetCitationTypeUnknown();
+  BOOST_CHECK(cit.IsCitationTypeUnknown() == true);
 
   BOOST_TEST_MESSAGE("  done.");
   BOOST_TEST_MESSAGE("  trying to add everything to an info object");

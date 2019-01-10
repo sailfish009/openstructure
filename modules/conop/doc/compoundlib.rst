@@ -45,7 +45,7 @@ build the compound library manually.
       write mode, the programs can deadlock.
     :type readonly: :class:`bool`
     
-    :returns: The loaded compound lib
+    :returns: The loaded compound lib or None if it failed.
     
   .. staticmethod:: Create(database)
     

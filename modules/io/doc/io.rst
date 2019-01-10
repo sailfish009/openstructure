@@ -142,8 +142,8 @@ Loading sequence or alignment files
     myseq = io.LoadSequence('seq.fasta')
     # for obtaining a SequenceList
     seqlist = io.LoadSequenceList('seqs.fasta')
-    # or for multiple aligned fasta files use
-    aln = io.LoadAlignment('algnm.aln',format="clustal")
+    # or for multiple alignments (here from CLUSTAL)
+    aln = io.LoadAlignment('algnm.aln', format="clustal")
     
   For a list of file formats supported by :func:`LoadSequence` see
   :doc:`sequence_formats`.
@@ -212,11 +212,11 @@ Saving Sequence Data
   .. code-block:: python
 
     # recognizes FASTA file by file extension
-    io.SaveSequence(myseq,'seq.fasta')
+    io.SaveSequence(myseq, 'seq.fasta')
     # for saving a SequenceList
-    io.SaveSequenceList(seqlist,'seqlist.fasta')
-    # or multiple aligned fasta files
-    io.SaveAlignment(aln,'algnm.aln',format="clustal")
+    io.SaveSequenceList(seqlist, 'seqlist.fasta')
+    # or for multiple alignments (here in FASTA format)
+    io.SaveAlignment(aln, 'aln.fasta')
     
   For a list of file formats supported by :func:`SaveSequence` see
   :doc:`sequence_formats`.
@@ -343,3 +343,31 @@ Saving Density Maps
   12
 
 
+Stereochemical Parameters
+--------------------------------------------------------------------------------
+
+In order to check the structure for some stereo-chemical and steric clashes
+before computing the lDDT scores it is required to pass parameter file based on
+Engh and Huber parameters, and on the atomic radii as defined in the Cambridge
+Structural Database. OpenStructure ships with default file called
+`stereo_chemical_props.txt` located in `$OST_ROOT/share/openstructure`
+directory. A function :func:`~ost.io.ReadStereoChemicalPropsFile` is used to
+read this file.
+
+
+
+.. function:: ReadStereoChemicalPropsFile(filename="", check=True)
+
+  Read stereochemical parameters - if not provided a local version will be used.
+
+  :param filename: The path to the parameter file that will be used. If set
+                   to "", it reads the default file shipped with OpenStructure.
+  :type filename: :class:`str`
+  :param check: Raise an error when any of the resulting tables are empty.
+  :type check:  :class:`bool`
+  :return: Object containing stereochemical parameters
+  :rtype: :class:`~ost.mol.alg.StereoChemicalProps`
+
+.. function:: GetStereoChemicalPropsFile()
+
+  Get the default path to the stereochemical paramteres file.

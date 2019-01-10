@@ -36,7 +36,7 @@ public:
   ImageStateBasePtr VisitState(const img::ImageStateImpl<T,D>& isi) {
     Size s=isi.GetExtent().GetSize();
 //    unsigned int rmax=static_cast<unsigned int>(std::min(s[0],s[1])*0.5);
-    unsigned int rmax=static_cast<unsigned int>(round_real(sqrt(s[0]*s[0]+s[1]*s[1])*0.5));
+    unsigned int rmax=static_cast<unsigned int>(round(sqrt(s[0]*s[0]+s[1]*s[1])*0.5));
     Extent e(Size(rmax,static_cast<unsigned int>(rmax*2.0*M_PI*sampling_)));
     std::cerr << e << std::endl;
     boost::shared_ptr<ImageStateImpl<T,image_state::SpatialDomain> > result(new ImageStateImpl<T,image_state::SpatialDomain>(e,isi.GetSampling()));
@@ -76,7 +76,7 @@ ImageHandle Polar::Visit(const ConstImageHandle& i)
 #else
   Size s=i.GetExtent().GetSize();
 //  unsigned int rmax=static_cast<unsigned int>(std::min(s[0],s[1])*0.5);
-  unsigned int rmax=static_cast<unsigned int>(round_double(sqrt(static_cast<double>(s[0]*s[0]+s[1]*s[1]))*0.5));
+  unsigned int rmax=static_cast<unsigned int>(round(sqrt(static_cast<double>(s[0]*s[0]+s[1]*s[1]))*0.5));
   Extent e(Size(rmax,static_cast<unsigned int>(rmax*2.0*M_PI*sampling_)));
   ImageHandle result = CreateImage(e,i.GetType(),SPATIAL);
   Real prefac=1/(rmax*sampling_);
@@ -103,7 +103,7 @@ ImageHandle EllipticPolar::Visit(const ConstImageHandle& i)
   Size s=i.GetExtent().GetSize();
   Real ang=atan(static_cast<double>(s[1]/s[0]));
   Real mdist=std::min(Length(ellipse.AtAngle(ang)),Length(ellipse.AtAngle(-ang)));
-  unsigned int rmax=static_cast<unsigned int>(round_double(sqrt(static_cast<double>(s[0]*s[0]+s[1]*s[1]))*0.5));
+  unsigned int rmax=static_cast<unsigned int>(round(sqrt(static_cast<double>(s[0]*s[0]+s[1]*s[1]))*0.5));
   Extent e(Size(rmax,static_cast<unsigned int>(rmax*2.0*M_PI*sampling_)));
   ImageHandle result = CreateImage(e,i.GetType(),SPATIAL);
   Real prefac=1/(rmax*sampling_);
