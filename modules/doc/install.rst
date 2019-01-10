@@ -33,7 +33,7 @@ required version is given in parentheses.
 * `Boost <http://boost.org>`_ (1.53)
 * `zlib <https://zlib.net/>`_ (usually comes with Boost or system)
 * `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
-* `SQLite3 <https://www3.sqlite.org>`_ (3.7.13)`
+* `SQLite3 <https://www3.sqlite.org>`_ (3.7.13)
 
 When you enable support for image processing, you will need:
 
@@ -317,22 +317,6 @@ version of OpenStructure.
 
   cmake . -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
           -DOPTIMIZE=ON
-
-
-**Fedora 26 without GUI**
-
-All the dependencies can be installed from the package manager as follows:
-
-.. code-block:: bash
-
-  sudo dnf install cmake eigen3-devel boost-devel libpng-devel python2-devel \
-                   fftw-devel libtiff-devel
-
-Here, we compile a version without GUI as follows:
-
-.. code-block:: bash
-
-  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF
 
 
 **macOS with Homebrew without GUI**
