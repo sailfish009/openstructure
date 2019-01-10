@@ -38,6 +38,7 @@ test:centos6.6:
     - module load zlib/1.2.8-goolf-1.4.10
     - module load Perl/5.16.3-goolf-1.4.10
     - module load HH-suite/2.0.16-goolf-1.4.10-Boost-1.53.0
+    - module load SQLite/3.9.2-goolf-1.7.20
     - echo "... done running centos6.6 'before_script'."
   script:
   - echo "Testing on CentOS 6..."
@@ -57,6 +58,8 @@ test:centos6.6:
              -DEIGEN3_INCLUDE_DIR=$EBROOTEIGEN/include
              -DFFTW_LIBRARY=$EBROOTFFTW/lib/libfftw3f.a
              -DFFTW_INCLUDE_DIR=$EBROOTFFTW/include
+             -DSQLITE3_LIBRARY=$EBROOTSQLITE/lib/libsqlite3.so
+             -DSQLITE3_INCLUDE_DIR=$EBROOTSQLITE/include
              -DBOOST_ROOT=$EBROOTBOOST
              -DQT_QMAKE_EXECUTABLE=$EBROOTQT/bin/qmake
              -DPNG_LIBRARY=$EBROOTLIBPNG/lib/libpng.so
@@ -106,6 +109,7 @@ test:centos7.3:
     - module load Perl/5.22.2-goolf-1.7.20
     - module load HH-suite/2.0.16-goolf-1.7.20-Boost-1.53.0-Python-2.7.11
     - module load OpenMM/6.1-goolf-1.7.20-Python-2.7.11
+    - module load SQLite/3.9.2-goolf-1.7.20
     - echo "... done running centos7.3 'before_script'."
   script:
   - echo "Testing on CentOS 7..."
@@ -125,6 +129,8 @@ test:centos7.3:
              -DEIGEN3_INCLUDE_DIR=$EBROOTEIGEN/include
              -DFFTW_LIBRARY=$EBROOTFFTW/lib/libfftw3f.a
              -DFFTW_INCLUDE_DIR=$EBROOTFFTW/include
+             -DSQLITE3_LIBRARY=$EBROOTSQLITE/lib/libsqlite3.so
+             -DSQLITE3_INCLUDE_DIR=$EBROOTSQLITE/include
              -DBOOST_ROOT=$EBROOTBOOST
              -DQT_QMAKE_EXECUTABLE=$EBROOTQT/bin/qmake
              -DPNG_LIBRARY=$EBROOTLIBPNG/lib/libpng.so
