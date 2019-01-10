@@ -55,8 +55,9 @@ apt-get update -y && apt-get install -y cmake \
 										doxygen \
 										swig \
 										clustalw \
-                                        python-virtualenv \
-                                        locales
+                    python-virtualenv \
+                    libsqlite3-dev \
+                    locales
 
 # SET LOCALE
 ############
