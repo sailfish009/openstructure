@@ -234,7 +234,8 @@ else()
 endif()
 
 find_package(Eigen 3.2.0 REQUIRED)
-find_package(Python 2.7 REQUIRED)
+find_package(Python 2.4 REQUIRED)
+find_package(SQLite3 3.7.13 REQUIRED)
 
 if(USE_NUMPY)
   find_package(Numpy REQUIRED)
@@ -307,6 +308,7 @@ include_directories(${Boost_INCLUDE_DIRS}
                     ${TIFF_INCLUDE_DIR}
                     ${PNG_INCLUDE_DIRS}
                     ${OPEN_MM_INCLUDE_DIRS}
+                    ${SQLITE3_INCLUDE_DIRS}
                     )
 if(USE_NUMPY)
 include_directories(${PYTHON_NUMPY_INCLUDE_DIR})

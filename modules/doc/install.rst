@@ -33,6 +33,7 @@ required version is given in parentheses.
 * `Boost <http://boost.org>`_ (1.53)
 * `zlib <https://zlib.net/>`_ (usually comes with Boost or system)
 * `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
+* `SQLite3 <https://www3.sqlite.org>`_ (3.7.13)
 
 When you enable support for image processing, you will need:
 
@@ -215,6 +216,10 @@ can influence it.
     starting with `libtiff`)
   * `TIFF_INCLUDE_DIR` defines the include folder of libtiff (contains include
     files directly)
+  * `SQLITE3_LIBRARY` defines the location of the SQLite3 library (file name starting
+    with `libsqlite3`)
+  * `SQLITE3_INCLUDE_DIR` defines the include folder of SQLite3 (contains include
+    files directly)
   * Usually, you will receive errors for those variables when executing `cmake`
     and set them accordingly as needed.
 
@@ -300,7 +305,7 @@ All the dependencies can be installed from the package manager as follows:
 
   sudo apt-get install cmake sip-dev libtiff-dev libfftw3-dev libeigen3-dev \
                libpng-dev python-all python2.7 python-qt4 libboost-all-dev \
-               qt4-qtconfig qt4-qmake libqt4-dev libpng-dev
+               qt4-qtconfig qt4-qmake libqt4-dev libpng-dev libsqlite3-dev
 
 Now, all dependencies are located in standard locations and cmake will
 automatically find them without the need to pass any additional parameters. The
@@ -312,22 +317,6 @@ version of OpenStructure.
 
   cmake . -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
           -DOPTIMIZE=ON
-
-
-**Fedora 26 without GUI**
-
-All the dependencies can be installed from the package manager as follows:
-
-.. code-block:: bash
-
-  sudo dnf install cmake eigen3-devel boost-devel libpng-devel python2-devel \
-                   fftw-devel libtiff-devel
-
-Here, we compile a version without GUI as follows:
-
-.. code-block:: bash
-
-  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF
 
 
 **macOS with Homebrew without GUI**

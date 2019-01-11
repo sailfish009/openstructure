@@ -47,6 +47,7 @@ RUN apt-get update -y && apt-get install -y cmake \
                                             swig \
                                             clustalw \
                                             python-virtualenv \
+                                            libsqlite3-dev \
                                             locales && \
                       # CLEANUP
                       rm -rf /var/lib/apt/lists/*
