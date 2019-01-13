@@ -46,12 +46,12 @@ When you enable support for image processing, you will need:
 
 If you would like to use the info module, also install:
 
-* `Qt4 <http://qt-project.org/>`_ (4.5, Qt5 is not supported yet)
+* `Qt5 <http://qt-project.org/>`_ 
 
 If you would like to use the graphical user interface (GUI), also install:
 
 * `SIP <http://www.riverbankcomputing.co.uk/software/sip/download>`_
-* `PyQt4 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
+* `PyQt5 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
 
 If you would like to use the :mod:`molecular mechanics <ost.mol.mm>` module:
 
@@ -267,7 +267,7 @@ Example Configurations
 **Generic linux without GUI**
 
 The simplest way to compile OpenStructure is to disable the GUI and any
-dependency to Qt4. You can build an optimized OpenStructure without GUI as
+dependency to Qt5. You can build an optimized OpenStructure without GUI as
 follows:
 
 .. code-block:: bash
@@ -291,21 +291,16 @@ observed for OpenMM versions 6.1 until 7.1.1 when compiling with gcc versions >=
 5.1. In those cases, you cannot use the binaries and will have to install OpenMM
 from source.
 
-On some Linux distributions, there are issues with Qt4 and hence it may not be
-possible to build OpenStructure with GUI support at all. This is for instance
-known to be an issue with boost versions >= 1.62. We hope to support Qt5 in the
-next OpenStructure release.
 
-
-**Ubuntu 16.04 with GUI**
+**Ubuntu 18.04 LTS / Debian 9 with GUI**
 
 All the dependencies can be installed from the package manager as follows:
 
 .. code-block:: bash
 
-  sudo apt-get install cmake sip-dev libtiff-dev libfftw3-dev libeigen3-dev \
-               libpng-dev python-all python2.7 python-qt4 libboost-all-dev \
-               qt4-qtconfig qt4-qmake libqt4-dev libpng-dev libsqlite3-dev
+  sudo apt-get install cmake g++ sip-dev libtiff-dev libfftw3-dev libeigen3-dev \
+               libpng-dev python-all python2.7 python-pyqt5 libboost-all-dev \
+               qt5-qmake qtbase5-dev libpng-dev libsqlite3-dev
 
 Now, all dependencies are located in standard locations and cmake will
 automatically find them without the need to pass any additional parameters. The
