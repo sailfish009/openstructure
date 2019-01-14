@@ -28,4 +28,16 @@ fi
 BIN_DIR=`dirname "$SCRIPT_NAME"`
 source "$BIN_DIR/../@LIBEXEC_PATH@/ost_config"
 
+
+opts=""
+
+for argument in "$@";do
+    if [ -n "$opts" ]; then
+      opts=$opts"#""$argument"
+    else
+      opts="$argument"
+    fi
+done
+IFS="#"
+
 $BIN_DIR/../@LIBEXEC_PATH@/gosty $DNG_INITDIR/dng_startup.py dng $opts
