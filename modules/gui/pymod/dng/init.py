@@ -26,9 +26,9 @@ from ost.gui.dng import superpositiondialog
 from ost.gui.scene.remote import RemoteLoader
 
 import ost.gui.dng.menu
-from PyQt5.QtGui import *
+
 def _my_exit(code):
-  QtGui.QApplication.instance().quit()
+  QtWidgets.QApplication.instance().quit()
   gui.GostyApp.Instance().ProcessEvents()
   sys._exit(code)
 
@@ -127,7 +127,7 @@ def _execute_script():
 
 def show_help(option, opt, value, parser):
   parser.print_help()
-  QtGui.QApplication.instance().exit()
+  QtWidgets.QApplication.instance().exit()
   sys.exit(-1)
 
 def parse_script_option(option, opt, value, parser):
@@ -156,7 +156,7 @@ class OstOptionParser(optparse.OptionParser):
     optparse.OptionParser.__init__(self, **kwargs)
   def exit(self, status_code, error_message):
     print error_message,
-    QtGui.QApplication.instance().exit()
+    QtWidgets.QApplication.instance().exit()
     sys.exit(-1)
 
 parser=OstOptionParser(usage=usage,conflict_handler="resolve")
@@ -178,7 +178,7 @@ if len(parser.rargs)!=0:
       loading_list.append(rargs_string)
     else:
       print 'Error:  one of the files to load is a Python script, use -s flag to execute it\n'
-      QtGui.QApplication.instance().exit()
+      QtWidgets.QApplication.instance().exit()
       sys.exit(-1)    
 
 if len(options.script)!=0:
