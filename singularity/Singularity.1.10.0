@@ -32,33 +32,33 @@ export VIRTUALENV_DIR="/usr/local/share/ost_venv"
 # INSTALL SYSTEM DEPS
 #####################
 apt-get update -y && apt-get install -y cmake \
-                    g++ \
-										sip-dev \
-										libtiff-dev \
-										libfftw3-dev \
-										libeigen3-dev \
-										libboost-all-dev \
-										libpng-dev \
-										python-all \
-										python2.7 \
-										python-pyqt5 \
-										qt5-qmake \
-										qtbase5-dev \
-										wget \
-										git \
-										gfortran \
-										python-pip \
-										tar \
-										libbz2-dev \
-										doxygen \
-										swig \
-										clustalw \
-                    python-virtualenv \
-                    libsqlite3-dev \
-                    dssp \
-                    python-enum34 \
-                    python-ipaddress \
-                    locales
+                                        g++ \
+                                        sip-dev \
+                                        libtiff-dev \
+                                        libfftw3-dev \
+                                        libeigen3-dev \
+                                        libboost-all-dev \
+                                        libpng-dev \
+                                        python-all \
+                                        python2.7 \
+                                        python-pyqt5 \
+                                        qt5-qmake \
+                                        qtbase5-dev \
+                                        wget \
+                                        git \
+                                        gfortran \
+                                        python-pip \
+                                        tar \
+                                        libbz2-dev \
+                                        doxygen \
+                                        swig \
+                                        clustalw \
+                                        python-virtualenv \
+                                        libsqlite3-dev \
+                                        dssp \
+                                        python-enum34 \
+                                        python-ipaddress \
+                                        locales
 
 # SET LOCALE
 ############

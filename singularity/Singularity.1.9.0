@@ -33,31 +33,31 @@ export VIRTUALENV_DIR="/usr/local/share/ost_venv"
 # INSTALL SYSTEM DEPS
 #####################
 apt-get update -y && apt-get install -y cmake \
-										sip-dev \
-										libtiff-dev \
-										libfftw3-dev \
-										libeigen3-dev \
-										libboost-all-dev \
-										libpng-dev \
-										python-all \
-										python2.7 \
-										python-qt4 \
-										qt4-qtconfig \
-										qt4-qmake \
-										libqt4-dev \
-										libpng-dev \
-										wget \
-										git \
-										gfortran \
-										python-pip \
-										tar \
-										libbz2-dev \
-										doxygen \
-										swig \
-										clustalw \
-                    python-virtualenv \
-                    libsqlite3-dev \
-                    locales
+                                        sip-dev \
+                                        libtiff-dev \ 
+                                        libfftw3-dev \
+                                        libeigen3-dev \
+                                        libboost-all-dev \
+                                        libpng-dev \
+                                        python-all \
+                                        python2.7 \
+                                        python-qt4 \
+                                        qt4-qtconfig \
+                                        qt4-qmake \
+                                        libqt4-dev \
+                                        libpng-dev \
+                                        wget \
+                                        git \
+                                        gfortran \
+                                        python-pip \
+                                        tar \
+                                        libbz2-dev \
+                                        doxygen \
+                                        swig \
+                                        clustalw \
+                                        python-virtualenv \
+                                        libsqlite3-dev \
+                                        locales
 
 # SET LOCALE
 ############
