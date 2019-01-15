@@ -1,16 +1,9 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # ARGUMENTS
 ###########
 
-# OBLIGATORY
-ARG OPENSTRUCTURE_VERSION
-RUN if [ -z "${OPENSTRUCTURE_VERSION}" ]; then \
-        echo "OPENSTRUCTURE_VERSION argument is obligatory. Run with --build-arg OPENSTRUCTURE_VERSION=<VERSION>"; \
-        exit 1; \
-    else : ; fi
-
-# OPTIONAL
+ARG OPENSTRUCTURE_VERSION="1.10.0"
 ARG SRC_FOLDER="/usr/local/src"
 ARG CPUS_FOR_MAKE=8
 ARG PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
@@ -24,6 +17,7 @@ ARG OPENMM_LIB_PATH="/usr/local/openmm/lib/"
 # INSTALL SYSTEM DEPS
 #####################
 RUN apt-get update -y && apt-get install -y cmake \
+                                            g++ \
                                             sip-dev \
                                             libtiff-dev \
                                             libfftw3-dev \
@@ -32,11 +26,9 @@ RUN apt-get update -y && apt-get install -y cmake \
                                             libpng-dev \
                                             python-all \
                                             python2.7 \
-                                            python-qt4 \
-                                            qt4-qtconfig \
-                                            qt4-qmake \
-                                            libqt4-dev \
-                                            libpng-dev \
+                                            python-pyqt5 \
+                                            qt5-qmake \
+                                            qtbase5-dev \
                                             wget \
                                             git \
                                             gfortran \
@@ -48,9 +40,12 @@ RUN apt-get update -y && apt-get install -y cmake \
                                             clustalw \
                                             python-virtualenv \
                                             libsqlite3-dev \
+                                            dssp \
+                                            python-enum34 \
                                             locales && \
-                      # CLEANUP
-                      rm -rf /var/lib/apt/lists/*
+                                            # CLEANUP
+                                            rm -rf /var/lib/apt/lists/*
+
 # INSTALL SOME PYTHON PACKAGES GLOBALY
 ######################################
 RUN pip install -U pip==9.0.3 && \
@@ -92,18 +87,6 @@ RUN cd ${SRC_FOLDER} && \
     rm -rf ${SRC_FOLDER}/openmm-${OPENMM_VERSION}.tar.gz && \
     rm -rf ${SRC_FOLDER}/openmm-${OPENMM_VERSION}
 
-
-# COMPILE AND INSTALL DSSP
-##########################
-RUN cd ${SRC_FOLDER} && \
-    wget ftp://ftp.cmbi.umcn.nl/pub/molbio/software/dssp-2/dssp-${DSSP_VERSION}.tgz && \
-    tar -xvzf dssp-${DSSP_VERSION}.tgz && \
-    cd dssp-${DSSP_VERSION} && \
-    make -j ${CPUS_FOR_MAKE} && \
-    make install && \
-    rm -rf ${SRC_FOLDER}/dssp-${DSSP_VERSION}.tgz && \
-    rm -rf ${SRC_FOLDER}/dssp-${DSSP_VERSION}
-
 # INSTALL OST
 #############
 RUN cd ${SRC_FOLDER} && \
@@ -112,6 +95,7 @@ RUN cd ${SRC_FOLDER} && \
     mkdir openstructure-${OPENSTRUCTURE_VERSION} && \
     tar xf openstructure-${OPENSTRUCTURE_VERSION}.tar.gz -C ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION} --strip-components=1 && \
     mkdir -p ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}/build
+
 WORKDIR ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}/build
 
 # cmake ost
