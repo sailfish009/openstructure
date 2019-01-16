@@ -186,11 +186,11 @@ def BlastVersion(blast_location=None):
 
   if os.path.basename(blast_exe)=='blastall':
     args=[blast_exe]
-    pattern=re.compile(r'blastall (\d+\.\d+\.\d+)\s+arguments:\s*')
+    pattern=re.compile(r'\s*blastall (\d+\.\d+\.\d+)\s+arguments:\s*')
 
   else:
     args=[blast_exe, '-version']
-    pattern=re.compile(r'Package: blast (\d+\.\d+\.\d+),\s+')
+    pattern=re.compile(r'\s*Package: blast (\d+\.\d+\.\d+),\s+')
 
   blast_pipe=subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
