@@ -543,6 +543,8 @@ class HHblits:
         """
         if a3m_file is None:
             a3m_file = '%s.a3m' % os.path.splitext(self.filename)[0]
+        else:
+            a3m_file = os.path.abspath(a3m_file)
         if os.path.exists(a3m_file):
             ost.LogInfo('Reusing already existing query alignment (%s)' % a3m_file)
             return a3m_file
@@ -720,7 +722,7 @@ class HHblits:
             self.hhblits_bin,
             opt_cmd,
             os.path.abspath(a3m_file),
-            hhr_file,
+            os.path.abspath(hhr_file),
             os.path.join(os.path.abspath(os.path.split(database)[0]),
                          os.path.split(database)[1]))
         ost.LogInfo('searching %s' % database)
