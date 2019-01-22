@@ -311,11 +311,14 @@ int main (int argc, char **argv)
   settings.PrintParameters();
   if (structural_checks) {
     LOG_INFO("Log entries format:");
+    // verbosity level/format must match filter_clashes::CheckStereoChemistry
     LOG_INFO("BOND INFO FORMAT:  Chain  Residue  ResNum  Bond  Min  Max  Observed  Z-score  Status");
     LOG_INFO("ANGLE INFO FORMAT:  Chain  Residue  ResNum  Angle  Min  Max  Observed  Z-score  Status");
-    LOG_INFO("CLASH INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  Observed  Difference  Status");
+    // verbosity level/format must match filter_clashes::FilterClashes
+    LOG_INFO("CLASH INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  Threshold  Observed  Difference  Status");
   }
-  LOG_INFO("LDDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
+  // verbosity level/format must match local_dist_diff_test::calc_overlap1
+  LOG_VERBOSE("LDDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDistMin  TargetDistMax  Tolerance  Status");
 
   // error if the reference structure is empty
   if (glob_dist_list.size()==0) {

@@ -27,7 +27,8 @@ String vector_to_string(std::vector<Real> vec) {
 // helper function
 bool within_tolerance(Real mdl_dist, const std::pair<Real,Real>& values, Real tol)
 {
-
+  // this considers min & max distance observed in all reference structures
+  // -> for single reference case values.first and values.second are the same
   return (values.first-tol)<=mdl_dist && (values.second+tol)>=mdl_dist;
 }      
 
@@ -82,10 +83,15 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
       Real tol = * tol_list_it; 
       if (within_tolerance(mdl_dist,values,tol)) {
         if (log) {
-          LOG_VERBOSE("lddt:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName() 
-                      << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetName() << " " << av2.GetResidue().GetNumber() << " " << av2.GetName() << " " 
-                      << mdl_dist << " " << values.first << " " << values.second << " " << tol << " " << "PASS")
-        }   
+          LOG_VERBOSE("LDDT:" << " " << av1.GetResidue().GetChain() << " "
+                      << av1.GetResidue().GetName() << " "
+                      << av1.GetResidue().GetNumber() << " " << av1.GetName()
+                      << " " << av2.GetResidue().GetChain() << " "
+                      << av2.GetResidue().GetName() << " "
+                      << av2.GetResidue().GetNumber() << " " << av2.GetName()
+                      << " " << mdl_dist << " " << values.first << " "
+                      << values.second << " " << tol << " " << "PASS")
+        }
         overlap.first+=1;
         if (!only_fixed) {
           overlap_list[rindex1].first+=1;
@@ -93,10 +99,15 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
         }
       } else {
         if (log) {
-          LOG_VERBOSE("lddt:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName() 
-             << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetName() << " " << av2.GetResidue().GetNumber() << " " << av2.GetName() << " " 
-             << mdl_dist << " " << values.first << " " << values.second << " " << tol << " " << "FAIL");
-        }  
+          LOG_VERBOSE("LDDT:" << " " << av1.GetResidue().GetChain() << " "
+                      << av1.GetResidue().GetName() << " "
+                      << av1.GetResidue().GetNumber() << " " << av1.GetName()
+                      << " " << av2.GetResidue().GetChain() << " "
+                      << av2.GetResidue().GetName() << " "
+                      << av2.GetResidue().GetNumber() << " " << av2.GetName()
+                      << " " << mdl_dist << " " << values.first << " "
+                      << values.second << " " << tol << " " << "FAIL");
+        }
         break;  
       }
     }    
