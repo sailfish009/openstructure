@@ -66,6 +66,10 @@ GostyApp* GostyApp::Instance() {
   return GostyApp::app_;
 }
 
+bool GostyApp::ValidInstance() {
+  return GostyApp::app_ != NULL;
+}
+
 void GostyApp::SetAppTitle(const QString& app_title)
 {
   main_->setWindowTitle(app_title);
