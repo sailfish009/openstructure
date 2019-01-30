@@ -14,11 +14,18 @@
 import sys, os
 
 site_packs='python%d.%d/site-packages' % sys.version_info[0:2]
-sys.path.append(os.path.join(os.path.abspath('../..'), 
-                             'stage/lib', site_packs))
-sys.path.append(os.path.join(os.path.abspath('../..'), 
-                             'stage/lib64', site_packs))
+# here we make sure that these paths are checked first...
+# note that we probably should use cmake to set these paths (see PM3)
+sys.path.insert(0, os.path.join(os.path.abspath('../../build'),
+                                'stage/lib', site_packs))
+sys.path.insert(0, os.path.join(os.path.abspath('../../build'),
+                                'stage/lib64', site_packs))
+sys.path.insert(0, os.path.join(os.path.abspath('../..'),
+                                'stage/lib', site_packs))
+sys.path.insert(0, os.path.join(os.path.abspath('../..'),
+                                'stage/lib64', site_packs))
 print site_packs
+print os.path.abspath('../..')
 import ost
 # -- General configuration -----------------------------------------------------
 
@@ -42,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'OpenStructure'
-copyright = u'2018, OpenStructure authors'
+copyright = u'2019, OpenStructure authors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
