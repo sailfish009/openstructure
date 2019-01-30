@@ -32,7 +32,7 @@ import ost
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 
-              'sphinx.ext.coverage', 'sphinx.ext.pngmath',  
+              'sphinx.ext.coverage', 'sphinx.ext.mathjax',  
               'sphinx.ext.ifconfig']
 
 # Add any paths that contain templates here, relative to this directory.
@@ -99,6 +99,13 @@ modindex_common_prefix = ['ost.']
 
 
 # -- Options for HTML output ---------------------------------------------------
+
+# Since we use sphinx.ext.mathjax to render formulas on HTML pages: The
+# MathJax web-page deprecated their own CDN to serve JavaScript but it is
+# still the default for Sphinx. Here we redirect to the CDN recommended by
+# MathJax.
+mathjax_path = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'
+# Look for "math" markup (e.g. ost.table.Table.GetOptimalPrefactors) to test
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
