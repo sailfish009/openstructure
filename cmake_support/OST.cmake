@@ -896,6 +896,12 @@ macro(setup_compiler_flags)
       #  -fno-strict-aliasing
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing" )
     endif()
+    #message(STATUS "GCC VERSION " ${_GCC_VERSION})
+    if ((ENABLE_INFO OR ENABLE_GUI) AND _GCC_VERSION LESS "60")
+      # for older compilers we need to enable C++11 for Qt5
+      #message(STATUS "ADDING C++11 FLAG")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    endif()
   endif()
 endmacro()
 set(_BOOST_MIN_VERSION 1.31)

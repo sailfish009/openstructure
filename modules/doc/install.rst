@@ -46,7 +46,7 @@ When you enable support for image processing, you will need:
 
 If you would like to use the info module, also install:
 
-* `Qt5 <http://qt-project.org/>`_ 
+* `Qt5 <http://qt-project.org/>`_ and a C++11 compatible compiler
 
 If you would like to use the graphical user interface (GUI), also install:
 
