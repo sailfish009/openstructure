@@ -80,7 +80,7 @@ void ost::mol::alg::RemoveAtoms(
        edi.DeleteAtom(*i);
        zremoved++;   
     }
-    std::cerr << " --> removed " << zremoved << " hydrogen atoms" << std::endl;
+    std::cerr << " --> removed " << zremoved << " atoms with zero occupancy" << std::endl;
   }
 
   if (rm_hyd_atoms) {

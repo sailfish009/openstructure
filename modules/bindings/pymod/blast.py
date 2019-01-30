@@ -149,21 +149,20 @@ def CreateDB(infasta, dbout, mkdb_cmd=None):
   if mkdb_cmd==None:
     try:
       exe=settings.Locate('formatdb')
-      args=[exe, '-i', infasta, '-v',str(10000),'-n',dbout]
+      args=[exe, '-i', infasta, '-n', dbout]
     except:
       try:
         exe=settings.Locate('makeblastdb')
-        args=[exe, '-in', infasta, ' -max_file_sz 10GB -out', dbout,'-dbtype','prot']
-        
+        args=[exe, '-in', infasta, '-out', dbout, '-dbtype', 'prot']
       except:
         raise RuntimeError('could not find makeblastdb/formatdb executable')
   else:
     if os.path.basename(mkdb_cmd)=='makeblastdb':
       exe=settings.Locate('makeblastdb',explicit_file_name=mkdb_cmd)
-      args=[exe, '-in', infasta, ' -max_file_sz 10GB -out', dbout,'-dbtype','prot']
+      args=[exe, '-in', infasta, '-out', dbout, '-dbtype', 'prot']
     elif os.path.basename(mkdb_cmd)=='formatdb':
         exe=settings.Locate('formatdb',explicit_filename=mkdb_cmd)
-        args=[exe, '-i', infasta, '-v',str(10000),'-n',dbout]
+        args=[exe, '-i', infasta, '-n', dbout]
     else:
       raise IOError('mkdb command must either be the path to formatdb or makeblastdb!')
 
@@ -186,11 +185,11 @@ def BlastVersion(blast_location=None):
 
   if os.path.basename(blast_exe)=='blastall':
     args=[blast_exe]
-    pattern=re.compile(r'blastall (\d+\.\d+\.\d+)\s+arguments:\s*')
+    pattern=re.compile(r'\s*blastall (\d+\.\d+\.\d+)\s+arguments:\s*')
 
   else:
     args=[blast_exe, '-version']
-    pattern=re.compile(r'Package: blast (\d+\.\d+\.\d+),\s+')
+    pattern=re.compile(r'\s*Package: blast (\d+\.\d+\.\d+),\s+')
 
   blast_pipe=subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
