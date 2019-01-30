@@ -24,8 +24,8 @@ sys.path.insert(0, os.path.join(os.path.abspath('../..'),
                                 'stage/lib', site_packs))
 sys.path.insert(0, os.path.join(os.path.abspath('../..'),
                                 'stage/lib64', site_packs))
-print site_packs
-print os.path.abspath('../..')
+# print site_packs
+# print os.path.abspath('../..')
 import ost
 # -- General configuration -----------------------------------------------------
 
