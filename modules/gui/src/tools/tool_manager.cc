@@ -68,8 +68,7 @@ Tool* ToolManager::GetActiveTool() const
   return active_tool_;
 }
 
-ToolManager::ToolManager()
-{
+ToolManager::ToolManager(): active_tool_(NULL) {
   
 }
 
