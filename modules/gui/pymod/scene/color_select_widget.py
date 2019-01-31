@@ -53,7 +53,7 @@ class ColorSelectWidget(QtWidgets.QWidget):
     
   def ChangeColor(self):
     color = QtWidgets.QColorDialog.getColor(initial = self.color_, parent = self,
-                                            title = "asdf")
+                                            title = "Select Color")
     
     if(color != self.color_ and color.isValid()):
       self.color_ = color
