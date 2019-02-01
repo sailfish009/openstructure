@@ -2156,6 +2156,9 @@ namespace {
       }
   };
 
+  /*
+  commented out to silence compiler warning, as it is not needed anywhere
+
   double unproj_x() {
     GLdouble gl_mmat[]={1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
     GLdouble gl_pmat[16];
@@ -2168,6 +2171,7 @@ namespace {
                  &res[0],&res[1],&res[2]);
     return res[0];
   }
+  */
 } // anon ns
 
 void Scene::render_bg()
