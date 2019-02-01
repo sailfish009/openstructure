@@ -41,6 +41,7 @@ void export_MenuBar();
 void export_FileLoader();
 void export_FileViewer();
 void export_Widget();
+void export_GLCanvas();
 
 #if OST_SPNAV_ENABLED
 void export_Input();
@@ -120,6 +121,7 @@ BOOST_PYTHON_MODULE(_ost_gui)
   export_FileLoader();
   export_FileViewer();
   export_Widget();
+  export_GLCanvas();
 
   #if OST_SPNAV_ENABLED
   export_Input();

@@ -17,6 +17,7 @@ set(OST_GUI_PYMOD_SOURCES
   export_file_loader.cc
   export_file_viewer.cc
   export_widget.cc
+  export_gl_canvas.cc
 )
 set(OST_GUI_SCENE_PYMOD_MODULES
 __init__.py
