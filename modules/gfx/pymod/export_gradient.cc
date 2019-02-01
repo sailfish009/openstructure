@@ -33,7 +33,7 @@ using namespace ost::gfx;
 namespace {
   Gradient* make_gradient_d(const dict& d)
   {
-    std::auto_ptr<Gradient> grad(new Gradient);
+    std::unique_ptr<Gradient> grad(new Gradient);
     list keys = d.keys();
     for(int i=0;i<len(keys);++i) {
       extract<float> fex(keys[i]);
@@ -65,7 +65,7 @@ namespace {
 
   Gradient* make_gradient_l(const list& l)
   {
-    std::auto_ptr<Gradient> grad(new Gradient);
+    std::unique_ptr<Gradient> grad(new Gradient);
     float mf = len(l)<2 ? 0.0 : 1.0/static_cast<float>(len(l)-1); 
     for(int i=0;i<len(l);++i) {
       float mark = static_cast<float>(i)*mf;

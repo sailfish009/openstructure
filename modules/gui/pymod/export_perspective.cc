@@ -45,8 +45,7 @@ object app_get_menu(Perspective* pers, const QString& name)
 
 void export_Perspective()
 {
-  class_<Perspective, std::auto_ptr<Perspective>,
-         boost::noncopyable>("Perspective", no_init)
+  class_<Perspective, boost::noncopyable>("Perspective", no_init)
     .def("GetPanels", &Perspective::GetPanels,
          return_value_policy<reference_existing_object>())
     .def("GetMainArea", &Perspective::GetMainArea,

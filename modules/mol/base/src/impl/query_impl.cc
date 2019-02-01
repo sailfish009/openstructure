@@ -743,7 +743,7 @@ Node* QueryImpl::ParsePropValueExpr(QueryLexer& lexer) {
       return NULL;
     }
   }
-  std::auto_ptr<Node> root_value(NULL);
+  std::unique_ptr<Node> root_value;
   do {
     Node* sel_node=this->ParseValueOrRange(property, op, lexer);
     if (sel_node==NULL) {
@@ -814,10 +814,10 @@ Node* QueryImpl::ParseBracketSubExpr(QueryLexer& lexer) {
 }
 
 Node* QueryImpl::ParseSubExpr(QueryLexer& lexer, bool paren) {
-  // Use auto_ptr to protect against memory leaks. In case of early exit, i.e.
+  // Use unique_ptr to protect against memory leaks. In case of early exit, i.e.
   // exceptions, the memory associated with root_node and its child nodes will
   // be freed.
-  std::auto_ptr<Node> root_node(NULL);
+  std::unique_ptr<Node> root_node;
   Node* new_node=NULL;
   QueryToken t=lexer.CurrentToken();
   LogicOP logic_op=LOP_AND;
