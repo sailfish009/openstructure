@@ -223,8 +223,6 @@ class SuperpositionDialog(QtWidgets.QDialog):
     view_one = self._chain_one.selected_chain
     view_two = self._chain_two.selected_chain
     atoms = self._GetAtomSelection()
-    print "atoms:", atoms
-    print "view lengths:", len(view_one.atoms), len(view_two.atoms)
     sp = Superpose(view_two, view_one,
                    self._mmethod_dict[str(self._methods.currentText())],
                    atoms, iterative=self._iterative, 
