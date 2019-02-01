@@ -42,7 +42,7 @@ class RemoteLoader(QtWidgets.QWidget):
     self._load.setText('load from %s  ' % name)
 
   def _ToggleRepo(self, action):
-    self._current_repo = str(action.data().toString())
+    self._current_repo = str(action.data())
     self._UpdateLoadButton(self._current_repo)
 
 
