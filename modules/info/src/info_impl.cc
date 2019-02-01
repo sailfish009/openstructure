@@ -227,7 +227,7 @@ const QDomElement& EleImpl::GetElement() const
 ElePtr EleImpl::GetSub(const String& name) const
 {
   QDomNodeList list = ele_.childNodes();
-  for(uint i=0;i<list.length();++i) {
+  for(int i=0;i<list.length();++i) {
     QDomNode n = list.item(i);
     if(n.isElement()) {
       QDomElement en = n.toElement();
@@ -243,7 +243,7 @@ EleList EleImpl::GetSubs(const String& name) const
 {
   EleList eles;
   QDomNodeList list = ele_.childNodes();
-  for(uint i=0;i<list.length();++i) {
+  for(int i=0;i<list.length();++i) {
     QDomNode n = list.item(i);
     if(n.isElement()) {
       QDomElement en = n.toElement();
@@ -266,7 +266,7 @@ ElePtr EleImpl::CreateSub(const String& name)
 bool EleImpl::HasSub(const String& name) const
 {
   QDomNodeList list = ele_.childNodes();
-  for(uint i=0;i<list.length();++i) {
+  for(int i=0;i<list.length();++i) {
     QDomNode n = list.item(i);
     if(n.isElement()) {
       QDomElement en = n.toElement();
@@ -281,7 +281,7 @@ bool EleImpl::HasSub(const String& name) const
 void EleImpl::RemoveSub(const String& name)
 {
   QDomNodeList list = ele_.childNodes();
-  for(uint i=0;i<list.length();++i) {
+  for(int i=0;i<list.length();++i) {
     QDomNode n = list.item(i);
     if(n.isElement()) {
       QDomElement en = n.toElement();
@@ -295,7 +295,7 @@ void EleImpl::RemoveSub(const String& name)
 void EleImpl::RemoveSub(const ElePtr& ele)
 {
   QDomNodeList list = ele_.childNodes();
-  for(uint i=0;i<list.length();++i) {
+  for(int i=0;i<list.length();++i) {
     QDomNode n = list.item(i);
     if(n.isElement()) {
       QDomElement en = n.toElement();
@@ -311,7 +311,7 @@ std::vector<ElePtr> EleImpl::GetSubList() const
   std::vector<ElePtr> epl;
   
   QDomNodeList list = ele_.childNodes();
-  for(uint i=0;i<list.length();++i) {
+  for(int i=0;i<list.length();++i) {
     QDomNode n = list.item(i);
     if(n.isElement()) {
       QDomElement ne = n.toElement();
@@ -334,7 +334,7 @@ ElePtr EleImpl::GetParent() const
 String EleImpl::GetTextData() const
 {
   QDomNodeList list = ele_.childNodes();
-  for(uint i=0;i<list.length();++i) {
+  for(int i=0;i<list.length();++i) {
     QDomNode n = list.item(i);
     if(n.isText()) {
       return QS(n.toText().data());
@@ -347,7 +347,7 @@ void EleImpl::SetTextData(const String& td)
 {
   bool succ=false;
   QDomNodeList list = ele_.childNodes();
-  for(uint i=0;i<list.length();++i) {
+  for(int i=0;i<list.length();++i) {
     QDomNode n = list.item(i);
     if(n.isText()) {
       n.toText().setData(QS(td));
@@ -404,7 +404,7 @@ std::vector<String> EleImpl::GetAttributeList() const
 {
   std::vector<String> result;
   QDomNamedNodeMap nmap = ele_.attributes();
-  for(uint i=0;i<nmap.length();++i) {
+  for(int i=0;i<nmap.length();++i) {
     QDomNode n = nmap.item(i);
     if(n.isAttr()) {
       QDomAttr attr = n.toAttr();
