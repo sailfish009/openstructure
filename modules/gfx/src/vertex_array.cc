@@ -1418,7 +1418,6 @@ void IndexedVertexArray::set_clip_offset(float o)
 #if OST_SHADER_SUPPORT_ENABLED
   float n=Scene::Instance().GetNear();
   float f=Scene::Instance().GetFar();
-  float z=n+o;
   float t=(f*(-n+o)+n*(n+o))/((f-n)*(n+o));
   t=(t+1.0)*0.5;
   glUniform1f(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"clip_offset"),t);
