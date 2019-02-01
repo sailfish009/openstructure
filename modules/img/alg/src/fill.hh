@@ -32,11 +32,13 @@ namespace {
 template<typename T>
 void set_val(T& v, Real rv, const Complex& cv);
 
-template<>
-void set_val<Real>(Real& v, Real rv, const Complex& cv) {v=rv;}
+// commented out to silence compiler warning, as they're not needed anywhere
 
-template<>
-void set_val<Complex>(Complex& v, Real rv, const Complex& cv) {v=cv;}
+//template<>
+//void set_val<Real>(Real& v, Real rv, const Complex& cv) {v=rv;}
+
+//template<>
+//void set_val<Complex>(Complex& v, Real rv, const Complex& cv) {v=cv;}
 
 template<typename T>
 void set_val(T& v, Real rv, const Complex& cv)
