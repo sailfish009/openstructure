@@ -476,11 +476,14 @@ TraceProfile CartoonRenderer::transform_and_add_profile(const std::vector<TraceP
 
 namespace {
 
+  /*
+  commented out to silence compiler warning, as it is not needed anywhere
   float spread(const geom::Vec3& v1, geom::Vec3& v2, geom::Vec3& v3, geom::Vec3& v4)
   {
     return geom::Dot(geom::Normalize(geom::Cross(geom::Normalize(v3-v1),geom::Normalize(v2-v1))),
 		     geom::Normalize(geom::Cross(geom::Normalize(v3-v4),geom::Normalize(v2-v4))));
   }
+  */
 
 }
 
