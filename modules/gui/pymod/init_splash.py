@@ -12,7 +12,7 @@ You are running version %s<br /><br />If you are new to OpenStructure, we
 invite you to run the demos from the examples directory. Scripts can be 
 displayed by right clicking on the file and selecting 'Show source'.<br/><br/>
 Feel free visit our website at:<br /> 
-<a href='http://www.openstructure.org'>http://www.openstructure.org</a>
+<a href='https://www.openstructure.org'>https://www.openstructure.org</a>
 """ % ost.VERSION
 
 class SplashDialog(QtWidgets.QDialog):
