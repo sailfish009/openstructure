@@ -55,8 +55,9 @@ class ChainComboBox(QtWidgets.QComboBox):
     if gfx:
       self.gfx = gfx
 
-  def _HighlightChain(self, chain):
-    if str(chain) != 'All':
+  def _HighlightChain(self, chain_idx):
+    chain = self.itemText(chain_idx)
+    if chain != 'All':
       self.gfx.SetSelection(self.entity.Select('cname="%s"' % str(chain)))
     else:
       self.gfx.SetSelection(self.entity.Select(''))
@@ -130,7 +131,7 @@ class SuperpositionDialog(QtWidgets.QDialog):
     self.gfx_select_one = None
     self.gfx_select_two = None
     QtWidgets.QDialog.__init__(self, parent)
-    self.setWindowTitle('Superpose structures')
+    self.setWindowTitle('Superpose Structures')
     if not isinstance(ent_one, mol.EntityHandle) and \
        not isinstance(ent_one, mol.EntityView):
       n_one = ent_one.GetName()
@@ -162,28 +163,28 @@ class SuperpositionDialog(QtWidgets.QDialog):
     if n_one == n_two:
       n_one = n_one + ' 1'
       n_two = n_two + ' 2' 
-    layout = QGridLayout(self)
+    layout = QtWidgets.QGridLayout(self)
     # select reference molecule
     self.reference = 0;
     self._reference = self._ReferenceSelection(n_one, n_two)
     grow = 0
-    layout.addWidget(QLabel("reference"), grow, 0)
+    layout.addWidget(QtWidgets.QLabel("reference"), grow, 0)
     layout.addWidget(self._reference, grow, 1)
     grow += 1
     # chains
     self._chain_one = ChainComboBox(self.ent_one, self.gfx_one, self)
     self._chain_two = ChainComboBox(self.ent_two, self.gfx_two, self)
-    layout.addWidget(QLabel("reference chain"), grow, 0)
+    layout.addWidget(QtWidgets.QLabel("reference chain"), grow, 0)
     layout.addWidget(self._chain_one, grow, 1)
     grow += 1
-    layout.addWidget(QLabel("chain"), grow, 0)
+    layout.addWidget(QtWidgets.QLabel("chain"), grow, 0)
     layout.addWidget(self._chain_two, grow, 1)
     grow += 1
     # link chain and reference selection
     self._reference.currentIndexChanged.connect(self._ChangeChainSelection)
     # match methods
     self._methods = self._MatchMethods()
-    layout.addWidget(QLabel('match residues by'), grow, 0)
+    layout.addWidget(QtWidgets.QLabel('match residues by'), grow, 0)
     grow += 1
     layout.addWidget(self._methods)
 
@@ -199,10 +200,10 @@ class SuperpositionDialog(QtWidgets.QDialog):
     layout.addWidget(self._atmselectbx, grow, 1)
     grow += 1
     # buttons
-    ok_button = QPushButton("Superpose")
+    ok_button = QtWidgets.QPushButton("Superpose")
     ok_button.clicked.connect(self.accept)
-    cancel_button = QPushButton("Cancel")
-    hbox_layout = QHBoxLayout()
+    cancel_button = QtWidgets.QPushButton("Cancel")
+    hbox_layout = QtWidgets.QHBoxLayout()
     hbox_layout.addStretch(1)
     layout.addLayout(hbox_layout, grow, 0, 1, 2)
     grow += 1
@@ -222,10 +223,13 @@ class SuperpositionDialog(QtWidgets.QDialog):
     view_one = self._chain_one.selected_chain
     view_two = self._chain_two.selected_chain
     atoms = self._GetAtomSelection()
+    print "atoms:", atoms
+    print "view lengths:", len(view_one.atoms), len(view_two.atoms)
     sp = Superpose(view_two, view_one,
                    self._mmethod_dict[str(self._methods.currentText())],
                    atoms, iterative=self._iterative, 
-                   max_iterations=self._it_in.value(), distance_threshold=self._dist_in.value())
+                   max_iterations=self._it_in.value(), 
+                   distance_threshold=self._dist_in.value())
     self.rmsd = sp.rmsd
     if self._iterative:
       self.rmsd_superposed_atoms = sp.rmsd_superposed_atoms
@@ -238,25 +242,25 @@ class SuperpositionDialog(QtWidgets.QDialog):
       self._atoms.setEnabled(False)
 
   def _AtomSelectionBox(self):
-    bt1 = QRadioButton('All')
-    bt2 = QRadioButton('Backbone')
-    bt3 = QRadioButton('CA')
+    bt1 = QtWidgets.QRadioButton('All')
+    bt2 = QtWidgets.QRadioButton('Backbone')
+    bt3 = QtWidgets.QRadioButton('CA')
     self.cstmbtntxt = 'Custom'
-    custom_rbutton = QRadioButton(self.cstmbtntxt)
-    group = QButtonGroup()
+    custom_rbutton = QtWidgets.QRadioButton(self.cstmbtntxt)
+    group = QtWidgets.QButtonGroup()
     group.addButton(bt1)
     group.addButton(bt2)
     group.addButton(bt3)
     group.addButton(custom_rbutton)
     bt1.setChecked(True)
-    vbox_layout = QVBoxLayout()
+    vbox_layout = QtWidgets.QVBoxLayout()
     vbox_layout.addWidget(bt1)
     vbox_layout.addWidget(bt2)
     vbox_layout.addWidget(bt3)
     vbox_layout.addWidget(custom_rbutton)
     vbox_layout.addWidget(self._atoms)
     custom_rbutton.toggled.connect(self._toggle_atoms)
-    box = QGroupBox("atom selection")
+    box = QtWidgets.QGroupBox("atom selection")
     box.setLayout(vbox_layout)
     return box, group
 
@@ -280,22 +284,22 @@ class SuperpositionDialog(QtWidgets.QDialog):
     for atm in ent_b.GetAtomList():
       if atm.name in atm_dict:
         atm_dict[atm.name] = 1
-    atmlst = QStringList()
+    atmlst = list()
     for atm in sorted(atm_dict.keys()):
       if atm_dict[atm]:
         atmlst.append(atm)
-    elems = QStringListModel(atmlst)
-    atoms = QListView(self)
+    elems = QtCore.QStringListModel(atmlst)
+    atoms = QtWidgets.QListView(self)
     dim.setHeight(3*dim.height())
     atoms.setFixedSize(dim)
     atoms.setModel(elems)
-    atoms.setSelectionMode(QAbstractItemView.MultiSelection)
-    atoms.setEditTriggers(QAbstractItemView.NoEditTriggers)
+    atoms.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
+    atoms.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
     atoms.setEnabled(False)
     return atoms
 
   def _ReferenceSelection(self, name_a, name_b):
-    cbox = QComboBox()
+    cbox = QtWidgets.QComboBox()
     cbox.addItem(name_a)
     cbox.addItem(name_b)
     if cbox.count() > 0:
@@ -313,13 +317,13 @@ class SuperpositionDialog(QtWidgets.QDialog):
       self._iterative=False
 
   def _ItBox(self):
-    bt1 = QRadioButton("On")
-    iteration_label=QLabel("Max Iterations: ")
-    distance_label=QLabel("Dist Thresh: ")
-    iteration_in=QSpinBox()
+    bt1 = QtWidgets.QRadioButton("On")
+    iteration_label=QtWidgets.QLabel("Max Iterations: ")
+    distance_label=QtWidgets.QLabel("Dist Thresh: ")
+    iteration_in=QtWidgets.QSpinBox()
     iteration_in.setRange(1,30)
     iteration_in.setValue(8)
-    distance_in=QDoubleSpinBox()
+    distance_in=QtWidgets.QDoubleSpinBox()
     distance_in.setRange(1.0,10.0)
     distance_in.setValue(3.0)
     distance_in.setDecimals(1)
@@ -328,7 +332,7 @@ class SuperpositionDialog(QtWidgets.QDialog):
     distance_in.setEnabled(False)
     bt1.setChecked(False)
     self._iterative=False
-    vbox_layout = QVBoxLayout()
+    vbox_layout = QtWidgets.QVBoxLayout()
     vbox_layout.addWidget(bt1)
     vbox_layout.addWidget(iteration_label)
     vbox_layout.addWidget(iteration_in)
@@ -336,7 +340,7 @@ class SuperpositionDialog(QtWidgets.QDialog):
     vbox_layout.addWidget(distance_in)
     vbox_layout.addSpacing(50)
     bt1.toggled.connect(self._toggle_iterative)
-    box = QGroupBox("Iterative")
+    box = QtWidgets.QGroupBox("Iterative")
     box.setLayout(vbox_layout)
     return box,iteration_in, distance_in
 
@@ -351,7 +355,7 @@ class SuperpositionDialog(QtWidgets.QDialog):
       self.reference = 1;
 
   def _MatchMethods(self):
-    methods=QComboBox(self)
+    methods=QtWidgets.QComboBox(self)
     for method in sorted(self._mmethod_dict):
       methods.addItem(method)
     return methods
