@@ -774,6 +774,10 @@ void EntityImpl::AttachObserver(const EntityObserverPtr& o)
 void EntityImpl::DetachObserver(const EntityObserverPtr& o)
 {
   EntityObserverMap::iterator it=observer_map_.find(o.get());
+
+  if(it != observer_map_.end()) {
+    observer_map_.erase(it);
+  }
 }
 
 void EntityImpl::NotifyObserver()
