@@ -35,8 +35,19 @@
 #include <ost/mol/impl/chain_impl.hh>
 #include <ost/mol/mol.hh>
 
+#include <memory>
+#include <cstddef>
+
 namespace ost { namespace mol {  namespace impl {
-  
+
+// portable solution for use of unique ptr in this file
+// -> use C++11 unique_ptr if possible and old auto_ptr otherwise
+#if __cplusplus >= 201103L
+typedef std::unique_ptr<Node> NodeUniquePtr;
+#else
+typedef std::auto_ptr<Node> NodeUniquePtr;
+#endif
+
 using namespace boost::spirit;
 
 namespace {
@@ -743,7 +754,7 @@ Node* QueryImpl::ParsePropValueExpr(QueryLexer& lexer) {
       return NULL;
     }
   }
-  std::unique_ptr<Node> root_value;
+  NodeUniquePtr root_value;
   do {
     Node* sel_node=this->ParseValueOrRange(property, op, lexer);
     if (sel_node==NULL) {
@@ -814,10 +825,10 @@ Node* QueryImpl::ParseBracketSubExpr(QueryLexer& lexer) {
 }
 
 Node* QueryImpl::ParseSubExpr(QueryLexer& lexer, bool paren) {
-  // Use unique_ptr to protect against memory leaks. In case of early exit, i.e.
+  // Use unique ptr to protect against memory leaks. In case of early exit, i.e.
   // exceptions, the memory associated with root_node and its child nodes will
   // be freed.
-  std::unique_ptr<Node> root_node;
+  NodeUniquePtr root_node;
   Node* new_node=NULL;
   QueryToken t=lexer.CurrentToken();
   LogicOP logic_op=LOP_AND;
