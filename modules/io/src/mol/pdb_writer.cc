@@ -397,6 +397,9 @@ PDBWriter::PDBWriter(const String& filename, const IOProfile& profile):
   multi_model_(false), charmm_style_(profile.dialect=="CHARMM"), 
   is_pqr_(false), profile_(profile), filename_(filename)
 {
+  if (!outfile_.is_open()) {
+    throw IOException("Failed to open: " + filename);
+  }
   if (boost::iequals(".pqr", boost::filesystem::extension(filename))) {
     is_pqr_=true;
   }
