@@ -98,7 +98,9 @@ void export_pdb_io()
   def("EntityToPDBStr", pdb_str_b,
       (arg("entity"), arg("profile")=IOProfile()));
 
-  def("PDBStrToEntity", &PDBStringToEntity, (arg("pdb_string"),arg("profile")=IOProfile()));
+  def("PDBStrToEntity", &PDBStringToEntity, (arg("pdb_string"),
+                                             arg("profile")=IOProfile(),
+                                             arg("process")=false));
 
   // we need to make sure there are no pending references to Python objects
   // tied to the IOProfileRegistry singleton. The destructor of 
