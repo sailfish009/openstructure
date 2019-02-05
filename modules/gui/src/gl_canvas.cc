@@ -36,7 +36,10 @@ namespace ost { namespace gui {
 ost::gui::GLCanvas::GLCanvas(): QOpenGLWindow(),
                                 last_pos_(),
                                 show_beacon_(false),
-                                bench_flag_(false) { }
+                                bench_flag_(false) { 
+  LOG_DEBUG("GLCanvas::registering with scene");
+  gfx::Scene::Instance().Register(this);  
+}
 
 void GLCanvas::StatusMessage(const String& m) {
   // This Window can also be displayed without a full blown GostyApp.
@@ -47,25 +50,31 @@ void GLCanvas::StatusMessage(const String& m) {
   }
 }
 
-QSurfaceFormat GLCanvas::GetDefaultFormat() {
+void GLCanvas::SetDefaultFormat() {
   QSurfaceFormat f = QSurfaceFormat::defaultFormat();
   f.setRedBufferSize(8);
   f.setGreenBufferSize(8);
   f.setBlueBufferSize(8);
   f.setAlphaBufferSize(8);
   f.setDepthBufferSize(24);
-  return f;
+  this->setFormat(f);
 }
 
-void GLCanvas::SetDefaultFormat() {
-  this->setFormat(GLCanvas::GetDefaultFormat());
+void GLCanvas::SetStereoFormat() {
+  QSurfaceFormat f = QSurfaceFormat::defaultFormat();
+  f.setRedBufferSize(8);
+  f.setGreenBufferSize(8);
+  f.setBlueBufferSize(8);
+  // QOpenGLWindow seems to dislike alphabuffer in stereo rendering...
+  //f.setAlphaBufferSize(8);
+  f.setDepthBufferSize(24);
+  f.setStereo(true);
+  this->setFormat(f);
 }
 
 void GLCanvas::initializeGL() {
   LOG_DEBUG("GLCanvas::initializeGL()");
-  gfx::Scene::Instance().InitGL();
-  LOG_DEBUG("GLCanvas::registering with scene");
-  gfx::Scene::Instance().Register(this);
+  gfx::Scene::Instance().InitGL();    
 }
 
 void GLCanvas::paintGL() {

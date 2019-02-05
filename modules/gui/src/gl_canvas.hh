@@ -46,8 +46,8 @@ public:
   virtual bool HasMultisample() const {return format().samples() > 1;}
 
   // QSurfaceFormat for GL context setup
-  static QSurfaceFormat GetDefaultFormat();
   void SetDefaultFormat();
+  void SetStereoFormat();
 
   // central point for sending input to the gfx layer
   void OnTransform(gfx::InputCommand, int indx, 

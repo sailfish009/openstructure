@@ -48,9 +48,7 @@ GLWin::GLWin(QWidget* p, bool try_stereo): Widget(NULL, p) {
   gl_canvas_ = new GLCanvas;
 
   if(try_stereo) {
-    QSurfaceFormat f = GLCanvas::GetDefaultFormat();
-    f.setStereo(true);
-    gl_canvas_->setFormat(f);
+    gl_canvas_->SetStereoFormat();
   } else{
     gl_canvas_->SetDefaultFormat();
   }

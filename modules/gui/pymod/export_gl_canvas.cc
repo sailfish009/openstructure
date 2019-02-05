@@ -36,6 +36,7 @@ void export_GLCanvas() {
     .def("Show", &GLCanvas::show)
     .def("SetFormat", &WrapSetGLCanvasFormat)
     .def("SetDefaultFormat", &GLCanvas::SetDefaultFormat)
+    .def("SetStereoFormat", &GLCanvas::SetStereoFormat)
     .def("GetQObject",&get_py_qobject<GLCanvas>)
     .add_property("qobject", &get_py_qobject<GLCanvas>)
   ;
