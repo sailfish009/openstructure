@@ -37,6 +37,7 @@ class GLCanvas : public QOpenGLWindow, public gfx::GLWinBase {
 
 public:
   GLCanvas();
+  virtual ~GLCanvas();
 
   // gfx::GLWinBase interface
   virtual void MakeActive() { this->makeCurrent(); }

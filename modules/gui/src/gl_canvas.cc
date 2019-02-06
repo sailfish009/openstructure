@@ -41,6 +41,10 @@ ost::gui::GLCanvas::GLCanvas(): QOpenGLWindow(),
   gfx::Scene::Instance().Register(this);  
 }
 
+ost::gui::GLCanvas::~GLCanvas() {
+  gfx::Scene::Instance().Unregister(this);
+}
+
 void GLCanvas::StatusMessage(const String& m) {
   // This Window can also be displayed without a full blown GostyApp.
   // We therefore only feed the message into Gosty if there's already
