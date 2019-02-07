@@ -26,7 +26,7 @@ from board import Board
 panels=gui.GostyApp.Instance().perspective.panels
 
 #Create Widget
-tetris=Board(panels.qobject)
+tetris=Board()
 
 #Wrap widget to Qt Widget
 wid=gui.Widget(tetris)
