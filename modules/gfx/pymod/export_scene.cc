@@ -268,15 +268,14 @@ void export_Scene()
     .add_property("hemi_params",scene_get_hemi_p,scene_set_hemi_p)
   ;
 
+  // we need to make sure there are no pending references to Python objects
+  // tied to the scene singleton. The destructor of 
+  // scene may be called after Python is shutdown which results
+  // in a segfault.
+  scope().attr("__dict__")["atexit"]=handle<>(PyImport_ImportModule("atexit"));
 
-// we need to make sure there are no pending references to Python objects
-// tied to the scene singleton. The destructor of 
-// scene may be called after Python is shutdown which results
-// in a segfault.
-scope().attr("__dict__")["atexit"]=handle<>(PyImport_ImportModule("atexit"));
-
-def("_clear_scene", &clear_scene);
-object r=scope().attr("_clear_scene");
-scope().attr("atexit").attr("register")(r);
+  def("_clear_scene", &clear_scene);
+  object r=scope().attr("_clear_scene");
+  scope().attr("atexit").attr("register")(r);
 
 }
