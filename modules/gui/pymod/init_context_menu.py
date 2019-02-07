@@ -179,7 +179,7 @@ class CalculateSurfaceSettingsDialog(QtWidgets.QDialog):
     cancel_btn.clicked.connect(self.reject)
     
   def GetPath(self):
-    path=QtWidgets.QFileDialog().getOpenFileName(self, "Choose MSMS Executable")
+    path, _ =QtWidgets.QFileDialog.getOpenFileName(self, "Choose MSMS Executable")
     if path!='':
       self.msmsexe_field.setText(path)
 
