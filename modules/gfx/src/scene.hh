@@ -548,6 +548,7 @@ private:
   Scene();
   Scene(const Scene&) {}
   Scene& operator=(const Scene&) {return *this;}
+  ~Scene();
 
   // The GL Context gets typically handled externally, e.g. using QT when
   // calling InitGL(), RenderGL() etc. However, there is no guarantee that the 

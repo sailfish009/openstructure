@@ -151,6 +151,13 @@ Scene::Scene():
   transform_.SetTrans(Vec3(0,0,-100));
 }
 
+Scene::~Scene()
+{
+  // cleanup all observers / gfx_nodes when scene is destructed
+  observers_.clear();
+  this->RemoveAll();
+}
+
 void Scene::SetFog(bool f)
 {
   fog_flag_=f;

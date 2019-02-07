@@ -87,6 +87,10 @@ void scene_set_hemi_p(Scene* s, tuple p)
 
 } // anon ns
 
+void clear_scene() {
+  Scene::Instance().RemoveAll();
+}
+
 void export_Scene()
 {
   def("Scene",get_scene,return_value_policy<reference_existing_object>());
@@ -264,5 +268,15 @@ void export_Scene()
     .add_property("hemi_params",scene_get_hemi_p,scene_set_hemi_p)
   ;
 
-}
 
+// we need to make sure there are no pending references to Python objects
+// tied to the scene singleton. The destructor of 
+// scene may be called after Python is shutdown which results
+// in a segfault.
+scope().attr("__dict__")["atexit"]=handle<>(PyImport_ImportModule("atexit"));
+
+def("_clear_scene", &clear_scene);
+object r=scope().attr("_clear_scene");
+scope().attr("atexit").attr("register")(r);
+
+}
