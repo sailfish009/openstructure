@@ -69,7 +69,7 @@ class SelectRefDialog(QtWidgets.QDialog):
     items = self.list.selectedItems()
     for item in items:
       if(item.column()==0):
-        ent = item.data(QtCore.Qt.UserRole).toPyObject()
+        ent = item.data(QtCore.Qt.UserRole)
         self.ent_list_.remove(ent)
         self.ent_list_.insert(0,ent)
     self.accept()
@@ -116,7 +116,7 @@ class ShowResultDialog(QtWidgets.QDialog):
       new_item = QtWidgets.QTableWidgetItem("%.2f"%res_list[i].rmsd)
       new_item.setFlags(QtCore.Qt.ItemIsEnabled)
       self.list.setItem(i, 1, new_item)
-      new_item = QtWidgets.QTableWidgetItem("%i"%res_list[i].tm_score)
+      new_item = QtWidgets.QTableWidgetItem("%.2f"%res_list[i].tm_score)
       new_item.setFlags(QtCore.Qt.ItemIsEnabled)
       self.list.setItem(i, 2, new_item)
       new_item = QtWidgets.QTableWidgetItem()
@@ -284,7 +284,7 @@ class AlignmentContextMenu(QtCore.QObject):
   def __ShowScore(self, ent_list, res_list):
     if(len(res_list)==1):
       res = res_list[0]
-      string = "RMSD: %.2f, TMScore: %i"%(res.rmsd, res.tm_score)
+      string = "RMSD: %.2f, TMScore: %.2f"%(res.rmsd, res.tm_score)
       gui.GostyApp.Instance().perspective.StatusMessage(string)
     elif(len(res_list)>1):
       ShowResultDialog(ent_list, res_list).exec_()
