@@ -127,7 +127,7 @@ typedef std::vector<ResNum> ResNumList;
 
 inline std::ostream& operator<<(std::ostream& os, const ResNum& n)
 {
-  return os << n.GetNum();
+  os << n.GetNum();
   if (n.GetInsCode()!='\0')
     os << n.GetInsCode();
   return os;
