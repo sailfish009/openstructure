@@ -1654,7 +1654,7 @@ bool Scene::StartOffscreenMode(unsigned int width, unsigned int height, int max_
   }
   old_vp_[0]=vp_width_;
   old_vp_[1]=vp_height_;
-  main_offscreen_buffer_->MakeActive();
+  this->ActivateGLContext();
   offscreen_flag_=true;
   root_node_->ContextSwitch();
 
@@ -1685,9 +1685,9 @@ void Scene::StopOffscreenMode()
   if(main_offscreen_buffer_) {
     delete main_offscreen_buffer_;
     main_offscreen_buffer_=0;
+    this->ActivateGLContext();
     Scene::Instance().SetViewport(old_vp_[0],old_vp_[1]);
     offscreen_flag_=false;
-    this->ActivateGLContext();
     root_node_->ContextSwitch();
     glDrawBuffer(GL_BACK);
     update_fog();
@@ -1714,8 +1714,6 @@ void Scene::Export(const String& fname, unsigned int width,
     return;
   }
 
-  this->ActivateGLContext();
-
   bool of_flag = (main_offscreen_buffer_==0);
 
   // only switch if offscreen mode is not active
@@ -1729,6 +1727,7 @@ void Scene::Export(const String& fname, unsigned int width,
 #endif
       max_samples=msamples;
     }
+    // proper GLContext is activated in StartOffscreenMode function
     if(!StartOffscreenMode(width,height, max_samples)) {
       return;
     }
