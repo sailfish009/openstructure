@@ -69,7 +69,6 @@ def _ParseTmAlign(lines,lines_matrix):
   alignment = seq.CreateAlignment()
   alignment.AddSequence(seq2)
   alignment.AddSequence(seq1)
-  print aln_length
   return ost.bindings.TMAlignResult(rmsd, tm_score, aln_length, tf, alignment)
 
 def _RunTmAlign(tmalign, tmp_dir):
