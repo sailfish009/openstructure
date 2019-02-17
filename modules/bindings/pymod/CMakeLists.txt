@@ -15,4 +15,12 @@ kclust.py
 ialign.py
 align_3dcomb.py
 )
-pymod(NAME bindings PY ${OST_BINDINGS})
+
+set(OST_BINDINGS_PYMOD_SOURCES
+  export_tmalign.cc
+  wrap_bindings.cc
+)
+
+
+pymod(NAME bindings OUTPUT_DIR ost/bindings CPP ${OST_BINDINGS_PYMOD_SOURCES} 
+      PY ${OST_BINDINGS})
