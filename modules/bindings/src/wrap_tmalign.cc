@@ -35,7 +35,7 @@ TMAlignResult WrappedTMAlign(const geom::Vec3List& pos_one,
   int ylen = pos_two.size();  
 
   if(xlen <= 5 || ylen <= 5) {
-    throw ost::Error("Input sequence to short!");
+    throw ost::Error("Input sequence too short!");
   }
 
   if(xlen != seq1.GetLength() || ylen != seq2.GetLength()) {
