@@ -147,6 +147,27 @@ void WrapGetPositions(LinearPositionContainerPtr container,
   container->GetPositions(p_range, positions);  
 }
 
+
+tuple WrapExtractTemplateData(const String& entry_name, const String& chain_name,
+                              const ost::seq::AlignmentHandle& aln,
+                              LinearIndexer& indexer,
+                              LinearCharacterContainer& seqres_container,
+                              LinearCharacterContainer& atomseq_container,
+                              LinearPositionContainer& position_container) {
+
+  std::vector<int> v_residue_numbers;
+  geom::Vec3List ca_positions;
+
+  ost::db::ExtractTemplateData(entry_name, chain_name, aln, indexer, 
+                               seqres_container, atomseq_container, 
+                               position_container, v_residue_numbers,
+                               ca_positions);
+
+  list residue_numbers;
+  VecToList(v_residue_numbers, residue_numbers);
+  return boost::python::make_tuple(residue_numbers, ca_positions);
+}   
+
 }
 
 
@@ -204,5 +225,14 @@ void export_linear_db() {
                                                         arg("atomseq_container"),
                                                         arg("position_container"),
                                                         arg("seq"), arg("positions")));
+
+  def("ExtractTemplateData", &WrapExtractTemplateData, (arg("entry_name"),
+                                                        arg("chain_name"),
+                                                        arg("aln"),
+                                                        arg("linear_indexer"),
+                                                        arg("seqres_container"),
+                                                        arg("atomseq_container"),
+                                                        arg("position_container")));
+
 }
 

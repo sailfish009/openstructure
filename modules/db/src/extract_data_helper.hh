@@ -24,6 +24,7 @@
 #include <ost/seq/sequence_handle.hh>
 #include <ost/db/linear_indexer.hh>
 #include <ost/db/binary_container.hh>
+#include <ost/seq/alignment_handle.hh>
 
 namespace ost { namespace db {
 
@@ -33,6 +34,15 @@ void ExtractValidPositions(const String& entry_name, const String& chain_name,
                            LinearPositionContainer& position_container,
                            ost::seq::SequenceHandle& seq,
                            geom::Vec3List& positions);
+
+void ExtractTemplateData(const String& entry_name, const String& chain_name,
+                         const ost::seq::AlignmentHandle& aln,
+                         LinearIndexer& indexer, 
+                         LinearCharacterContainer& seqres_container,
+                         LinearCharacterContainer& atomseq_container,
+                         LinearPositionContainer& position_container,
+                         std::vector<int>& residue_numbers,
+                         geom::Vec3List& ca_positions);
 
 }} //ns
 
