@@ -144,9 +144,9 @@ class TMScoreResult:
     
     The RMSD of the common Calpha atoms of both structures
 
-    .. attribute:: rmsd_below_five
+  .. attribute:: rmsd_below_five
 
-      The RMSD of all Calpha atoms that can be superposed below five Angstroem
+    The RMSD of all Calpha atoms that can be superposed below five Angstroem
     
   .. attribute:: tm_score
   

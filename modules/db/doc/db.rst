@@ -304,3 +304,89 @@ use an indexer to keep track of where to find data for a certain entry.
     :returns:           The number of stored positions
     :rypte:             :class:`int`
 
+
+Data Extraction
+--------------------------------------------------------------------------------
+
+Openstructure provides data extraction functionality for the following scenario:
+There are three binary container. A position container to hold CA-positions
+(:class:`LinearPositionContainer`), a SEQRES container and
+an ATOMSEQ container (both: :class:`LinearCharacterContainer`). 
+They contain entries from the protein structure database
+and sequence/position data is relative to the SEQRES of those entries. 
+This means, if the SEQRES has more characters as there are resolved residues
+in the structure, the entry in the position container still contains the exact
+number of SEQRES characters but some position remain invalid. Thats where the
+ATOMSEQ container comes in. It only contains matching residues to the SEQRES but
+marks non-resolved residues with '-'. 
+
+.. method:: ExtractValidPositions(entry_name, chain_name, indexer, \
+                                  atomseq_container, position_container, \
+                                  seq, positions)
+
+  Iterates over all data for a chain specified by *entry_name* and *chain_name*.
+  For every data point marked as valid in the *atomseq_container* (character at
+  that position is not '-'), the character and the corresponding position are 
+  added to *seq* and *positions*
+
+  :param entry_name:    Name of assembly you want the data from
+  :param chain_name:    Name of chain you want the data from
+  :param indexer:       Used to access *atomseq_container* and 
+                        *position_container*
+  :param atomseq_container: Container that marks locations with invalid position
+                            data with '-'
+  :param position_container: Container containing position data
+  :param seq:           Sequence with extracted valid positions gets stored
+                        in here.
+  :param positions:     The extracted valid positions get stored in here
+
+  :type entry_name:     :class:`str`
+  :type chain_name:     :class:`str`
+  :type indexer:        :class:`LinearIndexer`
+  :type atomseq_container: :class:`LinearCharacterContainer`
+  :type position_container: :class:`LinearPositionContainer`
+  :type seq:            :class:`ost.seq.SequenceHandle`
+  :type positions:      :class:`ost.geom.Vec3List`
+
+  :raises:              :exc:`ost.Error` if requested data is not present         
+
+
+.. method:: ExtractTemplateData(entry_name, chain_name, aln, indexer, \
+                                seqres_container, atomseq_container, \
+                                position_container)
+
+  Let's say we have a target-template alignment in *aln* (first seq: target, 
+  second seq: template). This function extracts all valid template positions 
+  given the entry specified by *entry_name* and *chain_name*. The template
+  sequence in *aln* must match the sequence in *seqres_container*. Again,
+  the *atomseq_container* is used to identify valid positions. The according
+  residue numbers relative to the target sequence in *aln* are also returned.
+
+  :param entry_name:    Name of assembly you want the data from
+  :param chain_name:    Name of chain you want the data from
+  :param aln:           Target-template sequence alignment
+  :param indexer:       Used to access *atomseq_container*, *seqres_container* 
+                        and *position_container*
+  :param seqres_container:  Container containing the full sequence data
+  :param atomseq_container: Container that marks locations with invalid position
+                            data with '-'
+  :param position_container: Container containing position data
+
+  :type entry_name:     :class:`str`
+  :type chain_name:     :class:`str`
+  :type aln:            :ost.seq.SequenceHandle:
+  :type indexer:        :class:`LinearIndexer`
+  :type seqres_container: :class:`LinearCharacterContainer`
+  :type atomseq_container: :class:`LinearCharacterContainer`
+  :type position_container: :class:`LinearPositionContainer`
+
+  :returns:             First element: :class:`list` of residue numbers that 
+                        relate each entry in the second element to the target 
+                        sequence specified in  *aln*. The numbering scheme 
+                        starts from one. Second Element: :class:`geom.Vec3List` 
+                        with the according positions.
+  :rtype:               :class:`tuple`
+
+  :raises:              :exc:`ost.Error` if requested data is not present in 
+                        the container or if the template sequence in *aln*
+                        doesn't match with the sequence in *seqres_container*
