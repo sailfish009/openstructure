@@ -53,6 +53,6 @@ void export_TMAlign() {
   def("WrappedTMAlign", &WrapTMAlignPos, (arg("pos1"), arg("pos2"), arg("seq1"), arg("seq2"),
                                           arg("fast")=false));
 
-  def("WrapedTMAlign", &WrapTMAlignView, (arg("chain1"), arg("chain2"),
-                                          arg("fast")=false));
+  def("WrappedTMAlign", &WrapTMAlignView, (arg("chain1"), arg("chain2"),
+                                           arg("fast")=false));
 }
