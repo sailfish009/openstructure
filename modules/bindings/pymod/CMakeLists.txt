@@ -21,6 +21,6 @@ set(OST_BINDINGS_PYMOD_SOURCES
   wrap_bindings.cc
 )
 
-
 pymod(NAME bindings OUTPUT_DIR ost/bindings CPP ${OST_BINDINGS_PYMOD_SOURCES} 
       PY ${OST_BINDINGS})
+

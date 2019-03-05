@@ -16,10 +16,11 @@ extract_data_helper.cc
 )
 
 module(NAME db SOURCES ${OST_DB_SOURCES} HEADERS ${OST_DB_HEADERS} 
-       DEPENDS_ON ost_base ost_geom ost_seq sqlite3)
+       DEPENDS_ON ost_base ost_geom ost_seq LINK sqlite3)
 if(WIN32)
   set_target_properties(ost_db PROPERTIES LINK_FLAGS "/DEF:${CMAKE_CURRENT_SOURCE_DIR}/sqlite3.def")
   add_definitions(/DSQLITE_ENABLE_COLUMN_METADATA)
 else(WIN32)
   add_definitions(-DSQLITE_OMIT_LOAD_EXTENSION)
 endif(WIN32)
+
