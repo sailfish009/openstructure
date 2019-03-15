@@ -606,8 +606,8 @@ class QSscoreEntity(object):
 
   .. attribute:: is_valid
 
-    True, if successfully initialized. False, if input structure is monomer or
-    has less than 2 protein chains with >= 20 residues.
+    True, if successfully initialized. False, if input structure has no protein
+    chains with >= 20 residues.
 
     :type: :class:`bool`
 
