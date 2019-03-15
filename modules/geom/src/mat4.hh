@@ -23,6 +23,7 @@
 #include <cstddef> // for size_t
 #include <ostream>
 #include <vector>
+#include <stdexcept>
 
 #include <boost/operators.hpp>
 
