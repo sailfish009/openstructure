@@ -601,7 +601,7 @@ class HHblits:
         Converts the A3M alignment file to a hhm profile. If hhm_file is not
         given, the output file will be set to <:attr:`a3m_file`-basename>.hhm.
 
-        The produced A3M file can be parsed by :func:`ParseHHM`.
+        The produced HHM file can be parsed by :func:`ParseHHM`.
 
         If the file was already produced, the existing file path is returned
         without recomputing it.
