@@ -150,6 +150,15 @@ of the annotation available.
 
     :type: :class:`MMCifInfoRevisions`
 
+  .. attribute:: obsolete
+
+    Stores information about obsoleted / superseded entries.
+
+    Also available as :meth:`GetObsoleteInfo`. May also be modified by
+    :meth:`SetObsoleteInfo`.
+
+    :type: :class:`MMCifInfoObsolete`
+
   .. method:: AddCitation(citation)
 
     Add a citation to the citation list of an info object.
@@ -285,6 +294,14 @@ of the annotation available.
 
     Set the date, when this entry first entered the PDB. Ignored if it was set
     in the past. See :meth:`MMCifInfoRevisions.SetDateOriginal`.
+
+  .. method:: GetObsoleteInfo()
+
+    See :attr:`obsolete`
+
+  .. method:: SetObsoleteInfo()
+
+    See :attr:`obsolete`
 
 .. class:: MMCifInfoCitation
 
@@ -894,7 +911,8 @@ of the annotation available.
 
 .. class:: MMCifInfoObsolete
 
-  Holds details on obsolete/ superseded structures.
+  Holds details on obsolete / superseded structures. The data is
+   available both in the obsolete and in the replacement entries.
 
   .. attribute:: date
 
