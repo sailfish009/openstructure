@@ -621,8 +621,8 @@ def _ReadStructureFile(path, c_alpha_only=False, fault_tolerant=False,
                 entity = _Select(entity)
                 entities.append(entity)
 
-        except Exception as exc:
-            raise exc
+        except Exception:
+            raise
     return entities
 
 
