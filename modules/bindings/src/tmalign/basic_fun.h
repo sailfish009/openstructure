@@ -7,7 +7,9 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 
 #include <sstream>
 #include <iostream>
