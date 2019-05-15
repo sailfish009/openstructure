@@ -232,6 +232,23 @@ class SurfaceContextMenu(QtCore.QObject):
         except UserWarning:
           LogError("WARNING: Entry with the same name already present in scene")
           return
+
+
+class SecStructContextMenu(QtCore.QObject):
+  def __init__(self, context_menu):
+    QtCore.QObject.__init__(self, context_menu.qobject)
+    self.action = QtWidgets.QAction("Assign Secondary Structure", self)
+    self.action.triggered.connect(self.AssignSecondaryStructure)
+    context_menu.AddAction(self.action, gui.ContextActionType.ENTITY)
+    
+  def AssignSecondaryStructure(self):
+    scene_selection = gui.SceneSelection.Instance()
+    ent_list = list()
+    for i in range(0,scene_selection.GetActiveNodeCount()):
+      node = scene_selection.GetActiveNode(i)
+      mol.alg.AssignSecStruct(node.view)
+      node.UpdateView()
+
   
 class AlignmentContextMenu(QtCore.QObject):
 
@@ -365,5 +382,6 @@ class SelectMenuPoints(QtCore.QObject):
 def _InitContextMenu(app):
   _InitContextMenu.cm=app.scene_win.GetContextMenu()
   _InitContextMenu.am=AlignmentContextMenu(_InitContextMenu.cm)
+  _InitContextMenu.sec=SecStructContextMenu(_InitContextMenu.cm)
   _InitContextMenu.sc=SurfaceContextMenu(_InitContextMenu.cm)
   _InitContextMenu.sm=SelectMenuPoints(_InitContextMenu.cm)
