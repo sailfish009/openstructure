@@ -247,8 +247,6 @@ Build Options
 
 * Experimental settings (only change if you know what you are doing):
 
-  * `USE_MESA` to use software rendered Mesa instead of hardware GL. By default,
-    this is turned off.
   * `USE_SHADER` controls whether to compile with shader support. By default,
     this is turned off.
   * `ENABLE_SPNAV` controls whether 3DConnexion devices should be supported. By

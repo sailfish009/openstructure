@@ -29,12 +29,6 @@
 #include <ost/config.hh>
 
 #if OST_SHADER_SUPPORT_ENABLED
-#if OST_MESA_SUPPORT_ENABLED
-#  define OST_GL_VERSION_2_0 1
-#  define GL_GLEXT_PROTOTYPES 1
-#  include <GL/gl.h>
-#  include <GL/glext.h>
-#else
 #  if OST_MODULE==OST_GFX
 #    define GLEW_BUILD
 #  endif
@@ -44,7 +38,6 @@
 #  if defined(_MSC_VER)
 #    include <ost/gfx/GL/wglew.h>
 #  endif
-#endif
 #endif
 
 #include <ost/gfx/gl_include.hh>

@@ -187,15 +187,13 @@ if (USE_SHADER)
   list(APPEND OST_GFX_SOURCES impl/scene_fx.cc)
   list(APPEND OST_GFX_IMPL_HEADERS scene_fx.hh)
   if (NOT APPLE)
-    if (NOT USE_MESA)
-      set(OST_GLEW_HEADERS
-         glew.h
-         glxew.h
-         wglew.h IN_DIR GL
-      )
-      list(APPEND OST_GFX_SOURCES GL/glew.c)
-      include_directories("${STAGE_DIR}/include/ost/gfx")
-    endif()
+    set(OST_GLEW_HEADERS
+       glew.h
+       glxew.h
+       wglew.h IN_DIR GL
+    )
+    list(APPEND OST_GFX_SOURCES GL/glew.c)
+    include_directories("${STAGE_DIR}/include/ost/gfx")
   endif()  
 endif()
 
@@ -215,9 +213,6 @@ module(NAME gfx SOURCES ${OST_GFX_SOURCES} ${OST_GFX_MAP_SOURCES}
 include_directories(${PNG_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR})
 
 # link against OpenGL and PNG libraries
-if(USE_MESA)
-  link_directories(${OPENGL_LIBRARY_DIR})
-endif()
 target_link_libraries(ost_gfx ${OPENGL_LIBRARIES} ${PNG_LIBRARIES})
 
 if (USE_SHADER)

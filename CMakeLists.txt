@@ -34,8 +34,6 @@ option(ENABLE_GUI "whether the graphical user interface should be enabled"
        ON)
 option(ENABLE_GFX "whether graphics support should be enabled"
       ON)
-option(USE_MESA "use software rendered Mesa instead of hardware GL"
-      OFF)
 option(ENABLE_IMG "whether the image processing module should be compiled"
        ON)
 option(ENABLE_INFO "whether openstructure should be compiled with support for the info library"
@@ -218,13 +216,7 @@ else()
   endif()
 endif()
 if (ENABLE_GFX)
-  if(USE_MESA)
-    find_package(Mesa REQUIRED)
-    set(_USE_MESA ON)
-  else()
-    find_package(OpenGL REQUIRED)
-    set(_USE_MESA OFF)
-  endif()
+  find_package(OpenGL REQUIRED)
 endif()
 
 if (ENABLE_IMG OR ENABLE_GFX)
@@ -359,7 +351,6 @@ message(STATUS
         "   Info support                     (-DENABLE_INFO) : ${_INFO}\n"
         "   Graphical interface               (-DENABLE_GUI) : ${_UI}\n"
         "   OpenGL support                    (-DENABLE_GFX) : ${_OPENGL}\n"
-        "   OpenGL via Mesa                     (-DUSE_MESA) : ${_USE_MESA}\n"
         "   Image Processing support          (-DENABLE_IMG) : ${_IMG}\n"
         "   Shader support                    (-DUSE_SHADER) : ${_SHADER}\n"
         "   Numpy support                      (-DUSE_NUMPY) : ${_NUMPY}\n"
