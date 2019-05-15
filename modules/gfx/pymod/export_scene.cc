@@ -108,8 +108,6 @@ void export_Scene()
   void (Scene::*remove2)(const String&) = &Scene::Remove;
   void (Scene::*center_on1)(const String&) = &Scene::CenterOn;
   void (Scene::*center_on2)(const GfxObjP&) = &Scene::CenterOn;
-  bool (Scene::*start_offscreen_mode1)(unsigned int, unsigned int) = &Scene::StartOffscreenMode;  
-  bool (Scene::*start_offscreen_mode2)(unsigned int, unsigned int, int) = &Scene::StartOffscreenMode;  
   class_<Viewport>("Viewport", init<>())
     .def_readwrite("x", &Viewport::x)
     .def_readwrite("y", &Viewport::y)
@@ -249,9 +247,6 @@ void export_Scene()
     .add_property("ao_quality",&Scene::GetAmbientOcclusionQuality,&Scene::SetAmbientOcclusionQuality)
     .add_property("ao_size",&Scene::GetAmbientOcclusionSize,&Scene::SetAmbientOcclusionSize)
     .def("AttachObserver",&Scene::AttachObserver)
-    .def("StartOffscreenMode",start_offscreen_mode1)
-    .def("StartOffscreenMode",start_offscreen_mode2)
-    .def("StopOffscreenMode",&Scene::StopOffscreenMode)
     .def("SetShadingMode",&Scene::SetShadingMode)
     .def("SetBeacon",&Scene::SetBeacon)
     .add_property("root_node", &Scene::GetRootNode)

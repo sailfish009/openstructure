@@ -29,6 +29,12 @@
 
 #include <QResizeEvent>
 #include <QMouseEvent>
+#include <QImage>
+#include <QString>
+#include <QOpenGLFramebufferObject>
+#include <QOffscreenSurface>
+#include <QOpenGLContext>
+#include <QOpenGLFunctions>
 
 
 namespace ost { namespace gui {
@@ -36,13 +42,36 @@ namespace ost { namespace gui {
 ost::gui::GLCanvas::GLCanvas(): QOpenGLWindow(),
                                 last_pos_(),
                                 show_beacon_(false),
-                                bench_flag_(false) { 
+                                bench_flag_(false),
+                                offscreen_flag_(false),
+                                offscreen_context_(NULL),
+                                offscreen_surface_(NULL),
+                                offscreen_fbo_(NULL) { 
   LOG_DEBUG("GLCanvas::registering with scene");
   gfx::Scene::Instance().Register(this);  
 }
 
 ost::gui::GLCanvas::~GLCanvas() {
   gfx::Scene::Instance().Unregister(this);
+  if(offscreen_fbo_ != NULL) {
+    // all other offscreen rendering objects are also != NULL
+    // cleanup done as in QT threadrenderer example, not sure whether
+    // offscreen context must be made current to delete offscreen buffer...
+    offscreen_context_->makeCurrent(offscreen_surface_);
+    delete offscreen_fbo_;
+    offscreen_context_->doneCurrent();
+    delete offscreen_context_;
+    delete offscreen_surface_;
+    offscreen_flag_ = false;
+  }
+}
+
+void GLCanvas::MakeActive() {
+  if(offscreen_flag_) {
+    offscreen_context_->makeCurrent(offscreen_surface_);
+  } else {
+    this->makeCurrent();
+  }
 }
 
 void GLCanvas::StatusMessage(const String& m) {
@@ -200,6 +229,110 @@ void GLCanvas::OnTransform(gfx::InputCommand com, int indx,
 
 void GLCanvas::SetTestMode(bool f) {
   gfx::Scene::Instance().SetTestMode(f);
+}
+
+void GLCanvas::Export(const String& fname, unsigned int width, 
+                      unsigned int height, bool transparent) {
+  this->Export(fname, width, height, 0, transparent);
+}
+
+void GLCanvas::Export(const String& fname, unsigned int width, 
+                      unsigned int height, int max_samples, bool transparent) {
+
+  // setup of context, surface, fbo etc are implemented as in the QT
+  // threadrenderer example
+
+  gfx::Viewport old_vp = gfx::Scene::Instance().GetViewport();
+
+  if(old_vp.width == static_cast<int>(width) && 
+     old_vp.height == static_cast<int>(height) && max_samples <= 0) {
+    // just grab the framebuffer, no need for fancy offscreen rendering...
+    this->Export(fname, transparent);
+    return;
+  }
+
+  offscreen_flag_ = true;
+
+  if(offscreen_surface_ == NULL) {
+    offscreen_surface_ = new QOffscreenSurface();
+    QSurfaceFormat f = this->context()->format();
+    if(max_samples > 0) {
+      f.setSamples(max_samples);
+    } 
+    offscreen_surface_->setFormat(f);
+    offscreen_surface_->create();
+  }
+
+  if(offscreen_context_ == NULL) {
+    QOpenGLContext *current = this->context();
+    // Some GL implementations require that the currently bound context is
+    // made non-current before we set up sharing, so we doneCurrent here
+    // and makeCurrent down below while setting up our own context.
+    current->doneCurrent();
+    offscreen_context_ = new QOpenGLContext();
+    QSurfaceFormat f = this->context()->format();
+    if(max_samples > 0) {
+      f.setSamples(max_samples);
+    } 
+    offscreen_context_->setFormat(f);
+    offscreen_context_->setShareContext(current);
+    offscreen_context_->create();
+    offscreen_context_->makeCurrent(offscreen_surface_);
+    gfx::Scene::Instance().ContextSwitch();
+    gfx::Scene::Instance().InitGL(false);
+  } else {
+    offscreen_context_->makeCurrent(offscreen_surface_);
+    gfx::Scene::Instance().ContextSwitch();
+    // the following InitGL sets potentially changed glClearcolor etc
+    // could be made more efficient...
+    gfx::Scene::Instance().InitGL(false);
+  }
+
+  if(offscreen_fbo_ == NULL || 
+     offscreen_fbo_->width() != static_cast<int>(width) || 
+     offscreen_fbo_->height() != static_cast<int>(height)) {
+    if(offscreen_fbo_ != NULL) {
+      delete offscreen_fbo_;
+    }
+    QOpenGLFramebufferObjectFormat fbo_format;
+    // the following flag is required for OpenGL depth testing
+    fbo_format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+    offscreen_fbo_ = new QOpenGLFramebufferObject(width, height, fbo_format);
+  }
+
+  offscreen_fbo_->bind();
+  gfx::Scene::Instance().Resize(width, height);
+  this->paintGL();
+
+  if(!transparent) {
+    gfx::Scene::Instance().SetAlphaBias(1.0);
+  }
+
+  offscreen_context_->functions()->glFlush();
+  QImage image = offscreen_fbo_->toImage();
+  offscreen_fbo_->release();
+
+  if(!transparent) {
+    gfx::Scene::Instance().SetAlphaBias(0.0);
+  }
+
+  image.save(QString(fname.c_str()));
+  offscreen_flag_ = false;
+  this->MakeActive();
+  gfx::Scene::Instance().Resize(old_vp.width, old_vp.height);
+  gfx::Scene::Instance().ContextSwitch();
+}
+
+void GLCanvas::Export(const String& fname, bool transparent) {
+
+  if(!transparent) {
+    gfx::Scene::Instance().SetAlphaBias(1.0);
+  }
+  QImage image = this->grabFramebuffer();
+  if(!transparent) {
+    gfx::Scene::Instance().SetAlphaBias(0.0);
+  }
+  image.save(QString(fname.c_str()));
 }
 
 bool GLCanvas::IsToolEvent(QInputEvent* event) const {

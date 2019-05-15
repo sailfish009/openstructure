@@ -151,13 +151,8 @@ void GfxObj::RenderGL(RenderPass pass)
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glMultMatrix(transform_.GetTransposedMatrix().Data());
-    if(Scene::Instance().InOffscreenMode()) {
-      LOG_TRACE("applying material");
-      mat_.RenderGL();
-    } else {
-      LOG_TRACE("applying material display list");
-      glCallList(mat_dlist_);
-    }
+    LOG_TRACE("applying material display list");
+    glCallList(mat_dlist_);
     LOG_TRACE("calling custom render gl pass " << pass);
 
     /*

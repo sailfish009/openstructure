@@ -316,9 +316,7 @@ void IndexedVertexArray::RenderGL()
   if(!initialized_) {
     LOG_DEBUG("initializing vertex array lists");
 #if OST_SHADER_SUPPORT_ENABLED
-    if(!Scene::Instance().InOffscreenMode()) {
-      glGenBuffers(7,buffer_id_);
-    }
+    glGenBuffers(7,buffer_id_);
 #endif
     outline_mat_dlist_=glGenLists(1);
     initialized_=true;
@@ -1025,7 +1023,6 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   
 bool IndexedVertexArray::prep_buff()
 {
-  if(Scene::Instance().InOffscreenMode()) return false;
 #if OST_SHADER_SUPPORT_ENABLED
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
@@ -1106,7 +1103,7 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
     glStencilOp(GL_KEEP,GL_INVERT,GL_INVERT);
   }
 
-  if(use_buff && !Scene::Instance().InOffscreenMode()) {
+  if(use_buff) {
 #if OST_SHADER_SUPPORT_ENABLED
 #if 0
     /*
@@ -1198,7 +1195,7 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
 
 void IndexedVertexArray::draw_p(bool use_buff)
 {
-  if(use_buff && !Scene::Instance().InOffscreenMode()) {
+  if(use_buff) {
 #if OST_SHADER_SUPPORT_ENABLED
     glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_VERTEX_BUFFER]);
     glVertexPointer(3, GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*9));

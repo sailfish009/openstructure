@@ -49,7 +49,6 @@
 namespace ost { namespace gfx {
 
 class InputEvent;
-class OffscreenBuffer;
 
 typedef std::vector<SceneObserver*>  SceneObserverList;
 
@@ -290,11 +289,7 @@ class DLLEXPORT_OST_GFX Scene {
   void SetSelectionMode(uint m);
   uint GetSelectionMode() const;
 
-  /// \name Export
-  //@}
-  /// \brief export scene into a bitmap, rendering into offscreen of given size
-  /// if a main offscreen buffer is active (\sa StartOffscreenMode), then the
-  /// dimensions here are ignored
+
   void Export(const String& fname, unsigned int w,
               unsigned int h, bool transparent=false);
   /// \brief export into bitmap, using multisample anti-aliasing
@@ -459,8 +454,6 @@ class DLLEXPORT_OST_GFX Scene {
   void AttachObserver(SceneObserver* o);
   /// \brief observer interface (internal use)
   void DetachObserver(SceneObserver* o);
-  
-  bool InOffscreenMode() const;
 
   /// \brief switch into test mode (internal use)
   void SetTestMode(bool t);
@@ -469,31 +462,6 @@ class DLLEXPORT_OST_GFX Scene {
 
   Viewport GetViewport() const;
 
-  /*!
-    This method has two different tasks. 
-
-    During interactive rendering, it facilitates export 
-    into an offscreen buffer with Scene::Export(file,width,height)
-    by avoiding repeated initializations of the GL state, e.g.
-    during animation rendering.
-
-    During batch mode, this is the only way to get meaningful
-    functionality with the gfx module
-
-    Returns true upon success and false upon failure
-
-    You can ask for multisampling to be enabled by giving the
-    max_samples a value larger than zero; in this case, the framebuffer
-    with at most this many samplebuffers will be used. The recommended
-    value here is 4; going to 8 or 16 may give you higher export times
-    with usually no marked increase in quality.
-
-  */
-  bool StartOffscreenMode(unsigned int w, unsigned int h, int max_samples);
-  bool StartOffscreenMode(unsigned int w, unsigned int h);
-
-  /// \brief stops offline rendering in interactive mode
-  void StopOffscreenMode();
 
   /// \brief show center of rotation of true
   void SetShowCenter(bool f);
@@ -525,6 +493,11 @@ class DLLEXPORT_OST_GFX Scene {
   bool GetShowExportAspect() const {return show_export_aspect_;}
 
   bool HasMultisample() const {return ms_flag_;}
+
+  void SetAlphaBias(Real bias);
+
+  void ContextSwitch();
+  
 protected:
   friend class GfxObj; 
   friend class GfxNode;
@@ -537,7 +510,6 @@ protected:
   void NodeTransformed(const GfxObjP& object);
   void NodeAdded(const GfxNodeP& node);
   void RenderModeChanged(const String& name);
-
 
 private:  
 
@@ -593,9 +565,6 @@ private:
   bool do_autoslab_;   // run autoslab on next scene update
   int autoslab_mode_;  // 0: fast, 1:precise, 2: max
 
-  bool offscreen_flag_; // a simple indicator whether in offscreen mode or not
-  OffscreenBuffer* main_offscreen_buffer_; // not null if a main offscreen buffer is present
-  uint old_vp_[2]; // used by the offline rendering code
   std::string def_shading_mode_;
 
   uint selection_mode_;

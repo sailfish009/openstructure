@@ -33,28 +33,6 @@ using boost::unit_test_framework::test_suite;
 using namespace ost;
 using namespace ost::gfx;
 
-// small RAII class to setup environment for unit tests. even though we don't
-// use any of the rendering functionality, we still need to initialize an 
-// offscreen buffer on mac to avoid segfaults.
-struct GfxTestEnv {
-  GfxTestEnv()
-  {
-#if defined(__APPLE__)    
-    // we know OST_ROOT is set for unit tests
-    SetPrefixPath(getenv("OST_ROOT"));
-    Scene::Instance().StartOffscreenMode(100, 100);
-#endif
-  }
-  
-  ~GfxTestEnv()
-  {
-#if defined(__APPLE__)
-    Scene::Instance().StopOffscreenMode();
-#endif
-  }
-
-};
-
 
 struct Observer : public SceneObserver {
   Observer(): added_count(0),removed_count(0) {}
@@ -134,7 +112,6 @@ BOOST_AUTO_TEST_CASE(gfx_node_remove_all)
 
 BOOST_AUTO_TEST_CASE(is_attached_to_scene) 
 {
-  GfxTestEnv env;
   Scene::Instance().RemoveAll();  
   GfxNodeP n1(new GfxNode("1"));
   GfxNodeP n2(new GfxNode("2"));
@@ -152,7 +129,6 @@ BOOST_AUTO_TEST_CASE(is_attached_to_scene)
 
 BOOST_AUTO_TEST_CASE(observe_added_removed)
 {
-  GfxTestEnv env;
   Observer o1;
   Scene::Instance().RemoveAll();
   Scene::Instance().AttachObserver(&o1);

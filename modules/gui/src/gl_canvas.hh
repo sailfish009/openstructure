@@ -29,6 +29,9 @@
 
 // forward declaration
 class QResizeEvent;
+class QOpenGLFramebufferObject;
+class QOpenGLContext;
+class QOffscreenSurface;
 
 namespace ost { namespace gui {
 
@@ -40,7 +43,7 @@ public:
   virtual ~GLCanvas();
 
   // gfx::GLWinBase interface
-  virtual void MakeActive() { this->makeCurrent(); }
+  virtual void MakeActive();
   virtual void DoRefresh() {this->update(); }
   virtual void StatusMessage(const String& m);
   virtual bool HasStereo() const {return format().stereo();};
@@ -55,6 +58,15 @@ public:
                    gfx::TransformTarget, Real val);
 
   void SetTestMode(bool f);
+
+  // Grab images from framebuffer and dump to disk
+  virtual void Export(const String& fname, unsigned int width, 
+                      unsigned int height, bool transparent);
+
+  virtual void Export(const String& fname, unsigned int width, 
+                      unsigned int height, int max_samples, bool transparent);
+
+  virtual void Export(const String& fname, bool transparent);
 
 signals:
   void CustomContextMenuRequested(const QPoint& point);
@@ -88,6 +100,12 @@ private:
   QPoint last_pos_;
   bool show_beacon_;  
   bool bench_flag_;
+
+  // for image export
+  bool offscreen_flag_;
+  QOpenGLContext* offscreen_context_;
+  QOffscreenSurface* offscreen_surface_;
+  QOpenGLFramebufferObject* offscreen_fbo_;
 };
 
 }} // ns
