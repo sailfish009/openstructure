@@ -7,7 +7,7 @@ import sip
 from ost import geom, gfx, gui, seq
 from ost import settings
 from ost import LogError, mol
-from ost.bindings import tmtools
+from ost.bindings import WrappedTMAlign
 from ost.bindings import msms
 from ost.seq import alg
 import ost
@@ -236,26 +236,12 @@ class SurfaceContextMenu(QtCore.QObject):
 class AlignmentContextMenu(QtCore.QObject):
 
   def __init__(self, context_menu):
-    try:
-      try: # workaround for interrupted system call bug on OSX
-        if platform.system() == "Windows":
-          settings_name="tmalign.exe"
-        else:
-          settings_name="tmalign"
-      except IOError:
-        # if platform.system() fails with an IOError we are most likely on a buggy mac an therefore
-        # use "tmalign"
-        settings_name="tmalign"
-
-      settings.Locate(settings_name)
-      QtCore.QObject.__init__(self, context_menu.qobject)
-
-      self.action = QtWidgets.QAction("Align", self)
-      self.action.triggered.connect(self.Align)
-      context_menu.AddAction(self.action, gui.ContextActionType.ENTITY | gui.ContextActionType.MULTI)
-      self.seq_viewer = None
-    except settings.FileNotFound:
-      return
+   
+    QtCore.QObject.__init__(self, context_menu.qobject)
+    self.action = QtWidgets.QAction("Align", self)
+    self.action.triggered.connect(self.Align)
+    context_menu.AddAction(self.action, gui.ContextActionType.ENTITY | gui.ContextActionType.MULTI)
+    self.seq_viewer = None
     
   def Align(self):
     scene_selection = gui.SceneSelection.Instance()
@@ -270,11 +256,11 @@ class AlignmentContextMenu(QtCore.QObject):
     node = ent_list[0]
     res_list = list()
     if isinstance(node, gfx.Entity):
-      ref = node.view.handle
+      ref = node.view.chains[0]
       for i in range(1,len(ent_list)):
         node = ent_list[i]
         if isinstance(node, gfx.Entity):
-          res_list.append(tmtools.TMAlign(node.view.handle, ref))
+          res_list.append(WrappedTMAlign(node.view.chains[0], ref))
           node.UpdatePositions()
     if show_scores:
       self.__ShowScore(ent_list, res_list)
@@ -291,12 +277,18 @@ class AlignmentContextMenu(QtCore.QObject):
       
   def __DisplayAlignment(self, ent_list, res_list):
     if(len(res_list)>0):
-      ref_seq = seq.CreateSequence("%s (ref)"%ent_list[0].GetName(),res_list[0].ref_sequence.GetGaplessString())
+      ref_seq = seq.CreateSequence("%s (ref)"%ent_list[0].GetName(),
+                                   res_list[0].alignment.GetSequence(1).GetGaplessString())
       aln_list = seq.AlignmentList()
       if(ref_seq.IsValid()):
         for i in range(0, len(res_list)):
-          res_list[i].alignment.SetSequenceName(1,ent_list[i+1].GetName())
-          aln_list.append(res_list[i].alignment)
+          # WrappedTMAlign returns an alignment with second sequence
+          # being reference... let's swap...
+          new_aln = seq.CreateAlignment()
+          new_aln.AddSequence(res_list[i].alignment.GetSequence(1))
+          new_aln.AddSequence(res_list[i].alignment.GetSequence(0))
+          new_aln.SetSequenceName(1, ent_list[i+1].GetName())
+          aln_list.append(new_aln)
         alignment = alg.MergePairwiseAlignments(aln_list, ref_seq)
         gosty = gui.GostyApp.Instance()
         main_area = gosty.perspective.GetMainArea()
