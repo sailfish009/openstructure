@@ -456,7 +456,7 @@ String RawEstimateSS(const std::vector<geom::Vec3>& ca_positions,
                      const std::vector<int>& connected_to_next) {
 
   if(size < 1){
-    throw ost::Error("Size of input  is too small!in dssp calculation");
+    throw ost::Error("Size of input is too small in dssp calculation!");
   }
 
   int full_size = ca_positions.size();

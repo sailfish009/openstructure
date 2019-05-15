@@ -19,6 +19,7 @@ OpenStructure documentation
   img/alg/alg
   seq/base/seq
   seq/alg/seqalg
+  db/db
 
   bindings/bindings
 
@@ -108,6 +109,8 @@ Varia
 **Molck**: :doc:`Molecular Checker<mol/alg/molck>`
 
 **Actions**: :doc:`OST Actions<actions>`
+
+**Database**: :doc:`Efficiently store structural data<db/db>`
 
 Extending OpenStructure
 --------------------------------------------------------------------------------

@@ -145,9 +145,13 @@ Algorithms for Alignments
   
   .. code-block:: python
   
-    seq_a=seq.CreateSequence('A', 'abcdefghijklmnok')
-    seq_b=seq.CreateSequence('B', 'cdehijk')
-    alns=seq.alg.GlobalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
+    seq_a = seq.CreateSequence('A', 'abcdefghijklmnok')
+    seq_b = seq.CreateSequence('B', 'cdehijk')
+    alns = seq.alg.GlobalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
+    print alns[0].ToString(80)
+    # >>> A abcdefghijklmnok
+    # >>> B --cde--hi-----jk
+    alns = seq.alg.SemiGlobalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
     print alns[0].ToString(80)
     # >>> A abcdefghijklmnok
     # >>> B --cde--hijk-----

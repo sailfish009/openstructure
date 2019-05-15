@@ -20,8 +20,6 @@
 /*
   Author: Marco Biasini
  */
-#include <ost/string_ref.hh>
-#include <ost/platform.hh>
 #include <ost/gfx/gfx_node.hh>
 #include <ost/gfx/gfx_object.hh>
 #include <ost/gfx/scene.hh>

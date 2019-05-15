@@ -29,6 +29,7 @@ Authors: Pascal Benkert, Marco Biasini
 """
 
 import subprocess, os, tempfile, platform
+import ost
 from ost import settings, io, geom, seq
 
 def _SetupFiles(models):
@@ -51,46 +52,9 @@ def _CleanupFiles(dir_name):
   import shutil
   shutil.rmtree(dir_name)
 
-class TMAlignResult:
-  """
-  Holds the result of running TMalign
-  
-  .. attribute:: rmsd
-    
-    The RMSD of the common Calpha atoms of both structures
-  
-  .. attribute:: transform
-  
-    The transform that superposes the model onto the reference structure.
-    
-    :type: :class:`~ost.geom.Mat4`
-  
-  .. attribute:: alignment
-  
-    The alignment of the structures, that is the pairing of Calphas of both 
-    structures. Since the programs only read ATOM records, residues consisting 
-    of HETATMs (MSE) are not included in the alignment.
-    
-    :type: :class:`~ost.seq.AlignmentHandle`
-
-  .. attribute:: tm_score
-
-    The TM-score of the structural superposition
-
-  """
-  def __init__(self, rmsd, tm_score, aligned_length, transform, 
-               ref_sequence, alignment):
-    
-    self.rmsd=rmsd
-    self.tm_score=tm_score    
-    self.aligned_length=aligned_length
-    self.transform=transform
-    self.ref_sequence =ref_sequence
-    self.alignment=alignment
-
 def _ParseTmAlign(lines,lines_matrix):
   info_line=lines[12].split(',')
-  aln_length=float(info_line[0].split('=')[1].strip())
+  aln_length=int(info_line[0].split('=')[1].strip())
   rmsd=float(info_line[1].split('=')[1].strip())  
   tm_score=float(lines[14].split('=')[1].split('(')[0].strip())
   tf1=[float(i.strip()) for i in lines_matrix[2].split()]
@@ -105,7 +69,7 @@ def _ParseTmAlign(lines,lines_matrix):
   alignment = seq.CreateAlignment()
   alignment.AddSequence(seq2)
   alignment.AddSequence(seq1)
-  return TMAlignResult(rmsd, tm_score, aln_length, tf, seq2, alignment)
+  return ost.bindings.TMAlignResult(rmsd, tm_score, aln_length, tf, alignment)
 
 def _RunTmAlign(tmalign, tmp_dir):
   model1_filename=os.path.join(tmp_dir, 'model01.pdb')
@@ -180,9 +144,9 @@ class TMScoreResult:
     
     The RMSD of the common Calpha atoms of both structures
 
-    .. attribute:: rmsd_below_five
+  .. attribute:: rmsd_below_five
 
-      The RMSD of all Calpha atoms that can be superposed below five Angstroem
+    The RMSD of all Calpha atoms that can be superposed below five Angstroem
     
   .. attribute:: tm_score
   
@@ -263,7 +227,7 @@ def TMAlign(model1, model2, tmalign=None):
   :type model2: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
   :param tmalign: If not None, the path to the tmalign executable.
   :returns: The result of the tmscore superposition
-  :rtype: :class:`TMAlignResult`
+  :rtype: :class:`ost.bindings.TMAlignResult`
   
   :raises: :class:`~ost.settings.FileNotFound` if tmalign could not be located.
   :raises: :class:`RuntimeError` if the superposition failed

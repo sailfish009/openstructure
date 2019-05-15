@@ -37,11 +37,15 @@ String EntityToPDBString(const mol::EntityView& ent, const IOProfile& profile) {
   return stream.str();
 }
 
-mol::EntityHandle PDBStringToEntity(const String& pdb, const IOProfile& profile) {
+mol::EntityHandle PDBStringToEntity(const String& pdb, const IOProfile& profile,
+                                    bool process) {
   std::stringstream stream(pdb);
   PDBReader reader(stream, profile);
   mol::EntityHandle ent = mol::CreateEntity();
   reader.Import(ent);
+  if(profile.processor && process) {
+    profile.processor->Process(ent);
+  }
   return ent;
 }
 

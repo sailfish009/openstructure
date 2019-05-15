@@ -254,21 +254,27 @@ def ParseHHblitsOutput(output):
                 if line[1:].startswith(' ss_dssp'):
                     continue
                 if line.startswith('T '):
-                    end_pos = line.find(' ', 22)
+                    for start_pos in range(22, len(line)):
+                        if line[start_pos].isalpha() or line[start_pos] == '-':
+                            break
+                    end_pos = line.find(' ', start_pos)
                     # this can fail if we didn't skip all other "T ..." lines
                     if end_pos == -1:
                         error_str = "Unparsable line '%s' for entry No %d" \
                                     % (line.strip(), entry_index + 1)
                         raise AssertionError(error_str)
-                    templ_str += line[22:end_pos]
+                    templ_str += line[start_pos:end_pos]
                 if line.startswith('Q '):
-                    end_pos = line.find(' ', 22)
+                    for start_pos in range(22, len(line)):
+                        if line[start_pos].isalpha() or line[start_pos] == '-':
+                            break
+                    end_pos = line.find(' ', start_pos)
                     # this can fail if we didn't skip all other "Q ..." lines
                     if end_pos == -1:
                         error_str = "Unparsable line '%s' for entry No %d" \
                                     % (line.strip(), entry_index + 1)
                         raise AssertionError(error_str)
-                    query_str += line[22:end_pos]
+                    query_str += line[start_pos:end_pos]
         except StopIteration:
             if len(query_str) > 0:
                 hits[entry_index][0].aln = _MakeAln(query_id,
@@ -595,7 +601,7 @@ class HHblits:
         Converts the A3M alignment file to a hhm profile. If hhm_file is not
         given, the output file will be set to <:attr:`a3m_file`-basename>.hhm.
 
-        The produced A3M file can be parsed by :func:`ParseHHM`.
+        The produced HHM file can be parsed by :func:`ParseHHM`.
 
         If the file was already produced, the existing file path is returned
         without recomputing it.
