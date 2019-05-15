@@ -27,7 +27,6 @@ texture.hh
 vertex_array.hh
 vertex_array_helper.hh
 scene_observer.hh
-offscreen_buffer.hh
 gl_include.hh
 glext_include.hh
 render_mode.hh
@@ -180,26 +179,6 @@ if (ENABLE_IMG)
 else()
   set(OST_GFX_MAP_HEADERS "")
   set(OST_GFX_MAP_SOURCES "")  
-endif()
-
-if (UNIX AND NOT APPLE)
-  if(USE_MESA)
-    list(APPEND OST_GFX_SOURCES impl/mesa_offscreen_buffer.cc)
-    list(APPEND OST_GFX_IMPL_HEADERS mesa_offscreen_buffer.hh)
-  else()
-    list(APPEND OST_GFX_SOURCES impl/glx_offscreen_buffer.cc)
-    list(APPEND OST_GFX_IMPL_HEADERS glx_offscreen_buffer.hh)
-  endif()
-endif()
-
-if (APPLE)
-  list(APPEND OST_GFX_SOURCES impl/cgl_offscreen_buffer.cc)
-  list(APPEND OST_GFX_IMPL_HEADERS cgl_offscreen_buffer.hh)
-endif()
-
-if(WIN32)
-  list(APPEND OST_GFX_SOURCES impl/wgl_offscreen_buffer.cc)
-  list(APPEND OST_GFX_IMPL_HEADERS wgl_offscreen_buffer.hh)
 endif()
 
 if (USE_SHADER)
