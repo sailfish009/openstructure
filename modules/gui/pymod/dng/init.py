@@ -96,11 +96,6 @@ def _InitFrontEnd(try_stereo):
     _InitSplash()
   
 def _load_files():
-  for pdb_id in options.pdb_ids:
-    pdb_id, sel=_SplitIDSel(pdb_id)
-    selection=_get_selection_query(sel)
-    gui.FileLoader.LoadFrom(pdb_id,"pdb.org",selection)
-    
   input_files=[_SplitIDSel(arg) for arg in loading_list]
   for f in input_files:
     selection=_get_selection_query(f[1])
@@ -164,10 +159,9 @@ parser.add_option("-h", "--help", action="callback", callback=show_help, help="s
 parser.add_option("-v", "--verbosity_level", action="store", type="int", dest="vlevel", default=2, 
                   help="sets the verbosity level [default: %default]")
 parser.add_option("-s", "--script", action="callback", default=[], dest="script", type="string", callback=parse_script_option, help="executes a script (syntax: -s SCRIPT [options] [args]) Anything that follows this option is passed to the script")
-parser.add_option("-p", "--pdb_id", dest="pdb_ids", default=[],action="append", help="PDB file ID. The file will be retrieved from PDB")
-parser.add_option("-b", "--processor", dest="processor", default="HEURISTIC", help="Type of processor used by the progam (either RULE_BASED or HEURISTIC) [default: %default]")
+parser.add_option("-p", "--processor", dest="processor", default="HEURISTIC", help="Type of processor used by the progam (either RULE_BASED or HEURISTIC) [default: %default]")
 parser.add_option("-c", "--compound_library", dest="complib", default="compounds.chemlib", help="Compound library for the RULE_BASED processor (only used if --processor option is set to RULE_BASED, otherwise ignored [default: %default]")
-parser.add_option("-q", "--query", dest="query", default="", help="Selection query to be highlighted automatically upon loading (only used together with -p option or when a PDB file is loaded, otherwise ignored [default: None]")
+parser.add_option("-q", "--query", dest="query", default="", help="Selection query to be highlighted automatically upon loading (only used when a PDB file is loaded, otherwise ignored [default: None]")
 parser.add_option("-S","--stereo", dest="try_stereo", default=False, action="store_true",help="try to get a quad-buffer stereo visual")
 parser.disable_interspersed_args()
 (options, args) = parser.parse_args()
@@ -215,7 +209,7 @@ if working_dir != None and os.path.isdir(working_dir):
 
 _InitFrontEnd(options.try_stereo)
 
-if len(loading_list)!=0 or len(options.pdb_ids)!=0:
+if len(loading_list)!=0:
   _load_files()
   gfx.Scene().Autoslab()
 if len(script_argv)!=0:
