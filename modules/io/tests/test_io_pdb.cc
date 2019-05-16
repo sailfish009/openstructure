@@ -802,8 +802,6 @@ BOOST_AUTO_TEST_CASE(res_num_too_low)
   edi.InsertAtom(r,"NH1", geom::Vec3(33.522, 48.572, 40.308), "N");
   edi.InsertAtom(r,"NH2", geom::Vec3(34.610, 50.427, 39.597), "N");
 
-  edi.SetResidueNumber(r, mol::ResNum(-999));
-  BOOST_CHECK_NO_THROW(writer.Write(ent));
   edi.SetResidueNumber(r, mol::ResNum(-1000));
   BOOST_CHECK_THROW(writer.Write(ent), IOException);
 }
@@ -829,8 +827,6 @@ BOOST_AUTO_TEST_CASE(res_num_too_high)
   edi.InsertAtom(r,"NH1", geom::Vec3(33.522, 48.572, 40.308), "N");
   edi.InsertAtom(r,"NH2", geom::Vec3(34.610, 50.427, 39.597), "N");
 
-  edi.SetResidueNumber(r, mol::ResNum(9999));
-  BOOST_CHECK_NO_THROW(writer.Write(ent));
   edi.SetResidueNumber(r, mol::ResNum(10000));
   BOOST_CHECK_THROW(writer.Write(ent), IOException);
 }
