@@ -422,7 +422,8 @@ void PDBWriter::WriteModelLeader()
   if (multi_model_) {
     out_ << "MODEL     " << mol_count_ << std::endl;
   } else if (mol_count_>1) {
-    throw IOException("Trying to write several models into one file with ");
+    throw IOException("Trying to write several models into one file without "
+                      "multi model mode enabled!");
   }
 }
 
