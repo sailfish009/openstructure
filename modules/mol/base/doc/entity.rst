@@ -1870,7 +1870,11 @@ Residue Numbering
   Number for a residue. The residue number has a numeric part and an (optional)
   insertion-code. You can work with this object as if it was an integer and
   comparison will look first at the numeric part and then the insertion-code.
-  All access to existing objects is read-only.
+  All access to existing objects is read-only. Openstructure supports a range
+  of (-8388608 to 8388607) for the numeric part. However, the PDB format only 
+  supports a range of (-999, 9999). This becomes relevant when a structure is 
+  saved in PDB format where an IOException is raised if the PDB range is not 
+  respected.
 
   :param num: Numeric part of residue number.
   :type num:  :class:`int`
