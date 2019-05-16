@@ -70,6 +70,8 @@ test:centos6.6:
              -DTIFF_INCLUDE_DIR=$EBROOTLIBTIFF/include
              -DTIFF_LIBRARY=$EBROOTLIBTIFF/lib/libtiff.so
              -DOPTIMIZE=1
+             -DCMAKE_C_FLAGS='-Wno-unused-local-typedefs'
+             -DCMAKE_CXX_FLAGS='-Wno-unused-local-typedefs'
   - make -j 2
   - echo "    ... done building OST."
   - echo "    Running unit tests for OST..."  
