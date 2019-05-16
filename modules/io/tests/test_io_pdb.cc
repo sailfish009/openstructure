@@ -788,7 +788,7 @@ BOOST_AUTO_TEST_CASE(res_num_too_low)
   
   mol::EntityHandle ent=mol::CreateEntity();
   mol::XCSEditor edi=ent.EditXCS();
-  mol::ChainHandle ch = edi.InsertChain(String(1, 'A'));;
+  mol::ChainHandle ch = edi.InsertChain("A");
   mol::ResidueHandle r = edi.AppendResidue(ch, "ARG");
   edi.InsertAtom(r,"N",   geom::Vec3(26.861, 50.841, 38.803), "N");
   edi.InsertAtom(r,"CA",  geom::Vec3(27.437, 49.969, 37.786), "C");
@@ -813,7 +813,7 @@ BOOST_AUTO_TEST_CASE(res_num_too_high)
   
   mol::EntityHandle ent=mol::CreateEntity();
   mol::XCSEditor edi=ent.EditXCS();
-  mol::ChainHandle ch = edi.InsertChain(String(1, 'A'));;
+  mol::ChainHandle ch = edi.InsertChain("A");
   mol::ResidueHandle r = edi.AppendResidue(ch, "ARG");
   edi.InsertAtom(r,"N",   geom::Vec3(26.861, 50.841, 38.803), "N");
   edi.InsertAtom(r,"CA",  geom::Vec3(27.437, 49.969, 37.786), "C");
