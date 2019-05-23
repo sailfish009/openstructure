@@ -52,7 +52,7 @@ namespace {
     float* vp=reinterpret_cast<float*>(PyArray_DATA(va));
     float* np=0;
     float* cp=0;
-    if(ona!=object()) {
+    if(!ona.is_none()) {
       if(!PyArray_Check(ona.ptr())) {
         throw Error("ona is not a numpy array");
       }
@@ -68,7 +68,7 @@ namespace {
       }
       np=reinterpret_cast<float*>(PyArray_DATA(na));
     }
-    if(oca!=object()) {
+    if(!oca.is_none()) {
       if(!PyArray_Check(oca.ptr())) {
         throw Error("oca is not a numpy array");
       }
