@@ -41,7 +41,7 @@ namespace {
     if(!PyArray_ISCONTIGUOUS(va)) {
       throw Error("expected vertex array to be contiguous");
     }
-    if(!PyArray_TYPE(va)==NPY_FLOAT) {
+    if(PyArray_TYPE(va)!=NPY_FLOAT) {
       throw Error("expected vertex array to be of dtype=float32");
     }
     size_t v_size=PyArray_SIZE(va);
@@ -60,7 +60,7 @@ namespace {
       if(!PyArray_ISCONTIGUOUS(na)) {
         throw Error("expected normal array to be contiguous");
       }
-      if(!PyArray_TYPE(na)==NPY_FLOAT) {
+      if(PyArray_TYPE(na)!=NPY_FLOAT) {
         throw Error("expected normal array to be of dtype=float32");
       }
       if((size_t)PyArray_SIZE(na)!=v_size) {
@@ -76,7 +76,7 @@ namespace {
       if(!PyArray_ISCONTIGUOUS(ca)) {
         throw Error("expected color array to be contiguous");
       }
-      if(!PyArray_TYPE(ca)==NPY_FLOAT) {
+      if(PyArray_TYPE(ca)!=NPY_FLOAT) {
         throw Error("expected color array to be of dtype=float32");
       }
       if((size_t)PyArray_SIZE(ca)!=v_count*4) {
@@ -91,7 +91,7 @@ namespace {
     if(!PyArray_ISCONTIGUOUS(ia)) {
       throw Error("expected vertex array to be contiguous");
     }
-    if(!PyArray_TYPE(ia)==NPY_UINT) {
+    if(PyArray_TYPE(ia)!=NPY_UINT) {
       throw Error("expected vertex array to be of dtype=uint32");
     }
     size_t i_size=PyArray_SIZE(ia);
