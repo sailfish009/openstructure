@@ -1889,7 +1889,7 @@ API
   :type settings: :class:`MolckSettings`
   :param prune: Whether to remove residues/chains that don't contain atoms 
                 anymore after Molck cleanup
-  :type prune: `bool` 
+  :type prune: :class:`bool` 
 
 
 
