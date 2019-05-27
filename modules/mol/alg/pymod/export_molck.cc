@@ -133,5 +133,5 @@ void export_Molck()
 
   def("CleanUpElementColumn", &CleanUpElementColumn, (arg("ent"), arg("lib")));
 
-  def("Molck", &Molck, (arg("ent"), arg("lib"), arg("settings")));
+  def("Molck", &Molck, (arg("ent"), arg("lib"), arg("settings"), arg("prune")=true));
 }

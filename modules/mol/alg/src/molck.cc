@@ -174,7 +174,8 @@ void CleanUpElementColumn(EntityHandle& ent, CompoundLibPtr lib){
 
 void Molck(ost::mol::EntityHandle& ent,
            ost::conop::CompoundLibPtr lib,
-           const MolckSettings& settings = MolckSettings()){
+           const MolckSettings& settings,
+           bool prune) {
 
   if(!lib) {
     throw ost::Error("Require valid compound library!");
@@ -193,7 +194,12 @@ void Molck(ost::mol::EntityHandle& ent,
               settings.colored);
   if (settings.assign_elem)  {
     CleanUpElementColumn(ent, lib);
-  }          
+  } 
+
+  if(prune) {
+    ost::mol::XCSEditor edi = ent.EditXCS();
+    edi.Prune();
+  }         
 }
 
 }}} // ns

@@ -1877,7 +1877,7 @@ API
   The API here is set such that the functions modify the passed structure *ent*
   in-place. If this is not ok, please work on a copy of the structure.
 
-.. function:: Molck(ent, lib, settings)
+.. function:: Molck(ent, lib, settings, [prune=True])
 
   Runs Molck on provided entity.
 
@@ -1887,6 +1887,10 @@ API
   :type lib: :class:`~ost.conop.CompoundLib`
   :param settings: Molck settings
   :type settings: :class:`MolckSettings`
+  :param prune: Whether to remove residues/chains that don't contain atoms 
+                anymore after Molck cleanup
+  :type prune: `bool` 
+
 
 
 .. function:: MapNonStandardResidues(ent, lib)
