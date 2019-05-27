@@ -328,6 +328,11 @@ public:
 
   /// \brief change the name of the atom to the new name  
   void RenameAtom(AtomHandle atom, const String& new_name);
+
+  /// \brief Removes all residues and chains in the attached entity that don't 
+  ///        contain any atoms
+  void Prune(); 
+
 protected:
   EditorBase(const EntityHandle& ent, EditMode mode);
   void UpdateTrace();
