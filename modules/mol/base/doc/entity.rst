@@ -401,6 +401,12 @@ The Handle Classes
        print chain.residues # [B.GLY1, B.GLY4, B.GLY3]
        print chain.in_sequence # prints false
 
+  .. attribute:: residue_count
+
+    Number of residues. Read-only. See :meth:`GetResidueCount`.
+
+    :type: :class:`int`
+
   .. attribute:: atoms
 
      Get list of all atoms of this chain. To access a single atom, use
@@ -454,7 +460,11 @@ The Handle Classes
                         
   .. method:: GetResidueList()
 
-    See :attr:`residues`.
+    See :attr:`residues`
+
+  .. method:: GetResidueCount()
+
+    See :attr:`residue_count`
 
   .. method:: FindAtom(res_num, atom_name)
 
