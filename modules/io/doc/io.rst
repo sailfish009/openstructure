@@ -144,12 +144,14 @@ file:
 
 .. function:: EntityToPDBStr(ent, profile=IOProfile())
 
-  Return entity as a string in PDB format.
+  Return entity as a string in PDB format. 
 
   :param entity: The :class:`~ost.mol.EntityHandle` or :class:`~ost.mol.EntityView`
 
   :param profile: The IO Profile to read the entity with. For more information
       on the IO Profiles available, see :doc:`profile`.
+  :raises: IOException if the restrictions of the PDB format are not satisfied
+           (see :meth:`ost.io.SavePDB`)
 
   :rtype: string.
 

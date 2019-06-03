@@ -191,7 +191,8 @@ QueryToken QueryLexer::LexToken() {
     if (isdigit(current_char) || current_char=='-') {
       return this->LexNumericToken();
     }
-    if (isalpha(current_char) || current_char=='?' || current_char=='*') {
+    if (isalpha(current_char) || current_char=='?' || current_char=='*' || 
+        current_char=='_') {
       return this->LexIdentOrStringToken();
     }
     switch (current_char) {

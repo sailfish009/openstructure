@@ -401,6 +401,12 @@ The Handle Classes
        print chain.residues # [B.GLY1, B.GLY4, B.GLY3]
        print chain.in_sequence # prints false
 
+  .. attribute:: residue_count
+
+    Number of residues. Read-only. See :meth:`GetResidueCount`.
+
+    :type: :class:`int`
+
   .. attribute:: atoms
 
      Get list of all atoms of this chain. To access a single atom, use
@@ -454,7 +460,11 @@ The Handle Classes
                         
   .. method:: GetResidueList()
 
-    See :attr:`residues`.
+    See :attr:`residues`
+
+  .. method:: GetResidueCount()
+
+    See :attr:`residue_count`
 
   .. method:: FindAtom(res_num, atom_name)
 
@@ -1870,7 +1880,11 @@ Residue Numbering
   Number for a residue. The residue number has a numeric part and an (optional)
   insertion-code. You can work with this object as if it was an integer and
   comparison will look first at the numeric part and then the insertion-code.
-  All access to existing objects is read-only.
+  All access to existing objects is read-only. Openstructure supports a range
+  of (-8388608 to 8388607) for the numeric part. However, the PDB format only 
+  supports a range of (-999, 9999). This becomes relevant when a structure is 
+  saved in PDB format where an IOException is raised if the PDB range is not 
+  respected.
 
   :param num: Numeric part of residue number.
   :type num:  :class:`int`

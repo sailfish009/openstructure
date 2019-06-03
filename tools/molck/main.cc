@@ -11,6 +11,7 @@
 #include <ost/io/mol/mmcif_reader.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/mol/alg/molck.hh>
+#include <ost/log.hh>
 #if defined(__APPLE__)
 #include <mach-o/dyld.h>
 #endif
@@ -47,7 +48,7 @@ const char* USAGE=
 
 void usage()
 {
-  std::cerr << USAGE << std::endl;
+  LOG_INFO(USAGE);
   exit(0);
 }	
 
@@ -69,12 +70,14 @@ EntityHandle load_x(const String& file, const IOProfile& profile)
         reader.Import(ent);
         return ent;
       }
-      std::cerr << "ERROR: '" << file << "' does not contain any ATOM records. "
-              << "Are you sure this is a PDB file?" << std::endl;
+      std::stringstream ss;
+      ss << "ERROR: '" << file << "' does not contain any ATOM records. "
+      << "Are you sure this is a PDB file?";
+      LOG_INFO(ss.str());
       return EntityHandle();
     }
   } catch (std::exception& e) {
-    std::cerr << "ERROR: " << e.what() << std::endl;
+    LOG_ERROR("ERROR: " << e.what());
     return EntityHandle();
   }
 }
@@ -86,7 +89,7 @@ ost::conop::CompoundLibPtr load_compound_lib(const String& custom_path)
     if (fs::exists(custom_path)) {  
       return ost::conop::CompoundLib::Load(custom_path);
     } else {
-      std::cerr << "Could not find compounds.chemlib at the provided location, trying other options" << std::endl;
+      LOG_INFO("Could not find compounds.chemlib at the provided location, trying other options");
     }
   } 
   if (fs::exists("compounds.chemlib")) {
@@ -105,8 +108,8 @@ ost::conop::CompoundLibPtr load_compound_lib(const String& custom_path)
   exe_path = std::string( result, (count > 0) ? count : 0 );
   #endif
   if (exe_path.empty()) { 
-    std::cerr << "Could not determine the path of the molck executable. Will only "
-       "look for compounds.chemlib in the current working directory" << std::endl;
+    LOG_INFO("Could not determine the path of the molck executable. Will only "
+             "look for compounds.chemlib in the current working directory");
   } else {
     fs::path path_and_exe(exe_path);
     fs::path path_only=path_and_exe.branch_path();
@@ -120,7 +123,7 @@ ost::conop::CompoundLibPtr load_compound_lib(const String& custom_path)
     }  
   }
   if (!lib) {
-    std::cerr << "Could not load compounds.chemlib" << std::endl;
+    LOG_ERROR("Could not load compounds.chemlib");
     exit(-1);
   }
   return ost::conop::CompoundLibPtr();
@@ -129,6 +132,9 @@ ost::conop::CompoundLibPtr load_compound_lib(const String& custom_path)
 
 int main(int argc, char *argv[])
 {
+  // setup logging
+  ost::Logger::Instance().PushVerbosityLevel(ost::Logger::INFO);
+
   if (argc<2) {
     usage();
   }
@@ -166,7 +172,7 @@ int main(int argc, char *argv[])
                 options(desc).positional(p).run(),
               vm);
   } catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    LOG_ERROR(e.what());
     usage();
     exit(-1);
   }
@@ -206,7 +212,9 @@ int main(int argc, char *argv[])
     } else if (rms[i] == StringRef("zeroocc", 7)) {
       settings.rm_zero_occ_atoms = true;
     } else {
-      std::cerr << "unknown value to remove '" << rms[i] << "'" << std::endl;
+      std::stringstream ss;
+      ss << "unknown value to remove '" << rms[i] << "'";
+      LOG_ERROR(ss.str());
       usage();
       exit(-1);
     }
@@ -246,8 +254,7 @@ int main(int argc, char *argv[])
       try {
         fs::path out_path(output_blueprint_string_copy);
         if (out_path.has_parent_path() && !exists(out_path.parent_path())) {
-          std::cerr << "Output path does not exist: " 
-                    << output_blueprint_string_copy << std::endl;
+          LOG_ERROR("Output path does not exist: " + output_blueprint_string_copy);
           exit(-1);
         }
       } catch (std::exception& e) {
@@ -255,15 +262,14 @@ int main(int argc, char *argv[])
         size_t perden = String(e.what()).find("Permission denied");	
 
         if (perden != String::npos) {
-          std::cerr << "Cannot write into output directory: " 
-                    << output_blueprint_string_copy << std::endl;
+          LOG_ERROR("Cannot write into output directory: " + output_blueprint_string_copy);
           exit(-1);
         } else {
-          std::cerr << e.what() << std::endl;
+          LOG_ERROR(e.what());
           exit(-1);
         }
       }
-      std::cerr << "Writing out file: " << output_blueprint_string_copy << std::endl;
+      LOG_INFO("Writing out file: " + output_blueprint_string_copy);
       PDBWriter writer(output_blueprint_string_copy, prof);
       writer.Write(ent);
     }

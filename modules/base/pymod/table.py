@@ -2394,46 +2394,49 @@ Statistics for column %(col)s
 
   def GetOptimalPrefactors(self, ref_col, *args, **kwargs):
     '''
-    This returns the optimal prefactor values (i.e. a, b, c, ...) for the
-    following equation
+    This returns the optimal prefactor values (i.e. :math:`a, b, c, ...`) for
+    the following equation
     
     .. math::
       :label: op1
-      
+
       a*u + b*v + c*w + ... = z
     
-    where u, v, w and z are vectors. In matrix notation
+    where :math:`u, v, w` and :math:`z` are vectors. In matrix notation
     
     .. math::
       :label: op2
-      
+
       A*p = z
     
-    where A contains the data from the table (u,v,w,...), p are the prefactors 
-    to optimize (a,b,c,...) and z is the vector containing the result of
-    equation :eq:`op1`.
+    where :math:`A` contains the data from the table :math:`(u,v,w,...)`,
+    :math:`p` are the prefactors to optimize :math:`(a,b,c,...)` and :math:`z`
+    is the vector containing the result of equation :eq:`op1`.
     
-    The parameter ref_col equals to z in both equations, and \*args are columns
-    u, v and w (or A in :eq:`op2`). All columns must be specified by their names.
+    The parameter ref_col equals to :math:`z` in both equations, and \*args
+    are columns :math:`u`, :math:`v` and :math:`w` (or :math:`A` in :eq:`op2`).
+    All columns must be specified by their names.
     
     **Example:**
-    
+
     .. code-block:: python
     
       tab.GetOptimalPrefactors('colC', 'colA', 'colB')
     
-    The function returns a list of containing the prefactors a, b, c, ... in 
-    the correct order (i.e. same as columns were specified in \*args).
+    The function returns a list containing the prefactors
+    :math:`a, b, c, ...` in the correct order (i.e. same as columns were
+    specified in \*args).
     
     Weighting:
     If the kwarg weights="columX" is specified, the equations are weighted by
-    the values in that column. Each row is multiplied by the weight in that row,
-    which leads to :eq:`op3`:
+    the values in that column. Each row is multiplied by the weight in that
+    row, which leads to :eq:`op3`:
     
     .. math::
       :label: op3
-      
-      weight*a*u + weight*b*v + weight*c*w + ... = weight*z
+
+      \\textit{weight}*a*u + \\textit{weight}*b*v + \\textit{weight}*c*w + ...
+      = \\textit{weight}*z
     
     Weights must be float or int and can have any value. A value of 0 ignores
     this equation, a value of 1 means the same as no weight. If all weights are

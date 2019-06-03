@@ -360,6 +360,10 @@ The basic functionality of editors is implemented in the EditorBase class.
      :type atom2:        :class:`AtomHandle`
      :param bond_order:  bond order (e.g. 1=single, 2=double, 3=triple)
      :type bond_order:   :class:`int`
+
+  .. method:: Prune()
+
+    Removes residues and chains that don't contain any atoms.
      
 
 Editor for the External Coordinate System

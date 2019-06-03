@@ -781,6 +781,56 @@ BOOST_AUTO_TEST_CASE(res_name_too_long)
   BOOST_CHECK_THROW(writer.Write(ent), IOException);
 }
 
+BOOST_AUTO_TEST_CASE(res_num_too_low)
+{
+  std::stringstream out;
+  PDBWriter writer(out, IOProfile());
+  
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor edi=ent.EditXCS();
+  mol::ChainHandle ch = edi.InsertChain("A");
+  mol::ResidueHandle r = edi.AppendResidue(ch, "ARG");
+  edi.InsertAtom(r,"N",   geom::Vec3(26.861, 50.841, 38.803), "N");
+  edi.InsertAtom(r,"CA",  geom::Vec3(27.437, 49.969, 37.786), "C");
+  edi.InsertAtom(r,"C",   geom::Vec3(26.336, 48.959, 37.429), "C");
+  edi.InsertAtom(r,"O",   geom::Vec3(25.745, 48.313, 38.312), "O");
+  edi.InsertAtom(r,"CB",  geom::Vec3(28.653, 49.266, 38.349), "C");
+  edi.InsertAtom(r,"CG",  geom::Vec3(29.870, 50.188, 38.416), "C");
+  edi.InsertAtom(r,"CD",  geom::Vec3(31.033, 49.532, 39.173), "C");
+  edi.InsertAtom(r,"NE",  geom::Vec3(32.318, 50.244, 39.125), "N");
+  edi.InsertAtom(r,"CZ",  geom::Vec3(33.462, 49.750, 39.679), "C");
+  edi.InsertAtom(r,"NH1", geom::Vec3(33.522, 48.572, 40.308), "N");
+  edi.InsertAtom(r,"NH2", geom::Vec3(34.610, 50.427, 39.597), "N");
+
+  edi.SetResidueNumber(r, mol::ResNum(-1000));
+  BOOST_CHECK_THROW(writer.Write(ent), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(res_num_too_high)
+{
+  std::stringstream out;
+  PDBWriter writer(out, IOProfile());
+  
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor edi=ent.EditXCS();
+  mol::ChainHandle ch = edi.InsertChain("A");
+  mol::ResidueHandle r = edi.AppendResidue(ch, "ARG");
+  edi.InsertAtom(r,"N",   geom::Vec3(26.861, 50.841, 38.803), "N");
+  edi.InsertAtom(r,"CA",  geom::Vec3(27.437, 49.969, 37.786), "C");
+  edi.InsertAtom(r,"C",   geom::Vec3(26.336, 48.959, 37.429), "C");
+  edi.InsertAtom(r,"O",   geom::Vec3(25.745, 48.313, 38.312), "O");
+  edi.InsertAtom(r,"CB",  geom::Vec3(28.653, 49.266, 38.349), "C");
+  edi.InsertAtom(r,"CG",  geom::Vec3(29.870, 50.188, 38.416), "C");
+  edi.InsertAtom(r,"CD",  geom::Vec3(31.033, 49.532, 39.173), "C");
+  edi.InsertAtom(r,"NE",  geom::Vec3(32.318, 50.244, 39.125), "N");
+  edi.InsertAtom(r,"CZ",  geom::Vec3(33.462, 49.750, 39.679), "C");
+  edi.InsertAtom(r,"NH1", geom::Vec3(33.522, 48.572, 40.308), "N");
+  edi.InsertAtom(r,"NH2", geom::Vec3(34.610, 50.427, 39.597), "N");
+
+  edi.SetResidueNumber(r, mol::ResNum(10000));
+  BOOST_CHECK_THROW(writer.Write(ent), IOException);
+}
+
 
 BOOST_AUTO_TEST_CASE(res_name_mismatch_alt_loc)
 {

@@ -5,6 +5,8 @@ Changes in Release 1.x.x
  * Port to Qt5
  * C++ wrapper around C++ implementation of TMalign
  * Database for efficient in-memory lookup of coordinates and sequences
+ * Updated CAD score binding with change in result format, check documentation
+   for further details 
 
 Changes in Release 1.9.0
 --------------------------------------------------------------------------------

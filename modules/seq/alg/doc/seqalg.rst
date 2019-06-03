@@ -9,8 +9,17 @@ Algorithms for Alignments
 
 .. function:: MergePairwiseAlignments(pairwise_alns, ref_seq)
 
+  :param pairwise_alns: A list of pairwise alignments
+  :type pairwise_alns: :class:`~ost.seq.AlignmentList`
+
+  :param ref_seq: The reference sequence
+  :type ref_seq: :class:`~ost.seq.SequenceHandle`
+
+  :returns: The merged alignment
+  :rtype: :class:`~ost.seq.AlignmentHandle`
+
   Merge a list of pairwise alignments into a multiple sequence alignments. This
-  function uses the reference sequence as the anchor and inserts gaps where 
+  function uses the reference sequence as the anchor and inserts gaps where
   needed. This is also known as the *star method*.
 
   The resulting multiple sequence alignment provides a simple way to map between 

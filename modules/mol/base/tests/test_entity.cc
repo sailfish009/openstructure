@@ -441,4 +441,57 @@ BOOST_AUTO_TEST_CASE(minmax)
   BOOST_CHECK_EQUAL(minmax.second, 7.0);
 }
 
+BOOST_AUTO_TEST_CASE(prune) {
+  EntityHandle ent=mol::CreateEntity();
+  XCSEditor edi = ent.EditXCS();
+
+  ChainHandle ch1 = edi.InsertChain("A");
+  ChainHandle ch2 = edi.InsertChain("B");
+
+  ResidueHandle res1_1 = edi.AppendResidue(ch1, "DUMMY");
+  ResidueHandle res1_2 = edi.AppendResidue(ch1, "DUMMY");
+  AtomHandle   atom1_1_1 = edi.InsertAtom(res1_1, "X", geom::Vec3(1,2,3), "C");
+  AtomHandle   atom1_2_1 = edi.InsertAtom(res1_2, "X", geom::Vec3(1,2,3), "C");
+
+  ResidueHandle res2_1 = edi.AppendResidue(ch2, "DUMMY");
+  ResidueHandle res2_2 = edi.AppendResidue(ch2, "DUMMY");
+  AtomHandle   atom2_1_1 = edi.InsertAtom(res2_1, "X", geom::Vec3(1,2,3), "C");
+  AtomHandle   atom2_2_1 = edi.InsertAtom(res2_2, "X", geom::Vec3(1,2,3), "C");
+
+  BOOST_CHECK_EQUAL(ent.GetChainCount(), 2);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 4);
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 4);
+
+  // shouldn't do anything
+  edi.Prune();
+  BOOST_CHECK_EQUAL(ent.GetChainCount(), 2);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 4);
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 4);
+
+  // remove one atom, the subsequent prune call should then remove the
+  // according residue but the number of chains should remain the same
+  edi.DeleteAtom(atom1_1_1);
+  edi.Prune();
+  BOOST_CHECK_EQUAL(ent.GetChainCount(), 2);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 3);
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 3);
+
+  // remove the second atom from the first chain, the whole chain should then
+  // be removed by Prune
+  edi.DeleteAtom(atom1_2_1);
+  edi.Prune();
+  BOOST_CHECK_EQUAL(ent.GetChainCount(), 1);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 2);
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 2);
+
+  // remove both residues from the second chain. The entity should be empty
+  // afterwards
+  edi.DeleteResidue(res2_1);
+  edi.DeleteResidue(res2_2);
+  edi.Prune();
+  BOOST_CHECK_EQUAL(ent.GetChainCount(), 0);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 0);
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 0);
+}
+
 BOOST_AUTO_TEST_SUITE_END();
