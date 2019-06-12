@@ -37,6 +37,16 @@ namespace {
     return String(1, char(s));
   }
 
+  boost::python::list get_alt_group_names(const ost::mol::ResidueHandle& res) {
+    std::vector<String>  v_alt_group_names = res.GetAltAtomGroupNames();
+    boost::python::list alt_group_names;
+    for(std::vector<String>::iterator it = v_alt_group_names.begin();
+        it != v_alt_group_names.end(); ++it) {
+      alt_group_names.append(*it);
+    }
+    return alt_group_names;
+  }
+
   typedef EntityView (ResidueHandle::*QueryMethod)(const Query&, uint) const;
   typedef EntityView (ResidueHandle::*StringMethod)(const String&, uint) const;
   QueryMethod select_query=&ResidueHandle::Select;
@@ -239,6 +249,7 @@ void export_Residue()
     .def("GetHandle", &ResidueHandle::GetHandle)
     .add_property("handle", &ResidueHandle::GetHandle)    
     .def("HasAltAtomGroup", &ResidueHandle::HasAltAtomGroup)
+    .def("GetAltAtomGroupNames", &get_alt_group_names)
     .def("GetCurrentAltGroupName", &ResidueHandle::GetCurrentAltGroupName,
          return_value_policy<copy_const_reference>())
     .def("SwitchAtomPos", &ResidueHandle::SwitchAtomPos)
