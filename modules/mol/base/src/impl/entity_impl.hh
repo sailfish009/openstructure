@@ -160,7 +160,7 @@ public:
   
   void UpdateOrganizer();
   
-  AtomImplList FindWithin(const geom::Vec3& pos, Real radius) const;
+  AtomImplList FindWithin(const geom::Vec3& pos, Real radius);
   // use query flag defaults
   EntityView Select(const EntityHandle& h, const Query& q) const;
   // override query flag defaults with given flags

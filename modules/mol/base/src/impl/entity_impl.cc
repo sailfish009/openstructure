@@ -816,8 +816,9 @@ TorsionImplP EntityImpl::FindTorsion(const AtomImplPtr& a1,
   return TorsionImplP();
 }
 
-AtomImplList EntityImpl::FindWithin(const geom::Vec3& pos, Real radius) const
+AtomImplList EntityImpl::FindWithin(const geom::Vec3& pos, Real radius)
 {
+  this->UpdateOrganizerIfNeeded();
   SpatialAtomOrganizer::ItemList alist = atom_organizer_.FindWithin(pos,radius);
   return alist;
 }
