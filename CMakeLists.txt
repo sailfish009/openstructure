@@ -188,6 +188,13 @@ if (ENABLE_STATIC AND UNIX AND NOT APPLE)
   set (CMAKE_FIND_LIBRARY_SUFFIXES .a)
 endif()
 
+# Python needed before Boost
+find_package(Python 2.4 REQUIRED)
+# Split version string
+string(REPLACE "." ";" _python_version_list ${PYTHON_VERSION})
+list(GET _python_version_list 0 PYTHON_VERSION_MAJOR)
+list(GET _python_version_list 1 PYTHON_VERSION_MINOR)
+
 if(BOOST_VERSION)
   message(STATUS "forcing boost to version ${BOOST_VERSION}")
   set(_BOOST_MIN_VERSION ${BOOST_VERSION})
@@ -233,7 +240,6 @@ else()
 endif()
 
 find_package(Eigen 3.2.0 REQUIRED)
-find_package(Python 2.4 REQUIRED)
 find_package(SQLite3 3.7.13 REQUIRED)
 
 if(USE_NUMPY)
