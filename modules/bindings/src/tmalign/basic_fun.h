@@ -7,7 +7,9 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
-#ifndef __APPLE__
+// OST-NOTE: ifdef was added here since malloc.h isn't required for Linux/Mac
+//           and for some compilers (clang, gcc8) it isn't available
+#ifdef _WIN32
 #include <malloc.h>
 #endif
 

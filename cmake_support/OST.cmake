@@ -770,7 +770,7 @@ macro(ost_match_boost_python_version)
   # this variable may either be a simple library path or list that contains
   # different libraries for different build-options. For example:
   # optimized;<lib1>;debug;<lib2>
-  set(_BOOST_PYTHON_LIBRARY ${Boost_PYTHON_LIBRARY})
+  set(_BOOST_PYTHON_LIBRARY ${BOOST_PYTHON_LIBRARIES})
   list(LENGTH _BOOST_PYTHON_LIBRARY _BP_LENGTH)
   if (_BP_LENGTH GREATER 1)
     list(FIND _BOOST_PYTHON_LIBRARY optimized _OPTIMIZED_INDEX)
@@ -908,8 +908,28 @@ set(_BOOST_MIN_VERSION 1.31)
 
 macro(setup_boost)
   set (Boost_NO_BOOST_CMAKE TRUE)
-  find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS python REQUIRED)
-  set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
+  # starting with CMake 3.11 we could use the following instead of the foreach
+  # find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS
+  #              python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} REQUIRED)
+  # set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
+  # see https://cmake.org/cmake/help/v3.11/module/FindBoost.html
+  foreach(_python_lib_name python
+                           python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}
+                           python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
+                           python${PYTHON_VERSION_MAJOR})
+    find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS ${_python_lib_name} QUIET)
+    if(Boost_FOUND)
+      message(STATUS "Found Boost package: " ${_python_lib_name})
+      set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
+      break()
+    else()
+      message(STATUS "Boost package not found: " ${_python_lib_name}
+                     ". Trying alternative names!")
+    endif()
+  endforeach(_python_lib_name)
+  if(NOT BOOST_PYTHON_LIBRARIES)
+    message(FATAL_ERROR "Failed to find any Boost Python library!")
+  endif()
   set(Boost_LIBRARIES)
   find_package(Boost ${_BOOST_MIN_VERSION}
                COMPONENTS unit_test_framework REQUIRED)
