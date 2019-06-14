@@ -21,6 +21,7 @@
 #define OST_IO_CONVERT_H
 
 // endian macros deprecated in Boost 1.68
+#include <boost/version.hpp>
 #if BOOST_VERSION<106800
 #include <boost/detail/endian.hpp>
 #ifdef BOOST_BIG_ENDIAN
