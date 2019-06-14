@@ -254,12 +254,14 @@ typedef ImageStateConstModIPAlgorithm<ButterworthLPBase> ButterworthLP;
 }}}} // ns
 
 #ifndef NO_EXPL_INST
-template class ost::img::ImageStateConstModIPAlgorithm<ost::img::alg::filter_detail::LPBase>;
-template class ost::img::ImageStateConstModIPAlgorithm<ost::img::alg::filter_detail::HPBase>;
-template class ost::img::ImageStateConstModIPAlgorithm<ost::img::alg::filter_detail::GaussianLPBase>;
-template class ost::img::ImageStateConstModIPAlgorithm<ost::img::alg::filter_detail::GaussianHPBase>;
-template class ost::img::ImageStateConstModIPAlgorithm<ost::img::alg::filter_detail::FermiLPBase>;
-template class ost::img::ImageStateConstModIPAlgorithm<ost::img::alg::filter_detail::ButterworthLPBase>;
+namespace ost { namespace img { namespace image_state {
+template class ImageStateConstModIPAlgorithm<ost::img::alg::filter_detail::LPBase>;
+template class ImageStateConstModIPAlgorithm<ost::img::alg::filter_detail::HPBase>;
+template class ImageStateConstModIPAlgorithm<ost::img::alg::filter_detail::GaussianLPBase>;
+template class ImageStateConstModIPAlgorithm<ost::img::alg::filter_detail::GaussianHPBase>;
+template class ImageStateConstModIPAlgorithm<ost::img::alg::filter_detail::FermiLPBase>;
+template class ImageStateConstModIPAlgorithm<ost::img::alg::filter_detail::ButterworthLPBase>;
+}}} // ns
 #endif
 
 
