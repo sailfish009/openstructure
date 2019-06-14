@@ -24,7 +24,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef __APPLE__
+#include <stdlib.h>
+#ifdef _WIN32
 #include <malloc.h>
 #endif
 #include <cmath>
