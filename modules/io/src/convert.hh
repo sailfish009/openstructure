@@ -20,14 +20,21 @@
 #ifndef OST_IO_CONVERT_H
 #define OST_IO_CONVERT_H
 
-
+// endian macros deprecated in Boost 1.68
+#if BOOST_VERSION<106800
 #include <boost/detail/endian.hpp>
+#ifdef BOOST_BIG_ENDIAN
+#define BOOST_ENDIAN_BIG_BYTE
+#endif
+#else
+#include <boost/predef/other/endian.h>
+#endif
 
 namespace ost { namespace io {
 
 enum Endianess {
   OST_BIG_ENDIAN,OST_LITTLE_ENDIAN,OST_VAX_DATA,
-#ifdef BOOST_BIG_ENDIAN
+#ifdef BOOST_ENDIAN_BIG_BYTE
   OST_LOCAL_ENDIAN = OST_BIG_ENDIAN
 #else
   OST_LOCAL_ENDIAN = OST_LITTLE_ENDIAN
