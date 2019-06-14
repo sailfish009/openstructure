@@ -1,12 +1,15 @@
 Changes in Release 1.x.x
 --------------------------------------------------------------------------------
 
- * Use system provided SQLite3 library
- * Port to Qt5
- * C++ wrapper around C++ implementation of TMalign
- * Database for efficient in-memory lookup of coordinates and sequences
+ * Use system provided SQLite3 library.
+ * Port from Qt4 to Qt5.
+ * C++ wrapper around C++ implementation of TMalign.
+ * Database for efficient in-memory lookup of coordinates and sequences.
  * Updated CAD score binding with change in result format, check documentation
-   for further details 
+   for further details.
+ * Improved support for recent compilers and libraries.
+ * Removed support for USE_MESA.
+ * Several minor bug fixes and improvements.
 
 Changes in Release 1.9.0
 --------------------------------------------------------------------------------
