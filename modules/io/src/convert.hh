@@ -24,10 +24,18 @@
 #include <boost/version.hpp>
 #if BOOST_VERSION<106800
 #include <boost/detail/endian.hpp>
+// recent Boost versions use boost/predef/other/endian.h anyway
+#ifndef BOOST_ENDIAN_BIG_BYTE
 #ifdef BOOST_BIG_ENDIAN
-#define BOOST_ENDIAN_BIG_BYTE
+#define BOOST_ENDIAN_BIG_BYTE 1
+#else
+#define BOOST_ENDIAN_BIG_BYTE 0
+#endif
 #endif
 #else
+// see https://www.boost.org/doc/libs/1_68_0/doc/html/predef/reference.html#predef.reference.other_macros.boost_endian
+// defines BOOST_ENDIAN_BIG_BYTE and BOOST_ENDIAN_LITTLE_BYTE
+// -> set to 1 or 0 respectively of endianness of machine
 #include <boost/predef/other/endian.h>
 #endif
 
@@ -35,7 +43,7 @@ namespace ost { namespace io {
 
 enum Endianess {
   OST_BIG_ENDIAN,OST_LITTLE_ENDIAN,OST_VAX_DATA,
-#ifdef BOOST_ENDIAN_BIG_BYTE
+#if BOOST_ENDIAN_BIG_BYTE
   OST_LOCAL_ENDIAN = OST_BIG_ENDIAN
 #else
   OST_LOCAL_ENDIAN = OST_LITTLE_ENDIAN
