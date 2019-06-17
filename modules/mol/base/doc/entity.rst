@@ -698,6 +698,43 @@ The Handle Classes
                         name could be found, an invalid :class:`AtomHandle`
                         otherwise
 
+  .. method:: HasAltAtoms()
+
+    Returns whether the residue has any alternative atom groups
+
+    :rtype:             :class:`bool`
+
+  .. method:: HasAltAtomGroup(group_name)
+
+    Returns whether the residue has a certain alternative atom group
+
+    :param group_name:  Group of interest
+    :type group_name:   :class:`str`
+    :rtype:             :class:`bool`
+
+  .. method:: GetAltAtomGroupNames()
+
+    Returns names of all alternative atom groups in residue
+
+    :rtype:             :class:`list` of :class:`str`
+
+  .. method:: GetCurrentAltGroupName()
+
+    Returns the currently active alternative atom group, empty
+    :class:`str` if residue has no alternative atom groups
+
+    :rtype:             :class:`str`
+
+  .. method:: SwitchAtomPos(group_name)
+
+    Switches the atoms in residue to the specified alternative atom group
+
+    :param group_name:  Group of interest
+    :type group_name:   :class:`str`
+    :rtype:             :class:`bool`
+    :returns:           Whether the switch was successful (e.g. False if no such
+                        group exists)
+
   .. method:: GetAtomList()
 
     See :attr:`atoms`
