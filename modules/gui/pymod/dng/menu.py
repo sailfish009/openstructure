@@ -17,7 +17,7 @@ class FileMenu(QMenu):
                   shortcut='Ctrl+Shift+S', 
                   enabled=gui.OneOf(gfx.Entity))
   def _Open(self):
-    filename=QFileDialog.getOpenFileName(None, 'Open file','')
+    filename,_=QFileDialog.getOpenFileName(None, 'Open file','')
     if(QFileInfo(filename).isFile()):
       gui.FileLoader.LoadObject(str(filename))
 
