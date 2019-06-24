@@ -1,7 +1,7 @@
 """
 deploy.py helps you package your code into a standalone application.
 
-for now, MacOS X and Linux are supported...
+for now, macOS and Linux are supported...
 """
 import os
 import subprocess

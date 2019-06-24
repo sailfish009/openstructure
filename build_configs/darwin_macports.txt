@@ -1,4 +1,4 @@
-# this file contains a list of settings to be used on MacOS X with
+# this file contains a list of settings to be used on macOS with
 # the dependencies installed over MacPorts
 set(BOOST_ROOT "/opt/local" CACHE PATH "prefix for the boost")
 set(PYTHON_ROOT "/opt/local" CACHE PATH "prefix for python")

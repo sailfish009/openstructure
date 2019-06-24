@@ -43,7 +43,7 @@
 #include <ost/gfx/gl_include.hh>
 
 #if defined(__APPLE__)
-// On all MacOS X version we support, OpenGL 2.0 is available, so it's safe to 
+// On all macOS version we support, OpenGL 2.0 is available, so it's safe to 
 // hardcode the value here...
 //same for windows vista and above, XP only has 1.1
 #define OST_GL_VERSION_2_0 1

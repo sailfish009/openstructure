@@ -122,7 +122,7 @@ to CMake with via `-D<opt>=<value>`.
 Flag to choose build generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-CMake supports different build generators. On UNIX, i.e. MacOS X and Linux, the
+CMake supports different build generators. On UNIX, i.e. macOS and Linux, the
 default build generator is Makefiles, but it is also possible to use other
 programs. For a list of supported build generators on your platform, start cmake
 without parameters.
@@ -339,7 +339,7 @@ to run multiple jobs at once.
 What's next?
 --------------------------------------------------------------------------------
 
-On Linux and MacOS X, you can start dng from the command-line. The binaries are all located in stage/bin:
+On Linux and macOS, you can start dng from the command-line. The binaries are all located in stage/bin:
 
 .. code-block:: bash
 

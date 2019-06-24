@@ -111,7 +111,7 @@ def AddMenuAction(*args, **kwargs):
     AddMenuAction('Scene', 'Background Color', SetBackgroundColor,
                   shortcut='Ctrl+B')
 
-  Whenever you press Ctrl+B (Cmd+B on MacOS X), the action will be executed.
+  Whenever you press Ctrl+B (Cmd+B on macOS), the action will be executed.
   
   Very often menu actions are coupled to the current selected objects in the 
   scene menu. These menu actions are either enabled or disabled depending on the 
