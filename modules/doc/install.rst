@@ -318,8 +318,12 @@ version of OpenStructure.
 dependencies. The current Boost version, as of writing these instructions, is
 1.70.0 but works so far. Do not forget to also install `boost-python`.
 
-Before running CMake, an environment variable needs to be set on the command line. If omitted, 
-the linker will throw a bunch of warnings later:
+If you want to build the info module or the graphical user interface, make sure
+you have the Xcode app installed. Just the Xcode command line tools which are
+sufficient for Homebrew, will not work with Qt5.
+
+Before running CMake, an environment variable needs to be set on the command
+line. If omitted, the linker will throw a bunch of warnings later:
 
 .. code-block:: bash
 
@@ -377,4 +381,4 @@ in your terminal. This will fetch the newest changes.
 ..  LocalWords:  Homebrew cmake CMake zlib SQLite FFTW libtiff libpng PyQt
 ..  LocalWords:  SSL macOS Makefiles PDB qmake PNG libz libsqlite OPTIMIZE
 ..  LocalWords:  DNDEBUG RPATH rpath SHADER shader SPNAV DConnexion profiler
-..  LocalWords:  DOPTIMIZE DENABLE DOPEN DPYTHON DBOOST DSYS
+..  LocalWords:  DOPTIMIZE DENABLE DOPEN DPYTHON DBOOST DSYS Xcode
