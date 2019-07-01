@@ -322,12 +322,19 @@ If you want to build the info module or the graphical user interface, make sure
 you have the Xcode app installed. Just the Xcode command line tools which are
 sufficient for Homebrew, will not work with Qt5.
 
-Before running CMake, an environment variable needs to be set on the command
+Before running CMake, some environment variables need to be set on the command
 line. If omitted, the linker will throw a bunch of warnings later:
 
 .. code-block:: bash
 
   export SDKROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+
+If building the info module or with graphical user interface, get the Qt
+binaries in your Path for CMake to determine its configuration:
+
+.. code-block:: bash
+
+  export PATH="/usr/local/opt/qt/bin:$PATH"
 
 Homebrew installs all the software under /usr/local. Thus we have to tell cmake
 where to find Boost and Python. Also the Python headers and libraries are not
