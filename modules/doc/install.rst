@@ -327,7 +327,7 @@ line. If omitted, the linker will throw a bunch of warnings later:
 
 .. code-block:: bash
 
-  export SDKROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk
+  export SDKROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
 
 Homebrew installs all the software under /usr/local. Thus we have to tell cmake
 where to find Boost and Python. Also the Python headers and libraries are not
