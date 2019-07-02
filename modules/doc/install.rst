@@ -312,7 +312,7 @@ version of OpenStructure.
           -DOPTIMIZE=ON
 
 
-**macOS (High Sierra) with Homebrew**
+**macOS (Mojave/ High Sierra) with Homebrew**
 
 `Homebrew <https://brew.sh/>`_ can be used to conveniently install all
 dependencies. The current Boost version, as of writing these instructions, is
