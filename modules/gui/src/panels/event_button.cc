@@ -18,7 +18,8 @@
 //------------------------------------------------------------------------------
 
 #include "event_button.hh"
-
+#include <QMimeData>
+#include <QDrag>
 
 namespace ost { namespace gui {
 

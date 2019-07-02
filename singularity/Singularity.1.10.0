@@ -1,5 +1,5 @@
 BootStrap: docker
-From: ubuntu:16.04
+From: ubuntu:18.04
 
 %post
 ##############################################################################
@@ -17,11 +17,10 @@ export CPUS_FOR_MAKE=8
 export PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
 # When changing OPENSTRUCTURE_VERSION make sure to change it also in the
 # environment section of singularity recipe (this file).
-export OPENSTRUCTURE_VERSION="1.9.0"
+export OPENSTRUCTURE_VERSION="1.10.0"
 export OPENSTRUCTURE_SHARE="/usr/local/share/ost"
 export MSMS_VERSION="2.6.1"
 export OPENMM_VERSION="7.1.1"
-export DSSP_VERSION="2.2.1"
 export OPENMM_INCLUDE_PATH=/usr/local/openmm/include/
 export OPENMM_LIB_PATH=/usr/local/openmm/lib/
 export JUPYTER_CONFIG_DIR="/usr/local/etc/jupyter"
@@ -33,19 +32,18 @@ export VIRTUALENV_DIR="/usr/local/share/ost_venv"
 # INSTALL SYSTEM DEPS
 #####################
 apt-get update -y && apt-get install -y cmake \
+                                        g++ \
                                         sip-dev \
-                                        libtiff-dev \ 
+                                        libtiff-dev \
                                         libfftw3-dev \
                                         libeigen3-dev \
                                         libboost-all-dev \
                                         libpng-dev \
                                         python-all \
                                         python2.7 \
-                                        python-qt4 \
-                                        qt4-qtconfig \
-                                        qt4-qmake \
-                                        libqt4-dev \
-                                        libpng-dev \
+                                        python-pyqt5 \
+                                        qt5-qmake \
+                                        qtbase5-dev \
                                         wget \
                                         git \
                                         gfortran \
@@ -57,6 +55,9 @@ apt-get update -y && apt-get install -y cmake \
                                         clustalw \
                                         python-virtualenv \
                                         libsqlite3-dev \
+                                        dssp \
+                                        python-enum34 \
+                                        python-ipaddress \
                                         locales
 
 # SET LOCALE
@@ -69,8 +70,8 @@ locale-gen en_US.UTF-8
 # INSTALL SOME PYTHON PACKAGES GLOBALY
 ######################################
 pip install --no-cache-dir numpy==1.10.4 \
-                                                        scipy==1.0.0 \
-                                                        pandas==0.22.0
+                           scipy==1.0.0 \
+                           pandas==0.22.0 
 
 
 # SET UP VIRTUALENV
@@ -107,17 +108,6 @@ if [ ! -f openmm-${OPENMM_VERSION}.tar.gz ]; then
     mkdir -p ${SRC_FOLDER}/openmm-${OPENMM_VERSION}/build && cd ${SRC_FOLDER}/openmm-${OPENMM_VERSION}/build
     cmake .. && make -j $CPUS_FOR_MAKE && make install
     cd ${SRC_FOLDER}/openmm-${OPENMM_VERSION}/build/python && python setup.py build && python setup.py install
-fi
-
-# COMPILE AND INSTALL DSSP
-##############
-cd ${SRC_FOLDER}
-if [ ! -f dssp-${DSSP_VERSION}.tgz ]; then
-    wget ftp://ftp.cmbi.umcn.nl/pub/molbio/software/dssp-2/dssp-${DSSP_VERSION}.tgz
-    tar -xvzf dssp-${DSSP_VERSION}.tgz
-    cd dssp-${DSSP_VERSION}
-    make -j ${CPUS_FOR_MAKE}
-    make install
 fi
 
 # INSTALL OST

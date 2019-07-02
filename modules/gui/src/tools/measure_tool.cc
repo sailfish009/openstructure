@@ -31,8 +31,6 @@
 #include <ost/platform.hh>
 #include <ost/gfx/scene.hh>
 
-#include <ost/gui/gl_canvas.hh>
-
 #include <ost/geom/vec3.hh>
 
 #include <QDir>

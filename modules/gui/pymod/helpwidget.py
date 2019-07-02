@@ -1,19 +1,17 @@
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5 import QtWidgets
 from ost import gui
-class DocWidget(QWidget):
+class DocWidget(QtWidgets.QWidget):
   def __init__(self, parent=None):
-    QWidget.__init__(self, parent)
-    l=QVBoxLayout(self)
-    l.setMargin(0)
+    QtWidgets.QWidget.__init__(self, parent)
+    l=QtWidgets.QVBoxLayout(self)
+    l.setContentsMargins(0,0,0,0)
     self.setWindowTitle('OpenStructure Help')
-    self.searchbox=QLineEdit(self)
+    self.searchbox=QtWidgets.QLineEdit(self)
     l.addWidget(self.searchbox)
-    self.doctext=QTextEdit('', self)
+    self.doctext=QtWidgets.QTextEdit('', self)
     l.addWidget(self.doctext)
     self.setLayout(l)
-    QObject.connect(self.searchbox, SIGNAL('returnPressed()'),
-                    self.OnReturnPressed)
+    self.searchbox.returnPressed.connect(self.OnReturnPressed)
   def OnReturnPressed(self):
     help(str(self.searchbox.text()))
 doc_widget=DocWidget()

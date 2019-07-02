@@ -26,6 +26,7 @@
 */
 
 #include <ost/gfx/module_config.hh>
+#include <ost/message.hh>
 
 namespace ost { namespace gfx {
 
@@ -42,6 +43,25 @@ public:
   virtual bool HasStereo() const = 0;
 
   virtual bool HasMultisample() const = 0;
+
+  // The GLWin is supposed to setup the OpenGL resources. To avoid implementing
+  // our own offscreen buffers, image export from OpenGL also happens here
+  virtual void Export(const String& fname, unsigned int width,
+                      unsigned int height, bool transparent) {
+  	throw ost::Error("Image export not implemented for this GLWin");
+  }
+
+  virtual void Export(const String& fname, unsigned int width,
+                      unsigned int height, int max_samples, 
+                      bool transparent) {
+  	throw ost::Error("Image export with multi-sampling not implemented for "
+  		             "this GLWin");
+  }
+
+  virtual void Export(const String& fname, bool transparent) {
+  	throw ost::Error("Image export not implemented for this GLWin");
+  }
+
 };
 
 }}

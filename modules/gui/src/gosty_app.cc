@@ -66,6 +66,10 @@ GostyApp* GostyApp::Instance() {
   return GostyApp::app_;
 }
 
+bool GostyApp::ValidInstance() {
+  return GostyApp::app_ != NULL;
+}
+
 void GostyApp::SetAppTitle(const QString& app_title)
 {
   main_->setWindowTitle(app_title);
@@ -118,17 +122,8 @@ ost::img::gui::DataViewer* GostyApp::CreateDataViewer(const ost::img::ImageHandl
   }
   else
   {
-    viewer=new ost::img::gui::DataViewer(main_,d,name);
-    QMdiSubWindow* mdi=new QMdiSubWindow(this->GetPerspective()->GetMainArea());
-    mdi->setWindowTitle(name);
-    mdi->setWidget(viewer);
-    mdi->setFocusProxy(viewer);
-    viewer->setAttribute(Qt::WA_DeleteOnClose);
-    mdi->setAttribute(Qt::WA_DeleteOnClose);
-    viewer->setParent(mdi);
-    this->GetPerspective()->GetMainArea()->addSubWindow(mdi);
-    mdi->showMaximized();
-    connect(viewer,SIGNAL(released()),mdi,SLOT(close()));
+    viewer=new ost::img::gui::DataViewer(NULL,d,name);
+    this->GetPerspective()->GetMainArea()->AddWidget(name, viewer);
   }
 
   return viewer;

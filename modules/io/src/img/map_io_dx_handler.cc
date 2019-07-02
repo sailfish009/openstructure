@@ -48,6 +48,10 @@ using boost::format;
 
 namespace {
 
+/*
+
+commented out to silence compiler warning, as it is not needed anywhere
+
 bool IEquals(const StringRef& a, const StringRef& b)
 {
   if (a.size()!=b.size()) {
@@ -60,6 +64,7 @@ bool IEquals(const StringRef& a, const StringRef& b)
   }
   return true;
 }
+*/
 
 }
 

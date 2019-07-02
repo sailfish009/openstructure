@@ -47,13 +47,13 @@ Perspective
     
     :param name: The name of the menu
     :type  arg2: :class:`str`
-    :rtype: :class:`QtCore.QMenu`
+    :rtype: :class:`QMenu`
 
   .. method:: GetMenuBar()
   
     Returns the Menubar of the Application. Can be used to add some menupoints.
     
-    :rtype: :class:`QtCore.QMenuBar`
+    :rtype: :class:`QMenuBar`
 
   .. method:: GetPanels()
 
@@ -86,9 +86,10 @@ how to add a  widget to the MDI area:
 
   .. code-block:: python
   
+    from PyQt5 import QtWidgets
     app = gui.GostyApp.Instance()
     main_area = app.perspective.main_area
-    label = QtGui.QLabel("Hello World")
+    label = QtWidgets.QLabel("Hello World")
     main_area.AddWidget("The beginning..", label)
     
 .. class:: MainArea
@@ -106,7 +107,7 @@ how to add a  widget to the MDI area:
     :param name: is the unique name (within the scope of the main area) for the widget that is used to restore and save the widget geometry.
     :type  name: :class:`str`
     :param widget: is the widget to be added to the main area.
-    :type  widget: :class:`QtCore.QWidget`
+    :type  widget: :class:`QWidget`
     :param window_state: custom window_state for the widget. See Qt Documentation to learn more about WindowStates.
     :type  name: :class:`QWindowState`
 
@@ -121,7 +122,7 @@ how to add a  widget to the MDI area:
     :param name: is the unique name (within the scope of the main area) for the widget that is used to restore and save the widget geometry.
     :type  name: :class:`str`
     :param widget: is the widget to be added to the main area
-    :type  widget: :class:`QtCore.QWidget`
+    :type  widget: :class:`QWidget`
     :param width: width of the widget inside the mdi
     :type  width: :class:`int`
     :param height: height of the widget inside the mdi
@@ -138,7 +139,7 @@ how to add a  widget to the MDI area:
     :param title: string that is displayed in the gui.
     :type  title: :class:`str`
     :param widget: is the widget to be added to the main area.
-    :type  widget: :class:`QtCore.QWidget`
+    :type  widget: :class:`QWidget`
 
   .. method:: ShowSubWindow(widget)
   
@@ -149,7 +150,7 @@ how to add a  widget to the MDI area:
     behavior!
   
     :param widget: widget which you want to make visible
-    :type  widget: :class:`QtCore.QWidget`
+    :type  widget: :class:`QWidget`
 
   
   .. method:: HideSubWindow(widget)
@@ -161,7 +162,7 @@ how to add a  widget to the MDI area:
     behavior!
   
     :param widget: widget which you want to hide
-    :type  widget: :class:`QtCore.QWidget`
+    :type  widget: :class:`QWidget`
   
   .. method:: EnableTabbedMode(tabbed_mode)
     
@@ -207,12 +208,12 @@ and finally display it in the right side bar:
 
   .. code-block:: python
   
-    qwidget = QtGui.QLabel("Test")
-    widget = gui.WrappedWidget(qwidget)
+    from PyQt5 import QtWidgets
+    qwidget = QtWidgets.QLabel("Test")
+    widget = gui.Widget(qwidget)
     panels = gui.GostyApp.Instance().perspective.GetPanels()
     panels.AddWidgetToPool("Test Label",widget)
     panels.AddWidget(gui.PanelPosition.RIGHT_PANEL, widget)
-    qwidget.show()
 
 .. class:: PanelManager
 
@@ -263,7 +264,7 @@ and finally display it in the right side bar:
     :param name: Name which is displayed in the gui.
     :type  name: :class:`str`
     :param widget: Widget which will be added to the WidgetPool of this class and the WidgetRegistry. 
-    :type  widget: :class:`WrappedWidget`
+    :type  widget: :class:`Widget`
 
   .. method:: GetMenu()
     
@@ -276,7 +277,7 @@ and finally display it in the right side bar:
 
     Get the SIP-QObject (QObject), learn more about :doc:`python_cpp`.
     
-    :rtype: PyQt4.QObject
+    :rtype: :class:`QObject`
 
   .. method:: RemoveWidget(widget)
 
@@ -284,7 +285,7 @@ and finally display it in the right side bar:
     The widget will be removed if it is in a PanelBar
   
     :param arg2: widget which should be removed
-    :type  arg2: :class:`WrappedWidget`
+    :type  arg2: :class:`Widget`
 
 .. data:: PanelPosition
  
@@ -307,8 +308,9 @@ describes how this is done within Python and PyQt:
 
 .. code-block:: python
 
+  from PyQt5 import QtWidgets
   menu_bar = gui.GostyApp.Instance().perspective.GetMenuBar()
-  test_action = QtGui.QAction('Test Menu Point', menu_bar) 
+  test_action = QtWidgets.QAction('Test Menu Point', menu_bar)
   test = menu_bar.addMenu('&Test')
   test.addAction(test_action)
 

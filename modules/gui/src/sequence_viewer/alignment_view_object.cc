@@ -143,19 +143,19 @@ QVariant AlignmentViewObject::GetData(int row, int column, int role)
         if(column -1 < conservation_1_.size()){
           return QVariant(conservation_1_[column-1]);
         }
-          return QVariant(Qt::transparent);
+          return QVariant(QColor(Qt::transparent));
       }
 
       if(role == Qt::ForegroundRole){
         if(column -1 < conservation_1_.size()){
           if(conservation_1_[column-1].red()>128){
-            return QVariant(Qt::black);
+            return QVariant(QColor(Qt::black));
           }
           else{
-            return QVariant(Qt::white);
+            return QVariant(QColor(Qt::white));
           }
         }
-        return QVariant(Qt::transparent);
+        return QVariant(QColor(Qt::transparent));
       }
     }
     else if(this->GetCurrentDisplayMode() == conservation_mode_2){
@@ -163,13 +163,13 @@ QVariant AlignmentViewObject::GetData(int row, int column, int role)
         if(column -1 < conservation_2_.size()){
           return QVariant(conservation_2_[column-1]);
         }
-        return QVariant(Qt::transparent);
+        return QVariant(QColor(Qt::transparent));
       }
       if(role == Qt::ForegroundRole){
         if(column -1 < conservation_2_.size()){
-            return QVariant(Qt::black);
+            return QVariant(QColor(Qt::black));
         }
-        return QVariant(Qt::transparent);
+        return QVariant(QColor(Qt::transparent));
       }
     }
   }

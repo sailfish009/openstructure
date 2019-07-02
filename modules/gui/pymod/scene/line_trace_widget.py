@@ -20,7 +20,7 @@
 
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 from render_mode_widget import RenderModeWidget
 
 #Simple Render Options
@@ -39,20 +39,20 @@ class LineTraceWidget(RenderModeWidget):
     max_line_width = 20
         
     #Create Ui elements
-    self.radius_spinbox_ = QtGui.QDoubleSpinBox()
+    self.radius_spinbox_ = QtWidgets.QDoubleSpinBox()
     self.radius_spinbox_.setRange(min_line_width, max_line_width)
     self.radius_spinbox_.setDecimals(2)
     self.radius_spinbox_.setSingleStep(0.1)
     
-    self.aa_rendering_cb_ = QtGui.QCheckBox()
+    self.aa_rendering_cb_ = QtWidgets.QCheckBox()
     
-    sline_label = QtGui.QLabel("Trace Settings")
+    sline_label = QtWidgets.QLabel("Trace Settings")
     font = sline_label.font()
     font.setBold(True)
     
-    radius_label = QtGui.QLabel("Line Width")
-    aa_label = QtGui.QLabel("AA-Lines")
-    grid = QtGui.QGridLayout()
+    radius_label = QtWidgets.QLabel("Line Width")
+    aa_label = QtWidgets.QLabel("AA-Lines")
+    grid = QtWidgets.QGridLayout()
     grid.addWidget(sline_label, 0, 0, 1, 1)
     grid.addWidget(radius_label, 1, 0, 1, 3)
     grid.addWidget(self.radius_spinbox_, 1, 2, 1, 1)
@@ -61,12 +61,8 @@ class LineTraceWidget(RenderModeWidget):
     grid.setRowStretch(3,1)
     self.setLayout(grid)
 
-    QtCore.QObject.connect(self.radius_spinbox_, 
-                           QtCore.SIGNAL("valueChanged(double)"), 
-                           self.UpdateLineWidth)
-    QtCore.QObject.connect(self.aa_rendering_cb_, 
-                           QtCore.SIGNAL("stateChanged(int)"), 
-                           self.UpdateAA)
+    self.radius_spinbox_.valueChanged.connect(self.UpdateLineWidth)
+    self.aa_rendering_cb_.stateChanged.connect(self.UpdateAA)
 
     self.setMinimumSize(250,90)
     

@@ -137,5 +137,5 @@ void GaussianLaplacianFilterBase::calcBVals( Real q )
 
 } // ns
 
-template class TEMPLATE_DEF_EXPORT ImageStateModIPAlgorithm<alg::GaussianLaplacianFilterBase>;
+template class TEMPLATE_DEF_EXPORT image_state::ImageStateModIPAlgorithm<alg::GaussianLaplacianFilterBase>;
 }}

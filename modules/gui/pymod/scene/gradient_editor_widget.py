@@ -21,22 +21,22 @@
 from ost import gui
 from ost import gfx
 from ost import mol
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from color_select_widget import ColorSelectWidget
 from gradient_preset_widget import GradientPresetWidget
 
 #Gradient Editor
-class GradientEditor(QtGui.QWidget):
+class GradientEditor(QtWidgets.QWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     self.parent_ = parent
     
     #Create Ui elements
-    gradient_label = QtGui.QLabel("Gradient Editor")
+    gradient_label = QtWidgets.QLabel("Gradient Editor")
     font = gradient_label.font()
     font.setBold(True)
     
-    self.prop_combo_box_ = QtGui.QComboBox()
+    self.prop_combo_box_ = QtWidgets.QComboBox()
     self.gradient_preview_ = GradientPreview()
     self.gradient_edit_ = GradientEdit(self.gradient_preview_,self)
     self.gradient_preset_ = GradientPresetWidget(self.gradient_edit_)
@@ -51,7 +51,7 @@ class GradientEditor(QtGui.QWidget):
     
     self.props=["abfac","rbfac","x","y","z","rnum","acharge"]
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
     grid.addWidget(gradient_label, 0, 0, 1, 1)
     grid.addWidget(self.prop_combo_box_, 1, 0, 1, 1)
@@ -61,9 +61,9 @@ class GradientEditor(QtGui.QWidget):
     grid.addWidget(self.gradient_preset_, 5, 0, 1, 1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.prop_combo_box_, QtCore.SIGNAL("currentIndexChanged(int)"), self.Update)
-    QtCore.QObject.connect(self.gradient_edit_, QtCore.SIGNAL("gradientUpdated"), self.Update)
-    QtCore.QObject.connect(self.gradient_preset_, QtCore.SIGNAL("gradientSelected"), self.gradient_edit_.LoadGradient)
+    self.prop_combo_box_.currentIndexChanged.connect(self.Update)
+    self.gradient_edit_.gradientUpdated.connect(self.Update)
+    self.gradient_preset_.gradientSelected.connect(self.gradient_edit_.LoadGradient)
     
     self.setMinimumSize(250,300)
         
@@ -97,14 +97,14 @@ class GradientEditor(QtGui.QWidget):
       entity.Apply(glco)
       
 #Gradient Preview
-class GradientPreview(QtGui.QWidget):
+class GradientPreview(QtWidgets.QWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     
     #Defaults
     self.border_offset_ = 3
     self.preview_height_ = 25
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     
     self.gradient_ = QtGui.QLinearGradient()
     
@@ -129,9 +129,12 @@ class GradientPreview(QtGui.QWidget):
         paint.end()
     
 #Gradient Edit
-class GradientEdit(QtGui.QWidget):
+class GradientEdit(QtWidgets.QWidget):
+  
+  gradientUpdated = QtCore.pyqtSignal()
+
   def __init__(self, gradient_preview, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
 
     #Defaults
     self.gradient_preview_ = gradient_preview
@@ -143,8 +146,8 @@ class GradientEdit(QtGui.QWidget):
     
     
     #ContextMenu    
-    self.add_ = QtGui.QAction("Add", self)
-    QtCore.QObject.connect(self.add_, QtCore.SIGNAL("triggered()"), self.Add)
+    self.add_ = QtWidgets.QAction("Add", self)
+    self.add_.triggered.connect(self.Add)
     self.addAction(self.add_)
     self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
     
@@ -165,33 +168,34 @@ class GradientEdit(QtGui.QWidget):
     self.width_ = self.width()
 
   def RemoveStop(self, stop):
-      self.stops.remove(stop)
-      stop.hide()
-      del(stop)
+    self.stops.remove(stop)
+    stop.hide()
+    del(stop)
 
-      self.UpdateGradient()
-      self.emit(QtCore.SIGNAL("gradientUpdated"),(self))
+    self.UpdateGradient()
+    self.gradientUpdated.emit()
       
   def RemoveStopGui(self, stop):
     if(len(self.stops)>2):
       self.RemoveStop(stop)
     else:
-      QtGui.QMessageBox.question(self, "Information", "Please keep in mind, at least two stops are needed for a gradient!")
+      QtWidgets.QMessageBox.question(self, "Information", "Please keep in mind, at least two stops are needed for a gradient!")
 
   def AddStop(self, pos, color=None):
     stop = MyGradientStop(pos, self.border_offset_, self, color)
-    QtCore.QObject.connect(stop, QtCore.SIGNAL("gradientChanged"), self.UpdateGradient)
-    QtCore.QObject.connect(stop, QtCore.SIGNAL("colorChanged"), self.UpdateGradient)
-    QtCore.QObject.connect(stop, QtCore.SIGNAL("colorChanged"), self.parent().Update)
-    QtCore.QObject.connect(stop, QtCore.SIGNAL("gradientUpdated"), self.parent().Update)
-    QtCore.QObject.connect(stop, QtCore.SIGNAL("removeStop"), self.RemoveStopGui)
+    stop.gradientChanged.connect(self.UpdateGradient)
+    stop.colorChanged.connect(self.UpdateGradient)
+    stop.colorChanged.connect(self.parent().Update)
+    stop.gradientUpdated.connect(self.parent().Update)
+    stop.removeStop.connect(self.RemoveStopGui)
+    stop.MoveToNewPos()
     
     self.stops.append(stop)
-    self.UpdateGradient()
-    self.emit(QtCore.SIGNAL("gradientUpdated"),(self))  
+    self.UpdateGradient() 
+    self.gradientUpdated.emit()
   
   def Add(self):
-    self.AddStop(QtGui.QCursor.pos().x() - self.mapToGlobal(QtCore.QPoint(0, 0)).x())
+    self.AddStop(QtWidgets.QCursor.pos().x() - self.mapToGlobal(QtCore.QPoint(0, 0)).x())
   
   def UpdateGradient(self):
     self.gradient_preview_.SetGradient(self.GetGradient())      
@@ -235,6 +239,11 @@ class GradientEdit(QtGui.QWidget):
     
 #Gradient Stop  
 class MyGradientStop(ColorSelectWidget):
+
+  removeStop = QtCore.pyqtSignal()
+  gradientChanged = QtCore.pyqtSignal()
+  gradientUpdated = QtCore.pyqtSignal()
+
   def __init__(self, pos, offset, parent, color=None):
     #Defaults
     self.length_ = 20
@@ -245,8 +254,6 @@ class MyGradientStop(ColorSelectWidget):
     
     ColorSelectWidget.__init__(self, self.length_,self.length_, color, parent)
     
-    self.MoveToNewPos()
-    
     if(color is None):
       self.color_ = QtGui.QColor("White")
       self.ChangeColor()
@@ -254,12 +261,12 @@ class MyGradientStop(ColorSelectWidget):
       self.color_ = color
     
     #ContextMenu    
-    self.remove_ = QtGui.QAction("Remove", self)
-    QtCore.QObject.connect(self.remove_, QtCore.SIGNAL("triggered()"), self.Remove)
+    self.remove_ = QtWidgets.QAction("Remove", self)
+    self.remove_.triggered.connect(self.Remove)
     self.addAction(self.remove_)
     
   def Remove(self):
-    self.emit(QtCore.SIGNAL("removeStop"),(self))
+    self.removeStop.emit()
 
   def GetPos(self):
     return self.pos_
@@ -279,7 +286,7 @@ class MyGradientStop(ColorSelectWidget):
   def MoveToNewPos(self):
     self.move(self.pos_ - self.halflength_, 0)
     self.update()
-    self.emit(QtCore.SIGNAL("gradientChanged"))
+    self.gradientChanged.emit()
  
   def mouseMoveEvent(self, event):
     self.pos_ += event.pos().x() - self.halflength_
@@ -294,4 +301,4 @@ class MyGradientStop(ColorSelectWidget):
     
   def mouseReleaseEvent(self, entity):
     if entity.button() == QtCore.Qt.LeftButton:
-      self.emit(QtCore.SIGNAL("gradientUpdated"))
+      self.gradientUpdated.emit()

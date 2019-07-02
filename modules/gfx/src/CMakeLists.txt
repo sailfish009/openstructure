@@ -27,7 +27,6 @@ texture.hh
 vertex_array.hh
 vertex_array_helper.hh
 scene_observer.hh
-offscreen_buffer.hh
 gl_include.hh
 glext_include.hh
 render_mode.hh
@@ -182,41 +181,19 @@ else()
   set(OST_GFX_MAP_SOURCES "")  
 endif()
 
-if (UNIX AND NOT APPLE)
-  if(USE_MESA)
-    list(APPEND OST_GFX_SOURCES impl/mesa_offscreen_buffer.cc)
-    list(APPEND OST_GFX_IMPL_HEADERS mesa_offscreen_buffer.hh)
-  else()
-    list(APPEND OST_GFX_SOURCES impl/glx_offscreen_buffer.cc)
-    list(APPEND OST_GFX_IMPL_HEADERS glx_offscreen_buffer.hh)
-  endif()
-endif()
-
-if (APPLE)
-  list(APPEND OST_GFX_SOURCES impl/cgl_offscreen_buffer.cc)
-  list(APPEND OST_GFX_IMPL_HEADERS cgl_offscreen_buffer.hh)
-endif()
-
-if(WIN32)
-  list(APPEND OST_GFX_SOURCES impl/wgl_offscreen_buffer.cc)
-  list(APPEND OST_GFX_IMPL_HEADERS wgl_offscreen_buffer.hh)
-endif()
-
 if (USE_SHADER)
   list(APPEND OST_GFX_SOURCES shader.cc)
   list(APPEND OST_GFX_HEADERS shader.hh)
   list(APPEND OST_GFX_SOURCES impl/scene_fx.cc)
   list(APPEND OST_GFX_IMPL_HEADERS scene_fx.hh)
   if (NOT APPLE)
-    if (NOT USE_MESA)
-      set(OST_GLEW_HEADERS
-         glew.h
-         glxew.h
-         wglew.h IN_DIR GL
-      )
-      list(APPEND OST_GFX_SOURCES GL/glew.c)
-      include_directories("${STAGE_DIR}/include/ost/gfx")
-    endif()
+    set(OST_GLEW_HEADERS
+       glew.h
+       glxew.h
+       wglew.h IN_DIR GL
+    )
+    list(APPEND OST_GFX_SOURCES GL/glew.c)
+    include_directories("${STAGE_DIR}/include/ost/gfx")
   endif()  
 endif()
 
@@ -236,9 +213,6 @@ module(NAME gfx SOURCES ${OST_GFX_SOURCES} ${OST_GFX_MAP_SOURCES}
 include_directories(${PNG_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR})
 
 # link against OpenGL and PNG libraries
-if(USE_MESA)
-  link_directories(${OPENGL_LIBRARY_DIR})
-endif()
 target_link_libraries(ost_gfx ${OPENGL_LIBRARIES} ${PNG_LIBRARIES})
 
 if (USE_SHADER)

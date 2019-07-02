@@ -157,6 +157,11 @@ public:
   /// \return the GostyApp instance
   static GostyApp* Instance();
 
+  /// \brief 
+  /// GostyApp is implemented as Singleton. This returns whether there is 
+  /// already a valid instance around
+  static bool ValidInstance();
+
   /// \brief This methods sets the Title of this Application
   /// \param app_title Title that will be displayed in the title bar
   void SetAppTitle(const QString& app_title);

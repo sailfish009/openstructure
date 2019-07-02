@@ -30,7 +30,6 @@
 #if OST_SHADER_SUPPORT_ENABLED
 # define MAP_ISO_USE_SHADER 0
 # include <ost/gfx/shader.hh>
-# include <ost/gfx/offscreen_buffer.hh>
 # include <ost/gfx/scene.hh>
 #endif
 

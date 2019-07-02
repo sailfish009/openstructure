@@ -36,6 +36,7 @@
 #include <QSize>
 #include <QFont>
 #include <QDebug>
+#include <QDataStream>
 
 namespace ost { namespace gui {
 

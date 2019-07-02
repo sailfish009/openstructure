@@ -2,7 +2,7 @@ Mixing PyQt and C++ Widgets
 ================================================================================
 .. currentmodule:: ost.gui
 
-PyQt4 is a set of Python bindings for Qt4. The exposure from C++ to Python is 
+PyQt5 is a set of Python bindings for Qt5. The exposure from C++ to Python is 
 done with SIP, which has a different mechanism than boost::python.
  
 To access a exported boost::python Qt-Object from Python we provide a method 
@@ -19,7 +19,8 @@ input for Qt Objects. It handles the cast to a C++ Qt Object internally.
 
 .. code-block:: python
   
+  from PyQt5 import QtWidgets
   persp = gui.GostyApp.Instance().perspective
   test = persp.GetMenu("Test") #Get boost::python qobject
-  test_action = QtGui.QAction('&Test me', test) #Create Python SIP Object 
+  test_action = QtWidgets.QAction('&Test me', test) #Create Python SIP Object
   test.addAction(test_action) #Add Action to boost::python object

@@ -105,7 +105,8 @@ OpBase* CompositeMask::create_op_(const String& name)
   if(name=="AND") return new AndOp;
   else if(name=="OR") return new OrOp;
   else if(name=="XOR") return new XorOp;
-  else throw("Unknown Operator");return new AndOp;
+  else throw("Unknown Operator");
+  return new AndOp;
 }
 
 

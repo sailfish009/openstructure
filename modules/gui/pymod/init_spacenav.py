@@ -1,6 +1,6 @@
 import math,traceback
 
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 import ost
 from ost import gfx, gui

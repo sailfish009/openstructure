@@ -23,7 +23,7 @@ import sip
 from ost import gfx
 import ost
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui
 from ost.gui import FileLoader
 from ost.gui.init_splash import _InitSplash
 from ost.gui.dng import termuse

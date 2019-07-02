@@ -2,7 +2,7 @@ from ost import gui
 from ost import gfx
 import os
 import ost
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 from immutable_gradient_info_handler import ImmutableGradientInfoHandler
 from gradient_info_handler import GradientInfoHandler
 
@@ -11,6 +11,8 @@ class GradientListModel(QtCore.QAbstractListModel):
   IMMUTABLE_GRADIENTS_PATH = os.path.join(ost.GetSharedDataPath(),"scene", 
                                           "gradients.xml")
   MUTABLE_GRADIENTS_PATH = "user_gradients.xml"
+
+  dataChanged = QtCore.pyqtSignal(int, int, name="dataChanged")
   
   def __init__(self, parent=None, *args): 
     QtCore.QAbstractListModel.__init__(self, parent, *args)
@@ -32,7 +34,7 @@ class GradientListModel(QtCore.QAbstractListModel):
       end_index = self.createIndex(self.rowCount(),0)
       if save:
         self.AddGradientToInfo(gradient,name)
-      self.emit(QtCore.SIGNAL("dataChanged"),model_index, end_index)
+      self.dataChanged.emit(model_index, end_index)
       return True
     return False
   
@@ -45,7 +47,7 @@ class GradientListModel(QtCore.QAbstractListModel):
       self.removeRow(row, QtCore.QModelIndex())
       model_index = self.createIndex(row,0)
       self.infoh_.RemoveGradient(name)
-      self.emit(QtCore.SIGNAL("dataChanged"),model_index, model_index)
+      self.dataChanged.emit(model_index, model_index)
       return True
     return False
 
@@ -115,12 +117,12 @@ class GradientListModel(QtCore.QAbstractListModel):
         new_name = value.toString()
         self.data_[row][0] = new_name
         self.infoh_.RenameGradient(old_name,str(new_name))
-        self.emit(QtCore.SIGNAL("dataChanged"),index, index)
+        self.dataChanged.emit(index, index)
         return True
       elif role == QtCore.Qt.DisplayRole:
         self.data_[row][0] = value.toString()
       elif role == QtCore.Qt.DecorationRole:
-        self.dat_[row][2] = value.toPyObject()
+        self.data_[row][2] = value.toPyObject()
     return False
 
   def flags(self, index):

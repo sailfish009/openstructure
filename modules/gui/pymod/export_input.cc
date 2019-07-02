@@ -31,7 +31,7 @@ namespace {
 object spnav_get_instance()
 {
   static object sip_module=import("sip");
-  static object pyqt4_module=import("PyQt4.QtCore");
+  static object pyqt5_module=import("PyQt5.QtCore");
   SpnavInput* si = SpnavInput::Instance();
   if(si->isValid()) {
     return ost::gui::get_py_qobject<SpnavInput>(si);

@@ -23,7 +23,7 @@ import sip
 from ost import gfx
 import ost
 import os
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 from toolbar_options_widget import ToolBarOptionsWidget 
 from render_options_widget import RenderOptionsWidget
 from color_options_widget import ColorOptionsWidget
@@ -48,8 +48,7 @@ class InspectorWidget(ToolBarOptionsWidget):
     self.obs = SceneObserverImpl()
     self.obs.AttachObserver(self)
     ost.scene.AttachObserver(self.obs)
-    QtCore.QObject.connect(app.scene_win.qobject,QtCore.SIGNAL("ActiveNodesChanged()"),
-                           self.ActiveNodesChanged)     
+    app.scene_win.qobject.ActiveNodesChanged.connect(self.ActiveNodesChanged)     
     
     self.setMinimumSize(250,215)
   #ToolBarOptionsWidget Method
@@ -73,19 +72,22 @@ class InspectorWidget(ToolBarOptionsWidget):
     SelHelper().Update()
     ToolBarOptionsWidget.Update(self)
 
-class InspectorDialog(QtGui.QDialog):
+class InspectorDialog(QtWidgets.QDialog):
+
+  visible = QtCore.pyqtSignal(bool, name="visible")
+
   def __init__(self, parent=None):
-    QtGui.QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     self.setWindowTitle("Inspector Gadget")
     self.setAttribute(QtCore.Qt.WA_MacSmallSize)    
-    self.layout=QtGui.QHBoxLayout()
-    self.layout.setMargin(0)
+    self.layout=QtWidgets.QHBoxLayout()
+    self.layout.setContentsMargins(0,0,0,0)
     self.layout.setSpacing(0)
     self.setLayout(self.layout)
     self.mywidget_ = InspectorWidget(self)
     self.layout.addWidget(self.mywidget_)
-    size_pol = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
-                                 QtGui.QSizePolicy.Expanding)
+    size_pol = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                 QtWidgets.QSizePolicy.Expanding)
     self.setSizePolicy(size_pol)
     self.DoResize()
     
@@ -100,9 +102,9 @@ class InspectorDialog(QtGui.QDialog):
     self.setHidden(not self.isHidden())
 
   def hideEvent(self, event):
-    self.emit(QtCore.SIGNAL("visible"),False)
-    QtGui.QDialog.hideEvent(self,event)
+    self.visible.emit(False)
+    QtWidgets.QDialog.hideEvent(self,event)
     
   def showEvent(self, event):
-    self.emit(QtCore.SIGNAL("visible"),True)
-    QtGui.QDialog.showEvent(self,event)
+    self.visible.emit(True)
+    QtWidgets.QDialog.showEvent(self,event)

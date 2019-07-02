@@ -20,7 +20,7 @@
 
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 from render_mode_widget import RenderModeWidget
 
 #Simple Render Options
@@ -41,30 +41,30 @@ class SimpleWidget(RenderModeWidget):
     self.mode_ = gfx.RenderMode.SIMPLE
         
     #Create Ui elements
-    self.aa_rendering_cb_ = QtGui.QCheckBox()
+    self.aa_rendering_cb_ = QtWidgets.QCheckBox()
   
-    self.radius_spinbox_ = QtGui.QDoubleSpinBox()
+    self.radius_spinbox_ = QtWidgets.QDoubleSpinBox()
     self.radius_spinbox_.setRange(min_line_width, max_line_width)
     self.radius_spinbox_.setDecimals(2)
     self.radius_spinbox_.setSingleStep(0.1)
 
-    self.bo_rendering_cb_ = QtGui.QCheckBox()
+    self.bo_rendering_cb_ = QtWidgets.QCheckBox()
     
-    self.bo_distance_spinbox_ = QtGui.QDoubleSpinBox()
+    self.bo_distance_spinbox_ = QtWidgets.QDoubleSpinBox()
     self.bo_distance_spinbox_.setRange(min_bo_dist, max_bo_dist)
     self.bo_distance_spinbox_.setDecimals(2)
     self.bo_distance_spinbox_.setSingleStep(0.01)
 
-    simple_label = QtGui.QLabel("Fast Bonds Simple Settings")
+    simple_label = QtWidgets.QLabel("Fast Bonds Simple Settings")
     font = simple_label.font()
     font.setBold(True)
     
-    radius_label = QtGui.QLabel("Line Width")
-    aa_label = QtGui.QLabel("AA-Lines")
-    bo_label = QtGui.QLabel("Show Bond Order")
-    bo_distance = QtGui.QLabel("Bond Order Distance")
+    radius_label = QtWidgets.QLabel("Line Width")
+    aa_label = QtWidgets.QLabel("AA-Lines")
+    bo_label = QtWidgets.QLabel("Show Bond Order")
+    bo_distance = QtWidgets.QLabel("Bond Order Distance")
 
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.addWidget(simple_label,0,0,1,3)
     grid.addWidget(aa_label, 1, 0, 1, 3)
     grid.addWidget(self.aa_rendering_cb_, 1, 2, 1, 1)
@@ -77,10 +77,10 @@ class SimpleWidget(RenderModeWidget):
     grid.setRowStretch(5,1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.radius_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateLineWidth)
-    QtCore.QObject.connect(self.aa_rendering_cb_, QtCore.SIGNAL("stateChanged(int)"), self.UpdateAA)
-    QtCore.QObject.connect(self.bo_distance_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateBODistance)
-    QtCore.QObject.connect(self.bo_rendering_cb_, QtCore.SIGNAL("stateChanged(int)"), self.UpdateBO)    
+    self.radius_spinbox_.valueChanged.connect(self.UpdateLineWidth)
+    self.aa_rendering_cb_.stateChanged.connect(self.UpdateAA)
+    self.bo_distance_spinbox_.valueChanged.connect(self.UpdateBODistance)
+    self.bo_rendering_cb_.stateChanged.connect(self.UpdateBO)    
     self.setMinimumSize(250,140)
     
     self.setMinimumSize(250,140)

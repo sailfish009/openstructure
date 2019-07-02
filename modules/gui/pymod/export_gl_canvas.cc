@@ -16,48 +16,28 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-/*
-  Author: Stefan Scheuber
-*/
-#include <ost/gfx/input.hh>
-#include <ost/gfx/entity.hh>
+#include <boost/python.hpp>
 
-#include "render_options.hh"
+#include <ost/gui/gl_canvas.hh>
+#include "sip_handler.hh"
 
-namespace ost { namespace gfx {
+using namespace boost::python;
+using namespace ost;
+using namespace ost::gui;
 
-RenderOptions::RenderOptions(){}
-
-bool RenderOptions::AddObserver(EntityP entity)
-{
-  for (EntityWObservers::const_iterator
-       i = observers_.begin(), e = observers_.end(); i != e; ++i) {
-    if (i->lock() == entity)
-      return false;
-  }
-  observers_.push_back(entity);
-  return true;
+void WrapSetGLCanvasFormat(GLCanvas& canvas, object py_obj) {
+  QSurfaceFormat* f = get_cpp_qobject<QSurfaceFormat>(py_obj);
+  canvas.setFormat(*f);
 }
 
-bool RenderOptions::RemoveObserver(EntityP entity)
-{
-  for (EntityWObservers::iterator i = observers_.begin(), e = observers_.end(); 
-       i != e; ++i) {
-    if (i->lock() == entity) {
-      observers_.erase(i);
-      return true;
-    }
-    
-  }
-  return false;
-}
+void export_GLCanvas() {
 
-void RenderOptions::NotifyStateChange()
-{
-  for (EntityWObservers::iterator
-       i = observers_.begin(), e = observers_.end(); i != e; ++i) {
-    i->lock()->OptionsChanged(this->GetRenderMode());
-  }
+   class_<GLCanvas, boost::noncopyable>("GLCanvas", init<>())
+    .def("Show", &GLCanvas::show)
+    .def("SetFormat", &WrapSetGLCanvasFormat)
+    .def("SetDefaultFormat", &GLCanvas::SetDefaultFormat)
+    .def("SetStereoFormat", &GLCanvas::SetStereoFormat)
+    .def("GetQObject",&get_py_qobject<GLCanvas>)
+    .add_property("qobject", &get_py_qobject<GLCanvas>)
+  ;
 }
-
-}} // ns

@@ -2,15 +2,16 @@ from ost import gui
 from ost import gfx
 import os
 import ost
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 from immutable_preset_info_handler import ImmutablePresetInfoHandler
 from preset_info_handler import PresetInfoHandler
-from PyQt4.QtGui import QDesktopServices
 class PresetListModel(QtCore.QAbstractListModel):
   
   IMMUTABLE_PRESET_PATH = os.path.join(ost.GetSharedDataPath(),"scene", 
                                           "presets.xml")
   MUTABLE_PRESET_PATH = "user_presets.xml"
+
+  dataChanged = QtCore.pyqtSignal(int, int, name="dataChanged")
   
   def __init__(self, parent=None, *args): 
     QtCore.QAbstractListModel.__init__(self, parent, *args)
@@ -20,7 +21,8 @@ class PresetListModel(QtCore.QAbstractListModel):
     #Info Handler
 
     self.immutable_infoh_=ImmutablePresetInfoHandler(PresetListModel.IMMUTABLE_PRESET_PATH)
-    data_loc=QDesktopServices.storageLocation(QDesktopServices.DataLocation)    
+    data_loc=str(QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.DataLocation))
+
     mutable_path=os.path.join(str(data_loc), 'config',
                               PresetListModel.MUTABLE_PRESET_PATH)
     qdir=QtCore.QDir(data_loc)
@@ -39,7 +41,7 @@ class PresetListModel(QtCore.QAbstractListModel):
       end_index = self.createIndex(self.rowCount(),0)
       if save:
         self.AddPresetToInfo(preset)
-      self.emit(QtCore.SIGNAL("dataChanged"),model_index, end_index)
+      self.dataChanged.emit(model_index, end_index)
       return True
     return False
   
@@ -52,7 +54,7 @@ class PresetListModel(QtCore.QAbstractListModel):
       self.removeRow(row, QtCore.QModelIndex())
       model_index = self.createIndex(row,0)
       self.infoh_.RemovePreset(name)
-      self.emit(QtCore.SIGNAL("dataChanged"),model_index, model_index)
+      self.dataChanged.emit(model_index, model_index)
       return True
     return False
 
@@ -113,7 +115,7 @@ class PresetListModel(QtCore.QAbstractListModel):
         new_name = value.toString()
         self.data_[row][0].SetName(str(new_name))
         self.infoh_.RenamePreset(old_name,str(new_name))
-        self.emit(QtCore.SIGNAL("dataChanged"),index, index)
+        self.dataChanged.emit(index, index)
         return True
       elif role == QtCore.Qt.DisplayRole:
         self.data_[row][0].SetName(value.toString())

@@ -2,7 +2,7 @@ from ost import gui
 from ost import gfx
 import os
 import ost
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore
 from preset import Preset
 
 class PresetEditorListModel(QtCore.QAbstractListModel):

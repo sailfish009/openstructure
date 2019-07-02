@@ -21,25 +21,20 @@
 
 
 #include <ost/gfx/scene_observer.hh>
-
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
-
-#include <QGLFormat>
-#include <QActionGroup>
-
-class QStatusBar;
-class QAction;
 
 /*
   Authors: Ansgar Philippsen, Marco Biasini
  */
+
 namespace ost { namespace gui {
 
 
 class GLCanvas;
 class ToolBar;
 class Tool;
+class SceneMenu;
 
 class DLLEXPORT_OST_GUI GLWin: public Widget, public gfx::SceneObserver
 {
@@ -49,9 +44,6 @@ public:
   ~GLWin();
   void SetTestMode(bool f);
 
-signals:
-  void ReleaseFocus();
-
 public:
   virtual bool Restore(const QString& prefix);
   virtual bool Save(const QString& prefix);
@@ -59,21 +51,15 @@ public:
 public slots:
   void StatusMessage(const String& m);
   void ActiveToolChanged(Tool* t);
+
+private slots:
+  virtual void RequestContextMenu(const QPoint& pos);
+  
 private:
-  static QGLFormat CreateFormat(int fid);
-  GLCanvas* gl_canvas_;
-
-  QAction* edit_rigid_action_;
-  QAction* edit_torsion_action_;
-  QAction* edit_angle_action_;
-  QAction* edit_rotamer_action_;
-  QAction* smode_atom_action_;
-  QAction* smode_residue_action_;
-  QAction* smode_chain_action_;
-
-  ToolBar*     toolbar_;
-  QStatusBar*  status_bar_;
-  ToolBar* build_toolbar();
+  GLCanvas*  gl_canvas_;
+  QWidget*   gl_canvas_widget_;
+  ToolBar*   toolbar_;
+  SceneMenu* scene_menu_;
 };
 
 }} // ns

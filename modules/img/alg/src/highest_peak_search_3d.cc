@@ -177,7 +177,7 @@ template <typename T, class D>
 } // ns
 
 
-template class TEMPLATE_DEF_EXPORT ImageStateNonModAlgorithm<alg::HighestPeakSearch3DBase>;
+template class TEMPLATE_DEF_EXPORT image_state::ImageStateNonModAlgorithm<alg::HighestPeakSearch3DBase>;
 
 
 }}  // ns

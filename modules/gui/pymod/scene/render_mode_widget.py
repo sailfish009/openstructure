@@ -20,13 +20,13 @@
 
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 
 
 #Tube Render Options
-class RenderModeWidget(QtGui.QWidget):
+class RenderModeWidget(QtWidgets.QWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     self.options_ = None
     self.entities_ = set()
 
@@ -64,9 +64,9 @@ class RenderModeWidget(QtGui.QWidget):
       entity = self.entities_.pop()
       self.options_=entity.GetOptions(self.GetRenderMode())
       self.UpdateGui(self.options_)
-      QtGui.QWidget.setEnabled(self,True)
+      QtWidgets.QWidget.setEnabled(self,True)
     else:
-      QtGui.QWidget.setEnabled(self,False)
+      QtWidgets.QWidget.setEnabled(self,False)
     
   def ApplyOptions(self):
     for entity in self.entities_:

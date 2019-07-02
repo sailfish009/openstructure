@@ -42,8 +42,9 @@ def ClearMessageWidget():
       gosty.message_widget.Clear()
 
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 from ost import gfx
 
 def PickColor(default=gfx.WHITE):
@@ -110,7 +111,7 @@ def AddMenuAction(*args, **kwargs):
     AddMenuAction('Scene', 'Background Color', SetBackgroundColor,
                   shortcut='Ctrl+B')
 
-  Whenever you press Ctrl+B (Cmd+B on MacOS X), the action will be executed.
+  Whenever you press Ctrl+B (Cmd+B on macOS), the action will be executed.
   
   Very often menu actions are coupled to the current selected objects in the 
   scene menu. These menu actions are either enabled or disabled depending on the 
@@ -135,8 +136,7 @@ def AddMenuAction(*args, **kwargs):
       self.predicate=predicate
       self.action=action
       app=GostyApp.Instance()
-      QObject.connect(app.scene_win.qobject, SIGNAL('ActiveNodesChanged()'),
-                      self.TestEnable)
+      app.scene_win.qobject.ActiveNodesChanged.connect(self.TestEnable)
       self.TestEnable()
 
     def TestEnable(self):
@@ -168,7 +168,7 @@ def AddMenuAction(*args, **kwargs):
       enabler=MenuActionEnabler(kwargs['enabled'], action)
     else:
       action.setEnabled(kwargs['enabled'])
-  QObject.connect(action, SIGNAL('triggered()'), function)
+  action.triggered.connect(function)
   return action
 
 

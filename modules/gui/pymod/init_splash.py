@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import os
 import ost
@@ -12,19 +12,19 @@ You are running version %s<br /><br />If you are new to OpenStructure, we
 invite you to run the demos from the examples directory. Scripts can be 
 displayed by right clicking on the file and selecting 'Show source'.<br/><br/>
 Feel free visit our website at:<br /> 
-<a href='http://www.openstructure.org'>http://www.openstructure.org</a>
+<a href='https://www.openstructure.org'>https://www.openstructure.org</a>
 """ % ost.VERSION
 
-class SplashDialog(QtGui.QDialog):
+class SplashDialog(QtWidgets.QDialog):
   def __init__(self, parent=None):
-    QtGui.QDialog.__init__(self, parent)
-    layout = QtGui.QHBoxLayout(self)
+    QtWidgets.QDialog.__init__(self, parent)
+    layout = QtWidgets.QHBoxLayout(self)
     self.setLayout(layout)
-    imageLabel = QtGui.QLabel();
+    imageLabel = QtWidgets.QLabel();
     self.pix_map = QtGui.QPixmap(LOGO_PATH);
     imageLabel.setPixmap(self.pix_map);
     layout.addWidget(imageLabel)
-    self.label = QtGui.QTextBrowser()
+    self.label = QtWidgets.QTextBrowser()
     self.label.setReadOnly(True)
     self.label.setOpenExternalLinks(True)
     self.label.setHtml(SPLASH_TEXT)

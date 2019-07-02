@@ -23,7 +23,7 @@ import ost
 import sip
 import re
 
-from PyQt4 import QtCore, QtGui, QtNetwork
+from PyQt5 import QtCore, QtGui, QtNetwork
 from ost.gui import FileLoader
 
 """

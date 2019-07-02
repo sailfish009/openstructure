@@ -1,5 +1,5 @@
 from ost.mol.mm import *
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 """
 MM - Demo
@@ -17,8 +17,7 @@ class Anim(QtCore.QTimer):
         self.sim=sim
         self.go = go
         self.ed = ent.EditXCS()
-        QtCore.QObject.connect(self, QtCore.SIGNAL("timeout()"), self.OnTimer)
-
+        self.timeout.connect(self.OnTimer)
         
     def OnTimer(self):
         self.sim.Steps(1)

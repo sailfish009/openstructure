@@ -407,7 +407,9 @@ bool QueryState::IsAtomSelected(const AtomHandle& h)
   if(ret==false) return false;
   ret = this->EvalResidue(h.GetResidue().Impl());
   if(ret==false) return false;
-  return this->EvalAtom(h.Impl());
+  ret = this->EvalAtom(h.Impl());
+  if(ret==false) return false;
+  return true;
 }
 
 bool QueryState::IsResidueSelected(const ResidueHandle& r)

@@ -103,7 +103,7 @@ void Argand::update_buffer()
   pnt.drawLine(0,p0.y(),size().width(),p0.y());
   if (!has_data_ || GetObservedData().GetType()!=COMPLEX) return;
   
-  Real maxlen;
+  Real maxlen = 0.0;
   std::vector<Complex> data_list;
   for(ExtentIterator it(extent_); !it.AtEnd(); ++it) {
     Complex v = GetObservedData().GetComplex(it);
@@ -111,6 +111,10 @@ void Argand::update_buffer()
     Real l = std::abs(v);
     maxlen = std::max(l,maxlen);
     data_list.push_back(v);
+  }
+
+  if(maxlen == 0.0) {
+    return;    // return to avoid zero division
   }
 
   int dim=std::min(size().width(),size().height());

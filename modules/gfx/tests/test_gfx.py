@@ -129,6 +129,28 @@ class TestGfx(unittest.TestCase):
                  None,
                  None,
                  numpy.zeros((4,3),dtype=numpy.uint32))
+
+      # Passing wrong data type should fail
+      with self.assertRaises(Exception):
+        pl.AddMesh(numpy.zeros((5, 3), dtype=numpy.uint32),
+                   numpy.zeros((5, 3), dtype=numpy.float32),
+                   numpy.zeros((5, 4), dtype=numpy.float32),
+                   numpy.zeros((2, 3), dtype=numpy.uint32))
+      with self.assertRaises(Exception):
+        pl.AddMesh(numpy.zeros((5, 3), dtype=numpy.float32),
+                   numpy.zeros((5, 3), dtype=numpy.uint32),
+                   numpy.zeros((5, 4), dtype=numpy.float32),
+                   numpy.zeros((2, 3), dtype=numpy.uint32))
+      with self.assertRaises(Exception):
+        pl.AddMesh(numpy.zeros((5, 3), dtype=numpy.float32),
+                   numpy.zeros((5, 3), dtype=numpy.float32),
+                   numpy.zeros((5, 4), dtype=numpy.uint32),
+                   numpy.zeros((2, 3), dtype=numpy.uint32))
+      with self.assertRaises(Exception):
+        pl.AddMesh(numpy.zeros((5, 3), dtype=numpy.float32),
+                   numpy.zeros((5, 3), dtype=numpy.float32),
+                   numpy.zeros((5, 4), dtype=numpy.float32),
+                   numpy.zeros((2, 3), dtype=numpy.float32))
                  
 
 if __name__== '__main__':

@@ -54,5 +54,5 @@ void SliceFnc::VisitState(ImageStateImpl<T,D>& isi) const
 }
 
 }
-template class TEMPLATE_DEF_EXPORT ImageStateConstModIPAlgorithm<alg::SliceFnc>;
+template class TEMPLATE_DEF_EXPORT image_state::ImageStateConstModIPAlgorithm<alg::SliceFnc>;
 }} // ns

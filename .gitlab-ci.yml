@@ -6,79 +6,6 @@
 stages:
   - test
 
-# CentOS6 STAGE
-test:centos6.6:
-  stage: test
-  image: centos:6.6
-  before_script:
-    - echo "Running centos6.6 'before_script'..."
-    - yum -y -q -e 0 install tcl
-    - yum -y -q -e 0 install glibc-common
-    - yum -y -q -e 0 install glibc-devel
-    - yum -y -q -e 0 install libjpeg-turbo
-    - yum -y -q -e 0 install freetype
-    - yum -y -q -e 0 install libpng
-    - yum -y -q -e 0 install mesa-libGL-devel
-    - yum -y -q -e 0 install mesa-libGLU-devel
-    - mkdir -p /scicore/soft/modules
-    - ln -s /export/soft/apps/centos6/generic /scicore/soft/apps
-    - ln -s /export/soft/modules/centos6/generic/all /scicore/soft/modules
-    - source /export/soft/lua_lmod/centos6/lmod/lmod/init/bash
-    - module use /scicore/soft/modules/all
-    - module load CMake/2.8.12-goolf-1.4.10
-    - module load Python/2.7.5-goolf-1.4.10
-    - module load OpenBLAS/0.2.6-gompi-1.4.10-LAPACK-3.4.2
-    - module load Eigen/3.2.1-goolf-1.4.10
-    - module load numpy/1.9.1-goolf-1.4.10-Python-2.7.5
-    - module load Boost/1.53.0-goolf-1.4.10-Python-2.7.5
-    - module load OpenMM/6.1-Linux64
-    - module load PyQt/4.11.4-goolf-1.4.10-Python-2.7.5
-    - module load LibTIFF/4.0.3-goolf-1.4.10
-    - module load libpng/1.6.17-goolf-1.4.10
-    - module load zlib/1.2.8-goolf-1.4.10
-    - module load Perl/5.16.3-goolf-1.4.10
-    - module load HH-suite/2.0.16-goolf-1.4.10-Boost-1.53.0
-    - module load SQLite/3.9.2-goolf-1.7.20
-    - echo "... done running centos6.6 'before_script'."
-  script:
-  - echo "Testing on CentOS 6..."
-  - echo "    Building OST..."
-  - mkdir build-ci
-  - cd build-ci
-  - cmake .. -DENABLE_MM=1
-             -DOPEN_MM_LIBRARY=$EBROOTOPENMM/lib/libOpenMM.so
-             -DOPEN_MM_PLUGIN_DIR=$EBROOTOPENMM/lib/plugins
-             -DOPEN_MM_INCLUDE_DIR=$EBROOTOPENMM/include
-             -DCOMPILE_TMTOOLS=1
-             -DENABLE_GFX=ON
-             -DENABLE_GUI=OFF
-             -DUSE_NUMPY=1
-             -DUSE_RPATH=1
-             -DPYTHON_ROOT=$EBROOTPYTHON
-             -DEIGEN3_INCLUDE_DIR=$EBROOTEIGEN/include
-             -DFFTW_LIBRARY=$EBROOTFFTW/lib/libfftw3f.a
-             -DFFTW_INCLUDE_DIR=$EBROOTFFTW/include
-             -DSQLITE3_LIBRARY=$EBROOTSQLITE/lib/libsqlite3.so
-             -DSQLITE3_INCLUDE_DIR=$EBROOTSQLITE/include
-             -DBOOST_ROOT=$EBROOTBOOST
-             -DQT_QMAKE_EXECUTABLE=$EBROOTQT/bin/qmake
-             -DPNG_LIBRARY=$EBROOTLIBPNG/lib/libpng.so
-             -DPNG_INCLUDE_DIR=$EBROOTLIBPNG/include
-             -DPNG_PNG_INCLUDE_DIR=$EBROOTLIBPNG/include
-             -DZLIB_LIBRARY=$EBROOTZLIB/lib/libz.so
-             -DZLIB_INCLUDE_DIR=$EBROOTZLIB/include
-             -DTIFF_INCLUDE_DIR=$EBROOTLIBTIFF/include
-             -DTIFF_LIBRARY=$EBROOTLIBTIFF/lib/libtiff.so
-             -DOPTIMIZE=1
-             -DCMAKE_C_FLAGS='-Wno-unused-local-typedefs'
-             -DCMAKE_CXX_FLAGS='-Wno-unused-local-typedefs'
-  - make -j 2
-  - echo "    ... done building OST."
-  - echo "    Running unit tests for OST..."  
-  - make check
-  - echo "    ... done running unit tests for OST..." 
-  - echo "... done testing on CentOS 6."
-
 # CentOS7 STAGE
 test:centos7.3:
   stage: test
@@ -106,7 +33,7 @@ test:centos7.3:
     - module load Eigen/3.2.8-goolf-1.7.20
     - module load numpy/1.10.1-goolf-1.7.20-Python-2.7.11
     - module load Boost/1.53.0-goolf-1.7.20-Python-2.7.11
-    - module load PyQt/4.11.4-goolf-1.7.20-Python-2.7.11
+    - module load Qt5/5.9.3-goolf-1.7.20
     - module load LibTIFF/.4.0.4-goolf-1.7.20
     - module load Perl/5.22.2-goolf-1.7.20
     - module load HH-suite/2.0.16-goolf-1.7.20-Boost-1.53.0-Python-2.7.11
@@ -134,7 +61,7 @@ test:centos7.3:
              -DSQLITE3_LIBRARY=$EBROOTSQLITE/lib/libsqlite3.so
              -DSQLITE3_INCLUDE_DIR=$EBROOTSQLITE/include
              -DBOOST_ROOT=$EBROOTBOOST
-             -DQT_QMAKE_EXECUTABLE=$EBROOTQT/bin/qmake
+             -DQT_QMAKE_EXECUTABLE=$EBROOTQT5/bin/qmake
              -DPNG_LIBRARY=$EBROOTLIBPNG/lib/libpng.so
              -DPNG_INCLUDE_DIR=$EBROOTLIBPNG/include
              -DPNG_PNG_INCLUDE_DIR=$EBROOTLIBPNG/include
@@ -143,8 +70,8 @@ test:centos7.3:
              -DTIFF_INCLUDE_DIR=$EBROOTLIBTIFF/include
              -DTIFF_LIBRARY=$EBROOTLIBTIFF/lib/libtiff.so
              -DOPTIMIZE=1
-             -DCMAKE_C_FLAGS='-L/scicore/soft/apps/LibTIFF/4.0.4-goolf-1.7.20/lib/ -L/scicore/soft/apps/libpng/1.6.18-goolf-1.7.20/lib/ -L/scicore/soft/apps/Boost/1.53.0-goolf-1.7.20-Python-2.7.11/lib/ -L/scicore/soft/apps/Qt/4.8.6-goolf-1.7.20/lib/ -Wno-unused-local-typedefs'
-             -DCMAKE_CXX_FLAGS='-L/scicore/soft/apps/LibTIFF/4.0.4-goolf-1.7.20/lib/ -L/scicore/soft/apps/libpng/1.6.18-goolf-1.7.20/lib/ -L/scicore/soft/apps/Boost/1.53.0-goolf-1.7.20-Python-2.7.11/lib/ -L/scicore/soft/apps/Qt/4.8.6-goolf-1.7.20/lib/ -Wno-unused-local-typedefs'
+             -DCMAKE_C_FLAGS='-L/scicore/soft/apps/LibTIFF/4.0.4-goolf-1.7.20/lib/ -L/scicore/soft/apps/libpng/1.6.18-goolf-1.7.20/lib/ -L/scicore/soft/apps/Boost/1.53.0-goolf-1.7.20-Python-2.7.11/lib/ -L/scicore/soft/apps/Qt5/5.9.3-goolf-1.7.20/lib/ -Wno-unused-local-typedefs'
+             -DCMAKE_CXX_FLAGS='-L/scicore/soft/apps/LibTIFF/4.0.4-goolf-1.7.20/lib/ -L/scicore/soft/apps/libpng/1.6.18-goolf-1.7.20/lib/ -L/scicore/soft/apps/Boost/1.53.0-goolf-1.7.20-Python-2.7.11/lib/ -L/scicore/soft/apps/Qt5/5.9.3-goolf-1.7.20/lib/ -Wno-unused-local-typedefs'
   - make -j 2
   - echo "    ... done building OST."
   - echo "    Running unit tests for OST..."  

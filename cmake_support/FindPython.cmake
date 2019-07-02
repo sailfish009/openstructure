@@ -2,7 +2,7 @@
 # Check for Python Libraries
 #
 #    PYTHON_IGNORE_FRAMEWORKS if set, do not check for python frameworks. 
-#                             has meaning on MacOS X only
+#                             has meaning on macOS only
 #    PYTHON_ROOT              Prefix for python libraries
 #    PYTHON_MIN_VERSION       minimal python version required
 #  

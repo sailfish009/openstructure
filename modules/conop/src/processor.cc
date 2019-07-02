@@ -344,9 +344,7 @@ bool Processor::HasUnknownAtoms(mol::ResidueHandle res,
                                 CompoundPtr compound,
                                 bool strict_hydrogens) const 
 {
-  AtomSpecList::const_iterator j=compound->GetAtomSpecs().begin();
   mol::AtomHandleList atoms=res.GetAtomList();
-  mol::AtomHandleList::iterator i=atoms.begin();
   for (mol::AtomHandleList::iterator 
        i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
     if ((*i).Impl()->GetState()==std::numeric_limits<unsigned int>::max()) {

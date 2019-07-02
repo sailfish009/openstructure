@@ -23,16 +23,12 @@ __all__=('TrajWidget','SetTimeUnit','AddTrajectory','RemoveTrajectory','SetSpeed
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #-------------------------------------------------------------------------------
-#from PyQt4.QtCore import *
-#from PyQt4.QtGui import *
-import PyQt4 as _PyQt4
-from PyQt4.QtCore import Qt as _Qt
-from PyQt4.QtCore import QObject as _QObject
-from PyQt4.QtGui import QWidget as _QWidget
-from PyQt4.QtGui import QLabel as _QLabel
-from PyQt4.QtGui import QPushButton as _QPushButton
-from PyQt4.QtCore import SIGNAL as _SIGNAL
-from PyQt4.QtCore import QString as _QString
+
+import PyQt5 as _PyQt5
+from PyQt5.QtCore import Qt as _Qt
+from PyQt5.QtWidgets import QWidget as _QWidget
+from PyQt5.QtWidgets import QLabel as _QLabel
+from PyQt5.QtWidgets import QPushButton as _QPushButton
 import ost as _ost
 import math as _math
 
@@ -50,22 +46,22 @@ class TrajWidget(_QWidget):
     self.modifiers=None
     for i,go in enumerate(self.golist_):
       self.index_dict[go.name]=i
-    vb=_PyQt4.QtGui.QVBoxLayout()
-    hb=_PyQt4.QtGui.QHBoxLayout()
-    hb1=_PyQt4.QtGui.QHBoxLayout()
-    hb2=_PyQt4.QtGui.QHBoxLayout()
-    hb3=_PyQt4.QtGui.QHBoxLayout()
-    hb4=_PyQt4.QtGui.QHBoxLayout()
+    vb=_PyQt5.QtWidgets.QVBoxLayout()
+    hb=_PyQt5.QtWidgets.QHBoxLayout()
+    hb1=_PyQt5.QtWidgets.QHBoxLayout()
+    hb2=_PyQt5.QtWidgets.QHBoxLayout()
+    hb3=_PyQt5.QtWidgets.QHBoxLayout()
+    hb4=_PyQt5.QtWidgets.QHBoxLayout()
     self.callback=None   
-    self._slider=_PyQt4.QtGui.QSlider(self)
+    self._slider=_PyQt5.QtWidgets.QSlider(self)
     self._slider.setOrientation(_Qt.Horizontal)
-    self._speed_slider=_PyQt4.QtGui.QSlider(self)
+    self._speed_slider=_PyQt5.QtWidgets.QSlider(self)
     self._speed_slider.setOrientation(_Qt.Horizontal)
     self._speedLabel=_QLabel(self)
     self._speedLabel.setText('Speed:')
     self._speedLabel.setAlignment(_Qt.AlignLeft)
-    self._play=_PyQt4.QtGui.QToolButton(self)
-    self._repeat=_PyQt4.QtGui.QCheckBox(self)
+    self._play=_PyQt5.QtWidgets.QToolButton(self)
+    self._repeat=_PyQt5.QtWidgets.QCheckBox(self)
     self._frame=_QLabel(self)
     self._frameNo=_QLabel(self)
     self._frameEnd=_QLabel(self)
@@ -96,11 +92,11 @@ class TrajWidget(_QWidget):
     self._left_arrow=_QPushButton("<")
     self._left_arrow2=_QPushButton("<<")
     self._left_end=_QPushButton("|<")
-    self._align_selection=_PyQt4.QtGui.QLineEdit()
+    self._align_selection=_PyQt5.QtWidgets.QLineEdit()
     self._align=_QPushButton("Align")
     self._align_label=_QLabel(self)
     self._align_label.setText('Selection:')
-    self._ref_entity_selection=_PyQt4.QtGui.QComboBox()
+    self._ref_entity_selection=_PyQt5.QtWidgets.QComboBox()
     for go in self.golist_:self._ref_entity_selection.addItem(go.name)
     self._ref_entity_selection_label=_QLabel(self)
     self._ref_entity_selection_label.setText('Ref. Entity:')
@@ -134,19 +130,17 @@ class TrajWidget(_QWidget):
     vb.addLayout(hb3)
     vb.addLayout(hb4)
     self._SetSpeedSliderPos(self._speed_slider_min+0.5*(self._speed_slider_max-self._speed_slider_min))
-    _QObject.connect(self._play, _SIGNAL('toggled(bool)'), 
-                    self._TogglePlay)
-    _QObject.connect(self._slider, _SIGNAL('valueChanged(int)'), 
-                    self._SliderValueChanged)
-    _QObject.connect(self._speed_slider,_SIGNAL('valueChanged(int)'),self._SpeedSliderValChanged)
-    _QObject.connect(self._right_end,_SIGNAL('clicked()'),self._RightEndClicked)
-    _QObject.connect(self._right_arrow2,_SIGNAL('clicked()'),self._Right2Clicked)
-    _QObject.connect(self._right_arrow,_SIGNAL('clicked()'),self._RightClicked)
-    _QObject.connect(self._left_arrow2,_SIGNAL('clicked()'),self._Left2Clicked)
-    _QObject.connect(self._left_arrow,_SIGNAL('clicked()'),self._LeftClicked)
-    _QObject.connect(self._left_end,_SIGNAL('clicked()'),self._LeftEndClicked)
-    _QObject.connect(self._align, _SIGNAL('clicked()'), self._AlignClicked)
-    _QObject.connect(self._ref_entity_selection, _SIGNAL('currentIndexChanged(int)'), self._EntitySelected)
+    self._play.toggled.connect(self._TogglePlay)
+    self._slider.valueChanged.connect(self._SliderValueChanged)
+    self._speed_slider.valueChanged.connect(self._SpeedSliderValChanged)
+    self._right_end.clicked.connect(self._RightEndClicked)
+    self._right_arrow2.clicked.connect(self._Right2Clicked)
+    self._right_arrow.clicked.connect(self._RightClicked)
+    self._left_arrow2.clicked.connect(self._Left2Clicked)
+    self._left_arrow.clicked.connect(self._LeftClicked)
+    self._left_end.clicked.connect(self._LeftEndClicked)
+    self._align.clicked.connect(self._AlignClicked)
+    self._ref_entity_selection.currentIndexChanged.connect(self._EntitySelected)
     self._slider.setMinimum(0)
     self.frame_number_=self.traj_.GetFrameCount()-1
     self.timestep_=self.traj_.GetDelta()

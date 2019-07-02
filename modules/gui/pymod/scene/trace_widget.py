@@ -20,7 +20,7 @@
 
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 from render_mode_widget import RenderModeWidget
 
 #Trace Render Options
@@ -44,25 +44,25 @@ class TraceWidget(RenderModeWidget):
     #########UI##########
             
     #Arc Label
-    arc_label = QtGui.QLabel("Arc Detail")
+    arc_label = QtWidgets.QLabel("Arc Detail")
     
-    self.arc_spinbox_ = QtGui.QSpinBox()
+    self.arc_spinbox_ = QtWidgets.QSpinBox()
     self.arc_spinbox_.setRange(min_arc_detail, max_arc_detail)
         
     #Tube Radius
-    radius_tube_label = QtGui.QLabel("Radius")
+    radius_tube_label = QtWidgets.QLabel("Radius")
     
-    self.width_tube_spinbox_ = QtGui.QDoubleSpinBox()
+    self.width_tube_spinbox_ = QtWidgets.QDoubleSpinBox()
     self.width_tube_spinbox_.setRange(min_width, max_tube_width)
     self.width_tube_spinbox_.setDecimals(1)
     self.width_tube_spinbox_.setSingleStep(0.1)
     
-    self.width_tube_slider_ = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+    self.width_tube_slider_ = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
     self.width_tube_slider_.setRange(min_width*10.0, max_tube_width*10.0)
-    self.width_tube_slider_.setTickPosition(QtGui.QSlider.NoTicks)
+    self.width_tube_slider_.setTickPosition(QtWidgets.QSlider.NoTicks)
     self.width_tube_slider_.setTickInterval(1)
 
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.addWidget(arc_label,3,0,1,3)
     grid.addWidget(self.arc_spinbox_,3,4,1,1)
     
@@ -73,15 +73,9 @@ class TraceWidget(RenderModeWidget):
     grid.setRowStretch(15,1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.arc_spinbox_, QtCore.SIGNAL("valueChanged(int)"), 
-                           self.UpdateArcDetail)
-    
-    QtCore.QObject.connect(self.width_tube_spinbox_, 
-                           QtCore.SIGNAL("valueChanged(double)"), 
-                           self.UpdateTubeRadius)
-    QtCore.QObject.connect(self.width_tube_slider_, 
-                           QtCore.SIGNAL("valueChanged(int)"), 
-                           self.UpdateSliderTubeRadius)
+    self.arc_spinbox_.valueChanged.connect(self.UpdateArcDetail)
+    self.width_tube_spinbox_.valueChanged.connect(self.UpdateTubeRadius)
+    self.width_tube_slider_.valueChanged.connect(self.UpdateSliderTubeRadius)
     
     self.setMinimumSize(250,60) #2*30
     ########/UI########

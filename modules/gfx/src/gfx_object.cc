@@ -151,13 +151,8 @@ void GfxObj::RenderGL(RenderPass pass)
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glMultMatrix(transform_.GetTransposedMatrix().Data());
-    if(Scene::Instance().InOffscreenMode()) {
-      LOG_TRACE("applying material");
-      mat_.RenderGL();
-    } else {
-      LOG_TRACE("applying material display list");
-      glCallList(mat_dlist_);
-    }
+    LOG_TRACE("applying material display list");
+    glCallList(mat_dlist_);
     LOG_TRACE("calling custom render gl pass " << pass);
 
     /*
@@ -679,10 +674,14 @@ void GfxObj::SmoothVertices(float smoothf)
 
 namespace {
 
+/*
+commented out to silence compiler warning, as it is not needed anywhere
 float normalize(float v, float min_v, float max_v)
 {
   return (v-min_v)/(max_v-min_v);
 }
+*/
+
 }
 
 void GfxObj::render_labels() const

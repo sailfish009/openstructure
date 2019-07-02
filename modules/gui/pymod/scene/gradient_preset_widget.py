@@ -26,85 +26,88 @@ from ost import info
 from datetime import datetime
 
 from datetime import datetime
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 from gradient_info_handler import GradientInfoHandler
 from gradient_list_model import GradientListModel
 
 
 #Gradient Preset Widget
-class GradientPresetWidget(QtGui.QWidget):
+class GradientPresetWidget(QtWidgets.QWidget):
   ICONS_DIR = os.path.join(ost.GetSharedDataPath(), "gui", "icons/")
+
+  gradientSelected = QtCore.pyqtSignal(object, name="gradientSelected")
+
   def __init__(self, gradient_edit, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     
     #Title
     self.text_ = "Gradient Presets"
     
     #Refrences
-    self.gradient_edit_ = gradient_edit
-    
+    self.gradient_edit_ = gradient_edit   
+
     #Create Ui elements
-    self.list_view_ = QtGui.QListView()
+    self.list_view_ = QtWidgets.QListView()
     
     #Create Model
     self.list_model_ = GradientListModel(self)
     self.list_view_.setModel(self.list_model_)
-    self.list_view_.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+    self.list_view_.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         
-    preset_label = QtGui.QLabel(self.text_)
+    preset_label = QtWidgets.QLabel(self.text_)
     font = preset_label.font()
     font.setBold(True)
     
-    self.add_action = QtGui.QAction("+",self)
+    self.add_action = QtWidgets.QAction("+",self)
     self.add_action.setIcon(QtGui.QIcon(GradientPresetWidget.ICONS_DIR+"add_icon.png"))
     
-    QtCore.QObject.connect(self.add_action, QtCore.SIGNAL("triggered()"), self.Add)
+    self.add_action.triggered.connect(self.Add)
     
-    self.add_button_ = QtGui.QToolButton(self)
+    self.add_button_ = QtWidgets.QToolButton(self)
     self.add_button_.setIconSize(QtCore.QSize(20,20))
     self.add_button_.setDefaultAction(self.add_action)
         
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
     grid.addWidget(preset_label, 0, 0, 1, 1)
-    qhbox = QtGui.QHBoxLayout()
+    qhbox = QtWidgets.QHBoxLayout()
     grid.addWidget(self.list_view_,1,0,3,3)
     grid.addWidget(self.add_button_,4,0,1,1)
     self.setLayout(grid)
     
     self.list_view_.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    QtCore.QObject.connect(self.list_view_, QtCore.SIGNAL("customContextMenuRequested(const QPoint)"), self.contextMenuEvent)
+    self.list_view_.customContextMenuRequested.connect(self.contextMenuEvent)
     self.CreateImmutableContextMenu()
     self.CreateContextMenu()
 
-    QtCore.QObject.connect(self.list_view_, QtCore.SIGNAL("doubleClicked(const QModelIndex)"), self.Load)
+    self.list_view_.doubleClicked.connect(self.Load)
 
   def CreateImmutableContextMenu(self):  
-    self.immucontextMenu_ = QtGui.QMenu("Context menu", self)
-    self.load_ = QtGui.QAction("Load", self.list_view_)  
+    self.immucontextMenu_ = QtWidgets.QMenu("Context menu", self)
+    self.load_ = QtWidgets.QAction("Load", self.list_view_)  
     self.immucontextMenu_.addAction(self.load_)
     #Connect Signal with Slot  
-    QtCore.QObject.connect(self.load_, QtCore.SIGNAL("triggered()"), self.LoadCurrentIndex)
+    self.load_.triggered.connect(self.LoadCurrentIndex)
 
   def CreateContextMenu(self):
-    self.contextMenu_ = QtGui.QMenu("Context menu", self)
-    self.remove_ = QtGui.QAction("Remove", self.list_view_)
-    self.rename_ = QtGui.QAction("Rename", self.list_view_)
+    self.contextMenu_ = QtWidgets.QMenu("Context menu", self)
+    self.remove_ = QtWidgets.QAction("Remove", self.list_view_)
+    self.rename_ = QtWidgets.QAction("Rename", self.list_view_)
     self.contextMenu_.addAction(self.load_)
     self.contextMenu_.addAction(self.remove_)
     self.contextMenu_.addAction(self.rename_)
     #Connect Signals with Slots  
-    QtCore.QObject.connect(self.remove_, QtCore.SIGNAL("triggered()"), self.Remove)
-    QtCore.QObject.connect(self.rename_, QtCore.SIGNAL("triggered()"), self.Rename)
+    self.remove_.triggered.connect(self.Remove)
+    self.rename_.triggered.connect(self.Rename)
   
   def contextMenuEvent(self, pos):
     #ContextMenu
     index = self.list_view_.indexAt(pos)
     if index.isValid(): 
       if self.list_model_.IsEditable(index.row()):
-        self.contextMenu_.popup(QtGui.QCursor.pos())
+        self.contextMenu_.popup(QtWidgets.QCursor.pos())
       else:
-        self.immucontextMenu_.popup(QtGui.QCursor.pos())
+        self.immucontextMenu_.popup(QtWidgets.QCursor.pos())
   
   def Add(self):
     if(self.list_view_.currentIndex().isValid()):
@@ -115,14 +118,14 @@ class GradientPresetWidget(QtGui.QWidget):
       self.list_view_.setCurrentIndex(index)
       self.Rename()
     else:
-      QtGui.QMessageBox.information(self, "Gradient not added", "The gradient could not be added!")
+      QtWidgets.QMessageBox.information(self, "Gradient not added", "The gradient could not be added!")
       
   def Remove(self):
     if(self.list_view_.currentIndex().isValid()):
-      ret = QtGui.QMessageBox.warning(self, "Delete Gradient",
+      ret = QtWidgets.QMessageBox.warning(self, "Delete Gradient",
                    "Delete Gradient?",
-                   QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-      if ret == QtGui.QMessageBox.Yes:
+                   QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+      if ret == QtWidgets.QMessageBox.Yes:
         self.list_model_.RemoveItem(self.list_view_.currentIndex().row())
 
   def LoadCurrentIndex(self):
@@ -131,7 +134,7 @@ class GradientPresetWidget(QtGui.QWidget):
 
   def Load(self, index):
     if(index.isValid()):
-      self.emit(QtCore.SIGNAL("gradientSelected"),self.list_model_.GetGradient(index))
+      self.gradientSelected.emit(self.list_model_.GetGradient(index))
 
   def Rename(self):
     if(self.list_view_.currentIndex().isValid()):
