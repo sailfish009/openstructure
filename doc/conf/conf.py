@@ -209,3 +209,12 @@ latex_documents = [
 
 # If false, no module index is generated.
 #latex_use_modindex = True
+
+# -- OST specific configuration --------------------------------------------
+
+# these links can be fed via Python and are added to all rst files
+# -> container instructions on GIT for current OST version (assumed to match tag!)
+rst_epilog = """
+.. _Docker instructions: https://git.scicore.unibas.ch/schwede/openstructure/tree/%s/docker
+.. _Singularity instructions: https://git.scicore.unibas.ch/schwede/openstructure/tree/%s/singularity
+""" % (ost.VERSION, ost.VERSION)

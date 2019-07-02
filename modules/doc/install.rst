@@ -9,8 +9,7 @@ container solution. We provide recipes to build images for
 `Docker <https://www.docker.com/>`_ and
 `Singularity <https://www.sylabs.io/guides/2.5.1/user-guide>`_.
 The latest recipes and instructions can be found on our GitLab site
-(`Docker instructions <https://git.scicore.unibas.ch/schwede/openstructure/tree/develop/docker>`_ and
-`Singularity instructions <https://git.scicore.unibas.ch/schwede/openstructure/tree/develop/singularity>`_).
+(`Docker instructions`_ and `Singularity instructions`_).
 
 If you wish to compile OpenStructure outside of a container, you need to follow
 the steps which we describe in detail below. In essence, these steps are:
