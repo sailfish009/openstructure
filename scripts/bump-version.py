@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys, fileinput
+import sys
 
 if len(sys.argv) < 2:
   print "USAGE: python scripts/bump-version.py OST_VERSION"
