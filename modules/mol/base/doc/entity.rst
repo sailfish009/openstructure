@@ -1146,13 +1146,16 @@ The View Classes
         v = pdb.CreateEmptyView()
         v.AddChain(pdb.chains[0])
 
-    To **copy** a whole chain, go like:
+    To get the chain with residues and atoms, go like:
 
     .. code-block:: python
 
         pdb = ost.io.LoadPDB(<PDB file name>)
         v = pdb.CreateEmptyView()
         v.AddChain(pdb.chains[0], ost.mol.INCLUDE_ALL)
+
+    Note that the view above still lacks bonds which can be added with the
+    :meth:`AddAllInclusiveBonds` method.
 
     :param chain_handle: The chain handle to be added.
     :type  chain_handle: :class:`ChainHandle`
