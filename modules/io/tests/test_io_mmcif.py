@@ -167,14 +167,21 @@ class TestMMCifInfo(unittest.TestCase):
 
     self.assertEquals(''.join([c.name for c in pdb_ent.chains]),
                       'AB_-CDEFGH')
-                      
     self.assertEquals([c.residue_count for c in pdb_ent.chains],
-                      [415, 414, 64, 3816, 415,414,415,414,415,414])
+                      [415, 414, 64, 3816, 415, 414, 415, 414, 415, 414])
+    self.assertEquals([c.atom_count for c in pdb_ent.chains],
+                      [3231, 3223, 268, 3816, 3231, 3223, 3231, 3223, 3231, 3223])
+    self.assertEquals([c.GetBondCount() for c in pdb_ent.chains],
+                      [3311, 3303, 204, 0, 3311, 3303, 3311, 3303, 3311, 3303])
 
     self.assertEquals(''.join([c.name for c in pdb_seqres_ent.chains]),
-                      'AB_-CDEFGH')
+                      ''.join([c.name for c in pdb_ent.chains]))
     self.assertEquals([c.residue_count for c in pdb_seqres_ent.chains],
-                      [415, 414, 64, 3816, 415,414,415,414,415,414])
+                      [c.residue_count for c in pdb_ent.chains])
+    self.assertEquals([c.atom_count for c in pdb_seqres_ent.chains],
+                      [c.atom_count for c in pdb_ent.chains])
+    self.assertEquals([c.GetBondCount() for c in pdb_seqres_ent.chains],
+                      [c.GetBondCount() for c in pdb_ent.chains])
 
   def test_mmcifinfo_biounit_pdbize_transformation(self):
     ent, seqres, info = io.LoadMMCIF("testfiles/mmcif/3hqv.cif.gz",
