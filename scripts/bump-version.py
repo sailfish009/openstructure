@@ -10,11 +10,7 @@ if len(sys.argv) < 2:
 # split up version number
 version_string = sys.argv[1]
 version = version_string.split('.')
-if len(version) == 2:
-  major, minor, patch = (int(version[0]), int(version[1]), 0)
-  version_string += ".0"
-else:
-  major, minor, patch = (int(version[0]), int(version[1]), int(version[2]))
+major, minor, patch = (int(version[0]), int(version[1]), int(version[2]))
 
 # fix CMakeLists
 lines = open("CMakeLists.txt").readlines()
