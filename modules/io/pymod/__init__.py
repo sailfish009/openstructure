@@ -381,7 +381,9 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10,
             tmp_ops.append(tp)
         trans_matrices = tmp_ops
     # select chains into a view as basis for each transformation
-    assu = asu.Select('cname='+','.join(chains[c_intvls[i][0]:c_intvls[i][1]]))
+    assu = asu.Select('cname='+','.join(mol.QueryQuoteName(name) \
+                                        for name in \
+                                        chains[c_intvls[i][0]:c_intvls[i][1]]))
     pdbizer.Add(assu, trans_matrices, ss)
   pdb_bu = pdbizer.Finish(transformation)
   if transformation:
