@@ -124,14 +124,14 @@ inline String DLLEXPORT_OST_MOL QueryQuoteName(const String& name) {
   char quote = '\'';
   if (name.find('\'') != String::npos) {
     if (name.find('"') != String::npos) {
-      throw Error("Cannot quote chain name " + name + " because it contains '"
-                  " and \" in its name.");
+      throw Error("Cannot quote chain name " + name + " because it contains "
+                  "both ' and \" in its name.");
     }
     quote = '"';
   }
   // check problematic \ at end (escapes quotation mark and breaks logic)
   if (name[name.length() - 1] == '\\') {
-    throw Error("Cannot quote chain name " + name + "because it ends in \\.");
+    throw Error("Cannot quote chain name " + name + " because it ends in \\.");
   }
   return quote + name + quote;
 }
@@ -139,4 +139,3 @@ inline String DLLEXPORT_OST_MOL QueryQuoteName(const String& name) {
 }} // ns
 
 #endif
-
