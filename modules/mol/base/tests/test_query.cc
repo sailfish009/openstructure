@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE(test_query_throw)
   BOOST_CHECK_NO_THROW(e.Select("gcnotsetprop:0=1"));
 }
 
-BOOST_AUTO_TEST_CASE(test_glob) 
+BOOST_AUTO_TEST_CASE(test_glob)
 {
   EntityHandle e=make_query_test_entity();
   ensure_counts(e, "rname=MET and aname=C*", 1, 1, 5);
@@ -297,6 +297,50 @@ BOOST_AUTO_TEST_CASE(test_glob)
   ensure_counts(e, "rname=ARG and aname=N?", 1, 1, 1);
   ensure_counts(e, "rname=LEU and aname=\"?D?\"", 1, 1, 2);
   ensure_counts(e, "rname=LEU and aname=?D?", 1, 1, 2);
+}
+
+BOOST_AUTO_TEST_CASE(test_quoting)
+{
+  // possible letters taken from mmCIF dictionary
+  // -> http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_atom_site.label_asym_id.html
+  // not ok for us: '\' alone
+  String single_letters = " ][_,.;:\"&<>()/{}'`~!@#$\%|+-"
+                          "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefgh"
+                          "ijklmnopqrstuvwxyz";
+  // put into vector
+  std::vector<String> chain_names;
+  for (size_t i = 0; i < single_letters.length(); ++i) {
+    chain_names.push_back(String(1, single_letters[i]));
+  }
+  // add some multi letter names and empty chain name too
+  // not ok: mixing ' and ", '\' at end
+  chain_names.push_back("\\ ][_,.;:&<>()/{}'`~!@#$\%|+-");
+  chain_names.push_back("ABCDEFGHIJKLMNOPQRSTU'VWXYZ0123456789abcdefgh");
+  chain_names.push_back("ijklmno\"pqrstuvwxyz");
+  chain_names.push_back("");
+  // setup entity
+  EntityHandle ent = CreateEntity();
+  XCSEditor edi = ent.EditXCS();
+  for (size_t i = 0; i < chain_names.size(); ++i) {
+    edi.InsertChain(chain_names[i]);
+  }
+  // test quoting
+  String query_all = "cname=";
+  for (size_t i = 0; i < chain_names.size(); ++i) {
+    const String quoted_name = QueryQuoteName(chain_names[i]);
+    BOOST_CHECK_EQUAL(ent.Select("cname=" + quoted_name).GetChainCount(), 1);
+    query_all += quoted_name;
+    if (i != chain_names.size() - 1) query_all += ",";
+  }
+  BOOST_CHECK_EQUAL(ent.Select(query_all).GetChainCount(),
+                    int(chain_names.size()));
+  // note: quoting * keeps it as wild card!
+  BOOST_CHECK_EQUAL(ent.Select("cname=" + QueryQuoteName("*")).GetChainCount(),
+                    int(chain_names.size()));
+  // expected failures (mixing ' and ", '\' at end)
+  BOOST_CHECK_THROW(QueryQuoteName("'\""), Error);
+  BOOST_CHECK_THROW(QueryQuoteName("\\"), Error);
+  BOOST_CHECK_THROW(QueryQuoteName("a\\"), Error);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
