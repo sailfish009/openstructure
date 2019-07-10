@@ -1,4 +1,4 @@
-Changes in Release 1.x.x
+Changes in Release 1.10.0
 --------------------------------------------------------------------------------
 
  * Use system provided SQLite3 library.
