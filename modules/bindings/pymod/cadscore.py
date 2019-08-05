@@ -79,8 +79,8 @@ class CADResult:
     Dictionary containing local CAD's atom-atom (AA) scores. 
     
     :type: dictionary (key: tuple(chain, resnum) (e.g.: 
-    ("A", ost.mol.ResNum(24)), value: CAD local AA score 
-    (see CAD Documentation online)
+           ("A", ost.mol.ResNum(24)), value: CAD local AA score 
+           (see CAD Documentation online)
   """
   def __init__(self, globalAA, localAA):    
     self.globalAA=globalAA
