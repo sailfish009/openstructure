@@ -326,7 +326,8 @@ line. If omitted, the linker will throw a bunch of warnings later:
 
 .. code-block:: bash
 
-  export SDKROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+  export SDKROOT=/Applications/Xcode.app/Contents/Developer/Platforms/\
+  MacOSX.platform/Developer/SDKs/MacOSX.sdk
 
 If building the info module or with graphical user interface, get the Qt
 binaries in your Path for CMake to determine its configuration:
@@ -341,8 +342,10 @@ located as they are on Linux and hence they must be specified too:
 
 .. code-block:: bash
 
-  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/Cellar/python@2/2.7.16/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
-          -DPYTHON_LIBRARIES=/usr/local/Cellar/python@2/2.7.16/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib \
+  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/Cellar/python@2/2.7.16/\
+  Frameworks/Python.framework/Versions/2.7/include/python2.7 \
+          -DPYTHON_LIBRARIES=/usr/local/Cellar/python@2/2.7.16/\
+  Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib \
           -DPYTHON_ROOT=/usr/local/ \
           -DBOOST_ROOT=/usr/local \
           -DSYS_ROOT=/usr/local \
@@ -358,7 +361,8 @@ to run multiple jobs at once.
 What's next?
 --------------------------------------------------------------------------------
 
-On Linux and macOS, you can start dng from the command-line. The binaries are all located in stage/bin:
+On Linux and macOS, you can start dng from the command-line. The binaries are
+all located in stage/bin:
 
 .. code-block:: bash
 
@@ -370,7 +374,8 @@ or, to start the command-line interpreter:
 
   stage/bin/ost
   
-If you repeatedly use OpenStructure, it is recommended to add /path/to/ost/stage/bin to your path.
+If you repeatedly use OpenStructure, it is recommended to add
+/path/to/ost/stage/bin to your path.
 
 Getting the newest changes
 --------------------------------------------------------------------------------
