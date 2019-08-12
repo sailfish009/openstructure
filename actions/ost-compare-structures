@@ -31,7 +31,7 @@ Only model structures are "Molck-ed" in CAMEO. The call to molck is as follows:
 
   molck \\
       --complib=<COMPOUND LIB> \\
-      --rm=hyd,oxt,unk \\
+      --rm=hyd,oxt,unk,nonstd \\
       --fix-ele \\
       --map-nonstd \\
       --out=<OUTPUT> \\
@@ -45,7 +45,7 @@ compare-structures as follows:
       --reference <REF> \\
       --output output.json \\
       --molck \\
-      --remove oxt hyd unk \\
+      --remove oxt hyd unk nonstd \\
       --clean-element-column \\
       --map-nonstandard-residues \\
       --structural-checks \\
@@ -243,7 +243,7 @@ def _ParseArgs():
               " * hyd - remove hydrogen atoms\n"
               " * oxt - remove terminal oxygens\n"
               " * nonstd - remove all residues not one of the 20\n"
-              " * standard amino acids\n"
+              "            standard amino acids\n"
               " * unk - Remove unknown and atoms not following the\n"
               "         nomenclature\n"
               "Defaults to hyd."))
