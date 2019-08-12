@@ -859,7 +859,7 @@ endmacro()
 #-------------------------------------------------------------------------------
 function(get_compiler_version _OUTPUT_VERSION)
   exec_program(${CMAKE_CXX_COMPILER}
-               ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+               ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpfullversion -dumpversion
                OUTPUT_VARIABLE _COMPILER_VERSION
   )
   string(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
