@@ -321,14 +321,14 @@ macro(executable)
   if (ENABLE_STATIC AND _ARG_STATIC)
     target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
     if (UNIX AND NOT APPLE)
-      if (OST_GCC_45)    
-        set_target_properties(${_ARG_NAME}
-                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
-                              LINK_FLAGS "-static-libgcc -static-libstdc++ -static -pthread")
-      else()
+      if (OST_GCC_LESS_45)
         set_target_properties(${_ARG_NAME}
                               PROPERTIES LINK_SEARCH_END_STATIC TRUE  
                               LINK_FLAGS "-static-libgcc -static -pthread")
+      else()
+        set_target_properties(${_ARG_NAME}
+                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
+                              LINK_FLAGS "-static-libgcc -static-libstdc++ -static -pthread")
       endif()        
     endif()
   endif()
@@ -899,8 +899,12 @@ macro(setup_compiler_flags)
     #message(STATUS "GCC VERSION " ${_GCC_VERSION})
     if ((ENABLE_INFO OR ENABLE_GUI) AND _GCC_VERSION LESS "60")
       # for older compilers we need to enable C++11 for Qt5
-      #message(STATUS "ADDING C++11 FLAG")
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    endif()
+    if (_GCC_VERSION LESS "45")
+      set(OST_GCC_LESS_45 true)
+    else()
+      set(OST_GCC_LESS_45 false)
     endif()
   endif()
 endmacro()

@@ -12,16 +12,6 @@ set (OST_VERSION_STRING ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR}.${OST_VERSION_
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
 include(OST)
 
-
-if (CMAKE_COMPILER_IS_GNUCXX)  
-  exec_program(gcc ARGS --version OUTPUT_VARIABLE CMAKE_C_COMPILER_VERSION)
-  if(CMAKE_C_COMPILER_VERSION MATCHES ".*4\\.[5-9].*")
-    set(OST_GCC_45 true)
-  else()   
-    set(OST_GCC_45 false)  
-  endif()
-endif()
-
 option(USE_SHADER "whether to compile with shader support"
        OFF)
 option(USE_RPATH "embed rpath upon make install"
