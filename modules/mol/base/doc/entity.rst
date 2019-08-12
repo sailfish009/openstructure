@@ -401,6 +401,12 @@ The Handle Classes
        print chain.residues # [B.GLY1, B.GLY4, B.GLY3]
        print chain.in_sequence # prints false
 
+  .. attribute:: residue_count
+
+    Number of residues. Read-only. See :meth:`GetResidueCount`.
+
+    :type: :class:`int`
+
   .. attribute:: atoms
 
      Get list of all atoms of this chain. To access a single atom, use
@@ -454,7 +460,11 @@ The Handle Classes
                         
   .. method:: GetResidueList()
 
-    See :attr:`residues`.
+    See :attr:`residues`
+
+  .. method:: GetResidueCount()
+
+    See :attr:`residue_count`
 
   .. method:: FindAtom(res_num, atom_name)
 
@@ -687,6 +697,43 @@ The Handle Classes
     :returns:           A valid :class:`AtomHandle` if an atom with the given
                         name could be found, an invalid :class:`AtomHandle`
                         otherwise
+
+  .. method:: HasAltAtoms()
+
+    Returns whether the residue has any alternative atom groups
+
+    :rtype:             :class:`bool`
+
+  .. method:: HasAltAtomGroup(group_name)
+
+    Returns whether the residue has a certain alternative atom group
+
+    :param group_name:  Group of interest
+    :type group_name:   :class:`str`
+    :rtype:             :class:`bool`
+
+  .. method:: GetAltAtomGroupNames()
+
+    Returns names of all alternative atom groups in residue
+
+    :rtype:             :class:`list` of :class:`str`
+
+  .. method:: GetCurrentAltGroupName()
+
+    Returns the currently active alternative atom group, empty
+    :class:`str` if residue has no alternative atom groups
+
+    :rtype:             :class:`str`
+
+  .. method:: SwitchAtomPos(group_name)
+
+    Switches the atoms in residue to the specified alternative atom group
+
+    :param group_name:  Group of interest
+    :type group_name:   :class:`str`
+    :rtype:             :class:`bool`
+    :returns:           Whether the switch was successful (e.g. False if no such
+                        group exists)
 
   .. method:: GetAtomList()
 
@@ -1099,13 +1146,16 @@ The View Classes
         v = pdb.CreateEmptyView()
         v.AddChain(pdb.chains[0])
 
-    To **copy** a whole chain, go like:
+    To get the chain with residues and atoms, go like:
 
     .. code-block:: python
 
         pdb = ost.io.LoadPDB(<PDB file name>)
         v = pdb.CreateEmptyView()
         v.AddChain(pdb.chains[0], ost.mol.INCLUDE_ALL)
+
+    Note that the view above still lacks bonds which can be added with the
+    :meth:`AddAllInclusiveBonds` method.
 
     :param chain_handle: The chain handle to be added.
     :type  chain_handle: :class:`ChainHandle`
@@ -1870,7 +1920,11 @@ Residue Numbering
   Number for a residue. The residue number has a numeric part and an (optional)
   insertion-code. You can work with this object as if it was an integer and
   comparison will look first at the numeric part and then the insertion-code.
-  All access to existing objects is read-only.
+  All access to existing objects is read-only. Openstructure supports a range
+  of (-8388608 to 8388607) for the numeric part. However, the PDB format only 
+  supports a range of (-999, 9999). This becomes relevant when a structure is 
+  saved in PDB format where an IOException is raised if the PDB range is not 
+  respected.
 
   :param num: Numeric part of residue number.
   :type num:  :class:`int`

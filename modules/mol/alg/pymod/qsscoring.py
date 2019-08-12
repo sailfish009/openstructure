@@ -606,8 +606,8 @@ class QSscoreEntity(object):
 
   .. attribute:: is_valid
 
-    True, if successfully initialized. False, if input structure is monomer or
-    has less than 2 protein chains with >= 20 residues.
+    True, if successfully initialized. False, if input structure has no protein
+    chains with >= 20 residues.
 
     :type: :class:`bool`
 
@@ -1462,18 +1462,6 @@ def _AlignAtomSeqs(seq_1, seq_2):
     LogWarning('%s:  %s' % (seq_2.name, seq_2.string))
   return aln
 
-def _FixSelectChainName(ch_name):
-  """
-  :return: String to be used with Select(cname=<RETURN>). Takes care of putting
-           quotation marks where needed.
-  :rtype:  :class:`str`
-  :param ch_name: Single chain name (:class:`str`).
-  """
-  if ch_name in ['-', '_', ' ']:
-    return '"%c"' % ch_name
-  else:
-    return ch_name
-
 def _FixSelectChainNames(ch_names):
   """
   :return: String to be used with Select(cname=<RETURN>). Takes care of joining
@@ -1481,8 +1469,7 @@ def _FixSelectChainNames(ch_names):
   :rtype:  :class:`str`
   :param ch_names: Some iterable list of chain names (:class:`str` items).
   """
-  chain_set = set([_FixSelectChainName(ch_name) for ch_name in ch_names])
-  return ','.join(chain_set)
+  return ','.join(mol.QueryQuoteName(ch_name) for ch_name in ch_names)
 
 # QS entity
 
@@ -1507,7 +1494,7 @@ def _CleanInputEntity(ent):
 
   # remove them from *ent*
   if removed_chains:
-    view = ent.Select('cname!=%s' % _FixSelectChainNames(removed_chains))
+    view = ent.Select('cname!=%s' % _FixSelectChainNames(set(removed_chains)))
     ent_new = mol.CreateEntityFromView(view, True)
     ent_new.SetName(ent.GetName())
   else:

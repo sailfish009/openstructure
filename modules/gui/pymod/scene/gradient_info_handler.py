@@ -21,7 +21,7 @@
 from ost import gui
 from ost import gfx
 from ost import info
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore
 from immutable_gradient_info_handler import ImmutableGradientInfoHandler
 
 #Gradient Info Handler

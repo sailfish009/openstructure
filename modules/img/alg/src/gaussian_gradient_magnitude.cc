@@ -143,6 +143,6 @@ void GaussianGradientMagnitudeFilterBase::calcBVals( Real q )
 
 } // ns
 
-template class TEMPLATE_DEF_EXPORT ImageStateModIPAlgorithm<alg::GaussianGradientMagnitudeFilterBase>;
+template class TEMPLATE_DEF_EXPORT image_state::ImageStateModIPAlgorithm<alg::GaussianGradientMagnitudeFilterBase>;
 
 }}

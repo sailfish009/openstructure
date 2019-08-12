@@ -42,6 +42,7 @@
 #include <QDirModel>
 #include <QStringList>
 #include <QDebug>
+#include <QMimeData>
 
 /*
  Authors: Marco Biasini, Andreas Schenk

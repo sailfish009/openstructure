@@ -202,7 +202,7 @@ Creating a compound library
 --------------------------------------------------------------------------------
 
 The simplest way to create compound library is to use the :program:`chemdict_tool`. The programs allows you to import the chemical 
-description of the compounds from a MMCIF dictionary, e.g. the components.cif dictionary provided by the PDB. The latest dictionary for can be downloaded from the `wwPDB site <http://www.wwpdb.org/ccd.html>`_. The files are rather large, it is therefore recommended to download the gzipped version. 
+description of the compounds from a mmCIF dictionary, e.g. the components.cif dictionary provided by the PDB. The latest dictionary for can be downloaded from the `wwPDB site <http://www.wwpdb.org/ccd.html>`_. The files are rather large, it is therefore recommended to download the gzipped version.
 
 After downloading the file use :program:`chemdict_tool` to convert the MMCIF  dictionary into our internal format.  
 

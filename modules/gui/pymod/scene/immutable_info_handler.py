@@ -21,7 +21,7 @@
 from ost import gui
 from ost import gfx
 from ost import info
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 
 #Gradient Editor
 class ImmutableInfoHandler:
@@ -50,13 +50,13 @@ class ImmutableInfoHandler:
   
   def ConvertToQGradient(self, gfxGradient):
     stops = gfxGradient.GetStops()
-    qgrad = QtGui.QLinearGradient()
+    qgrad = QtWidgets.QLinearGradient()
     for stop in stops:
       color = stop.GetColor()
-      qcolor = QtGui.QColor(color.Red()*255,
-                            color.Green()*255,
-                            color.Blue()*255,
-                            color.Alpha()*255)
+      qcolor = QtWidgets.QColor(color.Red()*255,
+                                color.Green()*255,
+                                color.Blue()*255,
+                                color.Alpha()*255)
       qgrad.setColorAt(stop.GetRel(), qcolor) 
     return qgrad 
   

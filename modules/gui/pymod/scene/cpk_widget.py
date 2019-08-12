@@ -20,7 +20,7 @@
 
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 from render_mode_widget import RenderModeWidget
 
 #CPK Render Options
@@ -40,26 +40,26 @@ class CPKWidget(RenderModeWidget):
         
     #Create Ui elements
     
-    self.sphere_spinbox_ = QtGui.QSpinBox()
+    self.sphere_spinbox_ = QtWidgets.QSpinBox()
     self.sphere_spinbox_.setRange(min_sphere_detail, max_sphere_detail)
-    cpk_mode_label = QtGui.QLabel("Rendering Mode")
-    self.cpk_mode_ = QtGui.QComboBox()
+    cpk_mode_label = QtWidgets.QLabel("Rendering Mode")
+    self.cpk_mode_ = QtWidgets.QComboBox()
     self.cpk_mode_.addItem("Triangles")
     self.cpk_mode_.addItem("3D Sprites")
-    cpk_label = QtGui.QLabel(self.text_)
+    cpk_label = QtWidgets.QLabel(self.text_)
     font = cpk_label.font()
     font.setBold(True)
     
-    sphere_label = QtGui.QLabel("Sphere Detail")
-    grid = QtGui.QGridLayout()
+    sphere_label = QtWidgets.QLabel("Sphere Detail")
+    grid = QtWidgets.QGridLayout()
     grid.addWidget(cpk_label,0,0,1,1)
     grid.addWidget(sphere_label, 1, 0, 1, 3)
     grid.addWidget(self.sphere_spinbox_, 1, 2, 1, 1)
     grid.setRowStretch(2,1)
     self.setLayout(grid)
   
-    QtCore.QObject.connect(self.sphere_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSphereDetail)
-    QtCore.QObject.connect(self.cpk_mode_, QtCore.SIGNAL("currentIndexChanged(int)"), self.UpdateSphereMode)
+    self.sphere_spinbox_.valueChanged.connect(self.UpdateSphereDetail)
+    self.cpk_mode_.currentIndexChanged.connect(self.UpdateSphereMode)
     
     self.setMinimumSize(250,60)
     

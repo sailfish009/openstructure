@@ -50,6 +50,16 @@ struct CubeGrid {
     delete [] cubes;
   }
 
+  static long int NumCubes(int x_c, int y_c, int z_c) {
+    int x_cubes = std::max(1, x_c);
+    int y_cubes = std::max(1, y_c);
+    int z_cubes = std::max(1, z_c);
+    long int n = x_cubes;
+    n *= y_cubes;
+    n *= z_cubes;
+    return n;
+  }
+
   int GetCubeIdx(Real x, Real y, Real z) {
     int x_cube = std::min(static_cast<int>((x - x_min) / cube_edge_length), 
                           x_cubes - 1);
@@ -560,10 +570,23 @@ CubeGrid SetupCubeGrid(const std::vector<Real>& x,
   Real x_range = x_max - x_min;
   Real y_range = y_max - y_min;
   Real z_range = z_max - z_min;
-  Real cube_edge_length = 2 * (r_max);
+  Real cube_edge_length = 2 * r_max;
   int x_cubes = std::ceil(x_range / cube_edge_length);
   int y_cubes = std::ceil(y_range / cube_edge_length);
   int z_cubes = std::ceil(z_range / cube_edge_length);
+  
+  while(true) {
+    long int n = CubeGrid::NumCubes(x_cubes, y_cubes, z_cubes);
+    if(n <= 125000000) {
+      // n is small enough, 125000000 corresponds to a grid of size 500x500x500
+      break;
+    }
+    // we get too many cubes, let's increase edge length...
+    cube_edge_length *= 1.1;
+    x_cubes = std::ceil(x_range / cube_edge_length);
+    y_cubes = std::ceil(y_range / cube_edge_length);
+    z_cubes = std::ceil(z_range / cube_edge_length);
+  }
 
   CubeGrid cube_grid(cube_edge_length, x_cubes, y_cubes, z_cubes,
                      x_min, y_min, z_min);
@@ -678,7 +701,6 @@ void CalculateASA(const std::vector<Real>& x,
 
   int num_cubes = cube_grid.GetNumCubes();
   for(int cube_idx = 0; cube_idx < num_cubes; ++cube_idx) {
-
     if(cube_grid.IsInitialized(cube_idx)) {
       // there is at least one atom!
       SolveCube(cube_grid, cube_idx, x, y, z, full_radii, 

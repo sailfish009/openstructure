@@ -404,19 +404,28 @@ std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityView&
           }      
           if (other_atom.GetHashCode() > atom.GetHandle().GetHashCode()) {
             Real blength = bond.GetLength();
-            String bond_str = bond_string(atom,other_atom);
-            std::pair<Real,Real> length_stddev = bond_table.GetParam(bond_str,residue_str);
+            String bond_str = bond_string(atom, other_atom);
+            std::pair<Real,Real> length_stddev = bond_table.GetParam(bond_str, residue_str);
             Real ref_length = length_stddev.first;
             Real ref_stddev = length_stddev.second;           
             Real min_length = ref_length - bond_tolerance*ref_stddev;
             Real max_length = ref_length + bond_tolerance*ref_stddev;
             Real zscore = (blength - ref_length)/ref_stddev;
             if (blength < min_length || blength > max_length) {
-              LOG_INFO("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "FAIL")
+              LOG_INFO("BOND:" << " " << res.GetChain() << " "
+                       << res.GetName() << " " << res.GetNumber() << " "
+                       << bond_str << " " << min_length << " " << max_length
+                       << " " << blength << " " << zscore << " " << "FAIL")
               bad_bond_count++;
-              UniqueAtomIdentifier atom_ui(atom.GetResidue().GetChain().GetName(),atom.GetResidue().GetNumber(),atom.GetResidue().GetName(),atom.GetName());
-              UniqueAtomIdentifier other_atom_ui(other_atom.GetResidue().GetChain().GetName(),other_atom.GetResidue().GetNumber(),other_atom.GetResidue().GetName(),other_atom.GetName());
-              StereoChemicalBondViolation bond_v(atom_ui,other_atom_ui,blength,std::make_pair(min_length,max_length));
+              UniqueAtomIdentifier atom_ui(atom.GetResidue().GetChain().GetName(),
+                                           atom.GetResidue().GetNumber(),
+                                           atom.GetResidue().GetName(), atom.GetName());
+              UniqueAtomIdentifier other_atom_ui(other_atom.GetResidue().GetChain().GetName(),
+                                                 other_atom.GetResidue().GetNumber(),
+                                                 other_atom.GetResidue().GetName(),
+                                                 other_atom.GetName());
+              StereoChemicalBondViolation bond_v(atom_ui, other_atom_ui, blength,
+                                                 std::make_pair(min_length, max_length));
               bond_violation_list.push_back(bond_v);
               remove_sc=true;
               if (always_remove_bb==true) {
@@ -432,7 +441,10 @@ std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityView&
                 }
               }
             } else {
-              LOG_VERBOSE("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "PASS")
+              LOG_VERBOSE("BOND:" << " " << res.GetChain() << " "
+                          << res.GetName() << " " << res.GetNumber() << " "
+                          << bond_str << " " << min_length << " " << max_length
+                          << " " << blength << " " << zscore << " " << "PASS")
             }
             bond_count++;
             running_sum_zscore_bonds+=zscore;
@@ -486,12 +498,25 @@ std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityView&
             Real max_width = ref_width + angle_tolerance*ref_stddev;
             Real zscore = (awidth - ref_width)/ref_stddev;
             if (awidth < min_width || awidth > max_width) {
-              LOG_INFO("ANGLE:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << angle_str << " " << min_width << " " << max_width << " " << awidth << " " << zscore << " " << "FAIL")
+              LOG_INFO("ANGLE:" << " " << res.GetChain() << " "
+                       << res.GetName() << " " << res.GetNumber() << " "
+                       << angle_str << " " << min_width << " " << max_width
+                       << " " << awidth << " " << zscore << " " << "FAIL")
               bad_angle_count++;
-              UniqueAtomIdentifier atom1_ui(atom1.GetResidue().GetChain().GetName(),atom1.GetResidue().GetNumber(),atom1.GetResidue().GetName(),atom1.GetName());
-              UniqueAtomIdentifier atom_ui(atom.GetResidue().GetChain().GetName(),atom.GetResidue().GetNumber(),atom.GetResidue().GetName(),atom.GetName());
-              UniqueAtomIdentifier atom2_ui(atom2.GetResidue().GetChain().GetName(),atom2.GetResidue().GetNumber(),atom2.GetResidue().GetName(),atom2.GetName());
-              StereoChemicalAngleViolation angle_v(atom1_ui,atom_ui,atom2_ui,awidth,std::make_pair(min_width,max_width));
+              UniqueAtomIdentifier atom1_ui(atom1.GetResidue().GetChain().GetName(),
+                                            atom1.GetResidue().GetNumber(),
+                                            atom1.GetResidue().GetName(),
+                                            atom1.GetName());
+              UniqueAtomIdentifier atom_ui(atom.GetResidue().GetChain().GetName(),
+                                           atom.GetResidue().GetNumber(),
+                                           atom.GetResidue().GetName(),
+                                           atom.GetName());
+              UniqueAtomIdentifier atom2_ui(atom2.GetResidue().GetChain().GetName(),
+                                            atom2.GetResidue().GetNumber(),
+                                            atom2.GetResidue().GetName(),
+                                            atom2.GetName());
+              StereoChemicalAngleViolation angle_v(atom1_ui,atom_ui,atom2_ui,awidth,
+                                                   std::make_pair(min_width,max_width));
               angle_violation_list.push_back(angle_v);
               remove_sc=true;
               if (always_remove_bb==true) {
@@ -502,7 +527,10 @@ std::pair<EntityView,StereoChemistryInfo> CheckStereoChemistry(const EntityView&
                 remove_bb=true;
               }
             } else {
-                LOG_VERBOSE("ANGLE:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << angle_str << " " << min_width << " " << max_width << " " << awidth << " " << zscore << " " << "PASS")
+              LOG_VERBOSE("ANGLE:" << " " << res.GetChain() << " "
+                          << res.GetName() << " " << res.GetNumber() << " "
+                          << angle_str << " " << min_width << " " << max_width
+                          << " " << awidth << " " << zscore << " " << "PASS")
             }
             angle_count++;
             running_sum_zscore_angles+=zscore;  
@@ -610,7 +638,14 @@ std::pair<EntityView,ClashingInfo> FilterClashes(const EntityView& ent, const Cl
         Real threshold=distance-tolerance;
 
         if (d<threshold*threshold) {
-          LOG_INFO(atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue().GetName() << " " << atom2.GetResidue().GetNumber() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << " " << sqrt(d)-threshold << " " << "FAIL")
+          LOG_INFO("CLASH:" << " " << atom.GetResidue().GetChain() << " "
+                   << atom.GetResidue().GetName() << " "
+                   << atom.GetResidue().GetNumber() << " " << atom.GetName()
+                   << " " << atom2.GetResidue().GetChain() << " "
+                   << atom2.GetResidue().GetName() << " "
+                   << atom2.GetResidue().GetNumber() << " " << atom2.GetName()
+                   << " " << threshold << " " << sqrt(d) << " "
+                   << sqrt(d)-threshold << " " << "FAIL")
           bad_distance_count++; 
           UniqueAtomIdentifier atom_ui(atom.GetResidue().GetChain().GetName(),atom.GetResidue().GetNumber(),atom.GetResidue().GetName(),atom.GetName());
           UniqueAtomIdentifier atom2_ui(atom2.GetResidue().GetChain().GetName(),atom2.GetResidue().GetNumber(),atom2.GetResidue().GetName(),atom2.GetName());
@@ -626,7 +661,14 @@ std::pair<EntityView,ClashingInfo> FilterClashes(const EntityView& ent, const Cl
             remove_bb=true;
           }
         } else {
-          LOG_VERBOSE("CLASH:" << " " << atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue().GetNumber() << " " << atom2.GetResidue().GetName() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << " " << sqrt(d)-threshold << " " << "PASS")
+          LOG_VERBOSE("CLASH:" << " " << atom.GetResidue().GetChain() << " "
+                      << atom.GetResidue().GetName() << " "
+                      << atom.GetResidue().GetNumber() << " " << atom.GetName()
+                      << " " << atom2.GetResidue().GetChain() << " "
+                      << atom2.GetResidue().GetName() << " "
+                      << atom2.GetResidue().GetNumber() << " " << atom2.GetName()
+                      << " " << threshold << " " << sqrt(d) << " "
+                      << sqrt(d)-threshold << " " << "PASS")
         }
         distance_count++;
       }

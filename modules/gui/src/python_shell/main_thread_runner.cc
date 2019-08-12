@@ -37,7 +37,8 @@ void MainThreadRunner::Run(const QString& widget)
   PyGILState_STATE gstate = PyGILState_Ensure();
   bp::object  main_module = bp::import("__main__");
   bp::object main_namespace = main_module.attr("__dict__");
-  bp::exec(bp::str("Proxy._widget_=QtGui."+widget.toStdString()+"()\n"),main_namespace,main_namespace);
+  std::string cmd = "Proxy._widget_=QtGui." + widget.toStdString() + "()\n";
+  bp::exec(cmd.c_str(), main_namespace, main_namespace);
   PyGILState_Release(gstate);
 }
 

@@ -48,13 +48,15 @@ Both the selection statements that have been used so far take strings as their a
   n_term = model.Select('rnum<=20')
 
 If you want to supply arguments with special characters they need to be put in
-quotation marks. For instance, this is needed to select the chain named "_" or
-for any chain name conatining ".", " " or ",". Hence, chain "_" can be selected
-with:
+quotation marks (' or "). For instance, this is needed for any chain name
+containing spaces as in:
 
 .. code-block:: python
 
-  model.Select('cname="_"')
+  model.Select('cname=" "')
+
+Almost any name can be quoted with :meth:`QueryQuoteName`.
+
 
 Combining predicates
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -305,3 +307,22 @@ In the following, the interface of the query class is described. In general, you
   * ``NO_BONDS`` - do not include any bonds (by default bonds are included)
   * ``MATCH_RESIDUES`` - include all atoms of a residue if any of its atoms is
     selected (by default only selected atoms are included)
+
+.. method:: QueryQuoteName(name)
+
+  Adds appropriate quotation marks to use *name* in a :class:`Query`. For
+  instance the following code snippet would generate a query string selecting
+  all chains from a list of chain names:
+
+  .. code-block:: python
+
+    query = "cname=" + ','.join(mol.QueryQuoteName(name) for name in names)
+
+  Note that there is some limited support of wild card symbols (* and ?) which
+  may have undesired effects in a query such as the code above.
+
+  :param name: Name to put in quotation marks
+  :type name:  :class:`str`
+  :rtype: :class:`str`
+  :raises: :exc:`~exceptions.Exception` if *name* cannot be used in queries.
+           This happens if *name* includes both ' and " or if it ends with \\.

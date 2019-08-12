@@ -30,15 +30,14 @@ void export_diag() {
   enum_<DiagType>("DiagType")
     .value("DIAG_UNK_ATOM", DIAG_UNK_ATOM)
     .value("DIAG_UNK_RESIDUE", DIAG_UNK_RESIDUE)
-    .value("(DIAG_MISSING_ATOM", DIAG_MISSING_ATOM)
+    .value("DIAG_MISSING_ATOM", DIAG_MISSING_ATOM)
     .value("DIAG_NONSTD_RESIDUE", DIAG_NONSTD_RESIDUE)
     .export_values()
   ;
 
   class_<Diag>("Diag", init<DiagType,const char*>())
-    .def("__str__(self)__", &Diag::Format)
+    .def("Format", &Diag::Format, arg("colored")=true)
   ;
   class_<Diagnostics, DiagnosticsPtr>("Diagnostics")
   ;
 }
-

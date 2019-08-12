@@ -19,14 +19,14 @@
 
 from ost import gui
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui
 from board import Board
 
 #Get Panels (Class which manages widgets)
 panels=gui.GostyApp.Instance().perspective.panels
 
 #Create Widget
-tetris=Board(panels.qobject)
+tetris=Board()
 
 #Wrap widget to Qt Widget
 wid=gui.Widget(tetris)

@@ -141,7 +141,14 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
       }
     }    
   }
-  line(22, 4)=fmt::LPaddedInt(res.GetNumber().GetNum());
+
+  int num = res.GetNumber().GetNum();
+  if(num < -999 || num > 9999) {
+    throw IOException("Residue number from " + res.GetQualifiedName() +
+                      " is out of range supported by the PDB format " 
+                      "(-999 to 9999)");
+  }
+  line(22, 4)=fmt::LPaddedInt(num);
   if (ins_code!=0) {
     line[26]=ins_code;
   }
@@ -397,6 +404,9 @@ PDBWriter::PDBWriter(const String& filename, const IOProfile& profile):
   multi_model_(false), charmm_style_(profile.dialect=="CHARMM"), 
   is_pqr_(false), profile_(profile), filename_(filename)
 {
+  if (!outfile_.is_open()) {
+    throw IOException("Failed to open: " + filename);
+  }
   if (boost::iequals(".pqr", boost::filesystem::extension(filename))) {
     is_pqr_=true;
   }
@@ -412,7 +422,8 @@ void PDBWriter::WriteModelLeader()
   if (multi_model_) {
     out_ << "MODEL     " << mol_count_ << std::endl;
   } else if (mol_count_>1) {
-    throw IOException("Trying to write several models into one file with ");
+    throw IOException("Trying to write several models into one file without "
+                      "multi model mode enabled!");
   }
 }
 

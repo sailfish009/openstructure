@@ -15,22 +15,19 @@ In order to build OST image:
 .. code-block:: bash
 
   cd <PATH TO OST>/docker
-  docker build --tag <IMAGE NAME> --build-arg OPENSTRUCTURE_VERSION=<VERSION> -f Dockerfile .
+  docker build --tag <IMAGE NAME> -f Dockerfile .
 
 or if you downloaded the Dockerfile directly:
 
 .. code-block:: bash
 
-  docker build --tag <IMAGE NAME> --build-arg OPENSTRUCTURE_VERSION=<VERSION> -f <DOCKERFILE NAME> <PATH TO DOCKERFILE DIR>
+  docker build --tag <IMAGE NAME> -f <DOCKERFILE NAME> <PATH TO DOCKERFILE DIR>
 
-You can chose any image name (tag) eg. ost. The ``OPENSTRUCTURE_VERSION``
-build argument is mandatory and image will not built without it. See
-`CHANGELOG <https://git.scicore.unibas.ch/schwede/openstructure/blob/master/CHANGELOG.txt>`_
-for current list of available releases. This is not expected to work for
-versions which are much older than the most recent one since the dependencies
-might have changed, but it should work for a few versions. If you need the
-recipe for an older version, we suggest to get an older recipe from the git
-history.
+You can chose any image name (tag) eg. ost.
+Here we only keep the recipe for the most recent version of OpenStructure. To
+build an image for a different version, you can either adapt the
+``OPENSTRUCTURE_VERSION`` variable in the recipe or look in the git history for
+an older recipe.
 
 Testing the image
 -----------------

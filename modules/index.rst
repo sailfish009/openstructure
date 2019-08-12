@@ -19,6 +19,7 @@ OpenStructure documentation
   img/alg/alg
   seq/base/seq
   seq/alg/seqalg
+  db/db
 
   bindings/bindings
 
@@ -36,7 +37,7 @@ OpenStructure documentation
 For Starters
 --------------------------------------------------------------------------------
 
-**Installation**: `install from binary <http://www.openstructure.org/download/>`_ | :doc:`install from source <install>`
+**Installation**: :doc:`install from source <install>`
 
 **Tutorial Style**: :doc:`introduction <intro>` | :doc:`molecules intro <intro-01>` | :doc:`images intro <intro-02>` | :doc:`graphics intro <intro-03>` 
 
@@ -108,6 +109,8 @@ Varia
 **Molck**: :doc:`Molecular Checker<mol/alg/molck>`
 
 **Actions**: :doc:`OST Actions<actions>`
+
+**Database**: :doc:`Efficiently store structural data<db/db>`
 
 Extending OpenStructure
 --------------------------------------------------------------------------------

@@ -27,27 +27,27 @@ try:
 except ImportError:
   _img_present=False
   pass
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 from color_select_widget import ColorSelectWidget
 
 #Uniform Color Widget
-class UniformColorWidget(QtGui.QWidget):
+class UniformColorWidget(QtWidgets.QWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     self.parent_ = parent
     
     self.text_ = "Uniform Color"
     
     #Create Ui elements
-    uniform_label = QtGui.QLabel(self.text_)
+    uniform_label = QtWidgets.QLabel(self.text_)
     font = uniform_label.font()
     font.setBold(True)
     
     self.color_select_widget_ = ColorSelectWidget(1,1,QtGui.QColor("White"))
     
-    top_layout = QtGui.QVBoxLayout()
+    top_layout = QtWidgets.QVBoxLayout()
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.addWidget(self.color_select_widget_, 2, 1, 1, 1)
     grid.setRowStretch(1, 1)
     grid.setRowStretch(3, 1)
@@ -58,7 +58,7 @@ class UniformColorWidget(QtGui.QWidget):
     top_layout.addLayout(grid)
     self.setLayout(top_layout)
     
-    QtCore.QObject.connect(self.color_select_widget_, QtCore.SIGNAL("colorChanged"), self.ChangeColors)
+    self.color_select_widget_.colorChanged.connect(self.ChangeColors)
     
     self.setMinimumSize(250,150)
 

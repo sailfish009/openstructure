@@ -27,9 +27,8 @@ item_type.hh
 geom_info_conversion.hh
 item_type_cast.hh)
 
-set(QT_DONT_USE_QTGUI 1)
 set(QT_USE_QTXML 1)
-include(${QT_USE_FILE})
+
 module(NAME info SOURCES ${OST_INFO_SOURCES}
        HEADERS ${OST_INFO_HEADERS}
        DEPENDS_ON ost_base LINK ${BOOST_REGEX_LIBRARIES} ${QT_LIBRARIES})

@@ -22,83 +22,83 @@ from ost import gfx
 import ost
 import os
 from datetime import datetime
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 from scene_selection_helper import SelHelper
 from preset_list_model import PresetListModel
 from preset_editor_widget import PresetEditor
 from preset import Preset
 
-class PresetWidget(QtGui.QWidget):
+class PresetWidget(QtWidgets.QWidget):
   PRESET_XML_FILE = os.path.join(ost.GetSharedDataPath(), "scene", "presets.xml")
   ICONS_DIR = os.path.join(ost.GetSharedDataPath(), "gui", "icons/")
   def __init__(self, parent=None):   
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     
     self.text_ = "Presets"
         
     #Create Ui elements
-    self.list_view_ = QtGui.QListView()
+    self.list_view_ = QtWidgets.QListView()
         
     #Create Model
     self.list_model_ = PresetListModel(self)
     self.list_view_.setModel(self.list_model_)
-    self.list_view_.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+    self.list_view_.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
     
-    self.add_action = QtGui.QAction("+",self)
+    self.add_action = QtWidgets.QAction("+",self)
     self.add_action.setIcon(QtGui.QIcon(PresetWidget.ICONS_DIR+"add_icon.png"))
     
-    QtCore.QObject.connect(self.add_action, QtCore.SIGNAL("triggered()"), self.Add)
+    self.add_action.triggered.connect(self.Add)
     
-    self.add_button_ = QtGui.QToolButton(self)
+    self.add_button_ = QtWidgets.QToolButton(self)
     self.add_button_.setIconSize(QtCore.QSize(20,20))
     self.add_button_.setDefaultAction(self.add_action)
     
     self.preset_editor_ = PresetEditor(self)
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
     grid.addWidget(self.list_view_,0,0,3,3)
     grid.addWidget(self.add_button_,3,0,1,1)
     self.setLayout(grid)
     
     self.list_view_.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    QtCore.QObject.connect(self.list_view_, QtCore.SIGNAL("customContextMenuRequested(const QPoint)"), self.contextMenuEvent)
+    self.list_view_.customContextMenuRequested.connect(self.contextMenuEvent)
     self.CreateImmutableContextMenu()
     self.CreateContextMenu()
   
-    QtCore.QObject.connect(self.list_view_, QtCore.SIGNAL("doubleClicked(const QModelIndex)"), self.Load)
+    self.list_view_.doubleClicked.connect(self.Load)
     
     self.setMinimumSize(250,200)
     
   def CreateImmutableContextMenu(self):  
-    self.immucontext_menu_ = QtGui.QMenu("Context menu", self)
-    self.load_ = QtGui.QAction("Load", self.list_view_)  
+    self.immucontext_menu_ = QtWidgets.QMenu("Context menu", self)
+    self.load_ = QtWidgets.QAction("Load", self.list_view_)  
     self.immucontext_menu_.addAction(self.load_)
     #Connect Signal with Slot  
-    QtCore.QObject.connect(self.load_, QtCore.SIGNAL("triggered()"), self.LoadCurrentIndex)
+    self.load_.triggered.connect(self.LoadCurrentIndex)
 
   def CreateContextMenu(self):
-    self.context_menu_ = QtGui.QMenu("Context menu", self)
-    self.remove_ = QtGui.QAction("Remove", self.list_view_)
-    self.rename_ = QtGui.QAction("Rename", self.list_view_)
-    self.edit_ = QtGui.QAction("Edit", self.list_view_)
+    self.context_menu_ = QtWidgets.QMenu("Context menu", self)
+    self.remove_ = QtWidgets.QAction("Remove", self.list_view_)
+    self.rename_ = QtWidgets.QAction("Rename", self.list_view_)
+    self.edit_ = QtWidgets.QAction("Edit", self.list_view_)
     self.context_menu_.addAction(self.load_)
     self.context_menu_.addAction(self.remove_)
     self.context_menu_.addAction(self.rename_)
     self.context_menu_.addAction(self.edit_)
     #Connect Signals with Slots  
-    QtCore.QObject.connect(self.remove_, QtCore.SIGNAL("triggered()"), self.Remove)
-    QtCore.QObject.connect(self.rename_, QtCore.SIGNAL("triggered()"), self.Rename)
-    QtCore.QObject.connect(self.edit_, QtCore.SIGNAL("triggered()"), self.Edit)
+    self.remove_.triggered.connect(self.Remove)
+    self.rename_.triggered.connect(self.Rename)
+    self.edit_.triggered.connect(self.Edit)
   
   def contextMenuEvent(self, pos):
     #ContextMenu
     index = self.list_view_.indexAt(pos)
     if index.isValid(): 
       if self.list_model_.IsEditable(index.row()):
-        self.context_menu_.popup(QtGui.QCursor.pos())
+        self.context_menu_.popup(QtWidgets.QCursor.pos())
       else:
-        self.immucontext_menu_.popup(QtGui.QCursor.pos())
+        self.immucontext_menu_.popup(QtWidgets.QCursor.pos())
   
   def Add(self):
     row = self.list_model_.GetLastRow()
@@ -112,10 +112,10 @@ class PresetWidget(QtGui.QWidget):
       
   def Remove(self):
     if(self.list_view_.currentIndex().isValid()):
-      ret = QtGui.QMessageBox.warning(self, "Delete Preset",
+      ret = QtWidgets.QMessageBox.warning(self, "Delete Preset",
                    "Delete Preset?",
-                   QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-      if ret == QtGui.QMessageBox.Yes:
+                   QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+      if ret == QtWidgets.QMessageBox.Yes:
         self.list_model_.RemoveItem(self.list_view_.currentIndex().row())
 
   def Edit(self):

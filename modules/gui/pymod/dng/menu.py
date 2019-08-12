@@ -1,5 +1,6 @@
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 from ost import *
 from ost import gui
 from ost.gui.init_splash import _InitSplash
@@ -16,7 +17,7 @@ class FileMenu(QMenu):
                   shortcut='Ctrl+Shift+S', 
                   enabled=gui.OneOf(gfx.Entity))
   def _Open(self):
-    filename=QFileDialog.getOpenFileName(None, 'Open file','')
+    filename,_=QFileDialog.getOpenFileName(None, 'Open file','')
     if(QFileInfo(filename).isFile()):
       gui.FileLoader.LoadObject(str(filename))
 
@@ -60,11 +61,11 @@ class ClipWidget(QWidget):
     l.addWidget(self.near_, 0, 2)
     l.addWidget(self.far_, 1, 2)
     l.addWidget(self.auto_, 2, 0, 1, 4)
-    self.connect(self.near_, SIGNAL('valueChanged(int)'), self.SetNear)
-    self.connect(self.far_, SIGNAL('valueChanged(int)'), self.SetFar)
-    self.connect(self.auto_, SIGNAL('stateChanged(int)'), self.SetAuto)
-    self.connect(bounds_near, SIGNAL('textEdited(QString)'), self.SetNearBounds)
-    self.connect(bounds_far, SIGNAL('textEdited(QString)'), self.SetFarBounds)
+    self.near_.valueChanged.connect(self.SetNear)
+    self.far_.valueChanged.connect(self.SetFar)
+    self.auto_.stateChanged.connect(self.SetAuto)
+    bounds_near.textEdited.connect(self.SetNearBounds)
+    bounds_far.textEdited.connect(self.SetFarBounds)
 
   def SetNear(self, val):
     gfx.Scene().near = val
@@ -104,13 +105,13 @@ class ExportSceneDialog(QDialog):
     l.addWidget(self.opaque_, 2, 1)
     hbox=QHBoxLayout()
     cancel=QPushButton("Cancel")
-    QObject.connect(cancel, SIGNAL('clicked()'), self.reject)
+    cancel.clicked.connect(self.reject)
     hbox.addWidget(cancel)
     export=QPushButton("Export")
     hbox.addWidget(export)
     export.setDefault(True)
     l.addLayout(hbox, 3, 1, 2, 1)
-    QObject.connect(export, SIGNAL('clicked()'), self.accept)
+    export.clicked.connect(self.accept)
   @property
   def transparent(self):
     return not self.opaque_.isChecked()
@@ -127,7 +128,7 @@ class SceneMenu(QMenu):
   def __init__(self, parent=None):
     QMenu.__init__(self, parent)
     self.setTitle('Scene')
-    QObject.connect(self, SIGNAL('aboutToShow()'), self._AboutToShow)
+    self.aboutToShow.connect(self._AboutToShow)
     gui.AddMenuAction(self, 'Background Color', self._SetSceneBackground)
     self.fog_action=gui.AddMenuAction(self, 'Depth Cueing', self._ToggleFog, 
                                   shortcut='Ctrl+Shift+F', checkable=True, 
@@ -145,8 +146,11 @@ class SceneMenu(QMenu):
     qd=ExportSceneDialog()
     if not qd.exec_():
       return
-    filename=QFileDialog.getSaveFileName(None, 'Save Snapshot', 
-                                         'snapshot.png')
+
+    options = QFileDialog.Options()
+    options |= QFileDialog.DontUseNativeDialog
+    filename, _ = QFileDialog.getSaveFileName(self,"Save Snapshot","snapshot.png", "", options=options)
+
     if filename:
       gfx.Scene().Export(str(filename), qd.width, qd.height, qd.transparent)
 
@@ -214,7 +218,7 @@ class WindowMenu(QMenu):
     QMenu.__init__(self, parent)
     self.setTitle('Window')
     gosty=gui.GostyApp.Instance()
-    QObject.connect(self, SIGNAL('aboutToShow()'), self._AboutToShow)
+    self.aboutToShow.connect(self._AboutToShow)
     inspector_visible=gosty.GetWidget('InspectorDialog').isVisible()
     self._gl_win_action=gui.AddMenuAction(self, 'GL Window',  
                                       self._ToggleShowGLWindow, checkable=True,

@@ -34,7 +34,8 @@ String DLLEXPORT_OST_IO
 EntityToPDBString(const mol::EntityView& ent, const IOProfile& profile=IOProfile());
 
 mol::EntityHandle DLLEXPORT_OST_IO
-PDBStringToEntity(const String& pdb, const IOProfile& profile=IOProfile());
+PDBStringToEntity(const String& pdb, const IOProfile& profile=IOProfile(),
+                  bool process=false);
 
 }}
 

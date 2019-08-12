@@ -20,7 +20,6 @@
 
 from ost import info
 from ost import gfx
-from PyQt4 import QtGui
 
 class VisibilityOp:
   VISIBLE_ATTRIBUTE_NAME = "Visible"

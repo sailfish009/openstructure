@@ -19,6 +19,17 @@
 #ifndef OST_GFX_OFFSCREEN_BUFFER_HH
 #define OST_GFX_OFFSCREEN_BUFFER_HH
 
+
+
+/*
+ THE OFFSCREEN BUFFER IS DEPRECATED AND CURRENTLY NOT USED
+ Offscreen rendering for image export is now performed in a QT managed
+ offscreen buffer (e.g. gui/src/gl_canvas.hh). Reason for that is maintenance,
+ as there are platform dependent buffer implementations.   
+*/
+
+
+
 /*
   Wraps GL offscreen rendering per platform
 

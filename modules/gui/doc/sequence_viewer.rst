@@ -180,7 +180,7 @@ can use the :meth:`AddEntity` method. If you want to load an alignment, the :met
     
     Get the SIP-QObject (QWidget), learn more about :doc:`python_cpp`.
     
-    :rtype: PyQt4.QWidget
+    :rtype: QWidget
 
   .. method:: Hide()
   

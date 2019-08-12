@@ -25,7 +25,7 @@ The example `Write a Tool in Python` demonstrates how to add a simple tool
 
   input_events Input Events
 
-  Tools receive input events when the Control key (Command on MacOS X) is
+  Tools receive input events when the Control key (Command on macOS) is
   pressed. This includes both keyboard events and mouse events such as mouse
   move events, clicks and Real clicks.
 

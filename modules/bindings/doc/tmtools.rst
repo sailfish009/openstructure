@@ -17,6 +17,17 @@ Citation:
   Yang Zhang and Jeffrey Skolnick, Proteins 2004 57: 702-710
   Y. Zhang and J. Skolnick, Nucl. Acids Res. 2005 33, 2302-9
 
+Besides using the standalone TM-align program, ost also provides a wrapper 
+around TM-align as published in:
+
+  Sha Gong, Chengxin Zhang, Yang Zhang, Bioinformatics 2019 
+
+The advantage is that no intermediate files must be generated, a wrapper on the
+c++ layer is used instead. However, only the basic TM-align superposition
+functionality is available.
+
+
+
 Distance measures used by TMscore
 --------------------------------------------------------------------------------
 
@@ -59,7 +70,6 @@ Usage of TMalign
 
 .. autofunction:: ost.bindings.tmtools.TMAlign
 
-.. autoclass:: ost.bindings.tmtools.TMAlignResult
 
 Usage of TMscore
 --------------------------------------------------------------------------------
@@ -67,3 +77,81 @@ Usage of TMscore
 .. autofunction:: ost.bindings.tmtools.TMScore
 
 .. autoclass:: ost.bindings.tmtools.TMScoreResult
+
+
+TMalign C++ wrapper
+--------------------------------------------------------------------------------
+
+.. module:: ost.bindings
+
+Instead of calling the TMalign executable, ost also provides a wrapper around
+its C++ implementation. The advantage is that no intermediate files need to be 
+generated in order to call the executable.
+
+.. code-block:: python
+
+  from ost import bindings
+  
+  pdb1=io.LoadPDB('1ake.pdb').Select("peptide=true")
+  pdb2=io.LoadPDB('4ake.pdb').Select("peptide=true")
+  result = bindings.WrappedTMAlign(pdb1.chains[0], pdb2.chains[0], 
+                                   fast=True)
+  print result.tm_score
+  print result.alignment.ToString(80)
+
+
+.. class:: TMAlignResult(rmsd, tm_score, aligned_length, transform, alignment)
+
+  All parameters of the constructor are available as attributes of the class
+
+  :param rmsd:          RMSD of the superposed residues
+  :param tm_score:      TMScore of the superposed residues
+  :param aligned_length: Number of superposed residues
+  :param transform:     Transformation matrix to superpose first chain onto 
+                        reference
+  :param alignment:     The sequence alignment given the structural superposition
+  :type rmsd:           :class:`float`
+  :type tm_score:       :class:`float`
+  :type aligned_length: :class:`int`
+  :type transform:      :class:`geom.Mat4`
+  :type alignment:      :class:`ost.seq.AlignmentHandle`
+
+.. method:: WrappedTMAlign(chain1, chain2, [fast=False])
+
+  Takes two chain views and runs TMalign with *chain2* as reference.
+  The positions and sequences are directly extracted from the chain
+  residues for every residue that fulfills:
+  
+    * peptide linking
+    * valid one letter code(no '?')
+    * valid CA atom
+
+  :param chain1:        Chain from which position and sequence are extracted
+                        to run TMalign.
+  :param chain2:        Chain from which position and sequence are extracted
+                        to run TMalign, this is the reference.
+  :param fast:          Whether to apply the *fast* flag to TMAlign
+  :type chain1:         :class:`ost.mol.ChainView`
+  :type chain2:         :class:`ost.mol.ChainView`
+  :type fast:           :class:`bool`
+  :rtype:               :class:`ost.bindings.TMAlignResult`
+
+
+.. method:: WrappedTMAlign(pos1, pos2, seq1, seq2 [fast=False])
+
+  Similar as described above, but directly feeding in raw data.
+
+  :param pos1:          CA positions of the first chain
+  :param pos2:          CA positions of the second chain, this is the reference.
+  :param seq1:          Sequence of first chain
+  :param seq2:          Sequence of second chain
+  :param fast:          Whether to apply the *fast* flag to TMAlign
+  :type pos1:           :class:`ost.geom.Vec3List`
+  :type pos2:           :class:`ost.geom.Vec3List`
+  :type seq1:           :class:`ost.seq.SequenceHandle`
+  :type seq2:           :class:`ost.seq.SequenceHandle`
+  :type fast:           :class:`bool`
+  :rtype:               :class:`ost.bindings.TMAlignResult`
+  :raises:              :class:`ost.Error` if pos1 and seq1, pos2 and seq2 
+                        respectively are not consistent in size.
+

@@ -85,16 +85,26 @@ BOOST_AUTO_TEST_CASE(hhm_loading)
 
   String olc = "ACDEFGHIKLMNPQRSTVWY";
 
-  Real correct_aa_freqs[] = {pow(2.0,-0.001*3706), pow(2.0,-0.001*5728), 
-                             pow(2.0,-0.001*4211), pow(2.0,-0.001*4064), 
-                             pow(2.0,-0.001*4839), pow(2.0,-0.001*3729),  
-                             pow(2.0,-0.001*4763), pow(2.0,-0.001*4308), 
-                             pow(2.0,-0.001*4069), pow(2.0,-0.001*3323), 
-                             pow(2.0,-0.001*5509), pow(2.0,-0.001*4640),  
-                             pow(2.0,-0.001*4464), pow(2.0,-0.001*4937), 
-                             pow(2.0,-0.001*4285), pow(2.0,-0.001*4423), 
-                             pow(2.0,-0.001*3815), pow(2.0,-0.001*3783),  
-                             pow(2.0,-0.001*6325), pow(2.0,-0.001*4665)};
+  Real correct_aa_freqs[] = {static_cast<Real>(pow(2.0, -0.001*3706)),
+                             static_cast<Real>(pow(2.0, -0.001*5728)),
+                             static_cast<Real>(pow(2.0, -0.001*4211)),
+                             static_cast<Real>(pow(2.0, -0.001*4064)),
+                             static_cast<Real>(pow(2.0, -0.001*4839)),
+                             static_cast<Real>(pow(2.0, -0.001*3729)),
+                             static_cast<Real>(pow(2.0, -0.001*4763)),
+                             static_cast<Real>(pow(2.0, -0.001*4308)),
+                             static_cast<Real>(pow(2.0, -0.001*4069)),
+                             static_cast<Real>(pow(2.0, -0.001*3323)),
+                             static_cast<Real>(pow(2.0, -0.001*5509)),
+                             static_cast<Real>(pow(2.0, -0.001*4640)),
+                             static_cast<Real>(pow(2.0, -0.001*4464)),
+                             static_cast<Real>(pow(2.0, -0.001*4937)),
+                             static_cast<Real>(pow(2.0, -0.001*4285)),
+                             static_cast<Real>(pow(2.0, -0.001*4423)),
+                             static_cast<Real>(pow(2.0, -0.001*3815)),
+                             static_cast<Real>(pow(2.0, -0.001*3783)),
+                             static_cast<Real>(pow(2.0, -0.001*6325)),
+                             static_cast<Real>(pow(2.0, -0.001*4665))};
 
   for (int i = 0; i < 20; ++i) {
     BOOST_CHECK_CLOSE(null_model.GetFreq(olc[i]), correct_aa_freqs[i],
@@ -105,17 +115,17 @@ BOOST_AUTO_TEST_CASE(hhm_loading)
   ProfileColumn col = (*prof)[2];
 
   memset(correct_aa_freqs, 0, 20*sizeof(Real));
-  correct_aa_freqs[0] = pow(2.0,-0.001*3676);
-  correct_aa_freqs[1] = pow(2.0,-0.001*2597);
-  correct_aa_freqs[5] = pow(2.0,-0.001*5359);
-  correct_aa_freqs[6] = pow(2.0,-0.001*3275);
-  correct_aa_freqs[11] = pow(2.0,-0.001*3292);
-  correct_aa_freqs[12] = pow(2.0,-0.001*5077);
-  correct_aa_freqs[13] = pow(2.0,-0.001*3826);
-  correct_aa_freqs[15] = pow(2.0,-0.001*2409);
-  correct_aa_freqs[16] = pow(2.0,-0.001*3733);
-  correct_aa_freqs[17] = pow(2.0,-0.001*4503);
-  correct_aa_freqs[19] = pow(2.0,-0.001*3070);
+  correct_aa_freqs[0] = static_cast<Real>(pow(2.0, -0.001*3676));
+  correct_aa_freqs[1] = static_cast<Real>(pow(2.0, -0.001*2597));
+  correct_aa_freqs[5] = static_cast<Real>(pow(2.0, -0.001*5359));
+  correct_aa_freqs[6] = static_cast<Real>(pow(2.0, -0.001*3275));
+  correct_aa_freqs[11] = static_cast<Real>(pow(2.0, -0.001*3292));
+  correct_aa_freqs[12] = static_cast<Real>(pow(2.0, -0.001*5077));
+  correct_aa_freqs[13] = static_cast<Real>(pow(2.0, -0.001*3826));
+  correct_aa_freqs[15] = static_cast<Real>(pow(2.0, -0.001*2409));
+  correct_aa_freqs[16] = static_cast<Real>(pow(2.0, -0.001*3733));
+  correct_aa_freqs[17] = static_cast<Real>(pow(2.0, -0.001*4503));
+  correct_aa_freqs[19] = static_cast<Real>(pow(2.0, -0.001*3070));
 
   for(int i = 0; i < 20; ++i){
     BOOST_CHECK_CLOSE(col.GetFreq(olc[i]), correct_aa_freqs[i], Real(1e-5));

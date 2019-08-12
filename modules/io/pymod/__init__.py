@@ -184,6 +184,15 @@ def SavePDB(models, filename, dialect=None,  pqr=False, profile='DEFAULT'):
   :param models: The entity or list of entities (handles or views) to be saved
   :param filename: The filename
   :type  filename: string
+  :raises: IOException if the restrictions of the PDB format are not satisfied
+           (with the exception of atom numbers, see above):
+
+             * Chain names with more than one character
+             * Atom positions with coordinates outside range [-999.99, 9999.99]
+             * Residue names longer than three characters
+             * Atom names longer than four characters
+             * Numeric part of :class:`ost.mol.ResNum` outside range [-999, 9999] 
+             * Alternative atom indicators longer than one character
   """
   if not getattr(models, '__len__', None):
     models=[models]
@@ -372,7 +381,9 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10,
             tmp_ops.append(tp)
         trans_matrices = tmp_ops
     # select chains into a view as basis for each transformation
-    assu = asu.Select('cname='+','.join(chains[c_intvls[i][0]:c_intvls[i][1]]))
+    assu = asu.Select('cname='+','.join(mol.QueryQuoteName(name) \
+                                        for name in \
+                                        chains[c_intvls[i][0]:c_intvls[i][1]]))
     pdbizer.Add(assu, trans_matrices, ss)
   pdb_bu = pdbizer.Finish(transformation)
   if transformation:

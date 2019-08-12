@@ -29,12 +29,6 @@
 #include <ost/config.hh>
 
 #if OST_SHADER_SUPPORT_ENABLED
-#if OST_MESA_SUPPORT_ENABLED
-#  define OST_GL_VERSION_2_0 1
-#  define GL_GLEXT_PROTOTYPES 1
-#  include <GL/gl.h>
-#  include <GL/glext.h>
-#else
 #  if OST_MODULE==OST_GFX
 #    define GLEW_BUILD
 #  endif
@@ -45,12 +39,11 @@
 #    include <ost/gfx/GL/wglew.h>
 #  endif
 #endif
-#endif
 
 #include <ost/gfx/gl_include.hh>
 
 #if defined(__APPLE__)
-// On all MacOS X version we support, OpenGL 2.0 is available, so it's safe to 
+// On all macOS version we support, OpenGL 2.0 is available, so it's safe to 
 // hardcode the value here...
 //same for windows vista and above, XP only has 1.1
 #define OST_GL_VERSION_2_0 1

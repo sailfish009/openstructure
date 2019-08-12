@@ -27,6 +27,8 @@
 #include <QApplication>
 #include <QSettings>
 #include <QDir>
+#include <QMimeData>
+#include <QDrag>
 
 namespace ost { namespace gui {
 

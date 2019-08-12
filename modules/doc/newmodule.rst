@@ -117,7 +117,7 @@ The line containing the `DEPENDS_ON` directive lists all the modules on which
 the new module depends (in this case :mod:`mol` and :mod:`ost.mol.alg`).  The 
 `module` macro will take care of staging the headers, in this case into 
 `ost/mod` and compiling, linking and staging of a library with the  name 
-`libost_mod.so` (`libost_gmod.dylib` on MacOS X).
+`libost_mod.so` (`libost_gmod.dylib` on macOS).
 
 .. note:: 
 

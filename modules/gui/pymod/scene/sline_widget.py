@@ -20,7 +20,7 @@
 
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 from render_mode_widget import RenderModeWidget
 
 #Simple Render Options
@@ -42,25 +42,25 @@ class SlineWidget(RenderModeWidget):
     max_line_width = 20
         
     #Create Ui elements
-    self.detail_spinbox_ = QtGui.QSpinBox()
+    self.detail_spinbox_ = QtWidgets.QSpinBox()
     self.detail_spinbox_.setRange(min_detail, max_detail)
     self.detail_spinbox_.setSingleStep(1)
     
-    self.aa_rendering_cb_ = QtGui.QCheckBox()
+    self.aa_rendering_cb_ = QtWidgets.QCheckBox()
     
-    self.radius_spinbox_ = QtGui.QDoubleSpinBox()
+    self.radius_spinbox_ = QtWidgets.QDoubleSpinBox()
     self.radius_spinbox_.setRange(min_line_width, max_line_width)
     self.radius_spinbox_.setDecimals(2)
     self.radius_spinbox_.setSingleStep(0.1)
     
-    sline_label = QtGui.QLabel("Spline Settings")
+    sline_label = QtWidgets.QLabel("Spline Settings")
     font = sline_label.font()
     font.setBold(True)
     
-    detail_label = QtGui.QLabel("Spline Detail")
-    aa_label = QtGui.QLabel("AA-Lines")
-    radius_label = QtGui.QLabel("Line Width")
-    grid = QtGui.QGridLayout()
+    detail_label = QtWidgets.QLabel("Spline Detail")
+    aa_label = QtWidgets.QLabel("AA-Lines")
+    radius_label = QtWidgets.QLabel("Line Width")
+    grid = QtWidgets.QGridLayout()
     grid.addWidget(sline_label, 0, 0, 1, 1)
     grid.addWidget(detail_label, 1, 0, 1, 3)
     grid.addWidget(self.detail_spinbox_, 1, 2, 1, 1)
@@ -71,9 +71,9 @@ class SlineWidget(RenderModeWidget):
     grid.setRowStretch(4,1)
     self.setLayout(grid)
 
-    QtCore.QObject.connect(self.detail_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateDetail)
-    QtCore.QObject.connect(self.aa_rendering_cb_, QtCore.SIGNAL("stateChanged(int)"), self.UpdateAA)
-    QtCore.QObject.connect(self.radius_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateLineWidth)
+    self.detail_spinbox_.valueChanged.connect(self.UpdateDetail)
+    self.aa_rendering_cb_.stateChanged.connect(self.UpdateAA)
+    self.radius_spinbox_.valueChanged.connect(self.UpdateLineWidth)
 
     self.setMinimumSize(250,120)
   

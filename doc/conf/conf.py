@@ -14,18 +14,25 @@
 import sys, os
 
 site_packs='python%d.%d/site-packages' % sys.version_info[0:2]
-sys.path.append(os.path.join(os.path.abspath('../..'), 
-                             'stage/lib', site_packs))
-sys.path.append(os.path.join(os.path.abspath('../..'), 
-                             'stage/lib64', site_packs))
-print site_packs
+# here we make sure that these paths are checked first...
+# note that we probably should use cmake to set these paths (see PM3)
+sys.path.insert(0, os.path.join(os.path.abspath('../../build'),
+                                'stage/lib', site_packs))
+sys.path.insert(0, os.path.join(os.path.abspath('../../build'),
+                                'stage/lib64', site_packs))
+sys.path.insert(0, os.path.join(os.path.abspath('../..'),
+                                'stage/lib', site_packs))
+sys.path.insert(0, os.path.join(os.path.abspath('../..'),
+                                'stage/lib64', site_packs))
+# print site_packs
+# print os.path.abspath('../..')
 import ost
 # -- General configuration -----------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 
-              'sphinx.ext.coverage', 'sphinx.ext.pngmath',  
+              'sphinx.ext.coverage', 'sphinx.ext.mathjax',
               'sphinx.ext.ifconfig']
 
 # Add any paths that contain templates here, relative to this directory.
@@ -42,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'OpenStructure'
-copyright = u'2018, OpenStructure authors'
+copyright = u'2019, OpenStructure authors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -92,6 +99,13 @@ modindex_common_prefix = ['ost.']
 
 
 # -- Options for HTML output ---------------------------------------------------
+
+# Since we use sphinx.ext.mathjax to render formulas on HTML pages: The
+# MathJax web-page deprecated their own CDN to serve JavaScript but it is
+# still the default for Sphinx. Here we redirect to the CDN recommended by
+# MathJax.
+mathjax_path = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'
+# Look for "math" markup (e.g. ost.table.Table.GetOptimalPrefactors) to test
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
@@ -195,3 +209,12 @@ latex_documents = [
 
 # If false, no module index is generated.
 #latex_use_modindex = True
+
+# -- OST specific configuration --------------------------------------------
+
+# these links can be fed via Python and are added to all rst files
+# -> container instructions on GIT for current OST version (assumed to match tag!)
+rst_epilog = """
+.. _Docker instructions: https://git.scicore.unibas.ch/schwede/openstructure/tree/%s/docker
+.. _Singularity instructions: https://git.scicore.unibas.ch/schwede/openstructure/tree/%s/singularity
+""" % (ost.VERSION, ost.VERSION)

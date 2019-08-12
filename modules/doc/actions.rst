@@ -1,4 +1,4 @@
-..  Note on large code blocks: keep max. width to 120 or it will look bad
+..  Note on large code blocks: keep max. width to 100 or it will look bad
                                on webpage!
 ..  TODO: look at argparse directive to autogenerate --help output!
 
@@ -101,7 +101,7 @@ Details on the usage (output of ``ost compare-structures --help``):
 
     molck \
         --complib=<COMPOUND LIB> \
-        --rm=hyd,oxt,unk \
+        --rm=hyd,oxt,unk,nonstd \
         --fix-ele \
         --map-nonstd \
         --out=<OUTPUT> \
@@ -115,7 +115,7 @@ Details on the usage (output of ``ost compare-structures --help``):
         --reference <REF> \
         --output output.json \
         --molck \
-        --remove oxt hyd unk \
+        --remove oxt hyd unk nonstd \
         --clean-element-column \
         --map-nonstandard-residues \
         --structural-checks \
@@ -171,7 +171,7 @@ Details on the usage (output of ``ost compare-structures --help``):
                            * hyd - remove hydrogen atoms
                            * oxt - remove terminal oxygens
                            * nonstd - remove all residues not one of the 20
-                           * standard amino acids
+                                      standard amino acids
                            * unk - Remove unknown and atoms not following the
                                    nomenclature
                           Defaults to hyd.
@@ -250,68 +250,68 @@ The output file has following format:
 .. code-block:: none
 
   {
-      "result": {
-          "<MODEL NAME>": { # Model name extracted from the file name
-              "<REFERENCE NAME>": { # Reference name extracted from the file name
-                  "info": {
-                      "residue_names_consistent": <Are the residue numbers consistent? true or false>,
-                      "mapping": {
-                          "chain_mapping": <Mapping of chains eg. {"A": "B", "B": "A"}>,
-                          "chain_mapping_scheme": <Scheme used to get mapping, check mapping manually
-                                                   if "permissive" or "extensive">,
-                          "alignments": <list of chain-chain alignments in FASTA format>
-                      }
-                  }, 
-                  "lddt": {
-                      # calculated when --lddt (-l) option is selected
-                      "oligo_lddt": {
-                          "status": <SUCCESS or FAILURE>,
-                          "error": <ERROR message if any>, 
-                          "global_score": <calculated oligomeric lDDT score>
-                      }, 
-                      "weighted_lddt": {
-                          "status": <SUCCESS or FAILURE>,
-                          "error": <ERROR message if any>, 
-                          "global_score": <calculated weighted lDDT score>
-                      }, 
-                      "single_chain_lddt": [
-                          # a list of chain-chain lDDTs
-                          {
-                              "status": <SUCCESS or FAILURE>,
-                              "error": <ERROR message if any>, 
-                              "reference_chain": <name of the chain in reference>, 
-                              "model_chain": <name of the chain in model>
-                              "global_score": <calculated single-chain lDDT score>, 
-                              "conserved_contacts": <number of conserved contacts between model and reference>,
-                              "total_contacts": <total number of contacts in reference>,
-                              "per_residue_scores": [
-                                  # per-residue lDDT scores
-                                  # only calculated when --save-per-residue-scores (-spr) option is selected
-                                  {
-                                      "residue_name": <three letter code of the residue in reference chain>,
-                                      "residue_number": <residue number in reference chain>,
-                                      "lddt": <residue lDDT score>,
-                                      "conserved_contacts": <conserved_contacts for given residue>,
-                                      "total_contacts": <total_contacts for given residue>
-                                  },
-                                  .
-                                  .
-                                  .
-                              ]
-                          }
-                      ]
+    "options": { ... },  # Options used to run the script
+    "result": {
+      "<MODEL NAME>": { # Model name extracted from the file name
+        "<REFERENCE NAME>": { # Reference name extracted from the file name
+          "info": {
+            "mapping": {
+              "alignments": <list of chain-chain alignments in FASTA format>,
+              "chain_mapping": <Mapping of chains eg. {"A": "B", "B": "A"}>,
+              "chain_mapping_scheme": <Scheme used to get mapping, check mapping manually
+                                       if "permissive" or "extensive">
+            },
+            "residue_names_consistent": <Are the residue numbers consistent? true or false>
+          },
+          "lddt": {
+            # calculated when --lddt (-l) option is selected
+            "oligo_lddt": {
+              "error": <ERROR message if any>,
+              "global_score": <calculated oligomeric lDDT score>,
+              "status": <SUCCESS or FAILURE>
+            },
+            "single_chain_lddt": [
+              # a list of chain-chain lDDTs
+              {
+                "conserved_contacts": <number of conserved contacts between model & reference>,
+                "error": <ERROR message if any>,
+                "global_score": <calculated single-chain lDDT score>,
+                "model_chain": <name of the chain in model>,
+                "reference_chain": <name of the chain in reference>,
+                "status": <SUCCESS or FAILURE>,
+                "total_contacts": <total number of contacts in reference>,
+                "per_residue_scores": [
+                  # per-residue lDDT scores
+                  # only calculated when --save-per-residue-scores (-spr) option is selected
+                  {
+                    "residue_name": <three letter code of the residue in reference chain>,
+                    "residue_number": <residue number in reference chain>,
+                    "lddt": <residue lDDT score>,
+                    "conserved_contacts": <conserved_contacts for given residue>,
+                    "total_contacts": <total_contacts for given residue>
                   },
-                  "qs_score": {
-                    # calculated when --qs-score (-q) option is selected
-                    "status": <SUCCESS or FAILURE>,
-                    "error": <ERROR message if any>,
-                    "global_score": <Global QS-score>,
-                    "best_score": <Best QS-score>
-                  }
+                  .
+                  .
+                  .
+                ]
               }
+            ],
+            "weighted_lddt": {
+              "error": <ERROR message if any>,
+              "global_score": <calculated weighted lDDT score>,
+              "status": <SUCCESS or FAILURE>
+            }
+          },
+          "qs_score": {
+            # calculated when --qs-score (-q) option is selected
+            "best_score": <Best QS-score>,
+            "error": <ERROR message if any>,
+            "global_score": <Global QS-score>,
+            "status": <SUCCESS or FAILURE>
           }
-      }, 
-      "options": {}  # Options used to run the script
+        }
+      }
+    }
   }
 
 The "result" filed is a dictionary mapping from model to reference as eg. in
@@ -322,64 +322,34 @@ Example usage:
 
 .. code-block:: console
 
-  $ CAMEO_TARGET_URL=https://www.cameo3d.org/static/data/modeling/2018.03.03/5X7J_B
+  $ CAMEO_TARGET_URL=https://www.cameo3d.org/static/data/modeling/2019.07.13/6PO4_F
   $ curl $CAMEO_TARGET_URL/bu_target_01.pdb > reference.pdb
-  $ curl $CAMEO_TARGET_URL/servers/server11/oligo_model-1/superposed_oligo_model-1.pdb > model.pdb
+  $ curl $CAMEO_TARGET_URL/servers/server20/oligomodel-1/oligomodel-1.pdb > model.pdb
   $ $OST_ROOT/bin/ost compare-structures \
         --model model.pdb --reference reference.pdb --output output.json \
         --qs-score --residue-number-alignment --lddt --structural-checks \
         --consistency-checks --inclusion-radius 15.0 --bond-tolerance 15.0 \
-        --angle-tolerance 15.0 --molck --remove oxt hyd unk \
+        --angle-tolerance 15.0 --molck --remove oxt hyd unk nonstd \
         --clean-element-column --map-nonstandard-residues
 
   ################################################################################
   Reading input files (fault_tolerant=False)
    --> reading model from model.pdb
-  imported 2 chains, 396 residues, 3106 atoms; with 0 helices and 0 strands
+  imported 2 chains, 462 residues, 3400 atoms; with 0 helices and 0 strands
    --> reading reference from reference.pdb
-  imported 3 chains, 408 residues, 3011 atoms; with 0 helices and 0 strands
+  imported 3 chains, 471 residues, 3465 atoms; with 0 helices and 0 strands
   ################################################################################
   Cleaning up input with Molck
   removing hydrogen atoms
    --> removed 0 hydrogen atoms
   removing OXT atoms
-   --> removed 0 OXT atoms
-  residue A.GLN54 is missing 4 atoms: 'CG', 'CD', 'OE1', 'NE2'
-  residue A.GLU55 is missing 4 atoms: 'CG', 'CD', 'OE1', 'OE2'
-  residue A.ARG139 is missing 6 atoms: 'CG', 'CD', 'NE', 'CZ', 'NH1', 'NH2'
-  residue B.THR53 is missing 1 atom: 'CG2'
-  residue B.GLN54 is missing 4 atoms: 'CG', 'CD', 'OE1', 'NE2'
-  residue B.GLU55 is missing 4 atoms: 'CG', 'CD', 'OE1', 'OE2'
-  residue B.GLU61 is missing 1 atom: 'OE2'
-  residue B.GLU117 is missing 1 atom: 'O'
-  residue B.ARG120 is missing 2 atoms: 'NH1', 'NH2'
-  residue B.ARG142 is missing 2 atoms: 'NH1', 'NH2'
-  residue B.GLU148 is missing 4 atoms: 'CG', 'CD', 'OE1', 'OE2'
-  residue B.PRO198 is missing 1 atom: 'O'
-  _.CL1 is not a standard amino acid
-  _.CL2 is not a standard amino acid
-  _.CL3 is not a standard amino acid
-  _.CL4 is not a standard amino acid
-  _.CA5 is not a standard amino acid
-  _.CA6 is not a standard amino acid
-  _.CA7 is not a standard amino acid
-  _.CA8 is not a standard amino acid
-  _.CA9 is not a standard amino acid
-  _.CL10 is not a standard amino acid
-  _.CL11 is not a standard amino acid
-  _.CL12 is not a standard amino acid
-  _.CL13 is not a standard amino acid
-  _.CL14 is not a standard amino acid
-  _.CL15 is not a standard amino acid
-  _.CA16 is not a standard amino acid
-  _.CA17 is not a standard amino acid
-  _.CA18 is not a standard amino acid
-  _.CA19 is not a standard amino acid
-  _.CA20 is not a standard amino acid
-  _.EDO21 is not a standard amino acid
-  _.EDO22 is not a standard amino acid
-  _.EDO23 is not a standard amino acid
-  _.EDO24 is not a standard amino acid
+   --> removed 3 OXT atoms
+  _.HCS1 is not a standard amino acid --> removed 
+  _.ADE2 is not a standard amino acid --> removed 
+  _.BO33 is not a standard amino acid --> removed 
+  _.ADE4 is not a standard amino acid --> removed 
+  _.HCS5 is not a standard amino acid --> removed 
+  _.BO36 is not a standard amino acid --> removed 
   removing hydrogen atoms
    --> removed 0 hydrogen atoms
   removing OXT atoms
@@ -389,29 +359,30 @@ Example usage:
    --> for reference(s)
   Checking reference.pdb
   Checking stereo-chemistry
-  Average Z-Score for bond lengths: 0.13694
-  Bonds outside of tolerance range: 0 out of 2654
+  Average Z-Score for bond lengths: 0.33163
+  Bonds outside of tolerance range: 0 out of 2993
   Bond  Avg Length  Avg zscore  Num Bonds
-  C-C 1.50876     0.09299     1501
-  C-N 1.42978     0.17690     635
-  C-O 1.25079     0.21528     518
-  Average Z-Score angle widths: 0.07562
-  Angles outside of tolerance range: 0 out of 2941
+  C-C 1.51236     0.03971     1682
+  C-N 1.46198     0.96819     603
+  C-O 1.25794     0.49967     674
+  C-S 1.80242     0.15292     34
+  Average Z-Score angle widths: -0.12077
+  Angles outside of tolerance range: 0 out of 3260
   Filtering non-bonded clashes
   0 non-bonded short-range distances shorter than tolerance distance
   Distances shorter than tolerance are on average shorter by: 0.00000
    --> for model(s)
   Checking model.pdb
   Checking stereo-chemistry
-  Average Z-Score for bond lengths: -0.22524
-  Bonds outside of tolerance range: 0 out of 2774
+  Average Z-Score for bond lengths: 0.23693
+  Bonds outside of tolerance range: 0 out of 2976
   Bond  Avg Length  Avg zscore  Num Bonds
-  C-C 1.50225     -0.20158    1558
-  C-N 1.42294     -0.12261    666
-  C-O 1.24232     -0.42115    546
-  C-S 1.80215     0.20858     4
-  Average Z-Score angle widths: -0.06767
-  Angles outside of tolerance range: 0 out of 3079
+  C-C 1.52020     0.40359     1674
+  C-N 1.43936     -0.19949    598
+  C-O 1.25221     0.20230     670
+  C-S 1.81182     0.38936     34
+  Average Z-Score angle widths: 0.04946
+  Angles outside of tolerance range: 0 out of 3241
   Filtering non-bonded clashes
   0 non-bonded short-range distances shorter than tolerance distance
   Distances shorter than tolerance are on average shorter by: 0.00000
@@ -419,25 +390,25 @@ Example usage:
   Comparing model.pdb to reference.pdb
   Chains in reference.pdb: AB
   Chains in model.pdb: AB
-  Chemically equivalent chain-groups in reference.pdb: [['B', 'A']]
+  Chemically equivalent chain-groups in reference.pdb: [['A', 'B']]
   Chemically equivalent chain-groups in model.pdb: [['A', 'B']]
-  Chemical chain-groups mapping: {('B', 'A'): ('A', 'B')}
+  Chemical chain-groups mapping: {('A', 'B'): ('A', 'B')}
   Identifying Symmetry Groups...
   Symmetry threshold 0.1 used for angles of reference.pdb
   Symmetry threshold 0.1 used for axis of reference.pdb
   Symmetry threshold 0.1 used for angles of model.pdb
   Symmetry threshold 0.1 used for axis of model.pdb
   Selecting Symmetry Groups...
-  Symmetry-groups used in reference.pdb: [('B',), ('A',)]
+  Symmetry-groups used in reference.pdb: [('A',), ('B',)]
   Symmetry-groups used in model.pdb: [('A',), ('B',)]
   Closed Symmetry with strict parameters
-  Mapping found: {'A': 'B', 'B': 'A'}
+  Mapping found: {'A': 'A', 'B': 'B'}
   --------------------------------------------------------------------------------
   Checking consistency between model.pdb and reference.pdb
   Consistency check: OK
   --------------------------------------------------------------------------------
   Computing QS-score
-  QSscore reference.pdb, model.pdb: best: 0.90, global: 0.90
+  QSscore reference.pdb, model.pdb: best: 0.96, global: 0.96
   --------------------------------------------------------------------------------
   Computing lDDT scores
   lDDT settings: 
@@ -446,21 +417,21 @@ Example usage:
   Cutoffs: 0.5, 1, 2, 4
   Residue properties label: lddt
   ===
-   --> Computing lDDT between model chain B and reference chain A
-  Coverage: 1 (187 out of 187 residues)
-  Global LDDT score: 0.8257
-  (877834 conserved distances out of 1063080 checked, over 4 thresholds)
-   --> Computing lDDT between model chain A and reference chain B
-  Coverage: 1 (197 out of 197 residues)
-  Global LDDT score: 0.7854
-  (904568 conserved distances out of 1151664 checked, over 4 thresholds)
+   --> Computing lDDT between model chain A and reference chain A
+  Coverage: 0.991416 (231 out of 233 residues)
+  Global LDDT score: 0.8955
+  (1194245 conserved distances out of 1333644 checked, over 4 thresholds)
+   --> Computing lDDT between model chain B and reference chain B
+  Coverage: 0.991379 (230 out of 232 residues)
+  Global LDDT score: 0.8998
+  (1200391 conserved distances out of 1334056 checked, over 4 thresholds)
    --> Computing oligomeric lDDT score
   Reference reference.pdb has: 2 chains
   Model model.pdb has: 2 chains
-  Coverage: 1 (384 out of 384 residues)
-  Oligo lDDT score: 0.8025
+  Coverage: 0.991398 (461 out of 465 residues)
+  Oligo lDDT score: 0.8977
    --> Computing weighted lDDT score
-  Weighted lDDT score: 0.8048
+  Weighted lDDT score: 0.8976
   ################################################################################
   Saving output into output.json
 
@@ -475,112 +446,114 @@ alignments were cut in display here for readability):
   new_alns = list()
   for aln in mapping["alignments"]:
     aln_lines = aln.splitlines()
-    aln_lines[1] = aln_lines[1][:20] + "..."
-    aln_lines[3] = aln_lines[3][:20] + "..."
+    aln_lines[1] = aln_lines[1][:15] + "..."
+    aln_lines[3] = aln_lines[3][:15] + "..."
     new_alns.append("\n".join(aln_lines))
   mapping["alignments"] = new_alns
   json_data["options"]["parameter_file"] = "Path to stage/share/openstructure/stereo_chemical_props.txt"
   json_data["options"]["compound_library"] = "Path to stage/share/openstructure/compounds.chemlib"
+  json_data["options"]["cwd"] = "Path to current working directory"
   with open("output_fixed.json", "w") as outfile:
-    json.dump(json_data, outfile, indent=4, sort_keys=True)
+    json.dump(json_data, outfile, indent=2, sort_keys=True)
 
 .. code-block:: json
 
   {
-      "options": {
-          "angle_tolerance": 15.0, 
-          "bond_tolerance": 15.0, 
-          "c_alpha_only": false, 
-          "chain_mapping": null, 
-          "clean_element_column": true, 
-          "compound_library": "Path to stage/share/openstructure/compounds.chemlib", 
-          "consistency_checks": true, 
-          "cwd": "/home/taurielg/GT/Code/ost/build", 
-          "dump_structures": false, 
-          "dump_suffix": ".compare.structures.pdb", 
-          "fault_tolerant": false, 
-          "inclusion_radius": 15.0, 
-          "lddt": true, 
-          "map_nonstandard_residues": true, 
-          "model": "model.pdb", 
-          "model_selection": "", 
-          "molck": true, 
-          "output": "output.json", 
-          "parameter_file": "Path to stage/share/openstructure/stereo_chemical_props.txt", 
-          "qs_max_mappings_extensive": 1000000, 
-          "qs_rmsd": false, 
-          "qs_score": true, 
-          "reference": "reference.pdb", 
-          "reference_selection": "", 
-          "remove": [
-              "oxt", 
-              "hyd", 
-              "unk"
-          ], 
-          "residue_number_alignment": true, 
-          "save_per_residue_scores": false, 
-          "sequence_separation": 0, 
-          "structural_checks": true, 
-          "verbosity": 3
-      }, 
-      "result": {
-          "model.pdb": {
-              "reference.pdb": {
-                  "info": {
-                      "mapping": {
-                          "alignments": [
-                              ">reference:A\n-PGLFLTLEGLDGSGKTTQA...\n>model:B\nMPGLFLTLEGLDGSGKTTQA...", 
-                              ">reference:B\n-PGLFLTLEGLDGSGKTTQA...\n>model:A\nMPGLFLTLEGLDGSGKTTQA..."
-                          ], 
-                          "chain_mapping": {
-                              "A": "B", 
-                              "B": "A"
-                          }, 
-                          "chain_mapping_scheme": "strict"
-                      }, 
-                      "residue_names_consistent": true
-                  }, 
-                  "lddt": {
-                      "oligo_lddt": {
-                          "error": "", 
-                          "global_score": 0.8025223275721413, 
-                          "status": "SUCCESS"
-                      }, 
-                      "single_chain_lddt": [
-                          {
-                              "conserved_contacts": 877834, 
-                              "error": "", 
-                              "global_score": 0.8257459402084351, 
-                              "model_chain": "B", 
-                              "reference_chain": "A", 
-                              "status": "SUCCESS", 
-                              "total_contacts": 1063080
-                          }, 
-                          {
-                              "conserved_contacts": 904568, 
-                              "error": "", 
-                              "global_score": 0.7854443788528442, 
-                              "model_chain": "A", 
-                              "reference_chain": "B", 
-                              "status": "SUCCESS", 
-                              "total_contacts": 1151664
-                          }
-                      ], 
-                      "weighted_lddt": {
-                          "error": "", 
-                          "global_score": 0.804789180710712, 
-                          "status": "SUCCESS"
-                      }
-                  }, 
-                  "qs_score": {
-                      "best_score": 0.9022811630070536, 
-                      "error": "", 
-                      "global_score": 0.8974384796108209, 
-                      "status": "SUCCESS"
-                  }
+    "options": {
+      "angle_tolerance": 15.0, 
+      "bond_tolerance": 15.0, 
+      "c_alpha_only": false, 
+      "chain_mapping": null, 
+      "clean_element_column": true, 
+      "compound_library": "Path to stage/share/openstructure/compounds.chemlib", 
+      "consistency_checks": true, 
+      "cwd": "Path to current working directory", 
+      "dump_structures": false, 
+      "dump_suffix": ".compare.structures.pdb", 
+      "fault_tolerant": false, 
+      "inclusion_radius": 15.0, 
+      "lddt": true, 
+      "map_nonstandard_residues": true, 
+      "model": "model.pdb", 
+      "model_selection": "", 
+      "molck": true, 
+      "output": "output.json", 
+      "parameter_file": "Path to stage/share/openstructure/stereo_chemical_props.txt", 
+      "qs_max_mappings_extensive": 1000000, 
+      "qs_rmsd": false, 
+      "qs_score": true, 
+      "reference": "reference.pdb", 
+      "reference_selection": "", 
+      "remove": [
+        "oxt", 
+        "hyd", 
+        "unk", 
+        "nonstd"
+      ], 
+      "residue_number_alignment": true, 
+      "save_per_residue_scores": false, 
+      "sequence_separation": 0, 
+      "structural_checks": true, 
+      "verbosity": 3
+    }, 
+    "result": {
+      "model.pdb": {
+        "reference.pdb": {
+          "info": {
+            "mapping": {
+              "alignments": [
+                ">reference:A\n-NAMKIGIVGAMAQE...\n>model:A\n---MKIGIVGAMAQE...", 
+                ">reference:B\n-NAMKIGIVGAMAQE...\n>model:B\n---MKIGIVGAMAQE..."
+              ], 
+              "chain_mapping": {
+                "A": "A", 
+                "B": "B"
+              }, 
+              "chain_mapping_scheme": "strict"
+            }, 
+            "residue_names_consistent": true
+          }, 
+          "lddt": {
+            "oligo_lddt": {
+              "error": "", 
+              "global_score": 0.8977285786061329, 
+              "status": "SUCCESS"
+            }, 
+            "single_chain_lddt": [
+              {
+                "conserved_contacts": 1194245, 
+                "error": "", 
+                "global_score": 0.8954750895500183, 
+                "model_chain": "A", 
+                "reference_chain": "A", 
+                "status": "SUCCESS", 
+                "total_contacts": 1333644
+              }, 
+              {
+                "conserved_contacts": 1200391, 
+                "error": "", 
+                "global_score": 0.8998055458068848, 
+                "model_chain": "B", 
+                "reference_chain": "B", 
+                "status": "SUCCESS", 
+                "total_contacts": 1334056
               }
+            ], 
+            "weighted_lddt": {
+              "error": "", 
+              "global_score": 0.8976406520766181, 
+              "status": "SUCCESS"
+            }
+          }, 
+          "qs_score": {
+            "best_score": 0.9619749105661133, 
+            "error": "", 
+            "global_score": 0.9619749105661133, 
+            "status": "SUCCESS"
           }
+        }
       }
+    }
   }
 
 If all the structures are clean and have matching residue numbers, one can omit
@@ -595,31 +568,32 @@ all the checking steps and calculate scores directly as here:
   ################################################################################
   Reading input files (fault_tolerant=False)
    --> reading model from model.pdb
-  imported 2 chains, 396 residues, 3106 atoms; with 0 helices and 0 strands
+  imported 2 chains, 462 residues, 3400 atoms; with 0 helices and 0 strands
    --> reading reference from reference.pdb
-  imported 3 chains, 408 residues, 3011 atoms; with 0 helices and 0 strands
+  imported 3 chains, 471 residues, 3465 atoms; with 0 helices and 0 strands
   ################################################################################
   Comparing model.pdb to reference.pdb
+  Chains removed from reference.pdb: _
   Chains in reference.pdb: AB
   Chains in model.pdb: AB
-  Chemically equivalent chain-groups in reference.pdb: [['B', 'A']]
+  Chemically equivalent chain-groups in reference.pdb: [['A', 'B']]
   Chemically equivalent chain-groups in model.pdb: [['A', 'B']]
-  Chemical chain-groups mapping: {('B', 'A'): ('A', 'B')}
+  Chemical chain-groups mapping: {('A', 'B'): ('A', 'B')}
   Identifying Symmetry Groups...
   Symmetry threshold 0.1 used for angles of reference.pdb
   Symmetry threshold 0.1 used for axis of reference.pdb
   Symmetry threshold 0.1 used for angles of model.pdb
   Symmetry threshold 0.1 used for axis of model.pdb
   Selecting Symmetry Groups...
-  Symmetry-groups used in reference.pdb: [('B',), ('A',)]
+  Symmetry-groups used in reference.pdb: [('A',), ('B',)]
   Symmetry-groups used in model.pdb: [('A',), ('B',)]
   Closed Symmetry with strict parameters
-  Mapping found: {'A': 'B', 'B': 'A'}
+  Mapping found: {'A': 'A', 'B': 'B'}
   --------------------------------------------------------------------------------
   Checking consistency between model.pdb and reference.pdb
   Consistency check: OK
   --------------------------------------------------------------------------------
   Computing QS-score
-  QSscore reference.pdb, model.pdb: best: 0.90, global: 0.90
+  QSscore reference.pdb, model.pdb: best: 0.96, global: 0.96
   ################################################################################
   Saving output into output_qs.json

@@ -17,6 +17,7 @@ set(OST_GUI_PYMOD_SOURCES
   export_file_loader.cc
   export_file_viewer.cc
   export_widget.cc
+  export_gl_canvas.cc
 )
 set(OST_GUI_SCENE_PYMOD_MODULES
 __init__.py
@@ -117,6 +118,5 @@ install(FILES ${INSPECTOR_ICONS} DESTINATION "share/openstructure/scene/icons")
 
 set(QT_USE_QTOPENGL 1)
 set(QT_USE_QTNETWORK 1)
-include(${QT_USE_FILE})
 
 target_link_libraries(_ost_gui ${QT_LIBRARIES})

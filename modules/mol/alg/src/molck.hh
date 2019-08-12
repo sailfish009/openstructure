@@ -80,7 +80,8 @@ struct MolckSettings{
 };
 
 void MapNonStandardResidues(ost::mol::EntityHandle& ent,
-                                              ost::conop::CompoundLibPtr lib);
+                            ost::conop::CompoundLibPtr lib,
+                            bool log_diags = true);
 
 void RemoveAtoms(ost::mol::EntityHandle& ent,
                  ost::conop::CompoundLibPtr lib,
@@ -96,7 +97,8 @@ void CleanUpElementColumn(ost::mol::EntityHandle& ent,
 
 void Molck(ost::mol::EntityHandle& ent,
            ost::conop::CompoundLibPtr lib,
-           const MolckSettings& settings);
+           const MolckSettings& settings,
+           bool prune = true);
 
 
 }}} // namespace

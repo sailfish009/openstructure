@@ -70,6 +70,31 @@ behaviour.
 
 .. autofunction:: ost.io.LoadPDB
 
+.. function:: PDBStrToEntity(pdb_string, profile=IOProfile(), process=False)
+
+  Load entity from a string in PDB format. By default the entity is loaded with
+  an empty IO Profile and is not processed with the :class:`~ost.conop.Processor`,
+  even if one is available in the IO Profile.
+
+  :param pdb_string: A PDB file as a string.
+
+  :param profile: The IO Profile to read the entity with. For more information
+      on the IO Profiles available, see :doc:`profile`.
+
+  :param process: If set to True, run the :class:`~ost.conop.Processor`
+      contained in the IO Profile.
+
+  :rtype: :class:`~ost.mol.EntityHandle`.
+
+  To get an entity equivalent to one loaded with :func:`LoadPDB`, set the
+  `profile` and `process` arguments as follows:
+
+.. code-block:: python
+
+  with open('protein.pdb') as pdb_fd:
+      pdb_str = pdb.read()
+      ent = io.PDBStrToEntity(pdb_str, ost.io.profiles['DEFAULT'], True)
+
 
 Saving Molecular Structures
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -117,7 +142,18 @@ file:
       
 .. autofunction:: ost.io.SavePDB
 
+.. function:: EntityToPDBStr(ent, profile=IOProfile())
 
+  Return entity as a string in PDB format. 
+
+  :param entity: The :class:`~ost.mol.EntityHandle` or :class:`~ost.mol.EntityView`
+
+  :param profile: The IO Profile to read the entity with. For more information
+      on the IO Profiles available, see :doc:`profile`.
+  :raises: IOException if the restrictions of the PDB format are not satisfied
+           (see :meth:`ost.io.SavePDB`)
+
+  :rtype: string.
 
 .. _seq-io:
 

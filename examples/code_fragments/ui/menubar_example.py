@@ -19,24 +19,23 @@
 from ost import gui
 from ost.gui import FileLoader
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class InitMenuBar(QtCore.QObject):
   def __init__(self, menu_bar=None):
     QtCore.QObject.__init__(self, menu_bar)
     self.scene_selection_ = gui.SceneSelection.Instance()
     
-    test_action = QtGui.QAction('Test Menu Point', self)
+    test_action = QtWidgets.QAction('Test Menu Point', self)
     test_action.setStatusTip('Print Hello World')
     test_action.setShortcut('Ctrl+T')
-
-    self.connect(test_action, QtCore.SIGNAL('triggered()'), self.TestMethod)
+    test_action.triggered.connect(self.TestMethod)
 
     test = menu_bar.addMenu('&Test')
     test.addAction(test_action)
 
   def TestMethod(self):
-    reply = QtGui.QMessageBox()
+    reply = QtWidgets.QMessageBox()
     
     node_count = self.scene_selection_.GetActiveNodeCount()
     if(node_count > 0):
@@ -47,7 +46,7 @@ class InitMenuBar(QtCore.QObject):
       reply.setText("Oh, there are selected entities: %s" % string)
     else:
       reply.setText("This is a test!")
-    reply.addButton(QtGui.QMessageBox.Yes)
+    reply.addButton(QtWidgets.QMessageBox.Yes)
     reply.exec_()
     
 menu_bar=gui.GostyApp.Instance().perspective.GetMenuBar()

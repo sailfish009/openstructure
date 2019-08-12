@@ -1,5 +1,4 @@
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5 import QtGui, QtCore, QtWidgets
 from ost.gui import AdminRights
 import ost
 import os
@@ -7,9 +6,9 @@ import os
 
 usage='''The DNG application bundle contains two shell commands ('ost' and 'dng') that lets you use the OpenStructure command-line interpreter and dng from the terminal. If you want to use these commands, it is recommended that a symbolic link is created. 
 '''
-class TerminalUsageDialog(QDialog):
+class TerminalUsageDialog(QtWidgets.QDialog):
   def __init__(self, parent=None):
-    QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     self.setWindowTitle('Enhanced Terminal Usage')
     self.setFixedSize(QSize(480, 300))
     l=QVBoxLayout(self)

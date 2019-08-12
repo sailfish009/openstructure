@@ -29,7 +29,7 @@ except ImportError:
   _img_present=False
   pass
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtWidgets
 from scene_selection_helper import SelHelper
 from gradient_editor_widget import GradientEditor
 from uniform_color_widget import UniformColorWidget
@@ -41,8 +41,8 @@ class ColorOptionsWidget(ComboOptionsWidget):
     
     #Title
     self.text_ = "Color Options"
-    conly_label_ = QtGui.QLabel('carbons only')
-    self.conly_box_ = QtGui.QCheckBox()
+    conly_label_ = QtWidgets.QLabel('carbons only')
+    self.conly_box_ = QtWidgets.QCheckBox()
     
     #Add options to menu
     self.entity_widgets_ = list()
@@ -55,8 +55,8 @@ class ColorOptionsWidget(ComboOptionsWidget):
     self.img_widgets_ = list()
     self.img_widgets_.append(["Uniform",UniformColorWidget()])
 
-    qw = QtGui.QWidget(self)
-    gl = QtGui.QGridLayout(qw)
+    qw = QtWidgets.QWidget(self)
+    gl = QtWidgets.QGridLayout(qw)
     gl.addWidget(self.conly_box_, 0, 0, 1, 1)
     gl.addWidget(conly_label_, 0, 1, 1, 4)
     self.grid_layout_.addWidget(qw, 2, 0, 1, 1)
@@ -112,9 +112,9 @@ class ColorOptionsWidget(ComboOptionsWidget):
     return self.conly_box_.isChecked()
   
 
-class ByElementWidget(QtGui.QWidget):
+class ByElementWidget(QtWidgets.QWidget):
   def __init__(self, text, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     self.parent_ = parent
 
     
@@ -122,13 +122,13 @@ class ByElementWidget(QtGui.QWidget):
     self.text_ = text
     
     #UI
-    text_label = QtGui.QLabel(text)
+    text_label = QtWidgets.QLabel(text)
     font = text_label.font()
     font.setBold(True)
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.addWidget(text_label,0,0,1,1)
-    grid.addWidget(QtGui.QLabel("No Settings available"), 1, 0, 1, 3)
+    grid.addWidget(QtWidgets.QLabel("No Settings available"), 1, 0, 1, 3)
     grid.setRowStretch(2,1)
     self.setLayout(grid)
     self.setMinimumSize(250,60)
@@ -156,20 +156,20 @@ class ByElementWidget(QtGui.QWidget):
     return self.text_
   
   
-class ByChainWidget(QtGui.QWidget):
+class ByChainWidget(QtWidgets.QWidget):
   def __init__(self, text, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     self.parent_ = parent
     
     #Title
     self.text_ = text
     
     #UI
-    text_label = QtGui.QLabel(text)
+    text_label = QtWidgets.QLabel(text)
     font = text_label.font()
     font.setBold(True)
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.addWidget(text_label,0,0,1,1)
     grid.setRowStretch(2,1)
     self.setLayout(grid)
@@ -197,20 +197,20 @@ class ByChainWidget(QtGui.QWidget):
   def GetText(self):
     return self.text_
 
-class ByEntityWidget(QtGui.QWidget):
+class ByEntityWidget(QtWidgets.QWidget):
   def __init__(self, text, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     self.parent_ = parent
     
     #Title
     self.text_ = text
     
     #UI
-    text_label = QtGui.QLabel(text)
+    text_label = QtWidgets.QLabel(text)
     font = text_label.font()
     font.setBold(True)
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.addWidget(text_label,0,0,1,1)
     grid.setRowStretch(2,1)
     self.setLayout(grid)

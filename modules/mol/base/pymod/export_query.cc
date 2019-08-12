@@ -68,5 +68,5 @@ void export_Query()
          return_value_policy<copy_const_reference>())
   ;
   
-
+  def("QueryQuoteName", &QueryQuoteName);
 }

@@ -41,11 +41,13 @@ bool RenderOptions::AddObserver(EntityP entity)
 
 bool RenderOptions::RemoveObserver(EntityP entity)
 {
-  for (EntityWObservers::iterator
-       i = observers_.begin(), e = observers_.end(); i != e; ++i) {
-    if (i->lock() == entity)
+  for (EntityWObservers::iterator i = observers_.begin(), e = observers_.end(); 
+       i != e; ++i) {
+    if (i->lock() == entity) {
       observers_.erase(i);
       return true;
+    }
+    
   }
   return false;
 }

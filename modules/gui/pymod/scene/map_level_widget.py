@@ -26,13 +26,13 @@ try:
 except ImportError:
   _img_present=False
   pass
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 
 from preset_widget import PresetWidget
 
-class AdditionalSettingsWidget(QtGui.QStackedWidget):
+class AdditionalSettingsWidget(QtWidgets.QStackedWidget):
   def __init__(self, parent=None):
-    QtGui.QStackedWidget.__init__(self, parent)
+    QtWidgets.QStackedWidget.__init__(self, parent)
     self.map_widget_ = MapLevelWidget(self)
     self.preset_widget_ = PresetWidget(self)
     self.addWidget(self.preset_widget_);
@@ -67,22 +67,22 @@ class AdditionalSettingsWidget(QtGui.QStackedWidget):
       self.setEnabled(False)
     
 #Map Level Widget
-class MapLevelWidget(QtGui.QWidget):
+class MapLevelWidget(QtWidgets.QWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     
     #Create Ui elements
-    self.map_level_label_ = QtGui.QLabel("Map Contour Level")
+    self.map_level_label_ = QtWidgets.QLabel("Map Contour Level")
     self.font = self.map_level_label_.font()
     self.font.setBold(True)
     
     self.level_preview_ = LevelPreview()
     
-    self.level_spinbox_ = QtGui.QDoubleSpinBox()
+    self.level_spinbox_ = QtWidgets.QDoubleSpinBox()
     self.level_spinbox_.setDecimals(3)
     self.level_spinbox_.setSingleStep(0.05)
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
     grid.addWidget(self.level_preview_, 0, 0, 1, 4)
     grid.addWidget(self.map_level_label_, 1, 0, 1, 3)
@@ -90,9 +90,9 @@ class MapLevelWidget(QtGui.QWidget):
     grid.setRowStretch(3, 1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.level_preview_, QtCore.SIGNAL("levelUpdated"), self.UpdateLevel)
-    QtCore.QObject.connect(self.level_preview_, QtCore.SIGNAL("levelModified"), self.ModifySpinBox)
-    QtCore.QObject.connect(self.level_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateLevel)
+    self.level_preview_.levelUpdated.connect(self.UpdateLevel)
+    self.level_preview_.levelModified.connect(self.ModifySpinBox)
+    self.level_spinbox_.valueChanged.connect(self.UpdateLevel)
 
     self.setMinimumSize(250,200)
         
@@ -129,19 +129,23 @@ class MapLevelWidget(QtGui.QWidget):
       node.SetLevel(level)
       
   def ModifySpinBox(self, level):
-    QtCore.QObject.disconnect(self.level_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateLevel)
+    self.level_spinbox_.valueChanged.disconnect(self.UpdateLevel)
     self.level_spinbox_.setValue(level)
-    QtCore.QObject.connect(self.level_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateLevel)
+    self.level_spinbox_.valueChanged.connect(self.UpdateLevel)
         
 #Level Preview
-class LevelPreview(QtGui.QWidget):
+class LevelPreview(QtWidgets.QWidget):
+
+  levelUpdated = QtCore.pyqtSignal(int, name="levelUpdated")
+  levelModified = QtCore.pyqtSignal(int, name="levelModified")
+
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     
     #Defaults
     self.border_offset_ = 3
     self.preview_height_ = 150
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     
     #Ui
     self.setMinimumSize(0, self.preview_height_ + 4)
@@ -171,7 +175,7 @@ class LevelPreview(QtGui.QWidget):
     
   def paintEvent(self, event):   
     if self.isEnabled() and self.bins_ is not None:
-      painter = QtGui.QPainter()
+      painter = QtWidgets.QPainter()
       if painter.begin(self):
         self.PaintBackground(painter)
         self.PaintBins(painter)
@@ -228,7 +232,7 @@ class LevelPreview(QtGui.QWidget):
     width = size.width()-(2* self.border_offset_)
     painter.setBrush(QtCore.Qt.gray)
     painter.setPen(QtCore.Qt.gray)
-    pos=self.mapFromGlobal(QtGui.QCursor.pos())
+    pos=self.mapFromGlobal(QtWidgets.QCursor.pos())
     painter.drawRect(pos.x(),
                    self.border_offset_,
                    1,
@@ -241,7 +245,7 @@ class LevelPreview(QtGui.QWidget):
     tot_len = self.maximum_-self.minimum_
     self.level_ = self.minimum_ + float(event.x())/width * tot_len
     self.update()
-    self.emit(QtCore.SIGNAL("levelUpdated"),(self.level_))
+    self.levelUpdated.emit(self.level_)
   
   def mousePressEvent(self,event):
     self.paint_mouse_=True
@@ -251,5 +255,5 @@ class LevelPreview(QtGui.QWidget):
     width = size.width()-(2* self.border_offset_)
     tot_len = self.maximum_-self.minimum_
     level = self.minimum_ + float(event.x())/width * tot_len
-    self.emit(QtCore.SIGNAL("levelModified"),(level))
+    self.levelModified.emit(level)
     self.update()

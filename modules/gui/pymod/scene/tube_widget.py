@@ -20,7 +20,7 @@
 
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 from render_mode_widget import RenderModeWidget
 
 #Tube Render Options
@@ -48,57 +48,57 @@ class TubeWidget(RenderModeWidget):
     max_ratio = 4
     
     #UI
-    tube_label = QtGui.QLabel("Tube Settings")
+    tube_label = QtWidgets.QLabel("Tube Settings")
     font = tube_label.font()
     font.setBold(True)
     
     #Poly Mode
-    poly_mode_label = QtGui.QLabel("Poly Mode")
+    poly_mode_label = QtWidgets.QLabel("Poly Mode")
     
-    self.poly_mode_cb_ = QtGui.QComboBox()
+    self.poly_mode_cb_ = QtWidgets.QComboBox()
     self.poly_mode_cb_.addItem("Points")
     self.poly_mode_cb_.addItem("Wireframe")
     self.poly_mode_cb_.addItem("Surface")
     
     #Sphere Label
-    spline_label = QtGui.QLabel("Spline Detail")
+    spline_label = QtWidgets.QLabel("Spline Detail")
     
-    self.spline_spinbox_ = QtGui.QSpinBox()
+    self.spline_spinbox_ = QtWidgets.QSpinBox()
     self.spline_spinbox_.setRange(min_spline_detail, max_spline_detail)
     
     #Arc Label
-    arc_label = QtGui.QLabel("Arc Detail")
+    arc_label = QtWidgets.QLabel("Arc Detail")
     
-    self.arc_spinbox_ = QtGui.QSpinBox()
+    self.arc_spinbox_ = QtWidgets.QSpinBox()
     self.arc_spinbox_.setRange(min_arc_detail, max_arc_detail)
         
     #Radius
-    radius_label = QtGui.QLabel("Tube radius")
+    radius_label = QtWidgets.QLabel("Tube radius")
 
     
-    self.radius_spinbox_ = QtGui.QDoubleSpinBox()
+    self.radius_spinbox_ = QtWidgets.QDoubleSpinBox()
     self.radius_spinbox_.setRange(min_radius, max_radius)
     self.radius_spinbox_.setDecimals(1)
     self.radius_spinbox_.setSingleStep(0.1)
 
-    self.radius_slider_ = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+    self.radius_slider_ = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
     self.radius_slider_.setRange(min_radius*10.0, max_radius*10.0)
-    self.radius_slider_.setTickPosition(QtGui.QSlider.NoTicks)
+    self.radius_slider_.setTickPosition(QtWidgets.QSlider.NoTicks)
     self.radius_slider_.setTickInterval(1)
     
     #Ratio
-    ratio_label = QtGui.QLabel("Tube ratio")
+    ratio_label = QtWidgets.QLabel("Tube ratio")
     
-    self.ratio_spinbox_ = QtGui.QDoubleSpinBox()
+    self.ratio_spinbox_ = QtWidgets.QDoubleSpinBox()
     self.ratio_spinbox_.setRange(min_ratio, max_ratio)
     self.ratio_spinbox_.setDecimals(1)
     self.ratio_spinbox_.setSingleStep(0.1)
-    self.ratio_slider_ = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+    self.ratio_slider_ = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
     self.ratio_slider_.setRange(min_ratio*10.0, max_ratio*10.0)
-    self.ratio_slider_.setTickPosition(QtGui.QSlider.NoTicks)
+    self.ratio_slider_.setTickPosition(QtWidgets.QSlider.NoTicks)
     self.ratio_slider_.setTickInterval(2)
     
-    grid = QtGui.QGridLayout()
+    grid = QtWidgets.QGridLayout()
     grid.addWidget(tube_label,0,0,1,3)
     grid.addWidget(poly_mode_label,1,0,1,3)
     grid.addWidget(self.poly_mode_cb_,1,3,1,2)
@@ -115,13 +115,13 @@ class TubeWidget(RenderModeWidget):
     grid.setRowStretch(6,1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.spline_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSplineDetail)
-    QtCore.QObject.connect(self.arc_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateArcDetail)
-    QtCore.QObject.connect(self.poly_mode_cb_, QtCore.SIGNAL("currentIndexChanged(int)"), self.UpdatePolyMode)
-    QtCore.QObject.connect(self.radius_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateRadius)
-    QtCore.QObject.connect(self.radius_slider_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSliderRadius)
-    QtCore.QObject.connect(self.ratio_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateRatio)
-    QtCore.QObject.connect(self.ratio_slider_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSliderRatio)
+    self.spline_spinbox_.valueChanged.connect(self.UpdateSplineDetail)
+    self.arc_spinbox_.valueChanged.connect(self.UpdateArcDetail)
+    self.poly_mode_cb_.currentIndexChanged.connect(self.UpdatePolyMode)
+    self.radius_spinbox_.valueChanged.connect(self.UpdateRadius)
+    self.radius_slider_.valueChanged.connect(self.UpdateSliderRadius)
+    self.ratio_spinbox_.valueChanged.connect(self.UpdateRatio)
+    self.ratio_slider_.valueChanged.connect(self.UpdateSliderRatio)
   
     self.setMinimumSize(250,200)
    

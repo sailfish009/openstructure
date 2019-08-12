@@ -103,7 +103,7 @@ void to_add_option_b(ToolOptions& to, const String& name,
 
 object qpoint_to_bp_object (QPoint& p)
 {
-  static object bp_module =import("PyQt4.QtCore");
+  static object bp_module =import("PyQt5.QtCore");
   return bp_module.attr("QPoint")(p.x(),p.y());
 }
 

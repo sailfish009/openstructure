@@ -267,6 +267,7 @@ void export_Editors()
     .def("RenumberAllResidues",&EditorBase::RenumberAllResidues)
     .def("RenumberChain",renumber_chain_a)
     .def("RenumberChain",renumber_chain_b)
+    .def("Prune", &EditorBase::Prune)
   ;
   
   void (XCSEditor::*apply_transform1)(const geom::Mat4&) = &XCSEditor::ApplyTransform;

@@ -4,13 +4,21 @@
 #include <ost/conop/amino_acids.hh>
 #include <ost/conop/rule_based.hh>
 #include <ost/mol/alg/molck.hh>
+#include <ost/message.hh>
+#include <ost/log.hh>
 
 using namespace ost::conop;
 using namespace ost::mol;
 
+namespace ost{ namespace mol{ namespace alg{
 
-void ost::mol::alg::MapNonStandardResidues(EntityHandle& ent, CompoundLibPtr lib) {
+void MapNonStandardResidues(EntityHandle& ent, CompoundLibPtr lib, bool log_diags) {
   // TODO: Maybe it is possible to make it in-place operation
+
+  if(!lib) {
+    throw ost::Error("Require valid compound library!");
+  }
+
   EntityHandle new_ent=CreateEntity();
   new_ent.SetName(ent.GetName());
   ChainHandleList chains=ent.GetChainList();
@@ -39,18 +47,17 @@ void ost::mol::alg::MapNonStandardResidues(EntityHandle& ent, CompoundLibPtr lib
            continue;
         } 
         ResidueHandle dest_res = new_edi.AppendResidue(new_chain,OneLetterCodeToResidueName(compound->GetOneLetterCode()),r->GetNumber());
-        ost::mol::alg::CopyResidue(*r,dest_res,new_edi,lib);
+        CopyResidue(*r,dest_res,new_edi,lib);
       }
     }
   }
   ent = new_ent;
   // Since we didn't do it in-place: reprocess the new entity
   RuleBasedProcessor pr(lib);
-  pr.Process(ent);
+  pr.Process(ent, log_diags);
 }
 
-void ost::mol::alg::RemoveAtoms(
-                 EntityHandle& ent,
+void RemoveAtoms(EntityHandle& ent,
                  CompoundLibPtr lib,
                  bool rm_unk_atoms,
                  bool rm_non_std,
@@ -58,33 +65,42 @@ void ost::mol::alg::RemoveAtoms(
                  bool rm_oxt_atoms,
                  bool rm_zero_occ_atoms,
                  bool colored /*=true*/){
+
+  if(!lib) {
+    throw ost::Error("Require valid compound library!");
+  }
+
   XCSEditor edi=ent.EditXCS();
   Diagnostics diags;
   Checker checker(lib, ent, diags);
   if (rm_zero_occ_atoms) {
-    std::cerr << "removing atoms with zero occupancy" << std::endl;
+    LOG_INFO("removing atoms with zero occupancy");
     int zremoved=0;
     AtomHandleList zero_atoms=checker.GetZeroOccupancy();
     for (AtomHandleList::const_iterator i=zero_atoms.begin(), e=zero_atoms.end(); i!=e; ++i) {
        edi.DeleteAtom(*i);
        zremoved++;   
     }
-    std::cerr << " --> removed " << zremoved << " hydrogen atoms" << std::endl;
+    std::stringstream ss;
+    ss << " --> removed " << zremoved << " atoms with zero occupancy";
+    LOG_INFO(ss.str());
   }
 
   if (rm_hyd_atoms) {
-    std::cerr << "removing hydrogen atoms" << std::endl;
+    LOG_INFO("removing hydrogen atoms");
     int hremoved=0;
     AtomHandleList hyd_atoms=checker.GetHydrogens();
     for (AtomHandleList::const_iterator i=hyd_atoms.begin(), e=hyd_atoms.end(); i!=e; ++i) {
        edi.DeleteAtom(*i);
        hremoved++;   
     }
-    std::cerr << " --> removed " << hremoved << " hydrogen atoms" << std::endl;
+    std::stringstream ss;
+    ss << " --> removed " << hremoved << " hydrogen atoms";
+    LOG_INFO(ss.str());
   }
   
   if (rm_oxt_atoms) {
-    std::cerr << "removing OXT atoms" << std::endl;
+    LOG_INFO("removing OXT atoms");
     int oremoved=0;
     AtomHandleList atoms=ent.GetAtomList();
     for (AtomHandleList::const_iterator i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
@@ -93,7 +109,9 @@ void ost::mol::alg::RemoveAtoms(
          oremoved++;   
        }
     }
-    std::cerr << " --> removed " << oremoved << " OXT atoms" << std::endl;
+    std::stringstream ss;
+    ss << " --> removed " << oremoved << " OXT atoms";
+    LOG_INFO(ss.str());
   }
 
   checker.CheckForCompleteness();
@@ -102,28 +120,34 @@ void ost::mol::alg::RemoveAtoms(
   for (Diagnostics::const_diag_iterator 
        j = diags.diags_begin(), e = diags.diags_end(); j != e; ++j) {
     const Diag* diag=*j;
-    std::cerr << diag->Format(colored);
+    std::stringstream ss;
+    ss << diag->Format(colored);
     switch (diag->GetType()) {
       case DIAG_UNK_ATOM:
         if (rm_unk_atoms) {
           edi.DeleteAtom(diag->GetAtom(0));
-          std::cerr << " --> removed ";  
+          ss << " --> removed "; 
         }
         break;
       case DIAG_NONSTD_RESIDUE:
         if (rm_non_std) {
           edi.DeleteResidue(diag->GetResidue(0));
-          std::cerr << " --> removed ";  
+          ss << " --> removed ";
         }
         break;
       default:
         break;
     }
-    std::cerr << std::endl;
+    LOG_INFO(ss.str());
   }
 }
 
-void ost::mol::alg::CleanUpElementColumn(EntityHandle& ent, CompoundLibPtr lib){
+void CleanUpElementColumn(EntityHandle& ent, CompoundLibPtr lib){
+
+  if(!lib) {
+    throw ost::Error("Require valid compound library!");
+  }
+
   ChainHandleList chains=ent.GetChainList();
   for (ChainHandleList::const_iterator c=chains.begin();c!=chains.end();++c) {
     ResidueHandleList residues = c->GetResidueList();
@@ -148,15 +172,20 @@ void ost::mol::alg::CleanUpElementColumn(EntityHandle& ent, CompoundLibPtr lib){
   }
 }
 
-void ost::mol::alg::Molck(
-           ost::mol::EntityHandle& ent,
+void Molck(ost::mol::EntityHandle& ent,
            ost::conop::CompoundLibPtr lib,
-           const ost::mol::alg::MolckSettings& settings=ost::mol::alg::MolckSettings()){
-  if (settings.map_nonstd_res)  {
-    ost::mol::alg::MapNonStandardResidues(ent, lib);
+           const MolckSettings& settings,
+           bool prune) {
+
+  if(!lib) {
+    throw ost::Error("Require valid compound library!");
   }
-  ost::mol::alg::RemoveAtoms(ent, 
-              lib, 
+
+  if (settings.map_nonstd_res)  {
+    MapNonStandardResidues(ent, lib, false);
+  }
+
+  RemoveAtoms(ent, lib, 
               settings.rm_unk_atoms,
               settings.rm_non_std,
               settings.rm_hyd_atoms,
@@ -164,6 +193,13 @@ void ost::mol::alg::Molck(
               settings.rm_zero_occ_atoms,
               settings.colored);
   if (settings.assign_elem)  {
-    ost::mol::alg::CleanUpElementColumn(ent, lib);
-  }          
+    CleanUpElementColumn(ent, lib);
+  } 
+
+  if(prune) {
+    ost::mol::XCSEditor edi = ent.EditXCS();
+    edi.Prune();
+  }         
 }
+
+}}} // ns

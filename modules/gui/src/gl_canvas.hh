@@ -19,94 +19,93 @@
 #ifndef OST_GUI_GL_CANVAS_HH
 #define OST_GUI_GL_CANVAS_HH
 
-
-
-#include <ost/gui/tools/tool.hh>
-#include <ost/gui/scene_menu.hh>
 #include <ost/gfx/glwin_base.hh>
+#include <ost/gui/tools/tool.hh>
 #include <ost/gfx/input.hh>
-#include <ost/gfx/gfx_object_fw.hh>
-
 
 // Qt includes must come last
-#include <QGLWidget>
-#include <QBasicTimer>
-class QMenu;
-class QMouseEvent;
+#include <QOpenGLWindow>
+#include <QSurfaceFormat>
+
+// forward declaration
+class QResizeEvent;
+class QOpenGLFramebufferObject;
+class QOpenGLContext;
+class QOffscreenSurface;
 
 namespace ost { namespace gui {
 
-class GLCanvas;
-
-class GLWin;
-
-class DLLEXPORT_OST_GUI GLCanvas : public QGLWidget, public gfx::GLWinBase
-{  
+class GLCanvas : public QOpenGLWindow, public gfx::GLWinBase {  
   Q_OBJECT;
+
 public:
-  GLCanvas(GLWin *gl_win, QWidget* parent,
-           const QGLFormat& f = QGLFormat::defaultFormat());
+  GLCanvas();
+  virtual ~GLCanvas();
 
   // gfx::GLWinBase interface
   virtual void MakeActive();
-  virtual void DoRefresh();
+  virtual void DoRefresh() {this->update(); }
   virtual void StatusMessage(const String& m);
   virtual bool HasStereo() const {return format().stereo();};
-  virtual bool HasMultisample() const {return format().sampleBuffers();}
+  virtual bool HasMultisample() const {return format().samples() > 1;}
+
+  // QSurfaceFormat for GL context setup
+  void SetDefaultFormat();
+  void SetStereoFormat();
 
   // central point for sending input to the gfx layer
   void OnTransform(gfx::InputCommand, int indx, 
                    gfx::TransformTarget, Real val);
 
   void SetTestMode(bool f);
-  
+
+  // Grab images from framebuffer and dump to disk
+  virtual void Export(const String& fname, unsigned int width, 
+                      unsigned int height, bool transparent);
+
+  virtual void Export(const String& fname, unsigned int width, 
+                      unsigned int height, int max_samples, bool transparent);
+
+  virtual void Export(const String& fname, bool transparent);
+
 signals:
-  void ReleaseFocus();
-  
+  void CustomContextMenuRequested(const QPoint& point);
+
 protected:
-  void Select(const String& query);  
-  void CopySelectionToClipboard();  
-  // QGLWidget interface
+
+  // QOpenGLWindow interface
   virtual void initializeGL();
-  virtual void resizeGL(int w, int h);
   virtual void paintGL();
+  virtual void resizeGL(int w, int h);
   
+  // event handling
   virtual void mouseMoveEvent(QMouseEvent* event);
   virtual void mousePressEvent(QMouseEvent* event);
   virtual void mouseReleaseEvent(QMouseEvent* event);
-  virtual void mouseDoubleClickEvent(QMouseEvent* event);
-  
+  virtual void mouseDoubleClickEvent(QMouseEvent* event);  
+
   virtual void keyPressEvent(QKeyEvent* event);
   virtual void keyReleaseEvent(QKeyEvent* event);
-  virtual void timerEvent(QTimerEvent * event);
   virtual void wheelEvent(QWheelEvent* event);
   virtual bool event(QEvent* event);
-private slots:
-  virtual void RequestContextMenu(const QPoint& pos);
 
 private:
-#if QT_VERSION >= 0x040600  
-  bool GestureEvent(QGestureEvent* event);
-#endif
+
   bool IsToolEvent(QInputEvent* event) const;
   MouseEvent::Buttons TranslateButtons(Qt::MouseButtons buttons) const;
   void HandleMousePressEvent(QMouseEvent* event);
   void HandleMouseReleaseEvent(QMouseEvent* event);
   void HandleMouseMoveEvent(QMouseEvent* event);
-  void build_context_menu();
-  void prepare_context_menu(const QPoint& pos);
-  GLWin* glwin_;
-  int mouse_key_mask_;
-  bool refresh_;
-  QBasicTimer master_timer_;
-  bool bench_flag_;
+
   QPoint last_pos_;
-  SceneMenu* scene_menu_;
-  bool show_beacon_;
-  float angular_speed_;
-#if QT_VERSION>=0x04600
-  QBasicTimer gesture_timer_;
-#endif
+  bool show_beacon_;  
+  bool bench_flag_;
+
+  // for image export
+  bool offscreen_flag_;
+  QOpenGLContext* offscreen_context_;
+  QOffscreenSurface* offscreen_surface_;
+  QOpenGLFramebufferObject* offscreen_fbo_;
 };
 
 }} // ns

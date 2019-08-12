@@ -20,28 +20,31 @@
 
 from ost import gui
 from ost import gfx
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 #Gradient Stop  
-class ColorSelectWidget(QtGui.QWidget):
+class ColorSelectWidget(QtWidgets.QWidget):
+
+  colorChanged = QtCore.pyqtSignal()
+
   def __init__(self, width, height, color, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     
     #Membervars
     self.width_ = width
     self.height_ = height
 
     if(color is None):
-      self.color_ = QtGui.QColor("White")
+      self.color_ = QtWidgets.QColor("White")
     else:
       self.color_ = color
         
     self.show()
     
     #ContextMenu
-    self.change_color_ = QtGui.QAction('ChangeColor', self)
+    self.change_color_ = QtWidgets.QAction('ChangeColor', self)
     
-    QtCore.QObject.connect(self.change_color_, QtCore.SIGNAL('triggered()'), self.ChangeColor)
+    self.change_color_.triggered.connect(self.ChangeColor)
     
     self.addAction(self.change_color_)
     self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
@@ -49,11 +52,12 @@ class ColorSelectWidget(QtGui.QWidget):
     self.Resize()
     
   def ChangeColor(self):
-    color = QtGui.QColorDialog.getColor(self.color_, self)
+    color = QtWidgets.QColorDialog.getColor(initial = self.color_, parent = self,
+                                            title = "Select Color")
     
     if(color != self.color_ and color.isValid()):
       self.color_ = color
-      self.emit(QtCore.SIGNAL("colorChanged"))
+      self.colorChanged.emit()
       self.update()
     
   def GetColor(self):
@@ -66,11 +70,11 @@ class ColorSelectWidget(QtGui.QWidget):
   def SetColor(self, color):
     if(self.color_ != color):
       self.color_ = color
-      self.emit(QtCore.SIGNAL("colorChanged"))
+      self.colorChanged.emit()
       self.update()
   
   def SetGfxColor(self, color):
-    qcolor= QtGui.QColor(color.Red()*255,color.Green()*255,color.Blue()*255,color.Alpha()*255)
+    qcolor= QtWidgets.QColor(color.Red()*255,color.Green()*255,color.Blue()*255,color.Alpha()*255)
     self.SetColor(qcolor)
             
   def paintEvent(self, event):

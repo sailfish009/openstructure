@@ -21,7 +21,6 @@
 from ost import gui
 from ost import gfx
 from ost import info
-from PyQt4 import QtCore, QtGui
 from ost.gui.scene.preset import Preset
 
 #Gradient Editor

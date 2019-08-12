@@ -685,18 +685,20 @@ Local Distance Test scores (lDDT, DRMSD)
   Dictionary-like object containing the list of interatomic distances that
   originate from a single residue to be checked during a run of the Local
   Distance Difference Test algorithm
-  (key = pair of :class:`UniqueAtomIdentifier`, value = pair of floats)
+  (key = pair of :class:`UniqueAtomIdentifier`, value = pair of floats
+  representing min and max distance observed in the structures used to build
+  the map).
 
 .. class:: GlobalRDMap
 
-  Dictionary-like object containing all the :class:`~ost.mol.alg.ResidueRDMap` objects related to residues of a single structure
-  (key = :class:`~ost.mol.ResNum`, value = :class:`ResidueRDMap`)
+  Dictionary-like object containing all the :class:`~ost.mol.alg.ResidueRDMap` objects related to all the residues
+  (key = :class:`~ost.mol.ResNum`, value = :class:`ResidueRDMap`).
 
   
 .. function:: PrintResidueRDMap(residue_distance_list)
 
   Prints to standard output all the distances contained in a
-  :class:`~ost.mol.alg.ResidueRDMap` object
+  :class:`~ost.mol.alg.ResidueRDMap` object.
 
 
 .. function:: PrintGlobalRDMap(global_distance_list)
@@ -1875,7 +1877,7 @@ API
   The API here is set such that the functions modify the passed structure *ent*
   in-place. If this is not ok, please work on a copy of the structure.
 
-.. function:: Molck(ent, lib, settings)
+.. function:: Molck(ent, lib, settings, [prune=True])
 
   Runs Molck on provided entity.
 
@@ -1885,6 +1887,10 @@ API
   :type lib: :class:`~ost.conop.CompoundLib`
   :param settings: Molck settings
   :type settings: :class:`MolckSettings`
+  :param prune: Whether to remove residues/chains that don't contain atoms 
+                anymore after Molck cleanup
+  :type prune: :class:`bool` 
+
 
 
 .. function:: MapNonStandardResidues(ent, lib)

@@ -143,11 +143,11 @@ AlignmentHandle MergePairwiseAlignments(const AlignmentList& pairwise_alns,
     AlignmentHandle ali_handle=*i;
     ConstSequenceHandle seq_handle=ali_handle.GetSequence(0);
     if (seq_handle.GetOffset()!=ref_offset) {
-      String error_string;
-      std::ostringstream error_ss(error_string);
-      error_ss << "The offset of the first sequence in alignment " << alignment_counter << 
-        "is not identical to the offset of the reference sequence." << std::endl;
-      throw IntegrityError(error_string);
+      std::ostringstream error_ss;
+      error_ss << "The offset of the first sequence in alignment "
+               << alignment_counter
+               << " is not identical to the offset of the reference sequence.";
+      throw IntegrityError(error_ss.str());
     }
     alignment_counter+=1;
   }

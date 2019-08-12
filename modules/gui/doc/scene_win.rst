@@ -24,7 +24,7 @@ selected objects.
 
     Get the SIP-QObject (QWidget), learn more about :doc:`python_cpp`.
     
-    :rtype: PyQt4.QWidget
+    :rtype: QWidget
 
   .. method:: Hide()
   
@@ -53,8 +53,9 @@ be shown.
 
   .. code-block:: python
   
+    from PyQt5 import QtWidgets
     cm = gui.GostyApp.Instance().scene_win.GetContextMenu()
-    action = QtGui.QAction("Test single entity", cm.qobject)
+    action = QtWidgets.QAction("Test single entity", cm.qobject)
     cm.AddAction(action, gui.ContextActionType.ENTITY | gui.ContextActionType.SINGLE)
 
 .. class:: ContextMenu
@@ -67,7 +68,7 @@ be shown.
 
      :param action: The Action which should be displayed in the context menu
     
-     :type  action: :class:`QtCore.QAction`
+     :type  action: :class:`QAction`
      
      :param flags: Flags that indicates, when the context_menu should be active. The action 
                    will be shown, when all flags are true.
@@ -79,7 +80,7 @@ be shown.
 
     Get the SIP-QObject (QObject), learn more about :doc:`python_cpp`.
     
-    :rtype: PyQt4.QObject
+    :rtype: QObject
 
     
 .. data:: ContextActionType

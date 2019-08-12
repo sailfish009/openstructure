@@ -30,7 +30,7 @@ The files we will be using in the tutorial are available in the examples
 directory that comes with OpenStructure. Depending on your platform, the
 examples are located at a different location:
 
- * on *MacOS X* the files are located inside the application bundle (DNG.app).
+ * on *macOS* the files are located inside the application bundle (DNG.app).
    The file browser will automatically point to the examples.
  * on *Linux* the files are located at PREFIX/share/openstructure/examples, 
    where PREFIX is the path to the directory containing OpenStructure.
@@ -41,7 +41,7 @@ Starting DNG
 The graphical user interface of OpenStructure is called DNG (Dino/DeepView Next 
 Generation). To start it, 
 
- * on *MacOS X* double click DNG.app
+ * on *macOS* double click DNG.app
  * on *Linux* fire up a terminal change into the OpenStructure installation 
    directory and type 'bin/dng'. If you have the binary directory in the PATH, 
    typing *dng* is sufficient.

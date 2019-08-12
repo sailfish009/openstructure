@@ -449,7 +449,7 @@ Operations on Geometrical Objects
   :param rhs: Second object
   :type  rhs: :class:`Line2`, :class:`Line3`, :class:`Plane`
   
-  :raises: :exc:`GeomException` when the two objects do not intersect
+  :raises: :exc:`~exceptions.RuntimeError` when the two objects do not intersect
   :rtype: :class:`Vec3` (:class:`Vec2` in case of :class:`Line2`)
 
 .. function:: IntersectionLine(plane2, plane2)
@@ -461,7 +461,7 @@ Operations on Geometrical Objects
   :param plane2: The second plane
   :type  plane2: :class:`Plane`  
   
-  :raises: :exc:GeomException if the two planes are parallel.
+  :raises: :exc:`~exceptions.RuntimeError` if the two planes are parallel.
   
 .. function:: Distance(lhs, rhs)
 

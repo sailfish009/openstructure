@@ -1312,10 +1312,18 @@ void MMCifReader::ParseStructConf(const std::vector<StringRef>& columns)
   if (restrict_chains_.size() == 0 ||
       restrict_chains_.find(chain_name.str()) != String::npos) {
     // fetch start and end
-    s_res_num = this->TryGetInt(columns[indices_[SC_BEG_LABEL_SEQ_ID]],
-                                "struct_conf.beg_label_seq_id");
-    e_res_num = this->TryGetInt(columns[indices_[SC_END_LABEL_SEQ_ID]],
-                                "struct_conf.end_label_seq_id");
+    std::pair<bool,int> s_beg = this->TryGetInt(columns[indices_[SC_BEG_LABEL_SEQ_ID]], // s_res_num
+                                                "struct_conf.beg_label_seq_id",
+                                                profile_.fault_tolerant);
+    std::pair<bool,int> s_end = this->TryGetInt(columns[indices_[SC_END_LABEL_SEQ_ID]], // e_res_num
+                                                "struct_conf.end_label_seq_id",
+                                                profile_.fault_tolerant);
+    if (!(s_beg.first && s_end.first)) {
+      return;
+    }
+    s_res_num = s_beg.second;
+    e_res_num = s_end.second;
+
     MMCifHSEntry hse = {to_res_num(s_res_num, ' '),
                         to_res_num(e_res_num, ' '),
                         chain_name.str()};
@@ -1353,10 +1361,17 @@ void MMCifReader::ParseStructSheetRange(const std::vector<StringRef>& columns)
   if (restrict_chains_.size() == 0 ||
       restrict_chains_.find(chain_name.str()) != String::npos) {
 
-    s_res_num = this->TryGetInt(columns[indices_[SSR_BEG_LABEL_SEQ_ID]],
-                                "struct_sheet_range.beg_label_seq_id");
-    e_res_num = this->TryGetInt(columns[indices_[SSR_END_LABEL_SEQ_ID]],
-                                "struct_sheet_range.end_label_seq_id");
+    std::pair<bool,int> s_beg = this->TryGetInt(columns[indices_[SSR_BEG_LABEL_SEQ_ID]], // s_res_num
+                                                "struct_sheet_range.beg_label_seq_id",
+                                                profile_.fault_tolerant);
+    std::pair<bool,int> s_end = this->TryGetInt(columns[indices_[SSR_END_LABEL_SEQ_ID]], // e_res_num
+                                                "struct_sheet_range.end_label_seq_id",
+                                                profile_.fault_tolerant);
+    if (!(s_beg.first && s_end.first)) {
+      return;
+    }
+    s_res_num = s_beg.second;
+    e_res_num = s_end.second;
 
     MMCifHSEntry hse = {to_res_num(s_res_num, ' '),
                         to_res_num(e_res_num, ' '),

@@ -42,7 +42,7 @@ bool CBetaInserter::VisitResidue(const mol::ResidueHandle& res)
   }
   catch(...) {
     LOG_WARNING("residue " << res.GetQualifiedName() 
-                << "doesn't have enough backbone atoms to reconstruct CBeta position");
+                << " doesn't have enough backbone atoms to reconstruct CBeta position");
     return false;
   }
   return false;
@@ -83,7 +83,7 @@ geom::Vec3 CBetaPosition(const ResidueHandle& residue, Real bond_length)
   if (!(ca.IsValid() && c.IsValid() && n.IsValid())) {
   std::stringstream ss;
   ss << "residue " << residue.GetQualifiedName() 
-     << "doesn't have enough backbone atoms to reconstruct CBeta position";
+     << " doesn't have enough backbone atoms to reconstruct CBeta position";
     throw ost::Error(ss.str());
   }
   return CBetaPosition(n.GetPos(), ca.GetPos(), c.GetPos(), bond_length);

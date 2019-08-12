@@ -87,7 +87,7 @@ EntityHandle load(const String& file, const IOProfile& profile)
 void usage()
 {
   std::cerr << "usage: lddt [options] <mod1> [mod1 [mod2]] <re1>[,ref2,ref3]" << std::endl;
-  std::cerr << "   -s         selection performed on ref" << std::endl;
+  std::cerr << "   -s <sel>   selection performed on ref" << std::endl;
   std::cerr << "   -c         use Calphas only" << std::endl;
   std::cerr << "   -f         perform structural checks and filter input data" << std::endl;
   std::cerr << "   -t         fault tolerant parsing" << std::endl;
@@ -99,7 +99,7 @@ void usage()
   std::cerr << "   -i <value> sequence separation" << std::endl;
   std::cerr << "   -e         print version" << std::endl;
   std::cerr << "   -x         ignore residue name consistency checks" << std::endl;
-
+  std::cerr << "   -l <path>  location of the compound library file" << std::endl;
 }
 
 CompoundLibPtr load_compound_lib(const String& custom_path)
@@ -178,7 +178,7 @@ int main (int argc, char **argv)
     ("parameter-file,p", po::value<String>(), "stereo-chemical parameter file")
     ("verbosity,v", po::value<int>(), "verbosity level")
     ("bond_tolerance,b", po::value<Real>(), "tolerance in stddev for bonds")
-    ("complib", po::value<String>(&custom_path)->default_value(""),"location of the compound library file")       
+    ("complib,l", po::value<String>(&custom_path)->default_value(""), "location of the compound library file")
     ("angle_tolerance,a", po::value<Real>(), "tolerance in stddev for angles")
     ("inclusion_radius,r", po::value<Real>(), "distance inclusion radius")
     ("sequence_separation,i", po::value<int>(), "sequence separation")
@@ -197,13 +197,13 @@ int main (int argc, char **argv)
     usage();
     exit(-1);
   }
+  po::notify(vm);
   conop::CompoundLibPtr lib = load_compound_lib(custom_path);
   if (!lib) {
     exit(0);
   }
   profile.processor = conop::RuleBasedProcessorPtr(new conop::RuleBasedProcessor(lib));
   profile.processor->SetCheckBondFeasibility(false);
-  po::notify(vm);
   if (vm.count("version")) {
     std::cout << "Version: " << version << std::endl;
     exit(0);
@@ -311,11 +311,14 @@ int main (int argc, char **argv)
   settings.PrintParameters();
   if (structural_checks) {
     LOG_INFO("Log entries format:");
+    // verbosity level/format must match filter_clashes::CheckStereoChemistry
     LOG_INFO("BOND INFO FORMAT:  Chain  Residue  ResNum  Bond  Min  Max  Observed  Z-score  Status");
     LOG_INFO("ANGLE INFO FORMAT:  Chain  Residue  ResNum  Angle  Min  Max  Observed  Z-score  Status");
-    LOG_INFO("CLASH INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  Observed  Difference  Status");
+    // verbosity level/format must match filter_clashes::FilterClashes
+    LOG_INFO("CLASH INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  Threshold  Observed  Difference  Status");
   }
-  LOG_INFO("LDDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
+  // verbosity level/format must match local_dist_diff_test::calc_overlap1
+  LOG_VERBOSE("LDDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDistMin  TargetDistMax  Tolerance  Status");
 
   // error if the reference structure is empty
   if (glob_dist_list.size()==0) {

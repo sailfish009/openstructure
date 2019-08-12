@@ -9,8 +9,7 @@ container solution. We provide recipes to build images for
 `Docker <https://www.docker.com/>`_ and
 `Singularity <https://www.sylabs.io/guides/2.5.1/user-guide>`_.
 The latest recipes and instructions can be found on our GitLab site
-(`Docker instructions <https://git.scicore.unibas.ch/schwede/openstructure/tree/develop/docker>`_ and
-`Singularity instructions <https://git.scicore.unibas.ch/schwede/openstructure/tree/develop/singularity>`_).
+(`Docker instructions`_ and `Singularity instructions`_).
 
 If you wish to compile OpenStructure outside of a container, you need to follow
 the steps which we describe in detail below. In essence, these steps are:
@@ -24,8 +23,8 @@ the steps which we describe in detail below. In essence, these steps are:
 Installing the Dependencies
 --------------------------------------------------------------------------------
 
-OpenStructure uses a bunch of OpenSource libraries. If you haven't already
-installed them, please install them now! Where appropriate the minimally
+OpenStructure uses a bunch of open-source libraries. If you haven't already
+installed them, please install them now! Where appropriate, the minimally
 required version is given in parentheses.
 
 * `CMake <http://cmake.org>`_ (2.6.4)
@@ -33,6 +32,7 @@ required version is given in parentheses.
 * `Boost <http://boost.org>`_ (1.53)
 * `zlib <https://zlib.net/>`_ (usually comes with Boost or system)
 * `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
+* `SQLite3 <https://www3.sqlite.org>`_ (3.7.13)
 
 When you enable support for image processing, you will need:
 
@@ -45,25 +45,16 @@ When you enable support for image processing, you will need:
 
 If you would like to use the info module, also install:
 
-* `Qt4 <http://qt-project.org/>`_ (4.5, Qt5 is not supported yet)
+* `Qt5 <http://qt-project.org/>`_ and a C++11 compatible compiler
 
 If you would like to use the graphical user interface (GUI), also install:
 
 * `SIP <http://www.riverbankcomputing.co.uk/software/sip/download>`_
-* `PyQt4 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
+* `PyQt5 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
 
 If you would like to use the :mod:`molecular mechanics <ost.mol.mm>` module:
 
 * `OpenMM <https://simtk.org/home/openmm>`_ (6.1)
-
-In case you are compiling under Windows you have to install `Visualstudio
-2008 <http://www.microsoft.com/express/Downloads>`_. to compile the dependencies 
-and OpenStructure. We recommend to compile the dependencies manually. Enter the 
-directories where the dependencies are located in Tools->Options->Projects and 
-Solutions->VC++ directories. Choose 'bin' directories to enter program paths to 
-cmake, qmake and python, 'lib' directories to point to the location(s) of your 
-dependencies.
-
 
 
 Getting the Source Code
@@ -113,7 +104,6 @@ specific features. To change to a specific branch, use
 Configuring
 --------------------------------------------------------------------------------
 
-
 OpenStructure uses `CMake <http://cmake.org>`_ for compiling and building the
 project. The next required step is to configure the build environment using
 cmake. You can do that by invoking `cmake` in the project directory.
@@ -125,25 +115,16 @@ cmake. You can do that by invoking `cmake` in the project directory.
 There are two kinds of options: Options that let you control the building
 behaviour, enabling and disabling the compilation of certain modules and options
 that let you tell CMake where to find the dependencies. All of them are passed
-to CMake with via `-D<opt>=<value>`.
+to CMake via `-D<opt>=<value>`.
 
-On Windows, use Tools -> VisualStudio -> commandline prompt from within
-VisualStudio.
 
 Flag to choose build generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-CMake supports different build generators. On UNIX, i.e. MacOS X and Linux, the
+CMake supports different build generators. On UNIX, i.e. macOS and Linux, the
 default build generator is Makefiles, but it is also possible to use other
-programs. For a list of supported build generators on your platform, start cmake
-without parameters.
-
-On Windows you have to explicitly set the build generator to
-"Visual Studio 9 2008" (or a later version):
-
-.. code-block:: bash
-
-  cmake -G"Visual Studio 9 2008"
+programs. For a list of supported build generators on your platform, run
+`cmake` without parameters.
 
 
 .. _cmake-flags:
@@ -234,6 +215,10 @@ can influence it.
     starting with `libtiff`)
   * `TIFF_INCLUDE_DIR` defines the include folder of libtiff (contains include
     files directly)
+  * `SQLITE3_LIBRARY` defines the location of the SQLite3 library (file name starting
+    with `libsqlite3`)
+  * `SQLITE3_INCLUDE_DIR` defines the include folder of SQLite3 (contains include
+    files directly)
   * Usually, you will receive errors for those variables when executing `cmake`
     and set them accordingly as needed.
 
@@ -241,7 +226,7 @@ can influence it.
 Build Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* `OPTIMIZE` can be switched on to build an optimized (-O3 -DNDEBUG) version of
+* `OPTIMIZE` can be switched on to build an optimised (-O3 -DNDEBUG) version of
   OpenStructure. By default, this is switched off.
 
 * `USE_DOUBLE_PRECISION` will switch on double precision within OpenStructure. 
@@ -249,7 +234,9 @@ Build Options
 
 * `ENABLE_STATIC` allows some parts of OpenStructure to be statically linked 
   and thus can be used more easily across a heterogeneous setup, e.g. older 
-  systems and newer systems. By default, this is switched off.
+  systems and newer systems. Note that enabling this flag will not compile the
+  full OpenStructure package and it is not guaranteed to lead to fully portable
+  binaries. By default, this is switched off.
 
 * For deployment of OpenStructure with `make install` there are two relevant
   settings to consider:
@@ -261,8 +248,6 @@ Build Options
 
 * Experimental settings (only change if you know what you are doing):
 
-  * `USE_MESA` to use software rendered Mesa instead of hardware GL. By default,
-    this is turned off.
   * `USE_SHADER` controls whether to compile with shader support. By default,
     this is turned off.
   * `ENABLE_SPNAV` controls whether 3DConnexion devices should be supported. By
@@ -278,10 +263,10 @@ Build Options
 Example Configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Generic linux without GUI**
+**Generic Linux without GUI**
 
 The simplest way to compile OpenStructure is to disable the GUI and any
-dependency to Qt4. You can build an optimized OpenStructure without GUI as
+dependency to Qt5. You can build an optimised OpenStructure without GUI as
 follows:
 
 .. code-block:: bash
@@ -305,26 +290,21 @@ observed for OpenMM versions 6.1 until 7.1.1 when compiling with gcc versions >=
 5.1. In those cases, you cannot use the binaries and will have to install OpenMM
 from source.
 
-On some Linux distributions, there are issues with Qt4 and hence it may not be
-possible to build OpenStructure with GUI support at all. This is for instance
-known to be an issue with boost versions >= 1.62. We hope to support Qt5 in the
-next OpenStructure release.
 
-
-**Ubuntu 16.04 with GUI**
+**Ubuntu 18.04 LTS / Debian 9 with GUI**
 
 All the dependencies can be installed from the package manager as follows:
 
 .. code-block:: bash
 
-  sudo apt-get install cmake sip-dev libtiff-dev libfftw3-dev libeigen3-dev \
-               libpng-dev python-all python2.7 python-qt4 libboost-all-dev \
-               qt4-qtconfig qt4-qmake libqt4-dev libpng-dev
+  sudo apt-get install cmake g++ sip-dev libtiff-dev libfftw3-dev libeigen3-dev \
+               libpng-dev python-all python2.7 python-pyqt5 libboost-all-dev \
+               qt5-qmake qtbase5-dev libpng-dev libsqlite3-dev
 
 Now, all dependencies are located in standard locations and cmake will
 automatically find them without the need to pass any additional parameters. The
 only exception is the Python library which is put in a different path than
-expected. Also, we add -DOPTIMIZE, which will tell cmake to build an optimized
+expected. Also, we add -DOPTIMIZE, which will tell cmake to build an optimised
 version of OpenStructure.
 
 .. code-block:: bash
@@ -333,52 +313,58 @@ version of OpenStructure.
           -DOPTIMIZE=ON
 
 
-**Fedora 26 without GUI**
+**macOS (Mojave/ High Sierra) with Homebrew**
 
-All the dependencies can be installed from the package manager as follows:
+`Homebrew <https://brew.sh/>`_ can be used to conveniently install all
+dependencies. The current Boost version, as of writing these instructions, is
+1.70.0 but works so far. Do not forget to also install `boost-python`.
+
+If you want to build the info module or the graphical user interface, make sure
+you have the Xcode app installed. Just the Xcode command line tools which are
+sufficient for Homebrew, will not work with Qt5.
+
+Before running CMake, some environment variables need to be set on the command
+line. If omitted, the linker will throw a bunch of warnings later:
 
 .. code-block:: bash
 
-  sudo dnf install cmake eigen3-devel boost-devel libpng-devel python2-devel \
-                   fftw-devel libtiff-devel
+  export SDKROOT=/Applications/Xcode.app/Contents/Developer/Platforms/\
+  MacOSX.platform/Developer/SDKs/MacOSX.sdk
 
-Here, we compile a version without GUI as follows:
+If building the info module or with graphical user interface, get the Qt
+binaries in your Path for CMake to determine its configuration:
 
 .. code-block:: bash
 
-  cmake . -DOPTIMIZE=ON -DENABLE_INFO=OFF
+  export PATH="/usr/local/opt/qt/bin:$PATH"
 
-
-**macOS with Homebrew without GUI**
-
-`Homebrew <https://brew.sh/>`_ can be used to conveniently install all packages
-on macOS. Unfortunately, Qt4 is not (officially) supported on macOS Sierra (and
-newer). Hence, it is not possible to build OpenStructure with GUI support there.
 Homebrew installs all the software under /usr/local. Thus we have to tell cmake
 where to find Boost and Python. Also the Python headers and libraries are not
-located as they are on linux and hence they must be specified too:
+located as they are on Linux and hence they must be specified too:
 
 .. code-block:: bash
-  
-  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/opt/python/Frameworks/Python.framework/Headers \
-          -DPYTHON_LIBRARIES=/usr/local/opt/python/Frameworks/Python.framework/Python \
-          -DBOOST_ROOT=/usr/local -DPYTHON_ROOT=/usr/local \
-          -DSYS_ROOT=/usr/local -DENABLE_INFO=OFF -DOPTIMIZE=ON
 
+  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/Cellar/python@2/2.7.16/\
+  Frameworks/Python.framework/Versions/2.7/include/python2.7 \
+          -DPYTHON_LIBRARIES=/usr/local/Cellar/python@2/2.7.16/\
+  Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib \
+          -DPYTHON_ROOT=/usr/local/ \
+          -DBOOST_ROOT=/usr/local \
+          -DSYS_ROOT=/usr/local \
+          -DOPTIMIZE=ON
 
 Building the Project
 --------------------------------------------------------------------------------
 
-Type `make`. If you are using a multi-core machine, you can use the `-j` flag to 
-run multiple jobs at once.
-
-On Windows run 'Build OpenStructure' from the build menu.
+Type ``make``. If you are using a multi-core machine, you can use the `-j` flag
+to run multiple jobs at once.
 
 
 What's next?
 --------------------------------------------------------------------------------
 
-On Linux and MacOS X, you can start dng from the command-line. The binaries are all located in stage/bin:
+On Linux and macOS, you can start dng from the command-line. The binaries are
+all located in stage/bin:
 
 .. code-block:: bash
 
@@ -390,7 +376,8 @@ or, to start the command-line interpreter:
 
   stage/bin/ost
   
-If you repeatedly use OpenStructure, it is recommended to add /path/to/ost/stage/bin to your path.
+If you repeatedly use OpenStructure, it is recommended to add
+/path/to/ost/stage/bin to your path.
 
 Getting the newest changes
 --------------------------------------------------------------------------------
@@ -403,3 +390,8 @@ To get the newest changes from the central git repository, enter
 
 in your terminal. This will fetch the newest changes.
 
+
+..  LocalWords:  Homebrew cmake CMake zlib SQLite FFTW libtiff libpng PyQt
+..  LocalWords:  SSL macOS Makefiles PDB qmake PNG libz libsqlite OPTIMIZE
+..  LocalWords:  DNDEBUG RPATH rpath SHADER shader SPNAV DConnexion profiler
+..  LocalWords:  DOPTIMIZE DENABLE DOPEN DPYTHON DBOOST DSYS Xcode

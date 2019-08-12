@@ -50,7 +50,8 @@ public:
   int columnCount(const QModelIndex&parent=QModelIndex()) const;
   QModelIndex index(int row, int column, const QModelIndex& parent=QModelIndex()) const;
   QModelIndex parent(const QModelIndex &index) const;
-  void Reset() { this->reset(); }
+  void Reset() {this->beginResetModel();
+                this->endResetModel(); }
 public slots:
   void NamespaceChanged();
 

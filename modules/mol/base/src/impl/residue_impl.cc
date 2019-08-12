@@ -648,6 +648,7 @@ bool ResidueImpl::SwitchAtomPos(const String& group) {
     entry.atom.lock()->SetOccupancy(j->occ);
   }
   curr_group_=group;
+  this->GetEntity()->MarkOrganizerDirty();
   return true;
 }
 

@@ -774,6 +774,10 @@ void EntityImpl::AttachObserver(const EntityObserverPtr& o)
 void EntityImpl::DetachObserver(const EntityObserverPtr& o)
 {
   EntityObserverMap::iterator it=observer_map_.find(o.get());
+
+  if(it != observer_map_.end()) {
+    observer_map_.erase(it);
+  }
 }
 
 void EntityImpl::NotifyObserver()
@@ -812,8 +816,9 @@ TorsionImplP EntityImpl::FindTorsion(const AtomImplPtr& a1,
   return TorsionImplP();
 }
 
-AtomImplList EntityImpl::FindWithin(const geom::Vec3& pos, Real radius) const
+AtomImplList EntityImpl::FindWithin(const geom::Vec3& pos, Real radius)
 {
+  this->UpdateOrganizerIfNeeded();
   SpatialAtomOrganizer::ItemList alist = atom_organizer_.FindWithin(pos,radius);
   return alist;
 }

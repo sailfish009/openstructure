@@ -321,15 +321,15 @@ macro(executable)
   if (ENABLE_STATIC AND _ARG_STATIC)
     target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
     if (UNIX AND NOT APPLE)
-      if (OST_GCC_45)    
-        set_target_properties(${_ARG_NAME}
-                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
-                              LINK_FLAGS "-static-libgcc -static-libstdc++ -static -pthread")
+      set_target_properties(${_ARG_NAME} PROPERTIES LINK_SEARCH_START_STATIC TRUE)
+      set_target_properties(${_ARG_NAME} PROPERTIES LINK_SEARCH_END_STATIC TRUE)
+      if (OST_GCC_LESS_45)
+        set_target_properties(${_ARG_NAME} PROPERTIES LINK_FLAGS
+                              "-static-libgcc -static -pthread")
       else()
-        set_target_properties(${_ARG_NAME}
-                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
-                              LINK_FLAGS "-static-libgcc -static -pthread")
-      endif()        
+        set_target_properties(${_ARG_NAME} PROPERTIES LINK_FLAGS
+                              "-static-libgcc -static-libstdc++ -static -pthread")
+      endif()
     endif()
   endif()
   install(TARGETS ${_ARG_NAME} DESTINATION bin)
@@ -702,9 +702,9 @@ macro(ost_unittest)
     foreach(py_test ${PY_TESTS})
       set(python_path $ENV{PYTHONPATH})
       if(python_path)
-        set(python_path "${python_path}:")
+        set(python_path ":${python_path}")
       endif(python_path)
-      set(python_path "${python_path}${LIB_STAGE_PATH}/python${PYTHON_VERSION}/site-packages")
+      set(python_path "${LIB_STAGE_PATH}/python${PYTHON_VERSION}/site-packages${python_path}")
       if(WIN32)
         set (PY_TESTS_CMD "PYTHONPATH=${python_path}  ${PYTHON_BINARY}")
         # todo fix python unit test running for Windows
@@ -770,7 +770,7 @@ macro(ost_match_boost_python_version)
   # this variable may either be a simple library path or list that contains
   # different libraries for different build-options. For example:
   # optimized;<lib1>;debug;<lib2>
-  set(_BOOST_PYTHON_LIBRARY ${Boost_PYTHON_LIBRARY})
+  set(_BOOST_PYTHON_LIBRARY ${BOOST_PYTHON_LIBRARIES})
   list(LENGTH _BOOST_PYTHON_LIBRARY _BP_LENGTH)
   if (_BP_LENGTH GREATER 1)
     list(FIND _BOOST_PYTHON_LIBRARY optimized _OPTIMIZED_INDEX)
@@ -859,7 +859,7 @@ endmacro()
 #-------------------------------------------------------------------------------
 function(get_compiler_version _OUTPUT_VERSION)
   exec_program(${CMAKE_CXX_COMPILER}
-               ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+               ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpfullversion -dumpversion
                OUTPUT_VARIABLE _COMPILER_VERSION
   )
   string(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
@@ -896,14 +896,44 @@ macro(setup_compiler_flags)
       #  -fno-strict-aliasing
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing" )
     endif()
+    #message(STATUS "GCC VERSION " ${_GCC_VERSION})
+    if ((ENABLE_INFO OR ENABLE_GUI) AND _GCC_VERSION LESS "60")
+      # for older compilers we need to enable C++11 for Qt5
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    endif()
+    if (_GCC_VERSION LESS "45")
+      set(OST_GCC_LESS_45 true)
+    else()
+      set(OST_GCC_LESS_45 false)
+    endif()
   endif()
 endmacro()
 set(_BOOST_MIN_VERSION 1.31)
 
 macro(setup_boost)
   set (Boost_NO_BOOST_CMAKE TRUE)
-  find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS python REQUIRED)
-  set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
+  # starting with CMake 3.11 we could use the following instead of the foreach
+  # find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS
+  #              python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} REQUIRED)
+  # set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
+  # see https://cmake.org/cmake/help/v3.11/module/FindBoost.html
+  foreach(_python_lib_name python
+                           python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}
+                           python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
+                           python${PYTHON_VERSION_MAJOR})
+    find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS ${_python_lib_name} QUIET)
+    if(Boost_FOUND)
+      message(STATUS "Found Boost package: " ${_python_lib_name})
+      set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
+      break()
+    else()
+      message(STATUS "Boost package not found: " ${_python_lib_name}
+                     ". Trying alternative names!")
+    endif()
+  endforeach(_python_lib_name)
+  if(NOT BOOST_PYTHON_LIBRARIES)
+    message(FATAL_ERROR "Failed to find any Boost Python library!")
+  endif()
   set(Boost_LIBRARIES)
   find_package(Boost ${_BOOST_MIN_VERSION}
                COMPONENTS unit_test_framework REQUIRED)

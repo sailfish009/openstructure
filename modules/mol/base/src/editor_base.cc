@@ -298,6 +298,22 @@ TorsionHandle EditorBase::AddTorsion(const String& name, const AtomHandle& a1,
                                                a3.Impl(), a4.Impl()));
 }
 
+void EditorBase::Prune() {
+  ost::mol::ResidueHandleList res_list = ent_.GetResidueList();
+  for(ost::mol::ResidueHandleList::iterator it = res_list.begin();
+      it != res_list.end(); ++it) {
+    if(it->GetAtomCount() == 0) {
+      this->DeleteResidue(*it);
+    }
+  }
+  ost::mol::ChainHandleList chain_list = ent_.GetChainList();
+  for(ost::mol::ChainHandleList::iterator it = chain_list.begin(); 
+      it != chain_list.end(); ++it) {
+    if(it->GetResidueCount() == 0) {
+      this->DeleteChain(*it);
+    }
+  }
+}
 
 void EditorBase::UpdateTrace()
 {

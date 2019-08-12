@@ -6,21 +6,11 @@ cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 project(OpenStructure CXX C)
 set (CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set (OST_VERSION_MAJOR 1)
-set (OST_VERSION_MINOR 9)
+set (OST_VERSION_MINOR 10)
 set (OST_VERSION_PATCH 0)
 set (OST_VERSION_STRING ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR}.${OST_VERSION_PATCH} )
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
 include(OST)
-
-
-if (CMAKE_COMPILER_IS_GNUCXX)  
-  exec_program(gcc ARGS --version OUTPUT_VARIABLE CMAKE_C_COMPILER_VERSION)
-  if(CMAKE_C_COMPILER_VERSION MATCHES ".*4\\.[5-9].*")
-    set(OST_GCC_45 true)
-  else()   
-    set(OST_GCC_45 false)  
-  endif()
-endif()
 
 option(USE_SHADER "whether to compile with shader support"
        OFF)
@@ -34,8 +24,6 @@ option(ENABLE_GUI "whether the graphical user interface should be enabled"
        ON)
 option(ENABLE_GFX "whether graphics support should be enabled"
       ON)
-option(USE_MESA "use software rendered Mesa instead of hardware GL"
-      OFF)
 option(ENABLE_IMG "whether the image processing module should be compiled"
        ON)
 option(ENABLE_INFO "whether openstructure should be compiled with support for the info library"
@@ -188,6 +176,13 @@ if (ENABLE_STATIC AND UNIX AND NOT APPLE)
   set (CMAKE_FIND_LIBRARY_SUFFIXES .a)
 endif()
 
+# Python needed before Boost
+find_package(Python 2.4 REQUIRED)
+# Split version string
+string(REPLACE "." ";" _python_version_list ${PYTHON_VERSION})
+list(GET _python_version_list 0 PYTHON_VERSION_MAJOR)
+list(GET _python_version_list 1 PYTHON_VERSION_MINOR)
+
 if(BOOST_VERSION)
   message(STATUS "forcing boost to version ${BOOST_VERSION}")
   set(_BOOST_MIN_VERSION ${BOOST_VERSION})
@@ -198,7 +193,8 @@ if (WIN32)
 endif()
 
 if (ENABLE_INFO)        
-  find_package(Qt4 4.5.0 REQUIRED)
+  find_package(Qt5Xml REQUIRED)
+  set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Xml)
 endif()
 
 if (OPTIMIZE)
@@ -217,13 +213,7 @@ else()
   endif()
 endif()
 if (ENABLE_GFX)
-  if(USE_MESA)
-    find_package(Mesa REQUIRED)
-    set(_USE_MESA ON)
-  else()
-    find_package(OpenGL REQUIRED)
-    set(_USE_MESA OFF)
-  endif()
+  find_package(OpenGL REQUIRED)
 endif()
 
 if (ENABLE_IMG OR ENABLE_GFX)
@@ -233,7 +223,7 @@ else()
 endif()
 
 find_package(Eigen 3.2.0 REQUIRED)
-find_package(Python 2.4 REQUIRED)
+find_package(SQLite3 3.7.13 REQUIRED)
 
 if(USE_NUMPY)
   find_package(Numpy REQUIRED)
@@ -269,8 +259,11 @@ if (ENABLE_STATIC)
 endif()
 
 if (ENABLE_GUI)
+  find_package(Qt5Widgets REQUIRED)
+  find_package(Qt5OpenGL REQUIRED)
+  set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Gui Qt5::Widgets Qt5::Core)
   ost_find_python_module(sip)
-  ost_find_python_module(PyQt4)
+  ost_find_python_module(PyQt5)
 endif()
 
 if (ENABLE_SPNAV)
@@ -303,6 +296,7 @@ include_directories(${Boost_INCLUDE_DIRS}
                     ${TIFF_INCLUDE_DIR}
                     ${PNG_INCLUDE_DIRS}
                     ${OPEN_MM_INCLUDE_DIRS}
+                    ${SQLITE3_INCLUDE_DIRS}
                     )
 if(USE_NUMPY)
 include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
@@ -353,7 +347,6 @@ message(STATUS
         "   Info support                     (-DENABLE_INFO) : ${_INFO}\n"
         "   Graphical interface               (-DENABLE_GUI) : ${_UI}\n"
         "   OpenGL support                    (-DENABLE_GFX) : ${_OPENGL}\n"
-        "   OpenGL via Mesa                     (-DUSE_MESA) : ${_USE_MESA}\n"
         "   Image Processing support          (-DENABLE_IMG) : ${_IMG}\n"
         "   Shader support                    (-DUSE_SHADER) : ${_SHADER}\n"
         "   Numpy support                      (-DUSE_NUMPY) : ${_NUMPY}\n"
