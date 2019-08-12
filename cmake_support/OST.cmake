@@ -321,15 +321,15 @@ macro(executable)
   if (ENABLE_STATIC AND _ARG_STATIC)
     target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
     if (UNIX AND NOT APPLE)
+      set_target_properties(${_ARG_NAME} PROPERTIES LINK_SEARCH_START_STATIC TRUE)
+      set_target_properties(${_ARG_NAME} PROPERTIES LINK_SEARCH_END_STATIC TRUE)
       if (OST_GCC_LESS_45)
-        set_target_properties(${_ARG_NAME}
-                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
-                              LINK_FLAGS "-static-libgcc -static -pthread")
+        set_target_properties(${_ARG_NAME} PROPERTIES LINK_FLAGS
+                              "-static-libgcc -static -pthread")
       else()
-        set_target_properties(${_ARG_NAME}
-                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
-                              LINK_FLAGS "-static-libgcc -static-libstdc++ -static -pthread")
-      endif()        
+        set_target_properties(${_ARG_NAME} PROPERTIES LINK_FLAGS
+                              "-static-libgcc -static-libstdc++ -static -pthread")
+      endif()
     endif()
   endif()
   install(TARGETS ${_ARG_NAME} DESTINATION bin)
