@@ -1,4 +1,4 @@
-Changes in Release 1.x.x
+Changes in Release 1.10.0
 --------------------------------------------------------------------------------
 
  * Use system provided SQLite3 library.
@@ -9,6 +9,7 @@ Changes in Release 1.x.x
    for further details.
  * Improved support for recent compilers and libraries.
  * Removed support for USE_MESA.
+ * Bugfix of string representation of ResNum which now includes insertion code.
  * Several minor bug fixes and improvements.
 
 Changes in Release 1.9.0

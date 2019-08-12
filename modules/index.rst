@@ -37,7 +37,7 @@ OpenStructure documentation
 For Starters
 --------------------------------------------------------------------------------
 
-**Installation**: `install from binary <http://www.openstructure.org/download/>`_ | :doc:`install from source <install>`
+**Installation**: :doc:`install from source <install>`
 
 **Tutorial Style**: :doc:`introduction <intro>` | :doc:`molecules intro <intro-01>` | :doc:`images intro <intro-02>` | :doc:`graphics intro <intro-03>` 
 

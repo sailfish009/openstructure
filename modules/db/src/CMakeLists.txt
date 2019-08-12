@@ -23,4 +23,6 @@ if(WIN32)
 else(WIN32)
   add_definitions(-DSQLITE_OMIT_LOAD_EXTENSION)
 endif(WIN32)
-
+if (ENABLE_STATIC AND UNIX AND NOT APPLE)
+  target_link_libraries(ost_db ${CMAKE_DL_LIBS})
+endif()

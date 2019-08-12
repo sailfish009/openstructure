@@ -321,15 +321,15 @@ macro(executable)
   if (ENABLE_STATIC AND _ARG_STATIC)
     target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
     if (UNIX AND NOT APPLE)
-      if (OST_GCC_45)    
-        set_target_properties(${_ARG_NAME}
-                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
-                              LINK_FLAGS "-static-libgcc -static-libstdc++ -static -pthread")
+      set_target_properties(${_ARG_NAME} PROPERTIES LINK_SEARCH_START_STATIC TRUE)
+      set_target_properties(${_ARG_NAME} PROPERTIES LINK_SEARCH_END_STATIC TRUE)
+      if (OST_GCC_LESS_45)
+        set_target_properties(${_ARG_NAME} PROPERTIES LINK_FLAGS
+                              "-static-libgcc -static -pthread")
       else()
-        set_target_properties(${_ARG_NAME}
-                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
-                              LINK_FLAGS "-static-libgcc -static -pthread")
-      endif()        
+        set_target_properties(${_ARG_NAME} PROPERTIES LINK_FLAGS
+                              "-static-libgcc -static-libstdc++ -static -pthread")
+      endif()
     endif()
   endif()
   install(TARGETS ${_ARG_NAME} DESTINATION bin)
@@ -859,7 +859,7 @@ endmacro()
 #-------------------------------------------------------------------------------
 function(get_compiler_version _OUTPUT_VERSION)
   exec_program(${CMAKE_CXX_COMPILER}
-               ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+               ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpfullversion -dumpversion
                OUTPUT_VARIABLE _COMPILER_VERSION
   )
   string(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
@@ -899,8 +899,12 @@ macro(setup_compiler_flags)
     #message(STATUS "GCC VERSION " ${_GCC_VERSION})
     if ((ENABLE_INFO OR ENABLE_GUI) AND _GCC_VERSION LESS "60")
       # for older compilers we need to enable C++11 for Qt5
-      #message(STATUS "ADDING C++11 FLAG")
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    endif()
+    if (_GCC_VERSION LESS "45")
+      set(OST_GCC_LESS_45 true)
+    else()
+      set(OST_GCC_LESS_45 false)
     endif()
   endif()
 endmacro()

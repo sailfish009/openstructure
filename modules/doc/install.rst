@@ -234,7 +234,9 @@ Build Options
 
 * `ENABLE_STATIC` allows some parts of OpenStructure to be statically linked 
   and thus can be used more easily across a heterogeneous setup, e.g. older 
-  systems and newer systems. By default, this is switched off.
+  systems and newer systems. Note that enabling this flag will not compile the
+  full OpenStructure package and it is not guaranteed to lead to fully portable
+  binaries. By default, this is switched off.
 
 * For deployment of OpenStructure with `make install` there are two relevant
   settings to consider:
