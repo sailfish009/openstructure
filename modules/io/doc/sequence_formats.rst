@@ -10,6 +10,9 @@ FASTA
 *Format Name*
   fasta
 
+*Mode*
+  Read/Write
+
 ClustalW
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -19,7 +22,10 @@ ClustalW
 *Format Name*
   clustal
 
-Promod
+*Mode*
+  Read-only
+
+Promod 2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 *Recognized File Extensions*
@@ -27,5 +33,6 @@ Promod
   
 *Format Name*
   promod
-  
 
+*Mode*
+  Read-only
