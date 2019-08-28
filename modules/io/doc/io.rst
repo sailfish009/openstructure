@@ -168,6 +168,12 @@ Loading sequence or alignment files
   Load sequence data from disk. If format is set to 'auto', the function guesses 
   the filetype based on the extension of the file. Files ending in '.fasta', 
   '.aln' will automatically be loaded.
+
+  :param filename: The filename
+  :type  filename: string
+  :param format: Name of the format
+  :type  format: string
+  :rtype: :class:`~ost.seq.SequenceHandle`
   
   For files with non-standard extensions, the format can be set explicitly 
   specifying the `format` parameter. 
@@ -197,11 +203,23 @@ Loading sequence or alignment files
   :func:`LoadSequence`. For a list of file formats supported by
   :func:`LoadSequenceList` see :doc:`sequence_formats`.
 
+  :param filename: The filename
+  :type  filename: string
+  :param format: Name of the format
+  :type  format: string
+  :rtype: :class:`~ost.seq.SequenceList`
+
 .. function:: LoadAlignment(filename, format='auto')
 
   For a description of how to use :func:`LoadAlignment` please refer to 
   :func:`LoadSequence`. For a list of file formats supported by 
   :func:`LoadAlignment` see :doc:`sequence_formats`.
+
+  :param filename: The filename
+  :type  filename: string
+  :param format: Name of the format
+  :type  format: string
+  :rtype: :class:`~ost.seq.AlignmentHandle`
 
 .. function:: LoadSequenceProfile(filename, format='auto')
 
@@ -226,6 +244,11 @@ Loading sequence or alignment files
     
   For a list of file formats supported by :func:`LoadSequenceProfile` see
   :doc:`sequence_profile_formats`.
+
+  :param filename: The filename
+  :type  filename: string
+  :param format: Name of the format
+  :type  format: string
   
   :rtype: :class:`~ost.seq.ProfileHandle`
 
@@ -237,13 +260,43 @@ Loading sequence or alignment files
       inexistent file.
 
 .. function:: AlignmentFromString(data, format)
-.. function:: SequenceFromString(data, format)
-.. function:: SequenceListFromString(data, format)
 
-  Load alignment, sequence or list of sequences from string.
+  Load alignment from string.
 
   The format argument is mandatory. For a list of supported formats,
   see :doc:`sequence_formats`.
+
+  :param data: The alignment
+  :type  data: string
+  :param format: Name of the format
+  :type  format: string
+  :rtype: :class:`~ost.seq.AlignmentHandle`
+
+.. function:: SequenceFromString(data, format)
+
+  Load sequence from string.
+
+  The format argument is mandatory. For a list of supported formats,
+  see :doc:`sequence_formats`.
+
+  :param data: The sequence
+  :type  data: string
+  :param format: Name of the format
+  :type  format: string
+  :rtype: :class:`~ost.seq.SequenceHandle`
+
+.. function:: SequenceListFromString(data, format)
+
+  Load a list of sequences from string.
+
+  The format argument is mandatory. For a list of supported formats,
+  see :doc:`sequence_formats`.
+
+  :param data: The list of sequences
+  :type  data: string
+  :param format: Name of the format
+  :type  format: string
+  :rtype: :class:`~ost.seq.SequenceList`
 
 Saving Sequence Data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -265,7 +318,14 @@ Saving Sequence Data
     
   For a list of file formats supported by :func:`SaveSequence` see
   :doc:`sequence_formats`.
-  
+
+  :param sequence: The sequence
+  :type  sequence: :class:`~ost.seq.SequenceHandle`
+  :param filename: The filename
+  :type  filename: string
+  :param format: Name of the format
+  :type  format: string
+
   :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
       is not recognized or the file format can not be detected based on the 
       file extension.
@@ -279,6 +339,13 @@ Saving Sequence Data
   :func:`SaveSequence`. For a list of file formats supported by 
   :func:`SaveSequenceList` see :doc:`sequence_formats`.
 
+  :param seq_list: The sequence list
+  :type  seq_list: :class:`~ost.seq.SequenceList`
+  :param filename: The filename
+  :type  filename: string
+  :param format: Name of the format
+  :type  format: string
+
 .. function:: SaveAlignment(aln, filename, format='auto')
 
   For a desription of how to use :func:`SaveAlignment` please refer to 
@@ -287,14 +354,51 @@ Saving Sequence Data
   For a list of file formats supported by :func:`SaveAlignment` see 
   :doc:`sequence_formats`.
 
-.. function:: AlignmentToString(ali, format)
-.. function:: SequenceToString(seq, format)
-.. function:: SequenceListToString(seq_list, format)
+  :param aln: The alignment
+  :type  aln: :class:`~ost.seq.AlignmentHandle`
+  :param filename: The filename
+  :type  filename: string
+  :param format: Name of the format
+  :type  format: string
 
-  Return alignment, sequence or sequence list as a string.
+.. function:: AlignmentToString(ali, format)
+
+  Return alignment as a string.
 
   The format argument is mandatory. For a list of supported formats
   see :doc:`sequence_formats`.
+
+  :param ali: The alignment
+  :type  ali: :class:`~ost.seq.AlignmentHandle`
+  :param format: Name of the format
+  :type  format: string
+  :rtype: string
+
+.. function:: SequenceToString(seq, format)
+
+  Return sequence as a string.
+
+  The format argument is mandatory. For a list of supported formats
+  see :doc:`sequence_formats`.
+
+  :param seq: The sequence
+  :type  seq: :class:`~ost.seq.SequenceHandle`
+  :param format: Name of the format
+  :type  format: string
+  :rtype: string
+
+.. function:: SequenceListToString(seq_list, format)
+
+  Return sequence list as a string.
+
+  The format argument is mandatory. For a list of supported formats
+  see :doc:`sequence_formats`.
+
+  :param seq_list: The sequence list
+  :type  seq: :class:`~ost.seq.SequenceList`
+  :param format: Name of the format
+  :type  format: string
+  :rtype: string
 
 .. _img-io: 
 
