@@ -25,6 +25,21 @@ ClustalW
 *Mode*
   Read-only
 
+PIR
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This is the format used by the
+`Protein Information Resource (PIR) <https://proteininformationresource.org/>`_.
+
+*Recognized File Extensions*
+  .pir
+
+*Format Name*
+  pir
+
+*Mode*
+  Read/Write
+
 Promod 2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
