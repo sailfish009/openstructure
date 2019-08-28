@@ -236,6 +236,15 @@ Loading sequence or alignment files
       :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
       inexistent file.
 
+.. function:: AlignmentFromString(data, format)
+.. function:: SequenceFromString(data, format)
+.. function:: SequenceListFromString(data, format)
+
+  Load alignment, sequence or list of sequences from string.
+
+  The format argument is mandatory. For a list of supported formats,
+  see :doc:`sequence_formats`.
+
 Saving Sequence Data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -278,6 +287,14 @@ Saving Sequence Data
   For a list of file formats supported by :func:`SaveAlignment` see 
   :doc:`sequence_formats`.
 
+.. function:: AlignmentToString(ali, format)
+.. function:: SequenceToString(seq, format)
+.. function:: SequenceListToString(seq_list, format)
+
+  Return alignment, sequence or sequence list as a string.
+
+  The format argument is mandatory. For a list of supported formats
+  see :doc:`sequence_formats`.
 
 .. _img-io: 
 
