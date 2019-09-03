@@ -46,6 +46,42 @@ Algorithms for Alignments
      considered as aligned. There is no information in the pairwise alignment to 
      guide the merging, the result is undefined.
 
+
+     **Example:**
+
+     .. code-block:: python
+
+       ref_seq = ost.seq.CreateSequence('ref', 'acdefghiklmn')
+       seq_a1 = seq.CreateSequence('A1', 'acdefghikl-mn')
+       seq_a2 = seq.CreateSequence('A2', 'atd-fghikllmn')
+       seq_b1 = seq.CreateSequence('B1', 'acdefg-hiklmn')
+       seq_b2 = seq.CreateSequence('B2', 'acd---qhirlmn')
+
+       aln_a = seq.CreateAlignment()
+       aln_a.AddSequence(seq_a1)
+       aln_a.AddSequence(seq_a2)
+       print aln_a
+       # >>> A1  acdefghikl-mn
+       # >>> A2  atd-fghikllmn
+
+       aln_b = seq.CreateAlignment()
+       aln_b.AddSequence(seq_b1)
+       aln_b.AddSequence(seq_b2)
+       print aln_b
+       # >>> B1  acdefg-hiklmn
+       # >>> B2  acd---qhirlmn
+
+       aln_list = ost.seq.AlignmentList()
+       aln_list.append(aln_a)
+       aln_list.append(aln_b)
+
+       merged_aln = ost.seq.alg.MergePairwiseAlignments(aln_list, ref_seq)
+       print merged_aln
+       # >>> ref  acdefg-hikl-mn
+       # >>> A2   atd-fg-hikllmn
+       # >>> B2   acd---qhirl-mn
+
+
 .. autofunction:: ValidateSEQRESAlignment
 
 .. autofunction:: AlignToSEQRES
