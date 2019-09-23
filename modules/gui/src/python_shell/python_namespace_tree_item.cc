@@ -110,7 +110,7 @@ void PythonNamespaceTreeItem::FetchMore()
     try{
       String keystring=bp::extract<String>(keys[i]);
       child_namespace=namespace_.attr(keystring.c_str());
-    } catch(bp::error_already_set) {
+    } catch(bp::error_already_set&) {
       PyErr_Clear();
     }
     children_.append(new PythonNamespaceTreeItem(child_namespace,

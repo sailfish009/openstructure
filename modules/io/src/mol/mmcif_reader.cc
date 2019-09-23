@@ -597,7 +597,7 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
     if (me.IsValid()) { // unit test
       try {
         editor.AddAltAtomPos(String(1, alt_loc), me, apos);
-      } catch (Error) {
+      } catch (Error&) {
         LOG_INFO("Ignoring atom alt location since there is already an atom "
                  "with name " << aname << ", but without an alt loc");
         return;
