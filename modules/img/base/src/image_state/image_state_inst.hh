@@ -34,7 +34,6 @@
 #include "image_state_impl.cc"
 #include "image_state_algorithm.cc"
 #include "value_holder.cc"
-#include "binop.cc"
 
 #include "image_state_impl.hh"
 #include "image_state_spatial_domain.hh"
