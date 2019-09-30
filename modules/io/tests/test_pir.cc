@@ -23,7 +23,6 @@
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-#include <boost/test/auto_unit_test.hpp>
 #include <ost/seq/invalid_sequence.hh>
 #include <ost/io/seq/pir_io_handler.hh>
 #include <ost/io/seq/load.hh>

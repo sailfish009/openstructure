@@ -18,7 +18,6 @@
 //------------------------------------------------------------------------------
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/auto_unit_test.hpp>
 #include <ost/mol/mm/topology.hh>
 #include <ost/mol/mm/topology_creator.hh>
 #include <ost/mol/mm/settings.hh>
