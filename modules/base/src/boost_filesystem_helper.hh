@@ -24,6 +24,7 @@
 #define OST_BOOST_FILESYSTEM_HELPER_HH
 
 #include <boost/filesystem/path.hpp>
+#include <boost/version.hpp>
 
 namespace {
 

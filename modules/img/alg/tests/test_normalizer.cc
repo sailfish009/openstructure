@@ -25,6 +25,12 @@
 #include <iostream>
 
 #include "tests.hh"
+#include <boost/version.hpp>
+#if BOOST_VERSION<105900
+#include <boost/test/floating_point_comparison.hpp>
+#else
+#include <boost/test/tools/floating_point_comparison.hpp>
+#endif
 
 #include <ost/img/image.hh>
 #include  <ost/img/alg/normalizer_factory.hh>

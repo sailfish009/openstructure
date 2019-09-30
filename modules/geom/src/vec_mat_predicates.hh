@@ -18,9 +18,13 @@
 //------------------------------------------------------------------------------
 #ifndef OST_GEOM_VEC_MAT_PREDICATES_HH
 #define OST_GEOM_VEC_MAT_PREDICATES_HH
-#include <boost/version.hpp>
 #include <boost/test/unit_test.hpp>
+#include <boost/version.hpp>
+#if BOOST_VERSION<105900
 #include <boost/test/floating_point_comparison.hpp>
+#else
+#include <boost/test/tools/floating_point_comparison.hpp>
+#endif
 #include <ost/geom/geom.hh>
 
 

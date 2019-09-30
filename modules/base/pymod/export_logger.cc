@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 #include <boost/python/raw_function.hpp>
+#include <boost/version.hpp>
 #if BOOST_VERSION<103400
 #include <boost/python/detail/api_placeholder.hpp>
 #endif

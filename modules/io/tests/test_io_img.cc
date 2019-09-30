@@ -18,6 +18,12 @@
 //------------------------------------------------------------------------------
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/version.hpp>
+#if BOOST_VERSION<105900
+#include <boost/test/floating_point_comparison.hpp>
+#else
+#include <boost/test/tools/floating_point_comparison.hpp>
+#endif
 
 #include <map>
 #include <ost/io/img/load_map.hh>
