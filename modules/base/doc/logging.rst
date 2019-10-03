@@ -41,31 +41,43 @@ OpenStructure has a logging system going beyond what print statements can offer.
 Verbosity Level
 --------------------------------------------------------------------------------
 
+Several verbosity levels are available. Verbosity levels are represented
+by an enumeration of integer values. They are wrapped to objects with
+memorable names by the :class:`LogLevel` class. The available levels are
+are summarized in the table below.
+
+===========   ================   ===================
+Level name    Verbosity value    LogLevel object
+===========   ================   ===================
+Error         0                  LogLevel.Error
+Warning       1                  LogLevel.Warning
+Script        2                  LogLevel.Script
+Info          3                  LogLevel.Info
+Verbose       4                  LogLevel.Verbose
+Debug         5                  LogLevel.Debug
+Trace         6                  LogLevel.Trace
+===========   ================   ===================
+
 You can change the verbosity level  with the following two methods:
 
 .. function:: PushVerbosityLevel(verbosity)
 
-  Change the verbosity level to the given integer value. All log events which
+  Change the verbosity level to the given integer value or :class:`LogLevel` 
+  enumeration object. All log events which
   have a severity above *verbosity* will not be shown. By default, the log level
   is 2, meaning that errors, warnings and script logging events are visible. By
-  setting it to -1, you can disable all logging. The table below shows the
-  mapping between the verbosity level names and their numeric values:
-
-  ===========   ================
-  Level name    Verbosity value
-  ===========   ================
-  (disabled)    -1
-  Error         0
-  Warning       1
-  Script        2
-  Info          3
-  Verbose       4
-  Debug         5
-  Trace         6
-  ===========   ================
+  setting it to -1, you can disable all logging.
 
   :param verbosity: Desired verbosity level
   :type  verbosity: :class:`int`
+
+  .. code-block:: python
+    
+       # Display warnings and errors:
+       ost.PushVerbosityLevel(ost.LogLevel.Warning)
+
+       # Disable all logging:
+       ost.PushVerbosityLevel(-1)
 
 .. function:: PopVerbosityLevel()
 
@@ -78,11 +90,65 @@ You can change the verbosity level  with the following two methods:
   :return: The current verbosity level
   :rtype:  :class:`int`
 
+  The :class:`LogLevel` class allows to map these integer values
+  to more a human-readable objects
+
+  .. code-block:: python
+
+      print ost.GetVerbosityLevel()
+      # Outputs: 2
+
+      print ost.LogLevel.values[ost.GetVerbosityLevel()]
+      # Outputs: Script
+
 .. class:: LogLevel
 
   Enumerates the logging levels (see :ref:`picking-logging-level`). Values:
 
-    Error, Warning, Script, Info, Verbose, Debug, Trace
+    .. attribute:: Error, Warning, Script, Info, Verbose, Debug, Trace
+
+      The enumerated LogLevel object, which wraps the corresponding integer
+      value. Note that these attributes are LogLevel objects themselves.
+
+      :type: :class:`LogLevel`
+
+      .. code-block:: python
+
+          ost.LogLevel.Info
+          # Outputs: ost._ost_base.LogLevel.Info
+
+          print ost.LogLevel.Info
+          # Outputs: Info
+          
+          int(ost.LogLevel.Info)
+          # Outputs: 3
+
+    .. attribute:: name
+
+      The name of the level
+
+      :type: :class:`str`
+
+      .. code-block:: python
+
+          ost.LogLevel.Info.name
+          # Outputs: 'Info'
+
+
+    .. attribute:: names
+
+      A dictionary mapping the log level names to the corresponding
+      LogLevel enumerated object.
+
+      :type: :class:`dict`
+
+    .. attribute:: values
+
+      A dictionary mapping the log level integer to the corresponding
+      LogLevel enumerated object.
+
+      :type: :class:`dict`
+
          
 Log sinks
 --------------------------------------------------------------------------------
