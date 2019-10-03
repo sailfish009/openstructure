@@ -48,7 +48,21 @@ You can change the verbosity level  with the following two methods:
   Change the verbosity level to the given integer value. All log events which
   have a severity above *verbosity* will not be shown. By default, the log level
   is 2, meaning that errors, warnings and script logging events are visible. By
-  setting it to -1, you can disable all logging.
+  setting it to -1, you can disable all logging. The table below shows the
+  mapping between the verbosity level names and their numeric values:
+
+  ===========   ================
+  Level name    Verbosity value
+  ===========   ================
+  (disabled)    -1
+  Error         0
+  Warning       1
+  Script        2
+  Info          3
+  Verbose       4
+  Debug         5
+  Trace         6
+  ===========   ================
 
   :param verbosity: Desired verbosity level
   :type  verbosity: :class:`int`
