@@ -90,17 +90,6 @@ You can change the verbosity level  with the following two methods:
   :return: The current verbosity level
   :rtype:  :class:`int`
 
-  The :class:`LogLevel` class allows to map these integer values
-  to more a human-readable objects
-
-  .. code-block:: python
-
-      print ost.GetVerbosityLevel()
-      # Outputs: 2
-
-      print ost.LogLevel.values[ost.GetVerbosityLevel()]
-      # Outputs: Script
-
 .. class:: LogLevel
 
   Enumerates the logging levels (see :ref:`picking-logging-level`). Values:
@@ -123,31 +112,17 @@ You can change the verbosity level  with the following two methods:
           int(ost.LogLevel.Info)
           # Outputs: 3
 
-    .. attribute:: name
+  These objects behave like integers, meaning that numeric comparisons work
+  as expected. So for instance if you want to increase verbosity to the Info
+  level, but leave it unchanged if it was already set to a higher value (such
+  as Debug), you can do the following:
 
-      The name of the level
+  .. code-block:: python
 
-      :type: :class:`str`
+    new_level = max(ost.GetVerbosityLevel(), ost.LogLevel.Info)
+    ost.PopVerbosityLevel()
+    ost.PushVerbosityLevel(new_level)
 
-      .. code-block:: python
-
-          ost.LogLevel.Info.name
-          # Outputs: 'Info'
-
-
-    .. attribute:: names
-
-      A dictionary mapping the log level names to the corresponding
-      LogLevel enumerated object.
-
-      :type: :class:`dict`
-
-    .. attribute:: values
-
-      A dictionary mapping the log level integer to the corresponding
-      LogLevel enumerated object.
-
-      :type: :class:`dict`
 
          
 Log sinks
