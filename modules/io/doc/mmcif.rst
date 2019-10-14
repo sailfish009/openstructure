@@ -281,7 +281,7 @@ of the annotation available.
     :type cif_chain_id: :class:`str`
     :returns: atom_site.label_entity_id as :class:`str` (empty if no mapping)
 
-  .. method:: AddRevision(num, date, status)
+  .. method:: AddRevision(num, date, status, major=-1, minor=-1)
 
     Add a new iteration to the revision history.
     See :meth:`MMCifInfoRevisions.AddRevision`.
@@ -1089,7 +1089,7 @@ of the annotation available.
 
     :type: :class:`int`
 
-  .. method:: AddRevision(num, date, status)
+  .. method:: AddRevision(num, date, status, major=-1, minor=-1)
 
     Add a new iteration to the history.
 
@@ -1099,6 +1099,10 @@ of the annotation available.
     :type date:  :class:`str`
     :param status: See :meth:`GetStatus`
     :type status:  :class:`str`
+    :param major: See :meth:`GetMajor`
+    :type major:  :class:`int`
+    :param minor: See :meth:`GetMinor`
+    :type minor:  :class:`int`
 
     :raises: Exception if *num* is <= the last added iteration.
 
@@ -1131,10 +1135,36 @@ of the annotation available.
     :rtype:  :class:`str`
     :raises: Exception if *i* out of bounds.
 
+  .. method:: GetMajor(i)
+
+    :param i: Index of revision
+    :type i: :class:`int`
+    :return: The major version of this revision (-1 if not set).
+    :rtype:  :class:`int`
+    :raises: Exception if *i* out of bounds.
+
+  .. method:: GetMinor(i)
+
+    :param i: Index of revision
+    :type i: :class:`int`
+    :return: The minor version of this revision (-1 if not set).
+    :rtype:  :class:`int`
+    :raises: Exception if *i* out of bounds.
+
   .. method:: GetLastDate()
 
     :return: Date of the latest revision ('?' if no revision set).
     :rtype:  :class:`str`
+
+  .. method:: GetLastMajor()
+
+    :return: Major version of the latest revision (-1 if not set).
+    :rtype:  :class:`int`
+
+  .. method:: GetLastMinor()
+
+    :return: Minor version of the latest revision (-1 if not set).
+    :rtype:  :class:`int`
 
   .. method:: SetDateOriginal(date)
               GetDateOriginal()

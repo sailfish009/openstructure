@@ -760,28 +760,19 @@ private:
 };
 
 /// \brief Container class for information on file revisions
-/// 
+/// See Python doc
 class DLLEXPORT_OST_IO MMCifInfoRevisions {
 public:
   /// \brief Start recording a revision process.
   MMCifInfoRevisions(): date_original_("?"), first_release_(0) {};
 
-  /// \brief Set date the entry entered PDB.
-  ///
-  /// \param date
+  // original depositon date
   void SetDateOriginal(String date) { date_original_ = date; }
-
-  /// \brief Get date the entry entered PDB.
-  ///
-  /// \return date
   String GetDateOriginal() const { return date_original_; }
 
-  /// \brief Add a revision to history
-  ///
-  /// \param num unique identifier
-  /// \param date date of revision
-  /// \param status status of the revision
-  void AddRevision(int num, String date, String status)
+  // revision history
+  void AddRevision(int num, String date, String status, int major = -1,
+                   int minor = -1)
   {
     if (num_.size() && (num_.back() >= num)) {
       std::stringstream ss;
@@ -792,6 +783,8 @@ public:
     num_.push_back(num);
     date_.push_back(date);
     status_.push_back(status);
+    major_.push_back(major);
+    minor_.push_back(minor);
     // set first release date if not already occupied
     if (first_release_ == 0) {
       if (status == "full release" || status == "Initial release") {
@@ -800,51 +793,39 @@ public:
     }
   }
 
-  /// \brief Get number of revisions stored.
-  ///
-  /// \return number
+  // revision history getters
   size_t GetSize() const { return num_.size(); }
-
-  /// \brief Get revision date by index in list.
-  ///
-  /// \param i position in list
-  /// \return date
   String GetDate(size_t i) const { return date_.at(i); }
-
-  /// \brief Get revision num by index in list.
-  ///
-  /// \param i position in list
-  /// \return num
   int GetNum(size_t i) const { return num_.at(i); }
-
-  /// \brief Get revision status by index in list.
-  ///
-  /// \param i position in list
-  /// \return status
   String GetStatus(size_t i) const { return status_.at(i); }
+  int GetMajor(size_t i) const { return major_.at(i); }
+  int GetMinor(size_t i) const { return minor_.at(i); }
 
-  /// \brief Get date of last revision.
-  ///
-  /// \return date
+  // get info of first and last revision
   String GetLastDate() const {
     if (date_.empty()) return "?";
     else               return date_.back();
   }
-
-  /// \brief Get the index of the full release revision.
-  ///
-  /// \return index
-  size_t GetFirstRelease() const
-  {
+  int GetLastMajor() const {
+    if (major_.empty()) return -1;
+    else                return major_.back();
+  }
+  int GetLastMinor() const {
+    if (minor_.empty()) return -1;
+    else                return minor_.back();
+  }
+  size_t GetFirstRelease() const {
     return first_release_;
   }
 
 private:
   String date_original_;       ///< first time seen in PDB
-  size_t first_release_;          ///< index of full release revision
+  size_t first_release_;       ///< index of full release revision
   std::vector<int> num_;       ///< sequential id of revision (gets larger)
   std::vector<String> date_;   ///< date of revision
   std::vector<String> status_; ///< ststus phrase for this revision
+  std::vector<int> major_;     ///< major version of revision
+  std::vector<int> minor_;     ///< minor version of revision
 };
 
 
@@ -1131,13 +1112,11 @@ public:
   }
 
   /// \brief Add a revision to history
-  ///
-  /// \param num unique identifier
-  /// \param date date of revision
-  /// \param status status of the revision
-  void AddRevision(int num, String date, String status)
+  /// \see MMCifInfoRevisions::AddRevision
+  void AddRevision(int num, String date, String status, int major = -1,
+                   int minor = -1)
   {
-    revisions_.AddRevision(num, date, status);
+    revisions_.AddRevision(num, date, status, major, minor);
   }
 
   /// \brief Get history

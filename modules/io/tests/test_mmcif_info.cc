@@ -243,26 +243,37 @@ BOOST_AUTO_TEST_CASE(mmcif_info_revisions)
   BOOST_CHECK(rev.GetFirstRelease() == 0);
   BOOST_CHECK(rev.GetSize() == 0);
   BOOST_CHECK(rev.GetLastDate() == "?");
+  BOOST_CHECK(rev.GetLastMajor() == -1);
+  BOOST_CHECK(rev.GetLastMinor() == -1);
   BOOST_CHECK_THROW(rev.GetDate(0), std::out_of_range);
   BOOST_CHECK_THROW(rev.GetNum(0), std::out_of_range);
   BOOST_CHECK_THROW(rev.GetStatus(0), std::out_of_range);
 
-  rev.SetDateOriginal("2012-05-04");
+  rev.SetDateOriginal("2012-05-03");
   rev.AddRevision(1, "2012-05-04", "in preparation");
-  rev.AddRevision(2, "2012-05-05", "full release");
+  rev.AddRevision(2, "2012-05-05", "full release", 1, 2);
 
   BOOST_CHECK(rev.GetSize() == 2);
-  BOOST_CHECK(rev.GetDateOriginal() == "2012-05-04");
+  BOOST_CHECK(rev.GetDateOriginal() == "2012-05-03");
   BOOST_CHECK(rev.GetDate(0) == "2012-05-04");
   BOOST_CHECK(rev.GetNum(0) == 1);
   BOOST_CHECK(rev.GetStatus(0) == "in preparation");
+  BOOST_CHECK(rev.GetMajor(0) == -1);
+  BOOST_CHECK(rev.GetMinor(0) == -1);
+  BOOST_CHECK(rev.GetDate(1) == "2012-05-05");
   BOOST_CHECK(rev.GetDate(1) == rev.GetLastDate());
   BOOST_CHECK(rev.GetFirstRelease() == 2);
   BOOST_CHECK(rev.GetNum(1) == 2);
-  BOOST_CHECK(rev.GetStatus(1) == "full release");  
+  BOOST_CHECK(rev.GetStatus(1) == "full release");
+  BOOST_CHECK(rev.GetMajor(1) == 1);
+  BOOST_CHECK(rev.GetMinor(1) == 2);
+  BOOST_CHECK(rev.GetMajor(1) == rev.GetLastMajor());
+  BOOST_CHECK(rev.GetMinor(1) == rev.GetLastMinor());
   BOOST_CHECK_THROW(rev.GetDate(2), std::out_of_range);
   BOOST_CHECK_THROW(rev.GetNum(2), std::out_of_range);
   BOOST_CHECK_THROW(rev.GetStatus(2), std::out_of_range);
+  BOOST_CHECK_THROW(rev.GetMajor(2), std::out_of_range);
+  BOOST_CHECK_THROW(rev.GetMinor(2), std::out_of_range);
 
   BOOST_TEST_MESSAGE("  done.");
 }
