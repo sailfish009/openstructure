@@ -1357,20 +1357,28 @@ BOOST_AUTO_TEST_CASE(mmcif_test_revisions_old)
   const MMCifInfo& info = mmcif_p.GetInfo();
   const MMCifInfoRevisions& revs = info.GetRevisions();
   
-  // check items
+  // check items (note: version numbers only for new mmCIF versions)
   BOOST_CHECK_EQUAL(revs.GetSize(), size_t(3));
   BOOST_CHECK_EQUAL(revs.GetNum(0), 1);
   BOOST_CHECK_EQUAL(revs.GetDate(0), String("2009-11-17"));
   BOOST_CHECK_EQUAL(revs.GetStatus(0), String("full release"));
+  BOOST_CHECK_EQUAL(revs.GetMajor(0), -1);
+  BOOST_CHECK_EQUAL(revs.GetMinor(0), -1);
   BOOST_CHECK_EQUAL(revs.GetNum(1), 2);
   BOOST_CHECK_EQUAL(revs.GetDate(1), String("2011-07-13"));
   BOOST_CHECK_EQUAL(revs.GetStatus(1), String("?"));
+  BOOST_CHECK_EQUAL(revs.GetMajor(1), -1);
+  BOOST_CHECK_EQUAL(revs.GetMinor(1), -1);
   BOOST_CHECK_EQUAL(revs.GetNum(2), 3);
   BOOST_CHECK_EQUAL(revs.GetDate(2), String("2012-12-12"));
   BOOST_CHECK_EQUAL(revs.GetStatus(2), String("?"));
+  BOOST_CHECK_EQUAL(revs.GetMajor(2), -1);
+  BOOST_CHECK_EQUAL(revs.GetMinor(2), -1);
   // check rest
   BOOST_CHECK_EQUAL(revs.GetDateOriginal(), String("2009-08-10"));
   BOOST_CHECK_EQUAL(revs.GetLastDate(), String("2012-12-12"));
+  BOOST_CHECK_EQUAL(revs.GetLastMajor(), -1);
+  BOOST_CHECK_EQUAL(revs.GetLastMinor(), -1);
   BOOST_CHECK_EQUAL(revs.GetFirstRelease(), size_t(1));
 
   BOOST_TEST_MESSAGE("  done.");
@@ -1394,15 +1402,23 @@ BOOST_AUTO_TEST_CASE(mmcif_test_revisions_new)
   BOOST_CHECK_EQUAL(revs.GetNum(0), 1);
   BOOST_CHECK_EQUAL(revs.GetDate(0), String("2009-11-17"));
   BOOST_CHECK_EQUAL(revs.GetStatus(0), String("Initial release"));
+  BOOST_CHECK_EQUAL(revs.GetMajor(0), 1);
+  BOOST_CHECK_EQUAL(revs.GetMinor(0), 0);
   BOOST_CHECK_EQUAL(revs.GetNum(1), 2);
   BOOST_CHECK_EQUAL(revs.GetDate(1), String("2011-07-13"));
   BOOST_CHECK_EQUAL(revs.GetStatus(1), String("?"));
+  BOOST_CHECK_EQUAL(revs.GetMajor(1), 1);
+  BOOST_CHECK_EQUAL(revs.GetMinor(1), 1);
   BOOST_CHECK_EQUAL(revs.GetNum(2), 3);
   BOOST_CHECK_EQUAL(revs.GetDate(2), String("2012-12-12"));
   BOOST_CHECK_EQUAL(revs.GetStatus(2), String("?"));
+  BOOST_CHECK_EQUAL(revs.GetMajor(2), 2);
+  BOOST_CHECK_EQUAL(revs.GetMinor(2), 0);
   // check rest
   BOOST_CHECK_EQUAL(revs.GetDateOriginal(), String("2009-08-10"));
   BOOST_CHECK_EQUAL(revs.GetLastDate(), String("2012-12-12"));
+  BOOST_CHECK_EQUAL(revs.GetLastMajor(), 2);
+  BOOST_CHECK_EQUAL(revs.GetLastMinor(), 0);
   BOOST_CHECK_EQUAL(revs.GetFirstRelease(), size_t(1));
 
   BOOST_TEST_MESSAGE("  done.");
