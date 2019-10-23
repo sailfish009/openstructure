@@ -269,7 +269,7 @@ class AlignmentContextMenu(QtCore.QObject):
     if(sd.exec_()):
       self.__Align(sd.GetEntities(),sd.GetShowScores(), sd.GetDisplayAlignment())
         
-  def __Align(self, ent_list,show_scores=True, display_alignment=False):
+  def __Align(self, ent_list, show_scores=True, display_alignment=False):
     node = ent_list[0]
     res_list = list()
     if isinstance(node, gfx.Entity):
@@ -277,7 +277,9 @@ class AlignmentContextMenu(QtCore.QObject):
       for i in range(1,len(ent_list)):
         node = ent_list[i]
         if isinstance(node, gfx.Entity):
-          res_list.append(WrappedTMAlign(node.view.chains[0], ref))
+          tm_result = WrappedTMAlign(node.view.chains[0], ref)
+          res_list.append(tm_result)
+          node.view.handle.EditXCS().ApplyTransform(tm_result.transform)
           node.UpdatePositions()
     if show_scores:
       self.__ShowScore(ent_list, res_list)
