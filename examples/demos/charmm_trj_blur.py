@@ -41,5 +41,5 @@ scene.AutoAutoslab(True)
 
 # create an animation timer and start it
 anim=Anim(cg,go)
-print 'Demo 6: Import of a CHARMM trajectory. Type anim.stop() to halt animation, anim.start(100) to start it again with stepsize 100!Starting animation now....'
+print('Demo 6: Import of a CHARMM trajectory. Type anim.stop() to halt animation, anim.start(100) to start it again with stepsize 100!Starting animation now....')
 anim.start(50)

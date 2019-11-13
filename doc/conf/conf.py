@@ -48,8 +48,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'OpenStructure'
-copyright = u'2019, OpenStructure authors'
+project = 'OpenStructure'
+copyright = '2019, OpenStructure authors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -189,8 +189,8 @@ htmlhelp_basename = 'openstructure-doc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'OpenStructure.tex', u'OpenStructure Documentation',
-   u'OpenStructure authors', 'manual'),
+  ('index', 'OpenStructure.tex', 'OpenStructure Documentation',
+   'OpenStructure authors', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

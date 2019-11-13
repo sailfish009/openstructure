@@ -76,7 +76,7 @@ if __name__ == "__main__":
   try:
     clustalw_path=settings.Locate(('clustalw', 'clustalw2'))
   except(settings.FileNotFound):
-    print "Could not find clustalw executable: ignoring unit tests"
+    print("Could not find clustalw executable: ignoring unit tests")
     sys.exit(0)
   from ost import testutils
   testutils.RunTests()

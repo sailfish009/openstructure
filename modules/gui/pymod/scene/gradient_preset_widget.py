@@ -27,8 +27,8 @@ from datetime import datetime
 
 from datetime import datetime
 from PyQt5 import QtCore, QtWidgets, QtGui
-from gradient_info_handler import GradientInfoHandler
-from gradient_list_model import GradientListModel
+from .gradient_info_handler import GradientInfoHandler
+from .gradient_list_model import GradientListModel
 
 
 #Gradient Preset Widget

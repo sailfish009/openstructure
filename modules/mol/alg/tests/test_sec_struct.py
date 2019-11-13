@@ -14,7 +14,7 @@ class TestSecStruct(unittest.TestCase):
       dssp_path = settings.Locate(['dsspcmbi', 'dssp', 'mkdssp'],
                                   env_name='DSSP_EXECUTABLE')
     except:
-      print "Could not find DSSP, could not compare sec struct assignment..."
+      print("Could not find DSSP, could not compare sec struct assignment...")
       return
 
     dssp_ent = io.LoadPDB(os.path.join("testfiles", "1a0s.pdb"))

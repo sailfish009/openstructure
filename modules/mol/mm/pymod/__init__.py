@@ -19,7 +19,7 @@
 
 import os.path
 from _ost_mol_mm import *
-import antechamber
+from . import antechamber
 import ost
 
 def LoadAMBERForcefield():

@@ -125,7 +125,7 @@ def _RuniAlign(ialign, tmp_dir, options={}):
          } 
   opts.update(options)
   cmd_opts = []
-  for k, v in opts.iteritems():
+  for k, v in opts.items():
     if type(v) == type(True):
       if v == True:
         cmd_opts.append('-%s' % str(k))

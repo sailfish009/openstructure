@@ -37,10 +37,10 @@ if __name__ == "__main__":
   try:
     msms._GetExecutable(msms_exe=None, msms_env='MSMSSERVER')
   except(settings.FileNotFound):
-    print "Could not find msms executable: ignoring unit tests"
+    print("Could not find msms executable: ignoring unit tests")
     exit(0)
   version = msms.GetVersion(msms_exe=None, msms_env='MSMSSERVER')
   if version!=VERSION_REQUIRED:
-    print "MSMS version (%s) does not match required version %s: ignoring unit tests"%(version, VERSION_REQUIRED)
+    print("MSMS version (%s) does not match required version %s: ignoring unit tests"%(version, VERSION_REQUIRED))
   from ost import testutils
   testutils.RunTests()

@@ -28,7 +28,7 @@ except ImportError:
   _img_present=False
   pass
 from PyQt5 import QtCore, QtWidgets, QtGui
-from color_select_widget import ColorSelectWidget
+from .color_select_widget import ColorSelectWidget
 
 #Uniform Color Widget
 class UniformColorWidget(QtWidgets.QWidget):

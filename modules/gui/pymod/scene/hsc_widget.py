@@ -21,7 +21,7 @@
 from ost import gui
 from ost import gfx
 from PyQt5 import QtCore, QtWidgets
-from render_mode_widget import RenderModeWidget
+from .render_mode_widget import RenderModeWidget
 
 #Tube Render Options
 class HSCWidget(RenderModeWidget):

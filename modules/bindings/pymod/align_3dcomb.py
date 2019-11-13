@@ -44,7 +44,7 @@ def _SetupFiles(structure_list):
   
   #write out temporary pdb files
   if not all([ev.IsValid() for ev in structure_list]):
-    raise RuntimeError, "Invalid EntityView in structure_list"
+    raise RuntimeError("Invalid EntityView in structure_list")
   tpd=utils.TempDirWithFiles(structure_list)
   
   #Write out the file containing the list of all structures
@@ -71,7 +71,7 @@ def _Run3DCOMB(command,tpd):
   outfile.close()
   #check for successful completion of 3DCOMB
   if returncode!=0:
-    print "WARNING: 3DCOMB error\n"
+    print("WARNING: 3DCOMB error\n")
     raise subprocess.CalledProcessError
   return returncode
 
@@ -87,7 +87,7 @@ def _ParseOutput(tpd):
     if l.startswith('>'):
       fl=ost.FloatList()
       for i in range(3):
-        l=f.next()
+        l=next(f)
         sl=l.split(',')
         fl.extend([float(el) for el in sl[0].split()+[sl[1]]])
       fl.extend([0,0,0,1])
@@ -115,7 +115,7 @@ def AlignStructures(structure_list,apply_transform=False,name_list=None,comb_exe
   returncode=_Run3DCOMB(command,tpd)
   try:ali,Tl,results=_ParseOutput(tpd)
   except:
-    print 'could not parse output'
+    print('could not parse output')
     raise RuntimeError
   if apply_transform:
     for T,ev in zip(Tl,structure_list):

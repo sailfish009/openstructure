@@ -163,4 +163,4 @@ if __name__ == "__main__":
   if testutils.SetDefaultCompoundLib():
     testutils.RunTests()
   else:
-    print 'No compound library available. Ignoring test_cleanup.py tests.'
+    print('No compound library available. Ignoring test_cleanup.py tests.')

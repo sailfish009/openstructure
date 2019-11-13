@@ -74,9 +74,9 @@ def _SetupFiles(entity, selection, scratch_dir, max_number_of_atoms):
   else:
     entity_view = entity
   if len(entity_view.atoms) > max_number_of_atoms:
-    raise RuntimeError, "Too much atoms for NACCESS (> %s)" % max_number_of_atoms
+    raise RuntimeError("Too much atoms for NACCESS (> %s)" % max_number_of_atoms)
   if not entity_view.IsValid():
-    raise RuntimeError, "Could not create view for selection (%s)"%(selection)
+    raise RuntimeError("Could not create view for selection (%s)"%(selection))
   
   # write entity to tmp file
   tmp_file_name = "entity.pdb"
@@ -162,7 +162,7 @@ def _ParseRsaFile(entity, file, asa_abs, asa_rel):
         res.SetFloatProp(asa_rel, float(rel_all) )
         res.SetFloatProp(asa_abs, float(abs_all) )
       else:
-        raise RuntimeError, "Residue Names are not the same for ResNumb: %s (%s vs %s)" % (res_number, res.name, res_name)
+        raise RuntimeError("Residue Names are not the same for ResNumb: %s (%s vs %s)" % (res_number, res.name, res_name))
       
 
 def __CleanupFiles(dir_name):

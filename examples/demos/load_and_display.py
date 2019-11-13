@@ -18,4 +18,4 @@ scene.Add(go)
 # center the scene on the geometric center of the SDH
 scene.CenterOn(go)
 
-print 'Demo 1: loading and displaying a pdb file'
+print('Demo 1: loading and displaying a pdb file')

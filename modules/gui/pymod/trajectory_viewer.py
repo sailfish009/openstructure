@@ -255,9 +255,9 @@ class TrajWidget(_QWidget):
     ref_eh=self.ehlist_[self.ref_index_]
     ref_v=ref_eh.Select(str(self._align_selection.text()))
     if ref_v.GetAtomCount()<=3:
-      print 'not enough atoms for alignment'
+      print('not enough atoms for alignment')
       return
-    for i,t,eh in zip(range(len(self.trajlist_)),self.trajlist_,self.ehlist_):
+    for i,t,eh in zip(list(range(len(self.trajlist_))),self.trajlist_,self.ehlist_):
       t=_ost.mol.alg.SuperposeFrames(t,eh.Select(str(self._align_selection.text())),ref_v)
       self.trajlist_[i]=t
       
@@ -342,10 +342,10 @@ class TrajWidget(_QWidget):
   def SetSpeed(self,val):
   #Value should be between 0 and 1
     if not (val<=1. and val >=0.):
-      print 'Speed should be set between 0 and 1'
+      print('Speed should be set between 0 and 1')
       return
     else:
       val=self._speed_slider_min-val*(self._speed_slider_min-self._speed_slider_max)
       self._SetSpeedSliderPos(val)
-      print val
+      print(val)
       

@@ -188,7 +188,7 @@ def PredictContacts(ali):
   import math
   from ost import seq
   if not type(ali)==type(seq.AlignmentHandle()):
-    print "Parameter should be an AlignmentHandle"
+    print("Parameter should be an AlignmentHandle")
     return
   mi=CalculateMutualInformation(ali)
   CoEvoSc=CalculateContactSubstitutionScore(ali)

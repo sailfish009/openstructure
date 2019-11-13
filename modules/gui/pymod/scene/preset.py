@@ -106,7 +106,7 @@ class Preset:
             op = op_class.FromInfo(op_group)
             class_order_dict[index]=op
     for i in range(0, len(class_order_dict)):
-      if(class_order_dict.has_key(i)):
+      if(i in class_order_dict):
         preset.AddOp(class_order_dict[i])
     return preset
     

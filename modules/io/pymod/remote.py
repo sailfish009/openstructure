@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import tempfile
 
 from ost.io import LoadPDB, LoadMMCIF
@@ -49,12 +49,12 @@ class RemoteRepository:
       tmp_file_suffix+='.gz'
 
     try:
-      connection = urllib2.urlopen(remote_url)
+      connection = urllib.request.urlopen(remote_url)
       if hasattr(connection, 'code'):
         status = connection.code
       else:
         status = connection.getcode()
-    except urllib2.HTTPError, e:
+    except urllib.error.HTTPError as e:
       status = e.code
     if status != 200:
       raise IOError('Could not load %s from %s (status code %d, url %s)' \

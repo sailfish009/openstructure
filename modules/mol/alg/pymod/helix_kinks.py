@@ -9,17 +9,17 @@ import ost
 
 def __FindProline(sele,proline):
   if not sele.IsValid():
-    print 'selection is not valid'
+    print('selection is not valid')
     raise RuntimeError
   if proline==False:
     proline=sele.Select('rname=PRO')
   if not proline.GetResidueCount()==1:
-    print proline.GetResidueCount(),'prolines in the selection. One proline is needed'
+    print(proline.GetResidueCount(),'prolines in the selection. One proline is needed')
     raise RuntimeError
   proline=proline.residues[0]
   proline_ca=proline.FindAtom('CA')
   if not proline_ca.IsValid():
-    print 'proline has no CA atom'
+    print('proline has no CA atom')
     raise RuntimeError
   return (proline,proline_ca)
   proline.GetNumber().num
@@ -27,14 +27,14 @@ def __FindProline(sele,proline):
 def __SelectPreAndPostProline(sele,proline_num):
   pre_proline=sele.Select('rnum<'+str(proline_num))
   post_proline=sele.Select('rnum>'+str(proline_num))
-  print 'pre-proline residues'
+  print('pre-proline residues')
   for res in pre_proline.residues:
-    print res
-  print 'post-proline residues'
+    print(res)
+  print('post-proline residues')
   for res in post_proline.residues:
-    print res
+    print(res)
   if pre_proline.GetResidueCount()<4 or post_proline.GetResidueCount()<4:
-    print 'pre and post proline helices should be at least 4 residues long, 7 for better stability'
+    print('pre and post proline helices should be at least 4 residues long, 7 for better stability')
     raise RuntimeError
   return (pre_proline,post_proline)
 
@@ -42,7 +42,7 @@ def __FindCa3AndCa4(sele,proline_ca,proline_num):
   ca_3=sele.FindAtom(proline_ca.GetHandle().GetChain().GetName(),proline_num-3,'CA')
   ca_4=sele.FindAtom(proline_ca.GetHandle().GetChain().GetName(),proline_num-4,'CA')
   if not (ca_3.IsValid() and ca_4.IsValid()):
-    print 'CA not found in (i-4) or (i-3) residue'
+    print('CA not found in (i-4) or (i-3) residue')
     raise RuntimeError
   return (ca_3,ca_4)
 

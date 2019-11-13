@@ -28,7 +28,7 @@ class RemoteLoader(QtWidgets.QWidget):
   def _RemoteMenu(self):
     menu = QtWidgets.QMenu()
     action_group = QtWidgets.QActionGroup(menu)
-    for k,v in REMOTE_REPOSITORIES.iteritems():
+    for k,v in REMOTE_REPOSITORIES.items():
       action = menu.addAction(v.name)
       action.setCheckable(True)
       if k == 'pdb':
@@ -56,13 +56,13 @@ class RemoteLoader(QtWidgets.QWidget):
     for split_id in split_ids:
       try:
         ent = RemoteLoad(split_id, from_repo=self._current_repo)
-      except Exception, e:
+      except Exception as e:
         LogError(str(e))
         continue
       g = gfx.Entity(split_id, ent)
       try:
         gfx.Scene().Add(g)
-      except Exception, e:
+      except Exception as e:
         LogError(str(e))
 
 remote_loader=RemoteLoader()

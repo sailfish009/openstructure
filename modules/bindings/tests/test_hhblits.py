@@ -399,8 +399,8 @@ class TestHHblitsBindings(unittest.TestCase):
 if __name__ == "__main__":
     hhsuite_root_dir =  os.getenv('EBROOTHHMINSUITE')
     if not hhsuite_root_dir:
-        print "No environment variable 'EBROOTHHMINSUITE'. To enable the "+\
-            "unit test, this needs to point to your HHsuite installation."
+        print("No environment variable 'EBROOTHHMINSUITE'. To enable the "+\
+            "unit test, this needs to point to your HHsuite installation.")
         sys.exit(0)
     from ost import testutils
     testutils.RunTests()

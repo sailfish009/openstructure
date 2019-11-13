@@ -38,12 +38,12 @@ def PairResiduesByNum(view_a, view_b,
   result_b=_EmptyView(view_b)
   try:
     while True:
-      r1=residues_a.next()
-      r2=residues_b.next()
+      r1=next(residues_a)
+      r2=next(residues_b)
       while r1.number<r2.number:
-        r1=residues_a.next()
+        r1=next(residues_a)
       while r2.number<r1.number:
-        r2=residues_b.next()
+        r2=next(residues_b)
       assert r1.number==r2.number
       result_a.AddResidue(r1, view_add_flags)
       result_b.AddResidue(r2, view_add_flags)

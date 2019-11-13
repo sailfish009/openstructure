@@ -23,10 +23,10 @@ import ost
 import os
 from datetime import datetime
 from PyQt5 import QtCore, QtWidgets, QtGui
-from scene_selection_helper import SelHelper
-from preset_list_model import PresetListModel
-from preset_editor_widget import PresetEditor
-from preset import Preset
+from .scene_selection_helper import SelHelper
+from .preset_list_model import PresetListModel
+from .preset_editor_widget import PresetEditor
+from .preset import Preset
 
 class PresetWidget(QtWidgets.QWidget):
   PRESET_XML_FILE = os.path.join(ost.GetSharedDataPath(), "scene", "presets.xml")

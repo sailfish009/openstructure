@@ -108,5 +108,5 @@ def HBondScore(ent1, ent2, hbplus_bin=None):
     return 0.0
 
 if __name__=='__main__':
-  print 'HBond Score:', HBondScore(io.LoadPDB(sys.argv[1]), 
-                                   io.LoadPDB(sys.argv[2]))
+  print('HBond Score:', HBondScore(io.LoadPDB(sys.argv[1]), 
+                                   io.LoadPDB(sys.argv[2])))

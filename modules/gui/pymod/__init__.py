@@ -24,9 +24,9 @@ import sip
 ## \brief Opens a DataViewer 
 # \sa \example fft_li.py "View Fourier Transform Example" \sa \ref modulate_image.py "Modulate Image Example"
 def _close_event_override_(event):
-  print "close event"
+  print("close event")
 def _set_data_override_(data):
-  print "set data"
+  print("set data")
 
 def CreateDataViewer(ih,flag=False):
       viewer=GostyApp.Instance().CreateDataViewer(ih)

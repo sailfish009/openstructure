@@ -199,7 +199,7 @@ def DistRMSDFromTraj(t,sele,ref_sele,radius=7.0,average=False,seq_sep=4,first=0,
   :return: a numpy vecor dist_rmsd(N\ :subscript:`frames`).  
   """
   if not sele.GetAtomCount()==ref_sele.GetAtomCount():
-    print 'Not same number of atoms in the two views'
+    print('Not same number of atoms in the two views')
     return
   try:
     import numpy as npy

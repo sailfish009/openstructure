@@ -42,7 +42,7 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
     lib_name=os.path.abspath(os.path.join(stage_dir, 'lib', 
                                           _lib_name(component)))  
     if not os.path.exists(lib_name):
-      print 'WARNING:', lib_name, 'does not exist'
+      print('WARNING:', lib_name, 'does not exist')
     if lib_name not in pool:
       _deps_for_lib(lib_name, pool)
       pool.add(lib_name)    
@@ -50,7 +50,7 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
     bin_name=os.path.abspath(os.path.join(stage_dir, 'bin', 
                                           bin))  
     if not os.path.exists(bin_name):
-      print 'WARNING:', bin_name, 'does not exist'
+      print('WARNING:', bin_name, 'does not exist')
       continue
     if bin_name not in pool:
       _deps_for_lib(bin_name, pool)
@@ -58,15 +58,15 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
     bin_name=os.path.abspath(os.path.join(stage_dir, 'libexec', libexec_path,
                                           bin))
     if not os.path.exists(bin_name):
-      print 'WARNING:', bin_name, 'does not exist'
+      print('WARNING:', bin_name, 'does not exist')
       continue
     if bin_name not in pool:
       _deps_for_lib(bin_name, pool)
   for site_package in site_packages:
     full_path=get_python_module_path(site_package)
-    print full_path
+    print(full_path)
     if not os.path.exists(full_path):
-      print 'WARNING:', site_package, 'does not exists'
+      print('WARNING:', site_package, 'does not exists')
       continue
     if os.path.isdir(full_path):
       for so_file in glob.glob(os.path.join(full_path, '*.so')):
@@ -104,7 +104,7 @@ def copy_binaries(stage_dir, outdir, binary_names, scripts, bin_dir,
     else:
       bin_name=os.path.join(stage_dir, binary_name)
     if not os.path.exists(bin_name):
-      print 'WARNING:', binary_name, 'does not exist'
+      print('WARNING:', binary_name, 'does not exist')
       continue
     dst_name=os.path.join(outdir, bin_dir, os.path.basename(bin_name))
     shutil.copy(bin_name, dst_name)
@@ -128,14 +128,14 @@ def split_framework_components(abs_path):
         return lead, trail
 
 def change_id(id, lib):
-  os.chmod(lib, 0666)
+  os.chmod(lib, 0o666)
   os.system(CHANGE_ID_RPATH % (id,lib))
-  os.chmod(lib, 0444)
+  os.chmod(lib, 0o444)
 
 def update_load_commands(lib, exe, exe_path):
   direct_deps=set()
   _deps_for_lib(lib, direct_deps, recursive=False)
-  os.chmod(lib, 0666)
+  os.chmod(lib, 0o666)
   for direct_dep in direct_deps:
     if direct_dep.endswith('.dylib'):
       new_name=os.path.basename(direct_dep)
@@ -147,9 +147,9 @@ def update_load_commands(lib, exe, exe_path):
       new_name=os.path.join(framework_name, rel_path)
       os.system(CHANGE_LOAD_CMD_RPATH % (direct_dep, new_name, lib))
   if exe:
-    os.chmod(lib, 0555)
+    os.chmod(lib, 0o555)
   else:
-    os.chmod(lib, 0444)
+    os.chmod(lib, 0o444)
 
 def copy_deps(dependencies, outdir):
   exe_path=os.path.join(outdir, 'bin')
@@ -209,20 +209,20 @@ def merge_tree(src, dst):
             merge_tree(srcname, dstname)
         else:
             shutil.copy2(srcname, dstname)
-    except (IOError, os.error), why:
+    except (IOError, os.error) as why:
         errors.append((srcname, dstname, str(why)))
-    except shutil.Error, err:
+    except shutil.Error as err:
         errors.extend(err.args[0])
   try:
       shutil.copystat(src, dst)
-  except OSError, why:
+  except OSError as why:
       if WindowsError is not None and isinstance(why, WindowsError):
           # Copying file access times may fail on Windows
           pass
       else:
           errors.extend((src, dst, str(why)))
   if errors:
-      raise shutil.Error, errors
+      raise shutil.Error(errors)
 
 def get_site_package_dir():
   """
@@ -269,7 +269,7 @@ class Package(object):
     self.site_packages=[]
     self.site_packages_dir=''
   def status(self, message):
-    print '%s: %s' % (self.name, message)
+    print('%s: %s' % (self.name, message))
 
   def _prepare_output_dir(self, output_dir):
     """
@@ -287,7 +287,7 @@ class Package(object):
     if self.libexec_dir:
       out_exec_dir=os.path.join(output_dir, 'libexec', self.libexec_dir)
       if not os.path.exists(out_exec_dir):
-        print 'making...', out_exec_dir
+        print('making...', out_exec_dir)
         os.makedirs(out_exec_dir)
   def _copy_site_packages(self, output_dir):
     for sp in SITE_PACKAGES:
@@ -296,7 +296,7 @@ class Package(object):
         merge_tree(src, os.path.joini(output_dir, self.pymod_dir, sp))
       else:
         shutil.copy(src, os.path.join(output_dir, self.pymod_dir, sp))
-    print 'updating link commands of python shared objects'
+    print('updating link commands of python shared objects')
     os.path.walk(os.path.join(output_dir, 'lib'), 
                  update_pymod_shared_objects, 
                  os.path.join(output_dir, 'lib'))

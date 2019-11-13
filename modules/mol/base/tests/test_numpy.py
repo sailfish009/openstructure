@@ -11,7 +11,7 @@ if ost.WITH_NUMPY:
   has_numpy=True
   try:
     import numpy
-  except ImportError, e:
+  except ImportError as e:
     has_numpy=False
 else:
   has_numpy=False

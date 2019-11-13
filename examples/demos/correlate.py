@@ -42,7 +42,7 @@ scene.CenterOn(map_go)
 candidates=io.LoadPDB('data/loop-candidates.pdb', 
                       load_multi=True)
 
-print len(candidates)
+print(len(candidates))
 #-------------------------------------------------------------------------------
 def Correlate(candidates):
   # this function converts the candidate loop into a density and calculates the 

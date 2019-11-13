@@ -52,8 +52,8 @@ def _ParseGDTSection(section, residue_count):
   cutoffs=[float(e) for e in section[0].split()[2:]]
   num_ca=[int(e) for e in section[1].split()[2:]]
   gdt_ts=[float(e) for e in section[2].split()[2:]]
-  scores=dict(zip(cutoffs, gdt_ts))
-  numbers=dict(zip(cutoffs, num_ca))
+  scores=dict(list(zip(cutoffs, gdt_ts)))
+  numbers=dict(list(zip(cutoffs, num_ca)))
   factor=(1.0/(4*residue_count))*100
   ts_cutoffs=(1.0, 2.0, 4.0, 8.0)
   ha_cutoffs=(0.5, 1.0, 2.0, 4.0)  

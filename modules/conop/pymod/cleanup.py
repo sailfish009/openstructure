@@ -79,7 +79,7 @@ def _CanonicalizeResidues(clean_entity, ed, compound_lib) :
           _DeleteSidechain(res, ed)
           for atom in res.atoms:
             atom.is_hetatom = False
-          print "Removing sidechain of %s, beacuse it has not been found in the compound library"% parent_tlc
+          print("Removing sidechain of %s, beacuse it has not been found in the compound library"% parent_tlc)
         else:
           #collect atom's names
           modif_atom_names = set([atom.name for atom in res.atoms

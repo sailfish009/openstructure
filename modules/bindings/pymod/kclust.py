@@ -84,7 +84,7 @@ def _ParseOutput(tmp_dir_name):
   #translate into final output
 
   res=list()
-  for k, v in clusters.iteritems():
+  for k, v in clusters.items():
     res.append(cluster(v, header_mapper[k]))
 
   return res

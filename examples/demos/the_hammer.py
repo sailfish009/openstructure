@@ -82,4 +82,4 @@ grad.SetColorAt(0.5, gfx.Color(1.0, 0.0, 1.0))
 grad.SetColorAt(1.0, gfx.Color(1.0, 0.0, 0.0))
 b_go.ColorBy('clash', gfx.Color(0,1,0), gfx.Color(1,0,0), 0.0, 10.0, mol.Prop.Level.ATOM)
 scene.CenterOn(b_go)
-print 'Demo 7: Illustrating a clash score'
+print('Demo 7: Illustrating a clash score')

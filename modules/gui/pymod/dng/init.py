@@ -13,7 +13,7 @@ except ImportError:
   _img_present=False
   pass
 
-import httplib
+import http.client
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ost.gui.scene.init_inspector import _InitInspector
@@ -116,7 +116,7 @@ def _execute_script():
   sys_argv_backup=sys.argv
   sys.argv=script_argv
   try:
-    execfile(script, __main__.__dict__)
+    exec(compile(open(script).read(), script, 'exec'), __main__.__dict__)
   finally:
     sys.argv=sys_argv_backup     
 
@@ -150,7 +150,7 @@ class OstOptionParser(optparse.OptionParser):
   def __init__(self, **kwargs):
     optparse.OptionParser.__init__(self, **kwargs)
   def exit(self, status_code, error_message):
-    print error_message,
+    print(error_message, end=' ')
     QtWidgets.QApplication.instance().exit()
     sys.exit(-1)
 
@@ -171,7 +171,7 @@ if len(parser.rargs)!=0:
     if not rargs_string.endswith('.py'):  
       loading_list.append(rargs_string)
     else:
-      print 'Error:  one of the files to load is a Python script, use -s flag to execute it\n'
+      print('Error:  one of the files to load is a Python script, use -s flag to execute it\n')
       QtWidgets.QApplication.instance().exit()
       sys.exit(-1)    
 
@@ -190,15 +190,15 @@ _ostrc=os.path.join(home, '.ostrc')
 if os.path.exists(_ostrc):
   try:
     exec(open(_ostrc))
-  except Exception, e:
-    print e
+  except Exception as e:
+    print(e)
 else:
   rcfile=open(_ostrc,"w")
-  print >> rcfile, '# This python file is parsed by ost and dng at startup'
-  print >> rcfile, '# Its content is made available in the global namespace'
-  print >> rcfile, '# It can be used to define custom variables and functions'
-  print >> rcfile, '# For example:'
-  print >> rcfile, '# IMPORTANT_DIR="path/to/important/dir"'
+  print('# This python file is parsed by ost and dng at startup', file=rcfile)
+  print('# Its content is made available in the global namespace', file=rcfile)
+  print('# It can be used to define custom variables and functions', file=rcfile)
+  print('# For example:', file=rcfile)
+  print('# IMPORTANT_DIR="path/to/important/dir"', file=rcfile)
   rcfile.close()
 
 ost.gui.PushVerbosityLevel(options.vlevel)

@@ -917,10 +917,10 @@ macro(setup_boost)
   #              python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} REQUIRED)
   # set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
   # see https://cmake.org/cmake/help/v3.11/module/FindBoost.html
-  foreach(_python_lib_name python
-                           python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}
+  foreach(_python_lib_name python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}
                            python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
-                           python${PYTHON_VERSION_MAJOR})
+                           python${PYTHON_VERSION_MAJOR}
+                           python)
     find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS ${_python_lib_name} QUIET)
     if(Boost_FOUND)
       message(STATUS "Found Boost package: " ${_python_lib_name})

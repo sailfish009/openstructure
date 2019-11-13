@@ -28,7 +28,7 @@ except ImportError:
   pass
 from PyQt5 import QtCore, QtWidgets
 
-from preset_widget import PresetWidget
+from .preset_widget import PresetWidget
 
 class AdditionalSettingsWidget(QtWidgets.QStackedWidget):
   def __init__(self, parent=None):

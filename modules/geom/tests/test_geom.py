@@ -30,7 +30,7 @@ import ost.geom as geom
 # which do not convert std::out_of_range to IndexError correctly.
 try:
   geom.Vec2()[3]
-except Exception, e:
+except Exception as e:
   pass
   IndexError = type(e)
 

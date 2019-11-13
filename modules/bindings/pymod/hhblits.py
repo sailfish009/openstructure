@@ -161,34 +161,34 @@ def ParseHHblitsOutput(output):
         value_start_column = 14
         date_pattern = '%a %b %d %H:%M:%S %Y'
         header = HHblitsHeader()
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('Query')
         header.query = line[value_start_column:].strip()
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('Match_columns')
         header.match_columns = int(line[value_start_column:].strip())
 
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('No_of_seqs')
 
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('Neff')
         header.n_eff = float(line[value_start_column:].strip())
 
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('Searched_HMMs')
         header.searched_hmms = int(line[value_start_column:].strip())
 
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('Date')
         value = line[value_start_column:].strip()
         header.date = datetime.datetime.strptime(value, date_pattern)
 
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('Command')
         header.command = line[value_start_column:].strip()
 
-        line = lines.next()
+        line = next(lines)
         assert len(line.strip()) == 0
         return header
 
@@ -196,7 +196,7 @@ def ParseHHblitsOutput(output):
         assert lines.next().startswith(' No Hit')
         hits = []
         while True:
-            line = lines.next()
+            line = next(lines)
             if len(line.strip()) == 0:
                 return hits
             hits.append(ParseHeaderLine(line))
@@ -221,7 +221,7 @@ def ParseHHblitsOutput(output):
                 # - "T <hit_id> <start> <data> <end>"
                 # - "Q <query_id> <start> <data> <end>"
                 # -> rest is to be skipped
-                line = lines.next()
+                line = next(lines)
                 if len(line.strip()) == 0:
                     continue
                 if line.startswith('Done!'):
@@ -241,7 +241,7 @@ def ParseHHblitsOutput(output):
                     templ_str = ''
                     # skip the next line. It doesn't contain information we
                     # don't already know
-                    lines.next()
+                    next(lines)
                     continue
                 assert entry_index != None
                 # Skip all "T ..." and "Q ..." lines besides the one we want
@@ -758,7 +758,7 @@ def _ParseOptions(opts):
     """
     opt_cmd = list()
     opt_str = list()
-    for k, val in opts.iteritems():
+    for k, val in opts.items():
         if type(val) == type(True):
             if val == True:
                 opt_cmd.append('-%s' % str(k))

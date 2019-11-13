@@ -31,10 +31,10 @@ class RenderModeWidget(QtWidgets.QWidget):
     self.entities_ = set()
 
   def GetText(self):
-    raise NotImplementedError, "Subclasses must define GetText()"
+    raise NotImplementedError("Subclasses must define GetText()")
   
   def GetRenderMode(self):
-    raise NotImplementedError, "Subclasses must define GetRenderMode()"
+    raise NotImplementedError("Subclasses must define GetRenderMode()")
     
   def UpdateGui(self, options):
     pass

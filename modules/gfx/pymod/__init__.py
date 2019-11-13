@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 from _ost_gfx import *
-from py_gfx_obj import PyGfxObj
+from .py_gfx_obj import PyGfxObj
 
 WHITE=RGB(1.0,1.0,1.0)
 BLACK=RGB(0.0,0.0,0.0)
@@ -282,7 +282,7 @@ def _entity_reset(self,*args,**kwargs):
     else:
       raise TypeError("Reset: unknown option of type '%s' given"%type(a))
 
-  for key,val in kwargs.iteritems():
+  for key,val in kwargs.items():
     if key=="entity":
       if not isinstance(val,mol.EntityHandle):
         raise TypeError("Reset: expected mol.EntityHandle for 'entity' option")

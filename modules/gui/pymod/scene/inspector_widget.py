@@ -24,12 +24,12 @@ from ost import gfx
 import ost
 import os
 from PyQt5 import QtCore, QtWidgets
-from toolbar_options_widget import ToolBarOptionsWidget 
-from render_options_widget import RenderOptionsWidget
-from color_options_widget import ColorOptionsWidget
+from .toolbar_options_widget import ToolBarOptionsWidget 
+from .render_options_widget import RenderOptionsWidget
+from .color_options_widget import ColorOptionsWidget
 from ost.gui.scene.scene_observer_impl import SceneObserverImpl
-from map_level_widget import AdditionalSettingsWidget
-from scene_selection_helper import SelHelper
+from .map_level_widget import AdditionalSettingsWidget
+from .scene_selection_helper import SelHelper
 
 class InspectorWidget(ToolBarOptionsWidget):
   ICONS_PATH = os.path.join(ost.GetSharedDataPath(), "scene", "icons/")

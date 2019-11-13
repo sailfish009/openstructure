@@ -177,7 +177,7 @@ if (ENABLE_STATIC AND UNIX AND NOT APPLE)
 endif()
 
 # Python needed before Boost
-find_package(Python 2.4 REQUIRED)
+find_package(Python 3.6 REQUIRED)
 # Split version string
 string(REPLACE "." ";" _python_version_list ${PYTHON_VERSION})
 list(GET _python_version_list 0 PYTHON_VERSION_MAJOR)

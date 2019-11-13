@@ -226,7 +226,7 @@ def _ParseAmberForceField(filename):
       if not keyword in keywords: continue
       # loop until empty line found
       ff_dict[keyword] = []
-      line = in_file.next()
+      line = next(in_file)
       while len(line.strip()) > 0:
         # check for warnings
         if 'ATTN' in line:
@@ -286,7 +286,7 @@ def _ParseAmberForceField(filename):
           epsilon = float(s[1])
           ff_dict[keyword].append([atype, Rvdw, epsilon])
         # next...
-        line = in_file.next()
+        line = next(in_file)
   return ff_dict
 ###############################################################################
 

@@ -103,12 +103,12 @@ def ParseBlastOutput(string, seqid_thres=0, evalue_thres=float("infinity")):
         aln=seq.CreateAlignment(query_seq, hit_seq)
         return AlignedPatch(aln, bit_score, score, evalue, seqid)
 
-    except Exception, e:
-      print str(e), query_seq, hit_seq
+    except Exception as e:
+      print(str(e), query_seq, hit_seq)
 
   try:
     doc=minidom.parseString(string)
-  except Exception, e:
+  except Exception as e:
     ost.LogError('Error while parsing BLAST output: %s' % str(e))
     return None
   hits=[]

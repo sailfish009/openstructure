@@ -5,8 +5,8 @@ from ost import io, mol, settings
 try:
   from ost.mol.alg.qsscoring import *
 except ImportError:
-  print "Failed to import qsscoring. Happens when numpy or scipy missing. " \
-        "Ignoring test_qsscoring.py tests."
+  print("Failed to import qsscoring. Happens when numpy or scipy missing. " \
+        "Ignoring test_qsscoring.py tests.")
   sys.exit(0)
 
 from ost.mol.alg import lDDTSettings
@@ -605,7 +605,7 @@ class TestQSscore(unittest.TestCase):
     cn2 = set([c for cg in qs_ent_2.chem_groups for c in cg])
     cm_names_1 = list()
     cm_names_2 = list()
-    for cg1, cg2 in qs_scorer.chem_mapping.iteritems():
+    for cg1, cg2 in qs_scorer.chem_mapping.items():
       ch_ref = qs_scorer.ent_to_cm_1.FindChain(cg1[0])
       self.assertEqual(ch_ref.residue_count, ch_ref.atom_count)
       self.assertGreaterEqual(ch_ref.residue_count, 5)
@@ -646,12 +646,12 @@ class TestQSscore(unittest.TestCase):
                      cm_names_2)
     # check chain_mapping
     # (all chains of ent with less chains mapped, each only once, chem_map)
-    chm_names_1 = qs_scorer.chain_mapping.keys()
-    chm_names_2 = qs_scorer.chain_mapping.values()
+    chm_names_1 = list(qs_scorer.chain_mapping.keys())
+    chm_names_2 = list(qs_scorer.chain_mapping.values())
     self.assertEqual(len(chm_names_1), min(len(cm_names_1), len(cm_names_2)))
     self.assertEqual(len(set(chm_names_1)), len(chm_names_1))
     self.assertEqual(len(set(chm_names_2)), len(chm_names_2))
-    for cg1, cg2 in qs_scorer.chem_mapping.iteritems():
+    for cg1, cg2 in qs_scorer.chem_mapping.items():
       for ch_name in cg1:
         if ch_name in qs_scorer.chain_mapping:
           self.assertTrue(qs_scorer.chain_mapping[ch_name] in cg2)
@@ -678,10 +678,10 @@ if __name__ == "__main__":
   try:
     settings.Locate(('clustalw', 'clustalw2'))
   except:
-    print "Could not find ClustalW. Ignoring test_qsscoring.py tests."
+    print("Could not find ClustalW. Ignoring test_qsscoring.py tests.")
     sys.exit(0)
   from ost import testutils
   if testutils.SetDefaultCompoundLib():
     testutils.RunTests()
   else:
-    print 'No compound library available. Ignoring test_qsscoring.py tests.'
+    print('No compound library available. Ignoring test_qsscoring.py tests.')

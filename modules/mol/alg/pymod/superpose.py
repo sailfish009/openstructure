@@ -110,13 +110,13 @@ def MatchResidueByNum(ent_a, ent_b, atoms='all'):
       ## check residues & copy to views
       try:
         while True:
-          r_a=residues_a.next()
-          r_b=residues_b.next()
+          r_a=next(residues_a)
+          r_b=next(residues_b)
           while r_a.number!=r_b.number:
             while r_a.number<r_b.number:
-              r_a=residues_a.next()
+              r_a=next(residues_a)
             while r_b.number<r_a.number:
-              r_b=residues_b.next()
+              r_b=next(residues_b)
           assert r_a.number==r_b.number
           result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)
       except StopIteration:
@@ -125,7 +125,7 @@ def MatchResidueByNum(ent_a, ent_b, atoms='all'):
       ## iterate one list of residues, search in other list
       try:
         while True:
-          r_a=residues_a.next()
+          r_a=next(residues_a)
           r_b=chain_b.FindResidue(r_a.number)
           if r_b.IsValid():
             result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)

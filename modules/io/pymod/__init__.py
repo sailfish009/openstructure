@@ -16,7 +16,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
-import os, tempfile, ftplib, httplib
+import os, tempfile, ftplib, http.client
 
 from _ost_io import *
 from ost import mol, geom, conop, seq

@@ -22,8 +22,8 @@ from ost import gui
 from ost import gfx
 from ost import mol
 from PyQt5 import QtCore, QtGui, QtWidgets
-from color_select_widget import ColorSelectWidget
-from gradient_preset_widget import GradientPresetWidget
+from .color_select_widget import ColorSelectWidget
+from .gradient_preset_widget import GradientPresetWidget
 
 #Gradient Editor
 class GradientEditor(QtWidgets.QWidget):

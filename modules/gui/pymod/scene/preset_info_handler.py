@@ -21,7 +21,7 @@
 from ost import gui
 from ost import gfx
 from ost import info
-from immutable_preset_info_handler import ImmutablePresetInfoHandler
+from .immutable_preset_info_handler import ImmutablePresetInfoHandler
 
 #Preset Info Handler
 class PresetInfoHandler(ImmutablePresetInfoHandler):

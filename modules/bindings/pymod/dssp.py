@@ -116,9 +116,9 @@ def AssignDSSP(ent, pdb_path="", extract_burial_status=False, tmp_dir=None,
   try:
     LoadDSSP(temp_dssp_path, ent, extract_burial_status,
              entity_saved)
-  except Exception, e:
+  except Exception as e:
     # clean up
-    print "Exception in DSSP:", e
+    print("Exception in DSSP:", e)
     _Cleanup(pdb_path, temp_dssp_path, entity_saved)
     raise RuntimeError(e)
 
@@ -203,8 +203,8 @@ def LoadDSSP(file_name, model, extract_burial_status=False,
               residue.SetStringProp("burial_status", 'b')
             else:
               residue.SetStringProp("burial_status", 'e')
-      except Exception, e:
-        print "ERROR:",e
+      except Exception as e:
+        print("ERROR:",e)
         continue
 
       rtype=line[16:17]

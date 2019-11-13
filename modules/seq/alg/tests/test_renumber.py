@@ -167,6 +167,6 @@ if __name__ == "__main__":
   # test renumbering
   # test if clustalw package is available on system, otherwise ignore tests
   if not clustalw_path:
-    print "Could not find clustalw executable: ignoring some renumber unit tests"
+    print("Could not find clustalw executable: ignoring some renumber unit tests")
   from ost import testutils
   testutils.RunTests()

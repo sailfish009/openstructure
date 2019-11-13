@@ -48,7 +48,7 @@ def _CreateAndCopy(in_name, outdir):
   if not os.path.exists(out_dir):
     _MkDir(out_dir)
   if _RequireCopy(in_name, out_name):
-    print 'cp %s %s' % (in_name, out_name)
+    print('cp %s %s' % (in_name, out_name))
     os.system('cp %s %s' % (in_name, out_name))
 
 def _MkDir(dirname):
@@ -99,7 +99,7 @@ sphinx_bin=settings.Locate(['sphinx-build', 'sphinx-build-2.6','sphinx-build-2.7
 if opts.html:
   cmd='%s %s -b html -c %s %s %s' % (sphinx_bin, opt_str, 
                                      'doc/conf', 'doc/source', 'doc/build/html')
-  print cmd
+  print(cmd)
   _CheckCall(cmd, shell=True)
 
 if opts.doctest:

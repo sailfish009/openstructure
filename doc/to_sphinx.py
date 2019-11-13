@@ -6,9 +6,9 @@ class_name=parts[-1]
 __import__(module, globals(), locals())
 mod=sys.modules[module]
 the_class=getattr(mod, class_name)
-print '.. currentmodule:: %s' % module
-print ''
-print '.. class:: %s' % class_name
+print('.. currentmodule:: %s' % module)
+print('')
+print('.. class:: %s' % class_name)
 
 def _arg_type(arg_type):
   if arg_type not in ('str', 'int', 'bool', 'float', 'None'):
@@ -63,10 +63,10 @@ def parse_signature(signature):
     return Method(method_match.groupdict()['name'], 
                   _arg_type(method_match.groupdict()['rtype']), 
                   args[1:], opt_args)
-  print signature, 'not matched'
+  print(signature, 'not matched')
 
 if '--no-derived' in sys.argv:
-  members=the_class.__dict__.keys()
+  members=list(the_class.__dict__.keys())
 else:
   members=dir(the_class)
 for m in members:
@@ -75,4 +75,4 @@ for m in members:
   member_doc=getattr(the_class, m).__doc__
   if member_doc:
     method=parse_signature(member_doc.split('\n')[1])
-    print method.to_sphinx()
+    print(method.to_sphinx())

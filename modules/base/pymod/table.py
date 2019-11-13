@@ -4,7 +4,7 @@ import math
 from ost import stutil
 import itertools
 import operator
-import cPickle
+import pickle
 import weakref
 from ost import LogError, LogWarning, LogInfo, LogVerbose
 
@@ -228,7 +228,7 @@ class Table(object):
     self.rows=[]    
     if len(kwargs)>=0:
       if not col_names:
-        self.col_names=[v for v in kwargs.keys()]
+        self.col_names=[v for v in list(kwargs.keys())]
       if not self.col_types:
         self.col_types=['string' for u in range(len(self.col_names))]
       if len(kwargs)>0:
@@ -249,8 +249,8 @@ class Table(object):
       return None
     
     short2long = {'s' : 'string', 'i': 'int', 'b' : 'bool', 'f' : 'float'}
-    allowed_short = short2long.keys()
-    allowed_long = short2long.values()
+    allowed_short = list(short2long.keys())
+    allowed_long = list(short2long.values())
     
     type_list = []
     
@@ -359,7 +359,7 @@ class Table(object):
     if ty=='string':
       return str(value)
     if ty=='bool':
-      if isinstance(value, str) or isinstance(value, unicode):
+      if isinstance(value, str) or isinstance(value, str):
         if value.upper() in ('FALSE', 'NO',):
           return False
         return True
@@ -525,11 +525,11 @@ Statistics for column %(col)s
              data items is different for different columns.
     '''
     # get column indices
-    idxs = [self.GetColIndex(k) for k in d.keys()]
+    idxs = [self.GetColIndex(k) for k in list(d.keys())]
     
     # convert scalar values to list
     old_len = None
-    for k,v in d.iteritems():
+    for k,v in d.items():
       if IsScalar(v):
         v = [v]
         d[k] = v
@@ -540,7 +540,7 @@ Statistics for column %(col)s
                          "for all columns in %s"%str(d))
     
     # convert column based dict to row based dict and create row and add data
-    for i,data in enumerate(zip(*d.values())):
+    for i,data in enumerate(zip(*list(d.values()))):
       new_row = [None for a in range(len(self.col_names))]
       for idx,v in zip(idxs,data):
         new_row[idx] = self._Coerce(v, self.col_types[idx])
@@ -815,7 +815,7 @@ Statistics for column %(col)s
         if not func(row):
           matches=False
           break
-      for key, val in kwargs.iteritems():
+      for key, val in kwargs.items():
         if row[self.GetColIndex(key)]!=val:
           matches=False
           break
@@ -947,13 +947,13 @@ Statistics for column %(col)s
       stream=open(stream_or_filename, 'rb')
     else:
       stream=stream_or_filename
-    return cPickle.load(stream)
+    return pickle.load(stream)
 
   @staticmethod
   def _GuessFormat(filename):
     try:
       filename = filename.name
-    except AttributeError, e:
+    except AttributeError as e:
       pass
     if filename.endswith('.csv'):
       return 'csv'
@@ -1085,7 +1085,7 @@ Statistics for column %(col)s
       for col1, col2 in zip(tab['col1'], tab['col2']):
         print col1, col2
     """
-    return zip(*[self[arg] for arg in args])
+    return list(zip(*[self[arg] for arg in args]))
 
   def Plot(self, x, y=None, z=None, style='.', x_title=None, y_title=None,
            z_title=None, x_range=None, y_range=None, z_range=None,
@@ -1561,7 +1561,7 @@ Statistics for column %(col)s
                          'specify the parameter rows with a list of row indices '\
                          '(max 7)')
       else:
-        rows=range(len(self.rows))
+        rows=list(range(len(self.rows)))
     else:
       if not isinstance(rows,list):
         rows=[rows]
@@ -2197,7 +2197,7 @@ Statistics for column %(col)s
   def _SavePickle(self, stream):
     if not hasattr(stream, 'write'):
       stream=open(stream, 'wb')
-    cPickle.dump(self, stream, cPickle.HIGHEST_PROTOCOL)
+    pickle.dump(self, stream, pickle.HIGHEST_PROTOCOL)
 
   def _SaveHTML(self, stream_or_filename):
     def _escape(s):
@@ -2459,7 +2459,7 @@ Statistics for column %(col)s
       a = self.GetNumpyMatrix(*args)
       
       if len(kwargs)!=0:
-        if kwargs.has_key('weights'):
+        if 'weights' in kwargs:
           w = self.GetNumpyMatrix(kwargs['weights'])
           b = np.multiply(b,w)
           a = np.multiply(a,w)
@@ -3048,7 +3048,7 @@ Statistics for column %(col)s
     num_rows = len(tab.rows)
     for i in range(0,num_rows):
       row = tab.rows[i]
-      data = dict(zip(tab.col_names,row))
+      data = dict(list(zip(tab.col_names,row)))
       self.AddRow(data, overwrite)
     
 
@@ -3133,7 +3133,7 @@ def Merge(table1, table2, by, only_matching=False):
       raise ValueError('duplicate key "%s" in second table' % (str(key)))
     common2[key]=row
   new_tab=Table(table1.col_names+col_names, table1.col_types+col_types)
-  for k, v in common1.iteritems():
+  for k, v in common1.items():
     row=v+[None for i in range(len(table2.col_names)-len(common2_indices))]
     matched=False
     if k in common2:
@@ -3146,7 +3146,7 @@ def Merge(table1, table2, by, only_matching=False):
     new_tab.AddRow(row)
   if only_matching:
     return new_tab
-  for k, v in common2.iteritems():
+  for k, v in common2.items():
     if not k in common1:
       v2=[v[i] for i in new_index]
       row=[None for i in range(len(table1.col_names))]+v2

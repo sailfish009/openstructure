@@ -3,8 +3,8 @@ from ost import gfx
 import os
 import ost
 from PyQt5 import QtCore, QtWidgets, QtGui
-from immutable_gradient_info_handler import ImmutableGradientInfoHandler
-from gradient_info_handler import GradientInfoHandler
+from .immutable_gradient_info_handler import ImmutableGradientInfoHandler
+from .gradient_info_handler import GradientInfoHandler
 
 class GradientListModel(QtCore.QAbstractListModel):
   
@@ -57,11 +57,11 @@ class GradientListModel(QtCore.QAbstractListModel):
   def LoadGradientFromInfo(self):
     if self.immutable_infoh_:
       qgradients = self.immutable_infoh_.GetQGradients()
-      for k, v in qgradients.iteritems():
+      for k, v in qgradients.items():
         self.AddItem(k, v, self.GetLastRow(), False, False)
     
     qgradients = self.infoh_.GetQGradients()
-    for k, v in qgradients.iteritems():
+    for k, v in qgradients.items():
       self.AddItem(k, v, self.GetLastRow(), True, False)
 
   def GetGradient(self, model_index):

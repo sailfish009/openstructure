@@ -39,9 +39,9 @@ void log_message_a(MessageWidget* message_widget, const QString& message, QMessa
 void log_message_b(MessageWidget * message_widget, object py_object)
 {
   if(py_object.ptr() != Py_None){
-    if(PyObject_IsInstance(py_object.ptr(), (PyObject*)&PyString_Type)){
-    String message = extract < std::string > (py_object);
-    message_widget->LogMessage(QString(message.c_str()));
+    if(PyObject_IsInstance(py_object.ptr(), (PyObject*)&PyUnicode_Type)){
+      String message = extract < std::string > (py_object);
+      message_widget->LogMessage(QString(message.c_str()));
     }
     else if(QStandardItem* item = get_cpp_qobject<QStandardItem>(py_object)){
       message_widget->LogMessage(item);

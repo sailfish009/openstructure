@@ -27,7 +27,7 @@ try:
 except ImportError:
   _img_present=False
   pass
-from scene_selection_helper import SelHelper
+from .scene_selection_helper import SelHelper
 
 #Wireframe Options
 class WireframeWidget(QtWidgets.QWidget):

@@ -246,16 +246,16 @@ def _RunCAD(tmp_dir, mode, cad_bin_path, old_regime):
 def _HasInsertionCodes(model, reference):
   for r in model.residues:
     if r.GetNumber().GetInsCode() != "\0":
-      print r
+      print(r)
       return True
   for r in reference.residues:
     if r.GetNumber().GetInsCode() != "\0":
-      print r
+      print(r)
       return True
   return False
 
 def _MapLabels(model, cad_results, label):
-  for k,v in cad_results.localAA.iteritems():
+  for k,v in cad_results.localAA.items():
     r = model.FindResidue(k[0], k[1])
     if not r.IsValid():
       raise RuntimeError("Failed to map cadscore on residues: " +

@@ -86,7 +86,7 @@ def _SetupFiles(entity, selection):
   # select only heavy atoms if no_hydrogens is true
   entity_view=entity.Select(selection)
   if not entity_view.IsValid():
-    raise RuntimeError, "Could not create view for selection (%s)"%(selection)
+    raise RuntimeError("Could not create view for selection (%s)"%(selection))
 
   # write entity to tmp file
   tmp_file_name=os.path.join(tmp_dir_name,"entity")
@@ -118,7 +118,7 @@ def _ParseAreaFile(entity, selection, file, asa_prop, esa_prop):
   # shift first line
   area_lines = area_lines[1:]
   if view.GetAtomCount() != len(area_lines):
-      raise RuntimeError, "Atom count (%d) unequeal to number of atoms in area file (%d)" % (view.GetAtomCount(), len(area_lines))
+      raise RuntimeError("Atom count (%d) unequeal to number of atoms in area file (%d)" % (view.GetAtomCount(), len(area_lines)))
   for l in area_lines:
       atom_no, sesa, sasa = l.split()
       a = view.atoms[int(atom_no)]
@@ -154,7 +154,7 @@ def _RunMSMS(command):
 
   #check for successful completion of msms
   if proc.returncode!=0:
-    print "WARNING: msms error\n", stdout_value
+    print("WARNING: msms error\n", stdout_value)
     raise MsmsProcessError(proc.returncode, command)
 
   return stdout_value

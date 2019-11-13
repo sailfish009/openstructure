@@ -139,10 +139,10 @@ class HBondDonor:
     _donor=res.FindAtom(donor_name).handle
     _hydrogen=res.FindAtom(hydrogen_name).handle
     if not _donor.IsValid():
-      if verbose:print 'Could not find '+donor_name+' in residue '+str(res)
+      if verbose:print('Could not find '+donor_name+' in residue '+str(res))
       return
     if not _hydrogen.IsValid():
-      if verbose:print 'Could not find '+hydrogen_name+' in residue '+str(res)
+      if verbose:print('Could not find '+hydrogen_name+' in residue '+str(res))
       return
     return cls(_donor,_hydrogen)
   
@@ -164,11 +164,11 @@ class HBondAcceptor:
     _acceptor=res.FindAtom(acceptor_name).handle
     _antecedent_list=_ost.mol.AtomHandleList([res.FindAtom(name).handle for name in antecedent_name_list])
     if not _acceptor.IsValid():
-      if verbose:print 'Could not find '+acceptor_name+' in residue '+str(res)
+      if verbose:print('Could not find '+acceptor_name+' in residue '+str(res))
       return
     for i,a in enumerate(_antecedent_list):
       if not a.IsValid():
-        if verbose:print 'Could not find '+antecedent_name_list[i]+' in residue '+str(res)
+        if verbose:print('Could not find '+antecedent_name_list[i]+' in residue '+str(res))
         return
     return cls(_acceptor,_antecedent_list)
   
@@ -223,13 +223,13 @@ def GetHbondDonorAcceptorList(eh,hbond_donor_acceptor_dict={},verbose=True):
   These names are given in a dictionary, which defaults to CHARMM.
   """
   if not hbond_donor_acceptor_dict:
-    print 'Using default CHARMM atom namings'
+    print('Using default CHARMM atom namings')
     hbond_donor_acceptor_dict=BuildCHARMMHBondDonorAcceptorDict()
   donor_list=[]
   acceptor_list=[]
   for r in eh.residues:
     if not r.name in hbond_donor_acceptor_dict:
-      print 'donors and acceptors for',r,'are not defined in the dictionary and will not be included'
+      print('donors and acceptors for',r,'are not defined in the dictionary and will not be included')
       continue
     res_da_dict=hbond_donor_acceptor_dict[r.name]
     for acceptor in res_da_dict.acceptors:
@@ -274,10 +274,10 @@ def GetHbondListFromTraj(t,eh,cutoff=0.7,stride=1,swap=False,donor_swap_dict={},
   """
   if swap:
     if not donor_swap_dict:
-      print 'use of standard CHARMM HBond donor swap dictionary'
+      print('use of standard CHARMM HBond donor swap dictionary')
       donor_swap_dict=BuildCHARMMHBondDonorEquivalenceDict()
     if not acceptor_swap_dict:
-      print 'use of standard CHARMM HBond acceptor swap dictionary'  
+      print('use of standard CHARMM HBond acceptor swap dictionary')  
       acceptor_swap_dict=BuildCHARMMHBondAcceptorEquivalenceDict()
   [donor_list,acceptor_list]=GetHbondDonorAcceptorList(eh,hbond_donor_acceptor_dict,verbose)
   hb_list=[]
@@ -339,10 +339,10 @@ def GetEquivalentHBonds(ref_hbond_list,eh,swap=False,donor_swap_dict={},acceptor
       hbond_list.append(set([HBond(donor,acceptor)]))
   else:
     if not donor_swap_dict:
-      print 'use of standard CHARMM HBond donor swap dictionary'
+      print('use of standard CHARMM HBond donor swap dictionary')
       donor_swap_dict=BuildCHARMMHBondDonorEquivalenceDict()
     if not acceptor_swap_dict:
-      print 'use of standard CHARMM HBond acceptor swap dictionary'  
+      print('use of standard CHARMM HBond acceptor swap dictionary')  
       acceptor_swap_dict=BuildCHARMMHBondAcceptorEquivalenceDict()
     for hbond in ref_hbond_list:
       res1=eh.FindResidue(hbond.donor.heavy_atom.chain.name,hbond.donor.heavy_atom.residue.number.num)
@@ -374,7 +374,7 @@ def CalculateHBondScore(ref_eh,eh2,ref_eh2=None,hbond_donor_acceptor_dict={},swa
   else:hbond_list1=GetHbondListFromView(ref_eh,hbond_donor_acceptor_dict,verbose)
   nbonds=float(len(hbond_list1))
   if nbonds==0:
-    print 'No HBonds in reference view'
+    print('No HBonds in reference view')
     return None
   hbond_list2=GetEquivalentHBonds(hbond_list1,eh2,swap,donor_swap_dict,acceptor_swap_dict,verbose)
   c=0
@@ -392,19 +392,19 @@ def AnalyzeHBondScore(ref_eh,t,eh2,ref_eh2=None,hbond_donor_acceptor_dict={},swa
   """
   if swap:
     if not donor_swap_dict:
-      print 'use of standard CHARMM HBond donor swap dictionary'
+      print('use of standard CHARMM HBond donor swap dictionary')
       donor_swap_dict=BuildCHARMMHBondDonorEquivalenceDict()
     if not acceptor_swap_dict:
-      print 'use of standard CHARMM HBond acceptor swap dictionary'  
+      print('use of standard CHARMM HBond acceptor swap dictionary')  
       acceptor_swap_dict=BuildCHARMMHBondAcceptorEquivalenceDict()
   if ref_eh2:hbond_list1=GetHbondListBetweenViews(ref_eh,ref_eh2,hbond_donor_acceptor_dict,verbose)
   elif type(ref_eh)==list:hbond_list1=ref_eh
   else:hbond_list1=GetHbondListFromView(ref_eh,hbond_donor_acceptor_dict,verbose)
   nbonds=float(len(hbond_list1))
   if nbonds==0:
-    print 'No HBonds in reference view'
+    print('No HBonds in reference view')
     return None
-  print 'number of hbonds in ref_eh:',nbonds
+  print('number of hbonds in ref_eh:',nbonds)
   hbond_list2=GetEquivalentHBonds(hbond_list1,eh2,swap,donor_swap_dict,acceptor_swap_dict,verbose)
   if last==-1:last=t.GetFrameCount()
   score=FloatList()
@@ -423,10 +423,10 @@ def AnalyzeHBondScore(ref_eh,t,eh2,ref_eh2=None,hbond_donor_acceptor_dict={},swa
 def GetHBondListIntersection(ref_hbond_list,ref_eh,hbond_list,swap=False,donor_swap_dict={},acceptor_swap_dict={}):
   if swap:
     if not donor_swap_dict:
-      print 'use of standard CHARMM HBond donor swap dictionary'
+      print('use of standard CHARMM HBond donor swap dictionary')
       donor_swap_dict=BuildCHARMMHBondDonorEquivalenceDict()
     if not acceptor_swap_dict:
-      print 'use of standard CHARMM HBond acceptor swap dictionary'  
+      print('use of standard CHARMM HBond acceptor swap dictionary')  
       acceptor_swap_dict=BuildCHARMMHBondAcceptorEquivalenceDict()
   hbond_list=GetEquivalentHBonds(hbond_list,ref_eh,swap,donor_swap_dict,acceptor_swap_dict)
   ref_hbond_list=GetEquivalentHBonds(ref_hbond_list,ref_eh,swap,donor_swap_dict,acceptor_swap_dict)

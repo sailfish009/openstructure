@@ -30,10 +30,10 @@ except ImportError:
   pass
 
 from PyQt5 import QtCore, QtWidgets, QtWidgets
-from scene_selection_helper import SelHelper
-from gradient_editor_widget import GradientEditor
-from uniform_color_widget import UniformColorWidget
-from combo_options_widget import ComboOptionsWidget
+from .scene_selection_helper import SelHelper
+from .gradient_editor_widget import GradientEditor
+from .uniform_color_widget import UniformColorWidget
+from .combo_options_widget import ComboOptionsWidget
 
 class ColorOptionsWidget(ComboOptionsWidget):
   def __init__(self, parent=None):

@@ -102,7 +102,7 @@ if __name__ == "__main__":
   try:
     blastpath=settings.Locate(('blastp','blastall'))
   except(settings.FileNotFound):
-    print "Could not find blast executable: ignoring unit tests"
+    print("Could not find blast executable: ignoring unit tests")
     sys.exit(0)
   from ost import testutils
   testutils.RunTests()

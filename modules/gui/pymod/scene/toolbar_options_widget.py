@@ -100,7 +100,7 @@ class ToolBarOptionsWidget(QtWidgets.QWidget):
      This abstract method must be implemented by all subclasses. 
      It can be used to do something ;-) whenever the combobox changes its value.
     """
-    raise NotImplementedError, "Subclasses must define OnComboChange()"
+    raise NotImplementedError("Subclasses must define OnComboChange()")
   
   def DoResize(self):
     item = self.__GetCurrentWidget()
