@@ -189,7 +189,7 @@ home = os.getenv('HOME') or os.getenv('USERPROFILE')
 _ostrc=os.path.join(home, '.ostrc')
 if os.path.exists(_ostrc):
   try:
-    exec(open(_ostrc))
+    exec(compile(open(_ostrc).read(), _ostrc, 'exec'))
   except Exception as e:
     print(e)
 else:
