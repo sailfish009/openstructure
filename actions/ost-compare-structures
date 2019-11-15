@@ -513,7 +513,7 @@ def _RevertChainNames(ent):
             used_names[original_name] += 1
     for chain in ent.chains:
         editor.RenameChain(chain, reverted_chains[chain.name[:-len(suffix)]])
-    rev_out = ["%s -> %s" % (on, nn) for on, nn in reverted_chains.iteritems()]
+    rev_out = ["%s -> %s" % (on, nn) for on, nn in reverted_chains.items()]
     ost.LogInfo("Reverted chains: %s" % ", ".join(rev_out))
 
 
