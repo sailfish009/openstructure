@@ -2274,7 +2274,7 @@ Statistics for column %(col)s
 
   def _SaveCSV(self, stream, sep):
     if not hasattr(stream, 'write'):
-      stream=open(stream, 'wb')
+      stream=open(stream, 'w')
 
     writer=csv.writer(stream, delimiter=sep)
     writer.writerow(['%s' % n for n in self.col_names])
