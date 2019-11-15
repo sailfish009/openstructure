@@ -1043,8 +1043,20 @@ Statistics for column %(col)s
       sign=1
     key_index=self.GetColIndex(by)
     def _key_cmp(lhs, rhs):
-      return sign*cmp(lhs[key_index], rhs[key_index])
-    self.rows=sorted(self.rows, _key_cmp)
+      a = lhs[key_index]
+      b = rhs[key_index]
+      # mimic behaviour of the cmp function from Python2 that happily
+      # compared None values
+      if a is None or b is None:
+        if a is None and b is not None:
+          return -1 * sign
+        if b is None and a is not None:
+          return 1 * sign
+        return 0
+      return sign*((a > b) - (a < b))
+
+    import functools
+    self.rows=sorted(self.rows, key=functools.cmp_to_key(_key_cmp))
     
   def GetUnique(self, col, ignore_nan=True):
     """
