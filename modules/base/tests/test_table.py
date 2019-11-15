@@ -861,7 +861,7 @@ class TestTable(unittest.TestCase):
     self.CompareDataFromDict(tab_loaded_fname_pickle, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
 
     # read from disc: ost
-    in_stream_ost = open("saveloadtable_filename_out.tab", 'rb')
+    in_stream_ost = open("saveloadtable_filename_out.tab", 'r')
     tab_loaded_stream_ost = Table.Load(in_stream_ost)
     in_stream_ost.close()
     tab_loaded_fname_ost = Table.Load('saveloadtable_filename_out.tab')
