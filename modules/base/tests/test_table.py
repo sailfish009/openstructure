@@ -931,7 +931,7 @@ class TestTable(unittest.TestCase):
     stream = io.StringIO()
     tab.Save(stream, format='context')
     self.assertEqual(stream.getvalue(), 
-                     '\\starttable[l|r|i3r|]\n\\HL\n\\NC \\bf first\\NC \\bf second\\NC \\bf third \\AR\\HL\n\\NC x\\NC 3\\NC --- \\AR\n\\NC foo\NC ---\NC 2.200 \\AR\n\\NC ---\\NC 9\\NC 3.300 \\AR\n\\HL\n\\stoptable')
+                     '\\starttable[l|r|i3r|]\n\\HL\n\\NC \\bf first\\NC \\bf second\\NC \\bf third \\AR\\HL\n\\NC x\\NC 3\\NC --- \\AR\n\\NC foo\\NC ---\\NC 2.200 \\AR\n\\NC ---\\NC 9\\NC 3.300 \\AR\n\\HL\n\\stoptable')
 
   def testSaveLoadTableCSV(self):
     tab = self.CreateTestTable()
