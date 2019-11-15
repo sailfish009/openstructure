@@ -15,10 +15,11 @@ def Median(xs):
   if len(xs)==0:
     raise RuntimeError("Can't calculate median of empty sequence")
   sorted_xs=sorted(xs)
+  central_idx = int((len(xs)-1)/2) 
   if (len(xs) % 2)==0:
-    return (sorted_xs[(len(xs)-1)/2]+sorted_xs[(len(xs)-1)/2+1])/2.0
+    return (sorted_xs[central_idx]+sorted_xs[central_idx+1])/2.0
   else:
-    return sorted_xs[(len(xs)-1)/2]
+    return sorted_xs[central_idx]
 
 def StdDev(xs):
   """
