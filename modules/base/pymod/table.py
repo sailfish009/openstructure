@@ -861,7 +861,7 @@ Statistics for column %(col)s
     """
 
     try:
-      from table_selector import TableSelector
+      from .table_selector import TableSelector
     except:
       raise ImportError("Tried to import from the file table_selector.py, but could not find it!")
 
