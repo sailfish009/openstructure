@@ -2002,7 +2002,7 @@ Statistics for column %(col)s
     
     .. code-block:: python
 
-      values[min(len(values), int(round(len(values)*nth/100+0.5)-1))]
+      values[min(len(values)-1, int(math.floor(len(values)*nth/100.0)))]
 
     where values are the sorted values of *col* not equal to ''None''
 
@@ -2033,7 +2033,9 @@ Statistics for column %(col)s
     percentiles=[]
     
     for nth in nths:
-      p=vals[min(len(vals)-1, int(round(len(vals)*nth/100.0+0.5)-1))]
+      # rounding behaviour between Python2 and Python3 changed....
+      # p=vals[min(len(vals)-1, int(round(len(vals)*nth/100.0+0.5)-1))]
+      p=vals[min(len(vals)-1, int(math.floor(len(vals)*nth/100.0)))]
       percentiles.append(p)
     return percentiles
 
