@@ -60,8 +60,7 @@ class RemoteRepository:
       raise IOError('Could not load %s from %s (status code %d, url %s)' \
                     % (id, self.name, status, remote_url))
     tmp_file = tempfile.NamedTemporaryFile(suffix=tmp_file_suffix)
-    contents = ''.join(connection)
-    tmp_file.write(contents)
+    tmp_file.write(connection.read())
     tmp_file.flush()
     return tmp_file
 
