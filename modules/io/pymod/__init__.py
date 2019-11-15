@@ -18,7 +18,7 @@
 #------------------------------------------------------------------------------
 import os, tempfile, ftplib, http.client
 
-from _ost_io import *
+from ._ost_io import *
 from ost import mol, geom, conop, seq
 
 profiles=None

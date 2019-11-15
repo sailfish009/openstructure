@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 import traceback
-from _ost_gfx import *
+from ._ost_gfx import *
 
 class PyGfxObj(GfxObj):
   def __init__(self,name):

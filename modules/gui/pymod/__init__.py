@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 import ost.gui.trajectory_viewer
-from _ost_gui import *
+from ._ost_gui import *
 import sip
 
 

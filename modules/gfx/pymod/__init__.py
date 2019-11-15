@@ -16,7 +16,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
-from _ost_gfx import *
+from ._ost_gfx import *
 from .py_gfx_obj import PyGfxObj
 
 WHITE=RGB(1.0,1.0,1.0)

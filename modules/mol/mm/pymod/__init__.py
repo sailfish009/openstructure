@@ -18,7 +18,7 @@
 #------------------------------------------------------------------------------
 
 import os.path
-from _ost_mol_mm import *
+from ._ost_mol_mm import *
 from . import antechamber
 import ost
 

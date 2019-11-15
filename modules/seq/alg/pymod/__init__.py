@@ -1,4 +1,4 @@
-from _ost_seq_alg import *
+from ._ost_seq_alg import *
 from ost.seq.alg.mat import *
 
 def ValidateSEQRESAlignment(aln, chain=None):
