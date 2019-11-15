@@ -54,7 +54,7 @@ PythonInterpreter::PythonInterpreter():
   main_module_ = bp::import("__main__");
   main_namespace_ = bp::extract<bp::dict>(main_module_.attr("__dict__"));
   main_namespace_["os"]=bp::import("os");
-  main_namespace_["__builtin__"]=bp::import("__builtin__");
+  main_namespace_["builtins"]=bp::import("builtins");
   main_namespace_["keyword"]=bp::import("keyword");
   bp::object code=bp::import("code");
   compile_command_=code.attr("compile_command");

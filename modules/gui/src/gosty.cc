@@ -185,14 +185,18 @@ int init_python_interpreter()
   String python_loc=setup_python_search_path(root, py);
   //py.RunCommand("from ost import *");
   //py.RunCommand("gui_mode=True");
-  std::stringstream cmd;
-  cmd << "execfile('" << python_loc;
+  std::stringstream script_path;
+  script_path << python_loc;
 #ifdef _MSC_VER
-  cmd << "\\ost\\gui\\";
+  script_path << "\\ost\\gui\\";
 #else  
-  cmd << "/ost/gui/";
+  script_path << "/ost/gui/";
 #endif
-  cmd << "gosty_startup.py')";
+  script_path << "gosty_startup.py";
+
+  std::stringstream cmd;
+  cmd << "exec(compile(open('" << script_path.str() << "').read(),'";
+  cmd << script_path.str() << "', 'exec'))";
   py.RunCommand(QString::fromStdString(cmd.str()));
   return 0;
 }
