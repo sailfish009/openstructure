@@ -72,6 +72,7 @@ void export_Extent()
     .def("__iter__",&WrapExtentIterator::Iter,
 	 return_internal_reference<>() )
     .def("next",&WrapExtentIterator::Next)
+    .def("__next__",&WrapExtentIterator::Next)
   ;
 
   class_<ExtentIterator>("ExtentIterator", init<const Extent&,optional<unsigned int> >() )

@@ -328,15 +328,19 @@ void export_sequence()
   ;*/
   class_<RegionRangeIter>("RegionRangeIter", no_init)
     .def("next", &RegionRangeIter::next)
+    .def("__next__", &RegionRangeIter::next)
   ;
     class_<RevRegionRangeIter>("RevRegionRangeIter", no_init)
     .def("next", &RevRegionRangeIter::next)
+    .def("__next__", &RevRegionRangeIter::next)
   ;
   class_<ConstSeqListIter>("ConstSeqListIter", no_init)
     .def("next", &ConstSeqListIter::next)
+    .def("__next__", &ConstSeqListIter::next)
   ;
   class_<SeqListIter>("SeqListIter", no_init)
     .def("next", &SeqListIter::next)
+    .def("__next__", &SeqListIter::next)
   ;
   class_<AlignmentHandle>("AlignmentHandle", init<>())
     .def("GetCount", &AlignmentHandle::GetCount)
