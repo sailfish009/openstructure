@@ -1468,7 +1468,8 @@ Statistics for column %(col)s
       max_val = chr(0)
     max_idx = None
     for i in range(0, len(self.rows)):
-      if self.rows[i][idx]>max_val:
+      val = self.rows[i][idx]
+      if val and val > max_val:
         max_val = self.rows[i][idx]
         max_idx = i
     return max_val, max_idx
