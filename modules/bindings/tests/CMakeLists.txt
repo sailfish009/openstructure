@@ -6,6 +6,7 @@ set(OST_BINDINGS_UNIT_TESTS
   test_kclust.py
   test_naccess.py
   test_cadscore.py
+  test_tmtools.py
 )
 
 ost_unittest(MODULE bindings 
