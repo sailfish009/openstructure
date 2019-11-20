@@ -192,7 +192,7 @@ def _RunACCALL(command, temp_dir, query):
   """
   proc = subprocess.Popen(command, stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE, stdin=subprocess.PIPE,
-                          cwd=temp_dir)
+                          cwd=temp_dir, universal_newlines=True)
   stdout_value, stderr_value = proc.communicate(query)
 
   # check for successful completion of naccess
@@ -215,7 +215,7 @@ def _RunNACCESS(command, temp_dir):
   :exception:      CalledProcessError for non-zero return value
   """
   proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
-                          cwd=temp_dir)
+                          cwd=temp_dir, universal_newlines=True)
   stdout_value, stderr_value = proc.communicate()
 
   # check for successful completion of naccess
