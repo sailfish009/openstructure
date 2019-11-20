@@ -192,7 +192,7 @@ def BlastVersion(blast_location=None):
     pattern=re.compile(r'\s*Package: blast (\d+\.\d+\.\d+),\s+')
 
   blast_pipe=subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
+                              stderr=subprocess.PIPE, universal_newlines=True)
   lines=blast_pipe.stdout.readlines()
 
   for line in lines:
@@ -264,7 +264,8 @@ def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
 
   ost.LogInfo('running BLAST (%s)' % ' '.join(args))
   blast_pipe=subprocess.Popen(args, stderr=subprocess.PIPE,
-                              stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+                              stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+                              universal_newlines=True)
   if isinstance(query, str):
     stdout, stderr=blast_pipe.communicate(query)
   else:
