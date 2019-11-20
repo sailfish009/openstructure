@@ -7,6 +7,7 @@ set(OST_BINDINGS_UNIT_TESTS
   test_naccess.py
   test_cadscore.py
   test_tmtools.py
+  test_ialign.py
 )
 
 ost_unittest(MODULE bindings 
