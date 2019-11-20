@@ -185,16 +185,19 @@ def _RunCAD(tmp_dir, mode, cad_bin_path, old_regime):
                                                             os.path.join(tmp_dir,
                                                             "cadtemp"))
 
-    ps1=subprocess.Popen(command1, shell=True, stdout=subprocess.PIPE)
+    ps1=subprocess.Popen(command1, shell=True, stdout=subprocess.PIPE,
+                         universal_newlines=True)
     ps1.wait()
-    ps2=subprocess.Popen(command2, shell=True, stdout=subprocess.PIPE)
+    ps2=subprocess.Popen(command2, shell=True, stdout=subprocess.PIPE,
+                         universal_newlines=True)
     ps2.wait()
     lines=ps2.stdout.readlines()
     try:
       globalAA=_ParseCADGlobal(lines)
     except:
       raise RuntimeError("CAD calculation failed")
-    ps3=subprocess.Popen(command3, shell=True, stdout=subprocess.PIPE)
+    ps3=subprocess.Popen(command3, shell=True, stdout=subprocess.PIPE,
+                         universal_newlines=True)
     ps3.wait()
     lines=ps3.stdout.readlines()
     try:
@@ -225,7 +228,8 @@ def _RunCAD(tmp_dir, mode, cad_bin_path, old_regime):
     if old_regime:
       cmd.append("--old-regime")
     cmd = ' '.join(cmd)
-    ps = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    ps = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                          universal_newlines=True)
     ps.wait()
     try:
       globalAA = _ParseVoronotaGlobal(ps.stdout.readlines())
@@ -246,11 +250,9 @@ def _RunCAD(tmp_dir, mode, cad_bin_path, old_regime):
 def _HasInsertionCodes(model, reference):
   for r in model.residues:
     if r.GetNumber().GetInsCode() != "\0":
-      print(r)
       return True
   for r in reference.residues:
     if r.GetNumber().GetInsCode() != "\0":
-      print(r)
       return True
   return False
 
