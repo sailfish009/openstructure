@@ -80,7 +80,8 @@ def _RunTmAlign(tmalign, tmp_dir):
   else:
     tmalign_path=settings.Locate('tmalign', explicit_file_name=tmalign)  
     command="\"%s\" \"%s\" \"%s\" -m \"%s\"" %(tmalign_path, model1_filename, model2_filename, os.path.join(tmp_dir,'matrix.txt'))
-  ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+  ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
+                      universal_newlines=True)
   ps.wait()
   lines=ps.stdout.readlines()
   if (len(lines))<22:
@@ -128,7 +129,8 @@ def _RunMmAlign(mmalign, tmp_dir):
   else:
     mmalign_path=settings.Locate('MMalign', explicit_file_name=mmalign)  
     command="\"%s\" \"%s\" \"%s\"" %(mmalign_path, model1_filename, model2_filename)
-  ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+  ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
+                      universal_newlines=True)
   ps.wait()
   lines=ps.stdout.readlines()
   if (len(lines))<22:
@@ -205,7 +207,8 @@ def _RunTmScore(tmscore, tmp_dir):
     tmscore_path=settings.Locate('tmscore', explicit_file_name=tmscore)
     command="\"%s\" \"%s\" \"%s\"" % (tmscore_path, model1_filename, 
                                       model2_filename)
-  ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+  ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
+                      universal_newlines=True)
   ps.wait()
   lines=ps.stdout.readlines()
   if (len(lines))<22:
