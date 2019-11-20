@@ -92,51 +92,6 @@ def _RunTmAlign(tmalign, tmp_dir):
   matrix_file.close() 
   return _ParseTmAlign(lines,lines_matrix)
 
-class MMAlignResult:
-  def __init__(self, rmsd, aligned_length, tm_score, transform, alignment):
-    self.rmsd=rmsd
-    self.tm_score=tm_score    
-    self.aligned_length=aligned_length
-    self.transform=transform
-    self.alignment=alignment
-
-def _ParseMmAlign(lines):
-  info_line=lines[10].split(',')
-  aln_length=float(info_line[0].split('=')[1].strip())
-  rmsd=float(info_line[1].split('=')[1].strip())  
-  tm_score=float(info_line[2].split('=')[1].strip())
-  tf1=[float(i.strip()) for i in lines[14].split()]
-  tf2=[float(i.strip()) for i in lines[15].split()]
-  tf3=[float(i.strip()) for i in lines[16].split()]
-  rot=geom.Mat3(tf1[2], tf1[3], tf1[4], tf2[2], tf2[3],
-                tf2[4], tf3[2], tf3[3], tf3[4])
-  tf=geom.Mat4(rot)
-  tf.PasteTranslation(geom.Vec3(tf1[1], tf2[1], tf3[1]))
-  seq1 = seq.CreateSequence("1",lines[19].strip())
-  seq2 = seq.CreateSequence("2",lines[21].strip())
-  alignment = seq.CreateAlignment()
-  alignment.AddSequence(seq2)
-  alignment.AddSequence(seq1)
-
-  return MMAlignResult(rmsd, tm_score, aln_length, tf, seq2, alignment)
-
-def _RunMmAlign(mmalign, tmp_dir):
-  model1_filename=os.path.join(tmp_dir, 'model01.pdb')
-  model2_filename=os.path.join(tmp_dir, 'model02.pdb')
-  if platform.system() == "Windows":
-    mmalign_path=settings.Locate('mmalign.exe', explicit_file_name=mmalign)
-    command="\"%s\" %s %s" %(os.path.normpath(mmalign_path), model1_filename, model2_filename)
-  else:
-    mmalign_path=settings.Locate('MMalign', explicit_file_name=mmalign)  
-    command="\"%s\" \"%s\" \"%s\"" %(mmalign_path, model1_filename, model2_filename)
-  ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
-                      universal_newlines=True)
-  ps.wait()
-  lines=ps.stdout.readlines()
-  if (len(lines))<22:
-    _CleanupFiles(tmp_dir)
-    raise RuntimeError("mmalign superposition failed")
-  return _ParseMmAlign(lines)
 
 class TMScoreResult:
   """
@@ -237,16 +192,6 @@ def TMAlign(model1, model2, tmalign=None):
   """
   tmp_dir_name=_SetupFiles((model1, model2))
   result=_RunTmAlign(tmalign, tmp_dir_name)
-  model1.handle.EditXCS().ApplyTransform(result.transform)
-  _CleanupFiles(tmp_dir_name)
-  return result
-
-def MMAlign(model1, model2, mmalign=None):
-  """
-  Run tmalign on two protein structures
-  """
-  tmp_dir_name=_SetupFiles((model1, model2))
-  result=_RunMmAlign(mmalign, tmp_dir_name)
   model1.handle.EditXCS().ApplyTransform(result.transform)
   _CleanupFiles(tmp_dir_name)
   return result
