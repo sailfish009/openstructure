@@ -13,7 +13,6 @@ blast.py
 cadscore.py
 kclust.py
 ialign.py
-align_3dcomb.py
 )
 
 set(OST_BINDINGS_PYMOD_SOURCES
