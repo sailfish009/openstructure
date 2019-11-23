@@ -182,7 +182,7 @@ class TestHHblitsBindings(unittest.TestCase):
         with self.assertRaises(IOError) as ioe:
             self.hh.A3MToProfile("doesnotexist.a3m")
         self.assertEqual(ioe.exception.errno, None)
-        self.assertEqual(ioe.exception.message,
+        self.assertEqual(ioe.exception.args[0],
                          "could not convert a3m to hhm file")
 
     def testA3mToCSFileName(self):
@@ -287,7 +287,7 @@ class TestHHblitsBindings(unittest.TestCase):
         # get info from an HHM file
         with self.assertRaises(IOError) as ioe:
             hhblits.ParseHHM(open('testfiles/testali.a3m'))
-        self.assertEqual(ioe.exception.message,
+        self.assertEqual(ioe.exception.args[0],
                          'Profile file "testfiles/testali.a3m" is missing '+
                          'the "Consensus" section')
 
