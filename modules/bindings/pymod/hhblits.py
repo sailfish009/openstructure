@@ -193,7 +193,8 @@ def ParseHHblitsOutput(output):
         return header
 
     def _ParseTableOfContents(lines):
-        assert lines.next().startswith(' No Hit')
+        line = next(lines)
+        assert line.startswith(' No Hit')
         hits = []
         while True:
             line = next(lines)
@@ -236,7 +237,8 @@ def ParseHHblitsOutput(output):
                             query_id, hits[entry_index][0].hit_id,
                             query_str, templ_str, *hits[entry_index][1])
                     entry_index = int(line[3:].strip())-1
-                    hits[entry_index][0].hit_id = lines.next()[1:].strip()
+                    line = next(lines)
+                    hits[entry_index][0].hit_id = line[1:].strip()
                     query_str = ''
                     templ_str = ''
                     # skip the next line. It doesn't contain information we
@@ -566,7 +568,8 @@ class HHblits:
                       (self.hhblits_bin, self.filename, a3m_file, full_nrdb,
                        opt_cmd)
         job = subprocess.Popen(hhblits_cmd, shell=True, cwd=self.working_dir,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                               universal_newlines=True)
         sout, _ = job.communicate()
         lines = sout.splitlines()
         for line in lines:
@@ -586,7 +589,7 @@ class HHblits:
                                         os.environ['PATH'])})
         job = subprocess.Popen(addss_cmd, shell=True, cwd=self.working_dir,
                                env=env, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+                               stderr=subprocess.PIPE, universal_newlines=True)
         sout, serr = job.communicate()
         lines = sout.splitlines()
         for line in lines:
@@ -623,7 +626,7 @@ class HHblits:
         ost.LogVerbose('converting %s to %s' % (a3m_file, hhm_file))
         os.putenv('HHLIB', self.hhlib_dir)
         if subprocess.call('%s -i %s -o %s' % (hhmake, a3m_file, hhm_file),
-                           shell=True):
+                           shell=True, universal_newlines=True):
             raise IOError('could not convert a3m to hhm file')
         return hhm_file
 
@@ -665,10 +668,9 @@ class HHblits:
         job = subprocess.Popen(cs_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, _ = job.communicate()
-        lines = sout.splitlines()
-        for line in lines:
-            if 'Wrote abstract state sequence to' in line:
-                return cs_file
+        if b'Wrote abstract state sequence to' in sout:
+            return cs_file
+
         ost.LogWarning('Creating column state sequence file (%s) failed' % \
                        cs_file)
 
@@ -734,7 +736,8 @@ class HHblits:
         ost.LogInfo('searching %s' % database)
         ost.LogVerbose(search_cmd)
         job = subprocess.Popen(search_cmd, shell=True, cwd=self.working_dir,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                               universal_newlines=True)
         sout, serr = job.communicate()
         if job.returncode != 0:
             lines = sout.splitlines()
