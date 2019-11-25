@@ -634,12 +634,12 @@ class TestQSscore(unittest.TestCase):
                      cm_names_2)
     # check symm_1 / symm_2
     # (>= 1 symm. group, all groups same length, all chains appear)
-    self.assertGreaterEqual(qs_scorer.symm_1, 1)
+    self.assertGreaterEqual(len(qs_scorer.symm_1), 1)
     ref_symm_1 = qs_scorer.symm_1[0]
     self.assertTrue(all(len(cg) == len(ref_symm_1) for cg in qs_scorer.symm_1))
     self.assertEqual(sorted(c for cg in qs_scorer.symm_1 for c in cg),
                      cm_names_1)
-    self.assertGreaterEqual(qs_scorer.symm_2, 1)
+    self.assertGreaterEqual(len(qs_scorer.symm_2), 1)
     ref_symm_2 = qs_scorer.symm_2[0]
     self.assertTrue(all(len(cg) == len(ref_symm_2) for cg in qs_scorer.symm_2))
     self.assertEqual(sorted(c for cg in qs_scorer.symm_2 for c in cg),
