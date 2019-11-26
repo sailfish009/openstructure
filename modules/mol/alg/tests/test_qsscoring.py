@@ -163,7 +163,8 @@ class TestQSscore(unittest.TestCase):
     # enforce different chain mapping
     enforced_cm = {'C': 'C', 'E': 'A', 'D': 'D', 'F': 'B'}
     qs_scorer_2 = QSscorer(qs_scorer.qs_ent_1, qs_scorer.qs_ent_2)
-    qs_scorer_2.chain_mapping = enforced_cm
+    # directly overwrite variable intended to be private. Have mercy with me.
+    qs_scorer_2._chain_mapping = enforced_cm
     self.assertAlmostEqual(qs_scorer_2.global_score, 0.356, 2)
     self.assertAlmostEqual(qs_scorer_2.best_score, 0.419, 2)
     self.assertEqual(qs_scorer_2.chain_mapping, enforced_cm)
