@@ -45,7 +45,8 @@ macro(_find_python PYTHON_ROOT VERSION)
   string(REPLACE "." "" _VERSION_NO_DOTS "${VERSION}")
   if(PYTHON_ROOT)
     find_library(PYTHON_LIBRARIES
-      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}"
+      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}" 
+      "python${_VERSION_NO_DOTS}m" "python${VERSION}m"
       HINTS "${PYTHON_ROOT}"
       PATH_SUFFIXES lib libs
       NO_SYSTEM_ENVIRONMENT_PATH NO_DEFAULT_PATH
@@ -53,17 +54,20 @@ macro(_find_python PYTHON_ROOT VERSION)
     find_path(PYTHON_INCLUDE_PATH
       NAMES Python.h
       HINTS "${PYTHON_ROOT}/include"
-      PATH_SUFFIXES include "python${_VERSION_NO_DOTS}" "python${VERSION}"
+      PATH_SUFFIXES include "python${_VERSION_NO_DOTS}" "python${VERSION}" 
+      "python${_VERSION_NO_DOTS}m" "python${VERSION}m"
       NO_SYSTEM_ENVIRONMENT_PATH NO_DEFAULT_PATH
     )
   else()
     find_library(PYTHON_LIBRARIES
-      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}"
+      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}" 
+      "python${_VERSION_NO_DOTS}m" "python${VERSION}m"
       PATH_SUFFIXES lib
     )
     find_path(PYTHON_INCLUDE_PATH
       NAMES Python.h
-      PATH_SUFFIXES include "python${_VERSION_NO_DOTS}" "python${VERSION}"     
+      PATH_SUFFIXES include "python${_VERSION_NO_DOTS}" "python${VERSION}" 
+      "python${_VERSION_NO_DOTS}m" "python${VERSION}m" 
     )    
   endif()  
 endmacro()
