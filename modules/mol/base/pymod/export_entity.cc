@@ -130,6 +130,8 @@ bool depr_is_transformation_identity(const EntityHandle& eh)
 void export_Entity()
 {
 #if OST_NUMPY_SUPPORT_ENABLED
+  // The following define enforces no return value when calling import_array
+  #define NUMPY_IMPORT_ARRAY_RETVAL
   import_array();
 #endif
 

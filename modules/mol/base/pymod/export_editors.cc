@@ -227,6 +227,8 @@ void set_t_pos(XCSEditor& e, object o1, object o2)
 void export_Editors()
 {
 #if OST_NUMPY_SUPPORT_ENABLED
+  // The following define enforces no return value when calling import_array
+  #define NUMPY_IMPORT_ARRAY_RETVAL
   import_array();
 #endif
 

@@ -137,6 +137,8 @@ namespace {
 void export_primlist()
 {
 #if OST_NUMPY_SUPPORT_ENABLED
+  // The following define enforces no return value when calling import_array
+  #define NUMPY_IMPORT_ARRAY_RETVAL
   import_array(); // magic handshake for numpy module
 #endif
 
