@@ -228,6 +228,10 @@ class QSscorer:
       self._chem_mapping = _GetChemGroupsMapping(self.qs_ent_1, self.qs_ent_2)
     return self._chem_mapping
 
+  @chem_mapping.setter
+  def chem_mapping(self, chem_mapping):
+    self._chem_mapping = chem_mapping
+
   @property
   def ent_to_cm_1(self):
     """Subset of :attr:`qs_ent_1` used to compute chain mapping and symmetries.
@@ -255,6 +259,10 @@ class QSscorer:
       self._ComputeAlignedEntities()
     return self._ent_to_cm_1
 
+  @ent_to_cm_1.setter
+  def ent_to_cm_1(self, ent_to_cm_1):
+    self._ent_to_cm_1 = ent_to_cm_1
+
   @property
   def ent_to_cm_2(self):
     """Subset of :attr:`qs_ent_1` used to compute chain mapping and symmetries
@@ -263,6 +271,10 @@ class QSscorer:
     if self._ent_to_cm_2 is None:
       self._ComputeAlignedEntities()
     return self._ent_to_cm_2
+
+  @ent_to_cm_2.setter
+  def ent_to_cm_2(self, ent_to_cm_2):
+    self._ent_to_cm_2 = ent_to_cm_2
 
   @property
   def symm_1(self):
@@ -384,6 +396,10 @@ class QSscorer:
       LogInfo('Mapping found: %s' % str(self._chain_mapping))
     return self._chain_mapping
 
+  @chain_mapping.setter
+  def chain_mapping(self, chain_mapping):
+    self._chain_mapping = chain_mapping
+
   @property
   def chain_mapping_scheme(self):
     """Mapping scheme used to get :attr:`chain_mapping`.
@@ -440,6 +456,10 @@ class QSscorer:
                                               self.res_num_alignment)
     return self._alignments
 
+  @alignments.setter
+  def alignments(self, alignments):
+    self._alignments = alignments
+
   @property
   def mapped_residues(self):
     """Mapping of shared residues in :attr:`alignments`.
@@ -453,6 +473,10 @@ class QSscorer:
     if self._mapped_residues is None:
       self._mapped_residues = _GetMappedResidues(self.alignments)
     return self._mapped_residues
+
+  @mapped_residues.setter
+  def mapped_residues(self, mapped_residues):
+    self._mapped_residues = mapped_residues
 
   @property
   def global_score(self):
@@ -521,6 +545,10 @@ class QSscorer:
     if self._clustalw_bin is None:
       self._clustalw_bin = settings.Locate(('clustalw', 'clustalw2'))
     return self._clustalw_bin
+
+  @clustalw_bin.setter
+  def clustalw_bin(self, clustalw_bin):
+    self._clustalw_bin = clustalw_bin
 
   def GetOligoLDDTScorer(self, settings, penalize_extra_chains=True):
     """
