@@ -63,7 +63,7 @@ def HBondList(ent, hbplus_bin=None):
   full_bin=_LocateHBPlus(hbplus_bin)
   temp_d=tempfile.mkdtemp(prefix='hbplus_')
   hb_proc=subprocess.Popen(full_bin, shell=True, stdout=subprocess.PIPE,
-                           stdin=subprocess.PIPE, universal_newlines=True)
+                           stdin=subprocess.PIPE)
   file_name=os.path.join(temp_d, 'ent.pdb')
   io.SaveEntity(ent, file_name)
   hb_proc.stdin.write('%s\n' % temp_d)

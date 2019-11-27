@@ -43,12 +43,11 @@ def GetVersion(msms_exe=None, msms_env=None):
   """
   msms_executable = _GetExecutable(msms_exe, msms_env)
   command = "%s" % (msms_executable)
-  proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
-                          universal_newlines=True)
+  proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   stdout_value, stderr_value = proc.communicate()
 
   version = ""
-  for l in stdout_value.splitlines():
+  for l in stdout_value.decode().splitlines():
     if l[0:4]=='MSMS':
       version = l.split(' ')[1]
       return version
@@ -150,16 +149,15 @@ def _RunMSMS(command):
   :returns:                 stdout of MSMS
   :raises:              :class:`CalledProcessError` for non-zero return value
   """
-  proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
-                          universal_newlines=True)
+  proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   stdout_value, stderr_value = proc.communicate()
 
   #check for successful completion of msms
   if proc.returncode!=0:
-    print("WARNING: msms error\n", stdout_value)
+    print("WARNING: msms error\n", stdout_value.decode())
     raise MsmsProcessError(proc.returncode, command)
 
-  return stdout_value
+  return stdout_value.decode()
   
 
 

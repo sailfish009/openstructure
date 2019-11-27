@@ -568,10 +568,9 @@ class HHblits:
                       (self.hhblits_bin, self.filename, a3m_file, full_nrdb,
                        opt_cmd)
         job = subprocess.Popen(hhblits_cmd, shell=True, cwd=self.working_dir,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                               universal_newlines=True)
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, _ = job.communicate()
-        lines = sout.splitlines()
+        lines = sout.decode().splitlines()
         for line in lines:
             ost.LogVerbose(line.strip())
         if not os.path.exists(a3m_file):
@@ -589,9 +588,9 @@ class HHblits:
                                         os.environ['PATH'])})
         job = subprocess.Popen(addss_cmd, shell=True, cwd=self.working_dir,
                                env=env, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, universal_newlines=True)
+                               stderr=subprocess.PIPE)
         sout, serr = job.communicate()
-        lines = sout.splitlines()
+        lines = sout.decode().splitlines()
         for line in lines:
             if 'error' in line.lower():
                 ost.LogWarning('Predicting secondary structure for MSA '+
@@ -626,7 +625,7 @@ class HHblits:
         ost.LogVerbose('converting %s to %s' % (a3m_file, hhm_file))
         os.putenv('HHLIB', self.hhlib_dir)
         if subprocess.call('%s -i %s -o %s' % (hhmake, a3m_file, hhm_file),
-                           shell=True, universal_newlines=True):
+                           shell=True):
             raise IOError('could not convert a3m to hhm file')
         return hhm_file
 
@@ -736,14 +735,13 @@ class HHblits:
         ost.LogInfo('searching %s' % database)
         ost.LogVerbose(search_cmd)
         job = subprocess.Popen(search_cmd, shell=True, cwd=self.working_dir,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                               universal_newlines=True)
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, serr = job.communicate()
         if job.returncode != 0:
-            lines = sout.splitlines()
+            lines = sout.decode().splitlines()
             for line in lines:
                 ost.LogError(line.strip())
-            lines = serr.splitlines()
+            lines = serr.decode().splitlines()
             for line in lines:
                 ost.LogError(line.strip())
             return None

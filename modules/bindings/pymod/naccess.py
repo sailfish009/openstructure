@@ -190,17 +190,18 @@ def _RunACCALL(command, temp_dir, query):
   :returns:        stdout of command
   :exception:      CalledProcessError for non-zero return value
   """
-  proc = subprocess.Popen(command, stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE, stdin=subprocess.PIPE,
-                          cwd=temp_dir, universal_newlines=True)
-  stdout_value, stderr_value = proc.communicate(query)
+
+  proc = subprocess.Popen(command, cwd=temp_dir, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+  stdout_value, stderr_value = proc.communicate(query.encode())
 
   # check for successful completion of naccess
   if proc.returncode != 0:
-    LogWarning("WARNING: naccess error\n%s\n%s" % (stdout_value, stderr_value))
+    LogWarning("WARNING: naccess error\n%s\n%s" % (stdout_value.decode(), 
+                                                   stderr_value.decode()))
     raise subprocess.CalledProcessError(proc.returncode, command)
 
-  return stdout_value
+  return stdout_value.decode()
 
 
 def _RunNACCESS(command, temp_dir):
@@ -214,16 +215,16 @@ def _RunNACCESS(command, temp_dir):
   :returns:        stdout of command
   :exception:      CalledProcessError for non-zero return value
   """
-  proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
-                          cwd=temp_dir, universal_newlines=True)
+  proc = subprocess.Popen(command, cwd=temp_dir, shell=True, 
+                          stdout=subprocess.PIPE)
   stdout_value, stderr_value = proc.communicate()
 
   # check for successful completion of naccess
   if proc.returncode != 0:
-    LogWarning("WARNING: naccess error\n%s" % stdout_value)
+    LogWarning("WARNING: naccess error\n%s" % stdout_value.decode())
     raise subprocess.CalledProcessError(proc.returncode, command)
 
-  return stdout_value
+  return stdout_value.decode()
 
 
 def CalculateSurfaceArea(entity,  radius=1.4,  

@@ -130,7 +130,7 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False,
     command=command+" "+clustalw_option_string  #see useful flags: http://toolkit.tuebingen.mpg.de/clustalw/help_params
 
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-  ps.stdout.readlines()
+  ps.wait()
   aln=io.LoadAlignment(out)
   
 

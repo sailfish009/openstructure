@@ -192,8 +192,9 @@ def BlastVersion(blast_location=None):
     pattern=re.compile(r'\s*Package: blast (\d+\.\d+\.\d+),\s+')
 
   blast_pipe=subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE, universal_newlines=True)
-  lines=blast_pipe.stdout.readlines()
+                              stderr=subprocess.PIPE)
+  stdout, _ = blast_pipe.communicate()
+  lines=stdout.decode().splitlines()
 
   for line in lines:
     m=pattern.match(line)
@@ -264,20 +265,19 @@ def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
 
   ost.LogInfo('running BLAST (%s)' % ' '.join(args))
   blast_pipe=subprocess.Popen(args, stderr=subprocess.PIPE,
-                              stdout=subprocess.PIPE, stdin=subprocess.PIPE,
-                              universal_newlines=True)
+                              stdout=subprocess.PIPE, stdin=subprocess.PIPE)
   if isinstance(query, str):
-    stdout, stderr=blast_pipe.communicate(query)
+    stdout, stderr=blast_pipe.communicate(query.encode())
   else:
-    stdout, stderr=blast_pipe.communicate(io.SequenceToString(query, 'fasta'))
+    stdout, stderr=blast_pipe.communicate(io.SequenceToString(query, 'fasta').encode())
 
   if len(stderr)>0:
      pattern=re.compile(r'^\[.*\]\s+ERROR:\s+(.*)')
-     lines=stderr.split('\n')
+     lines=stderr.decode().split('\n')
      error_message=pattern.match(lines[0])
      if error_message:
        raise BlastError(error_message.group(1), '\n'.join(lines[1:]))
   if outfmt==0:
-    return ParseBlastOutput(stdout)
+    return ParseBlastOutput(stdout.decode())
   else:
     return stdout
