@@ -130,8 +130,10 @@ class TestQSscore(unittest.TestCase):
     # check mappings
     self.assertEqual(qs_scorer.chem_mapping,
                      {('D', 'F'): ('B', 'D'), ('C', 'E'): ('A', 'C')})
-    self.assertEqual(sorted(qs_scorer.symm_1), [('D', 'C'), ('F', 'E')])
-    self.assertEqual(sorted(qs_scorer.symm_2), [('A', 'B'), ('C', 'D')])
+    self.assertEqual(len(qs_scorer.symm_1), 2)
+    self.assertEqual(len(qs_scorer.symm_1[0]), 2)
+    self.assertEqual(len(qs_scorer.symm_2), 2)
+    self.assertEqual(len(qs_scorer.symm_2[0]), 2)
     self.assertEqual(qs_scorer.chain_mapping,
                      {'C': 'A', 'E': 'C', 'D': 'B', 'F': 'D'})
     # check scoring
@@ -151,8 +153,10 @@ class TestQSscore(unittest.TestCase):
     # check mappings
     self.assertEqual(qs_scorer.chem_mapping,
                      {('C', 'E'): ('A', 'C'), ('D', 'F'): ('D', 'B')})
-    self.assertEqual(sorted(qs_scorer.symm_1), [('D', 'C'), ('F', 'E')])
-    self.assertEqual(sorted(qs_scorer.symm_2), [('B', 'A'), ('D', 'C')])
+    self.assertEqual(len(qs_scorer.symm_1), 2)
+    self.assertEqual(len(qs_scorer.symm_1[0]), 2)
+    self.assertEqual(len(qs_scorer.symm_2), 2)
+    self.assertEqual(len(qs_scorer.symm_2[0]), 2)
     self.assertEqual(qs_scorer.chain_mapping,
                      {'C': 'A', 'E': 'C', 'D': 'B', 'F': 'D'})
     # check scoring
@@ -191,8 +195,10 @@ class TestQSscore(unittest.TestCase):
     self.assertFalse(qs_scorer.calpha_only)
     self.assertEqual(qs_scorer.chem_mapping,
                      {('A', 'C'): ('A',), ('B', 'D'): ('B',)})
-    self.assertEqual(sorted(qs_scorer.symm_1), [('A', 'B'), ('C', 'D')])
-    self.assertEqual(sorted(qs_scorer.symm_2), [('A', 'B')])
+    self.assertEqual(len(qs_scorer.symm_1), 2)
+    self.assertEqual(len(qs_scorer.symm_1[0]), 2)
+    self.assertEqual(len(qs_scorer.symm_2), 1)
+    self.assertEqual(len(qs_scorer.symm_2[0]), 2)
     self.assertEqual(qs_scorer.chain_mapping, {'A': 'A', 'B': 'B'})
 
   def test_HeteroCase3(self):
@@ -208,11 +214,10 @@ class TestQSscore(unittest.TestCase):
     self.assertEqual(qs_scorer.chem_mapping,
                      {('A', 'C', 'E', 'G', 'I', 'K'): ('A', 'C', 'E'),
                       ('B', 'D', 'F', 'H', 'J', 'L'): ('B', 'D', 'F')})
-    self.assertEqual(sorted(qs_scorer.symm_1),
-                     [('A', 'B'), ('C', 'D'), ('E', 'F'),
-                      ('G', 'H'), ('I', 'J'), ('K', 'L')])
-    self.assertEqual(sorted(qs_scorer.symm_2),
-                     [('A', 'B'), ('C', 'D'), ('E', 'F')])
+    self.assertEqual(len(qs_scorer.symm_1), 6)
+    self.assertEqual(len(qs_scorer.symm_1[0]), 2)
+    self.assertEqual(len(qs_scorer.symm_2), 3)
+    self.assertEqual(len(qs_scorer.symm_2[0]), 2)
     self.assertEqual(qs_scorer.chain_mapping,
                      {'A':'A', 'B':'B', 'G':'C', 'H':'D', 'I':'E', 'J':'F'})
 
@@ -303,8 +308,10 @@ class TestQSscore(unittest.TestCase):
     # check properties
     self.assertFalse(qs_scorer.calpha_only)
     self.assertEqual(qs_scorer.chem_mapping, {('A', 'B'): ('B', 'C', 'D', 'A')})
-    self.assertEqual(sorted(qs_scorer.symm_1), [('A', 'B')])
-    self.assertEqual(sorted(qs_scorer.symm_2), [('B', 'A'), ('C', 'D')])
+    self.assertEqual(len(qs_scorer.symm_1), 1)
+    self.assertEqual(len(qs_scorer.symm_1[0]), 2)
+    self.assertEqual(len(qs_scorer.symm_2), 2)
+    self.assertEqual(len(qs_scorer.symm_2[0]), 2)
     self.assertEqual(qs_scorer.chain_mapping, {'A': 'B', 'B': 'A'})
 
   def test_HomoCase2(self):
@@ -320,8 +327,10 @@ class TestQSscore(unittest.TestCase):
     self.assertFalse(qs_scorer.calpha_only)
     self.assertEqual(qs_scorer.chem_mapping,
                      {('A', 'B', 'C', 'D', 'E', 'F'): ('A', 'B')})
-    self.assertEqual(sorted(qs_scorer.symm_1), [('A', 'B', 'C', 'D', 'E', 'F')])
-    self.assertEqual(sorted(qs_scorer.symm_2), [('B', 'A')])
+    self.assertEqual(len(qs_scorer.symm_1), 1)
+    self.assertEqual(len(qs_scorer.symm_1[0]), 6)
+    self.assertEqual(len(qs_scorer.symm_2), 1)
+    self.assertEqual(len(qs_scorer.symm_2[0]), 2)
     self.assertEqual(qs_scorer.chain_mapping, {'A': 'A', 'B': 'B'})
     self._CheckScorer(qs_scorer)
 
@@ -425,11 +434,10 @@ class TestQSscore(unittest.TestCase):
     self.assertEqual(qs_scorer.chem_mapping,
             {('A', 'C', 'E', 'G', 'I', 'K', 'M', 'O'): ('A', 'C', 'E', 'G'),
              ('B', 'D', 'F', 'H', 'J', 'L', 'N', 'P'): ('B', 'D', 'F', 'H')})
-    self.assertEqual(sorted(qs_scorer.symm_1),
-                     [('A', 'B'), ('C', 'D'), ('E', 'F'), ('G', 'H'),
-                      ('I', 'J'), ('K', 'L'), ('M', 'N'), ('O', 'P')])
-    self.assertEqual(sorted(qs_scorer.symm_2),
-                     [('A', 'B'), ('C', 'D'), ('E', 'F'), ('G', 'H')])
+    self.assertEqual(len(qs_scorer.symm_1), 8)
+    self.assertEqual(len(qs_scorer.symm_1[0]), 2)
+    self.assertEqual(len(qs_scorer.symm_2), 4)
+    self.assertEqual(len(qs_scorer.symm_2[0]), 2)
     self.assertEqual(qs_scorer.chain_mapping,
                      {'A': 'A', 'C': 'C', 'B': 'B', 'E': 'E',
                       'D': 'D', 'G': 'G', 'F': 'F', 'H': 'H'})
@@ -448,14 +456,10 @@ class TestQSscore(unittest.TestCase):
              ('A', 'E', 'I', 'M', 'Q'): ('A', 'E', 'I', 'M', 'Q'),
              ('C', 'G', 'K', 'O', 'S'): ('C', 'G', 'K', 'O', 'S'),
              ('B', 'F', 'J', 'N', 'R'): ('B', 'F', 'J', 'N', 'R')})
-    self.assertEqual(sorted(qs_scorer.symm_1),
-                     [('D', 'A', 'S', 'B'), ('H', 'E', 'C', 'F'),
-                      ('L', 'I', 'G', 'J'), ('P', 'M', 'K', 'N'),
-                      ('T', 'Q', 'O', 'R')])
-    self.assertEqual(sorted(qs_scorer.symm_2),
-                     [('D', 'A', 'S', 'B'), ('H', 'E', 'C', 'F'),
-                      ('L', 'I', 'G', 'J'), ('P', 'M', 'K', 'N'),
-                      ('T', 'Q', 'O', 'R')])
+    self.assertEqual(len(qs_scorer.symm_1), 5)
+    self.assertEqual(len(qs_scorer.symm_1[0]), 4)
+    self.assertEqual(len(qs_scorer.symm_2), 5)
+    self.assertEqual(len(qs_scorer.symm_2[0]), 4)
     self.assertEqual(qs_scorer.chain_mapping,
                      {'A': 'A', 'C': 'C', 'B': 'B', 'E': 'E', 'D': 'D',
                       'G': 'G', 'F': 'F', 'I': 'I', 'H': 'H', 'K': 'K',
@@ -474,12 +478,10 @@ class TestQSscore(unittest.TestCase):
     self.assertEqual(qs_scorer.chem_mapping,
             {('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'): \
                ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L')})
-    self.assertEqual(sorted(qs_scorer.symm_1),
-                     [('A', 'D'), ('B', 'E'), ('C', 'F'),
-                      ('G', 'J'), ('H', 'K'), ('I', 'L')])
-    self.assertEqual(sorted(qs_scorer.symm_2),
-                     [('A', 'G'), ('B', 'I'), ('C', 'E'),
-                      ('D', 'K'), ('F', 'J'), ('H', 'L')])
+    self.assertEqual(len(qs_scorer.symm_1), 6)
+    self.assertEqual(len(qs_scorer.symm_1[0]), 2)
+    self.assertEqual(len(qs_scorer.symm_2), 6)
+    self.assertEqual(len(qs_scorer.symm_2[0]), 2)
     # chain mapping is ambiguous here so we cannot check it
 
   def test_Urease(self):
@@ -496,14 +498,10 @@ class TestQSscore(unittest.TestCase):
                ('B', 'D', 'F', 'H', 'J', 'L', 'N', 'P', 'R', 'T', 'V', 'X'),
              ('A', 'C', 'E', 'G', 'I', 'K', 'M', 'O', 'Q', 'S', 'U', 'W'): \
                ('A', 'C', 'E', 'G', 'I', 'K', 'M', 'O', 'Q', 'S', 'U', 'W')})
-    self.assertEqual(sorted(qs_scorer.symm_1),
-                     [('B', 'Q'), ('D', 'G'), ('F', 'W'), ('H', 'U'),
-                      ('J', 'K'), ('L', 'S'), ('N', 'A'), ('P', 'E'),
-                      ('R', 'M'), ('T', 'I'), ('V', 'C'), ('X', 'O')])
-    self.assertEqual(sorted(qs_scorer.symm_2),
-                     [('B', 'Q'), ('D', 'W'), ('F', 'U'), ('H', 'C'),
-                      ('J', 'K'), ('L', 'S'), ('N', 'A'), ('P', 'E'),
-                      ('R', 'M'), ('T', 'I'), ('V', 'O'), ('X', 'G')])
+    self.assertEqual(len(qs_scorer.symm_1), 12)
+    self.assertEqual(len(qs_scorer.symm_1[0]), 2)
+    self.assertEqual(len(qs_scorer.symm_2), 12)
+    self.assertEqual(len(qs_scorer.symm_2[0]), 2)
     self.assertEqual(qs_scorer.chain_mapping,
                      {'A': 'A', 'C': 'W', 'B': 'B', 'E': 'E', 'D': 'X',
                       'G': 'G', 'F': 'F', 'I': 'I', 'H': 'H', 'K': 'K',
@@ -523,12 +521,10 @@ class TestQSscore(unittest.TestCase):
     self.assertEqual(qs_scorer.chem_mapping,
             {('A', 'B', 'C', 'D', 'E', 'F'): ('A', 'B', 'C', 'D', 'E', 'F'),
              ('G', 'H', 'I', 'J', 'K', 'L'): ('G', 'H', 'I', 'J', 'K', 'L')})
-    self.assertEqual(sorted(qs_scorer.symm_1),
-                     [('A', 'G'), ('B', 'H'), ('C', 'I'),
-                      ('D', 'J'), ('E', 'K'), ('F', 'L')])
-    self.assertEqual(sorted(qs_scorer.symm_2),
-                     [('A', 'G'), ('B', 'H'), ('C', 'I'),
-                      ('D', 'J'), ('E', 'K'), ('F', 'L')])
+    self.assertEqual(len(qs_scorer.symm_1), 6)
+    self.assertEqual(len(qs_scorer.symm_1[0]), 2)
+    self.assertEqual(len(qs_scorer.symm_2), 6)
+    self.assertEqual(len(qs_scorer.symm_2[0]), 2)
     self.assertEqual(qs_scorer.chain_mapping,
                      {'A': 'A', 'C': 'C', 'B': 'B', 'E': 'E',
                       'D': 'D', 'G': 'G', 'F': 'F', 'I': 'I',
@@ -548,14 +544,10 @@ class TestQSscore(unittest.TestCase):
               'J', 'K', 'L', 'N', 'O', 'P', 'R', 'S', 'T', 'V', 'W', 'X'): \
                ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
                 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X')})
-    self.assertEqual(sorted(qs_scorer.symm_1),
-                     [('A', 'X'), ('B', 'H'), ('C', 'P'), ('D', 'K'),
-                      ('E', 'I'), ('F', 'J'), ('G', 'T'), ('L', 'R'),
-                      ('M', 'S'), ('O', 'V'), ('Q', 'N'), ('U', 'W')])
-    self.assertEqual(sorted(qs_scorer.symm_2),
-                     [('A', 'O'), ('B', 'M'), ('C', 'N'), ('D', 'G'),
-                      ('E', 'H'), ('F', 'I'), ('J', 'W'), ('K', 'X'),
-                      ('L', 'V'), ('P', 'T'), ('Q', 'U'), ('R', 'S')])
+    self.assertEqual(len(qs_scorer.symm_1), 12)
+    self.assertEqual(len(qs_scorer.symm_1[0]), 2)
+    self.assertEqual(len(qs_scorer.symm_2), 12)
+    self.assertEqual(len(qs_scorer.symm_2[0]), 2)
     self.assertEqual(qs_scorer.chain_mapping,
                      {'A': 'J', 'C': 'L', 'B': 'K', 'E': 'P', 'D': 'R',
                       'G': 'O', 'F': 'Q', 'I': 'T', 'H': 'X', 'K': 'S',
