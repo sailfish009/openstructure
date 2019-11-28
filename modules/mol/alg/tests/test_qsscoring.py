@@ -547,12 +547,18 @@ class TestQSscore(unittest.TestCase):
     self.assertEqual(len(qs_scorer.symm_1[0]), 2)
     self.assertEqual(len(qs_scorer.symm_2), 12)
     self.assertEqual(len(qs_scorer.symm_2[0]), 2)
-    self.assertEqual(qs_scorer.chain_mapping,
-                     {'A': 'J', 'C': 'L', 'B': 'K', 'E': 'P', 'D': 'R',
-                      'G': 'O', 'F': 'Q', 'I': 'T', 'H': 'X', 'K': 'S',
-                      'J': 'U', 'M': 'G', 'L': 'I', 'O': 'N', 'N': 'H',
-                      'Q': 'E', 'P': 'V', 'S': 'D', 'R': 'F', 'U': 'B',
-                      'T': 'A', 'W': 'M', 'V': 'C', 'X': 'W'})
+
+    # Don't check for exact mapping, as structures are highly symmetric.
+    # Several mappings are thus valid. Only check whether we found an
+    # automated mapping with strict (stuff must really match)
+    # chain_mapping_scheme
+    self.assertEqual(qs_scorer.chain_mapping_scheme, 'strict')
+    #self.assertEqual(qs_scorer.chain_mapping,
+    #                 {'A': 'J', 'C': 'L', 'B': 'K', 'E': 'P', 'D': 'R',
+    #                  'G': 'O', 'F': 'Q', 'I': 'T', 'H': 'X', 'K': 'S',
+    #                  'J': 'U', 'M': 'G', 'L': 'I', 'O': 'N', 'N': 'H',
+    #                  'Q': 'E', 'P': 'V', 'S': 'D', 'R': 'F', 'U': 'B',
+    #                  'T': 'A', 'W': 'M', 'V': 'C', 'X': 'W'})
 
 
   ###########################################################################
