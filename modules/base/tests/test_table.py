@@ -907,6 +907,7 @@ class TestTable(unittest.TestCase):
     self.assertRaises(IOError, Table.Load, os.path.join('testfiles','emptytable.tab'))
     in_stream = open(os.path.join('testfiles','emptytable.csv'), 'r')
     self.assertRaises(IOError, Table.Load, in_stream)
+    in_stream.close()
     
   def testSaveLoadTableOSTWithSpaces(self):
     tab = self.CreateTestTable()

@@ -129,10 +129,10 @@ class TestHHblitsBindings(unittest.TestCase):
         os.remove(self.tmpfile)
         hhfile = self.hh.A3MToProfile("testfiles/testali.a3m",
                                       hhm_file=self.tmpfile)
-        tfh = open(hhfile)
-        efh = open("testfiles/test.hmm")
-        elst = efh.readlines()
-        tlst = tfh.readlines()
+        with open(hhfile) as tfh:
+          tlst = tfh.readlines()
+        with open("testfiles/test.hmm") as efh:
+          elst = efh.readlines()
         self.assertEqual(len(elst), len(tlst))
         for i in range(0, len(elst)):
             if not elst[i].startswith(('FILE', 'COM', 'DATE')):
@@ -147,10 +147,10 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         hhfile = self.hh.A3MToProfile("testfiles/testali.a3m")
-        tfh = open(hhfile)
-        efh = open("testfiles/test.hmm")
-        elst = efh.readlines()
-        tlst = tfh.readlines()
+        with open(hhfile) as tfh:
+          tlst = tfh.readlines()
+        with open("testfiles/test.hmm") as efh:
+          elst = efh.readlines()
         self.assertEqual(len(elst), len(tlst))
         for i in range(0, len(elst)):
             if not elst[i].startswith(('FILE', 'COM', 'DATE')):
@@ -244,10 +244,12 @@ class TestHHblitsBindings(unittest.TestCase):
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         search_file = self.hh.Search("testfiles/testali.a3m",
                                      'testfiles/hhblitsdb/hhblitsdb')
-        tfh = open(search_file)
-        efh = open("testfiles/test.hhr")
-        elst = efh.readlines()
-        tlst = tfh.readlines()
+
+        with open(search_file) as tfh:
+          tlst = tfh.readlines()
+        with open("testfiles/test.hhr") as efh:
+          elst = efh.readlines()
+
         self.assertEqual(len(elst), len(tlst))
         for i in range(0, len(elst)):
             if not elst[i].startswith(('Date', 'Command')):
@@ -286,7 +288,8 @@ class TestHHblitsBindings(unittest.TestCase):
     def testParseHHMNotWorking(self):
         # get info from an HHM file
         with self.assertRaises(IOError) as ioe:
-            hhblits.ParseHHM(open('testfiles/testali.a3m'))
+            with open('testfiles/testali.a3m') as f:
+              hhblits.ParseHHM(f)
         self.assertEqual(ioe.exception.args[0],
                          'Profile file "testfiles/testali.a3m" is missing '+
                          'the "Consensus" section')
@@ -317,7 +320,8 @@ class TestHHblitsBindings(unittest.TestCase):
         self.assertAlmostEqual(hit.ss_score, 34.1)
 
     def testParseHHblitsOutput(self):
-        header, hits = hhblits.ParseHHblitsOutput(open("testfiles/test.hhr"))
+        with open("testfiles/test.hhr") as f:
+          header, hits = hhblits.ParseHHblitsOutput(f)
         self.assertEqual(header.query, 'Test')
         self.assertEqual(header.match_columns, 141)
         self.assertEqual(header.n_eff, 9.4)

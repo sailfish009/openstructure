@@ -52,7 +52,8 @@ class TestBlastBindings(unittest.TestCase):
 
   def testBlastParseOutput(self):
 
-    raw_out=open('testfiles/raw_blastout.txt','r').read()
+    with open('testfiles/raw_blastout.txt','r') as f:
+      raw_out=f.read()
 
     parsed_out=blast.ParseBlastOutput(raw_out)
 

@@ -186,7 +186,7 @@ def _RunCAD(tmp_dir, mode, cad_bin_path, old_regime):
                                                             "cadtemp"))
 
     ps1=subprocess.Popen(command1, shell=True, stdout=subprocess.PIPE)
-    ps1.wait()
+    ps1.communicate()
     ps2=subprocess.Popen(command2, shell=True, stdout=subprocess.PIPE)
     stdout,_ = ps2.communicate()
     lines=stdout.decode().splitlines()
@@ -232,7 +232,8 @@ def _RunCAD(tmp_dir, mode, cad_bin_path, old_regime):
     except:
       raise RuntimeError("CAD calculation failed")
     try:
-      localAA = _ParseVoronotaLocal(open(local_score_filename).readlines())
+      with open(local_score_filename) as f: 
+        localAA = _ParseVoronotaLocal(f.readlines())
     except:
       raise RuntimeError("CAD calculation failed")
 

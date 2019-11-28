@@ -166,9 +166,10 @@ def CreateDB(infasta, dbout, mkdb_cmd=None):
     else:
       raise IOError('mkdb command must either be the path to formatdb or makeblastdb!')
 
-  cmd=' '.join(args)
-  ost.LogInfo('creating blast DB (%s)' % cmd)
-  os.system(cmd)
+  ost.LogInfo('creating blast DB (%s)' % ' '.join(args))
+  blast_pipe=subprocess.Popen(args, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+  blast_pipe.communicate()
 
 def BlastVersion(blast_location=None):
   """

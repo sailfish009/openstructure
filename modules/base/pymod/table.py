@@ -880,8 +880,10 @@ Statistics for column %(col)s
   def _LoadOST(stream_or_filename):
     fieldname_pattern=re.compile(r'(?P<name>[^[]+)(\[(?P<type>\w+)\])?')
     values_pattern=re.compile("([^\" ]+|\"[^\"]*\")+")
+    file_opened=False
     if not hasattr(stream_or_filename, 'read'):
       stream=open(stream_or_filename, 'r')
+      file_opened=True
     else:
       stream=stream_or_filename
     header=False
@@ -904,10 +906,18 @@ Statistics for column %(col)s
             else:
               fieldtypes.append('string')
             fieldnames.append(match.group('name'))
-        tab=Table(fieldnames, fieldtypes)
+        try:
+          tab=Table(fieldnames, fieldtypes)
+        except Exception as e:
+          # potentially fails if we read in crap... clean up and pass on error
+          if file_opened:
+            stream.close()
+          raise e
         header=True
         continue
       tab.AddRow([x.strip('"') for x in values_pattern.findall(line)])
+    if file_opened:
+      stream.close()
     if num_lines==0:
       raise IOError("Cannot read table from empty stream")
     return tab
@@ -921,8 +931,10 @@ Statistics for column %(col)s
         
   @staticmethod
   def _LoadCSV(stream_or_filename, sep):
+    file_opened=False
     if not hasattr(stream_or_filename, 'read'):
       stream=open(stream_or_filename, 'r')
+      file_opened=True
     else:
       stream=stream_or_filename
     reader=csv.reader(stream, delimiter=sep)
@@ -935,6 +947,8 @@ Statistics for column %(col)s
         first=False
       else:
         tab.AddRow(row)
+    if file_opened:
+      stream.close()
     if first:
       raise IOError('trying to load table from empty CSV stream/file')
 
@@ -943,11 +957,16 @@ Statistics for column %(col)s
 
   @staticmethod
   def _LoadPickle(stream_or_filename):
+    file_opened=False
     if not hasattr(stream_or_filename, 'read'):
       stream=open(stream_or_filename, 'rb')
+      file_opened=True
     else:
       stream=stream_or_filename
-    return pickle.load(stream)
+    tab = pickle.load(stream)
+    if file_opened:
+      stream.close()
+    return tab
 
   @staticmethod
   def _GuessFormat(filename):
@@ -2210,9 +2229,13 @@ Statistics for column %(col)s
     raise ValueError('unknown format "%s"' % format)
 
   def _SavePickle(self, stream):
+    file_opened=False
     if not hasattr(stream, 'write'):
       stream=open(stream, 'wb')
+      file_opened=True
     pickle.dump(self, stream, pickle.HIGHEST_PROTOCOL)
+    if file_opened:
+      stream.close()
 
   def _SaveHTML(self, stream_or_filename):
     def _escape(s):
@@ -2288,8 +2311,10 @@ Statistics for column %(col)s
       stream.close()
 
   def _SaveCSV(self, stream, sep):
+    file_opened=False
     if not hasattr(stream, 'write'):
       stream=open(stream, 'w')
+      file_opened=True
 
     writer=csv.writer(stream, delimiter=sep)
     writer.writerow(['%s' % n for n in self.col_names])
@@ -2299,13 +2324,18 @@ Statistics for column %(col)s
         if c==None:
           row[i]='NA'
       writer.writerow(row)
+    if file_opened:
+      stream.close()
+
 
   def _SaveOST(self, stream):
+    file_opened=False
     if hasattr(stream, 'write'):
       writer=csv.writer(stream, delimiter=' ')
     else:
       stream=open(stream, 'w')
       writer=csv.writer(stream, delimiter=' ')
+      file_opened=True
     if self.comment:
       stream.write(''.join(['# %s\n' % l for l in self.comment.split('\n')]))
     writer.writerow(['%s[%s]' % t for t in zip(self.col_names, self.col_types)])
@@ -2315,7 +2345,9 @@ Statistics for column %(col)s
         if c==None:
           row[i]='NA'
       writer.writerow(row)
-  
+    if file_opened:
+      stream.close()
+
      
   def GetNumpyMatrix(self, *args):
     '''
