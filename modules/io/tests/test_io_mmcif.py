@@ -1,4 +1,5 @@
 import unittest
+import subprocess
 import ost
 from ost import *
 
@@ -248,6 +249,19 @@ class TestMMCifInfo(unittest.TestCase):
     self.assertEqual(i.GetObsoleteInfo().GetID(), 'Obsolete')
     self.assertEqual(i.GetObsoleteInfo().GetPDBID(), '1FOO')
     self.assertEqual(i.GetObsoleteInfo().GetReplacedPDBID(), '2BAR')
+
+  def test_remote_loading(self):
+
+    if subprocess.call(['ping google.com -c 1'], shell=True,
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE) != 0:
+      print("No internet connection (or wrong OS) to test remote loading in "
+            "io.LoadMMCIF: ignoring unit test")
+      return
+
+    # let's hope that crambin stays the same forever
+    crambin_pdb = io.LoadMMCIF('1crn', remote=True)
+    self.assertEqual(len(crambin_pdb.residues), 46)
+    self.assertEqual(len(crambin_pdb.atoms), 327)
 
 if __name__== '__main__':
   from ost import testutils

@@ -1,5 +1,6 @@
 import unittest
 from ost import *
+import subprocess
 
 class TestPDB(unittest.TestCase):
   def setUp(self):
@@ -34,6 +35,22 @@ class TestPDB(unittest.TestCase):
     self.assertFalse(mol.BondExists(res1.FindAtom("CA"),res1.FindAtom("CB")))
     self.assertTrue(mol.BondExists(res2.FindAtom("CA"),res2.FindAtom("CB")))
     self.assertTrue(mol.BondExists(resd.FindAtom("CA"),resd.FindAtom("CB")))
+
+  def test_remote_loading(self):
+
+    if subprocess.call(['ping google.com -c 1'], shell=True,
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE) != 0:
+      print("No internet connection (or wrong OS) to test remote loading in "
+            "io.LoadPDB: ignoring unit test")
+      return
+
+    with self.assertRaises(IOError):
+      io.LoadPDB('1ake', remote=True, remote_repo="cheeseisgoodforyou")
+
+    # let's hope that crambin stays the same forever
+    crambin_pdb = io.LoadPDB('1crn', remote=True, remote_repo='pdb')
+    self.assertEqual(len(crambin_pdb.residues), 46)
+    self.assertEqual(len(crambin_pdb.atoms), 327)
     
 if __name__== '__main__':
   from ost import testutils
