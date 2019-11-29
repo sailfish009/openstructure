@@ -18,6 +18,7 @@
 #------------------------------------------------------------------------------
 from ._ost_gfx import *
 from .py_gfx_obj import PyGfxObj
+import functools
 
 WHITE=RGB(1.0,1.0,1.0)
 BLACK=RGB(0.0,0.0,0.0)
@@ -94,8 +95,10 @@ def FitToScreen(gfx_ent, width=None, height=None, margin=0.05):
         max_proj=max(proj, max_proj)
       lengths.append(max_proj-min_proj)
     def cmp_x(rhs, lhs):
-      return cmp(lhs[1], rhs[1])
-    sorted_axes=sorted(zip(rows, lengths), cmp_x)
+      # replaced cmp when porting to Python 3
+      #return cmp(lhs[1], rhs[1])
+      return (lhs[1] > rhs[1]) - (lhs[1] < rhs[1])
+    sorted_axes=sorted(zip(rows, lengths), key=functools.cmp_to_key(cmp_x))
     return [r*l for r,l in sorted_axes]
   scene=Scene()
   if not isinstance(gfx_ent, Entity):
