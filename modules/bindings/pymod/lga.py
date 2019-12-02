@@ -109,7 +109,9 @@ def GDT(pdb1, pdb2, chain1='', chain2='', reference_length=None, lga_bin=None):
   expanded_cmd=command % params
   lga_proc=subprocess.Popen(expanded_cmd, shell=True, 
                             stdout=subprocess.PIPE)
+  stdout, _ = lga_proc.communicate()
+
   length=reference_length or max(pdb1.residue_count, pdb2.residue_count)
-  result=_ParseLGAOutput(lga_proc.stdout.readlines(), reference_length)
+  result=_ParseLGAOutput(stdout.decode().splitlines(), reference_length)
   os.system('rm -r %s' % temp_d)
   return result
