@@ -210,7 +210,7 @@ module(NAME gfx SOURCES ${OST_GFX_SOURCES} ${OST_GFX_MAP_SOURCES}
                ${OST_GFX_HEADERS} ${OST_GFX_MAP_HEADERS}
        DEPENDS_ON ${OST_GFX_DEPENDENCIES})
 
-include_directories(${PNG_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR})
+include_directories(${PNG_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR})
 
 # link against OpenGL and PNG libraries
 target_link_libraries(ost_gfx ${OPENGL_LIBRARIES} ${PNG_LIBRARIES})
