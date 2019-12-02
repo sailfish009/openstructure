@@ -27,18 +27,18 @@ test:centos7.3:
     - ln -s /export/soft/modules/centos7/generic/all /scicore/soft/modules
     - source /export/soft/lua_lmod/centos7/lmod/lmod/init/bash
     - module use /scicore/soft/modules/all
-    - module load CMake/3.4.3-goolf-1.7.20
-    - module load Python/2.7.11-goolf-1.7.20
-    - module load OpenBLAS/0.2.13-GCC-4.8.4-LAPACK-3.5.0
-    - module load Eigen/3.2.8-goolf-1.7.20
-    - module load numpy/1.10.1-goolf-1.7.20-Python-2.7.11
-    - module load Boost/1.53.0-goolf-1.7.20-Python-2.7.11
-    - module load Qt5/5.9.3-goolf-1.7.20
-    - module load LibTIFF/.4.0.4-goolf-1.7.20
-    - module load Perl/5.22.2-goolf-1.7.20
-    - module load HH-suite/2.0.16-goolf-1.7.20-Boost-1.53.0-Python-2.7.11
-    - module load OpenMM/6.1-goolf-1.7.20-Python-2.7.11
-    - module load SQLite/3.9.2-goolf-1.7.20
+    - module load foss/2018b
+    - module load CMake/3.12.1-GCCcore-7.3.0
+    - module load Python/3.6.6-foss-2018b
+    - module load Eigen/3.3.1
+    - module load Boost/1.68.0-foss-2018b-Python-3.6.6
+    - module load LibTIFF/.4.0.9-GCCcore-7.3.0
+    - module load HH-suite/2.0.16-foss-2018b
+    - module load OpenMM/7.1.1-foss-2018b-Python-3.6.6
+    - module load SQLite/3.24.0-GCCcore-7.3.0
+    - module load dssp/2.2.1-foss-2018b-Boost-1.68.0-Python-3.6.6 
+    - module load msms/2.6.1-linux-x86_64 
+    - module load ClustalW2/2.1-foss-2018b
     - echo "... done running centos7.3 'before_script'."
   script:
   - echo "Testing on CentOS 7..."
@@ -50,7 +50,8 @@ test:centos7.3:
              -DOPEN_MM_PLUGIN_DIR=$EBROOTOPENMM/lib/plugins
              -DOPEN_MM_INCLUDE_DIR=$EBROOTOPENMM/include
              -DCOMPILE_TMTOOLS=1
-             -DENABLE_GFX=ON
+             -DENABLE_INFO=OFF
+             -DENABLE_GFX=OFF
              -DENABLE_GUI=OFF
              -DUSE_NUMPY=1
              -DUSE_RPATH=1
@@ -61,17 +62,16 @@ test:centos7.3:
              -DSQLITE3_LIBRARY=$EBROOTSQLITE/lib/libsqlite3.so
              -DSQLITE3_INCLUDE_DIR=$EBROOTSQLITE/include
              -DBOOST_ROOT=$EBROOTBOOST
-             -DQT_QMAKE_EXECUTABLE=$EBROOTQT5/bin/qmake
              -DPNG_LIBRARY=$EBROOTLIBPNG/lib/libpng.so
              -DPNG_INCLUDE_DIR=$EBROOTLIBPNG/include
-             -DPNG_PNG_INCLUDE_DIR=$EBROOTLIBPNG/include
              -DZLIB_LIBRARY=$EBROOTZLIB/lib/libz.so
              -DZLIB_INCLUDE_DIR=$EBROOTZLIB/include
              -DTIFF_INCLUDE_DIR=$EBROOTLIBTIFF/include
              -DTIFF_LIBRARY=$EBROOTLIBTIFF/lib/libtiff.so
              -DOPTIMIZE=1
-             -DCMAKE_C_FLAGS='-L/scicore/soft/apps/LibTIFF/4.0.4-goolf-1.7.20/lib/ -L/scicore/soft/apps/libpng/1.6.18-goolf-1.7.20/lib/ -L/scicore/soft/apps/Boost/1.53.0-goolf-1.7.20-Python-2.7.11/lib/ -L/scicore/soft/apps/Qt5/5.9.3-goolf-1.7.20/lib/ -Wno-unused-local-typedefs'
-             -DCMAKE_CXX_FLAGS='-L/scicore/soft/apps/LibTIFF/4.0.4-goolf-1.7.20/lib/ -L/scicore/soft/apps/libpng/1.6.18-goolf-1.7.20/lib/ -L/scicore/soft/apps/Boost/1.53.0-goolf-1.7.20-Python-2.7.11/lib/ -L/scicore/soft/apps/Qt5/5.9.3-goolf-1.7.20/lib/ -Wno-unused-local-typedefs'
+             -DCMAKE_C_FLAGS='-Wno-unused-local-typedefs -L/scicore/soft/apps/libpng/1.6.34-GCCcore-7.3.0/lib/ -L/scicore/soft/apps/LibTIFF/4.0.9-GCCcore-7.3.0/lib/ -L/scicore/soft/apps/zlib/1.2.11-GCCcore-7.3.0/lib' 
+             -DCMAKE_CXX_FLAGS='-Wno-unused-local-typedefs -L/scicore/soft/apps/libpng/1.6.34-GCCcore-7.3.0/lib/ -L/scicore/soft/apps/LibTIFF/4.0.9-GCCcore-7.3.0/lib/ -L/scicore/soft/apps/zlib/1.2.11-GCCcore-7.3.0/lib' 
+             -DCMAKE_EXE_LINKER_FLAGS=" -pthread"
   - make -j 2
   - echo "    ... done building OST."
   - echo "    Running unit tests for OST..."  
