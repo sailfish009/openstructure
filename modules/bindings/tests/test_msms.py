@@ -29,15 +29,15 @@ class TestMSMSBindings(unittest.TestCase):
                                                      msms_env='MSMSSERVER',
                                                      density=3,
                                                      radius=1.4)
-    self.assertEqual(self.ases, msms_ases[0])
-    self.assertEqual(self.asas, msms_asas[0])
+    self.assertAlmostEqual(self.ases, msms_ases[0], 1)
+    self.assertAlmostEqual(self.asas, msms_asas[0], 1)
 
   def testCalculateSurfaceVolume(self):
     volume=msms.CalculateSurfaceVolume(self.protein, \
                                        msms_env='MSMSSERVER',
                                        density=3,
                                        radius=1.4)
-    self.assertEqual(self.volume, volume)
+    self.assertAlmostEqual(self.volume, volume, 1)
 
 if __name__ == "__main__":
   # test if msms package is available on system, otherwise ignore tests
