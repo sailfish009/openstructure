@@ -1,4 +1,5 @@
 import unittest
+import sys
 from ost import *
 from ost import settings
 from ost.bindings import hbplus
