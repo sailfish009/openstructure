@@ -9,6 +9,7 @@ set(OST_BINDINGS_UNIT_TESTS
   test_tmtools.py
   test_ialign.py
   test_lga.py
+  test_hbplus.py
 )
 
 ost_unittest(MODULE bindings 
