@@ -8,6 +8,7 @@ from ost import settings
 import subprocess
 import re
 import os
+import shutil
 from ost import io
 from ost import mol
 
@@ -62,20 +63,23 @@ def HBondList(ent, hbplus_bin=None):
   """
   full_bin=_LocateHBPlus(hbplus_bin)
   temp_d=tempfile.mkdtemp(prefix='hbplus_')
-  hb_proc=subprocess.Popen(full_bin, shell=True, stdout=subprocess.PIPE,
-                           stdin=subprocess.PIPE)
   file_name=os.path.join(temp_d, 'ent.pdb')
   io.SaveEntity(ent, file_name)
-  hb_proc.stdin.write('%s\n' % temp_d)
-  hb_proc.stdin.write('%s\n\n' % file_name)
-  for line in hb_proc.stdout:
+  hb_proc=subprocess.Popen(full_bin, shell=True, stdout=subprocess.PIPE,
+                           stdin=subprocess.PIPE)
+  hb_proc.stdin.write(('%s\n' % temp_d).encode())
+  hb_proc.stdin.write(('%s\n\n' % file_name).encode())
+  stdout,_ = hb_proc.communicate()
+
+  for line in stdout.decode().splitlines():
     match=re.match(r'Configured for (\d+) atoms and\s+(\d+) residues\.', line)
     if match:
       assert ent.atom_count<int(match.group(1))
       assert ent.residue_count<int(match.group(2))
   hb_out=open(os.path.join(temp_d, 'ent.hb2'), 'r')
   hbonds=_ParseOutput(ent, hb_out)
-  os.system('rm -rf "%s"' % temp_d)
+  hb_out.close()
+  shutil.rmtree(temp_d)
   return hbonds
 
 def HBondScore(ent1, ent2, hbplus_bin=None):
