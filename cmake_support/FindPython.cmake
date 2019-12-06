@@ -17,8 +17,8 @@
 # Author: Marco Biasini
 #-------------------------------------------------------------------------------
 
-set(PYTHON_VERSIONS 3.8 3.7 3.6 2.7 2.6 2.5 2.4 2.3 2.2 )
-set(PYTHON_MIN_VERSION 2.2.1)
+set(PYTHON_VERSIONS 3.8 3.7 3.6 )
+set(PYTHON_MIN_VERSION 3.6.0)
 
 #-------------------------------------------------------------------------------
 # check for python framework
