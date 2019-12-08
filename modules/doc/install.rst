@@ -7,7 +7,7 @@ Brief Overview
 For a simple and portable way to use OpenStructure we recommend using a
 container solution. We provide recipes to build images for
 `Docker <https://www.docker.com/>`_ and
-`Singularity <https://www.sylabs.io/guides/2.5.1/user-guide>`_.
+`Singularity <https://sylabs.io/singularity/>`_.
 The latest recipes and instructions can be found on our GitLab site
 (`Docker instructions`_ and `Singularity instructions`_).
 
@@ -23,13 +23,14 @@ the steps which we describe in detail below. In essence, these steps are:
 Installing the Dependencies
 --------------------------------------------------------------------------------
 
-OpenStructure uses a bunch of open-source libraries. If you haven't already
-installed them, please install them now! Where appropriate, the minimally
-required version is given in parentheses.
+OpenStructure requires a c++11 enabled compiler (e.g. recent gcc/clang) and uses 
+a bunch of open-source libraries. If you haven't already installed them, please 
+install them now! Where appropriate, the minimally required version is given in 
+parentheses.
 
 * `CMake <http://cmake.org>`_ (2.6.4)
-* `Python2 <http://python.org>`_ (2.7)
-* `Boost <http://boost.org>`_ (1.53)
+* `Python3 <http://python.org>`_ (3.6)
+* `Boost <http://boost.org>`_ (1.65)
 * `zlib <https://zlib.net/>`_ (usually comes with Boost or system)
 * `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
 * `SQLite3 <https://www3.sqlite.org>`_ (3.7.13)
@@ -45,7 +46,7 @@ When you enable support for image processing, you will need:
 
 If you would like to use the info module, also install:
 
-* `Qt5 <http://qt-project.org/>`_ and a C++11 compatible compiler
+* `Qt5 <http://qt-project.org/>`_ 
 
 If you would like to use the graphical user interface (GUI), also install:
 
@@ -69,7 +70,7 @@ get the source code, use git clone:
   git clone https://git.scicore.unibas.ch/schwede/openstructure.git <directory-name>
   
 The above command will clone OpenStructure into the directory specified by
-`<directory-name>`. If omitted, the directory will be called ost. 
+`<directory-name>`. If omitted, the directory will be called openstructure. 
 
 .. note::
 
@@ -298,7 +299,7 @@ All the dependencies can be installed from the package manager as follows:
 .. code-block:: bash
 
   sudo apt-get install cmake g++ sip-dev libtiff-dev libfftw3-dev libeigen3-dev \
-               libpng-dev python-all python2.7 python-pyqt5 libboost-all-dev \
+               libpng-dev python3-all python3-pyqt5 libboost-all-dev \
                qt5-qmake qtbase5-dev libpng-dev libsqlite3-dev
 
 Now, all dependencies are located in standard locations and cmake will
@@ -309,7 +310,7 @@ version of OpenStructure.
 
 .. code-block:: bash
 
-  cmake . -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
+  cmake . -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython3.6m.so \
           -DOPTIMIZE=ON
 
 
