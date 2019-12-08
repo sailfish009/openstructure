@@ -5,17 +5,12 @@ import shutil
 from ost import settings
 from optparse import OptionParser
 import subprocess
+import sphinx
 
 if len(sys.argv)==2:
   root_dir=sys.argv[1]
 else:
   root_dir='.'
-
-def _CheckCall(cmd, shell):
-  r = subprocess.call(cmd, shell=True)
-  if r != 0:
-    sys.stderr.write("Command '%s' returned non-zero exit status %d\n"%(cmd, r))
-    sys.exit(-1)
 
 def _OutputPath(inpath, outdir):
   parts=inpath.split(os.path.sep)
@@ -71,7 +66,6 @@ def _CollectRstDocs(outdir, dirname, fnames):
         img_name = os.path.join(dirname,img)
         _CreateAndCopy(img_name, outdir)
 
-
 def ParseArgs():
   parser = OptionParser("usage: ost make.py [options] ")
   parser.add_option("-l","--linkcheck", action="store_true", default=False, dest="linkcheck", help="validate all external links")
@@ -93,25 +87,19 @@ if opts.quiet:
   opt_str=' -Q '
 
 for sub_dir in ('modules',):
-  os.path.walk(sub_dir, _CollectRstDocs, 'doc/source')
-sphinx_bin=settings.Locate(['sphinx-build', 'sphinx-build-2.6','sphinx-build-2.7'])
+  print("start walking")
+  for directory, dirnames, filenames in os.walk(sub_dir):
+    _CollectRstDocs('doc/source', directory, filenames)
 
 if opts.html:
-  cmd='%s %s -b html -c %s %s %s' % (sphinx_bin, opt_str, 
-                                     'doc/conf', 'doc/source', 'doc/build/html')
-  print(cmd)
-  _CheckCall(cmd, shell=True)
+  sphinx.main([opt_str, '-b', 'html', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
 
 if opts.doctest:
-  cmd='%s %s -b doctest -c %s %s %s' % (sphinx_bin, opt_str, 
-                                        'doc/conf', 'doc/source', 
-                                        'doc/build/doctest')
-  _CheckCall(cmd, shell=True)
+  sphinx.main([opt_str, '-b', 'doctest', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
+
 if opts.build_json:
-  cmd='%s %s -b json -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 
-                                     'doc/source', 'doc/build/json')
-  _CheckCall(cmd, shell=True)
+  sphinx.main([opt_str, '-b', 'json', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
+
 if opts.linkcheck:
-  cmd='%s %s -b linkcheck -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 
-                                          'doc/source', 'doc/build/check')
-  _CheckCall(cmd, shell=True)
+  sphinx.main([opt_str, '-b', 'linkcheck', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
+
