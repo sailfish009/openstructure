@@ -19,23 +19,24 @@
 
 from ost import gui
 
-from PyQt5 import QtCore, QtGui
-from board import Board
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 #Get Panels (Class which manages widgets)
 panels=gui.GostyApp.Instance().perspective.panels
 
 #Create Widget
-tetris=Board()
+my_awesome_widget = QtWidgets.QWidget()
+layout = QtWidgets.QVBoxLayout()
+layout.addWidget(QtWidgets.QPushButton('I dont do anything'))
+layout.addWidget(QtWidgets.QPushButton('I do even less'))
+my_awesome_widget.setLayout(layout)
 
 #Wrap widget to Qt Widget
-wid=gui.Widget(tetris)
+wid=gui.Widget(my_awesome_widget)
 
 #Add Widget to widget pool
-panels.AddWidgetToPool("Break Widget",wid)
+panels.AddWidgetToPool("Widget that doesnt do a thing", wid)
 
 #Add Widget to right panel
 panels.AddWidget(gui.PanelPosition.RIGHT_PANEL,wid,False)
 
-#Fun can start..
-tetris.start()
