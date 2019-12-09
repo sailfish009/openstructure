@@ -6,7 +6,7 @@
 # tabula rasa first
 scene.RemoveAll()
 
-
+import functools
 import ost.img.alg as img_alg
 from ost.mol.alg import EntityToDensityRosetta, HIGH_RESOLUTION
 sdh=io.LoadPDB('data/sdh-complete.pdb')
@@ -77,7 +77,7 @@ def Visualize(candidates):
       return 0
     else:
       return 1
-  candidates=sorted(candidates, cmp_correl)
+  candidates=sorted(candidates, key=functools.cmp_to_key(cmp_correl))
 
   # create render objects and add to scene
   for index, candidate in enumerate(candidates):
