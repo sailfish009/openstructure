@@ -1,170 +1,38 @@
 BootStrap: docker
-From: ubuntu:18.04
+From: registry.scicore.unibas.ch/schwede/openstructure:python3_test
+
 
 %post
 ##############################################################################
 # POST
 ##############################################################################
 
+
 # CHANGE DASH TO BASH
 rm /bin/sh
 ln -sf /bin/bash /bin/sh
 
-# DEFINE SOME ENV VARS USED DURING THE IMAGE BUILD
-##########################
-export SRC_FOLDER="/usr/local/src"
-export CPUS_FOR_MAKE=8
-export PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
-# When changing OPENSTRUCTURE_VERSION make sure to change it also in the
-# environment section of singularity recipe (this file).
-export OPENSTRUCTURE_VERSION="1.10.0"
-export OPENSTRUCTURE_SHARE="/usr/local/share/ost"
-export MSMS_VERSION="2.6.1"
-export OPENMM_VERSION="7.1.1"
-export OPENMM_INCLUDE_PATH=/usr/local/openmm/include/
-export OPENMM_LIB_PATH=/usr/local/openmm/lib/
-export JUPYTER_CONFIG_DIR="/usr/local/etc/jupyter"
-export JUPYTER_PATH="/usr/local/share/jupyter"
-export JUPYTER_RUNTIME_DIR="$JUPYTER_PATH/runtime"
-export VIRTUALENV_DIR="/usr/local/share/ost_venv"
-
 
 # INSTALL SYSTEM DEPS
 #####################
-apt-get update -y && apt-get install -y cmake \
-                                        g++ \
-                                        sip-dev \
-                                        libtiff-dev \
-                                        libfftw3-dev \
-                                        libeigen3-dev \
-                                        libboost-all-dev \
-                                        libpng-dev \
-                                        python-all \
-                                        python2.7 \
-                                        python-pyqt5 \
-                                        qt5-qmake \
-                                        qtbase5-dev \
-                                        wget \
-                                        git \
-                                        gfortran \
-                                        python-pip \
-                                        tar \
-                                        libbz2-dev \
-                                        doxygen \
-                                        swig \
-                                        clustalw \
-                                        python-virtualenv \
-                                        libsqlite3-dev \
-                                        dssp \
-                                        python-enum34 \
-                                        python-ipaddress \
-                                        locales
-
-# SET LOCALE
-############
-echo "LC_ALL=en_US.UTF-8" >> /etc/environment
-echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
-locale-gen en_US.UTF-8
-
-# INSTALL SOME PYTHON PACKAGES GLOBALY
-######################################
-pip install --no-cache-dir numpy==1.10.4 \
-                           scipy==1.0.0 \
-                           pandas==0.22.0 
+apt-get update -y && apt-get install -y python3-pip \
+                                        python3-venv
 
 
 # SET UP VIRTUALENV
 ###################
-virtualenv --system-site-packages $VIRTUALENV_DIR
+export VIRTUALENV_DIR="/usr/local/share/ost_venv"
+python3 -m venv --system-site-packages $VIRTUALENV_DIR
 . $VIRTUALENV_DIR/bin/activate
+pip3 install nglview \
+             ipython \
+             jupyter 
 
-
-# INSTALL REQUIRED PYTHON PACKAGES
-##################################
-pip install jupyter==1.0.0 \
-            nglview==1.1.6
-
-# DOWNLOAD AND INSTALL MSMS
-##############
-cd ${SRC_FOLDER}
-if [ ! -f msms_i86_64Linux2_${MSMS_VERSION}.tar.gz ]; then
-    mkdir -p msms
-    cd msms
-    wget http://mgltools.scripps.edu/downloads/tars/releases/MSMSRELEASE/REL${MSMS_VERSION}/msms_i86_64Linux2_${MSMS_VERSION}.tar.gz
-    tar -xvzf msms_i86_64Linux2_${MSMS_VERSION}.tar.gz
-    cp -v ${SRC_FOLDER}/msms/msms.x86_64Linux2.${MSMS_VERSION} /usr/local/bin/msms
-    cp -v ${SRC_FOLDER}/msms/pdb_to_xyzr /usr/local/bin/pdb_to_xyzr
-    cp -v ${SRC_FOLDER}/msms/pdb_to_xyzrn /usr/local/bin/pdb_to_xyzrn
-fi
-
-# COMPILE OPENMM FROM SOURCES. INSTALL TO /usr/local
-############################ 
-cd ${SRC_FOLDER}
-if [ ! -f openmm-${OPENMM_VERSION}.tar.gz ]; then
-    wget -O openmm-${OPENMM_VERSION}.tar.gz -nc https://github.com/pandegroup/openmm/archive/${OPENMM_VERSION}.tar.gz
-    mkdir ${SRC_FOLDER}/openmm-${OPENMM_VERSION}
-    tar xf openmm-${OPENMM_VERSION}.tar.gz -C ${SRC_FOLDER}/openmm-${OPENMM_VERSION} --strip-components=1
-    mkdir -p ${SRC_FOLDER}/openmm-${OPENMM_VERSION}/build && cd ${SRC_FOLDER}/openmm-${OPENMM_VERSION}/build
-    cmake .. && make -j $CPUS_FOR_MAKE && make install
-    cd ${SRC_FOLDER}/openmm-${OPENMM_VERSION}/build/python && python setup.py build && python setup.py install
-fi
-
-# INSTALL OST
-#############
-
-cd ${SRC_FOLDER}
-if [ ! -f openstructure-${OPENSTRUCTURE_VERSION}.tar.gz ]; then
-    # copy ost release
-    wget -O openstructure-${OPENSTRUCTURE_VERSION}.tar.gz -nc https://git.scicore.unibas.ch/schwede/openstructure/repository/${OPENSTRUCTURE_VERSION}/archive.tar.gz
-    mkdir openstructure-${OPENSTRUCTURE_VERSION}
-    tar xf openstructure-${OPENSTRUCTURE_VERSION}.tar.gz -C ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION} --strip-components=1
-    mkdir -p ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}/build && cd ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}/build
-
-    # cmake ost
-    cmake .. -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
-            -DOPTIMIZE=ON \
-            -DENABLE_MM=ON \
-            -DCOMPILE_TMTOOLS=1 \
-            -DUSE_NUMPY=1 \
-            -DOPEN_MM_LIBRARY=$OPENMM_LIB_PATH/libOpenMM.so \
-            -DOPEN_MM_INCLUDE_DIR=$OPENMM_INCLUDE_PATH \
-            -DOPEN_MM_PLUGIN_DIR=$OPENMM_LIB_PATH/plugins \
-            -DENABLE_GFX=ON \
-            -DENABLE_GUI=ON
-
-    # Build chemdict_tool
-    make -j ${CPUS_FOR_MAKE} chemdict_tool
-
-    # get the compound library
-    wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz
-    stage/bin/chemdict_tool create components.cif.gz compounds.chemlib pdb
-    stage/bin/chemdict_tool update ../modules/conop/data/charmm.cif compounds.chemlib charmm
-    mkdir -p $OPENSTRUCTURE_SHARE
-    chmod a+rw -R $OPENSTRUCTURE_SHARE
-    mv compounds.chemlib $OPENSTRUCTURE_SHARE
-
-    # Build and install OST
-    cmake .. -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
-            -DOPTIMIZE=ON \
-            -DENABLE_MM=ON \
-            -DCOMPILE_TMTOOLS=1 \
-            -DUSE_NUMPY=1 \
-            -DOPEN_MM_LIBRARY=$OPENMM_LIB_PATH/libOpenMM.so \
-            -DOPEN_MM_INCLUDE_DIR=$OPENMM_INCLUDE_PATH \
-            -DOPEN_MM_PLUGIN_DIR=$OPENMM_LIB_PATH/plugins \
-            -DENABLE_GFX=ON \
-            -DENABLE_GUI=ON \
-            -DCOMPOUND_LIB=$OPENSTRUCTURE_SHARE/compounds.chemlib
-
-    # Build chemdict_tool
-    make -j ${CPUS_FOR_MAKE}
-    make check
-    make install
-fi
-
-# SETUP JUPYTER
-###############
+# SETUP IPYTHON / JUPYTER
+#########################
+export JUPYTER_CONFIG_DIR="/usr/local/etc/jupyter"
+export JUPYTER_PATH="/usr/local/share/jupyter"
+export JUPYTER_RUNTIME_DIR="$JUPYTER_PATH/runtime"
 mkdir -p /usr/local/share/ipython
 mkdir -p $JUPYTER_PATH
 mkdir -p $JUPYTER_RUNTIME_DIR
@@ -176,60 +44,42 @@ chmod a+rw -R $JUPYTER_CONFIG_DIR
 chmod a+rw -R $JUPYTER_RUNTIME_DIR
 cat > $JUPYTER_PATH/kernels/ost-kernel/kernel.json <<EOF
 {
-	"display_name": "OST",
-	"language": "python",
-	"argv": [
-		"python",
-		"-m", "ipykernel",
+  "display_name": "OST",
+  "language": "python",
+  "argv": [
+    "python",
+    "-m", "ipykernel",
         "-f", "{connection_file}",
-		"--InteractiveShellApp.exec_PYTHONSTARTUP=False",
-		"--InteractiveShellApp.exec_files=['/usr/local/lib64/python2.7/site-packages/ost/ost_startup.py']"
-	],
-	"env": {
-	}
+    "--InteractiveShellApp.exec_PYTHONSTARTUP=False",
+    "--InteractiveShellApp.exec_files=['/usr/local/lib64/python3.6/site-packages/ost/ost_startup.py']"
+  ],
+  "env": {
+  }
 }
 EOF
 
 jupyter nbextension enable nglview --py --sys-prefix
 
-# GO HOME AND CLEANUP
-#####################
-apt-get purge -y cmake \
-                 wget \
-                 git \
-                 gfortran \
-                 python-pip \
-                 libbz2-dev \
-                 doxygen \
-                 swig
-apt-get clean
-apt-get autoremove -y
-
-cd $SRC_FOLDER && rm -rf $SRC_FOLDER/*
-
-cd /home
-
 %environment
 ##############################################################################
 # ENVIRONMENT
 ##############################################################################
-export OST_ROOT="/usr/local"
-export OPENSTRUCTURE_VERSION="1.10.0"
-export OPENMM_LIB_PATH=/usr/local/openmm/lib/
-export PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64:${OPENMM_LIB_PATH}"
-export QT_X11_NO_MITSHM=1
+# As the Singularity mounts $HOME by default Jupyter and Ipython config files
+# are moved to separate directories. Proper environmental variables are also 
+# set
 export IPYTHONDIR="/usr/local/share/ipython"
 export JUPYTER_CONFIG_DIR="/usr/local/etc/jupyter"
 export JUPYTER_PATH="/usr/local/share/jupyter"
-export JUPYTER_RUNTIME_DIR="$JUPYTER_PATH/runtime"
+export JUPYTER_RUNTIME_DIR="/usr/local/share/jupyter/runtime"
 export VIRTUALENV_DIR="/usr/local/share/ost_venv"
+
 
 %apprun ChemdictTool
 ##############################################################################
 # CHEMDICT TOOL APP
 ##############################################################################
 $OST_ROOT/bin/chemdict_tool "$@"
+
 
 %apprun lDDT
 ##############################################################################
@@ -257,6 +107,7 @@ Options:
    -i <value> sequence separation
    -e         print version
    -x         ignore residue name consistency checks
+
 
 %apprun Molck
 ##############################################################################
@@ -291,6 +142,7 @@ Options:
   --map-nonstd   maps modified residues back to the parent amino acid, for example
     MSE -> MET, SEP -> SER.
 
+
 %apprun OST
 ##############################################################################
 # OST APP
@@ -298,11 +150,12 @@ Options:
 $OST_ROOT/bin/ost "$@"
 
 %apphelp OST
-The OST app exposes OpenStructure binary and can be used to run interactive shell
-and scripts.
+The OST app exposes OpenStructure binary and can be used to run interactive
+shell and scripts.
 
 Usage:
-    singularity run --app OST <IMAGE> [ost options] [script to execute] [script parameters]
+    singularity run --app OST <IMAGE> [ost options] [script to execute]
+    [script parameters]
 
 Options:
   -i, --interactive     start interpreter interactively (must be first
@@ -321,13 +174,14 @@ goes to CWD. Thus this sould work as expected out of the box.
 # NOTEBOOK ENV
 ##############################################################################
 export DNG_ROOT=$OST_ROOT
-export DNG_INITDIR=${DNG_ROOT}/lib64/python2.7/site-packages/ost
+export DNG_INITDIR=${DNG_ROOT}/lib64/python3.6/site-packages/ost
+
 
 %apprun IPython
 ##############################################################################
 # OST IPYTON APP
 ##############################################################################
-. $VIRTUALENV_DIR/bin/activate && ipython -i $DNG_INITDIR/ost_startup.py "$@"
+. $VIRTUALENV_DIR/bin/activate && ipython3 -i $DNG_INITDIR/ost_startup.py "$@"
 
 %apphelp IPython
 OST-powered iPython shell.
@@ -340,6 +194,7 @@ Detailed help:
 
     singularity run --app IPython <IMAGE> --help
 
+
 %appenv Notebook
 ##############################################################################
 # NOTEBOOK ENV
@@ -348,6 +203,7 @@ export BIN_DIR=$OST_ROOT/bin
 export XDG_RUNTIME_DIR=""
 . $OST_ROOT/libexec/openstructure/ost_config
 
+
 %apprun Notebook
 ##############################################################################
 # NOTEBOOK APP
@@ -355,7 +211,7 @@ export XDG_RUNTIME_DIR=""
 . $VIRTUALENV_DIR/bin/activate && jupyter notebook --NotebookApp.iopub_data_rate_limit=10000000 --no-browser "$@"
 
 %apphelp Notebook
-A Jupyter notebook palyground with OST and nglview.
+A Jupyter notebook playground with OST and nglview.
 
 Usage:
 
@@ -379,8 +235,8 @@ For more details on how to use nglview see http://nglviewer.org/nglview/latest/.
 
 As the Singularity mounts $HOME by default Jupyter and Ipython config files
 are moved to separate directories. Proper environmental variables are also set.
-In addition, Jupyter is run in a separate virtualenv to not interact with possibly
-installed host version.
+In addition, Jupyter is run in a separate virtualenv to not interact with
+possibly installed host version.
 
 To list of all available options:
 
@@ -421,5 +277,3 @@ This container includes the following apps:
 To see the help for each individual app run:
 
     singularity help --app <APP NAME> <IMAGE NAME>
-
-
