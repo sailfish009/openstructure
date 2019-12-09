@@ -102,6 +102,7 @@ ENV OST_ROOT="/usr/local"
 ENV PYTHONPATH="/usr/local/lib64/python3.6/site-packages"
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64:/usr/local/openmm/lib/"
 ENV QT_X11_NO_MITSHM=1
+ENV OPENSTRUCTURE_VERSION=$OPENSTRUCTURE_VERSION
 
 ENTRYPOINT ["ost"]
 CMD ["-i"]
