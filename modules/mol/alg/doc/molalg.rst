@@ -576,7 +576,7 @@ Local Distance Test scores (lDDT, DRMSD)
     #
     # Calculate lDDT
     scorer = lDDTScorer(references=references, model=model_view, settings=settings)
-    print "Global score:", scorer.global_score
+    print("Global score:", scorer.global_score)
     scorer.PrintPerResidueStats()
   
   :param references: Sets :attr:`references`

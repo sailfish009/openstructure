@@ -12,7 +12,7 @@ which wraps the Object into a Python SIP Object.
    
   seq_viewer = gui.SequenceViewer() # Create SequenceViewer Object
   qobj = seq_viewer.qobject #Get Python SIP Object
-  print qobj.size()   # Call function on QWidget
+  print(qobj.size())   # Call function on QWidget
 
 The other way around, each boost::python Qt Object accepts Python objects as 
 input for Qt Objects. It handles the cast to a C++ Qt Object internally.

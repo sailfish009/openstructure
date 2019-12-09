@@ -30,7 +30,7 @@ Now let's inspect what we just loaded:
 
 .. code-block:: python
 
-  print map.GetPixelSampling(), map.GetSize()
+  print(map.GetPixelSampling(), map.GetSize())
     
 We can see that the sampling is set to 1.0 Angstrom in all three dimensions. The loaded map is an instance of :class:`~ost.img.ImageHandle`, a class to represent images in one, two and three dimensions.
 

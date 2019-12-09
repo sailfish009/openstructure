@@ -478,28 +478,6 @@ Saving Density Maps
     io.SaveImage(image, 'new_map.map', CCP4())
 
 
-
-
-
-.. testsetup:: io
-  from ost import io
-
-.. testcode:: io
-  :hide:
-
-  from ost import io,seq
-  ent = io.LoadPDB('./examples/entity/fragment.pdb')
-  print ent.atom_count 
-  myseq = seq.SequenceFromChain('t',ent.chains[0])
-  print myseq.GetLength()
-
-.. testoutput:: io
-  :hide:
-
-  81
-  12
-
-
 Stereochemical Parameters
 --------------------------------------------------------------------------------
 

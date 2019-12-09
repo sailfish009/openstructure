@@ -47,9 +47,9 @@ The loaded structure is an instance of :class:`~ost.mol.EntityHandle` which offe
 
 .. code-block:: python
 
-   print len(fragment.chains), fragment.chains
-   print len(fragment.residues), fragment.residues
-   print len(fragment.atoms), fragment.atoms
+   print(len(fragment.chains), fragment.chains)
+   print(len(fragment.residues), fragment.residues)
+   print(len(fragment.atoms), fragment.atoms)
 
 As you can see, our fragment consists of one peptide chain of 12 amino acids and 
 has 81 atoms in total. Now let's examine our fragment in more detail. Enter the 
@@ -58,9 +58,9 @@ command
 .. code-block:: python
 
   for residue in fragment.residues:
-    print residue, 'has', len(residue.atoms), 'atom(s).'
+    print(residue, 'has', len(residue.atoms), 'atom(s).')
     for atom in residue.atoms:
-      print ' ', atom.name, atom.pos
+      print(' ', atom.name, atom.pos)
 
 
 This will group the atoms by residue. And, for completeness, we will first group them by chain, then by residues.
@@ -68,11 +68,11 @@ This will group the atoms by residue. And, for completeness, we will first group
 .. code-block:: python
 
   for chain in fragment.chains:
-    print 'chain', chain.name, 'has', len(chain.residues), 'residue(s)'
+    print('chain', chain.name, 'has', len(chain.residues), 'residue(s)')
     for residue in chain.residues:
-      print ' ', residue, 'has', len(residue.atoms), 'atom(s).'
+      print(' ', residue, 'has', len(residue.atoms), 'atom(s).')
       for atom in residue.atoms:
-        print '    ', atom.name, atom.pos
+        print('    ', atom.name, atom.pos)
 
 A protein fragment would not be complete without bonds. Let's see 
 what bonds we have in there:
@@ -80,7 +80,7 @@ what bonds we have in there:
 .. code-block:: python
   
   for bond in fragment.bonds:
-    print bond
+    print(bond)
     
 Let There Be Shiny Graphics
 --------------------------------------------------------------------------------

@@ -39,7 +39,7 @@ Point
     ..code-block:: python
     
       p=img.Point(1,2,3)
-      print p
+      print(p)
       p[1]=5
 
   .. method:: ToVec3()
@@ -140,4 +140,4 @@ Extent
     # visits all the pixels in the extent and
     # prints out their values
     for pixel in ei:
-      print i.GetReal(pixel)
+      print(i.GetReal(pixel))

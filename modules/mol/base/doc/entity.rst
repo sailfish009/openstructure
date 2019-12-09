@@ -58,7 +58,7 @@ The Handle Classes
     .. code-block:: python
     
       for res in ent.residues:
-        print res.name, res.atom_count
+        print(res.name, res.atom_count)
     
     Also available as :meth:`GetResidueList`. To access a single residue, use 
     :meth:`FindResidue`. 
@@ -380,7 +380,7 @@ The Handle Classes
      
        chain=ent.FindChain("A")
        for res in chain.residues:
-         print res.name, res.atom_count
+         print(res.name, res.atom_count)
    
      Also available as :meth:`GetResidueList`. To access a single residue, use 
      :meth:`FindResidue`. 
@@ -394,12 +394,12 @@ The Handle Classes
      .. code-block:: python
      
        chain=ent.FindChain("A")
-       print chain.residues # [A.GLY1, A.GLY2, A.GLY4A, A.GLY4B]
-       print chain.in_sequence # prints true
+       print(chain.residues) # [A.GLY1, A.GLY2, A.GLY4A, A.GLY4B]
+       print(chain.in_sequence) # prints true
        
        chain=ent.FindChain("B")
-       print chain.residues # [B.GLY1, B.GLY4, B.GLY3]
-       print chain.in_sequence # prints false
+       print(chain.residues) # [B.GLY1, B.GLY4, B.GLY3]
+       print(chain.in_sequence) # prints false
 
   .. attribute:: residue_count
 
@@ -537,7 +537,7 @@ The Handle Classes
     
     .. code-block:: python
     
-      print ''.join([r.one_letter_code for r in chain.residues])
+      print(''.join([r.one_letter_code for r in chain.residues]))
     
     :type: str
     
@@ -1063,7 +1063,7 @@ The View Classes
     .. code-block:: python
     
       for res in ent.residues:
-        print res.name, res.atom_count
+        print(res.name, res.atom_count)
     
     Also available as :meth:`GetResidueList`. To access a single residue, use 
     :meth:`FindResidue`. 
@@ -1410,7 +1410,7 @@ The View Classes
      
        chain=ent.FindChain("A")
        for res in chain.residues:
-         print res.name, res.atom_count
+         print(res.name, res.atom_count)
    
      Also available as :meth:`GetResidueList`. To access a single residue, use
      :meth:`FindResidue`.
@@ -1424,12 +1424,12 @@ The View Classes
      .. code-block:: python
      
        chain=ent.FindChain("A")
-       print chain.residues # [A.GLY1, A.GLY2, A.GLY4A, A.GLY4B]
-       print chain.in_sequence # prints true
+       print(chain.residues) # [A.GLY1, A.GLY2, A.GLY4A, A.GLY4B]
+       print(chain.in_sequence) # prints true
        
        chain=ent.FindChain("B")
-       print chain.residues # [B.GLY1, B.GLY4, B.GLY3]
-       print chain.in_sequence # prints false
+       print(chain.residues) # [B.GLY1, B.GLY4, B.GLY3]
+       print(chain.in_sequence) # prints false
 
   .. attribute:: atoms
 
@@ -1653,7 +1653,7 @@ The View Classes
   
     .. code-block:: python
   
-      print ''.join([r.one_letter_code for r in chain.residues])
+      print(''.join([r.one_letter_code for r in chain.residues]))
   
     :type: str
   

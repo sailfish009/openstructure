@@ -60,14 +60,14 @@ Algorithms for Alignments
        aln_a = seq.CreateAlignment()
        aln_a.AddSequence(seq_a1)
        aln_a.AddSequence(seq_a2)
-       print aln_a
+       print(aln_a)
        # >>> A1  acdefghikl-mn
        # >>> A2  atd-fghikllmn
 
        aln_b = seq.CreateAlignment()
        aln_b.AddSequence(seq_b1)
        aln_b.AddSequence(seq_b2)
-       print aln_b
+       print(aln_b)
        # >>> B1  acdefg-hiklmn
        # >>> B2  acd---qhirlmn
 
@@ -76,7 +76,7 @@ Algorithms for Alignments
        aln_list.append(aln_b)
 
        merged_aln = ost.seq.alg.MergePairwiseAlignments(aln_list, ref_seq)
-       print merged_aln
+       print(merged_aln)
        # >>> ref  acdefg-hikl-mn
        # >>> A2   atd-fg-hikllmn
        # >>> B2   acd---qhirl-mn
@@ -121,7 +121,7 @@ Algorithms for Alignments
     seq_a = seq.CreateSequence('A', 'acdefghiklmn')
     seq_b = seq.CreateSequence('B', 'acdhiklmn')
     alns = seq.alg.LocalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
-    print alns[0].ToString(80)
+    print(alns[0].ToString(80))
     # >>> A acdefghiklmn
     # >>> B acd---hiklmn
 
@@ -150,7 +150,7 @@ Algorithms for Alignments
     seq_a = seq.CreateSequence('A', 'acdefghiklmn')
     seq_b = seq.CreateSequence('B', 'acdhiklmn')
     alns = seq.alg.GlobalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
-    print alns[0].ToString(80)
+    print(alns[0].ToString(80))
     # >>> A acdefghiklmn
     # >>> B acd---hiklmn
 
@@ -193,11 +193,11 @@ Algorithms for Alignments
     seq_a = seq.CreateSequence('A', 'abcdefghijklmnok')
     seq_b = seq.CreateSequence('B', 'cdehijk')
     alns = seq.alg.GlobalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
-    print alns[0].ToString(80)
+    print(alns[0].ToString(80))
     # >>> A abcdefghijklmnok
     # >>> B --cde--hi-----jk
     alns = seq.alg.SemiGlobalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
-    print alns[0].ToString(80)
+    print(alns[0].ToString(80))
     # >>> A abcdefghijklmnok
     # >>> B --cde--hijk-----
 
@@ -370,7 +370,7 @@ differences between the structures.
   dist_to_mean = seq.alg.CreateDist2Mean(d_map)
 
   # report min. and max. variances
-  print "MIN-MAX:", var_map.Min(), "-", var_map.Max()
+  print("MIN-MAX:", var_map.Min(), "-", var_map.Max())
   # get data and json-strings for further processing
   var_map_data = var_map.GetData()
   var_map_json = var_map.GetJsonString()

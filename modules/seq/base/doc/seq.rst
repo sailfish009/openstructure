@@ -56,7 +56,7 @@ input  methods, sequences can also be loaded from a string:
   seq_string = '''>sequence
   abcdefghiklmnop'''
   s = io.SequenceFromString(seq_string, 'fasta')
-  print s.name, s # will print "sequence abcdefghiklmnop"
+  print(s.name, s) # will print "sequence abcdefghiklmnop"
   
 Note that, in that case specifying the format is mandatory.
 
@@ -92,8 +92,8 @@ The SequenceHandle
     .. code-block:: python
       
       s=seq.CreateSequence("A", "abc---def")
-      print s.GetPos(1) # prints 1
-      print s.GetPos(3) # prints 6
+      print(s.GetPos(1)) # prints 1
+      print(s.GetPos(3)) # prints 6
     
     The reverse mapping, that is from position in the sequence to residue index 
     can be achieved with :meth:`GetResidueIndex`.
@@ -108,12 +108,12 @@ The SequenceHandle
     .. code-block:: python
       
       s=seq.CreateSequence("A", "abc--def")
-      print s.GetResidueIndex(1) # prints 1
-      print s.GetResidueIndex(6) # prints 4
+      print(s.GetResidueIndex(1)) # prints 1
+      print(s.GetResidueIndex(6)) # prints 4
       # the following line raises an exception of type
       # Error with the message "requested position contains 
       # a gap"
-      print s.GetResidueIndex(3)
+      print(s.GetResidueIndex(3))
 
   .. method:: GetResidue(pos)
      
@@ -319,11 +319,11 @@ an alignment:
   aln=io.LoadAlignment('aln.fasta')
   # iterate over the columns
   for col in aln:
-    print col
+    print(col)
 
   # iterate over the sequences
   for s in aln.sequences:
-    print s
+    print(s)
 
 .. function:: CreateAlignment()
 
@@ -376,7 +376,7 @@ an alignment:
       aln.AddSequence(seq.CreateSequence("A", "abcdefghik"))
       aln.AddSequence(seq.CreateSequence("B", "1234567890"))
       # The following command will print the output given below
-      print aln.ToString(7)
+      print(aln.ToString(7))
       # A abcde
       # B 12345
       #
@@ -431,7 +431,7 @@ an alignment:
       aln.AddSequence(seq.CreateSequence("B", "1234567890"))
       aln.Cut(4, 7)
       
-      print aln.ToString(80)
+      print(aln.ToString(80))
       # will print
       # A abcdhik
       # B 1234890

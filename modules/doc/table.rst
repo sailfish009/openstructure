@@ -42,14 +42,14 @@ Iterating over table items:
   # iterate over all rows
   for row in tab.rows:
     # print complete row
-    print row
+    print(row)
 
     # print value for column 'foo'
-    print row[idx]
+    print(row[idx])
 
   # iterate over all rows of selected columns
   for foo, bar in tab.Zip('foo','bar'):
-    print foo, bar
+    print(foo, bar)
 
 Doing element wise mathematical operations on entire colums:
 
@@ -63,7 +63,7 @@ Doing element wise mathematical operations on entire colums:
   # addition of column foo and column bar
   tab.AddCol('qux', 'f', tab['foo']+tab['bar'])
 
-  print tab
+  print(tab)
 
 
 Select part of the table based on a query:
@@ -76,11 +76,11 @@ Select part of the table based on a query:
 
   # select all rows where foo>=2 and bar<10
   subtab = tab.Select('foo>=2 and bar<10')
-  print subtab
+  print(subtab)
 
   # select all rows where foo>3 or bar=1
   subtab = tab.Select('foo>3 or bar=1')
-  print subtab
+  print(subtab)
 
 
 Functions You Might be Interested In
