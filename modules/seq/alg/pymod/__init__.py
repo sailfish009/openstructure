@@ -3,13 +3,15 @@ from ost.seq.alg.mat import *
 
 def ValidateSEQRESAlignment(aln, chain=None):
   """
-  Checks a sequence aligned to a SEQRES sequence to be free of strand breaks.
-  Residues divided by gaps are not considered as breakage but may also not be
-  connected.
+  Checks if sequence in alignment has same connectivity as residues in chain.
+  This looks for connected stretches in both the sequence and the chain and
+  returns False if they don't match. This uses the connectivity of the protein
+  backbone.
 
-  :param aln: Alignment
+  :param aln: Alignment of two sequences with second one expected to map to
+              residues in *chain*.
   :type aln: :class:`~ost.seq.AlignmentHandle`
-  :param chain: Source of the sequence
+  :param chain: Source of the sequence.
   :type chain: :class:`~ost.mol.ChainHandle`
 
   :returns: True if all residues (beside gapped ones) are connected, False
@@ -66,20 +68,20 @@ def AlignToSEQRES(chain, seqres, try_resnum_first=False, validate=True):
   SEQRES. If there are any additional residues in the chain, the function
   raises a ValueError.
 
-  If 'try_resnum_first' is set, building the alignment following residue numbers
-  is tried first.
-
-  If 'validate' is set (default), the alignment is checked using
-  :func:`~ost.seq.alg.ValidateSEQRESAlignment`.
-
   :param chain: Source of the sequence
   :type chain: :class:`~ost.mol.ChainHandle`
   :param seqres: SEQRES sequence
   :type seqres: :class:`str`
-  :param try_resnum_first: Try to align by residue number
+  :param try_resnum_first: If set to True, this first builds an alignment using
+                           residue numbers and checks if the one-letter-codes
+                           match. If they all match, this alignment is used
+                           (and possibly validated). Otherwise, it displays a
+                           warning and falls back to the connectivity-based
+                           alignment.
   :type try_resnum_first: :class:`bool`
-  :param validate: Validate alignment by
-                   :func:`~ost.seq.alg.ValidateSEQRESAlignment`
+  :param validate: If set to True, the alignment is additionally checked by
+                   :func:`~ost.seq.alg.ValidateSEQRESAlignment` and raises
+                   a ValueError if the validation failed.
   :type validate: :class:`bool`
 
   :returns: The alignment of the residues in the chain and the SEQRES entries.

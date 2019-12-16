@@ -290,13 +290,20 @@ def LoadMMCIF(filename, fault_tolerant=None, calpha_only=None, profile='DEFAULT'
      remote pdb repository www.pdb.org. The filename is then interpreted as the 
      pdb id.
 
-  :rtype: :class:`~ost.mol.EntityHandle`.
+  :rtype: :class:`~ost.mol.EntityHandle` (or tuple if *seqres* or *info* are
+          True).
 
-  :param seqres: Whether to read SEQRES records. If set to True, the loaded 
-    entity and seqres entry will be returned as second item.
+  :param seqres: Whether to read SEQRES records. If True, a
+                 :class:`~ost.seq.SequenceList` object is returned as the second
+                 item. The sequences in the list are named according to the
+                 mmCIF chain name.
+                 This feature requires a default
+                 :class:`compound library <ost.conop.CompoundLib>`
+                 to be defined and accessible via
+                 :func:`~ost.conop.GetDefaultLib` or an empty list is returned.
 
   :param info: Whether to return an info container with the other output.
-               Returns a :class:`MMCifInfo` object as last item.
+               If True, a :class:`MMCifInfo` object is returned as last item.
 
   :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous
            or non-existent file.

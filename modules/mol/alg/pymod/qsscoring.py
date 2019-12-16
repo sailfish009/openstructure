@@ -553,6 +553,8 @@ class QSscorer:
   def GetOligoLDDTScorer(self, settings, penalize_extra_chains=True):
     """
     :return: :class:`OligoLDDTScorer` object, setup for this QS scoring problem.
+             The scorer is set up with :attr:`qs_ent_1` as the reference and
+             :attr:`qs_ent_2` as the model.
     :param settings: Passed to :class:`OligoLDDTScorer` constructor.
     :param penalize_extra_chains: Passed to :class:`OligoLDDTScorer` constructor.
     """
