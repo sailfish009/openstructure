@@ -5,7 +5,6 @@ FROM ubuntu:18.04
 ARG OPENSTRUCTURE_VERSION="python3_port"
 ARG SRC_FOLDER="/usr/local/src"
 ARG CPUS_FOR_MAKE=2
-ARG OPENSTRUCTURE_SHARE="/usr/local/share/ost"
 ARG MSMS_VERSION="2.6.1"
 ARG OPENMM_VERSION="7.1.1"
 ARG OPENMM_INCLUDE_PATH="/usr/local/openmm/include/"
@@ -89,8 +88,7 @@ RUN cd ${SRC_FOLDER} && \
     make -j ${CPUS_FOR_MAKE} && \
     wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz && \
     stage/bin/chemdict_tool create components.cif.gz compounds.chemlib pdb && stage/bin/chemdict_tool update ../modules/conop/data/charmm.cif compounds.chemlib charmm && \
-    mkdir -p $OPENSTRUCTURE_SHARE && chmod a+rw -R $OPENSTRUCTURE_SHARE && mv compounds.chemlib $OPENSTRUCTURE_SHARE && \
-    cmake .. -DCOMPOUND_LIB=$OPENSTRUCTURE_SHARE/compounds.chemlib && \
+    cmake .. -DCOMPOUND_LIB=${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}/build/compounds.chemlib && \
              make -j ${CPUS_FOR_MAKE} && make check && make install && \
     rm ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}.tar.gz && \
     rm -rf ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}
@@ -106,3 +104,4 @@ ENV OPENSTRUCTURE_VERSION=$OPENSTRUCTURE_VERSION
 
 ENTRYPOINT ["ost"]
 CMD ["-i"]
+
