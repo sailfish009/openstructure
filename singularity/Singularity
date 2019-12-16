@@ -15,15 +15,7 @@ ln -sf /bin/bash /bin/sh
 
 # INSTALL SYSTEM DEPS
 #####################
-apt-get update -y && apt-get install -y python3-pip \
-                                        python3-venv
-
-
-# SET UP VIRTUALENV
-###################
-export VIRTUALENV_DIR="/usr/local/share/ost_venv"
-python3 -m venv --system-site-packages $VIRTUALENV_DIR
-. $VIRTUALENV_DIR/bin/activate
+apt-get update -y && apt-get install -y python3-pip
 pip3 install nglview \
              ipython \
              jupyter 
@@ -71,7 +63,6 @@ export IPYTHONDIR="/usr/local/share/ipython"
 export JUPYTER_CONFIG_DIR="/usr/local/etc/jupyter"
 export JUPYTER_PATH="/usr/local/share/jupyter"
 export JUPYTER_RUNTIME_DIR="/usr/local/share/jupyter/runtime"
-export VIRTUALENV_DIR="/usr/local/share/ost_venv"
 
 
 %apprun ChemdictTool
@@ -181,7 +172,7 @@ export DNG_INITDIR=${DNG_ROOT}/lib64/python3.6/site-packages/ost
 ##############################################################################
 # OST IPYTON APP
 ##############################################################################
-. $VIRTUALENV_DIR/bin/activate && ipython3 -i $DNG_INITDIR/ost_startup.py "$@"
+ipython3 -i $DNG_INITDIR/ost_startup.py "$@"
 
 %apphelp IPython
 OST-powered iPython shell.
@@ -208,7 +199,7 @@ export XDG_RUNTIME_DIR=""
 ##############################################################################
 # NOTEBOOK APP
 ##############################################################################
-. $VIRTUALENV_DIR/bin/activate && jupyter notebook --NotebookApp.iopub_data_rate_limit=10000000 --no-browser "$@"
+jupyter notebook --NotebookApp.iopub_data_rate_limit=10000000 --no-browser "$@"
 
 %apphelp Notebook
 A Jupyter notebook playground with OST and nglview.
@@ -235,8 +226,6 @@ For more details on how to use nglview see http://nglviewer.org/nglview/latest/.
 
 As the Singularity mounts $HOME by default Jupyter and Ipython config files
 are moved to separate directories. Proper environmental variables are also set.
-In addition, Jupyter is run in a separate virtualenv to not interact with
-possibly installed host version.
 
 To list of all available options:
 
