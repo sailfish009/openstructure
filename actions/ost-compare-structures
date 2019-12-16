@@ -989,20 +989,6 @@ def _Main():
         with open(opts.output, "w") as outfile:
             json.dump(result, outfile, indent=4, sort_keys=True)
 
-class _Unbuffered(object):
-    # https://stackoverflow.com/questions/45263064/how-can-i-fix-this-valueerror-cant-have-unbuffered-text-i-o-in-python-3/45263101
-    def __init__(self, stream):
-        self.stream = stream
-    def write(self, data):
-        self.stream.write(data)
-        self.stream.flush()
-    def writelines(self, datas):
-        self.stream.writelines(datas)
-        self.stream.flush()
-    def __getattr__(self, attr):
-        return getattr(self.stream, attr)
-
 if __name__ == '__main__':
-    # make script 'hot'
-    sys.stdout = _Unbuffered(sys.stdout)
     _Main()
+
