@@ -57,6 +57,9 @@ If you would like to use the :mod:`molecular mechanics <ost.mol.mm>` module:
 
 * `OpenMM <https://simtk.org/home/openmm>`_ (6.1)
 
+We do not provide backwards compatibility to Python 2.7. The last
+release supporting Python 2.7 is 1.11.0.
+
 
 Getting the Source Code
 --------------------------------------------------------------------------------
