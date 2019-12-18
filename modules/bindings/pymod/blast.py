@@ -208,8 +208,8 @@ def BlastVersion(blast_location=None):
 def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
          blast_location=None, outfmt=0, filter_low_complexity=True):
   """
-  Runs a protein vs. protein blast search. The results are returned as a
-  list of :class:`BlastHit` instances.
+  Runs a protein vs. protein blast search. The results are returned
+  according to the value of the ``outfmt`` parameter.
 
   :param query: the query sequence
   :type query: :class:`seq.ConstSequenceHandle`
@@ -224,10 +224,13 @@ def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
   :param gap_ext: Gap extension penalty. Only a subset of gap extension
      penalties are supported for each of the substitution matrices. Consult the
      blast docs for more information.
-  :param outfmt: output format, where '0' corresponds to default output (parsed blast output and 1 to raw output)
+  :param outfmt: output format, where '0' corresponds to default output (parsed 
+     blast output and 1 to raw string output).
   :param filter_low_complexity: Mask off segments of the query sequence that 
      have low compositional complexity, as determined by the SEG program of 
      Wootton & Federhen (Computers and Chemistry, 1993)
+  :rtype: :class:`BlastHit` (with ``outfmt=0``) or :class:`str` 
+     (with ``outfmt=1``)
   """
   subst_mats=('BLOSUM45', 'BLOSUM62', 'BLOSUM80', 'PAM30', 'PAM70',)
   if matrix not in subst_mats:
@@ -281,4 +284,4 @@ def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
   if outfmt==0:
     return ParseBlastOutput(stdout.decode())
   else:
-    return stdout
+    return stdout.decode()
