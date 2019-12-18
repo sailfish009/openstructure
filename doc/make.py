@@ -5,7 +5,7 @@ import shutil
 from ost import settings
 from optparse import OptionParser
 import subprocess
-import sphinx
+import sphinx.cmd.build
 
 if len(sys.argv)==2:
   root_dir=sys.argv[1]
@@ -82,24 +82,23 @@ if not opts.html and\
    not opts.doctest:
      opts.html=True
 
-opt_str='' 
+extra_opts=[]
 if opts.quiet:
-  opt_str=' -Q '
+  extra_opts=['-Q']
 
 for sub_dir in ('modules',):
-  print("start walking")
   for directory, dirnames, filenames in os.walk(sub_dir):
     _CollectRstDocs('doc/source', directory, filenames)
 
 if opts.html:
-  sphinx.main([opt_str, '-b', 'html', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
+  sphinx.cmd.build.main(extra_opts + ['-b', 'html', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
 
 if opts.doctest:
-  sphinx.main([opt_str, '-b', 'doctest', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
+  sphinx.cmd.build.main(extra_opts + ['-b', 'doctest', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
 
 if opts.build_json:
-  sphinx.main([opt_str, '-b', 'json', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
+  sphinx.cmd.build.main(extra_opts + ['-b', 'json', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
 
 if opts.linkcheck:
-  sphinx.main([opt_str, '-b', 'linkcheck', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
+  sphinx.cmd.build.main(extra_opts + ['-b', 'linkcheck', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
 
