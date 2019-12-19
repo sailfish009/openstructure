@@ -5,7 +5,12 @@ import shutil
 from ost import settings
 from optparse import OptionParser
 import subprocess
-import sphinx.cmd.build
+try:
+    # Import for new versions of Sphinx (tested with 2.3.0)
+    from sphinx.cmd.build import main as sphinx_main
+except ImportError:
+    # Import for older versions of Sphinx (should work with 1.6.7)
+    from sphinx import main as sphinx_main
 
 if len(sys.argv)==2:
   root_dir=sys.argv[1]
@@ -91,14 +96,14 @@ for sub_dir in ('modules',):
     _CollectRstDocs('doc/source', directory, filenames)
 
 if opts.html:
-  sphinx.cmd.build.main(extra_opts + ['-b', 'html', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
+  sphinx_main(extra_opts + ['-b', 'html', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
 
 if opts.doctest:
-  sphinx.cmd.build.main(extra_opts + ['-b', 'doctest', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
+  sphinx_main(extra_opts + ['-b', 'doctest', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
 
 if opts.build_json:
-  sphinx.cmd.build.main(extra_opts + ['-b', 'json', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
+  sphinx_main(extra_opts + ['-b', 'json', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
 
 if opts.linkcheck:
-  sphinx.cmd.build.main(extra_opts + ['-b', 'linkcheck', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
+  sphinx_main(extra_opts + ['-b', 'linkcheck', '-c', 'doc/conf', 'doc/source', 'doc/build/html'])
 
