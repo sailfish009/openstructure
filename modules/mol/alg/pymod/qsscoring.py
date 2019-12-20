@@ -22,7 +22,7 @@ from ost.bindings.clustalw import ClustalW
 from ost.mol.alg import lDDTScorer
 from ost.seq.alg.renumber import Renumber
 import numpy as np
-from scipy.misc import factorial
+from scipy.special import factorial
 from scipy.special import binom
 from scipy.cluster.hierarchy import fclusterdata
 import itertools
