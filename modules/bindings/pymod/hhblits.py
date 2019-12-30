@@ -667,7 +667,7 @@ class HHblits:
         job = subprocess.Popen(cs_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, _ = job.communicate()
-        lines = sout.decode()
+        sout = sout.decode()
         if 'Wrote abstract state sequence to' in sout:
             return cs_file
 
