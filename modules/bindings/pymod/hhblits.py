@@ -667,7 +667,8 @@ class HHblits:
         job = subprocess.Popen(cs_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, _ = job.communicate()
-        if b'Wrote abstract state sequence to' in sout:
+        lines = sout.decode()
+        if 'Wrote abstract state sequence to' in sout:
             return cs_file
 
         ost.LogWarning('Creating column state sequence file (%s) failed' % \
