@@ -86,7 +86,7 @@ if len(parser.rargs)>0 :
   sys_argv_backup=sys.argv
   sys.argv=parser.rargs
   try:
-    exec(compile(open(script).read(), script, 'exec'))
+    exec(compile(open(script,'rb').read(), script, 'exec'))
   finally:
     sys.argv=sys_argv_backup
 
