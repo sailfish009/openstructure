@@ -1,4 +1,4 @@
-Changes in Release 1.X.0
+Changes in Release 1.11.0
 --------------------------------------------------------------------------------
 
  * This is expected to be the last release supporting Python 2.

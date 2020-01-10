@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 # ARGUMENTS
 ###########
 
-ARG OPENSTRUCTURE_VERSION="1.10.0"
+ARG OPENSTRUCTURE_VERSION="1.11.0"
 ARG SRC_FOLDER="/usr/local/src"
 ARG CPUS_FOR_MAKE=8
 ARG PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
