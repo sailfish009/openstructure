@@ -205,7 +205,7 @@ can influence it.
     files directly)
   * `PNG_LIBRARY` defines the location of the libpng library (file name starting
     with `libpng`)
-  * `PNG_INCLUDE_DIR` defines the include folder of libpng (contains include
+  * `PNG_PNG_INCLUDE_DIR` defines the include folder of libpng (contains include
     files directly)
   * `ZLIB_LIBRARY` defines the location of the zlib library (file name starting
     with `libz`)

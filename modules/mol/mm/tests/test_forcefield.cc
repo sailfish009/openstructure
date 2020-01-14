@@ -18,7 +18,6 @@
 //------------------------------------------------------------------------------
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/auto_unit_test.hpp>
 #include <ost/mol/mm/settings.hh>
 #include <ost/mol/mm/forcefield.hh>
 #include <ost/mol/mm/interaction.hh>

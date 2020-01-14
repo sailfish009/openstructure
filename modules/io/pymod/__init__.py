@@ -65,8 +65,8 @@ def _override(val1, val2):
 def LoadPDB(filename, restrict_chains="", no_hetatms=None,
             fault_tolerant=None, load_multi=False, quack_mode=None,
             join_spread_atom_records=None, calpha_only=None,
-            profile='DEFAULT', remote=False, dialect=None,
-            seqres=False, bond_feasibility_check=None):
+            profile='DEFAULT', remote=False, remote_repo='pdb',
+            dialect=None, seqres=False, bond_feasibility_check=None):
   """
   Load PDB file from disk and return one or more entities. Several options 
   allow to customize the exact behaviour of the PDB import. For more information 
@@ -90,8 +90,16 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
       :attr:`IOProfile.join_spread_atom_records`.
   
   :param remote: If set to True, the method tries to load the pdb from the 
-     remote pdb repository www.pdb.org. The filename is then interpreted as the 
-     pdb id.
+     remote repository given as *remote_repo*. The filename is then 
+     interpreted as the entry id as further specified for the *remote_repo*
+     parameter.
+
+  :param remote_repo: Remote repository to fetch structure if *remote* is True. 
+                      Must be one in ['pdb', 'smtl', 'pdb_redo']. In case of 
+                      'pdb' and 'pdb_redo', the entry must be given as lower 
+                      case pdb id, which loads the deposited assymetric unit 
+                      (e.g. '1ake'). In case of 'smtl', the entry must also 
+                      specify the desired biounit (e.g. '1ake.1').
      
   :rtype: :class:`~ost.mol.EntityHandle` or a list thereof if `load_multi` is 
       True.
@@ -135,8 +143,10 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
 
   tmp_file = None # avoid getting out of scope
   if remote:
+    if remote_repo not in ['pdb', 'smtl', 'pdb_redo']:
+      raise IOError("remote_repo must be in ['pdb', 'smtl', 'pdb_redo']")
     from ost.io.remote import RemoteGet
-    tmp_file =RemoteGet(filename)
+    tmp_file =RemoteGet(filename, from_repo=remote_repo)
     filename = tmp_file.name
   
   conop_inst=conop.Conopology.Instance()
@@ -280,13 +290,20 @@ def LoadMMCIF(filename, fault_tolerant=None, calpha_only=None, profile='DEFAULT'
      remote pdb repository www.pdb.org. The filename is then interpreted as the 
      pdb id.
 
-  :rtype: :class:`~ost.mol.EntityHandle`.
+  :rtype: :class:`~ost.mol.EntityHandle` (or tuple if *seqres* or *info* are
+          True).
 
-  :param seqres: Whether to read SEQRES records. If set to True, the loaded 
-    entity and seqres entry will be returned as second item.
+  :param seqres: Whether to read SEQRES records. If True, a
+                 :class:`~ost.seq.SequenceList` object is returned as the second
+                 item. The sequences in the list are named according to the
+                 mmCIF chain name.
+                 This feature requires a default
+                 :class:`compound library <ost.conop.CompoundLib>`
+                 to be defined and accessible via
+                 :func:`~ost.conop.GetDefaultLib` or an empty list is returned.
 
   :param info: Whether to return an info container with the other output.
-               Returns a :class:`MMCifInfo` object as last item.
+               If True, a :class:`MMCifInfo` object is returned as last item.
 
   :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous
            or non-existent file.

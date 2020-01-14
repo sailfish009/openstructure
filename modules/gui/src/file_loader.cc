@@ -126,7 +126,7 @@ void FileLoader::AddToScene(const QString& filename, gfx::GfxObjP obj)
       gfx::Scene::Instance().SetCenter(obj->GetCenter());
     }
   }
-  catch (Error m) {
+  catch (Error& m) {
     FileLoader::HandleError(m, GFX_ADD, filename, obj);
   }
 }
@@ -208,7 +208,7 @@ gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHand
     try{
       handler = io::IOManager::Instance().FindEntityImportHandler(filename.toStdString());
     }
-    catch(io::IOUnknownFormatException e){
+    catch(io::IOUnknownFormatException& e){
       handler = io::EntityIOHandlerP();
     }
   }
@@ -242,7 +242,7 @@ gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename, io::MapIOHandlerPtr
     try{
       handler = io::IOManager::Instance().FindMapImportHandlerFile(filename.toStdString(),io::UndefinedImageFormat());
     }
-    catch(io::IOUnknownFormatException e){
+    catch(io::IOUnknownFormatException& e){
       handler = io::MapIOHandlerPtr();
     }
   }
@@ -275,7 +275,7 @@ gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename, io::SurfaceIOHa
     try{
       handler = io::IOManager::Instance().FindSurfaceImportHandler(filename.toStdString(),"auto");
     }
-    catch(io::IOUnknownFormatException e){
+    catch(io::IOUnknownFormatException& e){
       handler = io::SurfaceIOHandlerPtr();
     }
   }
@@ -306,7 +306,7 @@ gfx::GfxObjP FileLoader::TryLoadAlignment(const QString& filename,
     try{
       handler = io::IOManager::Instance().FindAlignmentImportHandler(filename.toStdString(),"auto");
     }
-    catch(io::IOUnknownFormatException e){
+    catch(io::IOUnknownFormatException& e){
       handler = io::SequenceIOHandlerPtr();
     }
   }
@@ -378,7 +378,7 @@ void FileLoader::LoadPDB(const QString& filename, const QString& selection)
     try{
       gfx::Scene::Instance().Add(gfx_ent);
     }
-    catch (Error e) {
+    catch (Error& e) {
       HandleError(e, GFX_ADD, filename, gfx_ent);
     }
     if (gfx::Scene::Instance().GetRootNode()->GetChildCount()==1) {
@@ -391,7 +391,7 @@ void FileLoader::LoadPDB(const QString& filename, const QString& selection)
         gfx::Scene::Instance().Add(gfx_ent);
       }
     }
-    catch (Error e) {
+    catch (Error& e) {
       FileLoader::HandleError(e,GFX_MULTIPLE_ADD,filename);
     }
   }

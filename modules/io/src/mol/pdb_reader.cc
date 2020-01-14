@@ -821,7 +821,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
     if (me.IsValid()) {
       try {
         editor.AddAltAtomPos(String(1, alt_loc), me, apos, o, b);
-      } catch (Error) {
+      } catch (Error&) {
         LOG_INFO("Ignoring atom alt location since there is already an atom "
                      "with name " << aname << ", but without an alt loc");
         return;

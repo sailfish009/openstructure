@@ -140,12 +140,12 @@ CodeBlockStatus PythonInterpreter::GetCodeBlockStatus(const QString& command)
           String doc=bp::extract<String>(result.attr("__doc__"));
           complete=true;
           status=CODE_BLOCK_COMPLETE;
-        } catch(bp::error_already_set) {
+        } catch(bp::error_already_set&) {
           status=CODE_BLOCK_INCOMPLETE;
           ++i;          
           PyErr_Clear();
         }
-      } catch(bp::error_already_set) {
+      } catch(bp::error_already_set&) {
         status=CODE_BLOCK_ERROR;
         complete=true;
         PyErr_Clear();

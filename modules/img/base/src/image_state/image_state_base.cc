@@ -23,34 +23,84 @@
 */
 
 #include "image_state_base.hh"
-#include "binop.hh"
+#include "dispatch.hh"
 
 namespace ost { namespace img { namespace image_state {
 
+// define functors to be dispatched
+namespace {
+template<typename T1, class D1, typename T2, class D2>
+struct fnc_add_ip {
+  void operator()(ImageStateImpl<T1,D1>* lhs, const ImageStateImpl<T2,D2>* rhs)
+  {
+    Extent ov=Overlap(lhs->GetExtent(),rhs->GetExtent());
+    for(ExtentIterator it(ov);!it.AtEnd();++it) {
+      lhs->Value(it)+=Val2Val<T2,T1>(rhs->Value(it));
+    }
+  }
+};
+
+// sub
+template<typename T1, class D1, typename T2, class D2>
+struct fnc_sub_ip {
+  void operator()(ImageStateImpl<T1,D1>* lhs, const ImageStateImpl<T2,D2>* rhs)
+  {
+    Extent ov=Overlap(lhs->GetExtent(),rhs->GetExtent());
+    for(ExtentIterator it(ov);!it.AtEnd();++it) {
+      lhs->Value(it)-=Val2Val<T2,T1>(rhs->Value(it));
+    }
+  }
+};
+
+// mul
+template<typename T1, class D1, typename T2, class D2>
+struct fnc_mul_ip {
+  void operator()(ImageStateImpl<T1,D1>* lhs, const ImageStateImpl<T2,D2>* rhs)
+  {
+    Extent ov=Overlap(lhs->GetExtent(),rhs->GetExtent());
+    for(ExtentIterator it(ov);!it.AtEnd();++it) {
+      lhs->Value(it)*=Val2Val<T2,T1>(rhs->Value(it));
+    }
+  }
+};
+
+// div
+template<typename T1, class D1, typename T2, class D2>
+struct fnc_div_ip {
+  void operator()(ImageStateImpl<T1,D1>* lhs, const ImageStateImpl<T2,D2>* rhs)
+  {
+    Extent ov=Overlap(lhs->GetExtent(),rhs->GetExtent());
+    for(ExtentIterator it(ov);!it.AtEnd();++it) {
+      lhs->Value(it)/=Val2Val<T2,T1>(rhs->Value(it));
+    }
+  }
+};
+} // anon ns
+
 ImageStateBase& ImageStateBase::operator+=(const ImageStateBase& b)
 {
-  static image_state::binop::add_ip f_add_ip;
+  static dispatch::binary_dispatch_ip<fnc_add_ip> f_add_ip;
   f_add_ip(this,&b);
   return *this;
 }
 
 ImageStateBase& ImageStateBase::operator-=(const ImageStateBase& b)
 {
-  static image_state::binop::sub_ip f_sub_ip;
+  static dispatch::binary_dispatch_ip<fnc_sub_ip> f_sub_ip;
   f_sub_ip(this,&b);
   return *this;
 }
 
 ImageStateBase& ImageStateBase::operator*=(const ImageStateBase& b)
 {
-  static image_state::binop::mul_ip f_mul_ip;
+  static dispatch::binary_dispatch_ip<fnc_mul_ip> f_mul_ip;
   f_mul_ip(this,&b);
   return *this;
 }
 
 ImageStateBase& ImageStateBase::operator/=(const ImageStateBase& b)
 {
-  static image_state::binop::div_ip f_div_ip;
+  static dispatch::binary_dispatch_ip<fnc_div_ip> f_div_ip;
   f_div_ip(this,&b);
   return *this;
 }

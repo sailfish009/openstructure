@@ -314,12 +314,18 @@ void export_mmcif_io()
   class_<MMCifInfoRevisions>("MMCifInfoRevisions", init<>())
     .def("SetDateOriginal", &MMCifInfoRevisions::SetDateOriginal)
     .def("GetDateOriginal", &MMCifInfoRevisions::GetDateOriginal)
-    .def("AddRevision", &MMCifInfoRevisions::AddRevision)
+    .def("AddRevision", &MMCifInfoRevisions::AddRevision,
+         (arg("num"), arg("date"), arg("status"), arg("major")=-1,
+          arg("minor")=-1))
     .def("GetSize", &MMCifInfoRevisions::GetSize)
     .def("GetDate", &MMCifInfoRevisions::GetDate)
     .def("GetNum", &MMCifInfoRevisions::GetNum)
     .def("GetStatus", &MMCifInfoRevisions::GetStatus)
+    .def("GetMajor", &MMCifInfoRevisions::GetMajor)
+    .def("GetMinor", &MMCifInfoRevisions::GetMinor)
     .def("GetLastDate", &MMCifInfoRevisions::GetLastDate)
+    .def("GetLastMajor", &MMCifInfoRevisions::GetLastMajor)
+    .def("GetLastMinor", &MMCifInfoRevisions::GetLastMinor)
     .def("GetFirstRelease", &MMCifInfoRevisions::GetFirstRelease)
     .add_property("date_original", &MMCifInfoRevisions::GetDateOriginal,
                   &MMCifInfoRevisions::SetDateOriginal)
@@ -356,7 +362,9 @@ void export_mmcif_io()
     .def("AddMMCifEntityIdTr", &MMCifInfo::AddMMCifEntityIdTr)
     .def("GetMMCifEntityIdTr", &MMCifInfo::GetMMCifEntityIdTr)
     .def("SetRevisionsDateOriginal", &MMCifInfo::SetRevisionsDateOriginal)
-    .def("AddRevision", &MMCifInfo::AddRevision)
+    .def("AddRevision", &MMCifInfo::AddRevision,
+         (arg("num"), arg("date"), arg("status"), arg("major")=-1,
+          arg("minor")=-1))
     .def("GetRevisions", &MMCifInfo::GetRevisions)
     .add_property("citations", make_function(&MMCifInfo::GetCitations,
                                    return_value_policy<copy_const_reference>()))

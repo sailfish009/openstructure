@@ -6,7 +6,6 @@ PARENT_SCOPE
 )
 
 set(OST_IMG_IMAGE_STATE_HEADERS
-binop.hh
 dispatch.hh
 image_state.hh
 image_state_fw.hh

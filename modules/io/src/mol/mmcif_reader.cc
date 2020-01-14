@@ -87,7 +87,7 @@ void MMCifReader::ClearState()
   bu_assemblies_.clear();
   helix_list_.clear();
   strand_list_.clear();
-  revision_dates_.clear();
+  revisions_.clear();
   revision_types_.clear();
   database_PDB_rev_added_ = false;
 }
@@ -339,6 +339,8 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     category_ = PDBX_AUDIT_REVISION_HISTORY;
     // mandatory items
     this->TryStoreIdx(PARH_ORDINAL, "ordinal", header);
+    this->TryStoreIdx(PARH_MAJOR, "major_revision", header);
+    this->TryStoreIdx(PARH_MINOR, "minor_revision", header);
     this->TryStoreIdx(PARH_REVISION_DATE, "revision_date", header);
     cat_available = true;
   } else if (header.GetCategory()=="pdbx_audit_revision_details") {
@@ -597,7 +599,7 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
     if (me.IsValid()) { // unit test
       try {
         editor.AddAltAtomPos(String(1, alt_loc), me, apos);
-      } catch (Error) {
+      } catch (Error&) {
         LOG_INFO("Ignoring atom alt location since there is already an atom "
                  "with name " << aname << ", but without an alt loc");
         return;
@@ -1423,8 +1425,12 @@ void MMCifReader::ParsePdbxAuditRevisionHistory(
   int num = this->TryGetInt(columns[indices_[PARH_ORDINAL]],
                             "pdbx_audit_revision_history.ordinal");
   StringRef date = columns[indices_[PARH_REVISION_DATE]];
+  int major = this->TryGetInt(columns[indices_[PARH_MAJOR]],
+                              "pdbx_audit_revision_history.major_revision");
+  int minor = this->TryGetInt(columns[indices_[PARH_MINOR]],
+                              "pdbx_audit_revision_history.minor_revision");
   // add to map
-  revision_dates_[num] = date.str();
+  revisions_.push_back(MMCifRevisionDesc(num, date.str(), major, minor));
 }
 
 void MMCifReader::ParsePdbxAuditRevisionDetails(
@@ -1779,17 +1785,16 @@ void MMCifReader::OnEndData()
 
   // add revision history for new style mmCIFs (only if no old data there)
   if (!database_PDB_rev_added_) {
-    std::map<int, String>::const_iterator rd_it;
-    for (rd_it = revision_dates_.begin(); rd_it != revision_dates_.end();
-         ++rd_it) {
+    std::vector<MMCifRevisionDesc>::const_iterator r_it;
+    for (r_it = revisions_.begin(); r_it != revisions_.end(); ++r_it) {
       // look for status
-      const int num = rd_it->first;
-      const String& date = rd_it->second;
+      const int num = r_it->num;
       std::map<int, String>::const_iterator rt_it = revision_types_.find(num);
       if (rt_it != revision_types_.end()) {
-        info_.AddRevision(num, date, rt_it->second);
+        info_.AddRevision(num, r_it->date, rt_it->second, r_it->major,
+                          r_it->minor);
       } else {
-        info_.AddRevision(num, date, "?");
+        info_.AddRevision(num, r_it->date, "?", r_it->major, r_it->minor);
       }
     }
   }

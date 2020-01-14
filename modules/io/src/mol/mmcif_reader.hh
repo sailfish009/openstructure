@@ -546,6 +546,8 @@ private:
   typedef enum {
     PARH_ORDINAL,         ///< unique identifier
     PARH_REVISION_DATE,   ///< revision date
+    PARH_MAJOR,           ///< major version
+    PARH_MINOR,           ///< minor version
   } PdbxAuditRevisionHistoryItems;
 
   /// \enum categories of the pdbx_audit_revision_details category
@@ -621,6 +623,21 @@ private:
   } MMCifPSAEntry;
   typedef std::map<String, MMCifPSAEntry> MMCifPSAMap;
 
+  /// \struct keeping track of revision information
+  struct MMCifRevisionDesc {
+    // silly GCC note: major() & minor() exist as macros...facepalm
+    MMCifRevisionDesc(int _num, const String& _date, int _major, int _minor)
+                     : date(_date) {
+      num = _num;
+      major = _major;
+      minor = _minor;
+    }
+    int num;      ///< unique identifier
+    String date;  ///< revision date
+    int major;    ///< major version
+    int minor;    ///< minor version
+  };
+
   // members
   MMCifCategory category_;
   int category_counts_[DONT_KNOW+1]; ///< overall no. of atom_site loops
@@ -653,7 +670,7 @@ private:
   MMCifHSVector strand_list_; ///< for storing struct_conf sec.struct. data
   MMCifInfoStructRefs struct_refs_;
   // for storing revisions 
-  std::map<int, String> revision_dates_;
+  std::vector<MMCifRevisionDesc> revisions_;
   std::map<int, String> revision_types_;
   bool database_PDB_rev_added_;
 };

@@ -18,7 +18,6 @@
 //------------------------------------------------------------------------------
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/auto_unit_test.hpp>
 #include <ost/mol/mm/topology.hh>
 #include <ost/mol/mm/topology_creator.hh>
 #include <ost/mol/mm/settings.hh>
@@ -560,7 +559,7 @@ BOOST_AUTO_TEST_CASE(test_topology_merge){
   geom::Vec3 v0;
 
   top_eight->GetHarmonicBondParameters(harmonic_bond_indices[0],ui0,ui1,r0,r1);
-  BOOST_CHECK(r0 = 42.0 && r1 == 42000.0);
+  BOOST_CHECK(r0 == 42.0 && r1 == 42000.0);
 
   top_eight->GetHarmonicAngleParameters(harmonic_angle_indices[0],ui0,ui1,ui2,r0,r1);
   BOOST_CHECK(r0 == 24.0 && r1 == 24000.0);

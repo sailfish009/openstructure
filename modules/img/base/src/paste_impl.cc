@@ -24,10 +24,39 @@
 
 #include "paste_impl.hh"
 
-#include "image_state/binop.hh"
+#include "image_state/dispatch.hh"
 #include "image.hh"
 
 namespace ost { namespace img { namespace detail {
+
+// define functors to be dispatched
+namespace {
+// paste
+template<typename T1, class D1, typename T2, class D2>
+struct fnc_paste_ip {
+  void operator()(image_state::ImageStateImpl<T1,D1>* lhs,
+                  const image_state::ImageStateImpl<T2,D2>* rhs) {
+    Extent ov=Overlap(lhs->GetExtent(),rhs->GetExtent());
+    for(ExtentIterator it(ov);!it.AtEnd();++it) {
+      lhs->Value(it)=Val2Val<T2,T1>(rhs->Value(it));
+    }
+  }
+};
+
+// partial specialization for half_frequency rhs
+template<typename T1, class D1>
+struct fnc_paste_ip<T1,D1,Complex,image_state::HalfFrequencyDomain> {
+  void operator()(image_state::ImageStateImpl<T1,D1>* lhs,
+                  const image_state::ImageStateImpl<Complex,
+                          image_state::HalfFrequencyDomain>* rhs)
+  {
+    Extent ov=Overlap(lhs->GetExtent(),rhs->GetLogicalExtent());
+    for(ExtentIterator it(ov);!it.AtEnd();++it) {
+      lhs->Value(it)=Val2Val<Complex,T1>(rhs->GetComplex(it));
+    }
+  }
+};
+} // anon ns
 
 PasteFnc::PasteFnc():
   target_()
@@ -40,7 +69,7 @@ PasteFnc::PasteFnc(const ImageHandle& h):
 template<typename V, class D>
 void PasteFnc::VisitState(const image_state::ImageStateImpl<V,D>& isi)
 {
-  static image_state::binop::paste_ip f_paste_ip;
+  static image_state::dispatch::binary_dispatch_ip<fnc_paste_ip> f_paste_ip;
   f_paste_ip(target_.ImageStatePtr().get(),&isi);
 }
 

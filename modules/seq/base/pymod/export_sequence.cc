@@ -62,7 +62,7 @@ T do_slice(const T& t, slice& sl) {
     if (start<0) {
       start=t.GetCount()+start;
     }    
-  } catch(error_already_set) {
+  } catch(error_already_set&) {
     PyErr_Clear();
   }
   try {
@@ -70,7 +70,7 @@ T do_slice(const T& t, slice& sl) {
     if (end<0) {
       end=t.GetCount()+end;
     }    
-  } catch(error_already_set) {
+  } catch(error_already_set&) {
     PyErr_Clear();
   }
   return t.Slice(start, end-start);
@@ -96,7 +96,7 @@ String slice_seq(const ConstSequenceHandle& sh, slice& sl) {
     if (start<0) {
       start=sh.GetLength()+start;
     }    
-  } catch(error_already_set) {
+  } catch(error_already_set&) {
     PyErr_Clear();
   }
   try {
@@ -104,7 +104,7 @@ String slice_seq(const ConstSequenceHandle& sh, slice& sl) {
     if (end<0) {
       end=sh.GetLength()+end;
     }
-  } catch(error_already_set) {
+  } catch(error_already_set&) {
     PyErr_Clear();
   }
   String s=sh.GetString();
@@ -118,7 +118,7 @@ AlignedRegion slice_aln(const AlignmentHandle& aln, slice sl) {
     if (start<0) {
       start=aln.GetLength()+start;
     }    
-  } catch(error_already_set) {
+  } catch(error_already_set&) {
     PyErr_Clear();
   }
   try {
@@ -126,7 +126,7 @@ AlignedRegion slice_aln(const AlignmentHandle& aln, slice sl) {
     if (end<0) {
       end=aln.GetLength()+end;
     }
-  } catch(error_already_set) {
+  } catch(error_already_set&) {
     PyErr_Clear();
   }
   return aln.MakeRegion(start, end-start);

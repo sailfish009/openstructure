@@ -22,7 +22,6 @@
  
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-#include <boost/test/auto_unit_test.hpp>
 #include <ost/geom/vec_mat_predicates.hh>
 #include <ost/mol/chem_class.hh>
 #include <ost/mol/mol.hh>

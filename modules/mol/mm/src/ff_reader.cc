@@ -389,32 +389,32 @@ void FFReader::ReadResidueDatabase(const String& basename){
   try{
     data = preprocessor_.Process(basename+".arn");
     this->ParseARN(data);
-  }catch(ost::io::IOException e) { }
+  }catch(ost::io::IOException& e) { }
 
   try{
     data = preprocessor_.Process(basename+".hdb");
     this->ParseHDB(data);
-  }catch(ost::io::IOException e) { }
+  }catch(ost::io::IOException& e) { }
 
   try{
     data = preprocessor_.Process(basename+".n.tdb");
     this->ParseNTDB(data);
-  }catch(ost::io::IOException e) { }
+  }catch(ost::io::IOException& e) { }
 
   try{
     data = preprocessor_.Process(basename+".c.tdb");
     this->ParseCTDB(data);
-  }catch(ost::io::IOException e) { }
+  }catch(ost::io::IOException& e) { }
 
   try{
     data = preprocessor_.Process(basename+".vsd");
     this->ParseVSD(data);
-  }catch(ost::io::IOException e) { }
+  }catch(ost::io::IOException& e) { }
 
   try{
     data = preprocessor_.Process(basename+".r2b");
     this->ParseRtoB(data);
-  }catch(ost::io::IOException e) { }
+  }catch(ost::io::IOException& e) { }
 }
 
 void FFReader::ReadCHARMMPRM(const String& filename){

@@ -132,7 +132,7 @@ void PythonInterpreterWorker::run_command_(std::pair<unsigned int,QString> pair)
     error_redirector_->Flush();
     emit Finished(pair.first,true);
     return;
-  }catch(bp::error_already_set){
+  }catch(bp::error_already_set&){
     if(PyErr_ExceptionMatches(PyExc_SystemExit)){
       PyErr_Clear();
       //emit Exit();
