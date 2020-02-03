@@ -82,7 +82,7 @@ Usage of TMscore
 TMalign C++ wrapper
 --------------------------------------------------------------------------------
 
-.. module:: ost.bindings
+.. currentmodule:: ost.bindings
 
 Instead of calling the TMalign executable, ost also provides a wrapper around
 its C++ implementation. The advantage is that no intermediate files need to be 
