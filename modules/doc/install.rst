@@ -23,7 +23,7 @@ the steps which we describe in detail below. In essence, these steps are:
 Installing the Dependencies
 --------------------------------------------------------------------------------
 
-OpenStructure requires a c++11 enabled compiler (e.g. recent gcc/clang) and uses 
+OpenStructure requires a C++11 enabled compiler (e.g. recent gcc/clang) and uses 
 a bunch of open-source libraries. If you haven't already installed them, please 
 install them now! Where appropriate, the minimally required version is given in 
 parentheses.
