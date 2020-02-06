@@ -25,8 +25,6 @@
 #include <ost/img/value_util.hh>
 #include <ost/img/alg/module_config.hh>
 
-namespace ost { namespace img { namespace alg {
-
 namespace {
 
 unsigned int absmod(int x, unsigned int y)
@@ -35,6 +33,8 @@ unsigned int absmod(int x, unsigned int y)
 }
 
 } // anon ns
+
+namespace ost { namespace img { namespace alg {
 
 class DLLEXPORT_IMG_ALG ShiftFnc {
 public:
@@ -49,9 +49,9 @@ public:
     unsigned int height=in_state.GetExtent().GetHeight();
     unsigned int width=in_state.GetExtent().GetWidth();
     
-    unsigned int p0=absmod(shift_[0],width);
-    unsigned int p1=absmod(shift_[1],height);
-    unsigned int p2=absmod(shift_[2],depth);
+    unsigned int p0=::absmod(shift_[0],width);
+    unsigned int p1=::absmod(shift_[1],height);
+    unsigned int p2=::absmod(shift_[2],depth);
 
     for(unsigned int u=0;u<width;++u) {
       for(unsigned int v=0;v<height;++v) {
