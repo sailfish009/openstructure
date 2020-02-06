@@ -35,6 +35,8 @@
 #include <ost/seq/alg/clip_alignment.hh>
 #include <ost/seq/alg/distance_map.hh>
 #include <ost/seq/alg/variance_map.hh>
+#include <ost/seq/alg/hmm_pseudo_counts.hh>
+#include <ost/seq/alg/hmm_score.hh>
 
 using namespace boost::python;
 using namespace ost::seq;
@@ -223,9 +225,19 @@ void export_distance_analysis()
   ;
 }
 
+////////////////////////////////////////////////////////////////////
+// algorithms involving hmms
+void export_hmm_algorithms() {
+  def("AddAAPseudoCounts", &AddAAPseudoCounts, (arg("profile")));
+  def("AddTransitionPseudoCounts", &AddTransitionPseudoCounts, (arg("profile")));
+  def("HMMScore", &HMMScore, (arg("profile_0"), arg("profile_1"), arg("alignment"),
+                              arg("s_0_idx"), arg("s_1_idx")));
+}
+
 BOOST_PYTHON_MODULE(_ost_seq_alg)
 {
   export_aln_alg();
   export_contact_prediction();
   export_distance_analysis();
+  export_hmm_algorithms();
 }
