@@ -58,6 +58,67 @@ seq::ProfileColumn GetColumn(const std::vector<ost::StringRef>& chunks,
   }
   return pc;
 }
+
+seq::HMMDataPtr GetHMMData(const std::vector<ost::StringRef>& chunks, 
+                           const std::vector<uint>& idx, 
+                           const std::vector<seq::HMMTransition>& transitions,
+                           int neff_idx,
+                           int neff_i_idx,
+                           int neff_d_idx, 
+                           const String& exception) {
+
+  // check chunks size
+  if(chunks.size() != 10) {
+    throw IOException(exception);
+  }
+
+  seq::HMMDataPtr data(new seq::HMMData);
+  for (uint i = 0; i < idx.size(); ++i) {
+    if (chunks[idx[i]] != ost::StringRef("*", 1)) {
+      std::pair<bool, int> p = chunks[idx[i]].to_int();
+      if (!p.first) {
+        throw IOException(exception);
+      }
+      data->SetProb(transitions[i], pow(2.0, -0.001 * p.second));
+    } else {
+      data->SetProb(transitions[i], 0.0);
+    }
+  }
+
+  if (chunks[neff_idx] != ost::StringRef("*", 1)) {
+    std::pair<bool, int> p = chunks[neff_idx].to_int();
+    if (!p.first) {
+      throw IOException(exception);
+    }
+    data->SetNeff(0.001 * p.second);
+  } else {
+    data->SetNeff(0.0);
+  }
+
+  if (chunks[neff_i_idx] != ost::StringRef("*", 1)) {
+    std::pair<bool, int> p = chunks[neff_i_idx].to_int();
+    if (!p.first) {
+      throw IOException(exception);
+    }
+    data->SetNeff_I(0.001 * p.second);
+  } else {
+    data->SetNeff_I(0.0);
+  }
+
+  if (chunks[neff_d_idx] != ost::StringRef("*", 1)) {
+    std::pair<bool, int> p = chunks[neff_d_idx].to_int();
+    if (!p.first) {
+      throw IOException(exception);
+    }
+    data->SetNeff_D(0.001 * p.second);
+  } else {
+    data->SetNeff_D(0.0);
+  }
+
+  return data;
+}
+
+
 } // anon ns
 
 void HhmIOHandler::Import(seq::ProfileHandle& prof,
@@ -81,11 +142,18 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
   std::string line;
   ost::StringRef sline;
   std::string null_line;
+  std::string neff_line;
   char olcs[20];
+  std::vector<ost::seq::HMMTransition> transitions;
+  std::vector<uint> transition_idx; 
+  int neff_idx = -1;
+  int neff_i_idx = -1;
+  int neff_d_idx = -1;
   std::vector<ost::StringRef> chunks;
 
-  // read line-by-line looking for NULL
+  // read line-by-line looking for NEFF and NULL
   bool null_found = false;
+  bool neff_found = false;
   while (std::getline(in, line)) {
     sline = ost::StringRef(line.c_str(), line.length());
     if (sline.length()>4 && 
@@ -93,6 +161,11 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
       null_line = line;
       null_found = true;
       break;
+    }
+    if (sline.length()>4 && 
+        sline.substr(0, 5) == ost::StringRef("NEFF ", 5)) {
+      neff_line = line;
+      neff_found = true;
     }
   }
   if (!null_found) {
@@ -115,8 +188,57 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
         }
         olcs[i-1] = chunks[i][0];
       }
-      // skip 2 lines and get out
+      // extract hmm data
       std::getline(in, line);
+      sline = ost::StringRef(line.c_str(), line.length());
+      chunks = sline.split();
+      if (chunks.size() != 10) {
+        throw IOException("Badly formatted HMM line in " + loc.string());
+      }
+
+      for (uint i = 0; i < 10; ++i) {
+        if(chunks[i] == ost::StringRef("M->M", 4)) {
+          transition_idx.push_back(i);
+          transitions.push_back(ost::seq::HMM_M2M);  
+        } else if(chunks[i] == ost::StringRef("M->I", 4)) {
+          transition_idx.push_back(i);
+          transitions.push_back(ost::seq::HMM_M2I); 
+        } else if(chunks[i] == ost::StringRef("M->D", 4)) {
+          transition_idx.push_back(i);
+          transitions.push_back(ost::seq::HMM_M2D); 
+        } else if(chunks[i] == ost::StringRef("I->M", 4)) {
+          transition_idx.push_back(i);
+          transitions.push_back(ost::seq::HMM_I2M); 
+        } else if(chunks[i] == ost::StringRef("I->I", 4)) {
+          transition_idx.push_back(i);
+          transitions.push_back(ost::seq::HMM_I2I); 
+        } else if(chunks[i] == ost::StringRef("D->M", 4)) {
+          transition_idx.push_back(i);
+          transitions.push_back(ost::seq::HMM_D2M); 
+        } else if(chunks[i] == ost::StringRef("D->D", 4)) {
+          transition_idx.push_back(i);
+          transitions.push_back(ost::seq::HMM_D2D); 
+        } else if(chunks[i] == ost::StringRef("Neff", 4)) {
+          neff_idx = i;
+        } else if(chunks[i] == ost::StringRef("Neff_I", 6)) {
+          neff_i_idx = i;
+        } else if(chunks[i] == ost::StringRef("Neff_D", 6)) {
+          neff_d_idx = i;
+        } else {
+          throw IOException("Badly formatted HMM line in " + loc.string()); 
+        }
+      }
+
+      // check whether we really got everything
+      if(neff_idx == -1 || neff_i_idx == -1 || neff_d_idx == -1) {
+        throw IOException("Badly formatted HMM line in " + loc.string());
+      }
+
+      if(transition_idx.size() != 7) {
+        throw IOException("Badly formatted HMM line in " + loc.string());      
+      }
+
+      // skip one line 
       std::getline(in, line);
       hmm_found = true;
       break;
@@ -142,8 +264,42 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
     // frequencies
     prof.AddColumn(GetColumn(chunks, 2, olcs, "Badly formatted line\n"
                              + line + "\n in " + loc.string()), olc);
-    // skip line (trans. matrix)
+    // get transition probabilities
     std::getline(in, line);
+    sline = ost::StringRef(line.c_str(), line.length());
+    if (sline.trim().empty()) continue;
+    if (sline.trim() == ost::StringRef("//", 2)) break;
+    chunks = sline.split();
+    prof.back().SetHMMData(GetHMMData(chunks, transition_idx, 
+                           transitions, neff_idx, neff_i_idx, neff_d_idx,
+                           "Badly formatted line\n" + line + "\n in " + 
+                           loc.string()));
+  }
+
+  // parse neff if it's there, calculate the average of every column otherwise
+  if(neff_found) {
+    sline = ost::StringRef(neff_line.c_str(), neff_line.length());
+    chunks = sline.split();
+    if(chunks.size() != 2) {
+      throw IOException("Badly formatted line\n" + neff_line+ "\n in " + 
+                        loc.string());
+    }
+    std::pair<bool, float> p = chunks[1].to_float();
+    if (!p.first) {
+      throw IOException("Badly formatted line\n" + neff_line+ "\n in " + 
+                        loc.string());
+    }
+    prof.SetNeff(p.second);
+  } else {
+    Real summed_neff = 0.0;
+    for(size_t i = 0; i < prof.size(); ++i) {
+      summed_neff += prof[i].GetHMMData()->GetNeff();
+    }
+    if(prof.size() > 0) {
+      prof.SetNeff(summed_neff/prof.size());
+    } else{
+      prof.SetNeff(1.0);
+    }
   }
 }
 
