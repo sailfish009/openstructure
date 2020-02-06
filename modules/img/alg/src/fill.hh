@@ -32,11 +32,17 @@ namespace {
 template<typename T>
 void set_val(T& v, Real rv, const Complex& cv);
 
+/* While the functions below are employed by the OST unit tests, GCC does not
+   notice this and complains about "unused functions".
+*/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 template<>
 void set_val<Real>(Real& v, Real rv, const Complex& cv) {v=rv;}
 
 template<>
 void set_val<Complex>(Complex& v, Real rv, const Complex& cv) {v=cv;}
+#pragma GCC diagnostic pop
 
 template<typename T>
 void set_val(T& v, Real rv, const Complex& cv)
