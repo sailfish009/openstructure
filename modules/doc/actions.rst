@@ -26,6 +26,10 @@ In summary it performs the following steps:
 
 - Read structures (PDB or mmCIF format, can be gzipped) and split into
   biological assemblies (all possible pairs are scored).
+- Mandatory cleanup of hydrogen atoms, ligand and water chains, small
+  (< 20 residues) peptides or chains with no amino acids as described in
+  :attr:`QSscoreEntity.ent <ost.mol.alg.qsscoring.QSscoreEntity.ent>` and
+  :attr:`QSscoreEntity.removed_chains <ost.mol.alg.qsscoring.QSscoreEntity.removed_chains>`.
 - Optional cleanup of structures with :func:`~ost.mol.alg.Molck`.
 - Optional structural checks with :func:`~ost.mol.alg.CheckStructure`.
 - Unless user-provided, find chain mapping between complexes (see

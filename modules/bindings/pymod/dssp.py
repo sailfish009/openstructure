@@ -55,8 +55,8 @@ def _ExecuteDSSP(path, dssp_bin, temp_dir=None):
   if not os.access(dssp_abs_path, os.X_OK):
     raise RuntimeError('"%s" is not executable' % dssp_abs_path)
 
-  ps=subprocess.Popen([dssp_abs_path, path, temp_dssp_path])
-  ps.wait()
+  subprocess.run([dssp_abs_path, path, temp_dssp_path])
+
   return temp_dssp_path
 
 

@@ -404,7 +404,7 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10,
     pdbizer.Add(assu, trans_matrices, ss)
   pdb_bu = pdbizer.Finish(transformation)
   if transformation:
-    return pdb_bu, pdb_bu.GetTransformationMatrix()
+    return pdb_bu, pdb_bu.GetTransform().GetMatrix()
   return pdb_bu
 
 MMCifInfoBioUnit.PDBize = _PDBize
