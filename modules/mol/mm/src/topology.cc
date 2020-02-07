@@ -255,41 +255,6 @@ void Topology::AddPositionConstraint(uint index){
   position_constraints_.push_back(index);
 }
 
-void Topology::SetDensity(const ost::img::ImageHandle& d, Real r, Real s){
-  density_ = d;
-  density_resolution_ = r;
-  density_scaling_ = s;
-  in_density_body_.assign(num_particles_,false);
-  density_bodies_.clear();
-}
-
-void Topology::DefineDensityBody(const std::vector<int>& indices){
-
-  if(!density_.IsValid()){
-    throw ost::Error("Must set valid density before you can define density bodies");
-  }
-
-  //first check, whether any of the indices is invalid or already part of a body
-  for(std::vector<int>::const_iterator i = indices.begin();
-      i != indices.end(); ++i){
-    if(*i >= static_cast<int>(num_particles_) || *i < 0){
-      throw ost::Error("Invalid index provided!");
-    }
-    if(in_density_body_[*i]){
-      throw ost::Error("Particle can be part of only one body!");
-    }
-  }
-
-  //let's change the state of the according particles
-  for(std::vector<int>::const_iterator i = indices.begin();
-      i != indices.end(); ++i){
-    in_density_body_[*i] = true;
-  }
-
-  //and finally define the body
-  density_bodies_.push_back(indices);
-}
-
 uint Topology::AddHarmonicPositionRestraint(uint ind, const geom::Vec3& ref_position, Real k, 
                                             Real x_scale, Real y_scale, Real z_scale){
   if(ind >= num_particles_){
