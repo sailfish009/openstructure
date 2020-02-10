@@ -624,8 +624,17 @@ class HHblits:
             return hhm_file
         ost.LogVerbose('converting %s to %s' % (a3m_file, hhm_file))
         os.putenv('HHLIB', self.hhlib_dir)
-        if subprocess.call('%s -i %s -o %s' % (hhmake, a3m_file, hhm_file),
-                           shell=True):
+        job = subprocess.Popen('%s -i %s -o %s' % (hhmake, a3m_file, hhm_file),
+                               shell=True, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+        sout, serr = job.communicate()
+        lines = serr.decode().splitlines()
+        for line in lines:
+            ost.LogWarning(line)
+        lines = sout.decode().splitlines()
+        for line in lines:
+            ost.LogVerbose(line)
+        if job.returncode !=0:
             raise IOError('could not convert a3m to hhm file')
         return hhm_file
 
