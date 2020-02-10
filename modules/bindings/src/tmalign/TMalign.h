@@ -794,7 +794,7 @@ bool overlap(const int a1,const int b1,const int c1,const int d1,
 void sec_str(int len,char *seq, const vector<vector<bool> >&bp, 
     int a, int b,int &c, int &d)
 {
-    int i,j;
+    int i;
     
     for (i=0;i<len;i++)
     {
@@ -811,8 +811,8 @@ void sec_str(int len,char *seq, const vector<vector<bool> >&bp,
  * 1->unpair, 2->paired with upstream, 3->paired with downstream */
 void make_sec(char *seq, double **x, int len, int *sec,const string atom_opt)
 {
-    int ii,jj,i,j;
-
+    int ii,jj,j;
+    unsigned int i;
     float lb=12.5; // lower bound for " C3'"
     float ub=15.0; // upper bound for " C3'"
     if     (atom_opt==" C4'") {lb=14.0;ub=16.0;}
@@ -825,7 +825,7 @@ void make_sec(char *seq, double **x, int len, int *sec,const string atom_opt)
     vector<bool> bp_tmp(len,false);
     vector<vector<bool> > bp(len,bp_tmp);
     bp_tmp.clear();
-    for (i=0; i<len; i++)
+    for (i=0;(int) i<len; i++)
     {
         sec[i]=1;
         for (j=i+1; j<len; j++)
@@ -843,7 +843,7 @@ void make_sec(char *seq, double **x, int len, int *sec,const string atom_opt)
     
     // From 5' to 3': A0 C0 D0 B0: A0 paired to B0, C0 paired to D0
     vector<int> A0,B0,C0,D0;
-    for (i=0; i<len-2; i++)
+    for (i=0;(int) i<len-2; i++)
     {
         for (j=i+3; j<len; j++)
         {
@@ -858,8 +858,8 @@ void make_sec(char *seq, double **x, int len, int *sec,const string atom_opt)
         }
     }
     
-    int sign;
-    for (i=0;i<A0.size();i++)
+    //int sign;
+    for (i=0; i<A0.size();i++)
     {
         /*
         sign=0;
@@ -1483,8 +1483,8 @@ void output_superpose(const string filename, const char *fname_super,
     double x1[3]; // after transform
 
     /* for PDBx/mmCIF only */
-    map<string,int> _atom_site;
-    int atom_site_pos;
+    map<string,unsigned int> _atom_site;
+    unsigned int atom_site_pos;
     vector<string> line_vec;
 
     while (compress_type?fin_gz.good():fin.good())
@@ -1545,7 +1545,7 @@ void output_superpose(const string filename, const char *fname_super,
                 transform(t, u, x, x1);
 
                 for (atom_site_pos=0; atom_site_pos<_atom_site.size(); atom_site_pos++)
-                {
+                { 
                     if (atom_site_pos==_atom_site["Cartn_x"])
                         buf<<setiosflags(ios::fixed)<<setprecision(3)
                            <<setw(8)<<x1[0]<<' ';
@@ -2324,7 +2324,6 @@ int TMalign_main(double **xa, double **ya,
     TM2 = TMscore8_search(r1, r2, xtm, ytm, xt, n_ali8, t, u, simplify_step,
         score_sum_method, &rmsd, local_d0_search, Lnorm, score_d8, d0);
 
-    double Lnorm_d0;
     if (a_opt>0)
     {
         //normalized by average length of structures A, B
@@ -2360,7 +2359,6 @@ int TMalign_main(double **xa, double **ya,
         d0_out=d0_scale;
         d0_0=d0_scale;
         //Lnorm_0=ylen;
-        Lnorm_d0=Lnorm_0;
         local_d0_search = d0_search;
         TM5 = TMscore8_search(r1, r2, xtm, ytm, xt, n_ali8, t0, u0,
             simplify_step, score_sum_method, &rmsd, local_d0_search, Lnorm,
