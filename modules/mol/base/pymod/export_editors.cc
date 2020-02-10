@@ -29,7 +29,15 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::mol;
 
+/* Including NumPy headers produces compiler warnings. The ones about "Using
+   deprecated NumPy API..." we can not get rid of. The highest NumPy version we
+   support is 1.6 while the non-deprecated API starts with version 1.7.
+   Also see the comment in modules/gfx/pymod/export_primlist.cc for further
+   information.
+*/
 #if OST_NUMPY_SUPPORT_ENABLED
+#include <numpy/numpyconfig.h>
+#define NPY_NO_DEPRECATED_API NPY_1_6_API_VERSION
 #include <numpy/arrayobject.h>
 #endif
 
@@ -228,6 +236,7 @@ void export_Editors()
 {
 #if OST_NUMPY_SUPPORT_ENABLED
   // The following define enforces no return value when calling import_array
+  #undef NUMPY_IMPORT_ARRAY_RETVAL
   #define NUMPY_IMPORT_ARRAY_RETVAL
   import_array();
 #endif
