@@ -1472,7 +1472,7 @@ class TestTable(unittest.TestCase):
     mcc = tab.ComputeMCC(score_col='prediction2', class_col='reference')
     self.assertAlmostEqual(mcc, 0.882089673321)
 
-  def testTableAsNumpyMatrix(self):
+  def testTableAsNumpyMatrixAsArray(self):
     if not HAS_NUMPY:
       return
 
@@ -1488,24 +1488,24 @@ class TestTable(unittest.TestCase):
     
     tab = self.CreateTestTable()
     tab.AddCol('fourth','b',[True, False, False])
-    m = tab.GetNumpyMatrix('second')
-    mc = np.matrix([[3],[None],[9]])
+    m = tab.GetNumpyMatrixAsArray('second')
+    mc = np.array([[3],[None],[9]])
     self.assertTrue(np.all(m==mc))
-    mc = np.matrix([[3],[None],[10]])
+    mc = np.array([[3],[None],[10]])
     self.assertFalse(np.all(m==mc))
-    m = tab.GetNumpyMatrix('third')
-    mc = np.matrix([[None],[2.200],[3.300]])
+    m = tab.GetNumpyMatrixAsArray('third')
+    mc = np.array([[None],[2.200],[3.300]])
     self.assertTrue(np.all(m==mc))
-    m = tab.GetNumpyMatrix('second','third')
-    mc = np.matrix([[3, None],[None, 2.200],[9, 3.300]])
+    m = tab.GetNumpyMatrixAsArray('second','third')
+    mc = np.array([[3, None],[None, 2.200],[9, 3.300]])
     self.assertTrue(np.all(m==mc))
-    m = tab.GetNumpyMatrix('third','second')
-    mc = np.matrix([[None, 3],[2.200, None],[3.300, 9]])
+    m = tab.GetNumpyMatrixAsArray('third','second')
+    mc = np.array([[None, 3],[2.200, None],[3.300, 9]])
     self.assertTrue(np.all(m==mc))
 
-    self.assertRaises(TypeError, tab.GetNumpyMatrix, 'fourth')
-    self.assertRaises(TypeError, tab.GetNumpyMatrix, 'first')
-    self.assertRaises(RuntimeError, tab.GetNumpyMatrix)
+    self.assertRaises(TypeError, tab.GetNumpyMatrixAsArray, 'fourth')
+    self.assertRaises(TypeError, tab.GetNumpyMatrixAsArray, 'first')
+    self.assertRaises(RuntimeError, tab.GetNumpyMatrixAsArray)
     
   def testOptimalPrefactors(self):
     if not HAS_NUMPY:
