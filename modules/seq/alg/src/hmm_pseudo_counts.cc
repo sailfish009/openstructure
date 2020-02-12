@@ -462,10 +462,6 @@ void AddTransitionPseudoCounts(ost::seq::ProfileHandle& profile) {
 
 void AddAAPseudoCounts(ost::seq::ProfileHandle& profile) {
 
-
-  ////////////////////
-  // do frequencies //
-  ////////////////////
   Real full_admixture [20];
   for(size_t col_idx = 0; col_idx < profile.size(); ++col_idx) {
     Real* col_freq = profile[col_idx].freqs_begin();
@@ -485,47 +481,12 @@ void AddAAPseudoCounts(ost::seq::ProfileHandle& profile) {
       col_freq[i] = (1. - tau) * col_freq[i] + tau * full_admixture[i];
     }
   }
-
-  /////////////////////////
-  // do null_frequencies //
-  /////////////////////////
-  Real mixing_factor = 100.0 / profile.GetNeff();
-  const Real* current_null_freq = profile.GetNullModel().freqs_begin();
-  Real null_freq[20];
-  for(int i = 0; i < 20; ++i) {
-    null_freq[i] = current_null_freq[i] * mixing_factor;
-  } 
-  for(size_t i = 0; i < profile.size(); ++i) {
-  	const Real* freq = profile[i].freqs_begin();
-    for(int j = 0; j < 20; ++j) {
-      null_freq[j] += freq[j]; 
-    }
-  }
-  // normalize
-  Real summed_p = 0.0;
-  for(int i = 0; i < 20; ++i) {
-    summed_p += null_freq[i];
-  }
-  Real factor = 1.0/summed_p;
-  for(int i = 0; i < 20; ++i) {
-    null_freq[i] *= factor;
-  }
-  // create new nullmodel and set it
-  ost::seq::ProfileColumn new_null_model;
-  Real* new_null_freq = new_null_model.freqs_begin();
-  for(int i = 0; i < 20; ++i) {
-    new_null_freq[i] = null_freq[i];
-  }
-  profile.SetNullModel(new_null_model);
 }
 
 
 void AddAAPseudoCounts(ost::seq::ProfileHandle& profile,
                        const ContextProfileDB& db) {
 
-  ////////////////////
-  // do frequencies //
-  ////////////////////
   std::vector<Real> cp_scores(db.size(), 0.0);
   int cp_length = db.profile_length();
   if(cp_length % 2 != 1) {
@@ -613,11 +574,10 @@ void AddAAPseudoCounts(ost::seq::ProfileHandle& profile,
       col_freq[i] = tau*context[i] + (1.-tau)*counts[i]/neff;
     }
   }
+}
 
 
-  /////////////////////////
-  // do null_frequencies //
-  /////////////////////////
+void AddNullPseudoCounts(ost::seq::ProfileHandle& profile) {
   Real mixing_factor = 100.0 / profile.GetNeff();
   const Real* current_null_freq = profile.GetNullModel().freqs_begin();
   Real null_freq[20];

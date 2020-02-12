@@ -165,6 +165,8 @@ void AddAAPseudoCounts(ost::seq::ProfileHandle& profile);
 void AddAAPseudoCounts(ost::seq::ProfileHandle& profile, 
                        const ContextProfileDB& db);
 
+void AddNullPseudoCounts(ost::seq::ProfileHandle& profile);
+
 }}} // ns
 
 #endif
