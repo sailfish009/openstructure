@@ -260,6 +260,7 @@ void export_hmm_algorithms() {
   def("AddAAPseudoCounts", &AAPseudoCountsSimple, (arg("profile")));
   def("AddAAPseudoCounts", &AAPseudoCountsAngermueller, (arg("profile"), arg("context_profile_db")));
   def("AddTransitionPseudoCounts", &AddTransitionPseudoCounts, (arg("profile")));
+  def("AddNullPseudoCounts", &AddNullPseudoCounts, (arg("profile")));
   def("HMMScore", &HMMScore, (arg("profile_0"), arg("profile_1"), arg("alignment"),
                               arg("s_0_idx"), arg("s_1_idx")));
 }
