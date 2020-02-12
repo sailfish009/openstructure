@@ -1618,7 +1618,7 @@ def _GetAngles(Rt):
   :type Rt:  :class:`ost.geom.Mat4`
   :return: A :class:`tuple` of angles for each axis (x,y,z)
   """
-  rot = np.asmatrix(Rt.ExtractRotation().data).reshape(3,3)
+  rot = np.asarray(Rt.ExtractRotation().data).reshape(3,3)
   tx = np.arctan2(rot[2,1], rot[2,2])
   if tx < 0:
     tx += 2*np.pi
