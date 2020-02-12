@@ -124,7 +124,7 @@ void split(const string &line, vector<string> &line_vec,
     const char delimiter=' ')
 {
     bool within_word = false;
-    for (int pos=0;pos<line.size();pos++)
+    for (unsigned int pos=0;pos<line.size();pos++)
     {
         if (line[pos]==delimiter)
         {
@@ -276,7 +276,7 @@ size_t get_PDB_lines(const string filename,
             chainID_list.push_back(i8_stream.str());
             PDB_lines.push_back(tmp_str_vec);
             mol_vec.push_back(0);
-            for (i=0;i<L;i++)
+            for (i=0;(int) i<L;i++)
             {
                 if (compress_type) fin_gz>>x>>y>>z;
                 else               fin   >>x>>y>>z;
@@ -294,7 +294,6 @@ size_t get_PDB_lines(const string filename,
     else if (infmt_opt==2) // xyz format
     {
         int L=0;
-        char A;
         stringstream i8_stream;
         while (compress_type?fin_gz.good():fin.good())
         {
@@ -309,7 +308,7 @@ size_t get_PDB_lines(const string filename,
             chainID_list.push_back(':'+line.substr(0,i));
             PDB_lines.push_back(tmp_str_vec);
             mol_vec.push_back(0);
-            for (i=0;i<L;i++)
+            for (i=0;(int) i<L;i++)
             {
                 if (compress_type) getline(fin_gz, line);
                 else               getline(fin, line);
@@ -511,7 +510,7 @@ size_t get_FASTA_lines(const string filename,
 {
     string line;
     vector<string> tmp_str_vec;
-    int l;
+    unsigned int l;
     
     int compress_type=0; // uncompressed file
     ifstream fin;
@@ -640,7 +639,7 @@ int extract_aln_from_resi(vector<string> &sequence, char *seqx, char *seqy,
 int read_PDB(const vector<string> &PDB_lines, double **a, char *seq,
     vector<string> &resi_vec, const int byresi_opt)
 {
-    int i;
+    unsigned int i;
     for (i=0;i<PDB_lines.size();i++)
     {
         a[i][0] = atof(PDB_lines[i].substr(30, 8).c_str());
@@ -733,7 +732,7 @@ void read_user_alignment(vector<string>&sequence, const string &fname_lign,
     if (I_opt)
     {
         int aligned_resNum=0;
-        for (int i=0;i<sequence[0].size();i++) 
+        for (unsigned int i=0;i<sequence[0].size();i++) 
             aligned_resNum+=(sequence[0][i]!='-' && sequence[1][i]!='-');
         if (aligned_resNum<3)
             PrintErrorAndQuit("ERROR! Superposition is undefined for <3 aligned residues.");

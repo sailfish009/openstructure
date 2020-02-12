@@ -71,8 +71,8 @@ test:centos7.3:
              -DZLIB_INCLUDE_DIR=$EBROOTZLIB/include
              -DZLIB_LIBRARY=$EBROOTZLIB/lib/libz.so
              -DOPTIMIZE=1
-             -DCMAKE_C_FLAGS='-Wno-unused-local-typedefs -L/scicore/soft/apps/libpng/1.6.34-GCCcore-7.3.0/lib/ -L/scicore/soft/apps/LibTIFF/4.0.9-GCCcore-7.3.0/lib/ -L/scicore/soft/apps/zlib/1.2.11-GCCcore-7.3.0/lib/ -isystem ${EBROOTBOOST}/include -isystem ${EBROOTOPENMM}/include'
-             -DCMAKE_CXX_FLAGS='-Wno-unused-local-typedefs -L/scicore/soft/apps/libpng/1.6.34-GCCcore-7.3.0/lib/ -L/scicore/soft/apps/LibTIFF/4.0.9-GCCcore-7.3.0/lib/ -L/scicore/soft/apps/zlib/1.2.11-GCCcore-7.3.0/lib/ -isystem ${EBROOTBOOST}/include -isystem ${EBROOTOPENMM}/include' 
+             -DCMAKE_C_FLAGS='-L/scicore/soft/apps/libpng/1.6.34-GCCcore-7.3.0/lib/ -L/scicore/soft/apps/LibTIFF/4.0.9-GCCcore-7.3.0/lib/ -L/scicore/soft/apps/zlib/1.2.11-GCCcore-7.3.0/lib/ -isystem ${EBROOTBOOST}/include -isystem ${EBROOTOPENMM}/include'
+             -DCMAKE_CXX_FLAGS='-L/scicore/soft/apps/libpng/1.6.34-GCCcore-7.3.0/lib/ -L/scicore/soft/apps/LibTIFF/4.0.9-GCCcore-7.3.0/lib/ -L/scicore/soft/apps/zlib/1.2.11-GCCcore-7.3.0/lib/ -isystem ${EBROOTBOOST}/include -isystem ${EBROOTOPENMM}/include' 
              -DCMAKE_EXE_LINKER_FLAGS=" -pthread"
   - make -j 2
   - echo "    ... done building OST."

@@ -2348,16 +2348,19 @@ Statistics for column %(col)s
     if file_opened:
       stream.close()
 
-     
-  def GetNumpyMatrix(self, *args):
+  def GetNumpyMatrixAsArray(self, *args):
     '''
-    Returns a numpy matrix containing the selected columns from the table as 
-    columns in the matrix.
+    Returns a numpy array containing the selected columns from the table as 
+    columns as a matrix.
 
     Only columns of type *int* or *float* are supported. *NA* values in the
     table will be converted to *None* values.
 
-    :param \*args: column names to include in numpy matrix
+    Originally the function used the numpy matrix class but that is going to be
+    deprecated in the future. Numpy itself suggests replacing numpy matrix by
+    numpy array.
+
+    :param \*args: column names to include in numpy array
 
     :warning: The function depends on *numpy*
     '''
@@ -2372,16 +2375,40 @@ Statistics for column %(col)s
         idx = self.GetColIndex(arg)
         col_type = self.col_types[idx]
         if col_type!='int' and col_type!='float':
-          raise TypeError("Numpy matrix can only be generated from numeric column types")
+          raise TypeError("Numpy matrix can only be generated from numeric "+\
+                          "column types")
         idxs.append(idx)
-      m = np.matrix([list(self[i]) for i in idxs]) 
-      return m.T
+
+      a = np.array([list(self[i]) for i in idxs])
+      return a.T
     
     except ImportError:
       LogError("Function needs numpy, but I could not import it.")
       raise
-    
 
+  def GetNumpyMatrix(self, *args):
+    '''
+    *Caution*: Numpy is deprecating the use of the numpy matrix class.
+
+    Returns a numpy matrix containing the selected columns from the table as 
+    columns in the matrix.
+
+    Only columns of type *int* or *float* are supported. *NA* values in the
+    table will be converted to *None* values.
+
+    :param \*args: column names to include in numpy matrix
+
+    :warning: The function depends on *numpy*
+    '''
+    LogWarning("table.GetNumpyMatrix is deprecated, please use "+
+               "table.GetNumpyMatrixAsArray instead")
+    try:
+      import numpy as np
+      m = self.GetNumpyMatrixAsArray(*args)
+      return np.matrix(m)
+    except ImportError:
+      LogError("Function needs numpy, but I could not import it.")
+      raise
 
   def GaussianSmooth(self, col, std=1.0, na_value=0.0, padding='reflect', c=0.0):
 
@@ -2502,20 +2529,20 @@ Statistics for column %(col)s
       if len(args)==0:
         raise RuntimeError("At least one column must be specified.")
       
-      b = self.GetNumpyMatrix(ref_col)
-      a = self.GetNumpyMatrix(*args)
-      
+      b = self.GetNumpyMatrixAsArray(ref_col)
+      a = self.GetNumpyMatrixAsArray(*args)
+
       if len(kwargs)!=0:
         if 'weights' in kwargs:
-          w = self.GetNumpyMatrix(kwargs['weights'])
+          w = self.GetNumpyMatrixAsArray(kwargs['weights'])
           b = np.multiply(b,w)
           a = np.multiply(a,w)
           
         else:
           raise RuntimeError("specified unrecognized kwargs, use weights as key")
       
-      k = (a.T*a).I*a.T*b
-      return list(np.array(k.T).reshape(-1))
+      k = np.linalg.inv(a.T@a)@a.T@b
+      return list(k.T.reshape(-1))
     
     except ImportError:
       LogError("Function needs numpy, but I could not import it.")
@@ -3202,3 +3229,5 @@ def Merge(table1, table2, by, only_matching=False):
       new_tab.AddRow(row)
   return new_tab
 
+
+#  LocalWords:  numpy Numpy

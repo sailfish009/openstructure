@@ -13,6 +13,24 @@ import ost
 from ost import seq
 from ost.bindings import hhblits
 
+class _UnitTestHHblitsLog(ost.LogSink):
+  """Dedicated logger to hide some expected warning/ error messages.
+  """
+  def __init__(self):
+    ost.LogSink.__init__(self)
+    self.lcwd = os.getcwd()
+
+  def LogMessage(self, message, severity):
+    message = message.strip()
+    dnem = "could not open file '%s'" % os.path.join(self.lcwd,
+                                                     'doesnotexist.a3m')
+    if message.endswith(dnem):
+        return
+    print(message)
+
+def setUpModule():
+  ost.PushLogSink(_UnitTestHHblitsLog())
+
 class TestHHblitsBindings(unittest.TestCase):
     def setUp(self):
         self.hhroot = os.getenv('EBROOTHHMINSUITE')
