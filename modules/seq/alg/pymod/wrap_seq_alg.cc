@@ -78,6 +78,15 @@ list VarMapGetData(const VarianceMapPtr v_map) {
 list DistToMeanGetData(const Dist2MeanPtr d2m) {
   return GetList(*d2m, d2m->GetNumResidues(), d2m->GetNumStructures());
 }
+
+void AAPseudoCountsSimple(ProfileHandle& profile) {
+  AddAAPseudoCounts(profile);
+}
+
+void AAPseudoCountsAngermueller(ProfileHandle& profile, const ContextProfileDB& db) {
+  AddAAPseudoCounts(profile, db);
+}
+
 } // anon ns
 ////////////////////////////////////////////////////////////////////
 
@@ -228,7 +237,28 @@ void export_distance_analysis()
 ////////////////////////////////////////////////////////////////////
 // algorithms involving hmms
 void export_hmm_algorithms() {
-  def("AddAAPseudoCounts", &AddAAPseudoCounts, (arg("profile")));
+
+  class_<ContextProfile>("ContextProfile", init<int>())
+    .def("SetWeight",&ContextProfile::SetWeight, (arg("pos"), arg("olc"), arg("weight")))
+    .def("SetPseudoCount",&ContextProfile::SetPseudoCount, (arg("olc"), arg("count")))
+    .def("SetBias",&ContextProfile::SetBias, (arg("bias")))
+    .def("GetWeight", &ContextProfile::GetWeight, (arg("pos"), arg("olc")))
+    .def("GetPseudoCount", &ContextProfile::GetPseudoCount,(arg("olc")))
+    .def("GetBias", &ContextProfile::GetBias)
+    .def("GetLength", &ContextProfile::GetLength)
+  ;
+
+  class_<ContextProfileDB, ContextProfileDBPtr>("ContextProfileDB", init<>())
+    .def("__len__",&ContextProfileDB::size)
+    .def("__getitem__",&ContextProfileDB::at,return_value_policy<reference_existing_object>(), (arg("idx")))
+    .def("Save", &ContextProfileDB::Save, (arg("filename")))
+    .def("Load", &ContextProfileDB::Load, (arg("filename"))).staticmethod("Load")
+    .def("FromCRF", &ContextProfileDB::FromCRF, (arg("filename"))).staticmethod("FromCRF")
+    .def("AddProfile", &ContextProfileDB::AddProfile, (arg("profile")))
+  ;
+
+  def("AddAAPseudoCounts", &AAPseudoCountsSimple, (arg("profile")));
+  def("AddAAPseudoCounts", &AAPseudoCountsAngermueller, (arg("profile"), arg("context_profile_db")));
   def("AddTransitionPseudoCounts", &AddTransitionPseudoCounts, (arg("profile")));
   def("HMMScore", &HMMScore, (arg("profile_0"), arg("profile_1"), arg("alignment"),
                               arg("s_0_idx"), arg("s_1_idx")));
