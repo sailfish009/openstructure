@@ -1,5 +1,8 @@
 # Doxyfile 1.5.7
 
+# RUN in OST_ROOT with "doxygen doxygen/Doxyfile" (assumes compiled in build)
+# -> outout in doc/html
+
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
@@ -91,7 +94,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ./modules ./stage
+INPUT                  = ./modules ./build/stage
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.hh \
                          *.dox \
