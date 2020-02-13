@@ -160,10 +160,12 @@ std::vector<ContextProfile> profiles_;
 
 void AddTransitionPseudoCounts(ost::seq::ProfileHandle& profile);
 
-void AddAAPseudoCounts(ost::seq::ProfileHandle& profile);
+void AddAAPseudoCounts(ost::seq::ProfileHandle& profile,
+                       Real a = 1.0, Real b = 1.5, Real c = 1.0);
 
 void AddAAPseudoCounts(ost::seq::ProfileHandle& profile, 
-                       const ContextProfileDB& db);
+                       const ContextProfileDB& db,
+                       Real a = 0.9, Real b = 4.0, Real c = 1.0);
 
 void AddNullPseudoCounts(ost::seq::ProfileHandle& profile);
 
