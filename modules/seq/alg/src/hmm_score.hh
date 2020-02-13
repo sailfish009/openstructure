@@ -28,7 +28,13 @@ namespace ost{ namespace seq{ namespace alg{
 Real HMMScore(const ost::seq::ProfileHandle& profile_0, 
 	          const ost::seq::ProfileHandle& profile_1,
 	          const ost::seq::AlignmentHandle& aln,
-	          int seq_0_idx, int seq_1_idx);
+	          int seq_0_idx, int seq_1_idx, 
+	          Real match_score_offset = -0.03,
+	          Real correl_score_weight = 0.1,
+	          Real del_start_penalty_factor=0.6,
+	          Real del_extend_penalty_factor=0.6,
+	          Real ins_start_penalty_factor=0.6,
+	          Real ins_extend_penalty_factor=0.6);
 
 }}} // ns
 

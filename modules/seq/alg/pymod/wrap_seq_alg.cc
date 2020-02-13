@@ -262,7 +262,13 @@ void export_hmm_algorithms() {
   def("AddTransitionPseudoCounts", &AddTransitionPseudoCounts, (arg("profile")));
   def("AddNullPseudoCounts", &AddNullPseudoCounts, (arg("profile")));
   def("HMMScore", &HMMScore, (arg("profile_0"), arg("profile_1"), arg("alignment"),
-                              arg("s_0_idx"), arg("s_1_idx")));
+                              arg("s_0_idx"), arg("s_1_idx"), 
+                              arg("match_score_offset")=-0.03,
+                              arg("correl_score_weight")=0.1,
+                              arg("del_start_penalty_factor")=0.6,
+                              arg("del_extend_penalty_factor")=0.6,
+                              arg("ins_start_penalty_factor")=0.6,
+                              arg("ins_extend_penalty_factor")=0.6));
 }
 
 BOOST_PYTHON_MODULE(_ost_seq_alg)
