@@ -79,12 +79,13 @@ list DistToMeanGetData(const Dist2MeanPtr d2m) {
   return GetList(*d2m, d2m->GetNumResidues(), d2m->GetNumStructures());
 }
 
-void AAPseudoCountsSimple(ProfileHandle& profile) {
-  AddAAPseudoCounts(profile);
+void AAPseudoCountsSimple(ProfileHandle& profile, Real a, Real b, Real c) {
+  AddAAPseudoCounts(profile, a, b, c);
 }
 
-void AAPseudoCountsAngermueller(ProfileHandle& profile, const ContextProfileDB& db) {
-  AddAAPseudoCounts(profile, db);
+void AAPseudoCountsAngermueller(ProfileHandle& profile, const ContextProfileDB& db,
+                                Real a, Real b, Real c) {
+  AddAAPseudoCounts(profile, db, a, b, c);
 }
 
 } // anon ns
@@ -257,8 +258,15 @@ void export_hmm_algorithms() {
     .def("AddProfile", &ContextProfileDB::AddProfile, (arg("profile")))
   ;
 
-  def("AddAAPseudoCounts", &AAPseudoCountsSimple, (arg("profile")));
-  def("AddAAPseudoCounts", &AAPseudoCountsAngermueller, (arg("profile"), arg("context_profile_db")));
+  def("AddAAPseudoCounts", &AAPseudoCountsSimple, (arg("profile"), 
+                                                   arg("a")=1.0,
+                                                   arg("b")=1.5,
+                                                   arg("c")=1.0));
+  def("AddAAPseudoCounts", &AAPseudoCountsAngermueller, (arg("profile"), 
+                                                         arg("context_profile_db"),
+                                                         arg("a")=0.9,
+                                                         arg("b")=4.0,
+                                                         arg("c")=1.0));
   def("AddTransitionPseudoCounts", &AddTransitionPseudoCounts, (arg("profile")));
   def("AddNullPseudoCounts", &AddNullPseudoCounts, (arg("profile")));
   def("HMMScore", &HMMScore, (arg("profile_0"), arg("profile_1"), arg("alignment"),

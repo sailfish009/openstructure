@@ -460,7 +460,8 @@ void AddTransitionPseudoCounts(ost::seq::ProfileHandle& profile) {
 }
 
 
-void AddAAPseudoCounts(ost::seq::ProfileHandle& profile) {
+void AddAAPseudoCounts(ost::seq::ProfileHandle& profile,
+                       Real a, Real b, Real c) {
 
   Real full_admixture [20];
   for(size_t col_idx = 0; col_idx < profile.size(); ++col_idx) {
@@ -476,7 +477,7 @@ void AddAAPseudoCounts(ost::seq::ProfileHandle& profile) {
     // this is the equation they write in HHblits when you display the help
     // (Neff[i]-1) got rid of the -1. Well, that's how HHblits implements it
     Real neff = profile[col_idx].GetHMMData()->GetNeff();
-    Real tau = std::min(1.0, 1.0 / (1.0 + (neff) / 1.5));
+    Real tau = std::min(1.0, a / (1.0 + std::pow((neff) / b, c)));
     for (int i = 0; i < 20; ++i) {
       col_freq[i] = (1. - tau) * col_freq[i] + tau * full_admixture[i];
     }
@@ -485,7 +486,8 @@ void AddAAPseudoCounts(ost::seq::ProfileHandle& profile) {
 
 
 void AddAAPseudoCounts(ost::seq::ProfileHandle& profile,
-                       const ContextProfileDB& db) {
+                       const ContextProfileDB& db,
+                       Real a, Real b, Real c) {
 
   std::vector<Real> cp_scores(db.size(), 0.0);
   int cp_length = db.profile_length();
@@ -566,7 +568,7 @@ void AddAAPseudoCounts(ost::seq::ProfileHandle& profile,
     // this is the equation they write in HHblits when you display the help
     // (Neff[i]-1) got rid of the -1. Well, that's how HHblits implements it
     Real neff = profile[col_idx].GetHMMData()->GetNeff();
-    Real tau = std::min(1.0, 0.9 / (1.0 + (neff) / 4.0));
+    Real tau = std::min(1.0, a / (1.0 + std::pow((neff) / b, c)));
     Real* col_freq = profile[col_idx].freqs_begin();
     const std::vector<Real>& counts = count_profile[col_idx];
     const std::vector<Real>& context = context_profile[col_idx];
