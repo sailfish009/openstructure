@@ -267,7 +267,10 @@ void export_hmm_algorithms() {
                                                          arg("a")=0.9,
                                                          arg("b")=4.0,
                                                          arg("c")=1.0));
-  def("AddTransitionPseudoCounts", &AddTransitionPseudoCounts, (arg("profile")));
+  def("AddTransitionPseudoCounts", &AddTransitionPseudoCounts, (arg("profile"),
+                                                                arg("gapb")=1.0,
+                                                                arg("gapd")=0.15,
+                                                                arg("gape")=1.0));
   def("AddNullPseudoCounts", &AddNullPseudoCounts, (arg("profile")));
   def("HMMScore", &HMMScore, (arg("profile_0"), arg("profile_1"), arg("alignment"),
                               arg("s_0_idx"), arg("s_1_idx"), 

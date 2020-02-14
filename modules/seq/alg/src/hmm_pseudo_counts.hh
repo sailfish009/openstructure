@@ -158,7 +158,9 @@ private:
 std::vector<ContextProfile> profiles_;
 };
 
-void AddTransitionPseudoCounts(ost::seq::ProfileHandle& profile);
+void AddTransitionPseudoCounts(ost::seq::ProfileHandle& profile,
+                               Real gapb = 1.0, Real gabd = 0.15, 
+                               Real gape = 1.0);
 
 void AddAAPseudoCounts(ost::seq::ProfileHandle& profile,
                        Real a = 1.0, Real b = 1.5, Real c = 1.0);
