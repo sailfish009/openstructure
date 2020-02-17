@@ -150,6 +150,9 @@ public:
 
 // specialization for source!=target vax conversion integer types
 
+// NOTE: the VAX conversion is based on the libvaxdata code by L. M. Baker
+// -> a copy of Baker's code was included until OST 1.11 and removed as unused
+
 // byte swapping for int types if local is big endian
 template<class VALUETYPE>
 class ConvertHelper<OST_BIG_ENDIAN,OST_VAX_DATA,VALUETYPE>{
