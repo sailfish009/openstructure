@@ -32,7 +32,7 @@ option(ENABLE_GUI "whether the graphical user interface should be enabled"
        ON)
 option(ENABLE_GFX "whether graphics support should be enabled"
        ON)
-option(ENABLE_GFX "whether to use the OpenGL Legacy GL implementation"
+option(OPENGLPREFERENCE_LEGACY "whether to use the OpenGL Legacy GL implementation"
        OFF)
 option(ENABLE_IMG "whether the image processing module should be compiled"
        ON)
