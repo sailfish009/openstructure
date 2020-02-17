@@ -31,7 +31,9 @@ option(PROFILE "whether to compile with profiling support"
 option(ENABLE_GUI "whether the graphical user interface should be enabled"
        ON)
 option(ENABLE_GFX "whether graphics support should be enabled"
-      ON)
+       ON)
+option(ENABLE_GFX "whether to use the OpenGL Legacy GL implementation"
+       OFF)
 option(ENABLE_IMG "whether the image processing module should be compiled"
        ON)
 option(ENABLE_INFO "whether openstructure should be compiled with support for the info library"
@@ -221,6 +223,11 @@ else()
   endif()
 endif()
 if (ENABLE_GFX)
+  if (OPENGLPREFERENCE_LEGACY)
+    set(OpenGL_GL_PREFERENCE LEGACY)
+  else()
+    set(OpenGL_GL_PREFERENCE GLVND)
+  endif(OPENGLPREFERENCE_LEGACY)
   find_package(OpenGL REQUIRED)
 endif()
 
