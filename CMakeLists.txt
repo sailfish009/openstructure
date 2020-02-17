@@ -2,7 +2,15 @@
 # Author: Marco Biasini
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12.1 FATAL_ERROR)
+
+# Set CMake policies
+# Behaviour of target_link_libraries, always link by full path. CMP0060 can
+# disable this to stay compatible with old projects. We want the new behaviour
+# since before we needed to provide the full path ourselves, that is: we
+# manually forced CMake to the new scheme.
+cmake_policy(SET CMP0060 NEW)
+
 project(OpenStructure CXX C)
 set (CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set (OST_VERSION_MAJOR 1)
@@ -262,7 +270,7 @@ if (ENABLE_GUI)
   find_package(Qt5Widgets REQUIRED)
   find_package(Qt5OpenGL REQUIRED)
   set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Gui Qt5::Widgets Qt5::Core)
-  ost_find_python_module(sip)
+  ost_find_python_module(PyQt5.sip)
   ost_find_python_module(PyQt5)
 endif()
 
@@ -362,3 +370,5 @@ message(STATUS
         "   Debian/Ubuntu directory layout (-DUBUNTU_LAYOUT) : ${_UBUNTU_LAYOUT}"
         ${HIDDEN_VIS_MSG})
 
+
+# LocalWords:  CMake CMP

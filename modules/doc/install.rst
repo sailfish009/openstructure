@@ -28,7 +28,7 @@ a bunch of open-source libraries. If you haven't already installed them, please
 install them now! Where appropriate, the minimally required version is given in 
 parentheses.
 
-* `CMake <http://cmake.org>`_ (2.6.4)
+* `CMake <http://cmake.org>`_ (3.12.1)
 * `Python3 <http://python.org>`_ (3.6)
 * `Boost <http://boost.org>`_ (1.65)
 * `zlib <https://zlib.net/>`_ (usually comes with Boost or system)
@@ -317,11 +317,13 @@ version of OpenStructure.
           -DOPTIMIZE=ON
 
 
-**macOS (Mojave/ High Sierra) with Homebrew**
+**macOS (Catalina) with Homebrew**
 
 `Homebrew <https://brew.sh/>`_ can be used to conveniently install all
-dependencies. The current Boost version, as of writing these instructions, is
-1.70.0 but works so far. Do not forget to also install `boost-python`.
+dependencies. The current Python version, as of writing these instructions, is
+3.7.6 but works so far. Boost comes as 1.72.0 which seems to be OK. Do not
+forget to also install `boost-python3`. Eigen and SQLite also seem to be
+unproblematic concerning higher version numbers.
 
 If you want to build the info module or the graphical user interface, make sure
 you have the Xcode app installed. Just the Xcode command line tools which are
@@ -398,4 +400,4 @@ in your terminal. This will fetch the newest changes.
 ..  LocalWords:  Homebrew cmake CMake zlib SQLite FFTW libtiff libpng PyQt
 ..  LocalWords:  SSL macOS Makefiles PDB qmake PNG libz libsqlite OPTIMIZE
 ..  LocalWords:  DNDEBUG RPATH rpath SHADER shader SPNAV DConnexion profiler
-..  LocalWords:  DOPTIMIZE DENABLE DOPEN DPYTHON DBOOST DSYS Xcode
+..  LocalWords:  DOPTIMIZE DENABLE DOPEN DPYTHON DBOOST DSYS Xcode Eigen
