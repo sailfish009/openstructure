@@ -304,6 +304,13 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   endif(HIDDEN_VISIBILITY)
 endif()
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-warning-option")
+endif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-warning-option")
+endif(CMAKE_C_COMPILER_ID MATCHES "Clang")
+
 # basic environment
 include_directories(${Boost_INCLUDE_DIRS} 
                     ${FFTW_INCLUDE_DIRS} 
