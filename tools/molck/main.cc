@@ -56,15 +56,15 @@ EntityHandle load_x(const String& file, const IOProfile& profile)
 {
   try {
     EntityHandle ent = CreateEntity();
-    if(file.compare(file.length() - 6, 6, ".mmcif") == 0 ||
-       file.compare(file.length() - 4, 4, ".cif") == 0){
-      MMCifReader reader(file,ent,profile);
+    const size_t fl = file.length();
+    if (   (fl > 6 && file.compare(fl - 6, 6, ".mmcif") == 0)
+        || (fl > 4 && file.compare(fl - 4, 4, ".cif") == 0)) {
+      MMCifReader reader(file, ent, profile);
       reader.Parse();
       return ent;
-    }
-    //if its not mmcif, we assume the file to be in pdb format without even
-    //looking at the filename
-    else{
+    } else {
+      // if its not mmcif, we assume the file to be in pdb format without even
+      // looking at the filename
       PDBReader reader(file, profile);
       if (reader.HasNext()) {
         reader.Import(ent);
