@@ -226,6 +226,10 @@ can influence it.
   * Usually, you will receive errors for those variables when executing `cmake`
     and set them accordingly as needed.
 
+* `OPENGLPREFERENCE_LEGACY` switches the GL implementation to be used by OpenGL.
+  The default is what should be used on modern systems. But since there are some
+  reports on the internet claiming that the default does not work everywhere,
+  this switch enables the usage of the legacy implementation of GL.
   
 Build Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
