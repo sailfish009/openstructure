@@ -350,18 +350,36 @@ binaries in your Path for CMake to determine its configuration:
 
 Homebrew installs all the software under /usr/local. Thus we have to tell cmake
 where to find Boost and Python. Also the Python headers and libraries are not
-located as they are on Linux and hence they must be specified too:
+located as they are on Linux and hence they must be specified too. To get rid of
+a ton of compilation warnings from third party software, we add some dedicated
+C flags:
 
 .. code-block:: bash
 
-  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/Cellar/python@2/2.7.16/\
-  Frameworks/Python.framework/Versions/2.7/include/python2.7 \
-          -DPYTHON_LIBRARIES=/usr/local/Cellar/python@2/2.7.16/\
-  Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib \
-          -DPYTHON_ROOT=/usr/local/ \
-          -DBOOST_ROOT=/usr/local \
-          -DSYS_ROOT=/usr/local \
-          -DOPTIMIZE=ON
+  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/Cellar/python3/3.7.6_1/\
+  Frameworks/Python.framework/Versions/Current/include/python3.7m \
+           -DPYTHON_LIBRARIES=/usr/local/Cellar/python3/3.7.6_1/\
+  Frameworks/Python.framework/Versions/Current/lib/libpython3.7m.dylib \
+           -DPYTHON_ROOT=/usr/local/ \
+           -DBOOST_ROOT=/usr/local \
+           -DSYS_ROOT=/usr/local \
+           -DOPTIMIZE=ON \
+           -DCMAKE_C_FLAGS="-isystem /Applications/Xcode.app/Contents/\
+  Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/\
+  Library/Frameworks/OpenGL.framework/Headers/ -isystem /usr/local/opt/\
+  qt/lib/QtCore.framework/Headers/ -isystem /usr/local/opt/qt/lib/\
+  QtWidgets.framework/Headers/ -isystem /Applications/Xcode.app/\
+  Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/\
+  MacOSX.sdk/System/Library/Frameworks/Security.framework/ \
+  -isystem /usr/local/opt/qt/lib/QtGui.framework/Headers/" \
+           -DCMAKE_CXX_FLAGS="-isystem /Applications/Xcode.app/Contents/\
+  Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/\
+  Library/Frameworks/OpenGL.framework/Headers/ -isystem /usr/local/opt/\
+  qt/lib/QtCore.framework/Headers/ -isystem /usr/local/opt/qt/lib/\
+  QtWidgets.framework/Headers/ -isystem /Applications/Xcode.app/\
+  Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/\
+  MacOSX.sdk/System/Library/Frameworks/Security.framework/ \
+  -isystem /usr/local/opt/qt/lib/QtGui.framework/Headers/"
 
 Building the Project
 --------------------------------------------------------------------------------
