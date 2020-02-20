@@ -49,16 +49,16 @@ bool CopyResidue(ResidueHandle src_res, ResidueHandle dst_res,
   bool has_cbeta = false;
   bool ret;
   char parent_src = (comp_lib->FindCompound(src_res.GetName(),
-                                            Compound::PDB))->GetOneLetterCode ();  
+                                            Compound::PDB))->GetOneLetterCode();
   char parent_dst = (comp_lib->FindCompound(dst_res.GetName(),
-                                            Compound::PDB))->GetOneLetterCode ();  
-  if (parent_src==parent_dst) {
+                                            Compound::PDB))->GetOneLetterCode();
+  if (parent_src == parent_dst) {
     ret = CopyConserved(src_res, dst_res, edi, has_cbeta, comp_lib);
   } else {
     ret = CopyNonConserved(src_res, dst_res, edi, has_cbeta);
   }
   // insert Cbeta, unless dst residue is glycine.
-  if (!has_cbeta && dst_res.GetName()!="GLY") {
+  if (!has_cbeta && dst_res.GetName() != "GLY") {
     try {
       geom::Vec3 cbeta_pos = mol::alg::CBetaPosition(dst_res);
       edi.InsertAtom(dst_res, "CB", cbeta_pos, "C");
