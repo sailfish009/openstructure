@@ -155,7 +155,9 @@ To see the help for compare-structures action run:
 Run GUI
 -------
 
-In order to run GUI do (tested on linux machine):
+The container is built with GUI support, but this is still to be considered an
+experimental feature as it is known to depend on some properties of the host
+where Docker is run. What works on some Linux machines is the following:
 
 .. code-block:: bash
 
