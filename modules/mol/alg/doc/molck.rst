@@ -53,7 +53,7 @@ please find them following:
                            - oxt - Remove terminal oxygens
                            - nonstd - Remove all residues not one of the
                                       20 standard amino acids
-                           - unk - Remove unknown and atoms not following
+                           - unk - Remove unknown atoms not following
                                    the nomenclature
                            Default: hyd
       --fix-ele            Clean up element column

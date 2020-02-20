@@ -38,7 +38,7 @@ const char* USAGE=
 "                       - oxt - Remove terminal oxygens\n"
 "                       - nonstd - Remove all residues not one of the\n"
 "                                  20 standard amino acids\n"
-"                       - unk - Remove unknown and atoms not following\n"
+"                       - unk - Remove unknown atoms not following\n"
 "                               the nomenclature\n"
 "                       Default: hyd\n"
 "  --fix-ele            Clean up element column\n"
