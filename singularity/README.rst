@@ -38,13 +38,13 @@ To see the help for each individual app run:
 
 .. code-block:: bash
 
-    singularity help --app <APP NAME> <PATH TO OST IMAGE>
+    singularity run-help --app <APP NAME> <PATH TO OST IMAGE>
 
 Eg.:
 
 .. code-block:: bash
 
-    singularity help --app OST ost.img
+    singularity run-help --app OST ost.img
 
 
 Facilitating the usage
