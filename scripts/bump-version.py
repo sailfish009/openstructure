@@ -1,9 +1,4 @@
-#!/usr/bin/env python
 import sys
-
-raise RuntimeError("Many things have changed in the Python 3 port. " +
-                   "bump-version.py might require updates. " +
-                   "Only remove this error after careful checking!")
 
 if len(sys.argv) < 2:
   print("USAGE: python scripts/bump-version.py OST_VERSION")
@@ -40,10 +35,3 @@ for i, line in enumerate(lines):
   if line.startswith("ARG OPENSTRUCTURE_VERSION"):
     lines[i] = 'ARG OPENSTRUCTURE_VERSION="%s"\n' % version_string
 open("docker/Dockerfile", "w").writelines(lines)
-
-# fix Singularity recipe
-lines = open("singularity/Singularity").readlines()
-for i, line in enumerate(lines):
-  if line.startswith("export OPENSTRUCTURE_VERSION="):
-    lines[i] = 'export OPENSTRUCTURE_VERSION="%s"\n' % version_string
-open("singularity/Singularity", "w").writelines(lines)
