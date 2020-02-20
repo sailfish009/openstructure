@@ -2,7 +2,7 @@
 # Author: Marco Biasini
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.12.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 
 # Set CMake policies
 # Behaviour of target_link_libraries, always link by full path. CMP0060 can
@@ -277,8 +277,8 @@ if (ENABLE_GUI)
   find_package(Qt5Widgets REQUIRED)
   find_package(Qt5OpenGL REQUIRED)
   set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Gui Qt5::Widgets Qt5::Core)
-  ost_find_python_module(PyQt5.sip)
   ost_find_python_module(PyQt5)
+  ost_find_python_module_alt("PyQt5.sip;sip")
 endif()
 
 if (ENABLE_SPNAV)

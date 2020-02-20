@@ -759,6 +759,34 @@ macro(ost_find_python_module MODULE)
   endif()
 endmacro()
 
+#-------------------------------------------------------------------------------
+# make sure the previously detected Python interpreter has the given module
+# while allowing alternative module names
+#-------------------------------------------------------------------------------
+macro(ost_find_python_module_alt MODULES)
+  set(_PY_MODS "")
+  foreach(py_mod ${MODULES})
+    if (NOT PYTHON_MODULE_${py_mod})
+      set(_PY_MODS "${_PY_MODS} ${py_mod}")
+      message(STATUS "Searching for python module ${py_mod} for ${PYTHON_BINARY}")
+      execute_process(COMMAND ${PYTHON_BINARY} -c "import ${py_mod}"
+                      OUTPUT_QUIET ERROR_QUIET
+                      RESULT_VARIABLE _IMPORT_ERROR)
+      if (NOT _IMPORT_ERROR)
+        message(STATUS "Found python module ${py_mod}")
+        set("PYTHON_MODULE_${py_mod}" FOUND CACHE STRING "" FORCE)
+        break()
+      endif (NOT _IMPORT_ERROR)
+    else ()
+      message(STATUS "Already found python module ${py_mod}")
+      unset(_IMPORT_ERROR)
+      break()
+    endif (NOT PYTHON_MODULE_${py_mod})
+  endforeach(py_mod ${MODULES})
+  if (_IMPORT_ERROR)
+    message(FATAL_ERROR "Could not find one of python modules ${_PY_MODS}. Please install one of them.")
+  endif ()    
+endmacro()
 
 #-------------------------------------------------------------------------------
 # this macro tries to detect a very common problem during configuration stage:
