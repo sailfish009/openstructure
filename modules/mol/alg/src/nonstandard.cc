@@ -21,6 +21,7 @@
   Author: Marco Biasini, Juergen Haas
  */
 
+#include <ost/message.hh>
 #include <ost/log.hh>
 #include <ost/dyn_cast.hh>
 #include <ost/conop/conop.hh>
@@ -58,8 +59,15 @@ bool CopyResidue(ResidueHandle src_res, ResidueHandle dst_res,
   }
   // insert Cbeta, unless dst residue is glycine.
   if (!has_cbeta && dst_res.GetName()!="GLY") {
-    geom::Vec3 cbeta_pos=mol::alg::CBetaPosition(dst_res);
-    edi.InsertAtom(dst_res, "CB", cbeta_pos, "C");
+    try {
+      geom::Vec3 cbeta_pos = mol::alg::CBetaPosition(dst_res);
+      edi.InsertAtom(dst_res, "CB", cbeta_pos, "C");
+    } catch (ost::Error& e) {
+      LOG_WARNING("Issue in CB reconstruction while copying residue "
+                  << src_res.GetQualifiedName() << " to "
+                  << dst_res.GetQualifiedName() << ": " << e.what()
+                  << ". Skipped reconstruction.");
+    }
   }
   return ret;
 }
