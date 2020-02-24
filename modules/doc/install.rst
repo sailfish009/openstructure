@@ -299,7 +299,7 @@ observed for OpenMM versions 6.1 until 7.1.1 when compiling with gcc versions >=
 from source.
 
 
-**Ubuntu 18.04 LTS / Debian 9 with GUI**
+**Ubuntu 18.04 LTS / Debian 10.3.0 with GUI**
 
 All the dependencies can be installed from the package manager as follows:
 
@@ -320,7 +320,9 @@ version of OpenStructure.
   cmake . -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython3.6m.so \
           -DOPTIMIZE=ON
 
-
+Be careful at -DPYTHON_LIBRARIES, Debian 10 comes with Python 3.7 so that needs
+to be substituted.
+          
 **macOS (Catalina) with Homebrew**
 
 `Homebrew <https://brew.sh/>`_ can be used to conveniently install all
