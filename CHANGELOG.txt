@@ -1,3 +1,10 @@
+Changes in Release 1.11.0
+--------------------------------------------------------------------------------
+
+ * This is expected to be the last release supporting Python 2.
+ * Read revision version numbers from mmCIF files.
+ * Several minor bug fixes and improvements.
+
 Changes in Release 1.10.0
 --------------------------------------------------------------------------------
 
