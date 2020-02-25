@@ -35,3 +35,13 @@ for i, line in enumerate(lines):
   if line.startswith("ARG OPENSTRUCTURE_VERSION"):
     lines[i] = 'ARG OPENSTRUCTURE_VERSION="%s"\n' % version_string
 open("docker/Dockerfile", "w").writelines(lines)
+
+# fix Singularity recipe
+vfile = "singularity/Singularity"
+lines = open(vfile).readlines()
+for i, line in enumerate(lines):
+  if line.startswith("From: registry.scicore.unibas.ch/schwede/openstructure:"):
+    lines[i] = 'From: registry.scicore.unibas.ch/schwede/openstructure:'+\
+      '"%s"' % version_string
+    break
+open(vfile, "w").writelines(lines)
