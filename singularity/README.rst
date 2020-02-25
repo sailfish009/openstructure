@@ -19,9 +19,8 @@ One can chose any name for an image. For the purose of this file we will assume
 that the image name is ``ost.img``.
 
 Here we only keep the recipe for the most recent version of OpenStructure. To
-build an image for a different version, you can either adapt the
-``OPENSTRUCTURE_VERSION`` variable in the recipe or look in the git history for
-an older recipe.
+build an image for a different version, edit the source line (``From:``) in the
+recipe or look in the git history for an older recipe.
 
 Available apps
 --------------
