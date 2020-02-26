@@ -35,7 +35,7 @@ locale-gen en_US.UTF-8
 export IPYTHONDIR="/usr/local/share/ipython"
 export JUPYTER_CONFIG_DIR="/usr/local/etc/jupyter"
 export JUPYTER_PATH="/usr/local/share/jupyter"
-export JUPYTER_RUNTIME_DIR="$JUPYTER_PATH/runtime"
+export JUPYTER_RUNTIME_DIR="/tmp/jupyter_runtime"
 
 mkdir -p /usr/local/share/ipython
 mkdir -p $JUPYTER_PATH
@@ -68,10 +68,14 @@ jupyter nbextension enable nglview --py --sys-prefix
 ##############################################################################
 # ENVIRONMENT
 ##############################################################################
+export TEMP="/tmp"
+export TEMPDIR="/tmp"
+export TMPDIR="/tmp"
+export TMP="/tmp"
 export IPYTHONDIR="/usr/local/share/ipython"
 export JUPYTER_CONFIG_DIR="/usr/local/etc/jupyter"
 export JUPYTER_PATH="/usr/local/share/jupyter"
-export JUPYTER_RUNTIME_DIR="$JUPYTER_PATH/runtime"
+export JUPYTER_RUNTIME_DIR="$TMPDIR/jupyter_runtime"
 
 %apprun ChemdictTool
 ##############################################################################
