@@ -1075,7 +1075,7 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   The function requires a reference structure and a probe structure. The
   function checks that all the residues in the reference structure that appear
   in the probe structure (i.e., that have the same ResNum) are of the same
-  residue type. Chains are comapred by order, not by chain name (i.e.: the first
+  residue type. Chains are compared by order, not by chain name (i.e.: the first
   chain of the reference will be compared with the first chain of the probe
   structure, etc.)
 

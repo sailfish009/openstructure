@@ -31,21 +31,29 @@ bool ResidueNamesMatch(const EntityView& probe, const EntityView& reference,
   ChainViewList ref_chains = reference.GetChainList();
   ChainViewList probe_chains = probe.GetChainList();
   for (unsigned int rci = 0; rci < ref_chains.size(); ++rci) {
-     ChainView ref_chain= ref_chains[rci];
-     if (rci<probe_chains.size()) {
+     ChainView ref_chain = ref_chains[rci];
+     if (rci < probe_chains.size()) {
       ChainView probe_chain = probe_chains[rci];     
       ResidueViewList ref_residues = ref_chain.GetResidueList();       
-      for (ResidueViewList::iterator rri=ref_residues.begin(), rre=ref_residues.end(); rri!=rre; ++rri) {
+      for (ResidueViewList::iterator rri = ref_residues.begin(),
+           rre = ref_residues.end(); rri != rre; ++rri) {
         ResidueView probe_residue = probe_chain.FindResidue(rri->GetNumber());
         if (probe_residue.IsValid()) {
           if (probe_residue.GetName()!=rri->GetName()) {
             return_value = false;
             if (log_as_error) {
-              LOG_ERROR("Name mismatch for residue " << probe_residue.GetNumber() << ": in the reference structure(s) is " << rri->GetName() << ", in the model " << probe_residue.GetName());
+              LOG_ERROR("Name mismatch for residue "
+                        << probe_residue.GetNumber()
+                        << ": in the reference structure(s) is "
+                        << rri->GetName() << ", in the model "
+                        << probe_residue.GetName());
             } else {
-              LOG_WARNING("Name mismatch for residue " << probe_residue.GetNumber() << ": in the reference structure(s) is " << rri->GetName() << ", in the model " << probe_residue.GetName());
+              LOG_WARNING("Name mismatch for residue "
+                          << probe_residue.GetNumber()
+                          << ": in the reference structure(s) is "
+                          << rri->GetName() << ", in the model "
+                          << probe_residue.GetName());
             }
-
           } 
         }            
       }
