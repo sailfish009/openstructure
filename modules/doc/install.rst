@@ -8,8 +8,10 @@ For a simple and portable way to use OpenStructure we recommend using a
 container solution. We provide recipes to build images for
 `Docker <https://www.docker.com/>`_ and
 `Singularity <https://sylabs.io/singularity/>`_.
-The latest recipes and instructions can be found on our GitLab site
-(`Docker instructions`_ and `Singularity instructions`_).
+The latest recipes and instructions can be found on our
+`GitLab site <https://git.scicore.unibas.ch/schwede/openstructure/>`_, including
+a link to OpenStructure's own `GitLab Docker registry <https://git.scicore.unibas.ch/schwede/openstructure/container_registry>`_ (`Docker instructions`_ and
+`Singularity instructions`_).
 
 If you wish to compile OpenStructure outside of a container, you need to follow
 the steps which we describe in detail below. In essence, these steps are:
