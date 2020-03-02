@@ -6,10 +6,11 @@ OST Docker
   For many docker installations it is required to run docker commands as root. As
   this depends on set up, we skip the ``sudo`` in all commands.
 
-Obtain image from the OST registry
+Obtain Docker image from the OST registry
 ----------------------------------
 
-OST has its own [container registry](https://git.scicore.unibas.ch/schwede/openstructure/container_registry) inside GitLab. There we try to keep one image for the latest stable version of OST. You can import it by
+OST has its own `container registry https://git.scicore.unibas.ch/schwede/openstructure/container_registry`_ inside GitLab. There we try to keep one image for
+the latest stable version of OST. You can import it by
 
 .. code-block:: bash
 
