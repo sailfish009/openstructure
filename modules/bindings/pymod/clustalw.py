@@ -72,8 +72,8 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False,
      I    isoleucine                 Y    tyrosine
      K    lysine                     Z    glutamate or glutamine
      L    leucine                    X    any
-     M    methionine                 \*   translation stop
-     N    asparagine                 \-   gap of indeterminate length
+     M    methionine                 \\*   translation stop
+     N    asparagine                 \\-   gap of indeterminate length
   ======= ======================= ======= ============================ 
 
   '''
