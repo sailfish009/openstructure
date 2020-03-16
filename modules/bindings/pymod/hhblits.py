@@ -448,7 +448,6 @@ def ParseHHM(profile):
             al.append(nl)
         profile_dict['msa'] = seq.alg.MergePairwiseAlignments(\
             al, seq.CreateSequence(msa_head[0], t))
-        #print profile_dict['msa'].ToString(80)
     # Consensus
     profile_dict['consensus'] = seq.CreateSequence('Consensus', consensus_txt)
 
@@ -487,7 +486,7 @@ class HHblits:
             self.bin_dir = os.path.dirname(self.hhblits_bin)
             # guess root folder (note: this may fail in future)
             self.hhsuite_root = os.path.dirname(self.bin_dir)
-        self.hhlib_dir = os.path.join(self.hhsuite_root, 'lib', 'hh')
+                                             
         if working_dir:
             self.needs_cleanup = False
             self.working_dir = working_dir
@@ -514,7 +513,7 @@ class HHblits:
                 self.working_dir = tmp_dir.dirname
                 self.filename = tmp_dir.files[0]
 
-    def BuildQueryMSA(self, nrdb, options={}, a3m_file=None):
+    def BuildQueryMSA(self, nrdb, options={}, a3m_file=None, assign_ss=False):
         """Builds the MSA for the query sequence.
 
         This function directly uses hhblits of hhtools. While in theory it would
@@ -525,14 +524,13 @@ class HHblits:
         these low scoring ends, part of the alignment corruption can be
         suppressed.
 
-        hhblits does **not** call PSIPRED on the MSA to predict the secondary
-        structure of the query sequence. This is done by addss.pl of hhtools.
-        The predicted secondary structure is stored together with the sequences
-        identified by hhblits.
-
         The produced A3M file can be parsed by :func:`ParseA3M`. If the file was
         already produced, hhblits is not called again and the existing file path
-        is returned.
+        is returned (neglecting the assign_ss flag).
+
+        This function does not raise if something goes wrong. It just logs a 
+        warning. You have to make sure that the produced a3m exists and that,
+        if *assign_ss* is True, the secondary structure has been assigned.
 
         :param nrdb: Database to be align against; has to be an hhblits database
         :type nrdb: :class:`str`
@@ -545,6 +543,14 @@ class HHblits:
 
         :param a3m_file: a path of a3m_file to be used, optional
         :type a3m_file: :class:`str`
+
+        :param assign_ss: HHblits does not assign predicted secondary structure 
+                          by default. You can optionally assign it with the
+                          addss.pl script provided by the HH-suite. However, 
+                          your HH-suite installation requires you to specify
+                          paths to PSIRED etc. We refer to the HH-suite user
+                          guide for further instructions.
+        :type assign_ss:  :class:`bool`
 
         :return: The path to the A3M file containing the MSA
         :rtype: :class:`str`
@@ -567,35 +573,46 @@ class HHblits:
         hhblits_cmd = '%s -e 0.001 -i %s -oa3m %s -d %s %s' % \
                       (self.hhblits_bin, self.filename, a3m_file, full_nrdb,
                        opt_cmd)
+
         job = subprocess.Popen(hhblits_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        sout, _ = job.communicate()
+        sout, serr = job.communicate()
+
         lines = sout.decode().splitlines()
         for line in lines:
             ost.LogVerbose(line.strip())
+        lines = serr.decode().splitlines()
+        for line in lines:
+            ost.LogVerbose(line.strip())
+
         if not os.path.exists(a3m_file):
             ost.LogWarning('Building query profile failed, no output')
             return a3m_file
+
+        if not assign_ss:
+            return a3m_file
+
         # add secondary structure annotation
-        addss_cmd = "%s %s" % (os.path.join(self.hhsuite_root,
-                                            'lib/hh/scripts/addss.pl'),
+        addss_cmd = "%s %s" % (os.path.join(self.hhsuite_root, 
+                                            'scripts/addss.pl'),
                                a3m_file)
         env = dict(os.environ)
-        env.update({'PERL5LIB' : os.path.join(self.hhsuite_root,
-                                              'lib/hh/scripts'),
-                    'HHLIB' : self.hhlib_dir,
+        env.update({'PERL5LIB' : os.path.join(self.hhsuite_root, 'scripts'),
+                    'HHLIB' : os.path.join(self.hhsuite_root),
                     'PATH' : '%s:%s' % (os.path.join(self.hhsuite_root, 'bin'),
                                         os.environ['PATH'])})
+
         job = subprocess.Popen(addss_cmd, shell=True, cwd=self.working_dir,
                                env=env, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
         sout, serr = job.communicate()
-        lines = sout.decode().splitlines()
+        lines = sout.decode().splitlines() + serr.decode().splitlines()
         for line in lines:
             if 'error' in line.lower():
                 ost.LogWarning('Predicting secondary structure for MSA '+
                                '(%s) failed, on command: %s' % (a3m_file, line))
                 return a3m_file
+
         return a3m_file
 
     def A3MToProfile(self, a3m_file, hhm_file=None):
@@ -623,7 +640,6 @@ class HHblits:
         if os.path.exists(hhm_file):
             return hhm_file
         ost.LogVerbose('converting %s to %s' % (a3m_file, hhm_file))
-        os.putenv('HHLIB', self.hhlib_dir)
         job = subprocess.Popen('%s -i %s -o %s' % (hhmake, a3m_file, hhm_file),
                                shell=True, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
@@ -661,7 +677,7 @@ class HHblits:
         :return: Path to the column state sequence file
         :rtype: :class:`str`
         """
-        cstranslate = os.path.join(self.hhlib_dir, 'bin', 'cstranslate')
+        cstranslate = os.path.join(self.bin_dir, 'cstranslate')
         if not cs_file:
             cs_file = '%s.seq219' % os.path.splitext(a3m_file)[0]
         if os.path.exists(cs_file):
