@@ -526,11 +526,7 @@ class HHblits:
 
         The produced A3M file can be parsed by :func:`ParseA3M`. If the file was
         already produced, hhblits is not called again and the existing file path
-        is returned (neglecting the assign_ss flag).
-
-        This function does not raise if something goes wrong. It just logs a 
-        warning. You have to make sure that the produced a3m exists and that,
-        if *assign_ss* is True, the secondary structure has been assigned.
+        is returned (neglecting the *assign_ss* flag!!!).
 
         :param nrdb: Database to be align against; has to be an hhblits database
         :type nrdb: :class:`str`
@@ -581,13 +577,13 @@ class HHblits:
         lines = sout.decode().splitlines()
         for line in lines:
             ost.LogVerbose(line.strip())
+
         lines = serr.decode().splitlines()
         for line in lines:
-            ost.LogVerbose(line.strip())
+            ost.LogError(line.strip())
 
         if not os.path.exists(a3m_file):
-            ost.LogWarning('Building query profile failed, no output')
-            return a3m_file
+            raise RuntimeError('Building query profile failed, no output')
 
         if not assign_ss:
             return a3m_file
@@ -606,12 +602,21 @@ class HHblits:
                                env=env, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
         sout, serr = job.communicate()
-        lines = sout.decode().splitlines() + serr.decode().splitlines()
+
+        lines = sout.decode().splitlines()
         for line in lines:
+            ost.LogVerbose(line.strip())
             if 'error' in line.lower():
-                ost.LogWarning('Predicting secondary structure for MSA '+
-                               '(%s) failed, on command: %s' % (a3m_file, line))
-                return a3m_file
+                raise RuntimeError('Predicting secondary structure for MSA '+
+                                   '(%s) failed, on command: %s' % (a3m_file, line))
+
+        lines = serr.decode().splitlines()
+        for line in lines:
+            ost.LogError(line.strip())
+            if 'error' in line.lower():
+                raise RuntimeError('Predicting secondary structure for MSA '+
+                                   '(%s) failed, on command: %s' % (a3m_file, line))
+
 
         return a3m_file
 
@@ -644,14 +649,19 @@ class HHblits:
                                shell=True, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
         sout, serr = job.communicate()
-        lines = serr.decode().splitlines()
-        for line in lines:
-            ost.LogWarning(line)
         lines = sout.decode().splitlines()
         for line in lines:
-            ost.LogVerbose(line)
-        if job.returncode !=0:
+            ost.LogVerbose(line.strip())
+        lines = serr.decode().splitlines()
+        for line in lines:
+            ost.LogError(line.strip())
+
+        if job.returncode != 0:
             raise IOError('could not convert a3m to hhm file')
+
+        if not os.path.exists(hhm_file):
+            raise RuntimeError('could not convert a3m to hhm file, no output')
+
         return hhm_file
 
     def A3MToCS(self, a3m_file, cs_file=None, options={}):
@@ -692,11 +702,15 @@ class HHblits:
         job = subprocess.Popen(cs_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, _ = job.communicate()
+
+        if not os.path.exists(cs_file):
+            raise RuntimeError('Creating column state sequence file failed, ' +
+                               'no output')
+
         if b'Wrote abstract state sequence to' in sout:
             return cs_file
-
-        ost.LogWarning('Creating column state sequence file (%s) failed' % \
-                       cs_file)
+        else:
+            raise RuntimeError('Creating column state sequence file failed')
 
     def Cleanup(self):
         """Delete temporary data.
@@ -762,14 +776,19 @@ class HHblits:
         job = subprocess.Popen(search_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, serr = job.communicate()
+        lines = sout.decode().splitlines()
+        for line in lines:
+            ost.LogVerbose(line.strip())
+        lines = serr.decode().splitlines()
+        for line in lines:
+            ost.LogError(line.strip())
+
         if job.returncode != 0:
-            lines = sout.decode().splitlines()
-            for line in lines:
-                ost.LogError(line.strip())
-            lines = serr.decode().splitlines()
-            for line in lines:
-                ost.LogError(line.strip())
-            return None
+            raise RuntimeError('Sequence search failed')
+
+        if not os.path.exists(hhr_file):
+            raise RuntimeError('Sequence search failed, no output')
+
         return hhr_file
 
 
