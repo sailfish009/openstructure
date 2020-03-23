@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -39,9 +39,9 @@ void log_message_a(MessageWidget* message_widget, const QString& message, QMessa
 void log_message_b(MessageWidget * message_widget, object py_object)
 {
   if(py_object.ptr() != Py_None){
-    if(PyObject_IsInstance(py_object.ptr(), (PyObject*)&PyString_Type)){
-    String message = extract < std::string > (py_object);
-    message_widget->LogMessage(QString(message.c_str()));
+    if(PyObject_IsInstance(py_object.ptr(), (PyObject*)&PyUnicode_Type)){
+      String message = extract < std::string > (py_object);
+      message_widget->LogMessage(QString(message.c_str()));
     }
     else if(QStandardItem* item = get_cpp_qobject<QStandardItem>(py_object)){
       message_widget->LogMessage(item);

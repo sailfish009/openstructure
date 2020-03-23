@@ -13,6 +13,24 @@ import ost
 from ost import seq
 from ost.bindings import hhblits
 
+class _UnitTestHHblitsLog(ost.LogSink):
+  """Dedicated logger to hide some expected warning/ error messages.
+  """
+  def __init__(self):
+    ost.LogSink.__init__(self)
+    self.lcwd = os.getcwd()
+
+  def LogMessage(self, message, severity):
+    message = message.strip()
+    dnem = "could not open file '%s'" % os.path.join(self.lcwd,
+                                                     'doesnotexist.a3m')
+    if message.endswith(dnem):
+        return
+    print(message)
+
+def setUpModule():
+  ost.PushLogSink(_UnitTestHHblitsLog())
+
 class TestHHblitsBindings(unittest.TestCase):
     def setUp(self):
         self.hhroot = os.getenv('EBROOTHHMINSUITE')
@@ -129,10 +147,10 @@ class TestHHblitsBindings(unittest.TestCase):
         os.remove(self.tmpfile)
         hhfile = self.hh.A3MToProfile("testfiles/testali.a3m",
                                       hhm_file=self.tmpfile)
-        tfh = open(hhfile)
-        efh = open("testfiles/test.hmm")
-        elst = efh.readlines()
-        tlst = tfh.readlines()
+        with open(hhfile) as tfh:
+          tlst = tfh.readlines()
+        with open("testfiles/test.hmm") as efh:
+          elst = efh.readlines()
         self.assertEqual(len(elst), len(tlst))
         for i in range(0, len(elst)):
             if not elst[i].startswith(('FILE', 'COM', 'DATE')):
@@ -147,10 +165,10 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         hhfile = self.hh.A3MToProfile("testfiles/testali.a3m")
-        tfh = open(hhfile)
-        efh = open("testfiles/test.hmm")
-        elst = efh.readlines()
-        tlst = tfh.readlines()
+        with open(hhfile) as tfh:
+          tlst = tfh.readlines()
+        with open("testfiles/test.hmm") as efh:
+          elst = efh.readlines()
         self.assertEqual(len(elst), len(tlst))
         for i in range(0, len(elst)):
             if not elst[i].startswith(('FILE', 'COM', 'DATE')):
@@ -182,7 +200,7 @@ class TestHHblitsBindings(unittest.TestCase):
         with self.assertRaises(IOError) as ioe:
             self.hh.A3MToProfile("doesnotexist.a3m")
         self.assertEqual(ioe.exception.errno, None)
-        self.assertEqual(ioe.exception.message,
+        self.assertEqual(ioe.exception.args[0],
                          "could not convert a3m to hhm file")
 
     def testA3mToCSFileName(self):
@@ -244,10 +262,12 @@ class TestHHblitsBindings(unittest.TestCase):
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         search_file = self.hh.Search("testfiles/testali.a3m",
                                      'testfiles/hhblitsdb/hhblitsdb')
-        tfh = open(search_file)
-        efh = open("testfiles/test.hhr")
-        elst = efh.readlines()
-        tlst = tfh.readlines()
+
+        with open(search_file) as tfh:
+          tlst = tfh.readlines()
+        with open("testfiles/test.hhr") as efh:
+          elst = efh.readlines()
+
         self.assertEqual(len(elst), len(tlst))
         for i in range(0, len(elst)):
             if not elst[i].startswith(('Date', 'Command')):
@@ -286,8 +306,9 @@ class TestHHblitsBindings(unittest.TestCase):
     def testParseHHMNotWorking(self):
         # get info from an HHM file
         with self.assertRaises(IOError) as ioe:
-            hhblits.ParseHHM(open('testfiles/testali.a3m'))
-        self.assertEqual(ioe.exception.message,
+            with open('testfiles/testali.a3m') as f:
+              hhblits.ParseHHM(f)
+        self.assertEqual(ioe.exception.args[0],
                          'Profile file "testfiles/testali.a3m" is missing '+
                          'the "Consensus" section')
 
@@ -317,7 +338,8 @@ class TestHHblitsBindings(unittest.TestCase):
         self.assertAlmostEqual(hit.ss_score, 34.1)
 
     def testParseHHblitsOutput(self):
-        header, hits = hhblits.ParseHHblitsOutput(open("testfiles/test.hhr"))
+        with open("testfiles/test.hhr") as f:
+          header, hits = hhblits.ParseHHblitsOutput(f)
         self.assertEqual(header.query, 'Test')
         self.assertEqual(header.match_columns, 141)
         self.assertEqual(header.n_eff, 9.4)
@@ -399,8 +421,8 @@ class TestHHblitsBindings(unittest.TestCase):
 if __name__ == "__main__":
     hhsuite_root_dir =  os.getenv('EBROOTHHMINSUITE')
     if not hhsuite_root_dir:
-        print "No environment variable 'EBROOTHHMINSUITE'. To enable the "+\
-            "unit test, this needs to point to your HHsuite installation."
+        print("No environment variable 'EBROOTHHMINSUITE'. To enable the "+\
+            "unit test, this needs to point to your HHsuite installation.")
         sys.exit(0)
     from ost import testutils
     testutils.RunTests()

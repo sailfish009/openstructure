@@ -5,6 +5,11 @@ set(OST_BINDINGS_UNIT_TESTS
   test_blast.py
   test_kclust.py
   test_naccess.py
+  test_cadscore.py
+  test_tmtools.py
+  test_ialign.py
+  test_lga.py
+  test_hbplus.py
 )
 
 ost_unittest(MODULE bindings 

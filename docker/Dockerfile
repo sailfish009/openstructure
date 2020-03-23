@@ -2,67 +2,46 @@ FROM ubuntu:18.04
 
 # ARGUMENTS
 ###########
-
-ARG OPENSTRUCTURE_VERSION="1.11.0"
+ARG OPENSTRUCTURE_VERSION="2.0.0"
 ARG SRC_FOLDER="/usr/local/src"
-ARG CPUS_FOR_MAKE=8
-ARG PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
-ARG OPENSTRUCTURE_SHARE="/usr/local/share/ost"
+ARG CPUS_FOR_MAKE=2
 ARG MSMS_VERSION="2.6.1"
 ARG OPENMM_VERSION="7.1.1"
-ARG DSSP_VERSION="2.2.1"
 ARG OPENMM_INCLUDE_PATH="/usr/local/openmm/include/"
 ARG OPENMM_LIB_PATH="/usr/local/openmm/lib/"
+ARG DEBIAN_FRONTEND=noninteractive
 
 # INSTALL SYSTEM DEPS
 #####################
 RUN apt-get update -y && apt-get install -y cmake \
                                             g++ \
+                                            gfortran \
+                                            wget \
+                                            tar \
+                                            libsqlite3-dev \
                                             sip-dev \
                                             libtiff-dev \
                                             libfftw3-dev \
                                             libeigen3-dev \
                                             libboost-all-dev \
                                             libpng-dev \
-                                            python-all \
-                                            python2.7 \
-                                            python-pyqt5 \
                                             qt5-qmake \
                                             qtbase5-dev \
-                                            wget \
-                                            git \
-                                            gfortran \
-                                            python-pip \
-                                            tar \
-                                            libbz2-dev \
+                                            python3-all \
+                                            python3-pyqt5 \
+                                            python3-numpy \
+                                            python3-scipy \
+                                            python3-pandas \
                                             doxygen \
                                             swig \
                                             clustalw \
-                                            python-virtualenv \
-                                            libsqlite3-dev \
                                             dssp \
-                                            python-enum34 \
                                             locales && \
                                             # CLEANUP
                                             rm -rf /var/lib/apt/lists/*
 
-# INSTALL SOME PYTHON PACKAGES GLOBALY
-######################################
-RUN pip install -U pip==9.0.3 && \
-    pip install -U setuptools==39.0.1 && \
-    pip install --no-cache-dir numpy==1.10.4 \
-                         scipy==1.0.0 \
-                         pandas==0.22.0
-
-# SET LOCALE
-############
-# RUN echo "LC_ALL=en_US.UTF-8" >> /etc/environment
-# RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
-# RUN echo "LANG=en_US.UTF-8" > /etc/locale.conf
-# RUN locale-gen en_US.UTF-8
-
-# DOWNLOAD AND INSTALL MSMS
-###########################
+# INSTALL MSMS
+##############
 RUN cd ${SRC_FOLDER} && \
     mkdir -p msms && \
     cd ${SRC_FOLDER}/msms && \
@@ -73,8 +52,8 @@ RUN cd ${SRC_FOLDER} && \
     cp -v ${SRC_FOLDER}/msms/pdb_to_xyzrn /usr/local/bin/pdb_to_xyzrn && \
     rm -rf ${SRC_FOLDER}/msms
 
-# COMPILE OPENMM FROM SOURCES. INSTALL TO /usr/local
-####################################################
+# INSTALL OPENMM
+################
 RUN cd ${SRC_FOLDER} && \
     wget -O openmm-${OPENMM_VERSION}.tar.gz -nc https://github.com/pandegroup/openmm/archive/${OPENMM_VERSION}.tar.gz && \
     mkdir ${SRC_FOLDER}/openmm-${OPENMM_VERSION} && \
@@ -83,42 +62,20 @@ RUN cd ${SRC_FOLDER} && \
     cd ${SRC_FOLDER}/openmm-${OPENMM_VERSION}/build && \
     cmake .. && make -j $CPUS_FOR_MAKE && make install && \
     cd ${SRC_FOLDER}/openmm-${OPENMM_VERSION}/build/python && \
-    python setup.py build && python setup.py install && \
-    rm -rf ${SRC_FOLDER}/openmm-${OPENMM_VERSION}.tar.gz && \
+    python3 setup.py build && python3 setup.py install && \
+    rm ${SRC_FOLDER}/openmm-${OPENMM_VERSION}.tar.gz && \
     rm -rf ${SRC_FOLDER}/openmm-${OPENMM_VERSION}
 
 # INSTALL OST
 #############
 RUN cd ${SRC_FOLDER} && \
-# copy ost release
+    # copy ost release
     wget -O openstructure-${OPENSTRUCTURE_VERSION}.tar.gz -nc https://git.scicore.unibas.ch/schwede/openstructure/repository/${OPENSTRUCTURE_VERSION}/archive.tar.gz && \
     mkdir openstructure-${OPENSTRUCTURE_VERSION} && \
     tar xf openstructure-${OPENSTRUCTURE_VERSION}.tar.gz -C ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION} --strip-components=1 && \
-    mkdir -p ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}/build
-
-WORKDIR ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}/build
-
-# cmake ost
-RUN cmake .. -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
-             -DOPTIMIZE=ON \
-             -DENABLE_MM=ON \
-             -DCOMPILE_TMTOOLS=1 \
-             -DUSE_NUMPY=1 \
-             -DOPEN_MM_LIBRARY=$OPENMM_LIB_PATH/libOpenMM.so \
-             -DOPEN_MM_INCLUDE_DIR=$OPENMM_INCLUDE_PATH \
-             -DOPEN_MM_PLUGIN_DIR=$OPENMM_LIB_PATH/plugins \
-             -DENABLE_GFX=ON \
-             -DENABLE_GUI=ON && \
-             # Build chemdict_tool
-             make -j ${CPUS_FOR_MAKE} chemdict_tool
-
-# get the compound library
-RUN wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz
-RUN stage/bin/chemdict_tool create components.cif.gz compounds.chemlib pdb && stage/bin/chemdict_tool update ../modules/conop/data/charmm.cif compounds.chemlib charmm
-RUN mkdir -p $OPENSTRUCTURE_SHARE && chmod a+rw -R $OPENSTRUCTURE_SHARE && mv compounds.chemlib $OPENSTRUCTURE_SHARE
-
-# Build and install OST
-RUN cmake .. -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
+    mkdir -p ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}/build && \
+    cd ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}/build && \
+    cmake .. -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython3.6m.so \
              -DOPTIMIZE=ON \
              -DENABLE_MM=ON \
              -DCOMPILE_TMTOOLS=1 \
@@ -128,34 +85,25 @@ RUN cmake .. -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
              -DOPEN_MM_PLUGIN_DIR=$OPENMM_LIB_PATH/plugins \
              -DENABLE_GFX=ON \
              -DENABLE_GUI=ON \
-             -DCOMPOUND_LIB=$OPENSTRUCTURE_SHARE/compounds.chemlib && \
-             # Build OST with compound library
-             make -j ${CPUS_FOR_MAKE} && make check && make install
-
-# GO HOME AND CLEANUP
-#####################
-# RUN apt-get purge -y cmake \
-#                      wget \
-#                      git \
-#                      gfortran \
-#                      python-pip \
-#                      libbz2-dev \
-#                      doxygen \
-#                      swig
-# RUN apt-get clean
-# RUN apt-get autoremove -y
-# 
-# WORKDIR $SRC_FOLDER
-# RUN rm -rf $SRC_FOLDER/*
-
-WORKDIR /home
+             -DCMAKE_C_FLAGS="-isystem /usr/include/boost/ -isystem ${OPENMM_INCLUDE_PATH}/include" \
+             -DCMAKE_CXX_FLAGS="-isystem /usr/include/boost/ -isystem ${OPENMM_INCLUDE_PATH}/include" && \
+    make -j ${CPUS_FOR_MAKE} && \
+    wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz && \
+    stage/bin/chemdict_tool create components.cif.gz compounds.chemlib pdb && stage/bin/chemdict_tool update ../modules/conop/data/charmm.cif compounds.chemlib charmm && \
+    cmake .. -DCOMPOUND_LIB=${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}/build/compounds.chemlib && \
+             make -j ${CPUS_FOR_MAKE} && make check && make install && \
+    rm ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}.tar.gz && \
+    rm -rf ${SRC_FOLDER}/openstructure-${OPENSTRUCTURE_VERSION}
 
 # ENVIRONMENT
-##############################################################################
+#############
+WORKDIR /home
 ENV OST_ROOT="/usr/local"
-ENV PYTHONPATH="/usr/local/lib64/python2.7/site-packages:${PYTHONPATH}"
-ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
+ENV PYTHONPATH="/usr/local/lib64/python3.6/site-packages"
+ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64:/usr/local/openmm/lib/"
 ENV QT_X11_NO_MITSHM=1
+ENV OPENSTRUCTURE_VERSION=$OPENSTRUCTURE_VERSION
 
 ENTRYPOINT ["ost"]
 CMD ["-i"]
+

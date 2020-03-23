@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2016 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -18,8 +18,8 @@
 #------------------------------------------------------------------------------
 
 import os.path
-from _ost_mol_mm import *
-import antechamber
+from ._ost_mol_mm import *
+from . import antechamber
 import ost
 
 def LoadAMBERForcefield():

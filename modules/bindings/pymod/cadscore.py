@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2009 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -186,17 +186,17 @@ def _RunCAD(tmp_dir, mode, cad_bin_path, old_regime):
                                                             "cadtemp"))
 
     ps1=subprocess.Popen(command1, shell=True, stdout=subprocess.PIPE)
-    ps1.wait()
+    ps1.communicate()
     ps2=subprocess.Popen(command2, shell=True, stdout=subprocess.PIPE)
-    ps2.wait()
-    lines=ps2.stdout.readlines()
+    stdout,_ = ps2.communicate()
+    lines=stdout.decode().splitlines()
     try:
       globalAA=_ParseCADGlobal(lines)
     except:
       raise RuntimeError("CAD calculation failed")
     ps3=subprocess.Popen(command3, shell=True, stdout=subprocess.PIPE)
-    ps3.wait()
-    lines=ps3.stdout.readlines()
+    stdout,_ = ps3.communicate()
+    lines=stdout.decode().splitlines()
     try:
       localAA=_ParseCADLocal(lines)
     except:
@@ -226,13 +226,14 @@ def _RunCAD(tmp_dir, mode, cad_bin_path, old_regime):
       cmd.append("--old-regime")
     cmd = ' '.join(cmd)
     ps = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    ps.wait()
+    stdout, _ = ps.communicate()
     try:
-      globalAA = _ParseVoronotaGlobal(ps.stdout.readlines())
+      globalAA = _ParseVoronotaGlobal(stdout.decode().splitlines())
     except:
       raise RuntimeError("CAD calculation failed")
     try:
-      localAA = _ParseVoronotaLocal(open(local_score_filename).readlines())
+      with open(local_score_filename) as f: 
+        localAA = _ParseVoronotaLocal(f.readlines())
     except:
       raise RuntimeError("CAD calculation failed")
 
@@ -246,16 +247,14 @@ def _RunCAD(tmp_dir, mode, cad_bin_path, old_regime):
 def _HasInsertionCodes(model, reference):
   for r in model.residues:
     if r.GetNumber().GetInsCode() != "\0":
-      print r
       return True
   for r in reference.residues:
     if r.GetNumber().GetInsCode() != "\0":
-      print r
       return True
   return False
 
 def _MapLabels(model, cad_results, label):
-  for k,v in cad_results.localAA.iteritems():
+  for k,v in cad_results.localAA.items():
     r = model.FindResidue(k[0], k[1])
     if not r.IsValid():
       raise RuntimeError("Failed to map cadscore on residues: " +

@@ -54,7 +54,7 @@ First query by sequence:
   with open(hit_file) as hit_fh:
       header, hits = hhblits.ParseHHblitsOutput(hit_fh)
   for hit in hits:
-      print hit.aln
+      print(hit.aln)
 
   # cleanup
   hh.Cleanup()
@@ -82,7 +82,7 @@ Very similar going by file:
   with open(hit_file) as hit_fh:
       header, hits = hhblits.ParseHHblitsOutput(hit_fh)
   for hit in hits:
-      print hit.aln
+      print(hit.aln)
 
   # cleanup
   hh.Cleanup()
@@ -106,7 +106,7 @@ so one may want to extract them:
   # note that ParseA3M is not a class method but a module function
   output = hhblits.ParseA3M(open(a3m_file))
 
-  print output['msa']
+  print(output['msa'])
 
   # cleanup
   hh.Cleanup()

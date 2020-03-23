@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -19,23 +19,24 @@
 
 from ost import gui
 
-from PyQt5 import QtCore, QtGui
-from board import Board
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 #Get Panels (Class which manages widgets)
 panels=gui.GostyApp.Instance().perspective.panels
 
 #Create Widget
-tetris=Board()
+my_awesome_widget = QtWidgets.QWidget()
+layout = QtWidgets.QVBoxLayout()
+layout.addWidget(QtWidgets.QPushButton('I dont do anything'))
+layout.addWidget(QtWidgets.QPushButton('I do even less'))
+my_awesome_widget.setLayout(layout)
 
 #Wrap widget to Qt Widget
-wid=gui.Widget(tetris)
+wid=gui.Widget(my_awesome_widget)
 
 #Add Widget to widget pool
-panels.AddWidgetToPool("Break Widget",wid)
+panels.AddWidgetToPool("Widget that doesnt do a thing", wid)
 
 #Add Widget to right panel
 panels.AddWidget(gui.PanelPosition.RIGHT_PANEL,wid,False)
 
-#Fun can start..
-tetris.start()

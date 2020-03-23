@@ -52,8 +52,8 @@ class ClipWidget(QWidget):
     self.far_.setMinimum(int(bounds_near.text()))
     self.far_.setMaximum(int(bounds_far.text()))
     far = int(gfx.Scene().far)
-    if far>sys.maxint:
-      far = sys.maxint
+    if far>sys.maxsize:
+      far = sys.maxsize
     self.far_.setValue(far)
     self.auto_ = QCheckBox("Continuous Automatic Clipping")
     self.auto_.setChecked(gfx.Scene().GetAutoAutoslab())

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2015 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -18,7 +18,6 @@
 //------------------------------------------------------------------------------
 
 #include <ost/mol/mm/system_creator.hh>
-#include <ost/mol/mm/density_force.hh>
 #include <OpenMM.h>
 
 namespace ost{ namespace mol{ namespace mm{
@@ -442,26 +441,6 @@ SystemPtr SystemCreator::Create(const TopologyPtr top,
                                                                            settings->barostat_frequency);
     sys->addForce(&barostat);
   }
-
-  //add density if valid
-  ost::img::ImageHandle density = top->GetDensity();
-  if(density.IsValid()){
-    Real r = top->GetDensityResolution();
-    Real s = top->GetDensityScaling();
-    DensityForce* density_force_ptr = new DensityForce(density,r,s);
-    for(std::vector<Real>::iterator i = masses.begin(); 
-        i != masses.end(); ++i){
-      density_force_ptr->addParticle(*i);
-    }
-    const std::vector<std::vector<int> >& density_bodies = top->GetDensityBodies();
-    for(std::vector<std::vector<int> >::const_iterator i = density_bodies.begin();
-        i != density_bodies.end(); ++i){
-      density_force_ptr->defineBody(*i);
-    }
-    sys->addForce(density_force_ptr);
-  }
-
-
 
   return sys;
 }

@@ -16,4 +16,4 @@ except qsscoring.QSscoreError as ex:
     ost.LogError('QSscore failed:', str(ex))
     qs_score = 0
 
-print "OST is working!"
+print("OST is working!")

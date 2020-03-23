@@ -18,13 +18,13 @@ class TestPDBize(unittest.TestCase):
     seqs = seq.CreateSequenceList()
     pdbizer.Add(m.Select(''), transformations, seqs)
     pdbized = pdbizer.Finish()
-    self.assertEquals([c.name for c in pdbized.chains], ["-"])
+    self.assertEqual([c.name for c in pdbized.chains], ["-"])
     residues = pdbized.residues
     for i in range(26):
-      self.assertEquals(residues[i].number.num, 1)
-      self.assertEquals(residues[i].number.ins_code, chr(ord('A')+i))
-    self.assertEquals(residues[26].number.num, 2)
-    self.assertEquals(residues[26].number.ins_code, 'A')
+      self.assertEqual(residues[i].number.num, 1)
+      self.assertEqual(residues[i].number.ins_code, chr(ord('A')+i))
+    self.assertEqual(residues[26].number.num, 2)
+    self.assertEqual(residues[26].number.ins_code, 'A')
   def test_starts_from_last_water_rnum(self):
     m = mol.CreateEntity()
     e = m.EditXCS(mol.BUFFERED_EDIT)
@@ -38,9 +38,9 @@ class TestPDBize(unittest.TestCase):
     pdbizer.Add(m.Select(''), transformations,seqs)
     pdbizer.Add(m.Select(''), transformations,seqs)
     pdbized = pdbizer.Finish()
-    self.assertEquals([c.name for c in pdbized.chains], ["-"])
+    self.assertEqual([c.name for c in pdbized.chains], ["-"])
     residues = pdbized.residues
-    self.assertEquals([r.number for r in residues],
+    self.assertEqual([r.number for r in residues],
                       [mol.ResNum(1, 'A'), mol.ResNum(1, 'B')])
 
 

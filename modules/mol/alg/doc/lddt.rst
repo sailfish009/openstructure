@@ -240,7 +240,7 @@ One can replicate the binary using simple python script:
     #
     # Check consistency
     is_cons = ResidueNamesMatch(model_view, references[0], True)
-    print "Consistency check: ", "OK" if is_cons else "ERROR"
+    print("Consistency check: ", "OK" if is_cons else "ERROR")
     #
     # Calculate lDDT
     LocalDistDiffTest(model_view,

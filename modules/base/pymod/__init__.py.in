@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -20,8 +20,8 @@
 
 __all__=['CharList','Correl', 'FileLogSink', 'FloatList', 'FloatMatrix', 'FloatMatrix3', 'FloatMatrix4', 'GetCurrentLogSink', 'GetPrefixPath', 'GetSharedDataPath', 'GetVerbosityLevel', 'Histogram', 'IntList', 'LogDebug', 'LogError', 'LogInfo', 'LogScript', 'LogSink', 'LogTrace', 'LogVerbose', 'LogWarning', 'Max', 'Mean', 'Median', 'Min', 'MultiLogSink', 'PopLogSink', 'PopVerbosityLevel', 'PushLogSink', 'PushVerbosityLevel', 'Range', 'SetPrefixPath', 'StdDev', 'StreamLogSink', 'StringList', 'StringLogSink', 'Units', 'VERSION', 'VERSION_MAJOR', 'VERSION_MINOR', 'VERSION_PATCH', 'WITH_NUMPY', 'conop', 'geom', 'io', 'mol', 'seq', 'stutil' @ALL_ADDITIONAL_MODULES@]
 
-from _ost_base import *
-from stutil import *
+from ._ost_base import *
+from .stutil import *
 
 class StreamLogSink(LogSink):
   def __init__(self, stream):

@@ -41,7 +41,7 @@ def RunTests():
       import __main__
       from ost import xmlrunner
       for name, obj in inspect.getmembers(__main__):
-        if (isinstance(obj, (type, types.ClassType)) and
+        if (isinstance(obj, type) and
                             issubclass(obj, unittest.TestCase)):
           suite = unittest.TestLoader().loadTestsFromTestCase(obj)
           stream = open('PYTEST-%s.xml'%name, 'w')
@@ -50,8 +50,8 @@ def RunTests():
 
     else:
       unittest.main()
-  except Exception, e:
-    print e
+  except Exception as e:
+    print(e)
 
 
 def SetDefaultCompoundLib():
@@ -92,7 +92,7 @@ def SetDefaultCompoundLib():
     # try to get the shared data path?
     try:
       shared_data_path = GetSharedDataPath()
-    except Exception, e:
+    except Exception as e:
       SetPrefixPath(os.path.abspath(os.path.join(conop.__path__[0], os.pardir,
                                                  os.pardir, os.pardir,
                                                  os.pardir, os.pardir)))

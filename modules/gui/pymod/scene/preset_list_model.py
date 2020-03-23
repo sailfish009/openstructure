@@ -3,8 +3,8 @@ from ost import gfx
 import os
 import ost
 from PyQt5 import QtCore, QtWidgets, QtGui
-from immutable_preset_info_handler import ImmutablePresetInfoHandler
-from preset_info_handler import PresetInfoHandler
+from .immutable_preset_info_handler import ImmutablePresetInfoHandler
+from .preset_info_handler import PresetInfoHandler
 class PresetListModel(QtCore.QAbstractListModel):
   
   IMMUTABLE_PRESET_PATH = os.path.join(ost.GetSharedDataPath(),"scene", 
@@ -64,11 +64,11 @@ class PresetListModel(QtCore.QAbstractListModel):
   def LoadPresetsFromInfo(self):
     if self.immutable_infoh_:
       presets = self.immutable_infoh_.GetPresets()
-      for k, v in presets.iteritems():
+      for k, v in presets.items():
         self.AddItem(v, self.GetLastRow(), False, False)
     
     presets = self.infoh_.GetPresets()
-    for k, v in presets.iteritems():
+    for k, v in presets.items():
       self.AddItem(v, self.GetLastRow(), True, False)
 
   def GetPreset(self, model_index):

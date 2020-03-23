@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2009 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -125,7 +125,7 @@ def _RuniAlign(ialign, tmp_dir, options={}):
          } 
   opts.update(options)
   cmd_opts = []
-  for k, v in opts.iteritems():
+  for k, v in opts.items():
     if type(v) == type(True):
       if v == True:
         cmd_opts.append('-%s' % str(k))
@@ -140,9 +140,11 @@ def _RuniAlign(ialign, tmp_dir, options={}):
   else:
     ialign_path=settings.Locate('ialign.pl', explicit_file_name=ialign)  
     command="\"%s\" \"%s\" \"%s\" %s" % (ialign_path, model1_filename, model2_filename, cmd_opts)
+
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-  ps.wait()
-  lines=ps.stdout.readlines()
+  stdout,_=ps.communicate()
+  lines=stdout.decode().splitlines()
+
   if (len(lines))<22:
     _CleanupFiles(tmp_dir)
     #for l in lines:

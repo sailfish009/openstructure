@@ -12,7 +12,7 @@ for p in img.ExtentIterator(mh.GetExtent()):
   mh.SetReal(p,val)
   vmin=min(vmin,val)
   vmax=max(vmax,val)
-print vmin, vmax
+print(vmin, vmax)
 for p in img.ExtentIterator(mh.GetExtent()):
   mh.SetReal(p,(mh.GetReal(p)-vmin)/(vmax-vmin))
 
@@ -55,4 +55,4 @@ scene.Add(go2)
 
 go2.ColorBy('HEAT_MAP',0.2,0.8)
 
-print 'Demo 4: Projecting the density of a map onto a plane...' 
+print('Demo 4: Projecting the density of a map onto a plane...') 

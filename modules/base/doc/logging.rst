@@ -106,7 +106,7 @@ You can change the verbosity level  with the following two methods:
           ost.LogLevel.Info
           # Outputs: ost._ost_base.LogLevel.Info
 
-          print ost.LogLevel.Info
+          print(ost.LogLevel.Info)
           # Outputs: Info
           
           int(ost.LogLevel.Info)
@@ -267,7 +267,7 @@ terminal (or the python shell in DNG). The logger also prints the current time.
       levels=['ERROR', 'WARNING', 'SCRIPT', 'INFO', 
               'VERBOSE', 'DEBUG', 'TRACE']
       level=levels[severity]
-      print '%s[%s]: %s' % (level, str(datetime.datetime.now()), message),
+      print('%s[%s]: %s' % (level, str(datetime.datetime.now()), message))
 
   py_logger=PyLogger()
   ost.PushLogSink(py_logger)

@@ -22,7 +22,7 @@ from ost.bindings.clustalw import ClustalW
 from ost.mol.alg import lDDTScorer
 from ost.seq.alg.renumber import Renumber
 import numpy as np
-from scipy.misc import factorial
+from scipy.special import factorial
 from scipy.special import binom
 from scipy.cluster.hierarchy import fclusterdata
 import itertools
@@ -228,6 +228,10 @@ class QSscorer:
       self._chem_mapping = _GetChemGroupsMapping(self.qs_ent_1, self.qs_ent_2)
     return self._chem_mapping
 
+  @chem_mapping.setter
+  def chem_mapping(self, chem_mapping):
+    self._chem_mapping = chem_mapping
+
   @property
   def ent_to_cm_1(self):
     """Subset of :attr:`qs_ent_1` used to compute chain mapping and symmetries.
@@ -255,6 +259,10 @@ class QSscorer:
       self._ComputeAlignedEntities()
     return self._ent_to_cm_1
 
+  @ent_to_cm_1.setter
+  def ent_to_cm_1(self, ent_to_cm_1):
+    self._ent_to_cm_1 = ent_to_cm_1
+
   @property
   def ent_to_cm_2(self):
     """Subset of :attr:`qs_ent_1` used to compute chain mapping and symmetries
@@ -263,6 +271,10 @@ class QSscorer:
     if self._ent_to_cm_2 is None:
       self._ComputeAlignedEntities()
     return self._ent_to_cm_2
+
+  @ent_to_cm_2.setter
+  def ent_to_cm_2(self, ent_to_cm_2):
+    self._ent_to_cm_2 = ent_to_cm_2
 
   @property
   def symm_1(self):
@@ -384,6 +396,10 @@ class QSscorer:
       LogInfo('Mapping found: %s' % str(self._chain_mapping))
     return self._chain_mapping
 
+  @chain_mapping.setter
+  def chain_mapping(self, chain_mapping):
+    self._chain_mapping = chain_mapping
+
   @property
   def chain_mapping_scheme(self):
     """Mapping scheme used to get :attr:`chain_mapping`.
@@ -440,6 +456,10 @@ class QSscorer:
                                               self.res_num_alignment)
     return self._alignments
 
+  @alignments.setter
+  def alignments(self, alignments):
+    self._alignments = alignments
+
   @property
   def mapped_residues(self):
     """Mapping of shared residues in :attr:`alignments`.
@@ -453,6 +473,10 @@ class QSscorer:
     if self._mapped_residues is None:
       self._mapped_residues = _GetMappedResidues(self.alignments)
     return self._mapped_residues
+
+  @mapped_residues.setter
+  def mapped_residues(self, mapped_residues):
+    self._mapped_residues = mapped_residues
 
   @property
   def global_score(self):
@@ -521,6 +545,10 @@ class QSscorer:
     if self._clustalw_bin is None:
       self._clustalw_bin = settings.Locate(('clustalw', 'clustalw2'))
     return self._clustalw_bin
+
+  @clustalw_bin.setter
+  def clustalw_bin(self, clustalw_bin):
+    self._clustalw_bin = clustalw_bin
 
   def GetOligoLDDTScorer(self, settings, penalize_extra_chains=True):
     """
@@ -1100,7 +1128,7 @@ class OligoLDDTScorer(object):
       nominator = sum([s * w for s, w in zip(scores, weights)])
       if self.penalize_extra_chains:
         ref_scorers = self._GetRefScorers()
-        denominator = sum(s.total_contacts for s in ref_scorers.values())
+        denominator = sum(s.total_contacts for s in list(ref_scorers.values()))
         denominator += self._GetModelPenalty()
       else:
         denominator = sum(weights)
@@ -1261,7 +1289,7 @@ class OligoLDDTScorer(object):
       for ch_name_mdl in sorted(unmapped_mdl_chains):
         # get penalty for chain
         cur_penalty = None
-        for cm_ref, cm_mdl in self.chem_mapping.iteritems():
+        for cm_ref, cm_mdl in self.chem_mapping.items():
           if ch_name_mdl in cm_mdl:
             # penalize by an average of the chem. mapped ref. chains
             cur_penalty = 0
@@ -1590,7 +1618,7 @@ def _GetAngles(Rt):
   :type Rt:  :class:`ost.geom.Mat4`
   :return: A :class:`tuple` of angles for each axis (x,y,z)
   """
-  rot = np.asmatrix(Rt.ExtractRotation().data).reshape(3,3)
+  rot = np.asarray(Rt.ExtractRotation().data).reshape(3,3)
   tx = np.arctan2(rot[2,1], rot[2,2])
   if tx < 0:
     tx += 2*np.pi
@@ -1635,8 +1663,8 @@ def _GetChemGroupsMapping(qs_ent_1, qs_ent_2):
   chain_pairs = []
   ca_chains_1 = qs_ent_1.ca_chains
   ca_chains_2 = qs_ent_2.ca_chains
-  for ch_1 in repr_chains_1.keys():
-    for ch_2 in repr_chains_2.keys():
+  for ch_1 in list(repr_chains_1.keys()):
+    for ch_2 in list(repr_chains_2.keys()):
       aln = _AlignAtomSeqs(ca_chains_1[ch_1], ca_chains_2[ch_2])
       if aln:
         chains_seqid = seq.alg.SequenceIdentity(aln)
@@ -1648,24 +1676,24 @@ def _GetChemGroupsMapping(qs_ent_1, qs_ent_2):
   chem_mapping = {}
   for _, c1, c2 in chain_pairs:
     skip = False
-    for a,b in chem_mapping.iteritems():
+    for a,b in chem_mapping.items():
       if repr_chains_1[c1] == a or repr_chains_2[c2] == b:
         skip = True
         break
     if not skip:
       chem_mapping[repr_chains_1[c1]] = repr_chains_2[c2]
   if swapped:
-    chem_mapping = {y: x for x, y in chem_mapping.iteritems()}
+    chem_mapping = {y: x for x, y in chem_mapping.items()}
     qs_ent_1, qs_ent_2 = qs_ent_2, qs_ent_1
 
   # notify chains without partner
-  mapped_1 = set([i for s in chem_mapping.keys() for i in s])
+  mapped_1 = set([i for s in list(chem_mapping.keys()) for i in s])
   chains_1 = set([c.name for c in qs_ent_1.ent.chains])
   if chains_1 - mapped_1:
     LogWarning('Unmapped Chains in %s: %s'
                % (qs_ent_1.GetName(), ','.join(list(chains_1 - mapped_1))))
 
-  mapped_2 = set([i for s in chem_mapping.values() for i in s])
+  mapped_2 = set([i for s in list(chem_mapping.values()) for i in s])
   chains_2 = set([c.name for c in qs_ent_2.ent.chains])
   if chains_2 - mapped_2:
     LogWarning('Unmapped Chains in %s: %s'
@@ -1716,7 +1744,7 @@ def _GetAlignedResidues(qs_ent_1, qs_ent_2, chem_mapping, max_ca_per_chain,
   ca_chains_1 = qs_ent_1.ca_chains
   ca_chains_2 = qs_ent_2.ca_chains
   # go through all mapped chemical groups
-  for group_1, group_2 in chem_mapping.iteritems():
+  for group_1, group_2 in chem_mapping.items():
     # MSA with ClustalW
     seq_list = seq.CreateSequenceList()
     # keep sequence-name (must be unique) to view mapping
@@ -1772,9 +1800,9 @@ def _FindSymmetry(qs_ent_1, qs_ent_2, ent_to_cm_1, ent_to_cm_2, chem_mapping):
 
   # get possible symmetry groups
   symm_subg_1 = _GetSymmetrySubgroups(qs_ent_1, ent_to_cm_1,
-                                      chem_mapping.keys())
+                                      list(chem_mapping.keys()))
   symm_subg_2 = _GetSymmetrySubgroups(qs_ent_2, ent_to_cm_2,
-                                      chem_mapping.values())
+                                      list(chem_mapping.values()))
 
   # check combination of groups
   LogInfo('Selecting Symmetry Groups...')
@@ -1880,7 +1908,7 @@ def _GetChainMapping(ent_1, ent_2, symm_1, symm_2, chem_mapping,
   ref_symm_2 = symm_2[0]
   asu_chem_mapping = _LimitChemMapping(chem_mapping, ref_symm_1, ref_symm_2)
   # for each chemically identical group
-  for g1, g2 in asu_chem_mapping.iteritems():
+  for g1, g2 in asu_chem_mapping.items():
     # try to superpose all possible pairs
     for c1, c2 in itertools.product(g1, g2):
       # get superposition transformation
@@ -1908,7 +1936,7 @@ def _GetChainMapping(ent_1, ent_2, symm_1, symm_2, chem_mapping,
     index_asu_c1 = ref_symm_1.index(intra_asu_c1)
     index_asu_c2 = ref_symm_2.index(intra_asu_c2)
     index_mapp = {ref_symm_1.index(s1): ref_symm_2.index(s2) \
-                  for s1, s2 in intra_asu_mapp.iteritems()}
+                  for s1, s2 in intra_asu_mapp.items()}
     LogInfo('Intra symmetry-group mapping: %s' % str(intra_asu_mapp))
 
     # get INTER symmetry group chain mapping
@@ -1930,8 +1958,8 @@ def _GetChainMapping(ent_1, ent_2, symm_1, symm_2, chem_mapping,
         check += 1
         # need to extract full chain mapping (use indexing)
         mapping = {}
-        for a, b in asu_mapp.iteritems():
-          for id_a, id_b in index_mapp.iteritems():
+        for a, b in asu_mapp.items():
+          for id_a, id_b in index_mapp.items():
             mapping[a[id_a]] = b[id_b]
         chains_rmsd = cached_rmsd.GetMappedRMSD(mapping, res.transformation)
         full_mappings.append((chains_rmsd, mapping))
@@ -2037,16 +2065,16 @@ def _GetDihedralSubgroups(ent, chem_groups, angles, angle_thr):
 
   # get those which are non redundant and covering all chains
   symm_groups = []
-  for clst in same_angles.values():
-    group = clst.keys()
+  for clst in list(same_angles.values()):
+    group = list(clst.keys())
     if _ValidChainGroup(group, ent):
       if len(chem_groups) > 1:
         # if hetero, we want to group toghether different chains only
-        symm_groups.append(zip(*group))
+        symm_groups.append(list(zip(*group)))
       else:
         # if homo, we also want pairs
         symm_groups.append(group)
-        symm_groups.append(zip(*group))
+        symm_groups.append(list(zip(*group)))
   return symm_groups
 
 def _GetCyclicSubgroups(ent, chem_groups, axis, axis_thr):
@@ -2068,8 +2096,8 @@ def _GetCyclicSubgroups(ent, chem_groups, axis, axis_thr):
 
   # use to get grouping
   symm_groups = []
-  for clst in same_axis.values():
-    all_chain = [item for sublist in clst.keys() for item in sublist]
+  for clst in list(same_axis.values()):
+    all_chain = [item for sublist in list(clst.keys()) for item in sublist]
     if len(set(all_chain)) == ent.chain_count:
       # if we have an hetero we can exploit cyclic symmetry for grouping
       if len(chem_groups) > 1:
@@ -2106,14 +2134,14 @@ def _ClusterData(data, thr, metric):
   """
   # special case length 1
   if len(data) == 1:
-    return {0: {data.keys()[0]: data.values()[0]} }
+    return {0: {list(data.keys())[0]: list(data.values())[0]} }
   # do the clustering
-  cluster_indices = fclusterdata(np.asarray(data.values()), thr,
+  cluster_indices = fclusterdata(np.asarray(list(data.values())), thr,
                                  method='complete', criterion='distance',
                                  metric=metric)
   # fclusterdata output is cluster ids -> put into dict of clusters
   res = {}
-  for cluster_idx, data_key in zip(cluster_indices, data.keys()):
+  for cluster_idx, data_key in zip(cluster_indices, list(data.keys())):
     if not cluster_idx in res:
       res[cluster_idx] = {}
     res[cluster_idx][data_key] = data[data_key]
@@ -2217,7 +2245,7 @@ def _LimitChemMapping(chem_mapping, limit_1, limit_2):
   limit_1_set = set(limit_1)
   limit_2_set = set(limit_2)
   asu_chem_mapping = dict()
-  for key, value in chem_mapping.iteritems():
+  for key, value in chem_mapping.items():
     new_key = tuple(set(key) & limit_1_set)
     if new_key:
       asu_chem_mapping[new_key] = tuple(set(value) & limit_2_set)
@@ -2249,7 +2277,7 @@ def _CountSuperpositionsAndMappings(symm_1, symm_2, chem_mapping):
   ref_symm_1 = symm_1[0]
   ref_symm_2 = symm_2[0]
   asu_chem_mapping = _LimitChemMapping(chem_mapping, ref_symm_1, ref_symm_2)
-  for g1, g2 in asu_chem_mapping.iteritems():
+  for g1, g2 in asu_chem_mapping.items():
     chain_superpositions = len(g1) * len(g2)
     c['intra']['superpositions'] += chain_superpositions
     map_per_sup = _PermutationOrCombinations(g1[0], g2[0], asu_chem_mapping)
@@ -2268,12 +2296,12 @@ def _PermutationOrCombinations(sup1, sup2, chem_mapping):
   """Should match len(_ListPossibleMappings(sup1, sup2, chem_mapping))."""
   # remove superposed elements, put smallest complex as key
   chem_map = {}
-  for a,b in chem_mapping.iteritems():
+  for a,b in chem_mapping.items():
     new_a = tuple([x for x in a if x != sup1])
     new_b = tuple([x for x in b if x != sup2])
     chem_map[new_a] = new_b
   mapp_nr = 1.0
-  for a, b in chem_map.iteritems():
+  for a, b in chem_map.items():
     if len(a) == len(b):
       mapp_nr *= factorial(len(a))
     elif len(a) < len(b):
@@ -2308,14 +2336,14 @@ def _ListPossibleMappings(sup1, sup2, chem_mapping):
            less elements) has more elements for any given mapped group.
   """
   # find smallest complex
-  chain1 = [i for s in chem_mapping.keys() for i in s]
-  chain2 = [i for s in chem_mapping.values() for i in s]
+  chain1 = [i for s in list(chem_mapping.keys()) for i in s]
+  chain2 = [i for s in list(chem_mapping.values()) for i in s]
   swap = False
   if len(chain1) > len(chain2):
     swap = True
   # remove superposed elements, put smallest complex as key
   chem_map = {}
-  for a, b in chem_mapping.iteritems():
+  for a, b in chem_mapping.items():
     new_a = tuple([x for x in a if x != sup1])
     new_b = tuple([x for x in b if x != sup2])
     if swap:
@@ -2326,7 +2354,7 @@ def _ListPossibleMappings(sup1, sup2, chem_mapping):
   # equivalent chains
   chem_perm = []
   chem_ref = []
-  for a, b in chem_map.iteritems():
+  for a, b in chem_map.items():
     if len(a) == len(b):
       chem_perm.append(list(itertools.permutations(b)))
       chem_ref.append(a)
@@ -2343,7 +2371,7 @@ def _ListPossibleMappings(sup1, sup2, chem_mapping):
     flat_perm = [i for s in perm for i in s]
     d = {c1: c2 for c1, c2 in zip(flat_ref, flat_perm)}
     if swap:
-      d = {v: k for k, v in d.items()}
+      d = {v: k for k, v in list(d.items())}
     d.update({sup1: sup2})
     mappings.append(d)
   return mappings
@@ -2389,7 +2417,7 @@ def _CheckClosedSymmetry(ent_1, ent_2, symm_1, symm_2, chem_mapping,
   asu_chem_mapping = _LimitChemMapping(chem_mapping, ref_symm_1, ref_symm_2)
   # for each chemically identical group
   rmsd_mappings = []
-  for g1, g2 in asu_chem_mapping.iteritems():
+  for g1, g2 in asu_chem_mapping.items():
     # try to superpose all possible pairs
     # -> note that some chain-chain combinations may work better than others
     #    to superpose the full oligomer (e.g. if some chains are open/closed)
@@ -2438,10 +2466,10 @@ def _GetSuperpositionMapping(ent_1, ent_2, chem_mapping, transformation,
     swap = True
     ent_1, ent_2 = ent_2, ent_1
     transformation = geom.Invert(transformation)
-    chem_pairs = zip(chem_mapping.values(), chem_mapping.keys())
+    chem_pairs = list(zip(list(chem_mapping.values()), list(chem_mapping.keys())))
   else:
     swap = False
-    chem_pairs = chem_mapping.iteritems()
+    chem_pairs = iter(chem_mapping.items())
   # sanity check
   if ent_1.chain_count == 0:
     return None
@@ -2463,7 +2491,7 @@ def _GetSuperpositionMapping(ent_1, ent_2, chem_mapping, transformation,
         ch_atoms[a_2.chain.name].add(a_2.hash_code)
     # get one with most atoms in overlap
     max_num, max_name = max((len(atoms), name)
-                            for name, atoms in ch_atoms.iteritems())
+                            for name, atoms in ch_atoms.items())
     # early abort if overlap fraction not good enough
     ch_2 = ent_2.FindChain(max_name)
     if max_num == 0 or max_num / float(ch_2.handle.atom_count) < sup_fract:
@@ -2482,7 +2510,7 @@ def _GetSuperpositionMapping(ent_1, ent_2, chem_mapping, transformation,
     mapped_chains.add(max_name)
   # unswap if needed and return
   if swap:
-    mapping = {v: k for k, v in mapping.iteritems()}
+    mapping = {v: k for k, v in mapping.items()}
   return mapping
 
 def _GetMappedRMSD(ent_1, ent_2, chain_mapping, transformation):
@@ -2498,7 +2526,7 @@ def _GetMappedRMSD(ent_1, ent_2, chain_mapping, transformation):
   # collect RMSDs and atom counts chain by chain and combine afterwards
   rmsds = []
   atoms = []
-  for c1, c2 in chain_mapping.iteritems():
+  for c1, c2 in chain_mapping.items():
     # get views and atom counts
     chain_1 = ent_1.Select('cname="%s"' % c1)
     chain_2 = ent_2.Select('cname="%s"' % c2)
@@ -2568,7 +2596,7 @@ class _CachedRMSD:
     # collect RMSDs and atom counts chain by chain and combine afterwards
     rmsds = []
     atoms = []
-    for c1, c2 in chain_mapping.iteritems():
+    for c1, c2 in chain_mapping.items():
       # cached?
       if (c1, c2) in self._pair_rmsd:
         atom_count, rmsd = self._pair_rmsd[(c1, c2)]

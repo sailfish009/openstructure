@@ -25,7 +25,7 @@ class TestNaccessBindings(unittest.TestCase):
         except:
             excp_raised = True
             raise
-        self.assertEquals(excp_raised, False, msg="Naccess raised an "+
+        self.assertEqual(excp_raised, False, msg="Naccess raised an "+
                           "exception on a path containing a '.'. This is not "+
                           "supposed to happen.")
 
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     try:
         settings.Locate("naccess")
     except:
-        print "Could not find NACCESS, could not test binding..."
+        print("Could not find NACCESS, could not test binding...")
         sys.exit(0)
     from ost import testutils
     testutils.RunTests()

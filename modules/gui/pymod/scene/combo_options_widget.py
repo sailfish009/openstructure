@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -90,7 +90,7 @@ class ComboOptionsWidget(QtWidgets.QWidget):
      This abstract method must be implemented by all subclasses. 
      It can be used to do something ;-) whenever the combobox changes its value.
     """
-    raise NotImplementedError, "Subclasses must define OnComboChange()"
+    raise NotImplementedError("Subclasses must define OnComboChange()")
 
   def OnActivate(self, item):
     return self.OnComboChange(self, item)

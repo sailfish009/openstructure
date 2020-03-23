@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -185,14 +185,18 @@ int init_python_interpreter()
   String python_loc=setup_python_search_path(root, py);
   //py.RunCommand("from ost import *");
   //py.RunCommand("gui_mode=True");
-  std::stringstream cmd;
-  cmd << "execfile('" << python_loc;
+  std::stringstream script_path;
+  script_path << python_loc;
 #ifdef _MSC_VER
-  cmd << "\\ost\\gui\\";
+  script_path << "\\ost\\gui\\";
 #else  
-  cmd << "/ost/gui/";
+  script_path << "/ost/gui/";
 #endif
-  cmd << "gosty_startup.py')";
+  script_path << "gosty_startup.py";
+
+  std::stringstream cmd;
+  cmd << "exec(compile(open('" << script_path.str() << "').read(),'";
+  cmd << script_path.str() << "', 'exec'))";
   py.RunCommand(QString::fromStdString(cmd.str()));
   return 0;
 }

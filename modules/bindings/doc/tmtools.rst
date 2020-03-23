@@ -61,9 +61,9 @@ structures and print the RMSD as well as the GDT_TS and GDT_HA similarity measur
   pdb1=io.LoadPDB('1ake.pdb', restrict_chains='A')
   pdb2=io.LoadPDB('4ake.pdb', restrict_chains='A')
   result=tmtools.TMScore(pdb1, pdb2)
-  print result.rmsd_below_five # 1.9
-  print result.gdt_ha # 0.41
-  print result.gdt_ts # 0.56
+  print(result.rmsd_below_five) # 1.9
+  print(result.gdt_ha) # 0.41
+  print(result.gdt_ts) # 0.56
 
 Usage of TMalign
 --------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ Usage of TMscore
 TMalign C++ wrapper
 --------------------------------------------------------------------------------
 
-.. module:: ost.bindings
+.. currentmodule:: ost.bindings
 
 Instead of calling the TMalign executable, ost also provides a wrapper around
 its C++ implementation. The advantage is that no intermediate files need to be 
@@ -96,8 +96,8 @@ generated in order to call the executable.
   pdb2=io.LoadPDB('4ake.pdb').Select("peptide=true")
   result = bindings.WrappedTMAlign(pdb1.chains[0], pdb2.chains[0], 
                                    fast=True)
-  print result.tm_score
-  print result.alignment.ToString(80)
+  print(result.tm_score)
+  print(result.alignment.ToString(80))
 
 
 .. class:: TMAlignResult(rmsd, tm_score, aligned_length, transform, alignment)

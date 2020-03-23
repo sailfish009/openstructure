@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -76,13 +76,13 @@ BOOST_AUTO_TEST_CASE(test_io_dcd_charmm_frames)
   BOOST_CHECK_EQUAL(cg2.GetFrameCount(),uint(1));
 
   mol::CoordFramePtr cf2 = cg2.GetFrame(0);
-  BOOST_CHECK(geom::Distance(cf2->GetCellSize(),cell_size)<1e-6);
-  BOOST_CHECK(geom::Distance(cf2->GetCellAngles(),cell_angles)<1e-6);
+  BOOST_CHECK(geom::Distance(cf2->GetCellSize(),cell_size)<1e-5);
+  BOOST_CHECK(geom::Distance(cf2->GetCellAngles(),cell_angles)<1e-5);
 
   geom::Vec3List atom_pos2=cg2.GetFramePositions(0);
 
   for(size_t i=0;i<natoms;++i) {
-    BOOST_CHECK(geom::Distance(atom_pos[i],atom_pos2[i])<1e-6);
+    BOOST_CHECK(geom::Distance(atom_pos[i],atom_pos2[i])<1e-5);
   }
 }
 

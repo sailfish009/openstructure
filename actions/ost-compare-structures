@@ -513,7 +513,7 @@ def _RevertChainNames(ent):
             used_names[original_name] += 1
     for chain in ent.chains:
         editor.RenameChain(chain, reverted_chains[chain.name[:-len(suffix)]])
-    rev_out = ["%s -> %s" % (on, nn) for on, nn in reverted_chains.iteritems()]
+    rev_out = ["%s -> %s" % (on, nn) for on, nn in list(reverted_chains.items())]
     ost.LogInfo("Reverted chains: %s" % ", ".join(rev_out))
 
 
@@ -522,7 +522,7 @@ def _CheckConsistency(alignments, log_error):
     for alignment in alignments:
         ref_chain = Renumber(alignment.GetSequence(0)).CreateFullView()
         mdl_chain = Renumber(alignment.GetSequence(1)).CreateFullView()
-        new_is_cons = ResidueNamesMatch(ref_chain, mdl_chain, log_error)
+        new_is_cons = ResidueNamesMatch(mdl_chain, ref_chain, log_error)
         is_cons = is_cons and new_is_cons
     return is_cons
 
@@ -989,9 +989,6 @@ def _Main():
         with open(opts.output, "w") as outfile:
             json.dump(result, outfile, indent=4, sort_keys=True)
 
-
 if __name__ == '__main__':
-    # make script 'hot'
-    unbuffered = os.fdopen(sys.stdout.fileno(), 'w', 0)
-    sys.stdout = unbuffered
     _Main()
+

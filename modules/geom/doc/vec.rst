@@ -16,9 +16,9 @@ This is shown in the following example:
    
    vec_a=geom.Vec2(1, 0)
    vec_b=geom.Vec2(0, 1)
-   print vec_a, vec_b
-   print vec_a+vec_b
-   print vec_a*3-vec_b
+   print(vec_a, vec_b)
+   print(vec_a+vec_b)
+   print(vec_a*3-vec_b)
 
 The standard vector operations are implemented as :ref:`free standing functions 
 <vector-functions>`:
@@ -29,12 +29,12 @@ The standard vector operations are implemented as :ref:`free standing functions
   vec_a=geom.Vec3(1, 0, 0)
   vec_b=geom.Vec3(0, 1, 0)
   
-  print geom.Dot(vec_a, vec_b)
-  print geom.Cross(vec_a, vec_b)
+  print(geom.Dot(vec_a, vec_b))
+  print(geom.Cross(vec_a, vec_b))
   
-  print geom.Normalize(geom.Vec3(1, 1, 0))
+  print(geom.Normalize(geom.Vec3(1, 1, 0)))
   
-  print geom.Length(geom.Vec3(1, 1, 1))
+  print(geom.Length(geom.Vec3(1, 1, 1)))
 
 
 Vector Classes

@@ -3,7 +3,7 @@ from ost import gfx
 import os
 import ost
 from PyQt5 import QtCore
-from preset import Preset
+from .preset import Preset
 
 class PresetEditorListModel(QtCore.QAbstractListModel):
   def __init__(self, preset, parent=None, *args): 

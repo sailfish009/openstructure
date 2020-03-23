@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -106,7 +106,7 @@ class Preset:
             op = op_class.FromInfo(op_group)
             class_order_dict[index]=op
     for i in range(0, len(class_order_dict)):
-      if(class_order_dict.has_key(i)):
+      if(i in class_order_dict):
         preset.AddOp(class_order_dict[i])
     return preset
     

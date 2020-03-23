@@ -161,42 +161,43 @@ def ParseHHblitsOutput(output):
         value_start_column = 14
         date_pattern = '%a %b %d %H:%M:%S %Y'
         header = HHblitsHeader()
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('Query')
         header.query = line[value_start_column:].strip()
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('Match_columns')
         header.match_columns = int(line[value_start_column:].strip())
 
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('No_of_seqs')
 
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('Neff')
         header.n_eff = float(line[value_start_column:].strip())
 
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('Searched_HMMs')
         header.searched_hmms = int(line[value_start_column:].strip())
 
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('Date')
         value = line[value_start_column:].strip()
         header.date = datetime.datetime.strptime(value, date_pattern)
 
-        line = lines.next()
+        line = next(lines)
         assert line.startswith('Command')
         header.command = line[value_start_column:].strip()
 
-        line = lines.next()
+        line = next(lines)
         assert len(line.strip()) == 0
         return header
 
     def _ParseTableOfContents(lines):
-        assert lines.next().startswith(' No Hit')
+        line = next(lines)
+        assert line.startswith(' No Hit')
         hits = []
         while True:
-            line = lines.next()
+            line = next(lines)
             if len(line.strip()) == 0:
                 return hits
             hits.append(ParseHeaderLine(line))
@@ -221,7 +222,7 @@ def ParseHHblitsOutput(output):
                 # - "T <hit_id> <start> <data> <end>"
                 # - "Q <query_id> <start> <data> <end>"
                 # -> rest is to be skipped
-                line = lines.next()
+                line = next(lines)
                 if len(line.strip()) == 0:
                     continue
                 if line.startswith('Done!'):
@@ -236,12 +237,13 @@ def ParseHHblitsOutput(output):
                             query_id, hits[entry_index][0].hit_id,
                             query_str, templ_str, *hits[entry_index][1])
                     entry_index = int(line[3:].strip())-1
-                    hits[entry_index][0].hit_id = lines.next()[1:].strip()
+                    line = next(lines)
+                    hits[entry_index][0].hit_id = line[1:].strip()
                     query_str = ''
                     templ_str = ''
                     # skip the next line. It doesn't contain information we
                     # don't already know
-                    lines.next()
+                    next(lines)
                     continue
                 assert entry_index != None
                 # Skip all "T ..." and "Q ..." lines besides the one we want
@@ -568,7 +570,7 @@ class HHblits:
         job = subprocess.Popen(hhblits_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, _ = job.communicate()
-        lines = sout.splitlines()
+        lines = sout.decode().splitlines()
         for line in lines:
             ost.LogVerbose(line.strip())
         if not os.path.exists(a3m_file):
@@ -588,7 +590,7 @@ class HHblits:
                                env=env, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
         sout, serr = job.communicate()
-        lines = sout.splitlines()
+        lines = sout.decode().splitlines()
         for line in lines:
             if 'error' in line.lower():
                 ost.LogWarning('Predicting secondary structure for MSA '+
@@ -622,8 +624,17 @@ class HHblits:
             return hhm_file
         ost.LogVerbose('converting %s to %s' % (a3m_file, hhm_file))
         os.putenv('HHLIB', self.hhlib_dir)
-        if subprocess.call('%s -i %s -o %s' % (hhmake, a3m_file, hhm_file),
-                           shell=True):
+        job = subprocess.Popen('%s -i %s -o %s' % (hhmake, a3m_file, hhm_file),
+                               shell=True, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+        sout, serr = job.communicate()
+        lines = serr.decode().splitlines()
+        for line in lines:
+            ost.LogWarning(line)
+        lines = sout.decode().splitlines()
+        for line in lines:
+            ost.LogVerbose(line)
+        if job.returncode !=0:
             raise IOError('could not convert a3m to hhm file')
         return hhm_file
 
@@ -665,10 +676,9 @@ class HHblits:
         job = subprocess.Popen(cs_cmd, shell=True, cwd=self.working_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, _ = job.communicate()
-        lines = sout.splitlines()
-        for line in lines:
-            if 'Wrote abstract state sequence to' in line:
-                return cs_file
+        if b'Wrote abstract state sequence to' in sout:
+            return cs_file
+
         ost.LogWarning('Creating column state sequence file (%s) failed' % \
                        cs_file)
 
@@ -737,10 +747,10 @@ class HHblits:
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sout, serr = job.communicate()
         if job.returncode != 0:
-            lines = sout.splitlines()
+            lines = sout.decode().splitlines()
             for line in lines:
                 ost.LogError(line.strip())
-            lines = serr.splitlines()
+            lines = serr.decode().splitlines()
             for line in lines:
                 ost.LogError(line.strip())
             return None
@@ -758,7 +768,7 @@ def _ParseOptions(opts):
     """
     opt_cmd = list()
     opt_str = list()
-    for k, val in opts.iteritems():
+    for k, val in opts.items():
         if type(val) == type(True):
             if val == True:
                 opt_cmd.append('-%s' % str(k))

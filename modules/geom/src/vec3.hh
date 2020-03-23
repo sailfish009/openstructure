@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -73,6 +73,23 @@ public:
   //! explicit initialization with an array of floats
   explicit Vec3(const float v[3]): x(v[0]), y(v[1]), z(v[2]) { }
 
+  /* The "=" operator for Vec3 gives the "maybe-uninitialize" warning in
+     combination with GenericPropValue with GCC when optimisation is turned on.
+     GenericPropValue is implemented via boost::variant which may confuse GCC
+     tracking variables through the compilation process. As boost::variant is
+     able to search for a "=" operator of different type if no direct match is
+     provided, maybe GCC mixes the Real and Vec3 operators where Real used for
+     Vec3 would indeed lack the y and z component. According to the GCC manual,
+     the "maybe-uninitialize" warnings are prone to produce false positives.
+     There is actually an initiative to get rid of them.
+
+     We ignore them for this particular case by saving the current diagnostic
+     settings (push), disabling the warning in the diagnostics
+     (ignored "-Wmaybe-uninitialized") and afterwards restoring the old
+     diagnostics context (pop).
+   */
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
   //! assignement op
   Vec3& operator=(const Vec3& v)
   {
@@ -81,7 +98,8 @@ public:
     z=v.z;
     return *this;
   }
-
+  #pragma GCC diagnostic pop
+  
   //! comparable
   bool operator==(const Vec3& rhs) const
   {

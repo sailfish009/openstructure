@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -328,15 +328,19 @@ void export_sequence()
   ;*/
   class_<RegionRangeIter>("RegionRangeIter", no_init)
     .def("next", &RegionRangeIter::next)
+    .def("__next__", &RegionRangeIter::next)
   ;
     class_<RevRegionRangeIter>("RevRegionRangeIter", no_init)
     .def("next", &RevRegionRangeIter::next)
+    .def("__next__", &RevRegionRangeIter::next)
   ;
   class_<ConstSeqListIter>("ConstSeqListIter", no_init)
     .def("next", &ConstSeqListIter::next)
+    .def("__next__", &ConstSeqListIter::next)
   ;
   class_<SeqListIter>("SeqListIter", no_init)
     .def("next", &SeqListIter::next)
+    .def("__next__", &SeqListIter::next)
   ;
   class_<AlignmentHandle>("AlignmentHandle", init<>())
     .def("GetCount", &AlignmentHandle::GetCount)

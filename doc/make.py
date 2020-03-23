@@ -5,17 +5,12 @@ import shutil
 from ost import settings
 from optparse import OptionParser
 import subprocess
+from sphinx.application import Sphinx
 
 if len(sys.argv)==2:
   root_dir=sys.argv[1]
 else:
   root_dir='.'
-
-def _CheckCall(cmd, shell):
-  r = subprocess.call(cmd, shell=True)
-  if r != 0:
-    sys.stderr.write("Command '%s' returned non-zero exit status %d\n"%(cmd, r))
-    sys.exit(-1)
 
 def _OutputPath(inpath, outdir):
   parts=inpath.split(os.path.sep)
@@ -48,7 +43,7 @@ def _CreateAndCopy(in_name, outdir):
   if not os.path.exists(out_dir):
     _MkDir(out_dir)
   if _RequireCopy(in_name, out_name):
-    print 'cp %s %s' % (in_name, out_name)
+    print('cp %s %s' % (in_name, out_name))
     os.system('cp %s %s' % (in_name, out_name))
 
 def _MkDir(dirname):
@@ -71,7 +66,6 @@ def _CollectRstDocs(outdir, dirname, fnames):
         img_name = os.path.join(dirname,img)
         _CreateAndCopy(img_name, outdir)
 
-
 def ParseArgs():
   parser = OptionParser("usage: ost make.py [options] ")
   parser.add_option("-l","--linkcheck", action="store_true", default=False, dest="linkcheck", help="validate all external links")
@@ -82,36 +76,44 @@ def ParseArgs():
   parser.add_option("-q", "--quiet", action="store_true", default=False, dest="quiet", help="run all test")
   return parser.parse_args()
 
+def _SelectBuilders(opts):
+  builders = []
+  if opts.html:
+    builders.append('html')
+
+  if opts.doctest:
+    builders.append('doctest')
+
+  if opts.build_json:
+    builders.append('json')
+
+  if opts.linkcheck:
+    builders.append('linkcheck')
+  return builders
+
+
 opts, args=ParseArgs()
 if not opts.html and\
    not opts.linkcheck and\
    not opts.doctest:
      opts.html=True
 
-opt_str='' 
+extra_args = {}
 if opts.quiet:
-  opt_str=' -Q '
+  extra_args['warning'] = None
+  extra_args['status'] = None
 
 for sub_dir in ('modules',):
-  os.path.walk(sub_dir, _CollectRstDocs, 'doc/source')
-sphinx_bin=settings.Locate(['sphinx-build', 'sphinx-build-2.6','sphinx-build-2.7'])
+  for directory, dirnames, filenames in os.walk(sub_dir):
+    _CollectRstDocs('doc/source', directory, filenames)
 
-if opts.html:
-  cmd='%s %s -b html -c %s %s %s' % (sphinx_bin, opt_str, 
-                                     'doc/conf', 'doc/source', 'doc/build/html')
-  print cmd
-  _CheckCall(cmd, shell=True)
+builders = _SelectBuilders(opts)
 
-if opts.doctest:
-  cmd='%s %s -b doctest -c %s %s %s' % (sphinx_bin, opt_str, 
-                                        'doc/conf', 'doc/source', 
-                                        'doc/build/doctest')
-  _CheckCall(cmd, shell=True)
-if opts.build_json:
-  cmd='%s %s -b json -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 
-                                     'doc/source', 'doc/build/json')
-  _CheckCall(cmd, shell=True)
-if opts.linkcheck:
-  cmd='%s %s -b linkcheck -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 
-                                          'doc/source', 'doc/build/check')
-  _CheckCall(cmd, shell=True)
+for builder in builders:
+  Sphinx(
+    srcdir='doc/source',
+    confdir='doc/conf',
+    outdir='doc/build/html',
+    doctreedir='doc/build/html/.doctrees',
+    buildername=builder,
+    **extra_args).build(True)

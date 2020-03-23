@@ -56,8 +56,10 @@ def _CleanupFiles(tmp_dir_name):
 
 def _ParseOutput(tmp_dir_name):
 
-  header_data=open(os.path.join(tmp_dir_name,'headers.dmp'),'r').readlines()
-  cluster_data=open(os.path.join(tmp_dir_name,'clusters.dmp'),'r').readlines()
+  with open(os.path.join(tmp_dir_name,'headers.dmp'),'r') as f:
+    header_data=f.readlines()
+  with open(os.path.join(tmp_dir_name,'clusters.dmp'),'r') as f:
+    cluster_data=f.readlines()
   sequences=io.LoadSequenceList(os.path.join(tmp_dir_name,'fastadb.fasta'))
 
   clusters=dict()
@@ -84,7 +86,7 @@ def _ParseOutput(tmp_dir_name):
   #translate into final output
 
   res=list()
-  for k, v in clusters.iteritems():
+  for k, v in clusters.items():
     res.append(cluster(v, header_mapper[k]))
 
   return res

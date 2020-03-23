@@ -7,9 +7,11 @@ Brief Overview
 For a simple and portable way to use OpenStructure we recommend using a
 container solution. We provide recipes to build images for
 `Docker <https://www.docker.com/>`_ and
-`Singularity <https://www.sylabs.io/guides/2.5.1/user-guide>`_.
-The latest recipes and instructions can be found on our GitLab site
-(`Docker instructions`_ and `Singularity instructions`_).
+`Singularity <https://sylabs.io/singularity/>`_.
+The latest recipes and instructions can be found on our
+`GitLab site <https://git.scicore.unibas.ch/schwede/openstructure/>`_, including
+a link to OpenStructure's own `GitLab Docker registry <https://git.scicore.unibas.ch/schwede/openstructure/container_registry>`_ (`Docker instructions`_ and
+`Singularity instructions`_).
 
 If you wish to compile OpenStructure outside of a container, you need to follow
 the steps which we describe in detail below. In essence, these steps are:
@@ -23,13 +25,14 @@ the steps which we describe in detail below. In essence, these steps are:
 Installing the Dependencies
 --------------------------------------------------------------------------------
 
-OpenStructure uses a bunch of open-source libraries. If you haven't already
-installed them, please install them now! Where appropriate, the minimally
-required version is given in parentheses.
+OpenStructure requires a C++11 enabled compiler (e.g. recent gcc/clang) and uses 
+a bunch of open-source libraries. If you haven't already installed them, please 
+install them now! Where appropriate, the minimally required version is given in 
+parentheses.
 
-* `CMake <http://cmake.org>`_ (2.6.4)
-* `Python2 <http://python.org>`_ (2.7)
-* `Boost <http://boost.org>`_ (1.53)
+* `CMake <http://cmake.org>`_ (3.10.2)
+* `Python3 <http://python.org>`_ (3.6)
+* `Boost <http://boost.org>`_ (1.65)
 * `zlib <https://zlib.net/>`_ (usually comes with Boost or system)
 * `Eigen3 <http://eigen.tuxfamily.org>`_ (3.2.0)
 * `SQLite3 <https://www3.sqlite.org>`_ (3.7.13)
@@ -45,7 +48,7 @@ When you enable support for image processing, you will need:
 
 If you would like to use the info module, also install:
 
-* `Qt5 <http://qt-project.org/>`_ and a C++11 compatible compiler
+* `Qt5 <http://qt-project.org/>`_ 
 
 If you would like to use the graphical user interface (GUI), also install:
 
@@ -55,6 +58,9 @@ If you would like to use the graphical user interface (GUI), also install:
 If you would like to use the :mod:`molecular mechanics <ost.mol.mm>` module:
 
 * `OpenMM <https://simtk.org/home/openmm>`_ (6.1)
+
+We do not provide backwards compatibility to Python 2.7. The last
+release supporting Python 2.7 is 1.11.0.
 
 
 Getting the Source Code
@@ -69,7 +75,7 @@ get the source code, use git clone:
   git clone https://git.scicore.unibas.ch/schwede/openstructure.git <directory-name>
   
 The above command will clone OpenStructure into the directory specified by
-`<directory-name>`. If omitted, the directory will be called ost. 
+`<directory-name>`. If omitted, the directory will be called openstructure. 
 
 .. note::
 
@@ -222,6 +228,10 @@ can influence it.
   * Usually, you will receive errors for those variables when executing `cmake`
     and set them accordingly as needed.
 
+* `OPENGLPREFERENCE_LEGACY` switches the GL implementation to be used by OpenGL.
+  The default is what should be used on modern systems. But since there are some
+  reports on the internet claiming that the default does not work everywhere,
+  this switch enables the usage of the legacy implementation of GL.
   
 Build Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -291,14 +301,14 @@ observed for OpenMM versions 6.1 until 7.1.1 when compiling with gcc versions >=
 from source.
 
 
-**Ubuntu 18.04 LTS / Debian 9 with GUI**
+**Ubuntu 18.04 LTS / Debian 10.3.0 with GUI**
 
 All the dependencies can be installed from the package manager as follows:
 
 .. code-block:: bash
 
   sudo apt-get install cmake g++ sip-dev libtiff-dev libfftw3-dev libeigen3-dev \
-               libpng-dev python-all python2.7 python-pyqt5 libboost-all-dev \
+               libpng-dev python3-all python3-pyqt5 libboost-all-dev \
                qt5-qmake qtbase5-dev libpng-dev libsqlite3-dev
 
 Now, all dependencies are located in standard locations and cmake will
@@ -309,15 +319,19 @@ version of OpenStructure.
 
 .. code-block:: bash
 
-  cmake . -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
+  cmake . -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython3.6m.so \
           -DOPTIMIZE=ON
 
-
-**macOS (Mojave/ High Sierra) with Homebrew**
+Be careful at -DPYTHON_LIBRARIES, Debian 10 comes with Python 3.7 so that needs
+to be substituted.
+          
+**macOS (Catalina) with Homebrew**
 
 `Homebrew <https://brew.sh/>`_ can be used to conveniently install all
-dependencies. The current Boost version, as of writing these instructions, is
-1.70.0 but works so far. Do not forget to also install `boost-python`.
+dependencies. The current Python version, as of writing these instructions, is
+3.7.6 but works so far. Boost comes as 1.72.0 which seems to be OK. Do not
+forget to also install `boost-python3`. Eigen and SQLite also seem to be
+unproblematic concerning higher version numbers.
 
 If you want to build the info module or the graphical user interface, make sure
 you have the Xcode app installed. Just the Xcode command line tools which are
@@ -340,18 +354,36 @@ binaries in your Path for CMake to determine its configuration:
 
 Homebrew installs all the software under /usr/local. Thus we have to tell cmake
 where to find Boost and Python. Also the Python headers and libraries are not
-located as they are on Linux and hence they must be specified too:
+located as they are on Linux and hence they must be specified too. To get rid of
+a ton of compilation warnings from third party software, we add some dedicated
+C flags:
 
 .. code-block:: bash
 
-  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/Cellar/python@2/2.7.16/\
-  Frameworks/Python.framework/Versions/2.7/include/python2.7 \
-          -DPYTHON_LIBRARIES=/usr/local/Cellar/python@2/2.7.16/\
-  Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib \
-          -DPYTHON_ROOT=/usr/local/ \
-          -DBOOST_ROOT=/usr/local \
-          -DSYS_ROOT=/usr/local \
-          -DOPTIMIZE=ON
+  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/Cellar/python3/3.7.6_1/\
+  Frameworks/Python.framework/Versions/Current/include/python3.7m \
+           -DPYTHON_LIBRARIES=/usr/local/Cellar/python3/3.7.6_1/\
+  Frameworks/Python.framework/Versions/Current/lib/libpython3.7m.dylib \
+           -DPYTHON_ROOT=/usr/local/ \
+           -DBOOST_ROOT=/usr/local \
+           -DSYS_ROOT=/usr/local \
+           -DOPTIMIZE=ON \
+           -DCMAKE_C_FLAGS="-isystem /Applications/Xcode.app/Contents/\
+  Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/\
+  Library/Frameworks/OpenGL.framework/Headers/ -isystem /usr/local/opt/\
+  qt/lib/QtCore.framework/Headers/ -isystem /usr/local/opt/qt/lib/\
+  QtWidgets.framework/Headers/ -isystem /Applications/Xcode.app/\
+  Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/\
+  MacOSX.sdk/System/Library/Frameworks/Security.framework/ \
+  -isystem /usr/local/opt/qt/lib/QtGui.framework/Headers/" \
+           -DCMAKE_CXX_FLAGS="-isystem /Applications/Xcode.app/Contents/\
+  Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/\
+  Library/Frameworks/OpenGL.framework/Headers/ -isystem /usr/local/opt/\
+  qt/lib/QtCore.framework/Headers/ -isystem /usr/local/opt/qt/lib/\
+  QtWidgets.framework/Headers/ -isystem /Applications/Xcode.app/\
+  Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/\
+  MacOSX.sdk/System/Library/Frameworks/Security.framework/ \
+  -isystem /usr/local/opt/qt/lib/QtGui.framework/Headers/"
 
 Building the Project
 --------------------------------------------------------------------------------
@@ -394,4 +426,4 @@ in your terminal. This will fetch the newest changes.
 ..  LocalWords:  Homebrew cmake CMake zlib SQLite FFTW libtiff libpng PyQt
 ..  LocalWords:  SSL macOS Makefiles PDB qmake PNG libz libsqlite OPTIMIZE
 ..  LocalWords:  DNDEBUG RPATH rpath SHADER shader SPNAV DConnexion profiler
-..  LocalWords:  DOPTIMIZE DENABLE DOPEN DPYTHON DBOOST DSYS Xcode
+..  LocalWords:  DOPTIMIZE DENABLE DOPEN DPYTHON DBOOST DSYS Xcode Eigen

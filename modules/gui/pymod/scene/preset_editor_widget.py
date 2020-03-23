@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -24,21 +24,21 @@ from ost import mol
 from datetime import datetime
 from datetime import datetime
 from PyQt5 import QtCore, QtWidgets, QtGui
-from color_select_widget import ColorSelectWidget
-from gradient_preset_widget import GradientPresetWidget
-from gradient_editor_widget import GradientPreview
-from gradient_editor_widget import GradientEdit
-from preset_editor_list_model import PresetEditorListModel
-from immutable_gradient_info_handler import ImmutableGradientInfoHandler
-from query_editor import QueryEditorWidget
+from .color_select_widget import ColorSelectWidget
+from .gradient_preset_widget import GradientPresetWidget
+from .gradient_editor_widget import GradientPreview
+from .gradient_editor_widget import GradientEdit
+from .preset_editor_list_model import PresetEditorListModel
+from .immutable_gradient_info_handler import ImmutableGradientInfoHandler
+from .query_editor import QueryEditorWidget
 from ost.mol import Prop
 from ost.gfx import ByElementColorOp
 from ost.gfx import ByChainColorOp
 from ost.gfx import GradientLevelColorOp
 from ost.gfx import UniformColorOp
-from preset import Preset
-from render_op import RenderOp
-from visibility_op import VisibilityOp
+from .preset import Preset
+from .render_op import RenderOp
+from .visibility_op import VisibilityOp
 
 #Preset Editor
 class PresetEditor(QtWidgets.QDialog):

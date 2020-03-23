@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -72,6 +72,7 @@ void export_Extent()
     .def("__iter__",&WrapExtentIterator::Iter,
 	 return_internal_reference<>() )
     .def("next",&WrapExtentIterator::Next)
+    .def("__next__",&WrapExtentIterator::Next)
   ;
 
   class_<ExtentIterator>("ExtentIterator", init<const Extent&,optional<unsigned int> >() )

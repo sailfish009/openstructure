@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -32,11 +32,17 @@ namespace {
 template<typename T>
 void set_val(T& v, Real rv, const Complex& cv);
 
+/* While the functions below are employed by the OST unit tests, GCC does not
+   notice this and complains about "unused functions".
+*/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 template<>
 void set_val<Real>(Real& v, Real rv, const Complex& cv) {v=rv;}
 
 template<>
 void set_val<Complex>(Complex& v, Real rv, const Complex& cv) {v=cv;}
+#pragma GCC diagnostic pop
 
 template<typename T>
 void set_val(T& v, Real rv, const Complex& cv)

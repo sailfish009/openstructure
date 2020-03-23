@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -32,7 +32,7 @@ if ost.WITH_NUMPY:
   has_numpy=True
   try:
     import numpy
-  except ImportError, e:
+  except ImportError as e:
     has_numpy=False
 else:
   has_numpy=False

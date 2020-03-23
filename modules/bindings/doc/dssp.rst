@@ -39,7 +39,7 @@ using the mmCIF interface.
   for chain in ent.chains:
     if chain.is_polypeptide:
       for res in chain.residues:
-        print res.GetFloatProp('relative_solvent_accessibility')
+        print(res.GetFloatProp('relative_solvent_accessibility'))
 
 
 DSSP bindings Usage

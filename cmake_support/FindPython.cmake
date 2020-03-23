@@ -17,8 +17,8 @@
 # Author: Marco Biasini
 #-------------------------------------------------------------------------------
 
-set(PYTHON_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 )
-set(PYTHON_MIN_VERSION 2.2.1)
+set(PYTHON_VERSIONS 3.8 3.7 3.6 )
+set(PYTHON_MIN_VERSION 3.6.0)
 
 #-------------------------------------------------------------------------------
 # check for python framework
@@ -45,7 +45,8 @@ macro(_find_python PYTHON_ROOT VERSION)
   string(REPLACE "." "" _VERSION_NO_DOTS "${VERSION}")
   if(PYTHON_ROOT)
     find_library(PYTHON_LIBRARIES
-      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}"
+      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}" 
+      "python${_VERSION_NO_DOTS}m" "python${VERSION}m"
       HINTS "${PYTHON_ROOT}"
       PATH_SUFFIXES lib libs
       NO_SYSTEM_ENVIRONMENT_PATH NO_DEFAULT_PATH
@@ -53,17 +54,20 @@ macro(_find_python PYTHON_ROOT VERSION)
     find_path(PYTHON_INCLUDE_PATH
       NAMES Python.h
       HINTS "${PYTHON_ROOT}/include"
-      PATH_SUFFIXES include "python${_VERSION_NO_DOTS}" "python${VERSION}"
+      PATH_SUFFIXES include "python${_VERSION_NO_DOTS}" "python${VERSION}" 
+      "python${_VERSION_NO_DOTS}m" "python${VERSION}m"
       NO_SYSTEM_ENVIRONMENT_PATH NO_DEFAULT_PATH
     )
   else()
     find_library(PYTHON_LIBRARIES
-      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}"
+      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}" 
+      "python${_VERSION_NO_DOTS}m" "python${VERSION}m"
       PATH_SUFFIXES lib
     )
     find_path(PYTHON_INCLUDE_PATH
       NAMES Python.h
-      PATH_SUFFIXES include "python${_VERSION_NO_DOTS}" "python${VERSION}"     
+      PATH_SUFFIXES include "python${_VERSION_NO_DOTS}" "python${VERSION}" 
+      "python${_VERSION_NO_DOTS}m" "python${VERSION}m" 
     )    
   endif()  
 endmacro()

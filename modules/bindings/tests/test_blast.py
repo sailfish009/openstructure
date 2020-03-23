@@ -52,7 +52,8 @@ class TestBlastBindings(unittest.TestCase):
 
   def testBlastParseOutput(self):
 
-    raw_out=open('testfiles/raw_blastout.txt','r').read()
+    with open('testfiles/raw_blastout.txt','r') as f:
+      raw_out=f.read()
 
     parsed_out=blast.ParseBlastOutput(raw_out)
 
@@ -102,7 +103,7 @@ if __name__ == "__main__":
   try:
     blastpath=settings.Locate(('blastp','blastall'))
   except(settings.FileNotFound):
-    print "Could not find blast executable: ignoring unit tests"
+    print("Could not find blast executable: ignoring unit tests")
     sys.exit(0)
   from ost import testutils
   testutils.RunTests()

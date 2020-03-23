@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -27,8 +27,8 @@ from datetime import datetime
 
 from datetime import datetime
 from PyQt5 import QtCore, QtWidgets, QtGui
-from gradient_info_handler import GradientInfoHandler
-from gradient_list_model import GradientListModel
+from .gradient_info_handler import GradientInfoHandler
+from .gradient_list_model import GradientListModel
 
 
 #Gradient Preset Widget

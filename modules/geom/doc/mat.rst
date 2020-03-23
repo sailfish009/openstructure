@@ -11,8 +11,8 @@ the following code examples:
 .. code-block:: python
 
   m=geom.Mat2(1, 2, 3, 4)
-  print m # will print {{1,2},{3,4}}
-  print m[(0,0)], m[(0,1)], m[(1,0)], m[(1,1)] # will print 1, 2, 3, 4
+  print(m) # will print {{1,2},{3,4}}
+  print(m[(0,0)], m[(0,1)], m[(1,0)], m[(1,1)]) # will print 1, 2, 3, 4
 
 Matrices support arithmetic via overloaded operators. The following operations are 
 supported:

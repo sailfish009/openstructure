@@ -103,12 +103,12 @@ def ParseBlastOutput(string, seqid_thres=0, evalue_thres=float("infinity")):
         aln=seq.CreateAlignment(query_seq, hit_seq)
         return AlignedPatch(aln, bit_score, score, evalue, seqid)
 
-    except Exception, e:
-      print str(e), query_seq, hit_seq
+    except Exception as e:
+      print(str(e), query_seq, hit_seq)
 
   try:
     doc=minidom.parseString(string)
-  except Exception, e:
+  except Exception as e:
     ost.LogError('Error while parsing BLAST output: %s' % str(e))
     return None
   hits=[]
@@ -166,9 +166,10 @@ def CreateDB(infasta, dbout, mkdb_cmd=None):
     else:
       raise IOError('mkdb command must either be the path to formatdb or makeblastdb!')
 
-  cmd=' '.join(args)
-  ost.LogInfo('creating blast DB (%s)' % cmd)
-  os.system(cmd)
+  ost.LogInfo('creating blast DB (%s)' % ' '.join(args))
+  blast_pipe=subprocess.Popen(args, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+  blast_pipe.communicate()
 
 def BlastVersion(blast_location=None):
   """
@@ -193,7 +194,8 @@ def BlastVersion(blast_location=None):
 
   blast_pipe=subprocess.Popen(args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
-  lines=blast_pipe.stdout.readlines()
+  stdout, _ = blast_pipe.communicate()
+  lines=stdout.decode().splitlines()
 
   for line in lines:
     m=pattern.match(line)
@@ -206,8 +208,8 @@ def BlastVersion(blast_location=None):
 def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
          blast_location=None, outfmt=0, filter_low_complexity=True):
   """
-  Runs a protein vs. protein blast search. The results are returned as a
-  list of :class:`BlastHit` instances.
+  Runs a protein vs. protein blast search. The results are returned
+  according to the value of the ``outfmt`` parameter.
 
   :param query: the query sequence
   :type query: :class:`seq.ConstSequenceHandle`
@@ -222,10 +224,13 @@ def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
   :param gap_ext: Gap extension penalty. Only a subset of gap extension
      penalties are supported for each of the substitution matrices. Consult the
      blast docs for more information.
-  :param outfmt: output format, where '0' corresponds to default output (parsed blast output and 1 to raw output)
+  :param outfmt: output format, where '0' corresponds to default output (parsed 
+     blast output and 1 to raw string output).
   :param filter_low_complexity: Mask off segments of the query sequence that 
      have low compositional complexity, as determined by the SEG program of 
      Wootton & Federhen (Computers and Chemistry, 1993)
+  :rtype: :class:`BlastHit` (with ``outfmt=0``) or :class:`str` 
+     (with ``outfmt=1``)
   """
   subst_mats=('BLOSUM45', 'BLOSUM62', 'BLOSUM80', 'PAM30', 'PAM70',)
   if matrix not in subst_mats:
@@ -266,17 +271,17 @@ def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
   blast_pipe=subprocess.Popen(args, stderr=subprocess.PIPE,
                               stdout=subprocess.PIPE, stdin=subprocess.PIPE)
   if isinstance(query, str):
-    stdout, stderr=blast_pipe.communicate(query)
+    stdout, stderr=blast_pipe.communicate(query.encode())
   else:
-    stdout, stderr=blast_pipe.communicate(io.SequenceToString(query, 'fasta'))
+    stdout, stderr=blast_pipe.communicate(io.SequenceToString(query, 'fasta').encode())
 
   if len(stderr)>0:
      pattern=re.compile(r'^\[.*\]\s+ERROR:\s+(.*)')
-     lines=stderr.split('\n')
+     lines=stderr.decode().split('\n')
      error_message=pattern.match(lines[0])
      if error_message:
        raise BlastError(error_message.group(1), '\n'.join(lines[1:]))
   if outfmt==0:
-    return ParseBlastOutput(stdout)
+    return ParseBlastOutput(stdout.decode())
   else:
-    return stdout
+    return stdout.decode()

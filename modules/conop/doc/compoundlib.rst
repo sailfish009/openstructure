@@ -194,7 +194,7 @@ In this example we will translate the three-letter-codes given in the SEQRES rec
     compound=compound_lib.FindCompound(tlc)
     if compound:
        sequence+=compound.one_letter_code
-  print sequence # prints 'AGMVF'
+  print(sequence) # prints 'AGMVF'
 
 .. _mmcif-convert:
 

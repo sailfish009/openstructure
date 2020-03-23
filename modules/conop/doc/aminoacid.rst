@@ -23,7 +23,7 @@ Converter functions
 --------------------------------------------------------------------------------
 .. function:: ResidueToAminoAcid(residue)
               ResidueNameToAminoAcid(rname) 
-              OneLetterCodeNameToAminoAcid(olc) 
+              OneLetterCodeToAminoAcid(olc) 
 
   :return: Amino acid from residue, residue name (three-letter-code)
            or one-letter-code. Returns XXX if residue, residue name or 

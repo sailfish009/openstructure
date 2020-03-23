@@ -6,9 +6,21 @@ OST Docker
   For many docker installations it is required to run docker commands as root. As
   this depends on set up, we skip the ``sudo`` in all commands.
 
+Obtain Docker image from the OST registry
+-----------------------------------------
+
+OST has its own container registry inside GitLab. There we try to keep one
+image for the latest stable version of OST. You can import it by
+
+.. code-block:: bash
+
+  docker pull registry.scicore.unibas.ch/schwede/openstructure:<TAG>
+
+and just start using it without the overhead to build it yourself.
+
+
 Build Docker image
 ------------------
-
 
 In order to build OST image:
 
@@ -155,7 +167,9 @@ To see the help for compare-structures action run:
 Run GUI
 -------
 
-In order to run GUI do (tested on linux machine):
+The container is built with GUI support, but this is still to be considered an
+experimental feature as it is known to depend on some properties of the host
+where Docker is run. What works on some Linux machines is the following:
 
 .. code-block:: bash
 

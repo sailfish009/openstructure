@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import tempfile
 
 from ost.io import LoadPDB, LoadMMCIF
@@ -49,19 +49,18 @@ class RemoteRepository:
       tmp_file_suffix+='.gz'
 
     try:
-      connection = urllib2.urlopen(remote_url)
+      connection = urllib.request.urlopen(remote_url)
       if hasattr(connection, 'code'):
         status = connection.code
       else:
         status = connection.getcode()
-    except urllib2.HTTPError, e:
+    except urllib.error.HTTPError as e:
       status = e.code
     if status != 200:
       raise IOError('Could not load %s from %s (status code %d, url %s)' \
                     % (id, self.name, status, remote_url))
     tmp_file = tempfile.NamedTemporaryFile(suffix=tmp_file_suffix)
-    contents = ''.join(connection)
-    tmp_file.write(contents)
+    tmp_file.write(connection.read())
     tmp_file.flush()
     return tmp_file
 

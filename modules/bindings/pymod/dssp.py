@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2009 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -55,9 +55,8 @@ def _ExecuteDSSP(path, dssp_bin, temp_dir=None):
   if not os.access(dssp_abs_path, os.X_OK):
     raise RuntimeError('"%s" is not executable' % dssp_abs_path)
 
-  ps=subprocess.Popen([dssp_abs_path, path, temp_dssp_path], 
-                      stderr=subprocess.PIPE)
-  err_lines=ps.stderr.readlines()
+  subprocess.run([dssp_abs_path, path, temp_dssp_path])
+
   return temp_dssp_path
 
 
@@ -116,9 +115,9 @@ def AssignDSSP(ent, pdb_path="", extract_burial_status=False, tmp_dir=None,
   try:
     LoadDSSP(temp_dssp_path, ent, extract_burial_status,
              entity_saved)
-  except Exception, e:
+  except Exception as e:
     # clean up
-    print "Exception in DSSP:", e
+    print("Exception in DSSP:", e)
     _Cleanup(pdb_path, temp_dssp_path, entity_saved)
     raise RuntimeError(e)
 
@@ -203,8 +202,8 @@ def LoadDSSP(file_name, model, extract_burial_status=False,
               residue.SetStringProp("burial_status", 'b')
             else:
               residue.SetStringProp("burial_status", 'e')
-      except Exception, e:
-        print "ERROR:",e
+      except Exception as e:
+        print("ERROR:",e)
         continue
 
       rtype=line[16:17]

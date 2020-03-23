@@ -42,7 +42,7 @@ def ParseOptions():
 
 def CheckLCOV():
   if not Which('lcov'):
-    print 'please install lcov to run this script'
+    print('please install lcov to run this script')
     sys.exit(-1)
 
 CheckLCOV()
@@ -50,9 +50,9 @@ CheckLCOV()
 opts=ParseOptions()
 
 def Print(message):
-  print '~~~~~~'
-  print '|  *  |', message
-  print '~~~~~~'  
+  print('~~~~~~')
+  print('|  *  |', message)
+  print('~~~~~~')  
   
 def RemoveFiles(directory, extension):
   glob_pattern='*.%s' % extension
@@ -113,7 +113,7 @@ def RunTests(modules):
     if os.path.exists(test_dir):
       test_binary=os.path.join(os.path.join(test_dir, 'tests'))
       if os.path.exists(test_binary) and os.access(test_binary, os.X_OK):
-        print 'running tests for module', module        
+        print('running tests for module', module)        
         Cleanup(modules)
         cmd='cd "%s"; ./tests' % test_dir
         os.system(cmd)

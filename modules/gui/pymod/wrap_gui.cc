@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -77,7 +77,7 @@ namespace {
 
     static void* convertible(PyObject* obj_ptr)
     {
-      if (!PyString_Check(obj_ptr)) return 0;
+      if (!PyUnicode_Check(obj_ptr)) return 0;
       return obj_ptr;
     }
 
@@ -85,8 +85,15 @@ namespace {
       PyObject* obj_ptr,
       boost::python::converter::rvalue_from_python_stage1_data* data)
     {
-      const char* value = PyString_AsString(obj_ptr);
-      if (value == 0) boost::python::throw_error_already_set();
+      PyObject* temp_bytes = PyUnicode_AsEncodedString(obj_ptr, "UTF-8", "strict");
+      char* value = NULL;
+      if (temp_bytes != NULL) {
+        value = PyBytes_AS_STRING(temp_bytes);
+        value = strdup(value);
+        Py_DECREF(temp_bytes);
+      }
+      if (value == NULL) boost::python::throw_error_already_set();
+
       void* storage = (
         (boost::python::converter::rvalue_from_python_storage<QString>*)
           data)->storage.bytes;

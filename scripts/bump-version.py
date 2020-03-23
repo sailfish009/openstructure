@@ -1,10 +1,9 @@
-#!/usr/bin/env python
 import sys
 
 if len(sys.argv) < 2:
-  print "USAGE: python scripts/bump-version.py OST_VERSION"
-  print "-> OST_VERSION is MAJOR.MINOR.PATCH (e.g. 1.9.1)"
-  print "-> assumption is that a git tag OST_VERSION will exist"
+  print("USAGE: python scripts/bump-version.py OST_VERSION")
+  print("-> OST_VERSION is MAJOR.MINOR.PATCH (e.g. 1.9.1)")
+  print("-> assumption is that a git tag OST_VERSION will exist")
   sys.exit(1)
 
 # split up version number
@@ -38,8 +37,11 @@ for i, line in enumerate(lines):
 open("docker/Dockerfile", "w").writelines(lines)
 
 # fix Singularity recipe
-lines = open("singularity/Singularity").readlines()
+vfile = "singularity/Singularity"
+lines = open(vfile).readlines()
 for i, line in enumerate(lines):
-  if line.startswith("export OPENSTRUCTURE_VERSION="):
-    lines[i] = 'export OPENSTRUCTURE_VERSION="%s"\n' % version_string
-open("singularity/Singularity", "w").writelines(lines)
+  if line.startswith("From: registry.scicore.unibas.ch/schwede/openstructure:"):
+    lines[i] = 'From: registry.scicore.unibas.ch/schwede/openstructure:'+\
+      '%s' % version_string
+    break
+open(vfile, "w").writelines(lines)

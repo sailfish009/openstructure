@@ -37,7 +37,7 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
     lib_name=os.path.abspath(os.path.join(stage_dir, 'lib', 
                                           _lib_name(component)))  
     if not os.path.exists(lib_name):
-      print 'WARNING:', lib_name, 'does not exist'
+      print('WARNING:', lib_name, 'does not exist')
     if lib_name not in pool:
       _deps_for_lib(lib_name, pool)
       pool.add(lib_name)    
@@ -45,7 +45,7 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
     bin_name=os.path.abspath(os.path.join(stage_dir, 'bin', 
                                           bin))  
     if not os.path.exists(bin_name):
-      print 'WARNING:', bin_name, 'does not exist'
+      print('WARNING:', bin_name, 'does not exist')
       continue
     if bin_name not in pool:
       _deps_for_lib(bin_name, pool)
@@ -53,15 +53,15 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
     bin_name=os.path.abspath(os.path.join(stage_dir, 'libexec/openstructure',
                                           bin))
     if not os.path.exists(bin_name):
-      print 'WARNING:', bin_name, 'does not exist'
+      print('WARNING:', bin_name, 'does not exist')
       continue
     if bin_name not in pool:
       _deps_for_lib(bin_name, pool)
   for site_package in site_packages:
     full_path=get_python_module_path(site_package)
-    print full_path
+    print(full_path)
     if not os.path.exists(full_path):
-      print 'WARNING:', site_package, 'does not exists'
+      print('WARNING:', site_package, 'does not exists')
       continue
     if os.path.isdir(full_path):
       for so_file in glob.glob(os.path.join(full_path, '*.so')):
@@ -99,7 +99,7 @@ def copy_binaries(stage_dir, outdir, binary_names, scripts, bin_dir,
     else:
       bin_name=os.path.join(stage_dir, binary_name)
     if not os.path.exists(bin_name):
-      print 'WARNING:', binary_name, 'does not exist'
+      print('WARNING:', binary_name, 'does not exist')
       continue
     dst_name=os.path.join(outdir, bin_dir, os.path.basename(bin_name))
     shutil.copy(bin_name, dst_name)
@@ -123,14 +123,14 @@ def split_framework_components(abs_path):
         return lead, trail
 
 def change_id(id, lib):
-  os.chmod(lib, 0666)
+  os.chmod(lib, 0o666)
   os.system(CHANGE_ID_RPATH % (id,lib))
-  os.chmod(lib, 0444)
+  os.chmod(lib, 0o444)
 
 def update_load_commands(lib, exe, exe_path):
   direct_deps=set()
   _deps_for_lib(lib, direct_deps, recursive=False)
-  os.chmod(lib, 0666)
+  os.chmod(lib, 0o666)
   for direct_dep in direct_deps:
     if direct_dep.endswith('.dylib'):
       new_name=os.path.basename(direct_dep)
@@ -142,9 +142,9 @@ def update_load_commands(lib, exe, exe_path):
       new_name=os.path.join(framework_name, rel_path)
       os.system(CHANGE_LOAD_CMD_RPATH % (direct_dep, new_name, lib))
   if exe:
-    os.chmod(lib, 0555)
+    os.chmod(lib, 0o555)
   else:
-    os.chmod(lib, 0444)
+    os.chmod(lib, 0o444)
 
 def copy_deps(dependencies, outdir):
   exe_path=os.path.join(outdir, 'bin')
@@ -218,7 +218,7 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
   os.system('mkdir -p "%s/lib"' % outdir)
   os.system('mkdir -p "%s/bin"' % outdir)
   os.system('mkdir -p "%s/libexec/openstructure"' % outdir)
-  print 'copying shared datafiles'
+  print('copying shared datafiles')
   shutil.copytree(os.path.join(stage_dir, 'share'), 
                   os.path.join(outdir, 'share'))
   scripts=SCRIPTS
@@ -233,7 +233,7 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
     components+=GUI_COMPONENTS
     libexec_binaries+=GUI_LIBEXEC_BINARIES
     site_packages+=GUI_SITE_PACKAGES
-  print 'collecting dependencies'
+  print('collecting dependencies')
   deps=collect_deps(stage_dir, components, binaries, libexec_binaries,
                     site_packages, site_packages_dir)
   # when running in non-gui mode, we are most likely missing the boost
@@ -242,14 +242,14 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
   pymod_dir='lib/python%d.%d/site-packages' % sys.version_info[0:2]
   _deps_for_lib(os.path.join(stage_dir, pymod_dir, 'ost/_ost_base.so'),
                 deps, recursive=False)
-  print 'copying dependencies'
+  print('copying dependencies')
   copy_deps(deps, outdir)
-  print 'copying libexec binaries'
+  print('copying libexec binaries')
   copy_binaries(stage_dir, outdir, libexec_binaries, libexec_scripts,
                 'libexec/openstructure')
-  print 'copying binaries'
+  print('copying binaries')
   copy_binaries(stage_dir, outdir, binaries, scripts, 'bin')
-  print 'copying pymod'
+  print('copying pymod')
   shutil.copytree(os.path.join(stage_dir,pymod_dir),
                   os.path.join(outdir, pymod_dir))
   copied_py_framework=False
@@ -261,10 +261,10 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
   if len(glob.glob(os.path.join(outdir, 'lib', 'libpython*')))>0:
     non_std_python=True
   if non_std_python:
-    print 'looks like we are using a non-standard python.'
+    print('looks like we are using a non-standard python.')
     python_home=get_python_home()    
     if not copied_py_framework:
-      print 'also copying python modules from %s' % python_home
+      print('also copying python modules from %s' % python_home)
       modules_dst=os.path.join(outdir, 'lib', os.path.basename(python_home))
       shutil.copytree(python_home, modules_dst)
       if os.path.exists(os.path.join(modules_dst, 'site-packages')):
@@ -298,23 +298,23 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
           shutil.rmtree(directory)
     # replace the python executable
     ost_script=os.path.join(outdir, 'libexec', 'openstructure', 'ost_config')
-    os.chmod(ost_script, 0666)
+    os.chmod(ost_script, 0o666)
     script=''.join(open(ost_script, 'r').readlines())
     script=script.replace(python_bin, '$BIN_DIR/python')
     open(ost_script, 'w').write(script)
-    os.chmod(ost_script, 0555)
+    os.chmod(ost_script, 0o555)
 
   if no_includes:
     os.system(REMOVE_HEADERS % outdir)
     os.system(REMOVE_CURRENT % outdir)  
-  print 'copying site-packages'
+  print('copying site-packages')
   for sp in SITE_PACKAGES:
     src=get_python_module_path(sp)
     if os.path.isdir(src):
       shutil.copytree(src, os.path.join(outdir, pymod_dir, sp))
     else:
       shutil.copy(src, os.path.join(outdir, pymod_dir, sp))
-  print 'updating link commands of python shared objects'
+  print('updating link commands of python shared objects')
   os.path.walk(os.path.join(outdir, 'lib'), 
                update_pymod_shared_objects, 
                os.path.join(outdir, 'lib'))

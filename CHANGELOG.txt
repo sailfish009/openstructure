@@ -1,3 +1,12 @@
+Changes in Release 2.0.0
+--------------------------------------------------------------------------------
+
+ * Port OpenStructure to Python 3 (3.6).
+ * Updated versions of dependencies
+ * Reduced amount of warnings during compilation.
+ * Removed OpenMM density plugin and out-dated bindings (3dcomb, MMalign).
+ * Several minor bug fixes and improvements.
+
 Changes in Release 1.11.0
 --------------------------------------------------------------------------------
 

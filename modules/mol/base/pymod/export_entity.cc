@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -35,7 +35,15 @@ using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
 
+/* Including NumPy headers produces compiler warnings. The ones about "Using
+   deprecated NumPy API..." we can not get rid of. The highest NumPy version we
+   support is 1.6 while the non-deprecated API starts with version 1.7.
+   Also see the comment in modules/gfx/pymod/export_primlist.cc for further
+   information.
+*/
 #if OST_NUMPY_SUPPORT_ENABLED
+#include <numpy/numpyconfig.h>
+#define NPY_NO_DEPRECATED_API NPY_1_6_API_VERSION
 #include <numpy/arrayobject.h>
 #endif
 
@@ -130,6 +138,9 @@ bool depr_is_transformation_identity(const EntityHandle& eh)
 void export_Entity()
 {
 #if OST_NUMPY_SUPPORT_ENABLED
+  // The following define enforces no return value when calling import_array
+  #undef NUMPY_IMPORT_ARRAY_RETVAL
+  #define NUMPY_IMPORT_ARRAY_RETVAL
   import_array();
 #endif
 

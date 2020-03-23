@@ -19,19 +19,19 @@ try:
   import numpy as np
 except ImportError:
   HAS_NUMPY=False
-  print "Could not find numpy: ignoring some table class unit tests"
+  print("Could not find numpy: ignoring some table class unit tests")
 
 try:
   import scipy.stats.mstats
 except ImportError:
   HAS_SCIPY_STATS=False
-  print "Could not find scipy.stats.mstats: ignoring some table class unit tests"
+  print("Could not find scipy.stats.mstats: ignoring some table class unit tests")
   
 try:
   import scipy.ndimage
 except ImportError:
   HAS_SCIPY_NDIMG=False
-  print "Could not find scipy.ndimage: ignoring some table class unit tests"
+  print("Could not find scipy.ndimage: ignoring some table class unit tests")
   
 
 try:
@@ -39,14 +39,14 @@ try:
   matplotlib.use('Agg')
 except ImportError:
   HAS_MPL=False
-  print "Could not find matplotlib: ignoring some table class unit tests"
+  print("Could not find matplotlib: ignoring some table class unit tests")
   
 try:
   from PIL import Image
   from PIL import ImageChops
 except ImportError:
   HAS_PIL=False
-  print "Could not find python imagine library: ignoring some table class unit tests"
+  print("Could not find python imagine library: ignoring some table class unit tests")
 
 # setting up an OST LogSink to capture error messages
 class _FetchLog(ost.LogSink):
@@ -57,7 +57,7 @@ class _FetchLog(ost.LogSink):
   def LogMessage(self, message, severity):
     levels=['ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE']
     level=levels[severity]
-    if not level in self.messages.keys():
+    if not level in list(self.messages.keys()):
       self.messages[level] = list()
     self.messages[level].append(message.strip())
   
@@ -128,7 +128,7 @@ class TestTable(unittest.TestCase):
     dictionary containing a list of values for each column.
     '''
     self.CompareColCount(t, len(data_dict))
-    for k, v in data_dict.iteritems():
+    for k, v in data_dict.items():
       self.CompareDataForCol(t, k, v)
       
   def CompareDataForCol(self, t, col_name, ref_data):
@@ -186,8 +186,8 @@ class TestTable(unittest.TestCase):
 
   def testAllowsToSearchColNames(self):
     tab = self.CreateTestTable()
-    self.assertEquals(tab.SearchColNames('d$'), ['second', 'third'])
-    self.assertEquals(tab.SearchColNames('(first|third)'), ['first','third'])
+    self.assertEqual(tab.SearchColNames('d$'), ['second', 'third'])
+    self.assertEqual(tab.SearchColNames('(first|third)'), ['first','third'])
 
   def testProvidesDirectAccessToColumns(self):
     tab = Table(['x', 'two'], 'ii')
@@ -218,10 +218,10 @@ class TestTable(unittest.TestCase):
     self.assertEqual(z[1][0], 'x')
     self.assertEqual(z[1][1], 'x')
     z=tab.Zip('col1', 'col4')
-    self.assertEquals(type(z[0][0]),str)
-    self.assertEquals(type(z[1][0]),str)
-    self.assertEquals(type(z[0][1]),int)
-    self.assertEquals(type(z[1][1]),int)
+    self.assertEqual(type(z[0][0]),str)
+    self.assertEqual(type(z[1][0]),str)
+    self.assertEqual(type(z[0][1]),int)
+    self.assertEqual(type(z[1][1]),int)
     self.assertRaises(ValueError, tab.Zip, 'col5', 'col3')
   def testPercentiles(self):
     tab = Table(['nums'], 'i')
@@ -340,7 +340,7 @@ class TestTable(unittest.TestCase):
       4.000
 
     '''
-    tab = Table(['x'], 'f', x=range(5))
+    tab = Table(['x'], 'f', x=list(range(5)))
     self.CompareColCount(tab, 1)
     self.CompareRowCount(tab, 5)
     self.CompareColNames(tab, ['x'])
@@ -377,7 +377,7 @@ class TestTable(unittest.TestCase):
 
     '''
     
-    tab = Table(['foo', 'bar'], 'si', bar=range(10,14), foo=['i','love','unit','tests'])
+    tab = Table(['foo', 'bar'], 'si', bar=list(range(10,14)), foo=['i','love','unit','tests'])
     self.CompareColCount(tab, 2)
     self.CompareRowCount(tab, 4)
     self.CompareColNames(tab, ['foo','bar'])
@@ -390,7 +390,7 @@ class TestTable(unittest.TestCase):
     '''
     
     self.assertRaises(ValueError, Table, ['foo', 'bar'], 'si',
-                      bar=range(10,14), foo=['i','love','tests'])
+                      bar=list(range(10,14)), foo=['i','love','tests'])
     
     
   def testTableInitMultiColMultiValueAndNoneNonEmpty(self):
@@ -672,40 +672,40 @@ class TestTable(unittest.TestCase):
     
   def testParseColumnTypes(self):
     types = Table._ParseColTypes(['i','f','s','b'])
-    self.assertEquals(types, ['int','float','string','bool'])
+    self.assertEqual(types, ['int','float','string','bool'])
     
     types = Table._ParseColTypes(['int','float','string','bool'])
-    self.assertEquals(types, ['int','float','string','bool'])
+    self.assertEqual(types, ['int','float','string','bool'])
     
     types = Table._ParseColTypes(['i','float','s','bool'])
-    self.assertEquals(types, ['int','float','string','bool'])
+    self.assertEqual(types, ['int','float','string','bool'])
 
     types = Table._ParseColTypes(['i','fLOAT','S','bool'])
-    self.assertEquals(types, ['int','float','string','bool'])
+    self.assertEqual(types, ['int','float','string','bool'])
     
     types = Table._ParseColTypes('ifsb')
-    self.assertEquals(types, ['int','float','string','bool'])
+    self.assertEqual(types, ['int','float','string','bool'])
     
     types = Table._ParseColTypes('int,float,string,bool')
-    self.assertEquals(types, ['int','float','string','bool'])
+    self.assertEqual(types, ['int','float','string','bool'])
     
     types = Table._ParseColTypes('int,f,s,bool')
-    self.assertEquals(types, ['int','float','string','bool'])
+    self.assertEqual(types, ['int','float','string','bool'])
     
     types = Table._ParseColTypes('INT,F,s,bOOL')
-    self.assertEquals(types, ['int','float','string','bool'])
+    self.assertEqual(types, ['int','float','string','bool'])
 
     types = Table._ParseColTypes('boOl')
-    self.assertEquals(types, ['bool'])
+    self.assertEqual(types, ['bool'])
     
     types = Table._ParseColTypes('S')
-    self.assertEquals(types, ['string'])
+    self.assertEqual(types, ['string'])
     
     types = Table._ParseColTypes(['i'])
-    self.assertEquals(types, ['int'])
+    self.assertEqual(types, ['int'])
     
     types = Table._ParseColTypes(['FLOAT'])
-    self.assertEquals(types, ['float'])
+    self.assertEqual(types, ['float'])
 
     self.assertRaises(ValueError, Table._ParseColTypes, 'bfstring')
     self.assertRaises(ValueError, Table._ParseColTypes, ['b,f,string'])
@@ -765,23 +765,23 @@ class TestTable(unittest.TestCase):
     tab = Table()
     
     # None values
-    self.assertEquals(tab._Coerce('NA', 'x'), None)
-    self.assertEquals(tab._Coerce(None, 'x'), None)
+    self.assertEqual(tab._Coerce('NA', 'x'), None)
+    self.assertEqual(tab._Coerce(None, 'x'), None)
     
     # int type
     self.assertTrue(isinstance(tab._Coerce(2 ,'int'), int))
-    self.assertEquals(tab._Coerce(2 ,'int'), 2)
+    self.assertEqual(tab._Coerce(2 ,'int'), 2)
     self.assertTrue(isinstance(tab._Coerce(2.2 ,'int'), int))
-    self.assertEquals(tab._Coerce(2.2 ,'int'), 2)
-    self.assertEquals(tab._Coerce(True ,'int'), 1)
-    self.assertEquals(tab._Coerce(False ,'int'), 0)
+    self.assertEqual(tab._Coerce(2.2 ,'int'), 2)
+    self.assertEqual(tab._Coerce(True ,'int'), 1)
+    self.assertEqual(tab._Coerce(False ,'int'), 0)
     self.assertRaises(ValueError, tab._Coerce, "foo" , 'int')
     
     # float type
     self.assertTrue(isinstance(tab._Coerce(2 ,'float'), float))
-    self.assertEquals(tab._Coerce(2 ,'float'), 2.000)
+    self.assertEqual(tab._Coerce(2 ,'float'), 2.000)
     self.assertTrue(isinstance(tab._Coerce(3.141 ,'float'), float))
-    self.assertEquals(tab._Coerce(3.141 ,'float'), 3.141)
+    self.assertEqual(tab._Coerce(3.141 ,'float'), 3.141)
     self.assertRaises(ValueError, tab._Coerce, "foo" , 'float')
     
     # string type
@@ -793,13 +793,13 @@ class TestTable(unittest.TestCase):
     self.assertTrue(isinstance(tab._Coerce(False ,'string'), str))
     
     # bool type
-    self.assertEquals(tab._Coerce(True ,'bool'), True)
-    self.assertEquals(tab._Coerce(False ,'bool'), False)
-    self.assertEquals(tab._Coerce('falSE' ,'bool'), False)
-    self.assertEquals(tab._Coerce('no' ,'bool'), False)
-    self.assertEquals(tab._Coerce('not false and not no','bool'), True)
-    self.assertEquals(tab._Coerce(0, 'bool'), False)
-    self.assertEquals(tab._Coerce(1, 'bool'), True)
+    self.assertEqual(tab._Coerce(True ,'bool'), True)
+    self.assertEqual(tab._Coerce(False ,'bool'), False)
+    self.assertEqual(tab._Coerce('falSE' ,'bool'), False)
+    self.assertEqual(tab._Coerce('no' ,'bool'), False)
+    self.assertEqual(tab._Coerce('not false and not no','bool'), True)
+    self.assertEqual(tab._Coerce(0, 'bool'), False)
+    self.assertEqual(tab._Coerce(1, 'bool'), True)
     
     # unknown type
     self.assertRaises(ValueError, tab._Coerce, 'bla', 'abc')
@@ -861,7 +861,7 @@ class TestTable(unittest.TestCase):
     self.CompareDataFromDict(tab_loaded_fname_pickle, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
 
     # read from disc: ost
-    in_stream_ost = open("saveloadtable_filename_out.tab", 'rb')
+    in_stream_ost = open("saveloadtable_filename_out.tab", 'r')
     tab_loaded_stream_ost = Table.Load(in_stream_ost)
     in_stream_ost.close()
     tab_loaded_fname_ost = Table.Load('saveloadtable_filename_out.tab')
@@ -880,7 +880,7 @@ class TestTable(unittest.TestCase):
     
   def testLoadOSTDifficultHeaders(self):
     tab = Table.Load(os.path.join('testfiles','ost-table-difficult-headers.tab'))
-    self.assertEquals(tab.col_types, ['float','float','float','float','float'])
+    self.assertEqual(tab.col_types, ['float','float','float','float','float'])
 
   def testSaveLoadTableOST(self):
     tab = self.CreateTestTable()
@@ -907,6 +907,7 @@ class TestTable(unittest.TestCase):
     self.assertRaises(IOError, Table.Load, os.path.join('testfiles','emptytable.tab'))
     in_stream = open(os.path.join('testfiles','emptytable.csv'), 'r')
     self.assertRaises(IOError, Table.Load, in_stream)
+    in_stream.close()
     
   def testSaveLoadTableOSTWithSpaces(self):
     tab = self.CreateTestTable()
@@ -920,18 +921,18 @@ class TestTable(unittest.TestCase):
     tab_loaded_fname = Table.Load('saveloadtable_withspaces_filename_out.tab')
     self.CompareDataFromDict(tab_loaded_fname, {'first': ['x','foo',None,'hello spaces'], 'second': [3,None,9,10], 'third': [None,2.2,3.3,10.1]})
   def testSaveTableHTML(self):
-    import StringIO
+    import io
     tab = self.CreateTestTable()
-    stream = StringIO.StringIO()
+    stream = io.StringIO()
     tab.Save(stream, format='html')
     self.assertEqual(stream.getvalue(), '<table><tr><th>first</th><th>second</th><th>third</th></tr><tr><td>x</td><td>3</td><td></td></tr><tr><td>foo</td><td></td><td>2.200</td></tr><tr><td></td><td>9</td><td>3.300</td></tr></table>')
   def testSaveTableContext(self):
-    import StringIO
+    import io
     tab = self.CreateTestTable()
-    stream = StringIO.StringIO()
+    stream = io.StringIO()
     tab.Save(stream, format='context')
     self.assertEqual(stream.getvalue(), 
-                     '\\starttable[l|r|i3r|]\n\\HL\n\\NC \\bf first\\NC \\bf second\\NC \\bf third \\AR\\HL\n\\NC x\\NC 3\\NC --- \\AR\n\\NC foo\NC ---\NC 2.200 \\AR\n\\NC ---\\NC 9\\NC 3.300 \\AR\n\\HL\n\\stoptable')
+                     '\\starttable[l|r|i3r|]\n\\HL\n\\NC \\bf first\\NC \\bf second\\NC \\bf third \\AR\\HL\n\\NC x\\NC 3\\NC --- \\AR\n\\NC foo\\NC ---\\NC 2.200 \\AR\n\\NC ---\\NC 9\\NC 3.300 \\AR\n\\HL\n\\stoptable')
 
   def testSaveLoadTableCSV(self):
     tab = self.CreateTestTable()
@@ -1042,44 +1043,44 @@ class TestTable(unittest.TestCase):
     tab = self.CreateTestTable()
     tab.AddCol('fourth','bool',[True,True,False])
 
-    self.assertEquals(tab.Min('first'),'foo')
-    self.assertEquals(tab.Min('second'),3)
-    self.assertAlmostEquals(tab.Min('third'),2.2)
-    self.assertEquals(tab.Min('fourth'),False)
+    self.assertEqual(tab.Min('first'),'foo')
+    self.assertEqual(tab.Min('second'),3)
+    self.assertAlmostEqual(tab.Min('third'),2.2)
+    self.assertEqual(tab.Min('fourth'),False)
     self.assertRaises(ValueError,tab.Min,'fifth')
     
-    self.assertEquals(tab.MinIdx('first'),1)
-    self.assertEquals(tab.MinIdx('second'),0)
-    self.assertAlmostEquals(tab.MinIdx('third'),1)
-    self.assertEquals(tab.MinIdx('fourth'),2)
+    self.assertEqual(tab.MinIdx('first'),1)
+    self.assertEqual(tab.MinIdx('second'),0)
+    self.assertAlmostEqual(tab.MinIdx('third'),1)
+    self.assertEqual(tab.MinIdx('fourth'),2)
     self.assertRaises(ValueError,tab.MinIdx,'fifth')
     
-    self.assertEquals(tab.MinRow('first'),['foo', None, 2.20, True])
-    self.assertEquals(tab.MinRow('second'),['x', 3, None, True])
-    self.assertEquals(tab.MinRow('third'),['foo', None, 2.20, True])
-    self.assertEquals(tab.MinRow('fourth'),[None, 9, 3.3, False])
+    self.assertEqual(tab.MinRow('first'),['foo', None, 2.20, True])
+    self.assertEqual(tab.MinRow('second'),['x', 3, None, True])
+    self.assertEqual(tab.MinRow('third'),['foo', None, 2.20, True])
+    self.assertEqual(tab.MinRow('fourth'),[None, 9, 3.3, False])
     self.assertRaises(ValueError,tab.MinRow,'fifth')
     
   def testMaxTable(self):
     tab = self.CreateTestTable()
     tab.AddCol('fourth','bool',[False,True,True])
     
-    self.assertEquals(tab.Max('first'),'x')
-    self.assertEquals(tab.Max('second'),9)
-    self.assertAlmostEquals(tab.Max('third'),3.3)
-    self.assertEquals(tab.Max('fourth'),True)
+    self.assertEqual(tab.Max('first'),'x')
+    self.assertEqual(tab.Max('second'),9)
+    self.assertAlmostEqual(tab.Max('third'),3.3)
+    self.assertEqual(tab.Max('fourth'),True)
     self.assertRaises(ValueError,tab.Max,'fifth')
     
-    self.assertEquals(tab.MaxIdx('first'),0)
-    self.assertEquals(tab.MaxIdx('second'),2)
-    self.assertAlmostEquals(tab.MaxIdx('third'),2)
-    self.assertEquals(tab.MaxIdx('fourth'),1)
+    self.assertEqual(tab.MaxIdx('first'),0)
+    self.assertEqual(tab.MaxIdx('second'),2)
+    self.assertAlmostEqual(tab.MaxIdx('third'),2)
+    self.assertEqual(tab.MaxIdx('fourth'),1)
     self.assertRaises(ValueError,tab.MaxIdx,'fifth')
     
-    self.assertEquals(tab.MaxRow('first'),['x', 3, None, False])
-    self.assertEquals(tab.MaxRow('second'),[None, 9, 3.3, True])
-    self.assertEquals(tab.MaxRow('third'),[None, 9, 3.3, True])
-    self.assertEquals(tab.MaxRow('fourth'),['foo', None, 2.2, True])
+    self.assertEqual(tab.MaxRow('first'),['x', 3, None, False])
+    self.assertEqual(tab.MaxRow('second'),[None, 9, 3.3, True])
+    self.assertEqual(tab.MaxRow('third'),[None, 9, 3.3, True])
+    self.assertEqual(tab.MaxRow('fourth'),['foo', None, 2.2, True])
     self.assertRaises(ValueError,tab.MaxRow,'fifth')
     
   def testSumTable(self):
@@ -1088,9 +1089,9 @@ class TestTable(unittest.TestCase):
     tab.AddCol('fifth','string',['foo','bar',None])
     
     self.assertRaises(TypeError,tab.Sum,'first')
-    self.assertEquals(tab.Sum('second'),12)
-    self.assertAlmostEquals(tab.Sum('third'),5.5)
-    self.assertEquals(tab.Sum('fourth'),1)
+    self.assertEqual(tab.Sum('second'),12)
+    self.assertAlmostEqual(tab.Sum('third'),5.5)
+    self.assertEqual(tab.Sum('fourth'),1)
     self.assertRaises(TypeError,tab.Sum,'fifth')
     self.assertRaises(ValueError,tab.Sum,'sixth')
     
@@ -1100,9 +1101,9 @@ class TestTable(unittest.TestCase):
     tab.AddCol('fifth','string',['foo','bar',None])
     
     self.assertRaises(TypeError,tab.Median,'first')
-    self.assertEquals(tab.Median('second'),6.0)
-    self.assertAlmostEquals(tab.Median('third'),2.75)
-    self.assertEquals(tab.Median('fourth'),False)
+    self.assertEqual(tab.Median('second'),6.0)
+    self.assertAlmostEqual(tab.Median('third'),2.75)
+    self.assertEqual(tab.Median('fourth'),False)
     self.assertRaises(TypeError,tab.Median,'fifth')
     self.assertRaises(ValueError,tab.Median,'sixth')
     
@@ -1112,9 +1113,9 @@ class TestTable(unittest.TestCase):
     tab.AddCol('fifth','string',['foo','bar',None])
     
     self.assertRaises(TypeError,tab.Mean,'first')
-    self.assertAlmostEquals(tab.Mean('second'),6.0)
-    self.assertAlmostEquals(tab.Mean('third'),2.75)
-    self.assertAlmostEquals(tab.Mean('fourth'),0.33333333)
+    self.assertAlmostEqual(tab.Mean('second'),6.0)
+    self.assertAlmostEqual(tab.Mean('third'),2.75)
+    self.assertAlmostEqual(tab.Mean('fourth'),0.33333333)
     self.assertRaises(TypeError,tab.Mean,'fifth')
     self.assertRaises(ValueError,tab.Mean,'sixth')
     
@@ -1146,9 +1147,9 @@ class TestTable(unittest.TestCase):
     tab.AddCol('fifth','string',['foo','bar',None])
     
     self.assertRaises(TypeError,tab.StdDev,'first')
-    self.assertAlmostEquals(tab.StdDev('second'),3.0)
-    self.assertAlmostEquals(tab.StdDev('third'),0.55)
-    self.assertAlmostEquals(tab.StdDev('fourth'),0.47140452079)
+    self.assertAlmostEqual(tab.StdDev('second'),3.0)
+    self.assertAlmostEqual(tab.StdDev('third'),0.55)
+    self.assertAlmostEqual(tab.StdDev('fourth'),0.47140452079)
     self.assertRaises(TypeError,tab.StdDev,'fifth')
     self.assertRaises(ValueError,tab.StdDev,'sixth')
     
@@ -1156,14 +1157,14 @@ class TestTable(unittest.TestCase):
     tab = self.CreateTestTable()
     tab.AddCol('fourth','bool',[False,True,False])
     
-    self.assertEquals(tab.Count('first'),2)
-    self.assertEquals(tab.Count('second'),2)
-    self.assertEquals(tab.Count('third'),2)
-    self.assertEquals(tab.Count('fourth'),3)
-    self.assertEquals(tab.Count('first', ignore_nan=False),3)
-    self.assertEquals(tab.Count('second', ignore_nan=False),3)
-    self.assertEquals(tab.Count('third', ignore_nan=False),3)
-    self.assertEquals(tab.Count('fourth', ignore_nan=False),3)
+    self.assertEqual(tab.Count('first'),2)
+    self.assertEqual(tab.Count('second'),2)
+    self.assertEqual(tab.Count('third'),2)
+    self.assertEqual(tab.Count('fourth'),3)
+    self.assertEqual(tab.Count('first', ignore_nan=False),3)
+    self.assertEqual(tab.Count('second', ignore_nan=False),3)
+    self.assertEqual(tab.Count('third', ignore_nan=False),3)
+    self.assertEqual(tab.Count('fourth', ignore_nan=False),3)
     self.assertRaises(ValueError,tab.Count,'fifth')
     
   def testCalcEnrichment(self):
@@ -1180,15 +1181,15 @@ class TestTable(unittest.TestCase):
                                       class_dir='-')
     
     for x,y,refx,refy in zip(enrx,enry,enrx_ref,enry_ref):
-      self.assertAlmostEquals(x,refx)
-      self.assertAlmostEquals(y,refy)
+      self.assertAlmostEqual(x,refx)
+      self.assertAlmostEqual(y,refy)
     
     enrx,enry = tab.ComputeEnrichment(score_col='score', score_dir='-',
                                       class_col='classific')
     
     for x,y,refx,refy in zip(enrx,enry,enrx_ref,enry_ref):
-      self.assertAlmostEquals(x,refx)
-      self.assertAlmostEquals(y,refy)
+      self.assertAlmostEqual(x,refx)
+      self.assertAlmostEqual(y,refy)
     
     tab.AddCol('bad','string','col')
     
@@ -1275,7 +1276,7 @@ class TestTable(unittest.TestCase):
                                    class_col='rmsd', class_cutoff=2.0,
                                    class_dir='-')
     
-    self.assertAlmostEquals(auc, auc_ref)
+    self.assertAlmostEqual(auc, auc_ref)
 
   def testPlotROC(self):
     if not HAS_MPL or not HAS_PIL:
@@ -1297,7 +1298,7 @@ class TestTable(unittest.TestCase):
     pl = tab.PlotROC(score_col='score', score_dir='+',
                      class_col='classific',
                      save=os.path.join("testfiles","roc-out.png"))
-    self.assertEquals(pl, None)
+    self.assertEqual(pl, None)
 
   def testPlotLogROC(self):
     if not HAS_MPL or not HAS_PIL:
@@ -1319,7 +1320,7 @@ class TestTable(unittest.TestCase):
     pl = tab.PlotLogROC(score_col='score', score_dir='+',
                         class_col='classific',
                         save=os.path.join("testfiles","logroc-out.png"))
-    self.assertEquals(pl, None)
+    self.assertEqual(pl, None)
 
   def testPlotROCSameValues(self):
     if not HAS_MPL or not HAS_PIL:
@@ -1361,14 +1362,14 @@ class TestTable(unittest.TestCase):
                 classific=[True, True, False, True, True, True, False, False, True, False, True, False, True, False, False, False, True, False, True, False],
                 score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
     auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
-    self.assertAlmostEquals(auc, auc_ref)
+    self.assertAlmostEqual(auc, auc_ref)
 
     # no true positives
     tab = Table(['classific', 'score'], 'bf',
                 classific=[False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
                 score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
     auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
-    self.assertEquals(auc, None)
+    self.assertEqual(auc, None)
     
   def testLogROCAUCforPerfectCurve(self):
     if not HAS_NUMPY:
@@ -1380,11 +1381,11 @@ class TestTable(unittest.TestCase):
     
     # test logAUC
     auc = tab.ComputeLogROCAUC(score_col='score', score_dir='+', class_col='classific')
-    self.assertAlmostEquals(auc, auc_ref)
+    self.assertAlmostEqual(auc, auc_ref)
     
     # test linear AUC
     auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
-    self.assertAlmostEquals(auc, auc_ref)
+    self.assertAlmostEqual(auc, auc_ref)
       
   def testCalcLogROCAUCRandomCurve(self):
     if not HAS_NUMPY:
@@ -1396,12 +1397,12 @@ class TestTable(unittest.TestCase):
     # test logAUC
     auc_ref = 0.1440197405305
     auc = tab.ComputeLogROCAUC(score_col='score', score_dir='+', class_col='classific')
-    self.assertAlmostEquals(auc, auc_ref)
+    self.assertAlmostEqual(auc, auc_ref)
     
     # test linear AUC    
     auc_ref = 0.5
     auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
-    self.assertAlmostEquals(auc, auc_ref)
+    self.assertAlmostEqual(auc, auc_ref)
 
 
   def testCalcROCAUCWithCutoff(self):
@@ -1411,18 +1412,18 @@ class TestTable(unittest.TestCase):
                 classific=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1],
                 score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
     auc = tab.ComputeROCAUC(score_col='score', class_col='classific', class_cutoff=0.5)
-    self.assertEquals(auc, 1.0)
+    self.assertEqual(auc, 1.0)
 
     # no true positives
     auc = tab.ComputeROCAUC(score_col='score', class_col='classific', class_cutoff=1.0)
-    self.assertEquals(auc, None)
+    self.assertEqual(auc, None)
 
   def testCalcROCFromFile(self):
     if not HAS_NUMPY:
       return
     tab = Table.Load(os.path.join('testfiles','roc_table.dat'))
     auc = tab.ComputeROCAUC(score_col='prediction', class_col='reference', class_cutoff=0.4)
-    self.assertEquals(auc, 1.0)
+    self.assertEqual(auc, 1.0)
       
 
   def testCalcROCAUCSameValues(self):
@@ -1433,7 +1434,7 @@ class TestTable(unittest.TestCase):
                 classific=[True, True, False, True, True, True, False, False, True, False, True, False, True, False, False, False, True, False, True, False],
                 score=[0.9, 0.8, 0.7, 0.7, 0.7, 0.7, 0.53, 0.52, 0.51, 0.505, 0.4, 0.4, 0.4, 0.4, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
     auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
-    self.assertAlmostEquals(auc, auc_ref)
+    self.assertAlmostEqual(auc, auc_ref)
 
   def testCalcMCC(self):
     log = _FetchLog()
@@ -1447,18 +1448,18 @@ class TestTable(unittest.TestCase):
                 class_wrong=[False,False,False,False,False,False, False,False,False, False,False,False,False,False,False, False,False,False,False, False,False,False,False,False])
     
     mcc = tab.ComputeMCC(score_col='score', score_dir='-', class_col='rmsd', class_dir='-', score_cutoff=1.0, class_cutoff=2.0)
-    self.assertAlmostEquals(mcc, 0.1490711984)
+    self.assertAlmostEqual(mcc, 0.1490711984)
     mcc = tab.ComputeMCC(score_col='class_score', class_col='class_rmsd')
-    self.assertAlmostEquals(mcc, 0.1490711984)
+    self.assertAlmostEqual(mcc, 0.1490711984)
     mcc = tab.ComputeMCC(score_col='score', score_dir='+', class_col='rmsd', class_dir='+', score_cutoff=1.0, class_cutoff=2.0)
-    self.assertAlmostEquals(mcc, 0.1490711984)
+    self.assertAlmostEqual(mcc, 0.1490711984)
     mcc = tab.ComputeMCC(score_col='score', score_dir='-', class_col='rmsd', class_dir='+', score_cutoff=1.0, class_cutoff=2.0)
-    self.assertAlmostEquals(mcc, -0.1490711984)
+    self.assertAlmostEqual(mcc, -0.1490711984)
     mcc = tab.ComputeMCC(score_col='score', score_dir='+', class_col='rmsd', class_dir='-', score_cutoff=1.0, class_cutoff=2.0)
-    self.assertAlmostEquals(mcc, -0.1490711984)
+    self.assertAlmostEqual(mcc, -0.1490711984)
     mcc = tab.ComputeMCC(score_col='class_wrong', class_col='class_rmsd')
-    self.assertEquals(mcc,None)
-    self.assertEquals(log.messages['WARNING'][0],
+    self.assertEqual(mcc,None)
+    self.assertEqual(log.messages['WARNING'][0],
     'Could not compute MCC: MCC is not defined since factor (tp + fp) is zero')
 
   def testCalcMCCPreclassified(self):
@@ -1467,11 +1468,11 @@ class TestTable(unittest.TestCase):
                 prediction1=[False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True,  False, True, False, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, False, True, False, True,  False, False, False, False, False, False],
                 prediction2=[False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True,  False, False, True,  False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, True, False, False, True,  False, True,  True,  False, False, False, False, False, False, False, False, False, False, True, False, False, True, False, False, False, True,  False, False, False, False])
     mcc = tab.ComputeMCC(score_col='prediction1', class_col='reference')
-    self.assertAlmostEquals(mcc, 0.538389277)
+    self.assertAlmostEqual(mcc, 0.538389277)
     mcc = tab.ComputeMCC(score_col='prediction2', class_col='reference')
-    self.assertAlmostEquals(mcc, 0.882089673321)
+    self.assertAlmostEqual(mcc, 0.882089673321)
 
-  def testTableAsNumpyMatrix(self):
+  def testTableAsNumpyMatrixAsArray(self):
     if not HAS_NUMPY:
       return
 
@@ -1487,24 +1488,24 @@ class TestTable(unittest.TestCase):
     
     tab = self.CreateTestTable()
     tab.AddCol('fourth','b',[True, False, False])
-    m = tab.GetNumpyMatrix('second')
-    mc = np.matrix([[3],[None],[9]])
+    m = tab.GetNumpyMatrixAsArray('second')
+    mc = np.array([[3],[None],[9]])
     self.assertTrue(np.all(m==mc))
-    mc = np.matrix([[3],[None],[10]])
+    mc = np.array([[3],[None],[10]])
     self.assertFalse(np.all(m==mc))
-    m = tab.GetNumpyMatrix('third')
-    mc = np.matrix([[None],[2.200],[3.300]])
+    m = tab.GetNumpyMatrixAsArray('third')
+    mc = np.array([[None],[2.200],[3.300]])
     self.assertTrue(np.all(m==mc))
-    m = tab.GetNumpyMatrix('second','third')
-    mc = np.matrix([[3, None],[None, 2.200],[9, 3.300]])
+    m = tab.GetNumpyMatrixAsArray('second','third')
+    mc = np.array([[3, None],[None, 2.200],[9, 3.300]])
     self.assertTrue(np.all(m==mc))
-    m = tab.GetNumpyMatrix('third','second')
-    mc = np.matrix([[None, 3],[2.200, None],[3.300, 9]])
+    m = tab.GetNumpyMatrixAsArray('third','second')
+    mc = np.array([[None, 3],[2.200, None],[3.300, 9]])
     self.assertTrue(np.all(m==mc))
 
-    self.assertRaises(TypeError, tab.GetNumpyMatrix, 'fourth')
-    self.assertRaises(TypeError, tab.GetNumpyMatrix, 'first')
-    self.assertRaises(RuntimeError, tab.GetNumpyMatrix)
+    self.assertRaises(TypeError, tab.GetNumpyMatrixAsArray, 'fourth')
+    self.assertRaises(TypeError, tab.GetNumpyMatrixAsArray, 'first')
+    self.assertRaises(RuntimeError, tab.GetNumpyMatrixAsArray)
     
   def testOptimalPrefactors(self):
     if not HAS_NUMPY:
@@ -1519,24 +1520,24 @@ class TestTable(unittest.TestCase):
                 f=[9,9,9,9,9,9,9,9,9])
     
     pref = tab.GetOptimalPrefactors('c','a','b')
-    self.assertAlmostEquals(pref[0],0.799999999)
-    self.assertAlmostEquals(pref[1],0.166666666666)
+    self.assertAlmostEqual(pref[0],0.799999999)
+    self.assertAlmostEqual(pref[1],0.166666666666)
     
     pref = tab.GetOptimalPrefactors('c','b','a')
-    self.assertAlmostEquals(pref[0],0.166666666666)
-    self.assertAlmostEquals(pref[1],0.799999999)
+    self.assertAlmostEqual(pref[0],0.166666666666)
+    self.assertAlmostEqual(pref[1],0.799999999)
     
     pref = tab.GetOptimalPrefactors('c','b','a',weights='e')
-    self.assertAlmostEquals(pref[0],0.166666666666)
-    self.assertAlmostEquals(pref[1],0.799999999)
+    self.assertAlmostEqual(pref[0],0.166666666666)
+    self.assertAlmostEqual(pref[1],0.799999999)
     
     pref = tab.GetOptimalPrefactors('c','b','a',weights='f')
-    self.assertAlmostEquals(pref[0],0.166666666666)
-    self.assertAlmostEquals(pref[1],0.799999999)
+    self.assertAlmostEqual(pref[0],0.166666666666)
+    self.assertAlmostEqual(pref[1],0.799999999)
     
     pref = tab.GetOptimalPrefactors('c','a','b',weights='d')
-    self.assertAlmostEquals(pref[0],0.6078825445851)
-    self.assertAlmostEquals(pref[1],0.3394613806088)
+    self.assertAlmostEqual(pref[0],0.6078825445851)
+    self.assertAlmostEqual(pref[1],0.3394613806088)
     
     self.assertRaises(RuntimeError, tab.GetOptimalPrefactors, 'c','a','b',weight='d')
     self.assertRaises(RuntimeError, tab.GetOptimalPrefactors, 'c',weights='d')
@@ -1580,12 +1581,12 @@ class TestTable(unittest.TestCase):
         tab_list[i].append(v)
 
     for i in range(len(ref_list[0])):
-      self.assertAlmostEquals(tab_list[0][i],ref_list[0][i])
-      self.assertAlmostEquals(tab_list[1][i],ref_list[1][i])
-      self.assertAlmostEquals(tab_list[2][i],ref_list[2][i])
-      self.assertAlmostEquals(tab_list[3][i],ref_list[3][i])
-      self.assertAlmostEquals(tab_list[4][i],ref_list[4][i])
-      self.assertAlmostEquals(tab_list[5][i],ref_list[5][i])
+      self.assertAlmostEqual(tab_list[0][i],ref_list[0][i])
+      self.assertAlmostEqual(tab_list[1][i],ref_list[1][i])
+      self.assertAlmostEqual(tab_list[2][i],ref_list[2][i])
+      self.assertAlmostEqual(tab_list[3][i],ref_list[3][i])
+      self.assertAlmostEqual(tab_list[4][i],ref_list[4][i])
+      self.assertAlmostEqual(tab_list[5][i],ref_list[5][i])
      
 
   def testIsEmpty(self):
@@ -1641,30 +1642,30 @@ class TestTable(unittest.TestCase):
     tab = self.CreateTestTable()
     tab.AddRow(['foo',4, 3.3])
     tab.AddRow([None,5, 6.3])
-    self.assertEquals(tab.GetUnique('first'), ['x','foo'])
-    self.assertEquals(tab.GetUnique('first', ignore_nan=False), ['x','foo', None])
-    self.assertEquals(tab.GetUnique('second'), [3,9,4,5])
-    self.assertEquals(tab.GetUnique('second', ignore_nan=False), [3,None,9,4,5])
-    self.assertEquals(tab.GetUnique('third'), [2.2, 3.3, 6.3])
-    self.assertEquals(tab.GetUnique('third', ignore_nan=False), [None, 2.2, 3.3, 6.3])
+    self.assertEqual(tab.GetUnique('first'), ['x','foo'])
+    self.assertEqual(tab.GetUnique('first', ignore_nan=False), ['x','foo', None])
+    self.assertEqual(tab.GetUnique('second'), [3,9,4,5])
+    self.assertEqual(tab.GetUnique('second', ignore_nan=False), [3,None,9,4,5])
+    self.assertEqual(tab.GetUnique('third'), [2.2, 3.3, 6.3])
+    self.assertEqual(tab.GetUnique('third', ignore_nan=False), [None, 2.2, 3.3, 6.3])
     
   def testCorrel(self):
     tab = self.CreateTestTable()
-    self.assertEquals(tab.Correl('second','third'), None)
+    self.assertEqual(tab.Correl('second','third'), None)
     tab.AddRow(['foo',4, 3.3])
     tab.AddRow([None,5, 6.3])
     tab.AddRow([None,8, 2])
-    self.assertAlmostEquals(tab.Correl('second','third'), -0.4954982578)
+    self.assertAlmostEqual(tab.Correl('second','third'), -0.4954982578)
     
   def testSpearmanCorrel(self):
     if not HAS_SCIPY_STATS:
       return
     tab = self.CreateTestTable()
-    self.assertEquals(tab.SpearmanCorrel('second','third'), None)
+    self.assertEqual(tab.SpearmanCorrel('second','third'), None)
     tab.AddRow(['foo',4, 3.3])
     tab.AddRow([None,5, 6.3])
     tab.AddRow([None,8, 2])
-    self.assertAlmostEquals(tab.SpearmanCorrel('second','third'), -0.316227766)
+    self.assertAlmostEqual(tab.SpearmanCorrel('second','third'), -0.316227766)
     
   def testExtend(self):
     '''
@@ -1804,8 +1805,8 @@ class TestTable(unittest.TestCase):
     split_exp_two=selector._ExpressionLexer(query_two)
     parsed_exp_two=selector._ParseExpression(split_exp_two)
     rpn_two=['a', 1, '=', 'a', 2, '=', 'or', 'b', 5.0, 'a', '+', '>', 'b', 2.0, '<', 'or', 'or']
-    self.assertEquals(selector._ShuntingYard(parsed_exp_one),rpn_one)
-    self.assertEquals(selector._ShuntingYard(parsed_exp_two),rpn_two)
+    self.assertEqual(selector._ShuntingYard(parsed_exp_one),rpn_one)
+    self.assertEqual(selector._ShuntingYard(parsed_exp_two),rpn_two)
 
     #check operator evaluations
     self.assertTrue(selector._EvaluateOperator('=',False,False))

@@ -51,7 +51,7 @@ class Table(QTableView):
      QObject.connect(self, SIGNAL('doubleClicked(QModelIndex)'), 
                      self.OnDoubleClick)
   def OnDoubleClick(self, model_index):
-    print 'DOUBLE'
+    print('DOUBLE')
     if not self.double_click:
       return
     row = table.TableRow(self._model.table.rows[model_index.row()],

@@ -759,6 +759,34 @@ macro(ost_find_python_module MODULE)
   endif()
 endmacro()
 
+#-------------------------------------------------------------------------------
+# make sure the previously detected Python interpreter has the given module
+# while allowing alternative module names
+#-------------------------------------------------------------------------------
+macro(ost_find_python_module_alt MODULES)
+  set(_PY_MODS "")
+  foreach(py_mod ${MODULES})
+    if (NOT PYTHON_MODULE_${py_mod})
+      set(_PY_MODS "${_PY_MODS} ${py_mod}")
+      message(STATUS "Searching for python module ${py_mod} for ${PYTHON_BINARY}")
+      execute_process(COMMAND ${PYTHON_BINARY} -c "import ${py_mod}"
+                      OUTPUT_QUIET ERROR_QUIET
+                      RESULT_VARIABLE _IMPORT_ERROR)
+      if (NOT _IMPORT_ERROR)
+        message(STATUS "Found python module ${py_mod}")
+        set("PYTHON_MODULE_${py_mod}" FOUND CACHE STRING "" FORCE)
+        break()
+      endif (NOT _IMPORT_ERROR)
+    else ()
+      message(STATUS "Already found python module ${py_mod}")
+      unset(_IMPORT_ERROR)
+      break()
+    endif (NOT PYTHON_MODULE_${py_mod})
+  endforeach(py_mod ${MODULES})
+  if (_IMPORT_ERROR)
+    message(FATAL_ERROR "Could not find one of python modules ${_PY_MODS}. Please install one of them.")
+  endif ()    
+endmacro()
 
 #-------------------------------------------------------------------------------
 # this macro tries to detect a very common problem during configuration stage:
@@ -897,7 +925,7 @@ macro(setup_compiler_flags)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing" )
     endif()
     #message(STATUS "GCC VERSION " ${_GCC_VERSION})
-    if ((ENABLE_INFO OR ENABLE_GUI) AND _GCC_VERSION LESS "60")
+    if (_GCC_VERSION LESS "60")
       # for older compilers we need to enable C++11 for Qt5
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     endif()
@@ -917,10 +945,10 @@ macro(setup_boost)
   #              python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} REQUIRED)
   # set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
   # see https://cmake.org/cmake/help/v3.11/module/FindBoost.html
-  foreach(_python_lib_name python
-                           python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}
+  foreach(_python_lib_name python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}
                            python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
-                           python${PYTHON_VERSION_MAJOR})
+                           python${PYTHON_VERSION_MAJOR}
+                           python)
     find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS ${_python_lib_name} QUIET)
     if(Boost_FOUND)
       message(STATUS "Found Boost package: " ${_python_lib_name})

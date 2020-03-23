@@ -9,9 +9,9 @@ class TestConvenientSuperpose(unittest.TestCase):
     pass
   
   def assertEqualAtomOrder(self, view1, view2):
-    self.assertEquals(len(view1.atoms),len(view2.atoms))
+    self.assertEqual(len(view1.atoms),len(view2.atoms))
     for a1, a2 in zip(view1.atoms, view2.atoms):
-      self.assertEquals(a1.element, a2.element)
+      self.assertEqual(a1.element, a2.element)
       self.assertTrue(geom.Equal(a1.pos, a2.pos))
 
   def testAssertion(self):

@@ -189,8 +189,8 @@ htmlhelp_basename = 'openstructure-doc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'OpenStructure.tex', u'OpenStructure Documentation',
-   u'OpenStructure authors', 'manual'),
+  ('index', 'OpenStructure.tex', 'OpenStructure Documentation',
+   'OpenStructure authors', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

@@ -26,7 +26,7 @@ As an example, we would like to obtain the full path of the msms executable (a p
   from ost import settings
   exe_path = settings.Locate('msms', search_paths=['/opt/app','/home/app'],
               env_name='MSMS', search_system_paths=True)
-  print exe_path
+  print(exe_path)
   
 The :func:`~ost.settings.Locate` command looks for the program with the name 
 `msms`. If env_name is set, it first looks if an environment variable with the 
@@ -52,12 +52,12 @@ An example how to generate a temporary directory, open a file in this directory 
   
   # generate a temporary directory
   tmp_dir_name = tempfile.mkdtemp()
-  print 'temporary directory:',tmp_dir_name
+  print('temporary directory:',tmp_dir_name)
   
   # generate and open a file in the temp directory
   tmp_file_name = os.path.join(tmp_dir_name,"entity")
   tmp_file_handle = open(tmp_file_name, 'w')
-  print 'temporary file:',tmp_file_handle
+  print('temporary file:',tmp_file_handle)
   
   # write position and radius of all atoms to file
   for a in entity.GetAtomList():
@@ -82,7 +82,7 @@ To run the external program msms from the above example, with the temporary file
   # set the command to execute
   command = "%s -if %s -of %s" % (exe_path,
             tmp_file_name, tmp_file_name)
-  print 'command:',command
+  print('command:',command)
 
   # run the executable with the command
   proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
@@ -90,11 +90,11 @@ To run the external program msms from the above example, with the temporary file
 
   # check for successful completion of msms
   if proc.returncode != 0:
-    print "WARNING: msms error\n", stdout_value
+    print("WARNING: msms error\n", stdout_value)
     raise subprocess.CalledProcessError(proc.returncode, command)
 
   # print everything written to the command line (stdout)
-  print stdout_value
+  print(stdout_value)
     
 Read Generated Output
 --------------------------------------------------------------------------------
@@ -106,8 +106,8 @@ Here we first print the command line output and then load the generated msms sur
 .. code-block:: python
 
   # print everything written to the command line (stdout)
-  print stdout_value
+  print(stdout_value)
   
   # read msms surface from file
   surface = io.LoadSurface(tmp_file_name, "msms")
-  print 'number of vertices:',len(surface.GetVertexIDList())
+  print('number of vertices:',len(surface.GetVertexIDList()))

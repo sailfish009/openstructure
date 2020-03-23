@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -137,6 +137,8 @@ namespace {
 void export_primlist()
 {
 #if OST_NUMPY_SUPPORT_ENABLED
+  // The following define enforces no return value when calling import_array
+  #define NUMPY_IMPORT_ARRAY_RETVAL
   import_array(); // magic handshake for numpy module
 #endif
 

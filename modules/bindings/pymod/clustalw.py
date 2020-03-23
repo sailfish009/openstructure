@@ -72,8 +72,8 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False,
      I    isoleucine                 Y    tyrosine
      K    lysine                     Z    glutamate or glutamine
      L    leucine                    X    any
-     M    methionine                 \*   translation stop
-     N    asparagine                 \-   gap of indeterminate length
+     M    methionine                 \\*   translation stop
+     N    asparagine                 \\-   gap of indeterminate length
   ======= ======================= ======= ============================ 
 
   '''
@@ -129,8 +129,8 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False,
   if clustalw_option_string!=False:
     command=command+" "+clustalw_option_string  #see useful flags: http://toolkit.tuebingen.mpg.de/clustalw/help_params
 
-  ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-  ps.stdout.readlines()
+  subprocess.run(command, shell=True, stdout=subprocess.DEVNULL) 
+
   aln=io.LoadAlignment(out)
   
 

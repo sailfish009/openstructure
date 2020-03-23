@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -28,7 +28,7 @@ except ImportError:
   pass
 from PyQt5 import QtCore, QtWidgets
 
-from preset_widget import PresetWidget
+from .preset_widget import PresetWidget
 
 class AdditionalSettingsWidget(QtWidgets.QStackedWidget):
   def __init__(self, parent=None):

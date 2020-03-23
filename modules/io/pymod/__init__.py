@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -16,9 +16,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
-import os, tempfile, ftplib, httplib
+import os, tempfile, ftplib, http.client
 
-from _ost_io import *
+from ._ost_io import *
 from ost import mol, geom, conop, seq
 
 profiles=None
@@ -404,7 +404,7 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10,
     pdbizer.Add(assu, trans_matrices, ss)
   pdb_bu = pdbizer.Finish(transformation)
   if transformation:
-    return pdb_bu, pdb_bu.GetTransformationMatrix()
+    return pdb_bu, pdb_bu.GetTransform().GetMatrix()
   return pdb_bu
 
 MMCifInfoBioUnit.PDBize = _PDBize

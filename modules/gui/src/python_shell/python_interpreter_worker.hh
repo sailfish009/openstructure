@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2014 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -23,8 +23,12 @@
 
 // workaround for QTBUG-22829: https://bugreports.qt-project.org/browse/QTBUG-22829
 #ifndef Q_MOC_RUN
+  // https://stackoverflow.com/questions/23068700/embedding-python3-in-qt-5
+  #pragma push_macro("slots")
+  #undef slots
   #include <boost/python.hpp>
   #include <boost/shared_ptr.hpp>
+  #pragma pop_macro("slots")
 #endif
 #include "output_redirector.hh"
 #include <csignal>

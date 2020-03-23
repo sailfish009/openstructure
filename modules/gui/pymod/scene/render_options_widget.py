@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -23,22 +23,22 @@ from ost import gui
 from ost import gfx
 try: 
   from ost import img
-  from wireframe_widget import WireframeWidget
+  from .wireframe_widget import WireframeWidget
   _img_present=True
 except ImportError:
   _img_present=False
   pass
 from PyQt5 import QtCore, QtWidgets
-from scene_selection_helper import SelHelper
-from combo_options_widget import ComboOptionsWidget
-from custom_widget import CustomWidget
-from cpk_widget import CPKWidget
-from tube_widget import TubeWidget
-from simple_widget import SimpleWidget
-from sline_widget import SlineWidget
-from hsc_widget import HSCWidget
-from trace_widget import TraceWidget
-from line_trace_widget import LineTraceWidget
+from .scene_selection_helper import SelHelper
+from .combo_options_widget import ComboOptionsWidget
+from .custom_widget import CustomWidget
+from .cpk_widget import CPKWidget
+from .tube_widget import TubeWidget
+from .simple_widget import SimpleWidget
+from .sline_widget import SlineWidget
+from .hsc_widget import HSCWidget
+from .trace_widget import TraceWidget
+from .line_trace_widget import LineTraceWidget
 
 class RenderOptionsWidget(ComboOptionsWidget):
   def __init__(self, parent=None):

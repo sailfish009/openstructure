@@ -30,11 +30,11 @@ def GetDistanceBetwCenterOfMass(sele1,sele2):
   :return: :class:`float`
   """
   if not sele1.IsValid() and sele2.IsValid():
-    print 'invalid view'
+    print('invalid view')
     return
   eh=sele1.GetHandle()
   if not eh==sele2.GetHandle():
-    print 'The two views must be from the same entity'
+    print('The two views must be from the same entity')
     return
   f=GetFrameFromEntity(eh)
   return f.GetDistanceBetwCenterOfMass(sele1,sele2)
@@ -52,11 +52,11 @@ def GetMinDistanceBetweenViews(sele1,sele2):
   :return: :class:`float`
   """
   if not sele1.IsValid() and sele2.IsValid():
-    print 'invalid view'
+    print('invalid view')
     return
   eh=sele1.GetHandle()
   if not eh==sele2.GetHandle():
-    print 'The two views must be from the same entity'
+    print('The two views must be from the same entity')
     return
   f=GetFrameFromEntity(eh)
   return f.GetMinDistance(sele1,sele2)
@@ -74,11 +74,11 @@ def GetMinDistBetwCenterOfMassAndView(sele1,sele2):
   :return: distance (\ :class:`float`\ )
   """
   if not sele1.IsValid() and sele2.IsValid():
-    print 'invalid view'
+    print('invalid view')
     return
   eh=sele1.GetHandle()
   if not eh==sele2.GetHandle():
-    print 'The two views must be from the same entity'
+    print('The two views must be from the same entity')
     return
   f=GetFrameFromEntity(eh)
   return f.GetMinDistBetwCenterOfMassAndView(sele1,sele2)
@@ -95,7 +95,7 @@ def GetAlphaHelixContent(sele1):
   :return: :class:`float`
   """
   if not sele1.IsValid():
-    print 'invalid view'
+    print('invalid view')
     return
   eh=sele1.GetHandle()
   f=GetFrameFromEntity(eh)
@@ -112,7 +112,7 @@ def CalculateBestFitLine(sele1):
   :return: :class:`~ost.geom.Line3`
   """
   if not sele1.IsValid():
-    print 'invalid view'
+    print('invalid view')
     return
   eh=sele1.GetHandle()
   f=GetFrameFromEntity(eh)
@@ -128,7 +128,7 @@ def CalculateBestFitPlane(sele1):
   :return: :class:`~ost.geom.Plane`
   """
   if not sele1.IsValid():
-    print 'invalid view'
+    print('invalid view')
     return
   eh=sele1.GetHandle()
   f=GetFrameFromEntity(eh)
@@ -146,7 +146,7 @@ def CalculateHelixAxis(sele1):
   :return: :class:`~ost.geom.Line3`
   """
   if not sele1.IsValid():
-    print 'invalid view'
+    print('invalid view')
     return
   eh=sele1.GetHandle()
   f=GetFrameFromEntity(eh)
@@ -172,10 +172,10 @@ def CalculateDistanceDifferenceMatrix(sele1,sele2):
     LogError("Function needs numpy, but I could not import it.")
     raise
   if not sele1.IsValid() and sele2.IsValid():
-    print 'invalid view'
+    print('invalid view')
     return
   if not sele1.GetAtomCount()==sele2.GetAtomCount():
-    print 'The two views must have the same number of atoms'
+    print('The two views must have the same number of atoms')
     return
   n_atoms=sele1.GetAtomCount()
   M=npy.zeros([n_atoms,n_atoms])

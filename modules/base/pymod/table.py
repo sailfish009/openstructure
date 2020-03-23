@@ -4,7 +4,7 @@ import math
 from ost import stutil
 import itertools
 import operator
-import cPickle
+import pickle
 import weakref
 from ost import LogError, LogWarning, LogInfo, LogVerbose
 
@@ -228,7 +228,7 @@ class Table(object):
     self.rows=[]    
     if len(kwargs)>=0:
       if not col_names:
-        self.col_names=[v for v in kwargs.keys()]
+        self.col_names=[v for v in list(kwargs.keys())]
       if not self.col_types:
         self.col_types=['string' for u in range(len(self.col_names))]
       if len(kwargs)>0:
@@ -249,8 +249,8 @@ class Table(object):
       return None
     
     short2long = {'s' : 'string', 'i': 'int', 'b' : 'bool', 'f' : 'float'}
-    allowed_short = short2long.keys()
-    allowed_long = short2long.values()
+    allowed_short = list(short2long.keys())
+    allowed_long = list(short2long.values())
     
     type_list = []
     
@@ -359,7 +359,7 @@ class Table(object):
     if ty=='string':
       return str(value)
     if ty=='bool':
-      if isinstance(value, str) or isinstance(value, unicode):
+      if isinstance(value, str) or isinstance(value, str):
         if value.upper() in ('FALSE', 'NO',):
           return False
         return True
@@ -525,11 +525,11 @@ Statistics for column %(col)s
              data items is different for different columns.
     '''
     # get column indices
-    idxs = [self.GetColIndex(k) for k in d.keys()]
+    idxs = [self.GetColIndex(k) for k in list(d.keys())]
     
     # convert scalar values to list
     old_len = None
-    for k,v in d.iteritems():
+    for k,v in d.items():
       if IsScalar(v):
         v = [v]
         d[k] = v
@@ -540,7 +540,7 @@ Statistics for column %(col)s
                          "for all columns in %s"%str(d))
     
     # convert column based dict to row based dict and create row and add data
-    for i,data in enumerate(zip(*d.values())):
+    for i,data in enumerate(zip(*list(d.values()))):
       new_row = [None for a in range(len(self.col_names))]
       for idx,v in zip(idxs,data):
         new_row[idx] = self._Coerce(v, self.col_types[idx])
@@ -815,7 +815,7 @@ Statistics for column %(col)s
         if not func(row):
           matches=False
           break
-      for key, val in kwargs.iteritems():
+      for key, val in kwargs.items():
         if row[self.GetColIndex(key)]!=val:
           matches=False
           break
@@ -835,7 +835,7 @@ Statistics for column %(col)s
 
     Operands have to be the name of a column or an expression that can be
     parsed to float, int, bool or string.
-    Valid operators are: and, or, !=, !, <=, >=, ==, =, <, >, +, -, \*, /
+    Valid operators are: and, or, !=, !, <=, >=, ==, =, <, >, +, -, \\*, /
     
     .. code-block:: python
     
@@ -861,7 +861,7 @@ Statistics for column %(col)s
     """
 
     try:
-      from table_selector import TableSelector
+      from .table_selector import TableSelector
     except:
       raise ImportError("Tried to import from the file table_selector.py, but could not find it!")
 
@@ -880,8 +880,10 @@ Statistics for column %(col)s
   def _LoadOST(stream_or_filename):
     fieldname_pattern=re.compile(r'(?P<name>[^[]+)(\[(?P<type>\w+)\])?')
     values_pattern=re.compile("([^\" ]+|\"[^\"]*\")+")
+    file_opened=False
     if not hasattr(stream_or_filename, 'read'):
       stream=open(stream_or_filename, 'r')
+      file_opened=True
     else:
       stream=stream_or_filename
     header=False
@@ -904,10 +906,18 @@ Statistics for column %(col)s
             else:
               fieldtypes.append('string')
             fieldnames.append(match.group('name'))
-        tab=Table(fieldnames, fieldtypes)
+        try:
+          tab=Table(fieldnames, fieldtypes)
+        except Exception as e:
+          # potentially fails if we read in crap... clean up and pass on error
+          if file_opened:
+            stream.close()
+          raise e
         header=True
         continue
       tab.AddRow([x.strip('"') for x in values_pattern.findall(line)])
+    if file_opened:
+      stream.close()
     if num_lines==0:
       raise IOError("Cannot read table from empty stream")
     return tab
@@ -921,8 +931,10 @@ Statistics for column %(col)s
         
   @staticmethod
   def _LoadCSV(stream_or_filename, sep):
+    file_opened=False
     if not hasattr(stream_or_filename, 'read'):
       stream=open(stream_or_filename, 'r')
+      file_opened=True
     else:
       stream=stream_or_filename
     reader=csv.reader(stream, delimiter=sep)
@@ -935,6 +947,8 @@ Statistics for column %(col)s
         first=False
       else:
         tab.AddRow(row)
+    if file_opened:
+      stream.close()
     if first:
       raise IOError('trying to load table from empty CSV stream/file')
 
@@ -943,17 +957,22 @@ Statistics for column %(col)s
 
   @staticmethod
   def _LoadPickle(stream_or_filename):
+    file_opened=False
     if not hasattr(stream_or_filename, 'read'):
       stream=open(stream_or_filename, 'rb')
+      file_opened=True
     else:
       stream=stream_or_filename
-    return cPickle.load(stream)
+    tab = pickle.load(stream)
+    if file_opened:
+      stream.close()
+    return tab
 
   @staticmethod
   def _GuessFormat(filename):
     try:
       filename = filename.name
-    except AttributeError, e:
+    except AttributeError as e:
       pass
     if filename.endswith('.csv'):
       return 'csv'
@@ -1043,8 +1062,20 @@ Statistics for column %(col)s
       sign=1
     key_index=self.GetColIndex(by)
     def _key_cmp(lhs, rhs):
-      return sign*cmp(lhs[key_index], rhs[key_index])
-    self.rows=sorted(self.rows, _key_cmp)
+      a = lhs[key_index]
+      b = rhs[key_index]
+      # mimic behaviour of the cmp function from Python2 that happily
+      # compared None values
+      if a is None or b is None:
+        if a is None and b is not None:
+          return -1 * sign
+        if b is None and a is not None:
+          return 1 * sign
+        return 0
+      return sign*((a > b) - (a < b))
+
+    import functools
+    self.rows=sorted(self.rows, key=functools.cmp_to_key(_key_cmp))
     
   def GetUnique(self, col, ignore_nan=True):
     """
@@ -1085,7 +1116,7 @@ Statistics for column %(col)s
       for col1, col2 in zip(tab['col1'], tab['col2']):
         print col1, col2
     """
-    return zip(*[self[arg] for arg in args])
+    return list(zip(*[self[arg] for arg in args]))
 
   def Plot(self, x, y=None, z=None, style='.', x_title=None, y_title=None,
            z_title=None, x_range=None, y_range=None, z_range=None,
@@ -1106,7 +1137,7 @@ Statistics for column %(col)s
     :param z: column name for third dimension
     :type z: :class:`str`
 
-    :param style: symbol style (e.g. *.*, *-*, *x*, *o*, *+*, *\**). For a
+    :param style: symbol style (e.g. *.*, *-*, *x*, *o*, *+*, *\\**). For a
                   complete list check (`matplotlib docu <http://matplotlib.sourceforge.net/api/pyplot_api.html#matplotlib.pyplot.plot>`__).
     :type style: :class:`str`
 
@@ -1172,7 +1203,7 @@ Statistics for column %(col)s
                        'linear')
     :type z_interpol: :class:`str`
 
-    :param \*\*kwargs: additional arguments passed to matplotlib
+    :param \\*\\*kwargs: additional arguments passed to matplotlib
     
     :returns: the ``matplotlib.pyplot`` module 
 
@@ -1468,7 +1499,8 @@ Statistics for column %(col)s
       max_val = chr(0)
     max_idx = None
     for i in range(0, len(self.rows)):
-      if self.rows[i][idx]>max_val:
+      val = self.rows[i][idx]
+      if val and val > max_val:
         max_val = self.rows[i][idx]
         max_idx = i
     return max_val, max_idx
@@ -1561,7 +1593,7 @@ Statistics for column %(col)s
                          'specify the parameter rows with a list of row indices '\
                          '(max 7)')
       else:
-        rows=range(len(self.rows))
+        rows=list(range(len(self.rows)))
     else:
       if not isinstance(rows,list):
         rows=[rows]
@@ -1989,7 +2021,7 @@ Statistics for column %(col)s
     
     .. code-block:: python
 
-      values[min(len(values), int(round(len(values)*nth/100+0.5)-1))]
+      values[min(len(values)-1, int(math.floor(len(values)*nth/100.0)))]
 
     where values are the sorted values of *col* not equal to ''None''
 
@@ -2020,7 +2052,9 @@ Statistics for column %(col)s
     percentiles=[]
     
     for nth in nths:
-      p=vals[min(len(vals)-1, int(round(len(vals)*nth/100.0+0.5)-1))]
+      # rounding behaviour between Python2 and Python3 changed....
+      # p=vals[min(len(vals)-1, int(round(len(vals)*nth/100.0+0.5)-1))]
+      p=vals[min(len(vals)-1, int(math.floor(len(vals)*nth/100.0)))]
       percentiles.append(p)
     return percentiles
 
@@ -2195,9 +2229,13 @@ Statistics for column %(col)s
     raise ValueError('unknown format "%s"' % format)
 
   def _SavePickle(self, stream):
+    file_opened=False
     if not hasattr(stream, 'write'):
       stream=open(stream, 'wb')
-    cPickle.dump(self, stream, cPickle.HIGHEST_PROTOCOL)
+      file_opened=True
+    pickle.dump(self, stream, pickle.HIGHEST_PROTOCOL)
+    if file_opened:
+      stream.close()
 
   def _SaveHTML(self, stream_or_filename):
     def _escape(s):
@@ -2273,8 +2311,10 @@ Statistics for column %(col)s
       stream.close()
 
   def _SaveCSV(self, stream, sep):
+    file_opened=False
     if not hasattr(stream, 'write'):
-      stream=open(stream, 'wb')
+      stream=open(stream, 'w')
+      file_opened=True
 
     writer=csv.writer(stream, delimiter=sep)
     writer.writerow(['%s' % n for n in self.col_names])
@@ -2284,13 +2324,18 @@ Statistics for column %(col)s
         if c==None:
           row[i]='NA'
       writer.writerow(row)
+    if file_opened:
+      stream.close()
+
 
   def _SaveOST(self, stream):
+    file_opened=False
     if hasattr(stream, 'write'):
       writer=csv.writer(stream, delimiter=' ')
     else:
       stream=open(stream, 'w')
       writer=csv.writer(stream, delimiter=' ')
+      file_opened=True
     if self.comment:
       stream.write(''.join(['# %s\n' % l for l in self.comment.split('\n')]))
     writer.writerow(['%s[%s]' % t for t in zip(self.col_names, self.col_types)])
@@ -2300,17 +2345,22 @@ Statistics for column %(col)s
         if c==None:
           row[i]='NA'
       writer.writerow(row)
-  
-     
-  def GetNumpyMatrix(self, *args):
+    if file_opened:
+      stream.close()
+
+  def GetNumpyMatrixAsArray(self, *args):
     '''
-    Returns a numpy matrix containing the selected columns from the table as 
-    columns in the matrix.
+    Returns a numpy array containing the selected columns from the table as 
+    columns as a matrix.
 
     Only columns of type *int* or *float* are supported. *NA* values in the
     table will be converted to *None* values.
 
-    :param \*args: column names to include in numpy matrix
+    Originally the function used the numpy matrix class but that is going to be
+    deprecated in the future. Numpy itself suggests replacing numpy matrix by
+    numpy array.
+
+    :param \\*args: column names to include in numpy array
 
     :warning: The function depends on *numpy*
     '''
@@ -2325,16 +2375,40 @@ Statistics for column %(col)s
         idx = self.GetColIndex(arg)
         col_type = self.col_types[idx]
         if col_type!='int' and col_type!='float':
-          raise TypeError("Numpy matrix can only be generated from numeric column types")
+          raise TypeError("Numpy matrix can only be generated from numeric "+\
+                          "column types")
         idxs.append(idx)
-      m = np.matrix([list(self[i]) for i in idxs]) 
-      return m.T
+
+      a = np.array([list(self[i]) for i in idxs])
+      return a.T
     
     except ImportError:
       LogError("Function needs numpy, but I could not import it.")
       raise
-    
 
+  def GetNumpyMatrix(self, *args):
+    '''
+    *Caution*: Numpy is deprecating the use of the numpy matrix class.
+
+    Returns a numpy matrix containing the selected columns from the table as 
+    columns in the matrix.
+
+    Only columns of type *int* or *float* are supported. *NA* values in the
+    table will be converted to *None* values.
+
+    :param \\*args: column names to include in numpy matrix
+
+    :warning: The function depends on *numpy*
+    '''
+    LogWarning("table.GetNumpyMatrix is deprecated, please use "+
+               "table.GetNumpyMatrixAsArray instead")
+    try:
+      import numpy as np
+      m = self.GetNumpyMatrixAsArray(*args)
+      return np.matrix(m)
+    except ImportError:
+      LogError("Function needs numpy, but I could not import it.")
+      raise
 
   def GaussianSmooth(self, col, std=1.0, na_value=0.0, padding='reflect', c=0.0):
 
@@ -2413,7 +2487,7 @@ Statistics for column %(col)s
     :math:`p` are the prefactors to optimize :math:`(a,b,c,...)` and :math:`z`
     is the vector containing the result of equation :eq:`op1`.
     
-    The parameter ref_col equals to :math:`z` in both equations, and \*args
+    The parameter ref_col equals to :math:`z` in both equations, and \\*args
     are columns :math:`u`, :math:`v` and :math:`w` (or :math:`A` in :eq:`op2`).
     All columns must be specified by their names.
     
@@ -2425,7 +2499,7 @@ Statistics for column %(col)s
     
     The function returns a list containing the prefactors
     :math:`a, b, c, ...` in the correct order (i.e. same as columns were
-    specified in \*args).
+    specified in \\*args).
     
     Weighting:
     If the kwarg weights="columX" is specified, the equations are weighted by
@@ -2455,20 +2529,20 @@ Statistics for column %(col)s
       if len(args)==0:
         raise RuntimeError("At least one column must be specified.")
       
-      b = self.GetNumpyMatrix(ref_col)
-      a = self.GetNumpyMatrix(*args)
-      
+      b = self.GetNumpyMatrixAsArray(ref_col)
+      a = self.GetNumpyMatrixAsArray(*args)
+
       if len(kwargs)!=0:
-        if kwargs.has_key('weights'):
-          w = self.GetNumpyMatrix(kwargs['weights'])
+        if 'weights' in kwargs:
+          w = self.GetNumpyMatrixAsArray(kwargs['weights'])
           b = np.multiply(b,w)
           a = np.multiply(a,w)
           
         else:
           raise RuntimeError("specified unrecognized kwargs, use weights as key")
       
-      k = (a.T*a).I*a.T*b
-      return list(np.array(k.T).reshape(-1))
+      k = np.linalg.inv(a.T@a)@a.T@b
+      return list(k.T.reshape(-1))
     
     except ImportError:
       LogError("Function needs numpy, but I could not import it.")
@@ -3048,7 +3122,7 @@ Statistics for column %(col)s
     num_rows = len(tab.rows)
     for i in range(0,num_rows):
       row = tab.rows[i]
-      data = dict(zip(tab.col_names,row))
+      data = dict(list(zip(tab.col_names,row)))
       self.AddRow(data, overwrite)
     
 
@@ -3133,7 +3207,7 @@ def Merge(table1, table2, by, only_matching=False):
       raise ValueError('duplicate key "%s" in second table' % (str(key)))
     common2[key]=row
   new_tab=Table(table1.col_names+col_names, table1.col_types+col_types)
-  for k, v in common1.iteritems():
+  for k, v in common1.items():
     row=v+[None for i in range(len(table2.col_names)-len(common2_indices))]
     matched=False
     if k in common2:
@@ -3146,7 +3220,7 @@ def Merge(table1, table2, by, only_matching=False):
     new_tab.AddRow(row)
   if only_matching:
     return new_tab
-  for k, v in common2.iteritems():
+  for k, v in common2.items():
     if not k in common1:
       v2=[v[i] for i in new_index]
       row=[None for i in range(len(table1.col_names))]+v2
@@ -3155,3 +3229,5 @@ def Merge(table1, table2, by, only_matching=False):
       new_tab.AddRow(row)
   return new_tab
 
+
+#  LocalWords:  numpy Numpy

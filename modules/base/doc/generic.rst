@@ -54,7 +54,7 @@ already exists, it will be overwritten. To check if it exists, use:
 .. code-block:: python
   
   exists=atom.HasProp("myfloatprop")
-  print exists
+  print(exists)
     
 To access the value of a generic property, we first check if the property exists
 and then access it, using the method suitable for the data type of the property. 
@@ -65,7 +65,7 @@ level:
   
   for atom in entity.GetAtomList(): 
     if atom.HasProp("myfloatprop"):
-      print atom.GetFloatProp("myfloatprop")
+      print(atom.GetFloatProp("myfloatprop"))
         
 When trying to access a property that has not been set, or one that has been 
 set, but at a different level, an error is thrown. The same is true when trying 
@@ -75,13 +75,13 @@ to access a property of a different data type, e.g.:
 
   # all of the following lines will throw errors
   # error because the property does not exist 
-  print atom.GetFloatProp("unknownprop")
+  print(atom.GetFloatProp("unknownprop"))
   
   # error because the property was set at another level
-  print entity.GetFloatProp("myfloatprop")
+  print(entity.GetFloatProp("myfloatprop"))
   
   # error because the data type of the property is different
-  print atom.GetStringProp("myfloatprop")
+  print(atom.GetStringProp("myfloatprop"))
       
 
 Use of Generic Properties in Queries

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2015 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -388,7 +388,6 @@ void export_Topology()
     .def("AddExclusion",&ost::mol::mm::Topology::AddExclusion,(arg("idx_one"),arg("idx_two")))
     .def("AddPositionConstraint",&ost::mol::mm::Topology::AddPositionConstraint,(arg("idx")))
     .def("ResetPositionConstraints",&ost::mol::mm::Topology::ResetPositionConstraints)
-    .def("SetDensity",&ost::mol::mm::Topology::SetDensity,(arg("density"),arg("resolution"),arg("scaling")=1.0))
     .def("ResetExclusions",&ost::mol::mm::Topology::ResetExclusions)
     .def("AddHarmonicPositionRestraint",&ost::mol::mm::Topology::AddHarmonicPositionRestraint,(arg("idx"),arg("ref_position"),arg("k"),arg("x_scale")=1.0,arg("y_scale")=1.0,arg("z_scale")=1.0))
     .def("AddHarmonicDistanceRestraint",&ost::mol::mm::Topology::AddHarmonicDistanceRestraint,(arg("idx_one"),arg("idx_two"),arg("length"),arg("force_constant")))
@@ -439,9 +438,6 @@ void export_Topology()
     .def("GetHarmonicDistanceRestraintParameters",&WrapGetHarmonicDistanceRestraintParam,(arg("interaction_idx")))
     .def("GetFGMDHBondDonorParameters",&WrapGetFGMDHBondDonorParam,(arg("interaction_idx")))
     .def("GetFGMDHBondAcceptorParameters",&WrapGetFGMDHBondAcceptorParam,(arg("interaction_idx")))
-    .def("GetDensity",&ost::mol::mm::Topology::GetDensity)
-    .def("GetDensityResolution",&ost::mol::mm::Topology::GetDensityResolution)
-    .def("GetDensityScaling",&ost::mol::mm::Topology::GetDensityResolution)
 
     //setter functions for interaction parameters
     .def("SetHarmonicBondParameters",&ost::mol::mm::Topology::SetHarmonicBondParameters,(arg("interaction_idx"),arg("bond_length"),arg("force_constant")))

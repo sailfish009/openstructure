@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -23,10 +23,10 @@ import ost
 import os
 from datetime import datetime
 from PyQt5 import QtCore, QtWidgets, QtGui
-from scene_selection_helper import SelHelper
-from preset_list_model import PresetListModel
-from preset_editor_widget import PresetEditor
-from preset import Preset
+from .scene_selection_helper import SelHelper
+from .preset_list_model import PresetListModel
+from .preset_editor_widget import PresetEditor
+from .preset import Preset
 
 class PresetWidget(QtWidgets.QWidget):
   PRESET_XML_FILE = os.path.join(ost.GetSharedDataPath(), "scene", "presets.xml")

@@ -106,7 +106,7 @@ class TestAccessibility(unittest.TestCase):
       acc_naccess = AccessibilitiesRaw(ent_three, use_naccess=True)
       self.assertTrue(Compare(acc_classic, acc_naccess))
     except:
-      print "Could not find NACCESS, could not compare Accessiblity function..."
+      print("Could not find NACCESS, could not compare Accessiblity function...")
 
 
   def testAccDSSP(self):
@@ -117,7 +117,7 @@ class TestAccessibility(unittest.TestCase):
       dssp_path = settings.Locate(['dsspcmbi', 'dssp', 'mkdssp'],
                                   env_name='DSSP_EXECUTABLE')
     except:
-      print "Could not find DSSP, could not compare Accessibility function..."
+      print("Could not find DSSP, could not compare Accessibility function...")
       return
 
     # we assume oligo mode to be working as it is tested in 

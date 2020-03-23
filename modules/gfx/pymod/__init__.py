@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -16,8 +16,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
-from _ost_gfx import *
-from py_gfx_obj import PyGfxObj
+from ._ost_gfx import *
+from .py_gfx_obj import PyGfxObj
+import functools
 
 WHITE=RGB(1.0,1.0,1.0)
 BLACK=RGB(0.0,0.0,0.0)
@@ -94,8 +95,10 @@ def FitToScreen(gfx_ent, width=None, height=None, margin=0.05):
         max_proj=max(proj, max_proj)
       lengths.append(max_proj-min_proj)
     def cmp_x(rhs, lhs):
-      return cmp(lhs[1], rhs[1])
-    sorted_axes=sorted(zip(rows, lengths), cmp_x)
+      # replaced cmp when porting to Python 3
+      #return cmp(lhs[1], rhs[1])
+      return (lhs[1] > rhs[1]) - (lhs[1] < rhs[1])
+    sorted_axes=sorted(zip(rows, lengths), key=functools.cmp_to_key(cmp_x))
     return [r*l for r,l in sorted_axes]
   scene=Scene()
   if not isinstance(gfx_ent, Entity):
@@ -282,7 +285,7 @@ def _entity_reset(self,*args,**kwargs):
     else:
       raise TypeError("Reset: unknown option of type '%s' given"%type(a))
 
-  for key,val in kwargs.iteritems():
+  for key,val in kwargs.items():
     if key=="entity":
       if not isinstance(val,mol.EntityHandle):
         raise TypeError("Reset: expected mol.EntityHandle for 'entity' option")

@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2020 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -21,7 +21,7 @@
 from ost import gui
 from ost import gfx
 from PyQt5 import QtCore, QtWidgets
-from render_mode_widget import RenderModeWidget
+from .render_mode_widget import RenderModeWidget
 
 #CPK Render Options
 class CPKWidget(RenderModeWidget):
