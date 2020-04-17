@@ -232,7 +232,7 @@ protected:
 	const MMCifInfoStructRefs& GetStructRefs() const { return struct_refs_; }
   /// \brief convert the seqres data item to canonical form. 
   /// 
-  /// The seqres sequence lists non-standard residues in paranthesis. For 
+  /// The seqres sequence lists non-standard residues in parenthesis. For 
   /// proper handling of our sequence classes, these need to be converted to 
   /// one-letter-codes. Ideally, we would use the canonical SEQRES. This is 
   /// not possible, however, since the PDB assigns multiple one letter codes 

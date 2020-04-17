@@ -30,6 +30,7 @@
 #include <ost/mol/alg/consistency_checks.hh>
 #include <ost/mol/alg/pdbize.hh>
 #include <ost/mol/alg/contact_overlap.hh>
+#include <ost/mol/alg/construct_cbeta.hh>
 #include <ost/export_helper/pair_to_tuple_conv.hh>
 #include <ost/export_helper/vec_to_list_conv.hh>
 
@@ -294,6 +295,15 @@ void print_lddt_per_residue_stats_wrapper(list& scores, bool structural_checks, 
  
  return mol::alg::PrintlDDTPerResidueStats(scores_vector, structural_checks, cutoffs_size);
 }
+
+geom::Vec3 cbeta_vectors(const geom::Vec3& n_pos, const geom::Vec3& ca_pos, 
+                         const geom::Vec3& c_pos, Real l) {
+  return mol::alg::CBetaPosition(n_pos, ca_pos, c_pos, l);
+}
+
+geom::Vec3 cbeta_residue(const ost::mol::ResidueHandle& r, Real l) {
+  return mol::alg::CBetaPosition(r, l);
+}
   
 }
 
@@ -529,4 +539,10 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("DRMSD",&mol::alg::DRMSD,(arg("view"),arg("distance_list"),
                                 arg("cap_distance")=5.0,arg("sequence_separation")=0));
 
+  def("CBetaPosition", &cbeta_vectors, (arg("n_pos"), arg("ca_pos"), 
+                                        arg("c_pos"), arg("l")=1.5));
+  def("CBetaPosition", &cbeta_residue, (arg("r"), arg("l") = 1.5));
+
+  def("ConstructCBetas", &mol::alg::ConstructCBetas, (arg("ent"), 
+                                                      arg("include_gly")=false));
 }
