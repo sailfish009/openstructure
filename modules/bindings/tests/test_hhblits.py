@@ -132,8 +132,8 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
-        a3m = self.hh.BuildQueryMSA('testfiles/hhblitsdb/hhblitsdb')
-        self.assertTrue(filecmp.cmp(a3m, "testfiles/testali.a3m"))
+        a3m = self.hh.BuildQueryMSA('testfiles/hhblitsdb/unittestdb')
+        self.assertTrue(filecmp.cmp(a3m, "testfiles/testali_two.a3m"))
 
     def testA3mToProfileFileName(self):
         # test A3mToProfile to work with a given hhmake_file name
@@ -215,7 +215,7 @@ class TestHHblitsBindings(unittest.TestCase):
         os.remove(self.tmpfile)
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
                                  cs_file=self.tmpfile, options={'-alphabet' :
-                                                os.path.join(self.hh.hhlib_dir,
+                                                os.path.join(self.hhroot,
                                                              'data',
                                                              'cs219.lib')})
         self.assertTrue(filecmp.cmp(csfile, 'testfiles/test.seq219'))
@@ -230,7 +230,7 @@ class TestHHblitsBindings(unittest.TestCase):
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
                                  options={'-alphabet' :
-                                          os.path.join(self.hh.hhlib_dir,
+                                          os.path.join(self.hhroot,
                                                        'data',
                                                        'cs219.lib')})
         self.assertTrue(filecmp.cmp(csfile, 'testfiles/test.seq219'))
@@ -247,7 +247,7 @@ class TestHHblitsBindings(unittest.TestCase):
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
                                  cs_file='testfiles/test.seq219',
                                  options={'-alphabet' :
-                                          os.path.join(self.hh.hhlib_dir,
+                                          os.path.join(self.hhroot,
                                                        'data',
                                                        'cs219.lib')})
         self.assertTrue(filecmp.cmp(csfile, 'testfiles/test.seq219'))
@@ -261,11 +261,11 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         search_file = self.hh.Search("testfiles/testali.a3m",
-                                     'testfiles/hhblitsdb/hhblitsdb')
+                                     'testfiles/hhblitsdb/unittestdb')
 
         with open(search_file) as tfh:
           tlst = tfh.readlines()
-        with open("testfiles/test.hhr") as efh:
+        with open("testfiles/test_two.hhr") as efh:
           elst = efh.readlines()
 
         self.assertEqual(len(elst), len(tlst))
@@ -274,16 +274,14 @@ class TestHHblitsBindings(unittest.TestCase):
                 self.assertEqual(elst[i], tlst[i])
 
     def testSearchNotWorking(self):
-        # successful search
         query_seq = seq.CreateSequence('Test', 'VLSPADKTNVKAAWGKVGAHAGEYGAEA'+
                                        'LERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVAD'+
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
-        search_file = self.hh.Search("doesnotexist.a3m",
-                                     'testfiles/hhblitsdb/hhblitsdb')
-        self.assertEqual(search_file, None)
+        with self.assertRaises(RuntimeError) as rte:
+            self.hh.Search("doesnotexist.a3m", 'testfiles/hhblitsdb/unittestdb')
 
     def testParseHHMWorking(self):
         # get info from an HHM file
