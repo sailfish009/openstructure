@@ -319,11 +319,8 @@ def ParseA3M(a3m_file):
             state = 'ssconf'
             continue
         elif line[0] == '>':
-            if state == 'ssconf' or state == 'msa':
-                msa_seq.append('')
-                msa_head.append(line[1:].rstrip())
-            else:
-                raise IOError('The A3M file is missing the "ss_conf" section')
+            msa_seq.append('')
+            msa_head.append(line[1:].rstrip())
             state = 'msa'
             continue
 
