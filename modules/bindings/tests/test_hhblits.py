@@ -133,6 +133,13 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         a3m = self.hh.BuildQueryMSA('testfiles/hhblitsdb/unittestdb')
+  
+        ost.LogError("Im the bad guy")
+        with open(a3m) as fh:
+            for line in fh.readlines():
+                ost.LogError(line)
+        ost.LogError("Bad guy over n out")
+
         self.assertTrue(filecmp.cmp(a3m, "testfiles/testali_two.a3m"))
 
     def testA3mToProfileFileName(self):
