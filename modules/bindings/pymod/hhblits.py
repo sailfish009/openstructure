@@ -302,6 +302,7 @@ def ParseA3M(a3m_file):
     
     :return: Dictionary containing "ss_pred" (:class:`list`), "ss_conf"
              (:class:`list`) and "msa" (:class:`~ost.seq.AlignmentHandle`).
+             If not available, "ss_pred" and "ss_conf" entries are set to None.
     '''
     profile_dict = dict()
     state = 'NONE'
@@ -331,12 +332,16 @@ def ParseA3M(a3m_file):
         elif state == 'msa':
             msa_seq[len(msa_seq)-1] += line.rstrip()
 
-    profile_dict['ss_pred'] = list()
-    profile_dict['ss_conf'] = list()
-    for i in range(0, len(pred_seq_txt)):
-        profile_dict['ss_pred'].append(pred_seq_txt[i])
-        profile_dict['ss_conf'].append(int(conf_seq_txt[i]))
-    
+    if len(pred_seq_txt) > 0:
+        profile_dict['ss_pred'] = list()
+        profile_dict['ss_conf'] = list()
+        for i in range(0, len(pred_seq_txt)):
+            profile_dict['ss_pred'].append(pred_seq_txt[i])
+            profile_dict['ss_conf'].append(int(conf_seq_txt[i]))
+    else:
+        profile_dict['ss_pred'] = None
+        profile_dict['ss_conf'] = None    
+
     # post processing
     # MSA
     profile_dict['msa'] = None
@@ -374,6 +379,7 @@ def ParseHHM(profile):
     :return: Dictionary containing "ss_pred" (:class:`list`), "ss_conf"
              (:class:`list`), "msa" (:class:`~ost.seq.AlignmentHandle`) and
              "consensus" (:class:`~ost.seq.SequenceHandle`).
+             If not available, "ss_pred" and "ss_conf" entries are set to None.
     '''
     profile_dict = dict()
     state = 'NONE'
@@ -416,11 +422,15 @@ def ParseHHM(profile):
         elif state == 'consensus':
             consensus_txt += line.rstrip()
 
-    profile_dict['ss_pred'] = list()
-    profile_dict['ss_conf'] = list()
-    for i in range(0, len(pred_seq_txt)):
-        profile_dict['ss_pred'].append(pred_seq_txt[i])
-        profile_dict['ss_conf'].append(int(conf_seq_txt[i]))
+    if len(pred_seq_txt) > 0:
+        profile_dict['ss_pred'] = list()
+        profile_dict['ss_conf'] = list()
+        for i in range(0, len(pred_seq_txt)):
+            profile_dict['ss_pred'].append(pred_seq_txt[i])
+            profile_dict['ss_conf'].append(int(conf_seq_txt[i]))
+    else:
+        profile_dict['ss_pred'] = None
+        profile_dict['ss_conf'] = None
 
     # post processing
     # MSA
