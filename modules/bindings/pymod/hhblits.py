@@ -596,9 +596,9 @@ class HHblits:
             return a3m_file
 
         # add secondary structure annotation
-        addss_cmd = "%s %s" % (os.path.join(self.hhsuite_root, 
-                                            'scripts/addss.pl'),
-                               a3m_file)
+        addss_cmd = "perl %s %s" % (os.path.join(self.hhsuite_root, 
+                                                 'scripts/addss.pl'), 
+                                    a3m_file)
         env = dict(os.environ)
         env.update({'PERL5LIB' : os.path.join(self.hhsuite_root, 'scripts'),
                     'HHLIB' : os.path.join(self.hhsuite_root),
