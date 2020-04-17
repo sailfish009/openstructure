@@ -510,7 +510,7 @@ class HHblits:
                 self.working_dir = tmp_dir.dirname
                 self.filename = tmp_dir.files[0]
 
-    def BuildQueryMSA(self, nrdb, options={}, a3m_file=None, assign_ss=False):
+    def BuildQueryMSA(self, nrdb, options={}, a3m_file=None, assign_ss=True):
         """Builds the MSA for the query sequence.
 
         This function directly uses hhblits of hhtools. While in theory it would
