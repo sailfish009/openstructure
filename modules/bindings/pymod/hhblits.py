@@ -613,14 +613,14 @@ class HHblits:
         lines = sout.decode().splitlines()
         for line in lines:
             ost.LogVerbose(line.strip())
-            if 'error' in line.lower():
+            if 'error' in line.lower() or 'bad interpreter' in line.lower():
                 raise RuntimeError('Predicting secondary structure for MSA '+
                                    '(%s) failed, on command: %s' % (a3m_file, line))
 
         lines = serr.decode().splitlines()
         for line in lines:
             ost.LogError(line.strip())
-            if 'error' in line.lower():
+            if 'error' in line.lower() or 'bad interpreter' in line.lower():
                 raise RuntimeError('Predicting secondary structure for MSA '+
                                    '(%s) failed, on command: %s' % (a3m_file, line))
 
