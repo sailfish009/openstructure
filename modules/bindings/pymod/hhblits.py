@@ -611,7 +611,7 @@ class HHblits:
         sout, serr = job.communicate()
 
         lines = sout.decode().splitlines()
-        ost.LogError("SecStruct stdout:")
+        ost.LogError("SecStruct stdout :")
         for line in lines:
             ost.LogError(line.strip())
             ost.LogVerbose(line.strip())
