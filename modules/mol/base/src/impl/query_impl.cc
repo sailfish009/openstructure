@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -797,7 +797,7 @@ Node* QueryImpl::ParseParenSubExpr(QueryLexer& lexer) {
     QueryToken end_paren=lexer.CurrentToken();
     if (end_paren.GetType()!=tok::RightParen) {
       delete n;      
-      error_desc_.msg="unmatched paranthesis in query string";
+      error_desc_.msg="unmatched parenthesis in query string";
       error_desc_.range=paren_token.GetRange();
       return NULL;
     } else {

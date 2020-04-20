@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 
 # ARGUMENTS
 ###########
-ARG OPENSTRUCTURE_VERSION="python3_port"
+ARG OPENSTRUCTURE_VERSION="2.0.0"
 ARG SRC_FOLDER="/usr/local/src"
 ARG CPUS_FOR_MAKE=2
 ARG MSMS_VERSION="2.6.1"
@@ -84,7 +84,9 @@ RUN cd ${SRC_FOLDER} && \
              -DOPEN_MM_INCLUDE_DIR=$OPENMM_INCLUDE_PATH \
              -DOPEN_MM_PLUGIN_DIR=$OPENMM_LIB_PATH/plugins \
              -DENABLE_GFX=ON \
-             -DENABLE_GUI=ON && \
+             -DENABLE_GUI=ON \
+             -DCMAKE_C_FLAGS="-isystem /usr/include/boost/ -isystem ${OPENMM_INCLUDE_PATH}/include" \
+             -DCMAKE_CXX_FLAGS="-isystem /usr/include/boost/ -isystem ${OPENMM_INCLUDE_PATH}/include" && \
     make -j ${CPUS_FOR_MAKE} && \
     wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz && \
     stage/bin/chemdict_tool create components.cif.gz compounds.chemlib pdb && stage/bin/chemdict_tool update ../modules/conop/data/charmm.cif compounds.chemlib charmm && \

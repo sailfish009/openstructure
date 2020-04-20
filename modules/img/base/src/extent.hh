@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -47,7 +47,7 @@ namespace ost { namespace img {
 struct DLLEXPORT InvalidExtentException: public Error
 {
   InvalidExtentException(const String& m= String("") ):
-    Error(String("an invalid extent occured ("+m+String(")")))
+    Error(String("an invalid extent occurred ("+m+String(")")))
   {}
 };
 

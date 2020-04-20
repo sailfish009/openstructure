@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -149,6 +149,9 @@ public:
 
 
 // specialization for source!=target vax conversion integer types
+
+// NOTE: the VAX conversion is based on the libvaxdata code by L. M. Baker
+// -> a copy of Baker's code was included until OST 1.11 and removed as unused
 
 // byte swapping for int types if local is big endian
 template<class VALUETYPE>

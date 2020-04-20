@@ -113,9 +113,9 @@ toolchain = {'name': 'goolf', 'version': '1.4.10'}
 
 sources = ['$TARBALL_NAME']
 
-builddependencies = [('CMake', '2.8.12')]
+builddependencies = [('CMake', '3.10.2')]
 
-pythonversion = "2.7.5"
+pythonversion = "3.6.6"
 pythonshortversion = ".".join(pythonversion.split(".")[:-1])
 
 dependencies = [
@@ -149,7 +149,7 @@ sanity_check_paths = {
     'dirs': ["include/ost"],
 }
 
-# add \$INSTALLDIR/lib64/python2.7/site-packages to PYTHONPATH
+# add \$INSTALLDIR/lib64/python3.6/site-packages to PYTHONPATH
 modextrapaths = {
     'PYTHONPATH': 'lib64/python%s/site-packages' % (pythonshortversion)
 }

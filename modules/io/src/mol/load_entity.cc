@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -55,7 +55,7 @@ void Import(mol::EntityHandle& eh, const String& filename, const String& format)
 
 mol::EntityHandle LoadEntity(const String& filename, const String& format)
 {
-  LOG_DEBUG("creating emtpy entity");
+  LOG_DEBUG("creating empty entity");
   mol::EntityHandle eh=mol::CreateEntity();
   mol::XCSEditor xcs_lock=eh.EditXCS(mol::BUFFERED_EDIT);
   Import(eh, filename, format);

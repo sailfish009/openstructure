@@ -23,28 +23,32 @@ namespace po=boost::program_options;
 namespace fs=boost::filesystem;
 
 const char* USAGE=
-"this is molck - the molecule checker\n"
-"usage: molck [options] file1.pdb [file2.pdb [...]]\n"
-"options \n"
-"  --complib=path    location of the compound library file. If not provided, the \n"
-"    following locations are searched in this order: \n" 
-"    1. Working directory, 2. OpenStructure standard library location (if the \n"
-"    executable is part of a standard OpenStructure installation) \n"
-"  --rm=<a>,<b>      remove atoms and residues matching some criteria \n"
-"    zeroocc - Remove atoms with zero occupancy \n"
-"    hyd - Remove hydrogen atoms \n"
-"    oxt - Remove terminal oxygens \n"
-"    nonstd - Remove all residues not one of the 20 standard amino acids \n"
-"    unk - Remove unknown and atoms not following the nomenclature\n"
-"  --fix-ele         clean up element column\n"
-"  --stdout          write cleaned file(s) to stdout \n"
-"  --out=filename    write cleaned file(s) to disk. % characters in the filename are \n"
-"    replaced with the basename of the input file without extension. \n"
-"    Default: %-molcked.pdb \n"
-"  --color=auto|on|off \n"
-"    whether output should be colored\n"
-"  --map-nonstd   maps modified residues back to the parent amino acid, for example\n"
-"    MSE -> MET, SEP -> SER.\n";
+"This is molck - the molecule checker\n"
+"Usage: molck [options] file1.pdb [file2.pdb [...]]\n"
+"Options\n"
+"  --complib=path       Location of the compound library file. If not provided,\n"
+"                       the following locations are searched in this order:\n" 
+"                       1. Working directory,\n"
+"                       2. OpenStructure standard library location (if the\n"
+"                          executable is part of a standard OpenStructure\n"
+"                          installation)\n"
+"  --rm=<a>,<b>         Remove atoms and residues matching some criteria:\n"
+"                       - zeroocc - Remove atoms with zero occupancy\n"
+"                       - hyd - Remove hydrogen atoms\n"
+"                       - oxt - Remove terminal oxygens\n"
+"                       - nonstd - Remove all residues not one of the\n"
+"                                  20 standard amino acids\n"
+"                       - unk - Remove unknown atoms not following\n"
+"                               the nomenclature\n"
+"                       Default: hyd\n"
+"  --fix-ele            Clean up element column\n"
+"  --stdout             Write cleaned file(s) to stdout\n"
+"  --out=filename       Write cleaned file(s) to disk. % characters in the\n"
+"                       filename are replaced with the basename of the input\n"
+"                       file without extension. Default: %-molcked.pdb\n"
+"  --color=auto|on|off  Whether output should be colored. Delault: auto\n"
+"  --map-nonstd         Maps modified residues back to the parent amino acid,\n"
+"                       for example: MSE -> MET, SEP -> SER.\n";
 
 void usage()
 {
@@ -56,15 +60,15 @@ EntityHandle load_x(const String& file, const IOProfile& profile)
 {
   try {
     EntityHandle ent = CreateEntity();
-    if(file.compare(file.length() - 6, 6, ".mmcif") == 0 ||
-       file.compare(file.length() - 4, 4, ".cif") == 0){
-      MMCifReader reader(file,ent,profile);
+    const size_t fl = file.length();
+    if (   (fl > 6 && file.compare(fl - 6, 6, ".mmcif") == 0)
+        || (fl > 4 && file.compare(fl - 4, 4, ".cif") == 0)) {
+      MMCifReader reader(file, ent, profile);
       reader.Parse();
       return ent;
-    }
-    //if its not mmcif, we assume the file to be in pdb format without even
-    //looking at the filename
-    else{
+    } else {
+      // if its not mmcif, we assume the file to be in pdb format without even
+      // looking at the filename
       PDBReader reader(file, profile);
       if (reader.HasNext()) {
         reader.Import(ent);
@@ -139,8 +143,10 @@ int main(int argc, char *argv[])
     usage();
   }
   IOProfile prof;
-  prof.fault_tolerant=true;
-  ost::mol::alg::MolckSettings settings;
+  prof.fault_tolerant = true;
+  // set all settings to false by default (set to true if args given)
+  ost::mol::alg::MolckSettings settings(false, false, false, false, false,
+                                        false, false, false);
   String rm;
   String color;
 
@@ -152,15 +158,15 @@ int main(int argc, char *argv[])
   po::options_description desc("Options");
   desc.add_options()
     ("rm", po::value<String>(&rm)->default_value("hyd"), "atoms to be removed")
-    ("color", po::value<String>(&color)->default_value("auto"), 
+    ("color", po::value<String>(&color)->default_value("auto"),
      "whether the output should be colored.")
     ("files", po::value< std::vector<String> >(), "input file(s)")
     ("stdout", "write cleaned file(s) to stdout")
-    ("out,o", po::value<String>(&output_blueprint_string)->default_value("%-molcked.pdb"), 
+    ("out,o", po::value<String>(&output_blueprint_string)->default_value("%-molcked.pdb"),
      "write cleaned file to output using blueprint to determine path")
     ("map-nonstd", "map non standard residues back to standard ones (e.g.: MSE->MET,SEP->SER,etc.)")
-    ("fix-ele", "insert element") 
-    ("complib", po::value<String>(&custom_path)->default_value(""),"location of the compound library file")       
+    ("fix-ele", "insert element")
+    ("complib", po::value<String>(&custom_path)->default_value(""),"location of the compound library file")
   ;
   po::positional_options_description p;
   p.add("files", -1);

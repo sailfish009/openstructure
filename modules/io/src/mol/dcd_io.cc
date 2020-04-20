@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -267,7 +267,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
   bool swap_flag=false, ucell_flag=false, gap_flag=false;
   read_dcd_header(istream, header, swap_flag, ucell_flag, gap_flag, detect_swap, byte_swap);
   if(alist.size() != static_cast<size_t>(header.t_atom_count)) {
-    LOG_ERROR("LoadCHARMMTraj: atom count missmatch: " << alist.size() 
+    LOG_ERROR("LoadCHARMMTraj: atom count mismatch: " << alist.size() 
                << " in coordinate file, " << header.t_atom_count 
                << " in each traj frame");
     throw(IOException("invalid trajectory"));

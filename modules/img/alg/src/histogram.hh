@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -36,7 +36,7 @@ namespace ost { namespace img { namespace alg {
 class DLLEXPORT HistogramError: public Error {
 public:
     HistogramError(const String& s):
-    Error(String("A histogram error occured: ") + s)
+    Error(String("A histogram error occurred: ") + s)
   {}
 };
 

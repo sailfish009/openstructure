@@ -2,11 +2,19 @@
 # Author: Marco Biasini
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
+
+# Set CMake policies
+# Behaviour of target_link_libraries, always link by full path. CMP0060 can
+# disable this to stay compatible with old projects. We want the new behaviour
+# since before we needed to provide the full path ourselves, that is: we
+# manually forced CMake to the new scheme.
+cmake_policy(SET CMP0060 NEW)
+
 project(OpenStructure CXX C)
 set (CMAKE_EXPORT_COMPILE_COMMANDS 1)
-set (OST_VERSION_MAJOR 1)
-set (OST_VERSION_MINOR 10)
+set (OST_VERSION_MAJOR 2)
+set (OST_VERSION_MINOR 0)
 set (OST_VERSION_PATCH 0)
 set (OST_VERSION_STRING ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR}.${OST_VERSION_PATCH} )
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
@@ -23,7 +31,9 @@ option(PROFILE "whether to compile with profiling support"
 option(ENABLE_GUI "whether the graphical user interface should be enabled"
        ON)
 option(ENABLE_GFX "whether graphics support should be enabled"
-      ON)
+       ON)
+option(OPENGLPREFERENCE_LEGACY "whether to use the OpenGL Legacy GL implementation"
+       OFF)
 option(ENABLE_IMG "whether the image processing module should be compiled"
        ON)
 option(ENABLE_INFO "whether openstructure should be compiled with support for the info library"
@@ -213,6 +223,11 @@ else()
   endif()
 endif()
 if (ENABLE_GFX)
+  if (OPENGLPREFERENCE_LEGACY)
+    set(OpenGL_GL_PREFERENCE LEGACY)
+  else()
+    set(OpenGL_GL_PREFERENCE GLVND)
+  endif(OPENGLPREFERENCE_LEGACY)
   find_package(OpenGL REQUIRED)
 endif()
 
@@ -262,8 +277,8 @@ if (ENABLE_GUI)
   find_package(Qt5Widgets REQUIRED)
   find_package(Qt5OpenGL REQUIRED)
   set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Gui Qt5::Widgets Qt5::Core)
-  ost_find_python_module(sip)
   ost_find_python_module(PyQt5)
+  ost_find_python_module_alt("PyQt5.sip;sip")
 endif()
 
 if (ENABLE_SPNAV)
@@ -288,6 +303,13 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     set (_HIDDEN_VIS OFF)
   endif(HIDDEN_VISIBILITY)
 endif()
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-warning-option")
+endif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-warning-option")
+endif(CMAKE_C_COMPILER_ID MATCHES "Clang")
 
 # basic environment
 include_directories(${Boost_INCLUDE_DIRS} 
@@ -362,3 +384,5 @@ message(STATUS
         "   Debian/Ubuntu directory layout (-DUBUNTU_LAYOUT) : ${_UBUNTU_LAYOUT}"
         ${HIDDEN_VIS_MSG})
 
+
+# LocalWords:  CMake CMP

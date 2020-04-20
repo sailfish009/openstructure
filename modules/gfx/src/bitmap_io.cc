@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -152,7 +152,7 @@ Bitmap import_png(const String& filename)
   channels=png_get_channels(png_ptr,info_ptr);
 
   if(channels<1 || channels>4) {
-    LOG_ERROR("error importing bitmap: " << filename << " has " << channels << " channels, excpected 1-4");
+    LOG_ERROR("error importing bitmap: " << filename << " has " << channels << " channels, expected 1-4");
     return bm;
   }
   

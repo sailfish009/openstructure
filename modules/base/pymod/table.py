@@ -835,7 +835,7 @@ Statistics for column %(col)s
 
     Operands have to be the name of a column or an expression that can be
     parsed to float, int, bool or string.
-    Valid operators are: and, or, !=, !, <=, >=, ==, =, <, >, +, -, \*, /
+    Valid operators are: and, or, !=, !, <=, >=, ==, =, <, >, +, -, \\*, /
     
     .. code-block:: python
     
@@ -1137,7 +1137,7 @@ Statistics for column %(col)s
     :param z: column name for third dimension
     :type z: :class:`str`
 
-    :param style: symbol style (e.g. *.*, *-*, *x*, *o*, *+*, *\**). For a
+    :param style: symbol style (e.g. *.*, *-*, *x*, *o*, *+*, *\\**). For a
                   complete list check (`matplotlib docu <http://matplotlib.sourceforge.net/api/pyplot_api.html#matplotlib.pyplot.plot>`__).
     :type style: :class:`str`
 
@@ -1203,7 +1203,7 @@ Statistics for column %(col)s
                        'linear')
     :type z_interpol: :class:`str`
 
-    :param \*\*kwargs: additional arguments passed to matplotlib
+    :param \\*\\*kwargs: additional arguments passed to matplotlib
     
     :returns: the ``matplotlib.pyplot`` module 
 
@@ -2360,7 +2360,7 @@ Statistics for column %(col)s
     deprecated in the future. Numpy itself suggests replacing numpy matrix by
     numpy array.
 
-    :param \*args: column names to include in numpy array
+    :param \\*args: column names to include in numpy array
 
     :warning: The function depends on *numpy*
     '''
@@ -2396,7 +2396,7 @@ Statistics for column %(col)s
     Only columns of type *int* or *float* are supported. *NA* values in the
     table will be converted to *None* values.
 
-    :param \*args: column names to include in numpy matrix
+    :param \\*args: column names to include in numpy matrix
 
     :warning: The function depends on *numpy*
     '''
@@ -2487,7 +2487,7 @@ Statistics for column %(col)s
     :math:`p` are the prefactors to optimize :math:`(a,b,c,...)` and :math:`z`
     is the vector containing the result of equation :eq:`op1`.
     
-    The parameter ref_col equals to :math:`z` in both equations, and \*args
+    The parameter ref_col equals to :math:`z` in both equations, and \\*args
     are columns :math:`u`, :math:`v` and :math:`w` (or :math:`A` in :eq:`op2`).
     All columns must be specified by their names.
     
@@ -2499,7 +2499,7 @@ Statistics for column %(col)s
     
     The function returns a list containing the prefactors
     :math:`a, b, c, ...` in the correct order (i.e. same as columns were
-    specified in \*args).
+    specified in \\*args).
     
     Weighting:
     If the kwarg weights="columX" is specified, the equations are weighted by

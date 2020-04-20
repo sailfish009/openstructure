@@ -522,7 +522,7 @@ def _CheckConsistency(alignments, log_error):
     for alignment in alignments:
         ref_chain = Renumber(alignment.GetSequence(0)).CreateFullView()
         mdl_chain = Renumber(alignment.GetSequence(1)).CreateFullView()
-        new_is_cons = ResidueNamesMatch(ref_chain, mdl_chain, log_error)
+        new_is_cons = ResidueNamesMatch(mdl_chain, ref_chain, log_error)
         is_cons = is_cons and new_is_cons
     return is_cons
 

@@ -37,29 +37,33 @@ All Options
 The molck executable supports several other command line options,
 please find them following:
 
-.. code-block:: bash 
+.. code-block:: bash
 
-    usage: molck [options] file1.pdb [file2.pdb [...]]
-    options
-      --complib=path       location of the compound library file. If not provided, the
-                           following locations are searched in this order:
+    Usage: molck [options] file1.pdb [file2.pdb [...]]
+    Options
+      --complib=path       Location of the compound library file. If not provided,
+                           the following locations are searched in this order:
                            1. Working directory,
                            2. OpenStructure standard library location (if the
-                              executable is part of a standard OpenStructure installation)
-      --rm=<a>,<b>         remove atoms and residues matching some criteria:
+                              executable is part of a standard OpenStructure
+                              installation)
+      --rm=<a>,<b>         Remove atoms and residues matching some criteria:
                            - zeroocc - Remove atoms with zero occupancy
                            - hyd - Remove hydrogen atoms
                            - oxt - Remove terminal oxygens
-                           - nonstd - Remove all residues not one of the 20 standard amino acids
-                           - unk - Remove unknown and atoms not following the nomenclature
-      --fix-ele            clean up element column
-      --stdout             write cleaned file(s) to stdout
-      --out=filename       write cleaned file(s) to disk. % characters in the filename are
-                           replaced with the basename of the input file without extension.
-                           Default: %-molcked.pdb
-      --color=auto|on|off  whether output should be colored
-      --map-nonstd         maps modified residues back to the parent amino acid, for example
-                           MSE -> MET, SEP -> SER.
+                           - nonstd - Remove all residues not one of the
+                                      20 standard amino acids
+                           - unk - Remove unknown atoms not following
+                                   the nomenclature
+                           Default: hyd
+      --fix-ele            Clean up element column
+      --stdout             Write cleaned file(s) to stdout
+      --out=filename       Write cleaned file(s) to disk. % characters in the
+                           filename are replaced with the basename of the input
+                           file without extension. Default: %-molcked.pdb
+      --color=auto|on|off  Whether output should be colored. Delault: auto
+      --map-nonstd         Maps modified residues back to the parent amino acid,
+                           for example: MSE -> MET, SEP -> SER.
 
 ================
 Molck Python API

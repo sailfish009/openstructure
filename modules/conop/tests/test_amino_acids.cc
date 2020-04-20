@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2016 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(test_one_letter_code_to_residue_name) {
   BOOST_CHECK_EQUAL(OneLetterCodeToResidueName('W'), "TRP");
   BOOST_CHECK_EQUAL(OneLetterCodeToResidueName('Y'), "TYR");
   BOOST_CHECK_EQUAL(OneLetterCodeToResidueName('V'), "VAL");
-  // should also wiork if not uppercase!
+  // should also work if not uppercase!
   BOOST_CHECK_EQUAL(OneLetterCodeToResidueName('a'), "ALA");
   BOOST_CHECK_EQUAL(OneLetterCodeToResidueName('r'), "ARG");
   BOOST_CHECK_EQUAL(OneLetterCodeToResidueName('n'), "ASN");
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_one_letter_code_to_amino_acid) {
   BOOST_CHECK_EQUAL(OneLetterCodeToAminoAcid('W'), TRP);
   BOOST_CHECK_EQUAL(OneLetterCodeToAminoAcid('Y'), TYR);
   BOOST_CHECK_EQUAL(OneLetterCodeToAminoAcid('V'), VAL);
-  // should also wiork if not uppercase!
+  // should also work if not uppercase!
   BOOST_CHECK_EQUAL(OneLetterCodeToAminoAcid('a'), ALA);
   BOOST_CHECK_EQUAL(OneLetterCodeToAminoAcid('r'), ARG);
   BOOST_CHECK_EQUAL(OneLetterCodeToAminoAcid('n'), ASN);
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(test_residue_name_to_one_letter_code) {
   BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("TRP"), 'W');
   BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("TYR"), 'Y');
   BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("VAL"), 'V');
-  // should also wiork if not uppercase!
+  // should also work if not uppercase!
   BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("Ala"), 'A');
   BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("Arg"), 'R');
   BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("Asn"), 'N');
@@ -193,6 +193,11 @@ BOOST_AUTO_TEST_CASE(test_residue_name_to_one_letter_code) {
   BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("Trp"), 'W');
   BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("Tyr"), 'Y');
   BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("Val"), 'V');
+  // non-standard amino acids
+  BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("MSE"), 'X');
+  BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("SEC"), 'X');
+  BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("PYL"), 'X');
+  BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("PCA"), 'X');
   // unknown ones
   BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("MUH"), 'X');
   BOOST_CHECK_EQUAL(ResidueNameToOneLetterCode("FOO"), 'X');
@@ -220,7 +225,7 @@ BOOST_AUTO_TEST_CASE(test_residue_name_to_amino_acid) {
   BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("TRP"), TRP);
   BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("TYR"), TYR);
   BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("VAL"), VAL);
-  // should also wiork if not uppercase!
+  // should also work if not uppercase!
   BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("Ala"), ALA);
   BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("Arg"), ARG);
   BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("Asn"), ASN);
@@ -241,6 +246,11 @@ BOOST_AUTO_TEST_CASE(test_residue_name_to_amino_acid) {
   BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("Trp"), TRP);
   BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("Tyr"), TYR);
   BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("Val"), VAL);
+  // non-standard amino acids
+  BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("MSE"), XXX);
+  BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("SEC"), XXX);
+  BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("PYL"), XXX);
+  BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("PCA"), XXX);
   // unknown ones
   BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("MUH"), XXX);
   BOOST_CHECK_EQUAL(ResidueNameToAminoAcid("FOO"), XXX);

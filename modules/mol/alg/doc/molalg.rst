@@ -1075,7 +1075,7 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   The function requires a reference structure and a probe structure. The
   function checks that all the residues in the reference structure that appear
   in the probe structure (i.e., that have the same ResNum) are of the same
-  residue type. Chains are comapred by order, not by chain name (i.e.: the first
+  residue type. Chains are compared by order, not by chain name (i.e.: the first
   chain of the reference will be compared with the first chain of the probe
   structure, etc.)
 
@@ -1656,17 +1656,22 @@ to standard amino acids.
   Copies the atoms of ``src_res`` to ``dst_res`` using the residue names
   as guide to decide which of the atoms should be copied. If ``src_res`` and
   ``dst_res`` have the same name, or ``src_res`` is a modified version of
-  ``dst_res`` (i.e. have the same single letter code), CopyConserved will be
-  called, otherwise CopyNonConserved will be called.
+  ``dst_res`` (i.e. have the same single letter code), :func:`CopyConserved`
+  will be called, otherwise :func:`CopyNonConserved`.
+
+  If a CBeta atom wasn't already copied from ``src_res``, a new one at a
+  reconstructed position will be added to ``dst_res`` if it is not ``GLY`` and
+  all backbone positions are available to do it.
 
   :param src_res: The source residue
   :type src_res: :class:`~ost.mol.ResidueHandle`
-  :param dst_res: The destination residue
+  :param dst_res: The destination residue (expected to be a standard amino acid)
   :type dst_res: :class:`~ost.mol.ResidueHandle`
   :param editor: Editor used to modify *dst_res*.
   :type editor: :class:`~ost.mol.XCSEditor`
 
-  :returns: True if the residue could be copied, False if not.
+  :returns: True if the residue could be copied as a conserved residue,
+            False if it had to fallback to :func:`CopyNonConserved`.
 
 .. function:: CopyConserved(src_res, dst_res, editor)
 
@@ -1677,35 +1682,37 @@ to standard amino acids.
   to ``dst_res``. If ``src_res`` is a modified version of ``dst_res`` and the
   modification is a pure addition (e.g. the phosphate group of phosphoserine),
   the modification is stripped off and all other heavy atoms are copied to
-  ``dst_res``. If the modification is not a pure addition, only the backbone
-  heavy atoms are copied to ``dst_res``.
+  ``dst_res``. If the modification is not a pure addition, it falls back to
+  :func:`CopyNonConserved`.
 
-  Additionally, the selenium atom of ``MSE`` is converted to sulphur.
+  Additionally, the selenium atom of ``MSE`` is converted to sulphur to map
+  ``MSE`` to ``MET``.
 
   :param src_res: The source residue
   :type src_res: :class:`~ost.mol.ResidueHandle`
-  :param dst_res: The destination residue
+  :param dst_res: The destination residue (expected to be a standard amino acid)
   :type dst_res: :class:`~ost.mol.ResidueHandle`
   :param editor: Editor used to modify *dst_res*.
   :type editor: :class:`~ost.mol.XCSEditor`
 
-  :returns: A tuple of bools stating whether the residue could be copied and
-    whether the Cbeta atom was inserted into the ``dst_res``.
+  :returns: A tuple of bools stating whether the residue could be copied without
+            falling back to :func:`CopyNonConserved` and whether the CBeta atom
+            was copied from ``src_res`` to ``dst_res``.
 
 .. function:: CopyNonConserved(src_res, dst_res, editor)
 
-  Copies the heavy backbone atoms and Cbeta (except for ``GLY``) of ``src_res``
+  Copies the heavy backbone atoms and CBeta (except for ``GLY``) of ``src_res``
   to ``dst_res``.
 
   :param src_res: The source residue
   :type src_res: :class:`~ost.mol.ResidueHandle`
-  :param dst_res: The destination residue
+  :param dst_res: The destination residue (expected to be a standard amino acid)
   :type dst_res: :class:`~ost.mol.ResidueHandle`
   :param editor: Editor used to modify *dst_res*.
   :type editor: :class:`~ost.mol.XCSEditor`
 
-  :returns: A tuple of bools stating whether the residue could be copied and
-    whether the Cbeta atom was inserted into the ``dst_res``.
+  :returns: A tuple of bools as in :func:`CopyConserved` with the first bool
+            always being False.
 
 
 Molecular Checker (Molck)

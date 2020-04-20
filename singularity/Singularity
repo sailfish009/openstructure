@@ -1,6 +1,5 @@
 BootStrap: docker
-From: registry.scicore.unibas.ch/schwede/openstructure:python3_test
-
+From: registry.scicore.unibas.ch/schwede/openstructure:2.0.0-bionic
 
 %post
 ##############################################################################
@@ -18,13 +17,26 @@ ln -sf /bin/bash /bin/sh
 apt-get update -y && apt-get install -y python3-pip
 pip3 install nglview \
              ipython \
-             jupyter 
+             jupyter \
+             six
+
+# SET LOCALE
+############
+echo "LC_ALL=en_US.UTF-8" >> /etc/environment
+echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+locale-gen en_US.UTF-8
 
 # SETUP IPYTHON / JUPYTER
 #########################
+# As the Singularity mounts $HOME by default Jupyter and Ipython config files
+# are moved to separate directories. Proper environmental variables are also 
+# set
+export IPYTHONDIR="/usr/local/share/ipython"
 export JUPYTER_CONFIG_DIR="/usr/local/etc/jupyter"
 export JUPYTER_PATH="/usr/local/share/jupyter"
-export JUPYTER_RUNTIME_DIR="$JUPYTER_PATH/runtime"
+export JUPYTER_RUNTIME_DIR="/tmp/jupyter_runtime"
+
 mkdir -p /usr/local/share/ipython
 mkdir -p $JUPYTER_PATH
 mkdir -p $JUPYTER_RUNTIME_DIR
@@ -56,14 +68,14 @@ jupyter nbextension enable nglview --py --sys-prefix
 ##############################################################################
 # ENVIRONMENT
 ##############################################################################
-# As the Singularity mounts $HOME by default Jupyter and Ipython config files
-# are moved to separate directories. Proper environmental variables are also 
-# set
+export TEMP="/tmp"
+export TEMPDIR="/tmp"
+export TMPDIR="/tmp"
+export TMP="/tmp"
 export IPYTHONDIR="/usr/local/share/ipython"
 export JUPYTER_CONFIG_DIR="/usr/local/etc/jupyter"
 export JUPYTER_PATH="/usr/local/share/jupyter"
-export JUPYTER_RUNTIME_DIR="/usr/local/share/jupyter/runtime"
-
+export JUPYTER_RUNTIME_DIR="$TMPDIR/jupyter_runtime"
 
 %apprun ChemdictTool
 ##############################################################################

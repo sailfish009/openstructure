@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -126,7 +126,7 @@ public:
   //! Creates an empty, ie invalid handle
   /*!
     The default ctor is provided for e.g. using ImageHandle in STL containers. Any
-    attempt to use the interface of an emtpy ImageHandle will throw an 
+    attempt to use the interface of an empty ImageHandle will throw an 
     InvalidImageHandle exception.
   */
   ImageHandle();

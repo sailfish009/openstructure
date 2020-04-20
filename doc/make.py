@@ -113,7 +113,7 @@ for builder in builders:
   Sphinx(
     srcdir='doc/source',
     confdir='doc/conf',
-    outdir='doc/build/html',
+    outdir='doc/build/%s' % builder,
     doctreedir='doc/build/html/.doctrees',
     buildername=builder,
     **extra_args).build(True)

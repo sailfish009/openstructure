@@ -2,7 +2,7 @@
 REM ------------------------------------------------------------------------------
 REM This file is part of the OpenStructure project <www.openstructure.org>
 REM
-REM Copyright (C) 2008-2011 by the OpenStructure authors
+REM Copyright (C) 2008-2020 by the OpenStructure authors
 REM
 REM This library is free software; you can redistribute it and/or modify it under
 REM the terms of the GNU Lesser General Public License as published by the Free
@@ -30,4 +30,4 @@ REM set PATH=%BIN_DIR%;%DNG_ROOT%\@LIBDIR@\@BUILD_TYPE@;%DNG_ROOT%\@LIBDIR@;%DNG
 REM "%BIN_DIR%\@BUILD_TYPE@\gosty.exe" "%DNG_ROOT%\@LIBDIR@\openstructure\dng_startup" ost %*
 
 set PATH=%BIN_DIR%;%DNG_ROOT%\@LIBDIR@\;%PATH%
-"%DNG_ROOT%\libexec\openstructure\gosty.exe" "%DNG_ROOT%\@LIBDIR@\python2.7\site-packages\ost\dng_startup" ost %*
+"%DNG_ROOT%\libexec\openstructure\gosty.exe" "%DNG_ROOT%\@LIBDIR@\python3.6\site-packages\ost\dng_startup" ost %*

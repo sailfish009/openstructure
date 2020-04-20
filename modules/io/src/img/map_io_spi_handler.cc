@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -482,7 +482,7 @@ void MapIOSpiHandler::Import(img::MapHandle& mh, std::istream& infile,const Imag
     detail::header_filler<OST_LITTLE_ENDIAN>(infile, header);
     break;
   default:
-    throw(IOException("unkown byte order"));
+    throw(IOException("unknown byte order"));
     break;
   }
 
@@ -506,7 +506,7 @@ void MapIOSpiHandler::Import(img::MapHandle& mh, std::istream& infile,const Imag
     detail::real_filler<OST_LITTLE_ENDIAN,float>(infile,header,mh,1.0);
     break;
   default:
-    throw(IOException("unkown byte order"));
+    throw(IOException("unknown byte order"));
     break;
   }
 

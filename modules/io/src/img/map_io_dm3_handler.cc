@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -320,7 +320,7 @@ void DM3Collector::check_image()
 
       image_handle_list_.push_back(ih);
     } else {
-      LOG_ERROR("missmatch in byte size of data (" 
+      LOG_ERROR("mismatch in byte size of data (" 
                 << data_size*type_sizeof(image_number_type_) << " != " 
                 << image_data_byte_size_ << "), ignoring this image entry");
     }

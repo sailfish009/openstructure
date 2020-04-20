@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -123,7 +123,7 @@ void set_pos2_t(XCSEditor& e, const AtomHandleList& alist, object pyobj)
   PyArrayObject* na=reinterpret_cast<PyArrayObject*>(pyobj.ptr());
   
   if(PyArray_NDIM(na)!=2 || PyArray_DIM(na,0)!=int(acount) || PyArray_DIM(na,1)!=3) {
-    throw Error("excpected a numpy array of shape (NAtoms, 3)");
+    throw Error("expected a numpy array of shape (NAtoms, 3)");
     return;
   }
   

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
+// Copyright (C) 2008-2020 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -82,7 +82,7 @@ void PovState::write_postamble()
     pov_ << " /*\n";
     pov_ << "  This transformation, together with\n";
     pov_ << "  the camera translation above,\n";
-    pov_ << "  mimicks the original scene view:\n";
+    pov_ << "  mimics the original scene view:\n";
     pov_ << "   1. translate to center of rotation\n";
     pov_ << "   2. apply rotation matrix\n";
     pov_ << "   3. apply xy translation (z component is in camera)\n";
