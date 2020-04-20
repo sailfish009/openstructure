@@ -611,23 +611,18 @@ class HHblits:
         sout, serr = job.communicate()
 
         lines = sout.decode().splitlines()
-        ost.LogError("SecStruct stdout :")
         for line in lines:
-            ost.LogError(line.strip())
             ost.LogVerbose(line.strip())
             if 'error' in line.lower():
                 raise RuntimeError('Predicting secondary structure for MSA '+
                                    '(%s) failed, on command: %s' % (a3m_file, line))
 
-        ost.LogError("SecStruct stderr:")
         lines = serr.decode().splitlines()
         for line in lines:
-            ost.LogError(line.strip())
             ost.LogError(line.strip())
             if 'error' in line.lower():
                 raise RuntimeError('Predicting secondary structure for MSA '+
                                    '(%s) failed, on command: %s' % (a3m_file, line))
-        ost.LogError("SecStruct done")
 
         return a3m_file
 
