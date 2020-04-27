@@ -1,4 +1,5 @@
 Changes in Release 2.x
+--------------------------------------------------------------------------------
 
  * Use the newer voronota implementation as default in CAD-score binding
  * Several minor bug fixes and improvements.
