@@ -149,6 +149,7 @@ ProfileHandlePtr ProfileHandle::Extract(uint from, uint to) const {
   // get subset to return
   ProfileHandlePtr return_prof(new ProfileHandle);
   return_prof->SetNullModel(null_model_);
+  return_prof->SetNeff(neff_);
   for (uint i = from; i < to; ++i) {
     return_prof->AddColumn(columns_[i], seq_[i]);
   }

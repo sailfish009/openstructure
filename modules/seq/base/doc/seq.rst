@@ -755,7 +755,8 @@ probabilities between Match, Insertion or Deletion states or neff values
     :type to:  :class:`int`
 
     :returns: sub-profile as defined by given indices
-              (:attr:`null_model` is copied)
+              (:attr:`null_model` and :attr:`neff` are copied,
+              you might want to manually reset neff)
     :rtype: :class:`ProfileHandle`
 
     :raises: :exc:`~exceptions.Error` if *to* <= *from* or
