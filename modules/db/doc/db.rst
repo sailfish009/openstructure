@@ -309,14 +309,14 @@ Data Extraction
 --------------------------------------------------------------------------------
 
 Openstructure provides data extraction functionality for the following scenario:
-There are three binary container. A position container to hold CA-positions
-(:class:`LinearPositionContainer`), a SEQRES container and
-an ATOMSEQ container (both: :class:`LinearCharacterContainer`). 
-They contain entries from the protein structure database
+There is a SEQRES container and an ATOMSEQ container 
+(both: :class:`LinearCharacterContainer`).
+Positions are stored in :class:`LinearPositionContainer`. 
+The containers contain entries from the protein structure database
 and sequence/position data is relative to the SEQRES of those entries. 
 This means, if the SEQRES has more characters as there are resolved residues
-in the structure, the entry in the position container still contains the exact
-number of SEQRES characters but some position remain invalid. Thats where the
+in the structure, the entry in the position container(s) still contains the exact
+number of SEQRES characters but some positions remain invalid. Thats where the
 ATOMSEQ container comes in. It only contains matching residues to the SEQRES but
 marks non-resolved residues with '-'. 
 
@@ -378,13 +378,16 @@ marks non-resolved residues with '-'.
   :type indexer:        :class:`LinearIndexer`
   :type seqres_container: :class:`LinearCharacterContainer`
   :type atomseq_container: :class:`LinearCharacterContainer`
-  :type position_container: :class:`LinearPositionContainer`
+  :type position_container: :class:`LinearPositionContainer` or 
+                            :class:`list` of :class:`LinearPositionContainer`
 
   :returns:             First element: :class:`list` of residue numbers that 
                         relate each entry in the second element to the target 
                         sequence specified in  *aln*. The numbering scheme 
-                        starts from one. Second Element: :class:`geom.Vec3List` 
-                        with the according positions.
+                        starts from one. Second Element: the according positions.
+                        :class:`ost.geom.Vec3List` if *position_container* was a
+                        :class:`LinearPositionContainer`, a list of 
+                        :class:`ost.geom.Vec3List` if it was a :class:`list`. 
   :rtype:               :class:`tuple`
 
   :raises:              :exc:`ost.Error` if requested data is not present in 
