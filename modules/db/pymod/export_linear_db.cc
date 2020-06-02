@@ -147,52 +147,102 @@ void WrapGetPositions(LinearPositionContainerPtr container,
   container->GetPositions(p_range, positions);  
 }
 
+// helper struct to reduce number of input parameters
+struct DisCoDataContainers {
 
-tuple WrapExtractTemplateDataSingle(const String& entry_name, const String& chain_name,
-                                    const ost::seq::AlignmentHandle& aln,
-                                    LinearIndexerPtr indexer,
-                                    LinearCharacterContainerPtr seqres_container,
-                                    LinearCharacterContainerPtr atomseq_container,
-                                    LinearPositionContainerPtr position_container) {
+  DisCoDataContainers(const String& indexer_path,
+                      const String& seqres_container_path,
+                      const String& atomseq_container_path,
+                      const String& position_container_path) {
+    indexer = LinearIndexer::Load(indexer_path);
+    seqres_container = LinearCharacterContainer::Load(seqres_container_path);
+    atomseq_container = LinearCharacterContainer::Load(atomseq_container_path);
+    position_container = LinearPositionContainer::Load(position_container_path);
+  }
 
-  std::vector<LinearPositionContainerPtr> position_containers;
-  position_containers.push_back(position_container);
+  LinearIndexerPtr indexer;
+  LinearCharacterContainerPtr seqres_container;
+  LinearCharacterContainerPtr atomseq_container;
+  LinearPositionContainerPtr position_container;
+};
+
+
+void WrapExtractTemplateDataDisCo(const String& entry_name, const String& chain_name,
+                                  const ost::seq::AlignmentHandle& aln,
+                                  DisCoDataContainers& data_containers,
+                                  boost::python::list& residue_numbers,
+                                  geom::Vec3List& positions) {
+
   std::vector<int> v_residue_numbers;
-  std::vector<geom::Vec3List> position_vec;
-
-  ost::db::ExtractTemplateData(entry_name, chain_name, aln, indexer, 
-                               seqres_container, atomseq_container, 
-                               position_containers, v_residue_numbers,
-                               position_vec);
-
-  list residue_numbers;
+  ost::db::ExtractTemplateDataDisCo(entry_name, chain_name, aln, 
+                                    data_containers.indexer, 
+                                    data_containers.seqres_container, 
+                                    data_containers.atomseq_container, 
+                                    data_containers.position_container, 
+                                    v_residue_numbers,
+                                    positions);
+  residue_numbers = boost::python::list();
   VecToList(v_residue_numbers, residue_numbers);
-  return boost::python::make_tuple(residue_numbers, position_vec[0]);
 } 
 
-tuple WrapExtractTemplateDataList(const String& entry_name, const String& chain_name,
-                                  const ost::seq::AlignmentHandle& aln,
-                                  LinearIndexerPtr indexer,
-                                  LinearCharacterContainerPtr seqres_container,
-                                  LinearCharacterContainerPtr atomseq_container,
-                                  boost::python::list& position_containers) {
 
-  std::vector<LinearPositionContainerPtr> v_position_containers; 
-  ListToVec(position_containers, v_position_containers);
+// helper struct to reduce number of input parameters
+struct GMQEDataContainers {
+
+  GMQEDataContainers(const String& indexer_path,
+                     const String& seqres_container_path,
+                     const String& atomseq_container_path,
+                     const String& dssp_container_path,
+                     const String& n_position_container_path,
+                     const String& ca_position_container_path,
+                     const String& c_position_container_path,
+                     const String& cb_position_container_path) {
+    indexer = LinearIndexer::Load(indexer_path);
+    seqres_container = LinearCharacterContainer::Load(seqres_container_path);
+    atomseq_container = LinearCharacterContainer::Load(atomseq_container_path);
+    dssp_container = LinearCharacterContainer::Load(dssp_container_path);
+    n_position_container = LinearPositionContainer::Load(n_position_container_path);
+    ca_position_container = LinearPositionContainer::Load(ca_position_container_path);
+    c_position_container = LinearPositionContainer::Load(c_position_container_path);
+    cb_position_container = LinearPositionContainer::Load(cb_position_container_path);
+  }
+
+  LinearIndexerPtr indexer;
+  LinearCharacterContainerPtr seqres_container;
+  LinearCharacterContainerPtr atomseq_container;
+  LinearCharacterContainerPtr dssp_container;
+  LinearPositionContainerPtr n_position_container;
+  LinearPositionContainerPtr ca_position_container;
+  LinearPositionContainerPtr c_position_container;
+  LinearPositionContainerPtr cb_position_container;
+};
+
+
+void WrapExtractTemplateDataGMQE(const String& entry_name, 
+                                                const String& chain_name,
+                                                const ost::seq::AlignmentHandle& aln,
+                                                GMQEDataContainers& data_containers,
+                                                boost::python::list& residue_numbers,
+                                                String& dssp,
+                                                geom::Vec3List& n_positions,
+                                                geom::Vec3List& ca_positions,
+                                                geom::Vec3List& c_positions,
+                                                geom::Vec3List& cb_positions) {
+
   std::vector<int> v_residue_numbers;
-  std::vector<geom::Vec3List> position_vec;
-
-  ost::db::ExtractTemplateData(entry_name, chain_name, aln, indexer, 
-                               seqres_container, atomseq_container, 
-                               v_position_containers, v_residue_numbers,
-                               position_vec);
-
-  list residue_numbers;
-  list position_list;
+  ost::db::ExtractTemplateDataGMQE(entry_name, chain_name, aln, 
+                                   data_containers.indexer, 
+                                   data_containers.seqres_container, 
+                                   data_containers.atomseq_container,
+                                   data_containers.dssp_container, 
+                                   data_containers.n_position_container,
+                                   data_containers.ca_position_container, 
+                                   data_containers.c_position_container,
+                                   data_containers.cb_position_container, 
+                                   v_residue_numbers, dssp, n_positions, 
+                                   ca_positions, c_positions, cb_positions);
   VecToList(v_residue_numbers, residue_numbers);
-  VecToList(position_vec, position_list);
-  return boost::python::make_tuple(residue_numbers, position_list);
-}   
+}
 
 }
 
@@ -252,20 +302,51 @@ void export_linear_db() {
                                                         arg("position_container"),
                                                         arg("seq"), arg("positions")));
 
-  def("ExtractTemplateData", &WrapExtractTemplateDataSingle, (arg("entry_name"),
-                                                              arg("chain_name"),
-                                                              arg("aln"),
-                                                              arg("linear_indexer"),
-                                                              arg("seqres_container"),
-                                                              arg("atomseq_container"),
-                                                              arg("position_container")));
+  class_<DisCoDataContainers>("DisCoDataContainers", init<const String&, 
+                                                          const String&, 
+                                                          const String&,
+                                                          const String&>())
+    .def_readonly("indexer", &DisCoDataContainers::indexer)
+    .def_readonly("seqres_container", &DisCoDataContainers::seqres_container)
+    .def_readonly("atomseq_container", &DisCoDataContainers::atomseq_container)
+    .def_readonly("position_container", &DisCoDataContainers::position_container)
+  ;
 
-  def("ExtractTemplateData", &WrapExtractTemplateDataList, (arg("entry_name"),
-                                                            arg("chain_name"),
-                                                            arg("aln"),
-                                                            arg("linear_indexer"),
-                                                            arg("seqres_container"),
-                                                            arg("atomseq_container"),
-                                                            arg("position_containers")));
+  def("ExtractTemplateDataDisCo", &WrapExtractTemplateDataDisCo, (arg("entry_name"),
+                                                                  arg("chain_name"),
+                                                                  arg("aln"),
+                                                                  arg("data_containers"),
+                                                                  arg("residue_numbers"),
+                                                                  arg("positions")));
+
+  class_<GMQEDataContainers>("GMQEDataContainers", init<const String&, 
+                                                        const String&, 
+                                                        const String&,
+                                                        const String&,
+                                                        const String&,
+                                                        const String&,
+                                                        const String&,
+                                                        const String&>())
+    .def_readonly("indexer", &GMQEDataContainers::indexer)
+    .def_readonly("seqres_container", &GMQEDataContainers::seqres_container)
+    .def_readonly("atomseq_container", &GMQEDataContainers::atomseq_container)
+    .def_readonly("dssp_container", &GMQEDataContainers::dssp_container)
+    .def_readonly("n_position_container", &GMQEDataContainers::n_position_container)
+    .def_readonly("ca_position_container", &GMQEDataContainers::ca_position_container)
+    .def_readonly("c_position_container", &GMQEDataContainers::c_position_container)
+    .def_readonly("cb_position_container", &GMQEDataContainers::cb_position_container)
+  ;
+
+  def("ExtractTemplateDataGMQE", &WrapExtractTemplateDataGMQE, (arg("entry_name"),
+                                                                arg("chain_name"),
+                                                                arg("aln"),
+                                                                arg("data_containers"),
+                                                                arg("residue_numbers"),
+                                                                arg("dssp"),
+                                                                arg("n_positions"),
+                                                                arg("ca_positions"),
+                                                                arg("c_positions"),
+                                                                arg("cb_positions")));
+
 }
 

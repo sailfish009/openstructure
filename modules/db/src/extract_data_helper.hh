@@ -35,15 +35,31 @@ void ExtractValidPositions(const String& entry_name, const String& chain_name,
                            ost::seq::SequenceHandle& seq,
                            geom::Vec3List& positions);
 
-void ExtractTemplateData(const String& entry_name, const String& chain_name,
-                         const ost::seq::AlignmentHandle& aln,
-                         LinearIndexerPtr indexer, 
-                         LinearCharacterContainerPtr seqres_container,
-                         LinearCharacterContainerPtr atomseq_container,
-                         std::vector<LinearPositionContainerPtr>& position_container,
-                         std::vector<int>& residue_numbers,
-                         std::vector<geom::Vec3List>& positions);
+void ExtractTemplateDataDisCo(const String& entry_name, const String& chain_name,
+                              const ost::seq::AlignmentHandle& aln,
+                              LinearIndexerPtr indexer, 
+                              LinearCharacterContainerPtr seqres_container,
+                              LinearCharacterContainerPtr atomseq_container,
+                              LinearPositionContainerPtr& position_container,
+                              std::vector<int>& residue_numbers,
+                              geom::Vec3List& positions);
 
+void ExtractTemplateDataGMQE(const String& entry_name, const String& chain_name,
+                             const ost::seq::AlignmentHandle& aln,
+                             LinearIndexerPtr indexer, 
+                             LinearCharacterContainerPtr seqres_container,
+                             LinearCharacterContainerPtr atomseq_container,
+                             LinearCharacterContainerPtr dssp_container,
+                             LinearPositionContainerPtr& n_position_container,
+                             LinearPositionContainerPtr& ca_position_container,
+                             LinearPositionContainerPtr& c_position_container,
+                             LinearPositionContainerPtr& cb_position_container,
+                             std::vector<int>& residue_numbers,
+                             String& dssp,
+                             geom::Vec3List& n_positions,
+                             geom::Vec3List& ca_positions,
+                             geom::Vec3List& c_positions,
+                             geom::Vec3List& cb_positions);
 }} //ns
 
 #endif

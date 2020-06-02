@@ -351,45 +351,164 @@ marks non-resolved residues with '-'.
   :raises:              :exc:`ost.Error` if requested data is not present         
 
 
-.. method:: ExtractTemplateData(entry_name, chain_name, aln, indexer, \
-                                seqres_container, atomseq_container, \
-                                position_container)
+.. class:: DisCoDataContainers(indexer_path, \
+                               seqres_container_path, \
+                               atomseq_container_path, \
+                               position_container_path)
 
+  Thin wrapper to organize the data containers required in 
+  :meth:`ExtractTemplateDataDisCo`. All containers are loaded
+  from disk and are expected to be consistent.
+
+  :param indexer_path: Path to indexer file to access the data containers 
+                       (:class:`LinearIndexer`)
+  :param seqres_container_path: Path to container with SEQRES data
+                                (:class:`LinearCharacterContainer`)
+  :param atomseq_container_path: Path to container with ATOMSEQ data
+                                 (:class:`LinearCharacterContainer`)
+  :param position_container_path: Path to container with CA position data
+                                  (:class:`LinearPositionContainer`)
+
+  :type indexer_path: :class:`str`
+  :type seqres_container_path: :class:`str`
+  :type atomseq_container_path: :class:`str`
+  :type position_container_path: :class:`str`
+
+  .. attribute:: indexer
+
+  .. attribute:: seqres_container
+
+  .. attribute:: atomseq_container
+
+  .. attribute:: position_container 
+
+.. method:: ExtractTemplateDataDisCo(entry_name, chain_name, aln, \
+                                     data_containers, residue_numbers, \
+                                     positions)
+
+  Data extraction helper for the specific use of extracting data required
+  to generate DisCoContainers in the QMEAN scoring function.
   Let's say we have a target-template alignment in *aln* (first seq: target, 
   second seq: template). This function extracts all valid template positions 
-  given the entry specified by *entry_name* and *chain_name*. The template
-  sequence in *aln* must match the sequence in *seqres_container*. Again,
-  the *atomseq_container* is used to identify valid positions. The according
-  residue numbers relative to the target sequence in *aln* are also returned.
+  and their residue numbers given the entry specified by *entry_name* and 
+  *chain_name*. The template sequence in *aln* must match the sequence in 
+  *seqres_container*. Again, the *atomseq_container* is used to identify valid 
+  positions.
 
   :param entry_name:    Name of assembly you want the data from
   :param chain_name:    Name of chain you want the data from
   :param aln:           Target-template sequence alignment
-  :param indexer:       Used to access *atomseq_container*, *seqres_container* 
-                        and *position_container*
-  :param seqres_container:  Container containing the full sequence data
-  :param atomseq_container: Container that marks locations with invalid position
-                            data with '-'
-  :param position_container: Container containing position data
+  :param data_containers: Contains all required data containers
+  :param residue_numbers: Residue numbers of extracted positions will be stored 
+                          in here
+  :param positions:     Extracted positions will be stored in here
+  :type entry_name:     :class:`str`
+  :type chain_name:     :class:`str`
+  :type aln:            :ost.seq.SequenceHandle:
+  :type data_containers: :class:`DisCoDataContainers`
+  :type residue_numbers: :class:`list` of :class:`int`
+  :type positions:       :class:`geom::Vec3List`
+
+  :raises:              :exc:`ost.Error` if requested data is not present in 
+                        the containers or if the template sequence in *aln*
+                        doesn't match with the sequence in *seqres_container*
+
+
+
+
+.. class:: GMQEDataContainers(indexer_path, \
+                               seqres_container_path, \
+                               atomseq_container_path, \
+                               dssp_container_path, \
+                               n_position_container_path, \
+                               ca_position_container_path, \
+                               c_position_container_path, \
+                               cb_position_container_path, \)
+
+  Thin wrapper to organize the data containers required in 
+  :meth:`ExtractTemplateDataGMQE`. All containers are loaded
+  from disk and are expected to be consistent.
+
+  :param indexer_path: Path to indexer file to access the data containers 
+                       (:class:`LinearIndexer`)
+  :param seqres_container_path: Path to container with SEQRES data
+                                (:class:`LinearCharacterContainer`)
+  :param atomseq_container_path: Path to container with ATOMSEQ data
+                                 (:class:`LinearCharacterContainer`)
+  :param dssp_container_path: Path to container containing dssp states
+                              (:class:`LinearCharacterContainer`)
+  :param n_position_container_path: Path to container with N position data
+                                    (:class:`LinearPositionContainer`)
+  :param ca_position_container_path: Path to container with CA position data
+                                    (:class:`LinearPositionContainer`)
+  :param c_position_container_path: Path to container with C position data
+                                    (:class:`LinearPositionContainer`)
+  :param cb_position_container_path: Path to container with CB position data
+                                     (:class:`LinearPositionContainer`)
+
+  :type indexer_path: :class:`str`
+  :type seqres_container_path: :class:`str`
+  :type atomseq_container_path: :class:`str`
+  :type dssp_container_path: :class:`str`
+  :type n_position_container_path: :class:`str`
+  :type ca_position_container_path: :class:`str`
+  :type c_position_container_path: :class:`str`
+  :type cb_position_container_path: :class:`str`
+
+  .. attribute:: indexer
+
+  .. attribute:: seqres_container
+
+  .. attribute:: atomseq_container
+
+  .. attribute:: dssp_container
+
+  .. attribute:: n_position_container 
+
+  .. attribute:: ca_position_container 
+
+  .. attribute:: c_position_container 
+
+  .. attribute:: cb_position_container 
+
+
+.. method:: ExtractTemplateDataGMQE(entry_name, chain_name, aln, \
+                                    data_containers, residue_numbers, \
+                                    dssp, n_positions, ca_positions, \
+                                    c_positions, cb_positions)
+
+  Data extraction helper for the specific use of extracting data required
+  to estimate GMQE as available in the QMEAN software package.
+  Let's say we have a target-template alignment in *aln* (first seq: target, 
+  second seq: template). This function extracts all valid template positions,
+  their dssp states and their residue numbers given the entry specified by 
+  *entry_name* and *chain_name*. The template sequence in *aln* must match the 
+  sequence in *seqres_container*. Again, the *atomseq_container* is used to 
+  identify valid positions.
+
+  :param entry_name:    Name of assembly you want the data from
+  :param chain_name:    Name of chain you want the data from
+  :param aln:           Target-template sequence alignment
+  :param data_containers: Contains all required data containers
+  :param residue_numbers: Residue numbers of extracted positions will be stored 
+                          in here
+  :param dssp:          Extracted DSSP states will be stored in here 
+  :param n_positions:   Extracted n_positions will be stored in here
+  :param ca_positions:  Extracted ca_positions will be stored in here
+  :param c_positions:   Extracted c_positions will be stored in here
+  :param cb_positions:  Extracted cb_positions will be stored in here
 
   :type entry_name:     :class:`str`
   :type chain_name:     :class:`str`
   :type aln:            :ost.seq.SequenceHandle:
-  :type indexer:        :class:`LinearIndexer`
-  :type seqres_container: :class:`LinearCharacterContainer`
-  :type atomseq_container: :class:`LinearCharacterContainer`
-  :type position_container: :class:`LinearPositionContainer` or 
-                            :class:`list` of :class:`LinearPositionContainer`
-
-  :returns:             First element: :class:`list` of residue numbers that 
-                        relate each entry in the second element to the target 
-                        sequence specified in  *aln*. The numbering scheme 
-                        starts from one. Second Element: the according positions.
-                        :class:`ost.geom.Vec3List` if *position_container* was a
-                        :class:`LinearPositionContainer`, a list of 
-                        :class:`ost.geom.Vec3List` if it was a :class:`list`. 
-  :rtype:               :class:`tuple`
+  :type data_containers: :class:`GMQEDataContainers`
+  :type residue_numbers: :class:`list` of :class:`int`
+  :type dssp:            :class:`str`
+  :type n_positions:     :class:`geom::Vec3List`
+  :type ca_positions:    :class:`geom::Vec3List`
+  :type c_positions:     :class:`geom::Vec3List`
+  :type cb_positions:    :class:`geom::Vec3List`
 
   :raises:              :exc:`ost.Error` if requested data is not present in 
-                        the container or if the template sequence in *aln*
+                        the containers or if the template sequence in *aln*
                         doesn't match with the sequence in *seqres_container*
