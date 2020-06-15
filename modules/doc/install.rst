@@ -329,9 +329,10 @@ to be substituted.
 
 `Homebrew <https://brew.sh/>`_ can be used to conveniently install all
 dependencies. The current Python version, as of writing these instructions, is
-3.7.6 but works so far. Boost comes as 1.72.0 which seems to be OK. Do not
-forget to also install `boost-python3`. Eigen and SQLite also seem to be
-unproblematic concerning higher version numbers.
+3.8.3 but works so far. Boost comes as 1.72.0 which seems to be OK. Do not
+forget to also install `boost-python3` (your system may have a lower version of
+Python than 3.8.3 but it seems like `boost-python` was compiled for 3.8.3).
+Eigen and SQLite also seem to be unproblematic concerning higher version numbers.
 
 If you want to build the info module or the graphical user interface, make sure
 you have the Xcode app installed. Just the Xcode command line tools which are
@@ -360,15 +361,15 @@ C flags:
 
 .. code-block:: bash
 
-  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/Cellar/python3/3.7.6_1/\
-  Frameworks/Python.framework/Versions/Current/include/python3.7m \
-           -DPYTHON_LIBRARIES=/usr/local/Cellar/python3/3.7.6_1/\
-  Frameworks/Python.framework/Versions/Current/lib/libpython3.7m.dylib \
-           -DPYTHON_ROOT=/usr/local/ \
-           -DBOOST_ROOT=/usr/local \
-           -DSYS_ROOT=/usr/local \
-           -DOPTIMIZE=ON \
-           -DCMAKE_C_FLAGS="-isystem /Applications/Xcode.app/Contents/\
+  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/Cellar/python@3.8/3.8.3/\
+  Frameworks/Python.framework/Versions/Current/include/python3.8/ \
+         -DPYTHON_LIBRARIES=/usr/local/Cellar/python@3.8/3.8.3/\
+  Frameworks/Python.framework/Versions/Current/lib/libpython3.8.dylib \
+         -DPYTHON_ROOT=/usr/local/Cellar/python@3.8/3.8.3 \
+         -DBOOST_ROOT=/usr/local \
+         -DSYS_ROOT=/usr/local \
+         -DOPTIMIZE=ON \
+         -DCMAKE_C_FLAGS="-isystem /Applications/Xcode.app/Contents/\
   Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/\
   Library/Frameworks/OpenGL.framework/Headers/ -isystem /usr/local/opt/\
   qt/lib/QtCore.framework/Headers/ -isystem /usr/local/opt/qt/lib/\
@@ -376,7 +377,7 @@ C flags:
   Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/\
   MacOSX.sdk/System/Library/Frameworks/Security.framework/ \
   -isystem /usr/local/opt/qt/lib/QtGui.framework/Headers/" \
-           -DCMAKE_CXX_FLAGS="-isystem /Applications/Xcode.app/Contents/\
+         -DCMAKE_CXX_FLAGS="-isystem /Applications/Xcode.app/Contents/\
   Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/\
   Library/Frameworks/OpenGL.framework/Headers/ -isystem /usr/local/opt/\
   qt/lib/QtCore.framework/Headers/ -isystem /usr/local/opt/qt/lib/\
