@@ -105,6 +105,14 @@ Real HMMScore(const ost::seq::ProfileHandle& prof_0,
   int s_1_o;
   SetupSequence(prof_1, aln, seq_1_idx, s_1, s_1_o);
 
+  // remove columns where both sequences have a gap
+  for(int idx = s_0.size() - 1; idx >= 0; --idx) {
+    if(s_0[idx] == '-' && s_1[idx] == '-') {
+      s_0.erase(idx, 1);
+      s_1.erase(idx, 1);
+    }
+  }
+
   // hhblits uses the average background frequencies by default
   std::vector<Real> null_freq(20, 0.0);
   const Real* prof_0_null_freq = prof_0.GetNullModel().freqs_begin(); 
@@ -125,9 +133,6 @@ Real HMMScore(const ost::seq::ProfileHandle& prof_0,
 
   // sum up column scores and all MM->MM transition scores
   for(uint idx = 0; idx < s_0.size(); ++idx) {
-    if(s_0[idx] == '-' && s_1[idx] == '-') {
-      throw Error("Cannot have gap at same location in both sequences!");
-    }
     if(s_0[idx] != '-' && s_1[idx] != '-') {
       // score of matching hmm columns
       Real summed_col_score = 0.0;
