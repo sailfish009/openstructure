@@ -135,6 +135,43 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
   }
   in.push(stream);
 
+  this->Import(prof, in);
+}
+
+void HhmIOHandler::ImportFromString(seq::ProfileHandle& prof, 
+                                    const String& data) {
+  std::stringstream ss(data);
+  this->Import(prof, ss);
+}
+
+void HhmIOHandler::Export(const seq::ProfileHandle& prof,
+                          const boost::filesystem::path& loc) const {
+  throw IOException("Cannot write hhm files.");
+}
+
+bool HhmIOHandler::ProvidesImport(const boost::filesystem::path& loc, 
+                                  const String& format) {
+  if (format=="auto") {
+    String match_suf_string = loc.string();
+    std::transform(match_suf_string.begin(), match_suf_string.end(),
+                   match_suf_string.begin(), tolower);
+    if (   detail::FilenameEndsWith(match_suf_string,".hhm")
+        || detail::FilenameEndsWith(match_suf_string,".hhm.gz")) {
+      return true;
+    }
+  } else if (format == "hhm") {
+    return true;
+  }
+  return false;
+}
+
+bool HhmIOHandler::ProvidesExport(const boost::filesystem::path& loc, 
+                                  const String& format) {
+  // no writers here
+  return false;
+}
+
+void HhmIOHandler::Import(seq::ProfileHandle& prof, std::istream& in) {
   // reset profile
   prof.clear();
   
@@ -169,7 +206,7 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
     }
   }
   if (!null_found) {
-    throw IOException("No NULL found in file " + loc.string());
+    throw IOException("No NULL found in file");
   }
 
   // read until we hit HMM, extract olcs, then skip 2 more lines
@@ -180,11 +217,11 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
     if (chunks[0] == ost::StringRef("HMM", 3)) {
       // extract olcs
       if (chunks.size() != 21) {
-        throw IOException("Badly formatted HMM line in " + loc.string());
+        throw IOException("Badly formatted HMM line: " + line);
       }
       for (uint i = 1; i < 21; ++i) {
         if (chunks[i].length() != 1) {
-          throw IOException("Badly formatted HMM line in " + loc.string());
+          throw IOException("Badly formatted HMM line: " + line);
         }
         olcs[i-1] = chunks[i][0];
       }
@@ -193,7 +230,7 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
       sline = ost::StringRef(line.c_str(), line.length());
       chunks = sline.split();
       if (chunks.size() != 10) {
-        throw IOException("Badly formatted HMM line in " + loc.string());
+        throw IOException("Badly formatted HMM line: " + line);
       }
 
       for (uint i = 0; i < 10; ++i) {
@@ -225,17 +262,17 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
         } else if(chunks[i] == ost::StringRef("Neff_D", 6)) {
           neff_d_idx = i;
         } else {
-          throw IOException("Badly formatted HMM line in " + loc.string()); 
+          throw IOException("Badly formatted HMM line: " + line); 
         }
       }
 
       // check whether we really got everything
       if(neff_idx == -1 || neff_i_idx == -1 || neff_d_idx == -1) {
-        throw IOException("Badly formatted HMM line in " + loc.string());
+        throw IOException("Badly formatted HMM line: " + line);
       }
 
       if(transition_idx.size() != 7) {
-        throw IOException("Badly formatted HMM line in " + loc.string());      
+        throw IOException("Badly formatted HMM line: " + line);      
       }
 
       // skip one line 
@@ -245,13 +282,13 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
     }
   }
   if (!hmm_found) {
-    throw IOException("No HMM found in file " + loc.string());
+    throw IOException("No HMM found in given input");
   }
 
   // set null model
   chunks = ost::StringRef(null_line.c_str(), null_line.length()).split();
   prof.SetNullModel(GetColumn(chunks, 1, olcs, "Badly formatted NULL line\n"
-                              + null_line + "\n in " + loc.string()));
+                              + null_line));
 
   // set columns
   while (std::getline(in, line)) {
@@ -263,7 +300,7 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
     const char olc = chunks[0][0];
     // frequencies
     prof.AddColumn(GetColumn(chunks, 2, olcs, "Badly formatted line\n"
-                             + line + "\n in " + loc.string()), olc);
+                             + line), olc);
     // get transition probabilities
     std::getline(in, line);
     sline = ost::StringRef(line.c_str(), line.length());
@@ -272,8 +309,7 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
     chunks = sline.split();
     prof.back().SetHMMData(GetHMMData(chunks, transition_idx, 
                            transitions, neff_idx, neff_i_idx, neff_d_idx,
-                           "Badly formatted line\n" + line + "\n in " + 
-                           loc.string()));
+                           "Badly formatted line\n" + line));
   }
 
   // parse neff if it's there, calculate the average of every column otherwise
@@ -281,13 +317,11 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
     sline = ost::StringRef(neff_line.c_str(), neff_line.length());
     chunks = sline.split();
     if(chunks.size() != 2) {
-      throw IOException("Badly formatted line\n" + neff_line+ "\n in " + 
-                        loc.string());
+      throw IOException("Badly formatted line\n" + neff_line);
     }
     std::pair<bool, float> p = chunks[1].to_float();
     if (!p.first) {
-      throw IOException("Badly formatted line\n" + neff_line+ "\n in " + 
-                        loc.string());
+      throw IOException("Badly formatted line\n" + neff_line);
     }
     prof.SetNeff(p.second);
   } else {
@@ -301,33 +335,6 @@ void HhmIOHandler::Import(seq::ProfileHandle& prof,
       prof.SetNeff(1.0);
     }
   }
-}
-
-void HhmIOHandler::Export(const seq::ProfileHandle& prof,
-                          const boost::filesystem::path& loc) const {
-  throw IOException("Cannot write hhm files.");
-}
-
-bool HhmIOHandler::ProvidesImport(const boost::filesystem::path& loc, 
-                                  const String& format) {
-  if (format=="auto") {
-    String match_suf_string = loc.string();
-    std::transform(match_suf_string.begin(), match_suf_string.end(),
-                   match_suf_string.begin(), tolower);
-    if (   detail::FilenameEndsWith(match_suf_string,".hhm")
-        || detail::FilenameEndsWith(match_suf_string,".hhm.gz")) {
-      return true;
-    }
-  } else if (format == "hhm") {
-    return true;
-  }
-  return false;
-}
-
-bool HhmIOHandler::ProvidesExport(const boost::filesystem::path& loc, 
-                                  const String& format) {
-  // no writers here
-  return false;
 }
 
 }}

@@ -323,6 +323,19 @@ Loading sequence or alignment files
   :type  format: string
   :rtype: :class:`~ost.seq.SequenceList`
 
+.. function:: SequenceProfileFromString(data, format)
+
+  Load sequence profile from string.
+
+  The format argument is mandatory.
+
+  :param data: String containing the data you would read from a file with
+               specified format.
+  :type  data: string
+  :param format: Name of the format. Can either be "hhm" or "pssm".
+  :type  format: string
+  :rtype: :class:`~ost.seq.ProfileHandle`
+
 Saving Sequence Data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
