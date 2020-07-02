@@ -569,11 +569,12 @@ class HHblits:
         full_nrdb = os.path.join(os.path.abspath(os.path.split(nrdb)[0]),
                                  os.path.split(nrdb)[1])
         # create MSA
-        opts = {'cpu' : 1, # no. of cpus used
-                'n'   : 1}   # no. of iterations
+        opts = {'cpu' : 1,     # no. of cpus used
+                'n'   : 1,     # no. of iterations
+                'e'   : 0.001} # evalue threshold
         opts.update(options)
         opt_cmd, _ = _ParseOptions(opts)
-        hhblits_cmd = '%s -e 0.001 -i %s -oa3m %s -d %s %s' % \
+        hhblits_cmd = '%s -i %s -oa3m %s -d %s %s' % \
                       (self.hhblits_bin, self.filename, a3m_file, full_nrdb,
                        opt_cmd)
 
