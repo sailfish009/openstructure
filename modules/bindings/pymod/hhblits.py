@@ -593,10 +593,24 @@ class HHblits:
         if not os.path.exists(a3m_file):
             raise RuntimeError('Building query profile failed, no output')
 
-        if not assign_ss:
+        if assign_ss:
+            return self.AssignSSToA3M(a3m_file)
+        else:
             return a3m_file
 
-        # add secondary structure annotation
+    def AssignSSToA3M(self, a3m_file):
+        """
+        HHblits does not assign predicted secondary structure by default. 
+        You can optionally assign it with the addss.pl script provided by the 
+        HH-suite. However, your HH-suite installation requires you to specify
+        paths to PSIRED etc. We refer to the HH-suite user guide for further 
+        instructions.
+
+        :param a3m_file:  Path to file you want to assign secondary structure to
+        :type a3m_file:  :class:`str`
+        """
+
+        a3m_file = os.path.abspath(a3m_file)
         addss_cmd = "perl %s %s" % (os.path.join(self.hhsuite_root, 
                                                  'scripts/addss.pl'), 
                                     a3m_file)
