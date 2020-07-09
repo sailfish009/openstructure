@@ -324,8 +324,17 @@ version of OpenStructure.
 
 Be careful at -DPYTHON_LIBRARIES, Debian 10 comes with Python 3.7 so that needs
 to be substituted.
-          
+
+
 **macOS (Catalina) with Homebrew**
+
+.. note::
+
+  When switching the Qt version used to compile OST with support for the
+  graphical user interface, dng may start behaving weird. Symptoms are that the
+  user interface starts being unresponsive to mouse clicks. An easy solution
+  may be to close dng and remove
+  $HOME/Library/Preferences/org.openstructure.dng.plist and start dng again.
 
 `Homebrew <https://brew.sh/>`_ can be used to conveniently install all
 dependencies. The current Python version, as of writing these instructions, is
