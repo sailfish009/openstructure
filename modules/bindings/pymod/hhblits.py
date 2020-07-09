@@ -540,8 +540,9 @@ class HHblits:
 
         :param options: Dictionary of options to *hhblits*, one "-" is added in
                         front of every key. Boolean True values add flag without
-                        value. Merged with default options {'cpu': 1, 'n': 1},
-                        where 'n' defines the number of iterations.
+                        value. Merged with default options 
+                        {'cpu': 1, 'n': 1, 'e': 0.001}, where 'n' defines the 
+                        number of iterations.
         :type options: :class:`dict`
 
         :param a3m_file: a path of a3m_file to be used, optional
