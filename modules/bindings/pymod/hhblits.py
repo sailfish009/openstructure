@@ -578,15 +578,14 @@ class HHblits:
                       (self.hhblits_bin, self.filename, a3m_file, full_nrdb,
                        opt_cmd)
 
-        job = subprocess.Popen(hhblits_cmd, shell=True, cwd=self.working_dir,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        sout, serr = job.communicate()
+        p = subprocess.run(hhblits_cmd, shell=True, cwd=self.working_dir,
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        lines = sout.decode().splitlines()
+        lines = p.stdout.decode().splitlines()
         for line in lines:
             ost.LogVerbose(line.strip())
 
-        lines = serr.decode().splitlines()
+        lines = p.stderr.decode().splitlines()
         for line in lines:
             ost.LogError(line.strip())
 
@@ -620,19 +619,18 @@ class HHblits:
                     'PATH' : '%s:%s' % (os.path.join(self.hhsuite_root, 'bin'),
                                         os.environ['PATH'])})
 
-        job = subprocess.Popen(addss_cmd, shell=True, cwd=self.working_dir,
-                               env=env, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-        sout, serr = job.communicate()
+        p = subprocess.run(addss_cmd, shell=True, cwd=self.working_dir,
+                           env=env, stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE)
 
-        lines = sout.decode().splitlines()
+        lines = p.stdout.decode().splitlines()
         for line in lines:
             ost.LogVerbose(line.strip())
             if 'error' in line.lower() or 'bad interpreter' in line.lower():
                 raise RuntimeError('Predicting secondary structure for MSA '+
                                    '(%s) failed, on command: %s' % (a3m_file, line))
 
-        lines = serr.decode().splitlines()
+        lines = p.stderr.decode().splitlines()
         for line in lines:
             ost.LogError(line.strip())
             if 'error' in line.lower() or 'bad interpreter' in line.lower():
@@ -666,18 +664,17 @@ class HHblits:
         if os.path.exists(hhm_file):
             return hhm_file
         ost.LogVerbose('converting %s to %s' % (a3m_file, hhm_file))
-        job = subprocess.Popen('%s -i %s -o %s' % (hhmake, a3m_file, hhm_file),
-                               shell=True, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-        sout, serr = job.communicate()
-        lines = sout.decode().splitlines()
+        p = subprocess.run('%s -i %s -o %s' % (hhmake, a3m_file, hhm_file),
+                           shell=True, stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE)
+        lines = p.stdout.decode().splitlines()
         for line in lines:
             ost.LogVerbose(line.strip())
-        lines = serr.decode().splitlines()
+        lines = p.stderr.decode().splitlines()
         for line in lines:
             ost.LogError(line.strip())
 
-        if job.returncode != 0:
+        if p.returncode != 0:
             raise IOError('could not convert a3m to hhm file')
 
         if not os.path.exists(hhm_file):
@@ -720,15 +717,14 @@ class HHblits:
             os.path.abspath(cs_file),
             opt_cmd)
         ost.LogVerbose('converting %s to %s' % (a3m_file, cs_file))
-        job = subprocess.Popen(cs_cmd, shell=True, cwd=self.working_dir,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        sout, _ = job.communicate()
+        p = subprocess.run(cs_cmd, shell=True, cwd=self.working_dir,
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         if not os.path.exists(cs_file):
             raise RuntimeError('Creating column state sequence file failed, ' +
                                'no output')
 
-        if b'Wrote abstract state sequence to' in sout:
+        if b'Wrote abstract state sequence to' in p.stdout:
             return cs_file
         else:
             raise RuntimeError('Creating column state sequence file failed')
@@ -794,17 +790,16 @@ class HHblits:
                          os.path.split(database)[1]))
         ost.LogInfo('searching %s' % database)
         ost.LogVerbose(search_cmd)
-        job = subprocess.Popen(search_cmd, shell=True, cwd=self.working_dir,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        sout, serr = job.communicate()
-        lines = sout.decode().splitlines()
+        p = subprocess.run(search_cmd, shell=True, cwd=self.working_dir,
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        lines = p.stdout.decode().splitlines()
         for line in lines:
             ost.LogVerbose(line.strip())
-        lines = serr.decode().splitlines()
+        lines = p.stderr.decode().splitlines()
         for line in lines:
             ost.LogError(line.strip())
 
-        if job.returncode != 0:
+        if p.returncode != 0:
             raise RuntimeError('Sequence search failed')
 
         if not os.path.exists(hhr_file):
