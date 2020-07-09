@@ -361,15 +361,15 @@ C flags:
 
 .. code-block:: bash
 
-  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/Cellar/python@3.8/3.8.3/\
-  Frameworks/Python.framework/Versions/Current/include/python3.8/ \
-         -DPYTHON_LIBRARIES=/usr/local/Cellar/python@3.8/3.8.3/\
+  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/Cellar/python@3.8/3.8.3_1/\
+  Frameworks/Python.framework/Versions/Current/include/python3.8 \
+          -DPYTHON_LIBRARIES=/usr/local/Cellar/python@3.8/3.8.3_1/\
   Frameworks/Python.framework/Versions/Current/lib/libpython3.8.dylib \
-         -DPYTHON_ROOT=/usr/local/Cellar/python@3.8/3.8.3 \
-         -DBOOST_ROOT=/usr/local \
-         -DSYS_ROOT=/usr/local \
-         -DOPTIMIZE=ON \
-         -DCMAKE_C_FLAGS="-isystem /Applications/Xcode.app/Contents/\
+          -DPYTHON_ROOT=/usr/local/Cellar/python@3.8/3.8.3_1 \
+          -DBOOST_ROOT=/usr/local \
+          -DSYS_ROOT=/usr/local \
+          -DOPTIMIZE=ON \
+          -DCMAKE_C_FLAGS="-isystem /Applications/Xcode.app/Contents/\
   Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/\
   Library/Frameworks/OpenGL.framework/Headers/ -isystem /usr/local/opt/\
   qt/lib/QtCore.framework/Headers/ -isystem /usr/local/opt/qt/lib/\
@@ -377,7 +377,7 @@ C flags:
   Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/\
   MacOSX.sdk/System/Library/Frameworks/Security.framework/ \
   -isystem /usr/local/opt/qt/lib/QtGui.framework/Headers/" \
-         -DCMAKE_CXX_FLAGS="-isystem /Applications/Xcode.app/Contents/\
+          -DCMAKE_CXX_FLAGS="-isystem /Applications/Xcode.app/Contents/\
   Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/\
   Library/Frameworks/OpenGL.framework/Headers/ -isystem /usr/local/opt/\
   qt/lib/QtCore.framework/Headers/ -isystem /usr/local/opt/qt/lib/\
