@@ -61,6 +61,7 @@ public:
   using MMCifReader::ParseStruct;
   using MMCifReader::ParseStructConf;
   using MMCifReader::ParseStructSheetRange;
+  using MMCifReader::ParsePdbxEntityBranch;
   using MMCifReader::TryStoreIdx;
   using MMCifReader::SetRestrictChains;
   using MMCifReader::SetReadSeqRes;
@@ -467,9 +468,8 @@ columns.push_back(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
     columns.push_back(StringRef("other", 5));
     BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntityPoly(columns));
     columns.pop_back();
-    columns.pop_back();
     columns.push_back(StringRef("badbadprion", 11));
-    BOOST_CHECK_THROW(tmmcif_p.ParseEntityPoly(columns), IOException);
+    BOOST_CHECK_THROW(tmmcif_p.ParseEntityPoly(columns), ost::Error);
     columns.pop_back();
   }
   BOOST_TEST_MESSAGE("          done.");
@@ -1421,6 +1421,68 @@ BOOST_AUTO_TEST_CASE(mmcif_test_revisions_new)
   BOOST_CHECK_EQUAL(revs.GetLastMinor(), 0);
   BOOST_CHECK_EQUAL(revs.GetFirstRelease(), size_t(1));
 
+  BOOST_TEST_MESSAGE("  done.");
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_pdbx_entity_branch_tests)
+{
+  BOOST_TEST_MESSAGE("  Running mmcif_pdbx_entity_branch_tests...");
+  IOProfile profile;
+  StarLoopDesc tmmcif_h;
+
+  mol::EntityHandle eh = mol::CreateEntity();
+  MMCifReader mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
+
+  mmcif_p.Parse();
+
+  BOOST_TEST_MESSAGE("          testing missing corresponding entity entry...");
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    std::vector<StringRef> columns;
+    TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+
+    tmmcif_h.SetCategory(StringRef("pdbx_entity_branch", 18));
+    tmmcif_h.Add(StringRef("entity_id", 9));
+    tmmcif_h.Add(StringRef("type", 4));
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+    columns.push_back(StringRef("1", 1));
+    columns.push_back(StringRef("oligosaccharide", 15));
+
+    BOOST_CHECK_THROW(tmmcif_p.ParsePdbxEntityBranch(columns), IOException);
+  }
+  BOOST_TEST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          testing chain type recognition...");
+  {
+    TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    std::vector<StringRef> columns;
+
+    // create corresponding entity entry
+    tmmcif_h.Clear();
+    tmmcif_h.SetCategory(StringRef("entity", 6));
+    tmmcif_h.Add(StringRef("id", 2));
+    tmmcif_h.Add(StringRef("type", 4));
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+    columns.push_back(StringRef("1", 1));
+    columns.push_back(StringRef("branched", 8));
+    tmmcif_p.ParseEntity(columns);
+    columns.pop_back();
+    columns.pop_back();
+
+    // build dummy pdbx_entity_branch header
+    tmmcif_h.Clear();
+    tmmcif_h.SetCategory(StringRef("pdbx_entity_branch", 18));
+    tmmcif_h.Add(StringRef("entity_id", 9));
+    tmmcif_h.Add(StringRef("type", 4));
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+    columns.push_back(StringRef("1", 1));
+    columns.push_back(StringRef("oligosaccharide", 15));
+    BOOST_CHECK_NO_THROW(tmmcif_p.ParsePdbxEntityBranch(columns));
+    columns.pop_back();
+
+    columns.push_back(StringRef("ordinarysugar", 13));
+    BOOST_CHECK_THROW(tmmcif_p.ParsePdbxEntityBranch(columns), ost::Error);
+  }
+  BOOST_TEST_MESSAGE("          done.");
   BOOST_TEST_MESSAGE("  done.");
 }
 
