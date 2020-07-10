@@ -54,6 +54,8 @@ ChainType ChainTypeFromString(StringRef identifier)
     return CHAINTYPE_CYCLIC_PSEUDO_PEPTIDE;
   } else if (StringRef("peptide nucleic acid", 20) == identifier) {
     return CHAINTYPE_POLY_PEPTIDE_DN_RN;
+  } else if (StringRef("branched", 8) == identifier) {
+    return CHAINTYPE_BRANCHED;
   } else if (StringRef("other", 5) == identifier) {
     return CHAINTYPE_UNKNOWN;
   }
@@ -98,6 +100,8 @@ String StringFromChainType(ChainType type)
     return "cyclic-pseudo-peptide";
   } else if (CHAINTYPE_POLY_PEPTIDE_DN_RN == type) {
     return "peptide nucleic acid";
+  } else if (CHAINTYPE_BRANCHED == type) {
+    return "branched";
   } else if (CHAINTYPE_UNKNOWN == type) {
     return "other";
   }

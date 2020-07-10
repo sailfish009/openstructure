@@ -320,6 +320,13 @@ BOOST_AUTO_TEST_CASE(chain_type)
    BOOST_CHECK(!ch1.IsPolypeptide());
    BOOST_CHECK(!ch1.IsPolynucleotide());
 
+   e.SetChainType(ch1, CHAINTYPE_BRANCHED);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_BRANCHED);
+   BOOST_CHECK(!ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(!ch1.IsPolypeptide());
+   BOOST_CHECK(!ch1.IsPolynucleotide());
+
    // string -> chain type
    BOOST_CHECK(ChainTypeFromString("polymer") == CHAINTYPE_POLY);
    BOOST_CHECK(ChainTypeFromString("non-polymer") == CHAINTYPE_NON_POLY);
@@ -345,6 +352,7 @@ BOOST_AUTO_TEST_CASE(chain_type)
                CHAINTYPE_CYCLIC_PSEUDO_PEPTIDE);
    BOOST_CHECK(ChainTypeFromString("peptide nucleic acid") ==
                CHAINTYPE_POLY_PEPTIDE_DN_RN);
+   BOOST_CHECK(ChainTypeFromString("branched") == CHAINTYPE_BRANCHED);
    BOOST_CHECK_THROW(ChainTypeFromString("supposed to fail"),
                      Error);
 
@@ -371,6 +379,7 @@ BOOST_AUTO_TEST_CASE(chain_type)
                "cyclic-pseudo-peptide");
    BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY_PEPTIDE_DN_RN) ==
                "peptide nucleic acid");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_BRANCHED) == "branched");
    BOOST_CHECK_THROW(StringFromChainType(CHAINTYPE_N_CHAINTYPES),
                      Error);
 }
