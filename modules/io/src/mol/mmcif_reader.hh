@@ -56,6 +56,7 @@ namespace ost { namespace io {
 /// \li struct_sheet_range
 /// \li pdbx_database_PDB_obs_spr
 /// \li database_PDB_rev
+/// \li pdbx_entity_branch
 class DLLEXPORT_OST_IO MMCifReader : public StarParser  {
 public:
   /// \brief create a MMCifReader
@@ -326,6 +327,11 @@ protected:
   /// \param columns data row
   void ParsePdbxDatabasePdbObsSpr(const std::vector<StringRef>& columns);
 
+  /// \brief Fetch mmCIF pdbx_entity_branch information
+  ///
+  /// \param columns data row
+  void ParsePdbxEntityBranch(const std::vector<StringRef>& columns);
+
   /// \struct types of secondary structure
   typedef enum {
     MMCIF_HELIX,
@@ -561,6 +567,12 @@ private:
     PDS_RECVD_INITIAL_DEPOSITION_DATE, ///< date of initial deposition
   } PdbxDatabaseStatusItems;
 
+  /// \enum items of the pdbx_entity_branch category (pendant to entity_poly)
+  typedef enum {
+    BR_ENTITY_ID,  ///< pointer to entity.id
+    BR_ENTITY_TYPE ///< type of branched molecular entity
+  } EntityBranchItems;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
@@ -584,6 +596,7 @@ private:
     PDBX_AUDIT_REVISION_HISTORY,
     PDBX_AUDIT_REVISION_DETAILS,
     PDBX_DATABASE_STATUS,
+    PDBX_ENTITY_BRANCH,
     DONT_KNOW
   } MMCifCategory;
 

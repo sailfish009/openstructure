@@ -362,7 +362,13 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     indices_[PDS_RECVD_INITIAL_DEPOSITION_DATE]
      = header.GetIndex("recvd_initial_deposition_date");
     cat_available = true;
-  }
+  } else if (header.GetCategory() == "pdbx_entity_branch") {
+    category_ = PDBX_ENTITY_BRANCH;
+    // mandatory
+    this->TryStoreIdx(BR_ENTITY_ID, "entity_id", header);
+    this->TryStoreIdx(BR_ENTITY_TYPE, "type", header); 
+    cat_available = true;
+ }
   category_counts_[category_]++;
   return cat_available;
 }
@@ -1541,6 +1547,10 @@ void MMCifReader::OnDataRow(const StarLoopDesc& header,
     LOG_TRACE("processing pdbx_database_status entry");
     this->ParsePdbxDatabaseStatus(columns);
     break;
+  case PDBX_ENTITY_BRANCH:
+    LOG_TRACE("processing pdbx_entity_branch entry");
+    this->ParsePdbxEntityBranch(columns);
+    break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                        "Uncatched category '"+ header.GetCategory() +"' found.",
@@ -1677,6 +1687,28 @@ void MMCifReader::ParseStructRefSeqDif(const std::vector<StringRef>& columns)
 	 ss << aln_id << "'";
 	 throw IOException(ss.str());
  }
+}
+
+void MMCifReader::ParsePdbxEntityBranch(const std::vector<StringRef>& columns)
+{
+  // we assume that the entity cat. ALWAYS comes before the pdbx_entity_branch
+  // cat.
+  // search entity
+  MMCifEntityDescMap::iterator edm_it =
+    entity_desc_map_.find(columns[indices_[BR_ENTITY_ID]].str());
+
+  if (edm_it == entity_desc_map_.end()) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+              "'pdbx_entity_branch' category defined before 'entity' for id '" +
+                                         columns[indices_[BR_ENTITY_ID]].str() +
+                                             "' or missing.",
+                                             this->GetCurrentLinenum()));
+  }
+
+  // store type
+  if (indices_[BR_ENTITY_TYPE] != -1) {
+    edm_it->second.type = mol::ChainTypeFromString(columns[indices_[EP_TYPE]]);
+  }
 }
 
 void MMCifReader::OnEndData()
