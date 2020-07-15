@@ -19,6 +19,7 @@
 #include <boost/python.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 using namespace boost::python;
 
 #include <ost/export_helper/pair_to_tuple_conv.hh>
@@ -344,7 +345,11 @@ void export_mmcif_io()
     .add_property("atom2", &MMCifInfoEntityBranch::GetAtom2,
                   &MMCifInfoEntityBranch::SetAtom2)
   ;
-  
+
+  class_<MMCifInfoEntityBranchMap>("MMCifInfoEntityBranchMap", init<>())
+    .def(map_indexing_suite<MMCifInfoEntityBranchMap>())
+  ;
+
   class_<MMCifInfo>("MMCifInfo", init<>())
     .def("AddCitation", &MMCifInfo::AddCitation)
     .def("GetCitations", make_function(&MMCifInfo::GetCitations,
