@@ -263,6 +263,21 @@ class TestMMCifInfo(unittest.TestCase):
     self.assertEqual(len(crambin_pdb.residues), 46)
     self.assertEqual(len(crambin_pdb.atoms), 327)
 
+  def test_mmcifinfo_entitybranch(self):
+    # create dummy atoms
+    eh = mol.CreateEntity()
+    editor = eh.EditXCS();
+    ch = editor.InsertChain("A");
+    res1 = editor.AppendResidue(ch, "BMA");
+    res2 = editor.AppendResidue(ch, "MAN");
+    atom1 = editor.InsertAtom(res2, "C1", geom.Vec3());
+    atom2 = editor.InsertAtom(res1, "O3", geom.Vec3());
+    branch = io.MMCifInfoEntityBranch(atom1, atom2)
+    self.assertEqual(branch.atom1.qualified_name, "A.MAN2.C1")
+
+    branch.ConnectBranchLink(editor)
+    self.assertEqual(atom2.GetBondPartners()[0].qualified_name, "A.MAN2.C1")
+
 if __name__== '__main__':
   from ost import testutils
   testutils.RunTests()

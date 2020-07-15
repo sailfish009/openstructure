@@ -332,6 +332,19 @@ void export_mmcif_io()
     .add_property("first_release", &MMCifInfoRevisions::GetFirstRelease)
   ;
 
+  class_<MMCifInfoEntityBranch>("MMCifInfoEntityBranch", init<mol::AtomHandle,
+                                mol::AtomHandle>())
+    .def("GetAtom1", &MMCifInfoEntityBranch::GetAtom1)
+    .def("GetAtom2", &MMCifInfoEntityBranch::GetAtom2)
+    .def("ConnectBranchLink", &MMCifInfoEntityBranch::ConnectBranchLink)
+    .def("SetAtom1", &MMCifInfoEntityBranch::SetAtom1)
+    .def("SetAtom2", &MMCifInfoEntityBranch::SetAtom2)
+    .add_property("atom1", &MMCifInfoEntityBranch::GetAtom1,
+                  &MMCifInfoEntityBranch::SetAtom1)
+    .add_property("atom2", &MMCifInfoEntityBranch::GetAtom2,
+                  &MMCifInfoEntityBranch::SetAtom2)
+  ;
+  
   class_<MMCifInfo>("MMCifInfo", init<>())
     .def("AddCitation", &MMCifInfo::AddCitation)
     .def("GetCitations", make_function(&MMCifInfo::GetCitations,
