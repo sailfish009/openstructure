@@ -927,6 +927,10 @@ public:
                 atom1_(atom1), atom2_(atom2) {}
         mol::AtomHandle GetAtom1() const { return atom1_;}
         mol::AtomHandle GetAtom2() const { return atom2_; }
+        void ConnectBranchLink(mol::XCSEditor editor)
+        {
+          editor.Connect(atom1_, atom2_);
+        }
 
 private:
   mol::AtomHandle atom1_;

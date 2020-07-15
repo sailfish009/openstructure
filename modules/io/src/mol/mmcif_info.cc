@@ -234,7 +234,7 @@ void MMCifInfo::ConnectBranchLinks(mol::XCSEditor editor)
            blm_it->second.begin();
          blv_it != blm_it->second.end();
          ++blv_it) {
-      editor.Connect(blv_it->GetAtom1(), blv_it->GetAtom2());
+      blv_it->ConnectBranchLink(editor);
     }
   }
 }
