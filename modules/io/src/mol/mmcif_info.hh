@@ -26,6 +26,7 @@
 #include <ost/geom/geom.hh>
 #include <ost/string_ref.hh>
 #include <ost/io/module_config.hh>
+#include <ost/mol/mol.hh>
 
 namespace ost { namespace io {
 
@@ -918,6 +919,21 @@ private:
 	String details_;
 };
 
+/// \brief Store information on brnached structures (oligosaccharides)
+///
+class DLLEXPORT_OST_IO MMCifInfoEntityBranch {
+public:
+  MMCifInfoEntityBranch(mol::AtomHandle atom1, mol::AtomHandle atom2):
+                atom1_(atom1), atom2_(atom2) {}
+        mol::AtomHandle GetAtom1() const { return atom1_;}
+        mol::AtomHandle GetAtom2() const { return atom2_; }
+
+private:
+  mol::AtomHandle atom1_;
+  mol::AtomHandle atom2_;
+};
+typedef std::map<String, std::vector<MMCifInfoEntityBranch> > MMCifInfoEntityBranchMap;
+
 /// \brief container class for additional information from MMCif files
 /// 
 /// \section mmcif annotation information
@@ -1126,6 +1142,26 @@ public:
   {
     return revisions_;
   }
+
+  /// \brief Add bond information for a branched entity
+  ///
+  /// \param chain_name chain the bond belongs to
+  /// \param atom1 first atom of the bond
+  /// \param atom2 second atom of the bond
+  void AddEntityBranchLink(String chain_name,
+                           mol::AtomHandle atom1,
+                           mol::AtomHandle atom2);
+
+  /// \brief Get all links for all branched entities
+  ///
+  const std::vector<MMCifInfoEntityBranch> GetEntityBranchLinks() const;
+  //GetEntityBranchChains
+  //GetEntityBranchByChain
+
+  /// \brief Connect all atoms listed as links for branched entities.
+  ///
+  void ConnectBranchLinks(mol::XCSEditor editor);
+
 //protected:
 
 private:
@@ -1140,10 +1176,11 @@ private:
   std::vector<MMCifInfoCitation> citations_;  ///< list of citations
   std::vector<MMCifInfoBioUnit>  biounits_;   ///< list of biounits
   std::vector<MMCifInfoTransOpPtr> transops_;
-	MMCifInfoStructRefs            struct_refs_;
+  MMCifInfoStructRefs            struct_refs_;
   std::map<String, String> cif_2_pdb_chain_id_;
   std::map<String, String> pdb_2_cif_chain_id_;
   std::map<String, String> cif_2_entity_id_;
+  std::map<String, std::vector<MMCifInfoEntityBranch> > entity_branches_;
 };
 
 

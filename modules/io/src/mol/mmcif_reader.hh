@@ -57,6 +57,7 @@ namespace ost { namespace io {
 /// \li pdbx_database_PDB_obs_spr
 /// \li database_PDB_rev
 /// \li pdbx_entity_branch
+/// \li pdbx_entity_branch_link
 class DLLEXPORT_OST_IO MMCifReader : public StarParser  {
 public:
   /// \brief create a MMCifReader
@@ -332,6 +333,11 @@ protected:
   /// \param columns data row
   void ParsePdbxEntityBranch(const std::vector<StringRef>& columns);
 
+  /// \brief Fetch mmCIF pdbx_entity_branch_link information
+  ///
+  /// \param columns data row
+  void ParsePdbxEntityBranchLink(const std::vector<StringRef>& columns);
+
   /// \struct types of secondary structure
   typedef enum {
     MMCIF_HELIX,
@@ -573,6 +579,20 @@ private:
     BR_ENTITY_TYPE ///< type of branched molecular entity
   } EntityBranchItems;
 
+  /// \enum items of the pdbx_entity_branch_link category
+  typedef enum {
+    BL_ENTITY_ID,                /// < pointer to entity.id
+    BL_ATOM_ID_1,                /// < atom identifier (element + number)
+    BL_ATOM_ID_2,                /// < atom identifier (element + number)
+    BL_COMP_ID_1,                /// < tlc of component
+    BL_COMP_ID_2,                /// < tlc of component
+    BL_ENTITY_BRANCH_LIST_NUM_1, /// < res. no. (pdbx_entity_branch_list.num)
+    BL_ENTITY_BRANCH_LIST_NUM_2, /// < res. no. (pdbx_entity_branch_list.num)
+    BL_ATOM_STEREO_CONFIG_1,     /// < chiral configuration (R/ S)
+    BL_ATOM_STEREO_CONFIG_2,     /// < chiral configuration (R/ S)
+    BL_VALUE_ORDER               /// < bond order
+  } EntityBranchLinkItems;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
@@ -597,6 +617,7 @@ private:
     PDBX_AUDIT_REVISION_DETAILS,
     PDBX_DATABASE_STATUS,
     PDBX_ENTITY_BRANCH,
+    PDBX_ENTITY_BRANCH_LINK,
     DONT_KNOW
   } MMCifCategory;
 
@@ -651,6 +672,18 @@ private:
     int minor;    ///< minor version
   };
 
+  /// \struct to keep entity_branch linker pairs while parsing
+  typedef struct {
+    int res_num_1;    ///< index of the linked residue relative to its chain
+    String cmp_1;     ///< tlc of residue (sugar)
+    String atm_nm_1;  ///< (IUPAC) name of the linking atom
+    int res_num_2;    ///< index of the linked residue relative to its chain
+    String cmp_2;     ///< tlc of residue (sugar)
+    String atm_nm_2;  ///< index of the linked residue relative to its chain
+  } MMCifPdbxEntityBranchLink;
+  typedef std::map<String, std::vector<MMCifPdbxEntityBranchLink> >
+    MMCifPdbxEntityBranchLinkMap;
+
   // members
   MMCifCategory category_;
   int category_counts_[DONT_KNOW+1]; ///< overall no. of atom_site loops
@@ -686,6 +719,8 @@ private:
   std::vector<MMCifRevisionDesc> revisions_;
   std::map<int, String> revision_types_;
   bool database_PDB_rev_added_;
+  // for entity_branch connections
+  MMCifPdbxEntityBranchLinkMap entity_branch_link_map_;
 };
 
 }}

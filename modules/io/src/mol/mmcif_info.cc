@@ -195,4 +195,48 @@ MMCifInfoStructRefSeq::AddDif(int seq_rnum, const String& db_rnum, const String&
 	return d;
 }
 
+void MMCifInfo::AddEntityBranchLink(String chain_name,
+                                    mol::AtomHandle atom1,
+                                    mol::AtomHandle atom2)
+{
+  // check if element already exists
+  MMCifInfoEntityBranchMap::iterator blm_it = entity_branches_.find(chain_name);
+  if (blm_it == entity_branches_.end()) {
+    // `find` points to the end of the map so chain_name was not found
+    std::pair<MMCifInfoEntityBranchMap::iterator, bool> rit =
+      entity_branches_.insert(MMCifInfoEntityBranchMap::value_type(chain_name,
+                                         std::vector<MMCifInfoEntityBranch>()));
+    // let blm_it point to the new element so we can add to the vector
+    blm_it = rit.first;
+  }
+  // add new branch element
+  blm_it->second.push_back(MMCifInfoEntityBranch(atom1, atom2));
+}
+
+const std::vector<MMCifInfoEntityBranch> MMCifInfo::GetEntityBranchLinks() const
+{
+  std::vector<MMCifInfoEntityBranch> all_links;
+  MMCifInfoEntityBranchMap::const_iterator blm_it;
+  for (blm_it = entity_branches_.begin();
+       blm_it != entity_branches_.end(); ++blm_it) {
+    std::copy(blm_it->second.begin(), blm_it->second.end(),
+              std::back_inserter(all_links));
+  }
+  return all_links;
+}
+
+void MMCifInfo::ConnectBranchLinks(mol::XCSEditor editor)
+{
+  MMCifInfoEntityBranchMap::iterator blm_it;
+  for (blm_it = entity_branches_.begin();
+       blm_it != entity_branches_.end(); ++blm_it) {
+    for (std::vector<MMCifInfoEntityBranch>::iterator blv_it =
+           blm_it->second.begin();
+         blv_it != blm_it->second.end();
+         ++blv_it) {
+      editor.Connect(blv_it->GetAtom1(), blv_it->GetAtom2());
+    }
+  }
+}
+
 }} //ns

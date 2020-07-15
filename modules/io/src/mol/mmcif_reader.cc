@@ -90,6 +90,7 @@ void MMCifReader::ClearState()
   revisions_.clear();
   revision_types_.clear();
   database_PDB_rev_added_ = false;
+  entity_branch_link_map_.clear();
 }
 
 void MMCifReader::SetRestrictChains(const String& restrict_chains)
@@ -367,6 +368,23 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     // mandatory
     this->TryStoreIdx(BR_ENTITY_ID, "entity_id", header);
     this->TryStoreIdx(BR_ENTITY_TYPE, "type", header); 
+    cat_available = true;
+ } else if (header.GetCategory() == "pdbx_entity_branch_link") {
+    category_ = PDBX_ENTITY_BRANCH_LINK;
+    // mandatory
+    this->TryStoreIdx(BL_ENTITY_ID, "entity_id", header);
+    this->TryStoreIdx(BL_ATOM_ID_1, "atom_id_1", header);
+    this->TryStoreIdx(BL_ATOM_ID_2, "atom_id_2", header);
+    this->TryStoreIdx(BL_COMP_ID_1, "comp_id_1", header);
+    this->TryStoreIdx(BL_COMP_ID_2, "comp_id_2", header);
+    this->TryStoreIdx(BL_ENTITY_BRANCH_LIST_NUM_1, "entity_branch_list_num_1",
+                      header);
+    this->TryStoreIdx(BL_ENTITY_BRANCH_LIST_NUM_2, "entity_branch_list_num_2",
+                      header);
+    // optional items
+    indices_[BL_ATOM_STEREO_CONFIG_1] = header.GetIndex("atom_stereo_config_1");
+    indices_[BL_ATOM_STEREO_CONFIG_2] = header.GetIndex("atom_stereo_config_2");
+    indices_[BL_VALUE_ORDER] = header.GetIndex("value_order");
     cat_available = true;
  }
   category_counts_[category_]++;
@@ -1551,6 +1569,10 @@ void MMCifReader::OnDataRow(const StarLoopDesc& header,
     LOG_TRACE("processing pdbx_entity_branch entry");
     this->ParsePdbxEntityBranch(columns);
     break;
+  case PDBX_ENTITY_BRANCH_LINK:
+    LOG_TRACE("processing pdbx_entity_branch_link entry");
+    this->ParsePdbxEntityBranchLink(columns);
+    break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                        "Uncatched category '"+ header.GetCategory() +"' found.",
@@ -1711,6 +1733,52 @@ void MMCifReader::ParsePdbxEntityBranch(const std::vector<StringRef>& columns)
   }
 }
 
+void MMCifReader::ParsePdbxEntityBranchLink(const std::vector<StringRef>& columns)
+{
+  MMCifPdbxEntityBranchLink link_pair;
+
+  String entity_id(columns[indices_[BL_ENTITY_ID]].str());
+
+  // list of entities -> pairs of info for link
+  link_pair.res_num_1 =
+    this->TryGetInt(columns[indices_[BL_ENTITY_BRANCH_LIST_NUM_1]],
+                    "pdbx_entity_branch_link.entity_branch_list_num_1");
+  link_pair.cmp_1 = columns[indices_[BL_COMP_ID_1]].str();
+  link_pair.atm_nm_1 = columns[indices_[BL_ATOM_ID_1]].str();
+  link_pair.res_num_2 =
+    this->TryGetInt(columns[indices_[BL_ENTITY_BRANCH_LIST_NUM_2]],
+                    "pdbx_entity_branch_link.entity_branch_list_num_2");
+  link_pair.cmp_2 = columns[indices_[BL_COMP_ID_2]].str();
+  link_pair.atm_nm_2 = columns[indices_[BL_ATOM_ID_2]].str();
+
+  /*if (indices_[BL_ATOM_STEREO_CONFIG_1] != -1) {
+    char A = *columns[indices_[BL_ATOM_STEREO_CONFIG_1]].begin();
+  }*/
+  // check stereo values to be N S R
+  /*if (indices_[BL_ATOM_STEREO_CONFIG_2] != -1) {
+  }*/
+  // check value order to be ... git grep bond_order
+  /*if (indices_[BL_VALUE_ORDER] != -1) {
+  }*/
+
+  std::pair<MMCifPdbxEntityBranchLinkMap::iterator, bool> rit;
+
+  // check if element already exists
+  MMCifPdbxEntityBranchLinkMap::iterator blm_it =
+    entity_branch_link_map_.find(entity_id);
+
+  // if the entity was not seen before, create it in the map
+  if (blm_it == entity_branch_link_map_.end()) {
+    rit = entity_branch_link_map_.insert(
+                   MMCifPdbxEntityBranchLinkMap::value_type(entity_id,
+                                      std::vector<MMCifPdbxEntityBranchLink>()));
+    blm_it = rit.first;
+  }
+
+  // add the link pair
+  blm_it->second.push_back(link_pair);
+}
+
 void MMCifReader::OnEndData()
 {
   mol::XCSEditor editor=ent_handle_.EditXCS(mol::BUFFERED_EDIT);
@@ -1718,10 +1786,12 @@ void MMCifReader::OnEndData()
   // process chain types
   std::vector<std::pair<mol::ChainHandle, String> >::const_iterator css;
   MMCifEntityDescMap::const_iterator edm_it;
+  MMCifPdbxEntityBranchLinkMap::const_iterator blm_it;
+  std::vector<MMCifPdbxEntityBranchLink>::const_iterator bl_it;
   String pdb_auth_chain_name;
   for (css = chain_id_pairs_.begin(); css != chain_id_pairs_.end(); ++css) {
+    // chain description
     edm_it = entity_desc_map_.find(css->second);
-
     if (edm_it != entity_desc_map_.end()) {
       editor.SetChainType(css->first, edm_it->second.type);
       editor.SetChainDescription(css->first, edm_it->second.details);
@@ -1744,6 +1814,21 @@ void MMCifReader::OnEndData()
     } else {
       LOG_WARNING("No entity description found for atom_site.label_entity_id '"
                   << css->second << "'");
+    }
+    // find
+    blm_it = entity_branch_link_map_.find(css->second);
+    // store linker pair
+    if (blm_it != entity_branch_link_map_.end()) {
+      for (bl_it = blm_it->second.begin(); bl_it != blm_it->second.end();
+           ++bl_it) {
+        mol::ResidueHandle res1 = css->first.FindResidue(to_res_num(
+                                                         bl_it->res_num_1, ' '));
+        mol::ResidueHandle res2 = css->first.FindResidue(to_res_num(
+                                                         bl_it->res_num_2, ' '));
+        info_.AddEntityBranchLink(css->first.GetName(),
+                                  res1.FindAtom(bl_it->atm_nm_1),
+                                  res2.FindAtom(bl_it->atm_nm_2));
+      }
     }
   }
 
