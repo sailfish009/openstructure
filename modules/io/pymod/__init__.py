@@ -339,6 +339,7 @@ def LoadMMCIF(filename, fault_tolerant=None, calpha_only=None, profile='DEFAULT'
     reader.Parse()
     if prof.processor:
       prof.processor.Process(ent)
+      reader.info.ConnectBranchLinks()
     #else:
     #  raise IOError("File doesn't contain any entities")
     if seqres and info:
