@@ -264,7 +264,7 @@ class TestMMCifInfo(unittest.TestCase):
     self.assertEqual(len(crambin_pdb.atoms), 327)
 
   def test_mmcifinfo_entitybranch(self):
-    # create dummy atoms
+    # test MMCifInfoEntityBranch
     eh = mol.CreateEntity()
     editor = eh.EditXCS();
     ch = editor.InsertChain("A");
@@ -277,6 +277,25 @@ class TestMMCifInfo(unittest.TestCase):
 
     branch.ConnectBranchLink(editor)
     self.assertEqual(atom2.GetBondPartners()[0].qualified_name, "A.MAN2.C1")
+
+    # test entity_branches_
+    ch = editor.InsertChain("B");
+    res1 = editor.AppendResidue(ch, "NAG");
+    res2 = editor.AppendResidue(ch, "NAG");
+    atom3 = editor.InsertAtom(res2, "C1", geom.Vec3());
+    atom4 = editor.InsertAtom(res1, "O4", geom.Vec3());
+    info = io.MMCifInfo()
+    info.AddEntityBranchLink("A", atom1, atom2)
+    info.AddEntityBranchLink(ch.name, atom3, atom4)
+
+    blinks = info.GetEntityBranchLinks()
+    self.assertEqual(blinks[0].GetAtom1().qualified_name, "A.MAN2.C1")
+    self.assertEqual(blinks[0].atom2.qualified_name, "A.BMA1.O3")
+    self.assertEqual(blinks[1].atom1.qualified_name, "B.NAG2.C1")
+    self.assertEqual(blinks[1].GetAtom2().qualified_name, "B.NAG1.O4")
+
+    info.ConnectBranchLinks(editor)
+    self.assertEqual(atom4.GetBondPartners()[0].qualified_name, "B.NAG2.C1")
 
 if __name__== '__main__':
   from ost import testutils

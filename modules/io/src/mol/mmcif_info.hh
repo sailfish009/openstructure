@@ -925,14 +925,27 @@ class DLLEXPORT_OST_IO MMCifInfoEntityBranch {
 public:
   MMCifInfoEntityBranch(mol::AtomHandle atom1, mol::AtomHandle atom2):
                 atom1_(atom1), atom2_(atom2) {}
-        mol::AtomHandle GetAtom1() const { return atom1_;}
-        mol::AtomHandle GetAtom2() const { return atom2_; }
-        void SetAtom1(mol::AtomHandle atom) { atom1_ = atom; }
-        void SetAtom2(mol::AtomHandle atom) { atom2_ = atom; }
-        void ConnectBranchLink(mol::XCSEditor editor)
-        {
-          editor.Connect(atom1_, atom2_);
-        }
+  mol::AtomHandle GetAtom1() const { return atom1_;}
+  mol::AtomHandle GetAtom2() const { return atom2_; }
+  void SetAtom1(mol::AtomHandle atom) { atom1_ = atom; }
+  void SetAtom2(mol::AtomHandle atom) { atom2_ = atom; }
+  void ConnectBranchLink(mol::XCSEditor editor) {
+    editor.Connect(atom1_, atom2_);
+  }
+
+  bool operator==(const MMCifInfoEntityBranch& eb) const {
+    if (this->atom1_ != eb.atom1_) {
+      return false;
+    }
+    if (this->atom2_ != eb.atom2_) {
+      return false;
+    }
+    return true;
+  }
+
+  bool operator!=(const MMCifInfoEntityBranch& eb) const {
+    return !this->operator == (eb);
+  }
 
 private:
   mol::AtomHandle atom1_;
@@ -1189,7 +1202,11 @@ private:
   std::map<String, std::vector<MMCifInfoEntityBranch> > entity_branches_;
 };
 
+DLLEXPORT_OST_IO std::ostream& operator<<(std::ostream& os, 
+                                          const MMCifInfoEntityBranch& eb);
 
+DLLEXPORT_OST_IO std::ostream& operator<<(std::ostream& os, 
+                             const std::vector<MMCifInfoEntityBranch>& eb_list);
 }} // ns
 
 #endif

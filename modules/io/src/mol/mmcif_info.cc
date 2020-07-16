@@ -239,4 +239,24 @@ void MMCifInfo::ConnectBranchLinks(mol::XCSEditor editor)
   }
 }
 
+std::ostream& operator<<(std::ostream& os, const MMCifInfoEntityBranch& eb)
+{
+  os << "<MMCifInfoEntityBranch atom1:" << eb.GetAtom1() << " atom2:"
+     << eb.GetAtom2() << ">";
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os,
+                         const std::vector<MMCifInfoEntityBranch>& eb_list)
+{
+  os << "<MMCifInfoEntityBranchList";
+  std::vector<MMCifInfoEntityBranch>::const_iterator bl_it;
+  for (bl_it = eb_list.begin(); bl_it != eb_list.end(); ++bl_it) {
+    os << " <atom1:" << bl_it->GetAtom1() << " atom2:"
+       << bl_it->GetAtom2() << ">";
+  }
+  os << ">";
+  return os;
+}
+
 }} //ns

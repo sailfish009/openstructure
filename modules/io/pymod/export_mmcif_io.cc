@@ -340,6 +340,7 @@ void export_mmcif_io()
     .def("ConnectBranchLink", &MMCifInfoEntityBranch::ConnectBranchLink)
     .def("SetAtom1", &MMCifInfoEntityBranch::SetAtom1)
     .def("SetAtom2", &MMCifInfoEntityBranch::SetAtom2)
+    .def(self_ns::str(self))
     .add_property("atom1", &MMCifInfoEntityBranch::GetAtom1,
                   &MMCifInfoEntityBranch::SetAtom1)
     .add_property("atom2", &MMCifInfoEntityBranch::GetAtom2,
@@ -348,6 +349,12 @@ void export_mmcif_io()
 
   class_<MMCifInfoEntityBranchMap>("MMCifInfoEntityBranchMap", init<>())
     .def(map_indexing_suite<MMCifInfoEntityBranchMap>())
+  ;
+
+  class_<std::vector<MMCifInfoEntityBranch> >("MMCifInfoEntityBranchList",
+                                              init<>())
+    .def(vector_indexing_suite<std::vector<MMCifInfoEntityBranch> >())
+    .def(self_ns::str(self))
   ;
 
   class_<MMCifInfo>("MMCifInfo", init<>())
@@ -384,6 +391,9 @@ void export_mmcif_io()
          (arg("num"), arg("date"), arg("status"), arg("major")=-1,
           arg("minor")=-1))
     .def("GetRevisions", &MMCifInfo::GetRevisions)
+    .def("AddEntityBranchLink", &MMCifInfo::AddEntityBranchLink)
+    .def("GetEntityBranchLinks", &MMCifInfo::GetEntityBranchLinks)
+    .def("ConnectBranchLinks", &MMCifInfo::ConnectBranchLinks)
     .add_property("citations", make_function(&MMCifInfo::GetCitations,
                                    return_value_policy<copy_const_reference>()))
     .add_property("biounits", make_function(&MMCifInfo::GetBioUnits,
