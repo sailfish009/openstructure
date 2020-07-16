@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(mmcif_info)
   BOOST_CHECK(blinks[1].GetAtom2().GetQualifiedName() == "B.BMA1.O3");
 
   // check that branch links get bonds
-  info.ConnectBranchLinks(editor);
+  info.ConnectBranchLinks();
 
   BOOST_CHECK(atom11.GetBondPartners()[0] == atom12);
   BOOST_CHECK(atom22.GetBondPartners()[0] == atom21);

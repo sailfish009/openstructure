@@ -225,16 +225,19 @@ const std::vector<MMCifInfoEntityBranch> MMCifInfo::GetEntityBranchLinks() const
   return all_links;
 }
 
-void MMCifInfo::ConnectBranchLinks(mol::XCSEditor editor)
+void MMCifInfo::ConnectBranchLinks()
 {
   MMCifInfoEntityBranchMap::iterator blm_it;
   for (blm_it = entity_branches_.begin();
        blm_it != entity_branches_.end(); ++blm_it) {
-    for (std::vector<MMCifInfoEntityBranch>::iterator blv_it =
-           blm_it->second.begin();
-         blv_it != blm_it->second.end();
-         ++blv_it) {
-      blv_it->ConnectBranchLink(editor);
+    // We assume that one chain only comes from one entity, so we go with one
+    // editor per chain
+    std::vector<MMCifInfoEntityBranch>::iterator blv_it = blm_it->second.begin();
+    if (blv_it != blm_it->second.end()) {
+      mol::XCSEditor editor = blv_it->GetAtom1().GetEntity().EditXCS();
+      for (; blv_it != blm_it->second.end(); ++blv_it) {
+        blv_it->ConnectBranchLink(editor);
+      }
     }
   }
 }

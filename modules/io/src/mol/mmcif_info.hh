@@ -1179,7 +1179,7 @@ public:
 
   /// \brief Connect all atoms listed as links for branched entities.
   ///
-  void ConnectBranchLinks(mol::XCSEditor editor);
+  void ConnectBranchLinks();
 
 //protected:
 

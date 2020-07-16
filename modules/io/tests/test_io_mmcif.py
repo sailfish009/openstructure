@@ -294,7 +294,7 @@ class TestMMCifInfo(unittest.TestCase):
     self.assertEqual(blinks[1].atom1.qualified_name, "B.NAG2.C1")
     self.assertEqual(blinks[1].GetAtom2().qualified_name, "B.NAG1.O4")
 
-    info.ConnectBranchLinks(editor)
+    info.ConnectBranchLinks()
     self.assertEqual(atom4.GetBondPartners()[0].qualified_name, "B.NAG2.C1")
 
 if __name__== '__main__':
