@@ -1757,9 +1757,13 @@ void MMCifReader::ParsePdbxEntityBranchLink(const std::vector<StringRef>& column
   // check stereo values to be N S R
   /*if (indices_[BL_ATOM_STEREO_CONFIG_2] != -1) {
   }*/
-  // check value order to be ... git grep bond_order
-  /*if (indices_[BL_VALUE_ORDER] != -1) {
-  }*/
+  // check value order
+  if (indices_[BL_VALUE_ORDER] != -1) {
+    link_pair.bond_order = MMCifValueOrderToOSTBondOrder(
+                                              columns[indices_[BL_VALUE_ORDER]]);
+  } else {
+    link_pair.bond_order = 1;
+  }
 
   std::pair<MMCifPdbxEntityBranchLinkMap::iterator, bool> rit;
 
@@ -1827,7 +1831,8 @@ void MMCifReader::OnEndData()
                                                          bl_it->res_num_2, ' '));
         info_.AddEntityBranchLink(css->first.GetName(),
                                   res1.FindAtom(bl_it->atm_nm_1),
-                                  res2.FindAtom(bl_it->atm_nm_2));
+                                  res2.FindAtom(bl_it->atm_nm_2),
+                                  bl_it->bond_order);
       }
     }
   }
@@ -1922,6 +1927,66 @@ void MMCifReader::OnEndData()
            << atom_count_ << " atoms;"
            << helix_list_.size() << " helices and "
            << strand_list_.size() << " strands");
+}
+
+unsigned char MMCifValueOrderToOSTBondOrder(const StringRef value_order)
+{
+  if (value_order == StringRef("sing", 4)) {
+      return 1;
+  }
+  if (value_order == StringRef("doub", 4)) {
+      return 2;
+  }
+  if (value_order == StringRef("trip", 4)) {
+      return 3;
+  }
+  LOG_WARNING("Non-covered bond order found: '" << value_order << "'");
+  if (value_order == StringRef("arom", 4)) {
+      return 4;
+  }
+  if (value_order == StringRef("delo", 4)) {
+      return 5;
+  }
+  if (value_order == StringRef("pi", 2)) {
+      return 6;
+  }
+  if (value_order == StringRef("poly", 4)) {
+      return 7;
+  }
+  if (value_order == StringRef("quad", 4)) {
+      return 8;
+  }
+  return 1;
+}
+
+String OSTBondOrderToMMCifValueOrder(const unsigned char bond_order)
+{
+  if (bond_order == 1) {
+    return String("sing");
+  }
+  if (bond_order == 2) {
+    return String("doub");
+  }
+  if (bond_order == 3) {
+    return String("trip");
+  }
+  if (bond_order == 4) {
+    return String("arom");
+  }
+  if (bond_order == 5) {
+      return String("delo");
+  }
+  if (bond_order == 6) {
+      return String("pi");
+  }
+  if (bond_order == 7) {
+      return String("poly");
+  }
+  if (bond_order == 8) {
+      return String("quad");
+  }
+  LOG_WARNING("Unknow bond order found: '" << (int)bond_order << "'");
+  return String("");
 }
 
 }}

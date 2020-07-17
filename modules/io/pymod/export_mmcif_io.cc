@@ -334,17 +334,21 @@ void export_mmcif_io()
   ;
 
   class_<MMCifInfoEntityBranch>("MMCifInfoEntityBranch", init<mol::AtomHandle,
-                                mol::AtomHandle>())
+                                mol::AtomHandle, unsigned char>())
     .def("GetAtom1", &MMCifInfoEntityBranch::GetAtom1)
     .def("GetAtom2", &MMCifInfoEntityBranch::GetAtom2)
+    .def("GetBondOrder", &MMCifInfoEntityBranch::GetBondOrder)
     .def("ConnectBranchLink", &MMCifInfoEntityBranch::ConnectBranchLink)
     .def("SetAtom1", &MMCifInfoEntityBranch::SetAtom1)
     .def("SetAtom2", &MMCifInfoEntityBranch::SetAtom2)
+    .def("SetBondOrder", &MMCifInfoEntityBranch::SetBondOrder)
     .def(self_ns::str(self))
     .add_property("atom1", &MMCifInfoEntityBranch::GetAtom1,
                   &MMCifInfoEntityBranch::SetAtom1)
     .add_property("atom2", &MMCifInfoEntityBranch::GetAtom2,
                   &MMCifInfoEntityBranch::SetAtom2)
+    .add_property("bond_order", &MMCifInfoEntityBranch::GetBondOrder,
+                  &MMCifInfoEntityBranch::SetBondOrder)
   ;
 
   class_<MMCifInfoEntityBranchMap>("MMCifInfoEntityBranchMap", init<>())

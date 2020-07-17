@@ -923,14 +923,18 @@ private:
 ///
 class DLLEXPORT_OST_IO MMCifInfoEntityBranch {
 public:
-  MMCifInfoEntityBranch(mol::AtomHandle atom1, mol::AtomHandle atom2):
-                atom1_(atom1), atom2_(atom2) {}
+  MMCifInfoEntityBranch(mol::AtomHandle atom1,
+                        mol::AtomHandle atom2,
+                        unsigned char bond_order):
+atom1_(atom1), atom2_(atom2), bond_order_(bond_order) {}
   mol::AtomHandle GetAtom1() const { return atom1_;}
   mol::AtomHandle GetAtom2() const { return atom2_; }
+  unsigned char GetBondOrder() const { return bond_order_; }
   void SetAtom1(mol::AtomHandle atom) { atom1_ = atom; }
   void SetAtom2(mol::AtomHandle atom) { atom2_ = atom; }
+  void SetBondOrder(unsigned char bond_order) { bond_order_ = bond_order; }
   void ConnectBranchLink(mol::XCSEditor editor) {
-    editor.Connect(atom1_, atom2_);
+    editor.Connect(atom1_, atom2_, bond_order_);
   }
 
   bool operator==(const MMCifInfoEntityBranch& eb) const {
@@ -950,6 +954,7 @@ public:
 private:
   mol::AtomHandle atom1_;
   mol::AtomHandle atom2_;
+  unsigned char bond_order_;
 };
 typedef std::map<String, std::vector<MMCifInfoEntityBranch> > MMCifInfoEntityBranchMap;
 
@@ -1169,7 +1174,8 @@ public:
   /// \param atom2 second atom of the bond
   void AddEntityBranchLink(String chain_name,
                            mol::AtomHandle atom1,
-                           mol::AtomHandle atom2);
+                           mol::AtomHandle atom2,
+                           unsigned char bond_order);
 
   /// \brief Get all links for all branched entities
   ///

@@ -293,10 +293,11 @@ BOOST_AUTO_TEST_CASE(mmcif_info_branch)
   mol::AtomHandle atom1 = editor.InsertAtom(res2, "C1",geom::Vec3());
   mol::AtomHandle atom2 = editor.InsertAtom(res1, "O4",geom::Vec3());
 
-  MMCifInfoEntityBranch branch1(atom1, atom2);
+  MMCifInfoEntityBranch branch1(atom1, atom2, 1);
   BOOST_CHECK(branch1.GetAtom1().GetQualifiedName() == "A.NAG2.C1");
   BOOST_CHECK(branch1.GetAtom2().GetQualifiedName() == "A.NAG1.O4");
-  
+  BOOST_CHECK(branch1.GetBondOrder() == 1);
+
   BOOST_TEST_MESSAGE("  done.");
 }
 
@@ -348,15 +349,17 @@ BOOST_AUTO_TEST_CASE(mmcif_info)
   // create AtomHandles for testing
   mol::AtomHandle atom21 = editor.InsertAtom(res22, "C1",geom::Vec3());
   mol::AtomHandle atom22 = editor.InsertAtom(res21, "O3",geom::Vec3());
-  info.AddEntityBranchLink(ch1.GetName(), atom11, atom12);
-  info.AddEntityBranchLink(ch2.GetName(), atom21, atom22);
+  info.AddEntityBranchLink(ch1.GetName(), atom11, atom12, 1);
+  info.AddEntityBranchLink(ch2.GetName(), atom21, atom22, 1);
   std::vector<MMCifInfoEntityBranch> blinks = info.GetEntityBranchLinks();
   
   BOOST_CHECK(blinks.size() == 2);
   BOOST_CHECK(blinks[0].GetAtom1().GetQualifiedName() == "A.NAG2.C1");
   BOOST_CHECK(blinks[0].GetAtom2().GetQualifiedName() == "A.NAG1.O4");
+  BOOST_CHECK(blinks[0].GetBondOrder() == 1);
   BOOST_CHECK(blinks[1].GetAtom1().GetQualifiedName() == "B.MAN2.C1");
   BOOST_CHECK(blinks[1].GetAtom2().GetQualifiedName() == "B.BMA1.O3");
+  BOOST_CHECK(blinks[1].GetBondOrder() == 1);
 
   // check that branch links get bonds
   info.ConnectBranchLinks();

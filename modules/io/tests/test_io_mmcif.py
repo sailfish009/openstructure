@@ -272,8 +272,9 @@ class TestMMCifInfo(unittest.TestCase):
     res2 = editor.AppendResidue(ch, "MAN");
     atom1 = editor.InsertAtom(res2, "C1", geom.Vec3());
     atom2 = editor.InsertAtom(res1, "O3", geom.Vec3());
-    branch = io.MMCifInfoEntityBranch(atom1, atom2)
+    branch = io.MMCifInfoEntityBranch(atom1, atom2, 1)
     self.assertEqual(branch.atom1.qualified_name, "A.MAN2.C1")
+    self.assertEqual(branch.bond_order, 1)
 
     branch.ConnectBranchLink(editor)
     self.assertEqual(atom2.GetBondPartners()[0].qualified_name, "A.MAN2.C1")
@@ -285,14 +286,16 @@ class TestMMCifInfo(unittest.TestCase):
     atom3 = editor.InsertAtom(res2, "C1", geom.Vec3());
     atom4 = editor.InsertAtom(res1, "O4", geom.Vec3());
     info = io.MMCifInfo()
-    info.AddEntityBranchLink("A", atom1, atom2)
-    info.AddEntityBranchLink(ch.name, atom3, atom4)
+    info.AddEntityBranchLink("A", atom1, atom2, 1)
+    info.AddEntityBranchLink(ch.name, atom3, atom4, 1)
 
     blinks = info.GetEntityBranchLinks()
     self.assertEqual(blinks[0].GetAtom1().qualified_name, "A.MAN2.C1")
     self.assertEqual(blinks[0].atom2.qualified_name, "A.BMA1.O3")
+    self.assertEqual(blinks[0].GetBondOrder(), 1)
     self.assertEqual(blinks[1].atom1.qualified_name, "B.NAG2.C1")
     self.assertEqual(blinks[1].GetAtom2().qualified_name, "B.NAG1.O4")
+    self.assertEqual(blinks[1].GetBondOrder(), 1)
 
     info.ConnectBranchLinks()
     self.assertEqual(atom4.GetBondPartners()[0].qualified_name, "B.NAG2.C1")

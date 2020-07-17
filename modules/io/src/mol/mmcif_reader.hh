@@ -680,6 +680,7 @@ private:
     int res_num_2;    ///< index of the linked residue relative to its chain
     String cmp_2;     ///< tlc of residue (sugar)
     String atm_nm_2;  ///< index of the linked residue relative to its chain
+    unsigned char bond_order; ///< ID of value_order as OST bond_order
   } MMCifPdbxEntityBranchLink;
   typedef std::map<String, std::vector<MMCifPdbxEntityBranchLink> >
     MMCifPdbxEntityBranchLinkMap;
@@ -723,6 +724,18 @@ private:
   MMCifPdbxEntityBranchLinkMap entity_branch_link_map_;
 };
 
+/// \brief Translate mmCIF info on bond type (e.g.
+///        pdbx_entity_branch_link.value_order) to OST bond_order
+///
+/// \param value_order abbreviation detemrining the bond order
+DLLEXPORT_OST_IO unsigned char MMCifValueOrderToOSTBondOrder(
+                                                    const StringRef value_order);
+
+/// \brief Translate an OST bond_order to mmCIF value_order
+///
+/// \param bond_order OST bond order
+DLLEXPORT_OST_IO String OSTBondOrderToMMCifValueOrder(
+                                                 const unsigned char bond_order);
 }}
 
 #endif

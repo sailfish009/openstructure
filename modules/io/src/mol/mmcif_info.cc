@@ -197,7 +197,8 @@ MMCifInfoStructRefSeq::AddDif(int seq_rnum, const String& db_rnum, const String&
 
 void MMCifInfo::AddEntityBranchLink(String chain_name,
                                     mol::AtomHandle atom1,
-                                    mol::AtomHandle atom2)
+                                    mol::AtomHandle atom2,
+                                    unsigned char bond_order)
 {
   // check if element already exists
   MMCifInfoEntityBranchMap::iterator blm_it = entity_branches_.find(chain_name);
@@ -210,7 +211,7 @@ void MMCifInfo::AddEntityBranchLink(String chain_name,
     blm_it = rit.first;
   }
   // add new branch element
-  blm_it->second.push_back(MMCifInfoEntityBranch(atom1, atom2));
+  blm_it->second.push_back(MMCifInfoEntityBranch(atom1, atom2, bond_order));
 }
 
 const std::vector<MMCifInfoEntityBranch> MMCifInfo::GetEntityBranchLinks() const
