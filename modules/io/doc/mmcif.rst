@@ -1246,6 +1246,12 @@ of the annotation available.
     :type editor: :class:`~ost.mol.XCSEditor`
     :returns: Nothing
 
+  .. method:: GetEntityBranchChainNames
+
+    Get a list of chain names which contain branched entities.
+
+    :returns: :class:`list` od :class:`str`
+
   .. method:: GetAtom1
 
     See :attr:`atom1`

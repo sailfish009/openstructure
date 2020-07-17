@@ -1180,6 +1180,11 @@ public:
   /// \brief Get all links for all branched entities
   ///
   const std::vector<MMCifInfoEntityBranchLink> GetEntityBranchLinks() const;
+
+  /// \brief Get the names of all chains of branched entities.
+  ///
+  const std::vector<String> GetEntityBranchChainNames() const;
+
   //GetEntityBranchChains
   //GetEntityBranchByChain
 

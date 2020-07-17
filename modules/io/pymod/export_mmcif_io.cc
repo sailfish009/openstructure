@@ -30,6 +30,20 @@ using namespace ost;
 using namespace ost::io;
 using namespace ost::mol;
 
+template<typename T>
+boost::python::list VecToList(std::vector<T>& vec){
+  boost::python::list l;
+  for(typename std::vector<T>::iterator it=vec.begin();it!=vec.end();++it){
+    l.append(*it);
+  }
+  return l;
+}
+
+boost::python::list WrapGetNames(MMCifInfo *p){
+  std::vector<String> names = p->GetEntityBranchChainNames();
+  return VecToList<String>(names);
+}
+
 void export_mmcif_io()
 {
   class_<MMCifReader, boost::noncopyable>("MMCifReader", init<const String&, EntityHandle&, const IOProfile&>())
@@ -400,6 +414,7 @@ void export_mmcif_io()
     .def("AddEntityBranchLink", &MMCifInfo::AddEntityBranchLink)
     .def("GetEntityBranchLinks", &MMCifInfo::GetEntityBranchLinks)
     .def("ConnectBranchLinks", &MMCifInfo::ConnectBranchLinks)
+    .def("GetEntityBranchChainNames", &WrapGetNames)
     .add_property("citations", make_function(&MMCifInfo::GetCitations,
                                    return_value_policy<copy_const_reference>()))
     .add_property("biounits", make_function(&MMCifInfo::GetBioUnits,

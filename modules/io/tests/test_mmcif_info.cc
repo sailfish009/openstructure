@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(mmcif_info)
   info.AddEntityBranchLink(ch1.GetName(), atom11, atom12, 1);
   info.AddEntityBranchLink(ch2.GetName(), atom21, atom22, 1);
   std::vector<MMCifInfoEntityBranchLink> blinks = info.GetEntityBranchLinks();
-  
+
   BOOST_CHECK(blinks.size() == 2);
   BOOST_CHECK(blinks[0].GetAtom1().GetQualifiedName() == "A.NAG2.C1");
   BOOST_CHECK(blinks[0].GetAtom2().GetQualifiedName() == "A.NAG1.O4");
@@ -366,6 +366,11 @@ BOOST_AUTO_TEST_CASE(mmcif_info)
 
   BOOST_CHECK(atom11.GetBondPartners()[0] == atom12);
   BOOST_CHECK(atom22.GetBondPartners()[0] == atom21);
+
+  // check chain(name) retrieval works
+  std::vector<String> chain_names = info.GetEntityBranchChainNames();
+  BOOST_CHECK(chain_names[0] == "A");
+  BOOST_CHECK(chain_names[1] == "B");
 
   BOOST_TEST_MESSAGE("  done.");
 }

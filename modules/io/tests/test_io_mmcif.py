@@ -300,6 +300,9 @@ class TestMMCifInfo(unittest.TestCase):
     info.ConnectBranchLinks()
     self.assertEqual(atom4.GetBondPartners()[0].qualified_name, "B.NAG2.C1")
 
+    chain_names = info.GetEntityBranchChainNames()
+    self.assertEqual(chain_names, ['A', 'B'])
+
 if __name__== '__main__':
   from ost import testutils
   testutils.RunTests()
