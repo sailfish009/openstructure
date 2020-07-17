@@ -370,11 +370,11 @@ C flags:
 
 .. code-block:: bash
 
-  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/Cellar/python@3.8/3.8.3_2/\
-  Frameworks/Python.framework/Versions/Current/include/python3.8 \
-          -DPYTHON_LIBRARIES=/usr/local/Cellar/python@3.8/3.8.3_2/\
-  Frameworks/Python.framework/Versions/Current/lib/libpython3.8.dylib \
-          -DPYTHON_ROOT=/usr/local/Cellar/python@3.8/3.8.3_2 \
+  cmake . -DPYTHON_INCLUDE_PATH=/usr/local/opt/python@3.8/Frameworks/\
+  Python.framework/Versions/Current/include/python3.8/ \
+          -DPYTHON_LIBRARIES=/usr/local/opt/python@3.8/Frameworks/\
+  Python.framework/Versions/Current/lib/libpython3.8.dylib \
+          -DPYTHON_ROOT=/usr/local/opt/python@3.8/ \
           -DBOOST_ROOT=/usr/local \
           -DSYS_ROOT=/usr/local \
           -DOPTIMIZE=ON \
