@@ -919,7 +919,7 @@ private:
 	String details_;
 };
 
-/// \brief Store information on brnached structures (oligosaccharides)
+/// \brief Store information on branched structures (oligosaccharides)
 ///
 class DLLEXPORT_OST_IO MMCifInfoEntityBranchLink {
 public:

@@ -1203,15 +1203,83 @@ of the annotation available.
 
     See :attr:`first_release`
 
+.. class:: MMCifInfoEntityBranchLink
+
+  Data from ``pdbx_entity_branch``, most specifically
+  ``pdbx_entity_branch_link``. That is connectivity information for branched
+  entities, e.g. carbohydrates/ oligosaccharides.
+  :class:`Conop Processors <ost.conop.Processor>` can not easily connect them so
+  we use this information in :meth:`LoadMMCIF` to do that.
+
+  .. attribute:: atom1
+
+    The first atom of the bond. Corresponds to ``entity_branch_link.atom_id_1``,
+    ``entity_branch_link.comp_id_1`` and
+    ``entity_branch_link.entity_branch_list_num_1``. Also available via
+    :meth:`GetAtom1` and :meth:`SetAtom1`.
+
+    :type: :class:`~ost.mol.AtomHandle`
+
+  .. attribute:: atom2
+
+    The second atom of the bond. Corresponds to ``entity_branch_link.atom_id_2``,
+    ``entity_branch_link.comp_id_2`` and
+    ``entity_branch_link.entity_branch_list_num_2``. Also available via
+    :meth:`GetAtom2` and :meth:`SetAtom2`.
+
+    :type: :class:`~ost.mol.AtomHandle`
+
+  .. attribute:: bond_order
+
+    Order of a bond (e.g. 1=single, 2=double, 3=triple). Corresponds to
+    ``entity_branch_link.value_order``. Also available via :meth:`GetBondOrder`
+    and :meth:`SetBondOrder`.
+
+    :type: :class:`int`
+
+  .. method:: ConnectBranchLink(editor)
+
+    Establish a bond between :attr:`atom1` and :attr:`atom2` of a
+    :class:`MMCifInfoEntityBranchLink`.
+
+    :param editor: The editor instance to call for connecting the atoms.
+    :type editor: :class:`~ost.mol.XCSEditor`
+    :returns: Nothing
+
+  .. method:: GetAtom1
+
+    See :attr:`atom1`
+
+  .. method:: GetAtom2
+
+    See :attr:`atom2`
+
+  .. method:: GetBondOrder
+
+    See :attr:`bond_order`
+
+  .. method:: SetAtom1
+
+    See :attr:`atom1`
+
+  .. method:: SetAtom2
+
+    See :attr:`atom2`
+
+  .. method:: SetBondOrder
+
+    See :attr:`bond_order`
+
 ..  LocalWords:  cas isbn pubmed asu seqres conop ConnectAll casp COMPND OBSLTE
 ..  LocalWords:  SPRSDE pdb func autofunction exptl attr pdbx oper conf spr dif
 ..  LocalWords:  biounits biounit uniprot UNP seqs AddMMCifPDBChainTr cif asym
 ..  LocalWords:  auth GetMMCifPDBChainTr AddPDBCMMCifhainTr GetPDBMMCifChainTr
 ..  LocalWords:  GetRevisions AddRevision SetRevisionsDateOriginal GetSize
 ..  LocalWords:  GetNum num GetStatus GetLastDate GetFirstRelease storable
-..  LocalWords:  cas isbn pubmed asu seqres conop casp COMPND OBSLTE
+..  LocalWords:  cas isbn pubmed asu seqres conop casp COMPND OBSLTE LoadMMCIF
 ..  LocalWords:  SetChainList MMCifInfoTransOp ChainTypes MMCifInfoStructRef
 ..  LocalWords:  MMCifInfoRevisions bool difs MMCifInfoStructRefSeqDif rnum
 ..  LocalWords:  SetDateOriginal GetDateOriginal yyyy operationsintervalls
-..  LocalWords:  chainintervalls GetChainIntervalList GetMethodDetails
-..  LocalWords:  GetOperationsIntervalList SetMethodDetails
+..  LocalWords:  chainintervalls GetChainIntervalList GetMethodDetails GetAtom
+..  LocalWords:  GetOperationsIntervalList SetMethodDetails oligosaccharides
+..  LocalWords:  SetAtom GetBondOrder SetBondOrder MMCifInfoEntityBranchLink
