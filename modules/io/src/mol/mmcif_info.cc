@@ -201,23 +201,24 @@ void MMCifInfo::AddEntityBranchLink(String chain_name,
                                     unsigned char bond_order)
 {
   // check if element already exists
-  MMCifInfoEntityBranchMap::iterator blm_it = entity_branches_.find(chain_name);
+  MMCifInfoEntityBranchLinkMap::iterator blm_it =
+                                               entity_branches_.find(chain_name);
   if (blm_it == entity_branches_.end()) {
     // `find` points to the end of the map so chain_name was not found
-    std::pair<MMCifInfoEntityBranchMap::iterator, bool> rit =
-      entity_branches_.insert(MMCifInfoEntityBranchMap::value_type(chain_name,
-                                         std::vector<MMCifInfoEntityBranch>()));
+    std::pair<MMCifInfoEntityBranchLinkMap::iterator, bool> rit =
+     entity_branches_.insert(MMCifInfoEntityBranchLinkMap::value_type(chain_name,
+                                      std::vector<MMCifInfoEntityBranchLink>()));
     // let blm_it point to the new element so we can add to the vector
     blm_it = rit.first;
   }
   // add new branch element
-  blm_it->second.push_back(MMCifInfoEntityBranch(atom1, atom2, bond_order));
+  blm_it->second.push_back(MMCifInfoEntityBranchLink(atom1, atom2, bond_order));
 }
 
-const std::vector<MMCifInfoEntityBranch> MMCifInfo::GetEntityBranchLinks() const
+const std::vector<MMCifInfoEntityBranchLink> MMCifInfo::GetEntityBranchLinks() const
 {
-  std::vector<MMCifInfoEntityBranch> all_links;
-  MMCifInfoEntityBranchMap::const_iterator blm_it;
+  std::vector<MMCifInfoEntityBranchLink> all_links;
+  MMCifInfoEntityBranchLinkMap::const_iterator blm_it;
   for (blm_it = entity_branches_.begin();
        blm_it != entity_branches_.end(); ++blm_it) {
     std::copy(blm_it->second.begin(), blm_it->second.end(),
@@ -228,12 +229,13 @@ const std::vector<MMCifInfoEntityBranch> MMCifInfo::GetEntityBranchLinks() const
 
 void MMCifInfo::ConnectBranchLinks()
 {
-  MMCifInfoEntityBranchMap::iterator blm_it;
+  MMCifInfoEntityBranchLinkMap::iterator blm_it;
   for (blm_it = entity_branches_.begin();
        blm_it != entity_branches_.end(); ++blm_it) {
     // We assume that one chain only comes from one entity, so we go with one
     // editor per chain
-    std::vector<MMCifInfoEntityBranch>::iterator blv_it = blm_it->second.begin();
+    std::vector<MMCifInfoEntityBranchLink>::iterator blv_it =
+                                                          blm_it->second.begin();
     if (blv_it != blm_it->second.end()) {
       mol::XCSEditor editor = blv_it->GetAtom1().GetEntity().EditXCS();
       for (; blv_it != blm_it->second.end(); ++blv_it) {
@@ -243,18 +245,18 @@ void MMCifInfo::ConnectBranchLinks()
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const MMCifInfoEntityBranch& eb)
+std::ostream& operator<<(std::ostream& os, const MMCifInfoEntityBranchLink& eb)
 {
-  os << "<MMCifInfoEntityBranch atom1:" << eb.GetAtom1() << " atom2:"
+  os << "<MMCifInfoEntityBranchLink atom1:" << eb.GetAtom1() << " atom2:"
      << eb.GetAtom2() << ">";
   return os;
 }
 
 std::ostream& operator<<(std::ostream& os,
-                         const std::vector<MMCifInfoEntityBranch>& eb_list)
+                         const std::vector<MMCifInfoEntityBranchLink>& eb_list)
 {
-  os << "<MMCifInfoEntityBranchList";
-  std::vector<MMCifInfoEntityBranch>::const_iterator bl_it;
+  os << "<MMCifInfoEntityBranchLinkList";
+  std::vector<MMCifInfoEntityBranchLink>::const_iterator bl_it;
   for (bl_it = eb_list.begin(); bl_it != eb_list.end(); ++bl_it) {
     os << " <atom1:" << bl_it->GetAtom1() << " atom2:"
        << bl_it->GetAtom2() << ">";

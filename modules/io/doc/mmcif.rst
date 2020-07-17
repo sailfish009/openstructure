@@ -3,14 +3,14 @@ mmCIF File Format
 
 .. currentmodule:: ost.io
 
-The mmCIF file format is an alternate container for structural entities, also
-provided by the PDB. Here we describe how to load those files and how to deal
-with information provided above the common PDB format (:class:`MMCifInfo`,
+The mmCIF file format is a container for structural entities provided by the
+PDB. Here we describe how to load those files and how to deal with information
+provided above the legacy PDB format (:class:`MMCifInfo`,
 :class:`MMCifInfoCitation`, :class:`MMCifInfoTransOp`,
 :class:`MMCifInfoBioUnit`, :class:`MMCifInfoStructDetails`,
 :class:`MMCifInfoObsolete`, :class:`MMCifInfoStructRef`,
 :class:`MMCifInfoStructRefSeq`, :class:`MMCifInfoStructRefSeqDif`,
-:class:`MMCifInfoRevisions`).
+:class:`MMCifInfoRevisions`, :class:`MMCifInfoEntityBranchLink`).
 
 
 Loading mmCIF Files
@@ -50,6 +50,9 @@ The following categories of a mmCIF file are considered by the reader:
   :class:`MMCifInfoRevisions`
 * ``pdbx_audit_revision_history`` and ``pdbx_audit_revision_details``
   (mmCIF dictionary version >= 5) used to fill :class:`MMCifInfoRevisions`
+* ``pdbx_entity_branch`` and ``pdbx_entity_branch_link`` used for
+  :class:`MMCifInfoEntityBranchLink`, a list of links is available by
+  :meth:`~MMCifInfo.GetEntityBranchLinks`
 
 Notes:
 
@@ -302,6 +305,31 @@ of the annotation available.
   .. method:: SetObsoleteInfo()
 
     See :attr:`obsolete`
+
+  .. method:: GetEntityBranchLinks()
+
+    Get bond information for branched entities. Returns all
+    :class:`MMCifInfoEntityBranchLink` objects in one list. Chain and residue
+    information is available by the stored
+    :class:`AtomHandles <ost.mol.AtomHandle>` of each entry.
+
+  .. method:: AddEntityBranchLink(chain_name, atom1, atom2, bond_order)
+
+    Add bond information for a branched entity.
+
+    :param chain_name: Chain the bond belongs to
+    :type chain_name: :class:`str`
+    :param atom1: First atom of the bond
+    :type atom1: :class:`~ost.mol.AtomHandle`
+    :param atom2: Second atom of the bond
+    :type atom2: :class:`~ost.mol.AtomHandle`
+    :param bond_order: bond order (e.g. 1=single, 2=double, 3=triple)
+    :type bond_order: :class:`int`
+    :returns: Nothing
+
+  .. method:: ConnectBranchLinks()
+
+    Establish all bonds stored for branched entities.
 
 .. class:: MMCifInfoCitation
 

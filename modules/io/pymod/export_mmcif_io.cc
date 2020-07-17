@@ -333,31 +333,33 @@ void export_mmcif_io()
     .add_property("first_release", &MMCifInfoRevisions::GetFirstRelease)
   ;
 
-  class_<MMCifInfoEntityBranch>("MMCifInfoEntityBranch", init<mol::AtomHandle,
-                                mol::AtomHandle, unsigned char>())
-    .def("GetAtom1", &MMCifInfoEntityBranch::GetAtom1)
-    .def("GetAtom2", &MMCifInfoEntityBranch::GetAtom2)
-    .def("GetBondOrder", &MMCifInfoEntityBranch::GetBondOrder)
-    .def("ConnectBranchLink", &MMCifInfoEntityBranch::ConnectBranchLink)
-    .def("SetAtom1", &MMCifInfoEntityBranch::SetAtom1)
-    .def("SetAtom2", &MMCifInfoEntityBranch::SetAtom2)
-    .def("SetBondOrder", &MMCifInfoEntityBranch::SetBondOrder)
+  class_<MMCifInfoEntityBranchLink>("MMCifInfoEntityBranchLink",
+                                    init<mol::AtomHandle,
+                                    mol::AtomHandle, unsigned char>())
+    .def("GetAtom1", &MMCifInfoEntityBranchLink::GetAtom1)
+    .def("GetAtom2", &MMCifInfoEntityBranchLink::GetAtom2)
+    .def("GetBondOrder", &MMCifInfoEntityBranchLink::GetBondOrder)
+    .def("ConnectBranchLink", &MMCifInfoEntityBranchLink::ConnectBranchLink)
+    .def("SetAtom1", &MMCifInfoEntityBranchLink::SetAtom1)
+    .def("SetAtom2", &MMCifInfoEntityBranchLink::SetAtom2)
+    .def("SetBondOrder", &MMCifInfoEntityBranchLink::SetBondOrder)
     .def(self_ns::str(self))
-    .add_property("atom1", &MMCifInfoEntityBranch::GetAtom1,
-                  &MMCifInfoEntityBranch::SetAtom1)
-    .add_property("atom2", &MMCifInfoEntityBranch::GetAtom2,
-                  &MMCifInfoEntityBranch::SetAtom2)
-    .add_property("bond_order", &MMCifInfoEntityBranch::GetBondOrder,
-                  &MMCifInfoEntityBranch::SetBondOrder)
+    .add_property("atom1", &MMCifInfoEntityBranchLink::GetAtom1,
+                  &MMCifInfoEntityBranchLink::SetAtom1)
+    .add_property("atom2", &MMCifInfoEntityBranchLink::GetAtom2,
+                  &MMCifInfoEntityBranchLink::SetAtom2)
+    .add_property("bond_order", &MMCifInfoEntityBranchLink::GetBondOrder,
+                  &MMCifInfoEntityBranchLink::SetBondOrder)
   ;
 
-  class_<MMCifInfoEntityBranchMap>("MMCifInfoEntityBranchMap", init<>())
-    .def(map_indexing_suite<MMCifInfoEntityBranchMap>())
+  class_<MMCifInfoEntityBranchLinkMap>("MMCifInfoEntityBranchLinkMap", init<>())
+    .def(map_indexing_suite<MMCifInfoEntityBranchLinkMap>())
   ;
 
-  class_<std::vector<MMCifInfoEntityBranch> >("MMCifInfoEntityBranchList",
-                                              init<>())
-    .def(vector_indexing_suite<std::vector<MMCifInfoEntityBranch> >())
+  class_<std::vector<MMCifInfoEntityBranchLink> >(
+                                                 "MMCifInfoEntityBranchLinkList",
+                                                 init<>())
+    .def(vector_indexing_suite<std::vector<MMCifInfoEntityBranchLink> >())
     .def(self_ns::str(self))
   ;
 

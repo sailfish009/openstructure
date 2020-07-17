@@ -921,11 +921,11 @@ private:
 
 /// \brief Store information on brnached structures (oligosaccharides)
 ///
-class DLLEXPORT_OST_IO MMCifInfoEntityBranch {
+class DLLEXPORT_OST_IO MMCifInfoEntityBranchLink {
 public:
-  MMCifInfoEntityBranch(mol::AtomHandle atom1,
-                        mol::AtomHandle atom2,
-                        unsigned char bond_order):
+  MMCifInfoEntityBranchLink(mol::AtomHandle atom1,
+                            mol::AtomHandle atom2,
+                            unsigned char bond_order):
 atom1_(atom1), atom2_(atom2), bond_order_(bond_order) {}
   mol::AtomHandle GetAtom1() const { return atom1_;}
   mol::AtomHandle GetAtom2() const { return atom2_; }
@@ -937,7 +937,7 @@ atom1_(atom1), atom2_(atom2), bond_order_(bond_order) {}
     editor.Connect(atom1_, atom2_, bond_order_);
   }
 
-  bool operator==(const MMCifInfoEntityBranch& eb) const {
+  bool operator==(const MMCifInfoEntityBranchLink& eb) const {
     if (this->atom1_ != eb.atom1_) {
       return false;
     }
@@ -947,7 +947,7 @@ atom1_(atom1), atom2_(atom2), bond_order_(bond_order) {}
     return true;
   }
 
-  bool operator!=(const MMCifInfoEntityBranch& eb) const {
+  bool operator!=(const MMCifInfoEntityBranchLink& eb) const {
     return !this->operator == (eb);
   }
 
@@ -956,7 +956,7 @@ private:
   mol::AtomHandle atom2_;
   unsigned char bond_order_;
 };
-typedef std::map<String, std::vector<MMCifInfoEntityBranch> > MMCifInfoEntityBranchMap;
+typedef std::map<String, std::vector<MMCifInfoEntityBranchLink> > MMCifInfoEntityBranchLinkMap;
 
 /// \brief container class for additional information from MMCif files
 /// 
@@ -1179,7 +1179,7 @@ public:
 
   /// \brief Get all links for all branched entities
   ///
-  const std::vector<MMCifInfoEntityBranch> GetEntityBranchLinks() const;
+  const std::vector<MMCifInfoEntityBranchLink> GetEntityBranchLinks() const;
   //GetEntityBranchChains
   //GetEntityBranchByChain
 
@@ -1205,14 +1205,14 @@ private:
   std::map<String, String> cif_2_pdb_chain_id_;
   std::map<String, String> pdb_2_cif_chain_id_;
   std::map<String, String> cif_2_entity_id_;
-  std::map<String, std::vector<MMCifInfoEntityBranch> > entity_branches_;
+  std::map<String, std::vector<MMCifInfoEntityBranchLink> > entity_branches_;
 };
 
 DLLEXPORT_OST_IO std::ostream& operator<<(std::ostream& os, 
-                                          const MMCifInfoEntityBranch& eb);
+                                          const MMCifInfoEntityBranchLink& eb);
 
 DLLEXPORT_OST_IO std::ostream& operator<<(std::ostream& os, 
-                             const std::vector<MMCifInfoEntityBranch>& eb_list);
+                          const std::vector<MMCifInfoEntityBranchLink>& eb_list);
 }} // ns
 
 #endif
