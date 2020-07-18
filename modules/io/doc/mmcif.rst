@@ -1250,7 +1250,7 @@ of the annotation available.
 
     Get a list of chain names which contain branched entities.
 
-    :returns: :class:`list` od :class:`str`
+    :returns: :class:`list` of :class:`str`
 
   .. method:: GetAtom1
 
