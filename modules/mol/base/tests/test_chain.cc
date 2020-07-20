@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(chain_type)
    BOOST_CHECK(!ch1.IsPolynucleotide());
    e.SetChainType(ch1, CHAINTYPE_OLIGOSACCHARIDE);
    BOOST_CHECK(ch1.GetType() == CHAINTYPE_OLIGOSACCHARIDE);
-   BOOST_CHECK(!ch1.IsPolymer());
+   BOOST_CHECK(ch1.IsPolymer());
    BOOST_CHECK(!ch1.IsPolysaccharide());
    BOOST_CHECK(!ch1.IsPolypeptide());
    BOOST_CHECK(!ch1.IsPolynucleotide());
