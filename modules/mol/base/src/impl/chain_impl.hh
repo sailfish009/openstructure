@@ -69,7 +69,8 @@ public:
   {
     return type_==CHAINTYPE_POLY || this->IsPolypeptide() || 
            this->IsPolynucleotide() || this->IsPolysaccharide() ||
-           type_==CHAINTYPE_POLY_PEPTIDE_DN_RN;
+           type_==CHAINTYPE_POLY_PEPTIDE_DN_RN ||
+           type_==CHAINTYPE_OLIGOSACCHARIDE;
   }
   /// \brief whether the chain is a polysaccharide
   bool IsPolysaccharide() const
