@@ -542,7 +542,8 @@ class HHblits:
                         front of every key. Boolean True values add flag without
                         value. Merged with default options 
                         {'cpu': 1, 'n': 1, 'e': 0.001}, where 'n' defines the 
-                        number of iterations.
+                        number of iterations and 'e' the E-value cutoff for 
+                        inclusion of sequences in result alignment.
         :type options: :class:`dict`
 
         :param a3m_file: a path of a3m_file to be used, optional
@@ -553,7 +554,9 @@ class HHblits:
                           addss.pl script provided by the HH-suite. However, 
                           your HH-suite installation requires you to specify
                           paths to PSIRED etc. We refer to the HH-suite user
-                          guide for further instructions.
+                          guide for further instructions. Assignment is done
+                          by calling :func:`HHblits.AssignSSToA3M`
+
         :type assign_ss:  :class:`bool`
 
         :return: The path to the A3M file containing the MSA
