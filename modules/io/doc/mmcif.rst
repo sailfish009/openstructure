@@ -1252,6 +1252,12 @@ of the annotation available.
 
     :returns: :class:`list` of :class:`str`
 
+  .. method:: GetEntityBranchChains
+
+    Get a list of chains which contain branched entities.
+
+    :returns: :class:`list` of :class:`~ost.mol.ChainHandle`
+
   .. method:: GetAtom1
 
     See :attr:`atom1`
