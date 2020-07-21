@@ -11,6 +11,7 @@ import datetime
 
 import ost
 from ost import seq
+from ost import settings
 from ost.bindings import hhblits
 
 class _UnitTestHHblitsLog(ost.LogSink):
@@ -33,7 +34,9 @@ def setUpModule():
 
 class TestHHblitsBindings(unittest.TestCase):
     def setUp(self):
-        self.hhroot = os.getenv('EBROOTHHMINSUITE')
+        # expects default hhblits installation...
+        hhblits_bin_dir = os.path.dirname(settings.Locate('hhblits'))
+        self.hhroot = os.path.join(hhblits_bin_dir, os.pardir)
 
     def tearDown(self):
         if hasattr(self, 'hh'):
@@ -228,6 +231,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
+
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
                                  options={'-alphabet' :
                                           os.path.join(self.hhroot,
@@ -417,10 +421,19 @@ class TestHHblitsBindings(unittest.TestCase):
                          'a4b2554d... ATPEQAQLVHKEIRKIVKDTC\n')
 
 if __name__ == "__main__":
-    hhsuite_root_dir =  os.getenv('EBROOTHHMINSUITE')
-    if not hhsuite_root_dir:
-        print("No environment variable 'EBROOTHHMINSUITE'. To enable the "+\
-            "unit test, this needs to point to your HHsuite installation.")
+    try:
+        hhblits_version_string = hhblits.GetHHblitsVersionString()
+    except:
+        print("No HHblits installation found: skip unit tests")
         sys.exit(0)
+    if hhblits_version_string is None:
+        print("Could not identify HHblits version: skip unit tests")
+        sys.exit(0)
+    hhblits_version_major = int(hhblits_version_string.split('.')[0])
+    if hhblits_version_major != 3:
+        print("Found hhblits with major version %i. Unit tests only run with "\
+              "version 3: skip unit tests"%(hhblits_version_major))
+        sys.exit(0)
+
     from ost import testutils
     testutils.RunTests()
