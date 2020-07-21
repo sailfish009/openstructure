@@ -135,8 +135,9 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
-        a3m = self.hh.BuildQueryMSA('testfiles/hhblitsdb/unittestdb')
-        self.assertTrue(filecmp.cmp(a3m, "testfiles/testali_two.a3m"))
+        a3m = self.hh.BuildQueryMSA('testfiles/hhblitsdb/unittestdb', 
+                                    assign_ss = False)
+        self.assertTrue(filecmp.cmp(a3m, "testfiles/testali_two_no_ss.a3m"))
 
     def testA3mToProfileFileName(self):
         # test A3mToProfile to work with a given hhmake_file name
