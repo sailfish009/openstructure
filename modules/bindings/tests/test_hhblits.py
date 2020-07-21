@@ -268,15 +268,12 @@ class TestHHblitsBindings(unittest.TestCase):
         search_file = self.hh.Search("testfiles/testali.a3m",
                                      'testfiles/hhblitsdb/unittestdb')
 
-        with open(search_file) as tfh:
-          tlst = tfh.readlines()
-        with open("testfiles/test_two.hhr") as efh:
-          elst = efh.readlines()
-
-        self.assertEqual(len(elst), len(tlst))
-        for i in range(0, len(elst)):
-            if not elst[i].startswith(('Date', 'Command')):
-                self.assertEqual(elst[i], tlst[i])
+        with open(search_file) as f:
+              header, hits = hhblits.ParseHHblitsOutput(f)
+        self.assertEqual(len(hits), 4)
+        exp_scores = [199.3, 12.3, 11.5, 8.1]
+        for hit_idx in range(4):
+            self.assertAlmostEqual(hits[hit_idx].score, exp_scores[hit_idx])
 
     def testSearchNotWorking(self):
         query_seq = seq.CreateSequence('Test', 'VLSPADKTNVKAAWGKVGAHAGEYGAEA'+
