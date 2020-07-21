@@ -415,6 +415,7 @@ void export_mmcif_io()
     .def("GetEntityBranchLinks", &MMCifInfo::GetEntityBranchLinks)
     .def("ConnectBranchLinks", &MMCifInfo::ConnectBranchLinks)
     .def("GetEntityBranchChainNames", &WrapGetNames)
+    .def("GetEntityBranchChains", &MMCifInfo::GetEntityBranchChains)
     .add_property("citations", make_function(&MMCifInfo::GetCitations,
                                    return_value_policy<copy_const_reference>()))
     .add_property("biounits", make_function(&MMCifInfo::GetBioUnits,

@@ -302,6 +302,9 @@ class TestMMCifInfo(unittest.TestCase):
 
     chain_names = info.GetEntityBranchChainNames()
     self.assertEqual(chain_names, ['A', 'B'])
+    chains = info.GetEntityBranchChains()
+    self.assertEqual(chains[0].name, 'A')
+    self.assertEqual(chains[1].name, 'B')
 
 if __name__== '__main__':
   from ost import testutils
