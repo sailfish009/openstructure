@@ -372,6 +372,11 @@ BOOST_AUTO_TEST_CASE(mmcif_info)
   BOOST_CHECK(chain_names[0] == "A");
   BOOST_CHECK(chain_names[1] == "B");
 
+  // check chain(handle) retrieval works
+  mol::ChainHandleList chains = info.GetEntityBranchChains();
+  BOOST_CHECK(chains[0].GetName() == "A");
+  BOOST_CHECK(chains[1].GetName() == "B");
+
   BOOST_TEST_MESSAGE("  done.");
 }
 

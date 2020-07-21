@@ -238,6 +238,18 @@ const std::vector<String> MMCifInfo::GetEntityBranchChainNames() const
   return chain_names;
 }
 
+const mol::ChainHandleList MMCifInfo::GetEntityBranchChains() const
+{
+  std::vector<mol::ChainHandle> chains;
+  MMCifInfoEntityBranchLinkMap::const_iterator blm_it;
+  for (blm_it = entity_branches_.begin();
+       blm_it != entity_branches_.end(); ++blm_it) {
+    chains.push_back(blm_it->second[0].GetAtom1().GetResidue().GetChain());
+  }
+
+  return chains;
+}
+
 void MMCifInfo::ConnectBranchLinks()
 {
   MMCifInfoEntityBranchLinkMap::iterator blm_it;

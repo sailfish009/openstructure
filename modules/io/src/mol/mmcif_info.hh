@@ -1185,7 +1185,10 @@ public:
   ///
   const std::vector<String> GetEntityBranchChainNames() const;
 
-  //GetEntityBranchChains
+  /// \brief Get the all chains of branched entities.
+  ///
+const mol::ChainHandleList GetEntityBranchChains() const;
+
   //GetEntityBranchByChain
 
   /// \brief Connect all atoms listed as links for branched entities.
