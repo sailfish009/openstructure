@@ -311,9 +311,13 @@ BOOST_AUTO_TEST_CASE(mmcif_unknown_entity_type)
   columns.push_back(StringRef("polymer", 7));
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntity(columns));
   columns.pop_back();
+  columns.pop_back();
+  columns.push_back(StringRef("2", 1));
   columns.push_back(StringRef("non-polymer", 11));
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntity(columns));
   columns.pop_back();
+  columns.pop_back();
+  columns.push_back(StringRef("3", 1));  
   columns.push_back(StringRef("water", 5));
   BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntity(columns));
   BOOST_TEST_MESSAGE("          done.");
@@ -321,6 +325,8 @@ BOOST_AUTO_TEST_CASE(mmcif_unknown_entity_type)
   // negative
   BOOST_TEST_MESSAGE("          unknown type...");
   columns.pop_back();
+  columns.pop_back();
+  columns.push_back(StringRef("4", 1));
   columns.push_back(StringRef("foo", 3));
   BOOST_CHECK_THROW(tmmcif_p.ParseEntity(columns), Error);
   BOOST_TEST_MESSAGE("          done.");
@@ -404,20 +410,6 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
   seq::SequenceHandle curr = seqres.FindSequence("A");
   BOOST_CHECK(curr.GetString() == "VTI");
 
-  BOOST_TEST_MESSAGE("          testing missing corresponding entity entry...");
-  {
-    mol::EntityHandle eh = mol::CreateEntity();
-    std::vector<StringRef> columns;
-    TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
-
-    tmmcif_h.SetCategory(StringRef("entity_poly", 11));
-    tmmcif_h.Add(StringRef("entity_id", 9));
-    tmmcif_p.OnBeginLoop(tmmcif_h);
-
-    columns.push_back(StringRef("1", 1));
-    BOOST_CHECK_THROW(tmmcif_p.ParseEntityPoly(columns), IOException);
-  }
-  BOOST_TEST_MESSAGE("          done.");
   BOOST_TEST_MESSAGE("          testing type recognition...");
   {
     TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
@@ -1435,22 +1427,6 @@ BOOST_AUTO_TEST_CASE(mmcif_pdbx_entity_branch_tests)
 
   mmcif_p.Parse();
 
-  BOOST_TEST_MESSAGE("          testing missing corresponding entity entry...");
-  {
-    mol::EntityHandle eh = mol::CreateEntity();
-    std::vector<StringRef> columns;
-    TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
-
-    tmmcif_h.SetCategory(StringRef("pdbx_entity_branch", 18));
-    tmmcif_h.Add(StringRef("entity_id", 9));
-    tmmcif_h.Add(StringRef("type", 4));
-    tmmcif_p.OnBeginLoop(tmmcif_h);
-    columns.push_back(StringRef("1", 1));
-    columns.push_back(StringRef("oligosaccharide", 15));
-
-    BOOST_CHECK_THROW(tmmcif_p.ParsePdbxEntityBranch(columns), IOException);
-  }
-  BOOST_TEST_MESSAGE("          done.");
   BOOST_TEST_MESSAGE("          testing chain type recognition...");
   {
     TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);

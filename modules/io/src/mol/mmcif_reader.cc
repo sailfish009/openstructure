@@ -660,47 +660,50 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
                 columns[indices_[GROUP_PDB]][0]=='H');
 }
 
+MMCifReader::MMCifEntityDescMap::iterator MMCifReader::GetEntityDescMapIterator(
+  const String& entity_id)
+{
+  MMCifEntityDescMap::iterator edm_it = entity_desc_map_.find(entity_id);
+  // if the entity ID is not already stored, insert it with empty values
+  if (edm_it == entity_desc_map_.end()) {
+    MMCifEntityDesc desc = {.type=mol::CHAINTYPE_N_CHAINTYPES,
+                            .details="",
+                            .seqres=""};
+    edm_it = entity_desc_map_.insert(entity_desc_map_.begin(),
+                                     MMCifEntityDescMap::value_type(entity_id,
+                                                                    desc));
+  }
+  return edm_it;
+}
+
 void MMCifReader::ParseEntity(const std::vector<StringRef>& columns)
 {
-  bool store = false; // is it worth storing this record?
-  MMCifEntityDesc desc;
+  MMCifEntityDescMap::iterator edm_it =
+    GetEntityDescMapIterator(columns[indices_[E_ID]].str());
 
   // type
   if (indices_[E_TYPE] != -1) {
-    desc.type = mol::ChainTypeFromString(columns[indices_[E_TYPE]]);
-    store = true;
+    // only use the entity type if no other is set, entity_poly type is
+    // more precise, so if that was set before just leave it in
+    if (edm_it->second.type == mol::CHAINTYPE_N_CHAINTYPES) {
+      edm_it->second.type = mol::ChainTypeFromString(columns[indices_[E_TYPE]]);
+    }
+  } else {
+    // don't deal with entities without type
+    entity_desc_map_.erase(edm_it);
+    return;
   }
 
   // description
   if (indices_[PDBX_DESCRIPTION] != -1) {
-    desc.details = columns[indices_[PDBX_DESCRIPTION]].str();
-  } else {
-    desc.details = "";
-  }
-
-  if (store) {
-    desc.seqres = "";
-    entity_desc_map_.insert(
-                   MMCifEntityDescMap::value_type(columns[indices_[E_ID]].str(),
-                                                  desc)
-                            );
+    edm_it->second.details = columns[indices_[PDBX_DESCRIPTION]].str();
   }
 }
 
 void MMCifReader::ParseEntityPoly(const std::vector<StringRef>& columns)
 {
-  // we assume that the entity cat. ALWAYS comes before the entity_poly cat.
-  // search entity
   MMCifEntityDescMap::iterator edm_it =
-    entity_desc_map_.find(columns[indices_[ENTITY_ID]].str());
-
-  if (edm_it == entity_desc_map_.end()) {
-    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
-                     "'entity_poly' category defined before 'entity' for id '" +
-                                            columns[indices_[ENTITY_ID]].str() +
-                                             "' or missing.",
-                                             this->GetCurrentLinenum()));
-  }
+    GetEntityDescMapIterator(columns[indices_[ENTITY_ID]].str());
 
   // store type
   if (indices_[EP_TYPE] != -1) {
@@ -1713,19 +1716,9 @@ void MMCifReader::ParseStructRefSeqDif(const std::vector<StringRef>& columns)
 
 void MMCifReader::ParsePdbxEntityBranch(const std::vector<StringRef>& columns)
 {
-  // we assume that the entity cat. ALWAYS comes before the pdbx_entity_branch
-  // cat.
-  // search entity
+  // get entity/ descreption entry
   MMCifEntityDescMap::iterator edm_it =
-    entity_desc_map_.find(columns[indices_[BR_ENTITY_ID]].str());
-
-  if (edm_it == entity_desc_map_.end()) {
-    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
-              "'pdbx_entity_branch' category defined before 'entity' for id '" +
-                                         columns[indices_[BR_ENTITY_ID]].str() +
-                                             "' or missing.",
-                                             this->GetCurrentLinenum()));
-  }
+    GetEntityDescMapIterator(columns[indices_[BR_ENTITY_ID]].str());
 
   // store type
   if (indices_[BR_ENTITY_TYPE] != -1) {

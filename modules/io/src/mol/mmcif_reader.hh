@@ -629,6 +629,10 @@ private:
   } MMCifEntityDesc;
   typedef std::map<String, MMCifEntityDesc> MMCifEntityDescMap;
 
+  /// \brief Get an iterator for MMCifEntityDescMap by finding an element or
+  ///        inserting a new one into the map.
+  MMCifEntityDescMap::iterator GetEntityDescMapIterator(const String&);
+
   /// \struct assembly information
   typedef struct {
     String biounit_id;                              ///< identifier for the bu
@@ -739,3 +743,5 @@ DLLEXPORT_OST_IO String OSTBondOrderToMMCifValueOrder(
 }}
 
 #endif
+
+//  LocalWords:  MMCifEntityDescMap
