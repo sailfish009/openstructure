@@ -62,6 +62,7 @@ public:
   using MMCifReader::ParseStructConf;
   using MMCifReader::ParseStructSheetRange;
   using MMCifReader::ParsePdbxEntityBranch;
+  using MMCifReader::ParsePdbxEntityBranchLink;
   using MMCifReader::TryStoreIdx;
   using MMCifReader::SetRestrictChains;
   using MMCifReader::SetReadSeqRes;
@@ -1419,13 +1420,8 @@ BOOST_AUTO_TEST_CASE(mmcif_test_revisions_new)
 BOOST_AUTO_TEST_CASE(mmcif_pdbx_entity_branch_tests)
 {
   BOOST_TEST_MESSAGE("  Running mmcif_pdbx_entity_branch_tests...");
-  IOProfile profile;
   StarLoopDesc tmmcif_h;
-
   mol::EntityHandle eh = mol::CreateEntity();
-  MMCifReader mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
-
-  mmcif_p.Parse();
 
   BOOST_TEST_MESSAGE("          testing chain type recognition...");
   {
@@ -1457,6 +1453,69 @@ BOOST_AUTO_TEST_CASE(mmcif_pdbx_entity_branch_tests)
 
     columns.push_back(StringRef("ordinarysugar", 13));
     BOOST_CHECK_THROW(tmmcif_p.ParsePdbxEntityBranch(columns), ost::Error);
+  }
+  BOOST_TEST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("  done.");
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_pdbx_entity_branch_link_tests)
+{
+  BOOST_TEST_MESSAGE("  Running mmcif_pdbx_entity_branch_link_tests...");
+  mol::EntityHandle eh = mol::CreateEntity();
+  StarLoopDesc tmmcif_h;
+
+  BOOST_TEST_MESSAGE("          testing link retrieval...");
+  {
+    TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    std::vector<StringRef> columns;
+
+    // build dummy pdbx_entity_branch_link header
+    tmmcif_h.Clear();
+    tmmcif_h.SetCategory(StringRef("pdbx_entity_branch_link", 23));
+    tmmcif_h.Add(StringRef("entity_id", 9));
+    tmmcif_h.Add(StringRef("atom_id_1", 9));
+    tmmcif_h.Add(StringRef("atom_id_2", 9));
+    tmmcif_h.Add(StringRef("comp_id_1", 9));
+    tmmcif_h.Add(StringRef("comp_id_2", 9));
+    tmmcif_h.Add(StringRef("entity_branch_list_num_1", 24));
+    tmmcif_h.Add(StringRef("entity_branch_list_num_2", 24));
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+    columns.push_back(StringRef("1", 1));
+    columns.push_back(StringRef("C1", 2));
+    columns.push_back(StringRef("O3", 2));
+    columns.push_back(StringRef("MAN", 3));
+    columns.push_back(StringRef("BMA", 3));
+    columns.push_back(StringRef("2", 1));
+    columns.push_back(StringRef("1", 1));
+    BOOST_CHECK_NO_THROW(tmmcif_p.ParsePdbxEntityBranchLink(columns));
+  }
+  BOOST_TEST_MESSAGE("          done.");
+  BOOST_TEST_MESSAGE("          testing link with bond order...");
+  {
+    TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    std::vector<StringRef> columns;
+
+    // build dummy pdbx_entity_branch_link header
+    tmmcif_h.Clear();
+    tmmcif_h.SetCategory(StringRef("pdbx_entity_branch_link", 23));
+    tmmcif_h.Add(StringRef("entity_id", 9));
+    tmmcif_h.Add(StringRef("atom_id_1", 9));
+    tmmcif_h.Add(StringRef("atom_id_2", 9));
+    tmmcif_h.Add(StringRef("comp_id_1", 9));
+    tmmcif_h.Add(StringRef("comp_id_2", 9));
+    tmmcif_h.Add(StringRef("entity_branch_list_num_1", 24));
+    tmmcif_h.Add(StringRef("entity_branch_list_num_2", 24));
+    tmmcif_h.Add(StringRef("value_order", 11));
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+    columns.push_back(StringRef("1", 1));
+    columns.push_back(StringRef("C1", 2));
+    columns.push_back(StringRef("O3", 2));
+    columns.push_back(StringRef("MAN", 3));
+    columns.push_back(StringRef("BMA", 3));
+    columns.push_back(StringRef("2", 1));
+    columns.push_back(StringRef("1", 1));
+    columns.push_back(StringRef("2", 1));
+    BOOST_CHECK_NO_THROW(tmmcif_p.ParsePdbxEntityBranchLink(columns));
   }
   BOOST_TEST_MESSAGE("          done.");
   BOOST_TEST_MESSAGE("  done.");
