@@ -48,14 +48,14 @@ void ExtractValidPositions(const String& entry_name, const String& chain_name,
                                                          valid_seq.end()));
 }
 
-void ExtractTemplateDataDisCo(const String& entry_name, const String& chain_name,
-                              const ost::seq::AlignmentHandle& aln,
-                              LinearIndexerPtr indexer,
-                              LinearCharacterContainerPtr seqres_container,
-                              LinearCharacterContainerPtr atomseq_container,
-                              LinearPositionContainerPtr& position_container,
-                              std::vector<int>& residue_numbers,
-                              geom::Vec3List& positions) {
+void ExtractTemplateData(const String& entry_name, const String& chain_name,
+                         const ost::seq::AlignmentHandle& aln,
+                         LinearIndexerPtr indexer,
+                         LinearCharacterContainerPtr seqres_container,
+                         LinearCharacterContainerPtr atomseq_container,
+                         std::vector<LinearPositionContainerPtr>& position_containers,
+                         std::vector<int>& residue_numbers,
+                         std::vector<geom::Vec3List>& positions) {
 
   std::pair<uint64_t, uint64_t> data_range = indexer->GetDataRange(entry_name,
                                                                    chain_name);
@@ -75,119 +75,34 @@ void ExtractTemplateDataDisCo(const String& entry_name, const String& chain_name
 
   String template_atomseq;
   atomseq_container->GetCharacters(data_range, template_atomseq);
-  geom::Vec3List extracted_positions;
-  position_container->GetPositions(data_range, extracted_positions);
+  int n_pos_containers = position_containers.size();
+  std::vector<geom::Vec3List> extracted_positions(n_pos_containers);
+  for(int i = 0; i < n_pos_containers; ++i) {
+    position_containers[i]->GetPositions(data_range, extracted_positions[i]);
+  }
 
-  // prepare output
-  uint template_atomseq_size = template_atomseq.size();
-  residue_numbers.clear();
-  residue_numbers.reserve(template_atomseq_size);  
-  positions.clear();
-  positions.reserve(template_atomseq_size);
-
-  // extract
   uint current_rnum = aln.GetSequence(0).GetOffset() + 1;
   uint current_template_pos = 0;
   String seqres_seq = aln.GetSequence(0).GetString();
   String template_seq = aln.GetSequence(1).GetString();
+
+  // prepare output
+  uint template_atomseq_size = template_atomseq.size();
+  positions.assign(n_pos_containers, geom::Vec3List());
+  for(int i = 0; i < n_pos_containers; ++i) {
+    positions[i].reserve(template_atomseq_size);
+  }
+  residue_numbers.clear();
+  residue_numbers.reserve(template_atomseq_size);  
 
   for(int i = 0; i < aln.GetLength(); ++i) {
     if(seqres_seq[i] != '-' && template_seq[i] != '-') {
       if(template_atomseq[current_template_pos] != '-') {
         // it is aligned and we have a valid position!
         residue_numbers.push_back(current_rnum);
-        positions.push_back(extracted_positions[current_template_pos]);
-      }
-    }
-
-    if(seqres_seq[i] != '-') {
-      ++current_rnum;
-    }
-
-    if(template_seq[i] != '-') {
-      ++current_template_pos;
-    }
-  }
-}
-
-void ExtractTemplateDataGMQE(const String& entry_name, const String& chain_name,
-                             const ost::seq::AlignmentHandle& aln,
-                             LinearIndexerPtr indexer, 
-                             LinearCharacterContainerPtr seqres_container,
-                             LinearCharacterContainerPtr atomseq_container,
-                             LinearCharacterContainerPtr dssp_container,
-                             LinearPositionContainerPtr& n_position_container,
-                             LinearPositionContainerPtr& ca_position_container,
-                             LinearPositionContainerPtr& c_position_container,
-                             LinearPositionContainerPtr& cb_position_container,
-                             std::vector<int>& residue_numbers,
-                             String& dssp,
-                             geom::Vec3List& n_positions,
-                             geom::Vec3List& ca_positions,
-                             geom::Vec3List& c_positions,
-                             geom::Vec3List& cb_positions) {
-
-  std::pair<uint64_t, uint64_t> data_range = indexer->GetDataRange(entry_name,
-                                                                   chain_name);
-
-  String template_seqres = aln.GetSequence(1).GetGaplessString();
-  data_range.first += aln.GetSequence(1).GetOffset();
-  data_range.second = data_range.first + template_seqres.size();
-
-  // check, whether the the template seqres is consistent with what
-  // we find in seqres_container
-  String expected_template_seqres;
-  seqres_container->GetCharacters(data_range, expected_template_seqres);
-  if(expected_template_seqres != template_seqres) {
-    throw std::runtime_error("Template sequence in input alignment is "
-                             "inconsistent with sequence in SEQRES container!");
-  }
-
-  String template_atomseq;
-  atomseq_container->GetCharacters(data_range, template_atomseq);
-  String extracted_dssp;
-  dssp_container->GetCharacters(data_range, extracted_dssp);
-  geom::Vec3List extracted_n_positions;
-  n_position_container->GetPositions(data_range, extracted_n_positions);
-  geom::Vec3List extracted_ca_positions;
-  ca_position_container->GetPositions(data_range, extracted_ca_positions);
-  geom::Vec3List extracted_c_positions;
-  c_position_container->GetPositions(data_range, extracted_c_positions);
-  geom::Vec3List extracted_cb_positions;
-  cb_position_container->GetPositions(data_range, extracted_cb_positions);
-
-  // prepare output
-  uint template_atomseq_size = template_atomseq.size();
-  residue_numbers.clear();
-  residue_numbers.reserve(template_atomseq_size);  
-  dssp.clear();
-  dssp.reserve(template_atomseq_size);
-  n_positions.clear();
-  n_positions.reserve(template_atomseq_size);
-  ca_positions.clear();
-  ca_positions.reserve(template_atomseq_size);
-  c_positions.clear();
-  c_positions.reserve(template_atomseq_size);
-  cb_positions.clear();
-  cb_positions.reserve(template_atomseq_size);
-
-
-  // extract
-  uint current_rnum = aln.GetSequence(0).GetOffset() + 1;
-  uint current_template_pos = 0;
-  String seqres_seq = aln.GetSequence(0).GetString();
-  String template_seq = aln.GetSequence(1).GetString();
-
-  for(int i = 0; i < aln.GetLength(); ++i) {
-    if(seqres_seq[i] != '-' && template_seq[i] != '-') {
-      if(template_atomseq[current_template_pos] != '-') {
-        // it is aligned and we have a valid position!
-        residue_numbers.push_back(current_rnum);
-        dssp.push_back(extracted_dssp[current_template_pos]);
-        n_positions.push_back(extracted_n_positions[current_template_pos]);
-        ca_positions.push_back(extracted_ca_positions[current_template_pos]);
-        c_positions.push_back(extracted_c_positions[current_template_pos]);
-        cb_positions.push_back(extracted_cb_positions[current_template_pos]);
+        for(int j = 0; j < n_pos_containers; ++j) {
+          positions[j].push_back(extracted_positions[j][current_template_pos]);
+        }
       }
     }
 
