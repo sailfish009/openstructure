@@ -148,50 +148,24 @@ void WrapGetPositions(LinearPositionContainerPtr container,
 }
 
 
-tuple WrapExtractTemplateDataSingle(const String& entry_name, const String& chain_name,
-                                    const ost::seq::AlignmentHandle& aln,
-                                    LinearIndexerPtr indexer,
-                                    LinearCharacterContainerPtr seqres_container,
-                                    LinearCharacterContainerPtr atomseq_container,
-                                    LinearPositionContainerPtr position_container) {
+tuple WrapExtractTemplateData(const String& entry_name, const String& chain_name,
+                              const ost::seq::AlignmentHandle& aln,
+                              LinearIndexer& indexer,
+                              LinearCharacterContainer& seqres_container,
+                              LinearCharacterContainer& atomseq_container,
+                              LinearPositionContainer& position_container) {
 
-  std::vector<LinearPositionContainerPtr> position_containers;
-  position_containers.push_back(position_container);
   std::vector<int> v_residue_numbers;
-  std::vector<geom::Vec3List> position_vec;
+  geom::Vec3List ca_positions;
 
   ost::db::ExtractTemplateData(entry_name, chain_name, aln, indexer, 
                                seqres_container, atomseq_container, 
-                               position_containers, v_residue_numbers,
-                               position_vec);
+                               position_container, v_residue_numbers,
+                               ca_positions);
 
   list residue_numbers;
   VecToList(v_residue_numbers, residue_numbers);
-  return boost::python::make_tuple(residue_numbers, position_vec[0]);
-} 
-
-tuple WrapExtractTemplateDataList(const String& entry_name, const String& chain_name,
-                                  const ost::seq::AlignmentHandle& aln,
-                                  LinearIndexerPtr indexer,
-                                  LinearCharacterContainerPtr seqres_container,
-                                  LinearCharacterContainerPtr atomseq_container,
-                                  boost::python::list& position_containers) {
-
-  std::vector<LinearPositionContainerPtr> v_position_containers; 
-  ListToVec(position_containers, v_position_containers);
-  std::vector<int> v_residue_numbers;
-  std::vector<geom::Vec3List> position_vec;
-
-  ost::db::ExtractTemplateData(entry_name, chain_name, aln, indexer, 
-                               seqres_container, atomseq_container, 
-                               v_position_containers, v_residue_numbers,
-                               position_vec);
-
-  list residue_numbers;
-  list position_list;
-  VecToList(v_residue_numbers, residue_numbers);
-  VecToList(position_vec, position_list);
-  return boost::python::make_tuple(residue_numbers, position_list);
+  return boost::python::make_tuple(residue_numbers, ca_positions);
 }   
 
 }
@@ -252,20 +226,13 @@ void export_linear_db() {
                                                         arg("position_container"),
                                                         arg("seq"), arg("positions")));
 
-  def("ExtractTemplateData", &WrapExtractTemplateDataSingle, (arg("entry_name"),
-                                                              arg("chain_name"),
-                                                              arg("aln"),
-                                                              arg("linear_indexer"),
-                                                              arg("seqres_container"),
-                                                              arg("atomseq_container"),
-                                                              arg("position_container")));
+  def("ExtractTemplateData", &WrapExtractTemplateData, (arg("entry_name"),
+                                                        arg("chain_name"),
+                                                        arg("aln"),
+                                                        arg("linear_indexer"),
+                                                        arg("seqres_container"),
+                                                        arg("atomseq_container"),
+                                                        arg("position_container")));
 
-  def("ExtractTemplateData", &WrapExtractTemplateDataList, (arg("entry_name"),
-                                                            arg("chain_name"),
-                                                            arg("aln"),
-                                                            arg("linear_indexer"),
-                                                            arg("seqres_container"),
-                                                            arg("atomseq_container"),
-                                                            arg("position_containers")));
 }
 

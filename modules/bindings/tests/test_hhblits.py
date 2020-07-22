@@ -11,6 +11,7 @@ import datetime
 
 import ost
 from ost import seq
+from ost import settings
 from ost.bindings import hhblits
 
 class _UnitTestHHblitsLog(ost.LogSink):
@@ -33,7 +34,9 @@ def setUpModule():
 
 class TestHHblitsBindings(unittest.TestCase):
     def setUp(self):
-        self.hhroot = os.getenv('EBROOTHHMINSUITE')
+        # expects default hhblits installation...
+        hhblits_bin_dir = os.path.dirname(settings.Locate('hhblits'))
+        self.hhroot = os.path.join(hhblits_bin_dir, os.pardir)
 
     def tearDown(self):
         if hasattr(self, 'hh'):
@@ -132,8 +135,9 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
-        a3m = self.hh.BuildQueryMSA('testfiles/hhblitsdb/hhblitsdb')
-        self.assertTrue(filecmp.cmp(a3m, "testfiles/testali.a3m"))
+        a3m = self.hh.BuildQueryMSA('testfiles/hhblitsdb/unittestdb', 
+                                    assign_ss = False)
+        self.assertTrue(filecmp.cmp(a3m, "testfiles/testali_two_no_ss.a3m"))
 
     def testA3mToProfileFileName(self):
         # test A3mToProfile to work with a given hhmake_file name
@@ -215,7 +219,7 @@ class TestHHblitsBindings(unittest.TestCase):
         os.remove(self.tmpfile)
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
                                  cs_file=self.tmpfile, options={'-alphabet' :
-                                                os.path.join(self.hh.hhlib_dir,
+                                                os.path.join(self.hhroot,
                                                              'data',
                                                              'cs219.lib')})
         self.assertTrue(filecmp.cmp(csfile, 'testfiles/test.seq219'))
@@ -228,9 +232,10 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
+
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
                                  options={'-alphabet' :
-                                          os.path.join(self.hh.hhlib_dir,
+                                          os.path.join(self.hhroot,
                                                        'data',
                                                        'cs219.lib')})
         self.assertTrue(filecmp.cmp(csfile, 'testfiles/test.seq219'))
@@ -247,7 +252,7 @@ class TestHHblitsBindings(unittest.TestCase):
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
                                  cs_file='testfiles/test.seq219',
                                  options={'-alphabet' :
-                                          os.path.join(self.hh.hhlib_dir,
+                                          os.path.join(self.hhroot,
                                                        'data',
                                                        'cs219.lib')})
         self.assertTrue(filecmp.cmp(csfile, 'testfiles/test.seq219'))
@@ -261,29 +266,24 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
         search_file = self.hh.Search("testfiles/testali.a3m",
-                                     'testfiles/hhblitsdb/hhblitsdb')
+                                     'testfiles/hhblitsdb/unittestdb')
 
-        with open(search_file) as tfh:
-          tlst = tfh.readlines()
-        with open("testfiles/test.hhr") as efh:
-          elst = efh.readlines()
-
-        self.assertEqual(len(elst), len(tlst))
-        for i in range(0, len(elst)):
-            if not elst[i].startswith(('Date', 'Command')):
-                self.assertEqual(elst[i], tlst[i])
+        with open(search_file) as f:
+              header, hits = hhblits.ParseHHblitsOutput(f)
+        self.assertEqual(len(hits), 4)
+        exp_scores = [199.3, 12.3, 11.5, 8.1]
+        for hit_idx in range(4):
+            self.assertAlmostEqual(hits[hit_idx].score, exp_scores[hit_idx])
 
     def testSearchNotWorking(self):
-        # successful search
         query_seq = seq.CreateSequence('Test', 'VLSPADKTNVKAAWGKVGAHAGEYGAEA'+
                                        'LERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVAD'+
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
         self.hh = hhblits.HHblits(query_seq, self.hhroot)
-        search_file = self.hh.Search("doesnotexist.a3m",
-                                     'testfiles/hhblitsdb/hhblitsdb')
-        self.assertEqual(search_file, None)
+        with self.assertRaises(RuntimeError) as rte:
+            self.hh.Search("doesnotexist.a3m", 'testfiles/hhblitsdb/unittestdb')
 
     def testParseHHMWorking(self):
         # get info from an HHM file
@@ -419,10 +419,19 @@ class TestHHblitsBindings(unittest.TestCase):
                          'a4b2554d... ATPEQAQLVHKEIRKIVKDTC\n')
 
 if __name__ == "__main__":
-    hhsuite_root_dir =  os.getenv('EBROOTHHMINSUITE')
-    if not hhsuite_root_dir:
-        print("No environment variable 'EBROOTHHMINSUITE'. To enable the "+\
-            "unit test, this needs to point to your HHsuite installation.")
+    try:
+        hhblits_version_string = hhblits.GetHHblitsVersionString()
+    except:
+        print("No HHblits installation found: skip unit tests")
         sys.exit(0)
+    if hhblits_version_string is None:
+        print("Could not identify HHblits version: skip unit tests")
+        sys.exit(0)
+    hhblits_version_major = int(hhblits_version_string.split('.')[0])
+    if hhblits_version_major != 3:
+        print("Found hhblits with major version %i. Unit tests only run with "\
+              "version 3: skip unit tests"%(hhblits_version_major))
+        sys.exit(0)
+
     from ost import testutils
     testutils.RunTests()
