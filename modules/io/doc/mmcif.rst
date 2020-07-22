@@ -336,7 +336,7 @@ of the annotation available.
     :type atom1: :class:`~ost.mol.AtomHandle`
     :param atom2: Second atom of the bond
     :type atom2: :class:`~ost.mol.AtomHandle`
-    :param bond_order: bond order (e.g. 1=single, 2=double, 3=triple)
+    :param bond_order: Bond order (e.g. 1=single, 2=double, 3=triple)
     :type bond_order: :class:`int`
     :returns: Nothing
 
