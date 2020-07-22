@@ -37,12 +37,12 @@ void ExtractValidPositions(const String& entry_name, const String& chain_name,
 
 void ExtractTemplateData(const String& entry_name, const String& chain_name,
                          const ost::seq::AlignmentHandle& aln,
-                         LinearIndexerPtr indexer, 
-                         LinearCharacterContainerPtr seqres_container,
-                         LinearCharacterContainerPtr atomseq_container,
-                         std::vector<LinearPositionContainerPtr>& position_container,
+                         LinearIndexer& indexer, 
+                         LinearCharacterContainer& seqres_container,
+                         LinearCharacterContainer& atomseq_container,
+                         LinearPositionContainer& position_container,
                          std::vector<int>& residue_numbers,
-                         std::vector<geom::Vec3List>& positions);
+                         geom::Vec3List& ca_positions);
 
 }} //ns
 
