@@ -377,6 +377,13 @@ BOOST_AUTO_TEST_CASE(mmcif_info)
   BOOST_CHECK(chains[0].GetName() == "A");
   BOOST_CHECK(chains[1].GetName() == "B");
 
+  // check retrieval of links by chain name
+  std::vector<MMCifInfoEntityBranchLink> cblinks =
+    info.GetEntityBranchByChain("A");
+  BOOST_CHECK(cblinks.size() == 1);
+  cblinks = info.GetEntityBranchByChain("C");
+  BOOST_CHECK(cblinks.size() == 0);
+
   BOOST_TEST_MESSAGE("  done.");
 }
 

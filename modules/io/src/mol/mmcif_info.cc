@@ -227,6 +227,18 @@ const std::vector<MMCifInfoEntityBranchLink> MMCifInfo::GetEntityBranchLinks() c
   return all_links;
 }
 
+const std::vector<MMCifInfoEntityBranchLink> MMCifInfo::GetEntityBranchByChain(
+                                                 const String& chain_name) const
+{
+  // search the requested chain
+  MMCifInfoEntityBranchLinkMap::const_iterator blm_it =
+                                               entity_branches_.find(chain_name);
+  if (blm_it != entity_branches_.end()) {
+    return blm_it->second;
+  }
+  return std::vector<MMCifInfoEntityBranchLink>();
+}
+
 const std::vector<String> MMCifInfo::GetEntityBranchChainNames() const
 {
   std::vector<String> chain_names;

@@ -631,7 +631,8 @@ private:
 
   /// \brief Get an iterator for MMCifEntityDescMap by finding an element or
   ///        inserting a new one into the map.
-  MMCifEntityDescMap::iterator GetEntityDescMapIterator(const String&);
+  /// \param entity_id ID of the entity to talk to
+  MMCifEntityDescMap::iterator GetEntityDescMapIterator(const String& entity_id);
 
   /// \struct assembly information
   typedef struct {

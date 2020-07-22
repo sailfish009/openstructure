@@ -52,7 +52,8 @@ The following categories of a mmCIF file are considered by the reader:
   (mmCIF dictionary version >= 5) used to fill :class:`MMCifInfoRevisions`
 * ``pdbx_entity_branch`` and ``pdbx_entity_branch_link`` used for
   :class:`MMCifInfoEntityBranchLink`, a list of links is available by
-  :meth:`~MMCifInfo.GetEntityBranchLinks`
+  :meth:`~MMCifInfo.GetEntityBranchLinks` and
+  :meth:`~MMCifInfo.GetEntityBranchByChain`
 
 Notes:
 
@@ -313,6 +314,18 @@ of the annotation available.
     information is available by the stored
     :class:`AtomHandles <ost.mol.AtomHandle>` of each entry.
 
+    :returns: :class:`list` of :class:`MMCifInfoEntityBranchLink`
+
+  .. method:: GetEntityBranchByChain(chain_name)
+
+    Get bond information for chains with branched entities. Returns all
+    :class:`MMCifInfoEntityBranchLink` objects in one list if chain is a
+    branched entity, an empty list otherwise.
+
+    :param chain_name: Chain name to check for branch links
+    :type chain_name: :class:`str`
+    :returns: :class:`list` of :class:`MMCifInfoEntityBranchLink`
+
   .. method:: AddEntityBranchLink(chain_name, atom1, atom2, bond_order)
 
     Add bond information for a branched entity.
@@ -327,7 +340,19 @@ of the annotation available.
     :type bond_order: :class:`int`
     :returns: Nothing
 
-  .. method:: ConnectBranchLinks()
+  .. method:: GetEntityBranchChainNames
+
+    Get a list of chain names which contain branched entities.
+
+    :returns: :class:`list` of :class:`str`
+
+  .. method:: GetEntityBranchChains
+
+    Get a list of chains which contain branched entities.
+
+    :returns: :class:`list` of :class:`~ost.mol.ChainHandle`
+
+  .. method:: ConnectBranchLinks
 
     Establish all bonds stored for branched entities.
 
@@ -1246,18 +1271,6 @@ of the annotation available.
     :type editor: :class:`~ost.mol.XCSEditor`
     :returns: Nothing
 
-  .. method:: GetEntityBranchChainNames
-
-    Get a list of chain names which contain branched entities.
-
-    :returns: :class:`list` of :class:`str`
-
-  .. method:: GetEntityBranchChains
-
-    Get a list of chains which contain branched entities.
-
-    :returns: :class:`list` of :class:`~ost.mol.ChainHandle`
-
   .. method:: GetAtom1
 
     See :attr:`atom1`
@@ -1286,7 +1299,7 @@ of the annotation available.
 ..  LocalWords:  SPRSDE pdb func autofunction exptl attr pdbx oper conf spr dif
 ..  LocalWords:  biounits biounit uniprot UNP seqs AddMMCifPDBChainTr cif asym
 ..  LocalWords:  auth GetMMCifPDBChainTr AddPDBCMMCifhainTr GetPDBMMCifChainTr
-..  LocalWords:  GetRevisions AddRevision SetRevisionsDateOriginal GetSize
+..  LocalWords:  GetRevisions AddRevision SetRevisionsDateOriginal GetSize str
 ..  LocalWords:  GetNum num GetStatus GetLastDate GetFirstRelease storable
 ..  LocalWords:  cas isbn pubmed asu seqres conop casp COMPND OBSLTE LoadMMCIF
 ..  LocalWords:  SetChainList MMCifInfoTransOp ChainTypes MMCifInfoStructRef
@@ -1295,3 +1308,4 @@ of the annotation available.
 ..  LocalWords:  chainintervalls GetChainIntervalList GetMethodDetails GetAtom
 ..  LocalWords:  GetOperationsIntervalList SetMethodDetails oligosaccharides
 ..  LocalWords:  SetAtom GetBondOrder SetBondOrder MMCifInfoEntityBranchLink
+..  LocalWords:  GetEntityBranchByChain param

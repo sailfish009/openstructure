@@ -306,6 +306,12 @@ class TestMMCifInfo(unittest.TestCase):
     self.assertEqual(chains[0].name, 'A')
     self.assertEqual(chains[1].name, 'B')
 
+    blinks = info.GetEntityBranchByChain('B')
+    self.assertEqual(len(blinks), 1)
+    self.assertEqual(blinks[0].atom1.qualified_name, "B.NAG2.C1")
+    blinks = info.GetEntityBranchByChain('C')
+    self.assertEqual(len(blinks), 0)
+
 if __name__== '__main__':
   from ost import testutils
   testutils.RunTests()

@@ -1181,15 +1181,19 @@ public:
   ///
   const std::vector<MMCifInfoEntityBranchLink> GetEntityBranchLinks() const;
 
+  /// \brief Check if a chain is a branched entity and return it
+  ///
+  /// \param chain_name Name of the chain to check
+  const std::vector<MMCifInfoEntityBranchLink> GetEntityBranchByChain(
+                                                const String& chain_name) const;
+
   /// \brief Get the names of all chains of branched entities.
   ///
   const std::vector<String> GetEntityBranchChainNames() const;
 
   /// \brief Get the all chains of branched entities.
   ///
-const mol::ChainHandleList GetEntityBranchChains() const;
-
-  //GetEntityBranchByChain
+  const mol::ChainHandleList GetEntityBranchChains() const;
 
   /// \brief Connect all atoms listed as links for branched entities.
   ///
