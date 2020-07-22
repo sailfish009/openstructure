@@ -2,6 +2,8 @@ Changes in Release 2.x
 --------------------------------------------------------------------------------
 
  * Use the newer voronota implementation as default in CAD-score binding
+ * Added HHblits3 support - HHblits2 still supported but considered deprecated
+ * HMMScore: HMM-HMM alignment score as it is optimized in HHblits searches
  * Several minor bug fixes and improvements.
 
 Changes in Release 2.0.0
