@@ -12,7 +12,7 @@ import datetime
 import ost
 from ost import seq
 from ost import settings
-from ost.bindings import hhblits
+from ost.bindings import hhblits3
 
 class _UnitTestHHblitsLog(ost.LogSink):
   """Dedicated logger to hide some expected warning/ error messages.
@@ -53,7 +53,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'PDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDV'+
                                        'TGEELTTRKDDQEETVRKRLVEYHQMTAPLIGYYYYS'+
                                        'KEAEAGNTKYAKVDGTKPVAEVRADLEKILG')
-        self.hh = hhblits.HHblits(query_seq, self.hhroot)
+        self.hh = hhblits3.HHblits(query_seq, self.hhroot)
         # this works only as long as utils.TempDirWithFiles() names the first
         # fasta file seq01.fasta
         self.assertEqual(self.hh.filename[-11:], 'seq01.fasta')
@@ -68,7 +68,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'TGEELTTRKDDQEETVRKRLVEYHQMTAPLIGYYYYS'+
                                        'KEAEAGNTKYAKVDGTKPVAEVRADLEKILG')
         tmpdir = tempfile.mkdtemp()
-        self.hh = hhblits.HHblits(query_seq, self.hhroot, working_dir=tmpdir)
+        self.hh = hhblits3.HHblits(query_seq, self.hhroot, working_dir=tmpdir)
         self.assertEqual(self.hh.filename, os.path.join(tmpdir,
                                                         'query_hhblits.fasta'))
         self.assertEqual(self.hh.working_dir, tmpdir)
@@ -76,14 +76,14 @@ class TestHHblitsBindings(unittest.TestCase):
 
     def testFileNoWDir(self):
         # we have a sequence but no working dir
-        self.hh = hhblits.HHblits('testfiles/seq2.fasta', self.hhroot)
+        self.hh = hhblits3.HHblits('testfiles/seq2.fasta', self.hhroot)
         self.assertEqual(self.hh.filename[-10:], 'seq2.fasta')
 
     def testFileWDir(self):
         # we have a sequence and a working dir
         tmpdir = tempfile.mkdtemp()
-        self.hh = hhblits.HHblits('testfiles/seq2.fasta', self.hhroot,
-                                  working_dir=tmpdir)
+        self.hh = hhblits3.HHblits('testfiles/seq2.fasta', self.hhroot,
+                                   working_dir=tmpdir)
         self.assertEqual(self.hh.filename, os.path.join(tmpdir, 'seq2.fasta'))
         self.assertEqual(self.hh.working_dir, tmpdir)
         self.hh.needs_cleanup = True
@@ -91,8 +91,8 @@ class TestHHblitsBindings(unittest.TestCase):
     def testDoCleanup(self):
         # test that cleanup cleans up
         tmpdir = tempfile.mkdtemp()
-        self.hh = hhblits.HHblits('testfiles/seq2.fasta', self.hhroot,
-                                  working_dir=tmpdir)
+        self.hh = hhblits3.HHblits('testfiles/seq2.fasta', self.hhroot,
+                                   working_dir=tmpdir)
         self.assertTrue(os.path.isdir(tmpdir))
         self.hh.needs_cleanup = True
         self.hh.Cleanup()
@@ -101,8 +101,8 @@ class TestHHblitsBindings(unittest.TestCase):
     def testDoNotCleanup(self):
         # test that cleanup cleans up
         tmpdir = tempfile.mkdtemp()
-        self.hh = hhblits.HHblits('testfiles/seq2.fasta', self.hhroot,
-                                  working_dir=tmpdir)
+        self.hh = hhblits3.HHblits('testfiles/seq2.fasta', self.hhroot,
+                                   working_dir=tmpdir)
         self.assertTrue(os.path.isdir(tmpdir))
         self.hh.needs_cleanup = False
         self.hh.Cleanup()
@@ -113,8 +113,8 @@ class TestHHblitsBindings(unittest.TestCase):
     def testCleanupFailed(self):
         # test that cleanup cleans up
         tmpdir = tempfile.mkdtemp()
-        self.hh = hhblits.HHblits('testfiles/seq2.fasta', self.hhroot,
-                                  working_dir=tmpdir)
+        self.hh = hhblits3.HHblits('testfiles/seq2.fasta', self.hhroot,
+                                   working_dir=tmpdir)
         self.assertTrue(os.path.isdir(tmpdir))
         self.hh.needs_cleanup = False
         self.hh.CleanupFailed()
@@ -123,7 +123,7 @@ class TestHHblitsBindings(unittest.TestCase):
     def testFileNoExists(self):
         # test on calling with a non-existing fasta file
         with self.assertRaises(IOError) as ioe:
-            hhblits.HHblits('notthere.fasta', self.hhroot)
+            hhblits3.HHblits('notthere.fasta', self.hhroot)
         self.assertEqual(ioe.exception.errno, 2)
         self.assertEqual(ioe.exception.strerror, 'No such file or directory')
 
@@ -134,7 +134,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
-        self.hh = hhblits.HHblits(query_seq, self.hhroot)
+        self.hh = hhblits3.HHblits(query_seq, self.hhroot)
         a3m = self.hh.BuildQueryMSA('testfiles/hhblitsdb/unittestdb', 
                                     assign_ss = False)
         self.assertTrue(filecmp.cmp(a3m, "testfiles/testali_two_no_ss.a3m"))
@@ -146,7 +146,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
-        self.hh = hhblits.HHblits(query_seq, self.hhroot)
+        self.hh = hhblits3.HHblits(query_seq, self.hhroot)
         _, self.tmpfile = tempfile.mkstemp(suffix='.hmm')
         os.remove(self.tmpfile)
         hhfile = self.hh.A3MToProfile("testfiles/testali.a3m",
@@ -167,7 +167,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
-        self.hh = hhblits.HHblits(query_seq, self.hhroot)
+        self.hh = hhblits3.HHblits(query_seq, self.hhroot)
         hhfile = self.hh.A3MToProfile("testfiles/testali.a3m")
         with open(hhfile) as tfh:
           tlst = tfh.readlines()
@@ -186,7 +186,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
-        self.hh = hhblits.HHblits(query_seq, self.hhroot)
+        self.hh = hhblits3.HHblits(query_seq, self.hhroot)
         hhfile = self.hh.A3MToProfile("testfiles/testali.a3m",
                                       hhm_file="testfiles/test.hmm")
         # when the hmm file already exists, its not touched, so files should be
@@ -200,7 +200,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
-        self.hh = hhblits.HHblits(query_seq, self.hhroot)
+        self.hh = hhblits3.HHblits(query_seq, self.hhroot)
         with self.assertRaises(IOError) as ioe:
             self.hh.A3MToProfile("doesnotexist.a3m")
         self.assertEqual(ioe.exception.errno, None)
@@ -214,7 +214,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
-        self.hh = hhblits.HHblits(query_seq, self.hhroot)
+        self.hh = hhblits3.HHblits(query_seq, self.hhroot)
         _, self.tmpfile = tempfile.mkstemp(suffix='.seq219')
         os.remove(self.tmpfile)
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
@@ -231,7 +231,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
-        self.hh = hhblits.HHblits(query_seq, self.hhroot)
+        self.hh = hhblits3.HHblits(query_seq, self.hhroot)
 
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
                                  options={'-alphabet' :
@@ -248,7 +248,7 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
-        self.hh = hhblits.HHblits(query_seq, self.hhroot)
+        self.hh = hhblits3.HHblits(query_seq, self.hhroot)
         csfile = self.hh.A3MToCS("testfiles/testali.a3m",
                                  cs_file='testfiles/test.seq219',
                                  options={'-alphabet' :
@@ -264,12 +264,12 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
-        self.hh = hhblits.HHblits(query_seq, self.hhroot)
+        self.hh = hhblits3.HHblits(query_seq, self.hhroot)
         search_file = self.hh.Search("testfiles/testali.a3m",
                                      'testfiles/hhblitsdb/unittestdb')
 
         with open(search_file) as f:
-              header, hits = hhblits.ParseHHblitsOutput(f)
+              header, hits = hhblits3.ParseHHblitsOutput(f)
         self.assertEqual(len(hits), 4)
         exp_scores = [199.3, 12.3, 11.5, 8.1]
         for hit_idx in range(4):
@@ -281,14 +281,14 @@ class TestHHblitsBindings(unittest.TestCase):
                                        'ALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKL'+
                                        'LSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVL'+
                                        'TSKYR')
-        self.hh = hhblits.HHblits(query_seq, self.hhroot)
+        self.hh = hhblits3.HHblits(query_seq, self.hhroot)
         with self.assertRaises(RuntimeError) as rte:
             self.hh.Search("doesnotexist.a3m", 'testfiles/hhblitsdb/unittestdb')
 
     def testParseHHMWorking(self):
         # get info from an HHM file
         with open("testfiles/test.hmm") as hhm_fh:
-            prof = hhblits.ParseHHM(hhm_fh)
+            prof = hhblits3.ParseHHM(hhm_fh)
         self.assertEqual(''.join([str(x) for x in prof['ss_conf']]),
                          '999999999999998873391557999999998639441123987788888'+
                          '856788999999999998735477789999999887650299989899889'+
@@ -307,7 +307,7 @@ class TestHHblitsBindings(unittest.TestCase):
         # get info from an HHM file
         with self.assertRaises(IOError) as ioe:
             with open('testfiles/testali.a3m') as f:
-              hhblits.ParseHHM(f)
+              hhblits3.ParseHHM(f)
         self.assertEqual(ioe.exception.args[0],
                          'Profile file "testfiles/testali.a3m" is missing '+
                          'the "Consensus" section')
@@ -315,7 +315,7 @@ class TestHHblitsBindings(unittest.TestCase):
     def testParseA3MWorking(self):
         # get info from an HHM file
         with open("testfiles/testali.a3m") as a3m_fh:
-            prof = hhblits.ParseA3M(a3m_fh)
+            prof = hhblits3.ParseA3M(a3m_fh)
         self.assertEqual(''.join([str(x) for x in prof['ss_conf']]),
                          '999999999999998873391557999999998639441123987788888'+
                          '856788999999999998735477789999999887650299989899889'+
@@ -329,7 +329,7 @@ class TestHHblitsBindings(unittest.TestCase):
     def fastParseHeader(self):
         header_line = '  1 814cbc1899f35c872169524af30fc2 100.0  5E-100' + \
                       '  5E-104  710.5  34.1  277    3-293     2-280 (281)'
-        hit, offset = hhblits.ParseHeaderLine(header_line)
+        hit, offset = hhblits3.ParseHeaderLine(header_line)
         self.assertEqual(hit.hit_id, '814cbc1899f35c872169524af30fc2')
         self.assertAlmostEqual(hit.evalue, 0)
         self.assertAlmostEqual(hit.prob, 100.0)
@@ -339,7 +339,7 @@ class TestHHblitsBindings(unittest.TestCase):
 
     def testParseHHblitsOutput(self):
         with open("testfiles/test.hhr") as f:
-          header, hits = hhblits.ParseHHblitsOutput(f)
+          header, hits = hhblits3.ParseHHblitsOutput(f)
         self.assertEqual(header.query, 'Test')
         self.assertEqual(header.match_columns, 141)
         self.assertEqual(header.n_eff, 9.4)
@@ -420,6 +420,7 @@ class TestHHblitsBindings(unittest.TestCase):
 
 if __name__ == "__main__":
     try:
+        from ost.bindings import hhblits
         hhblits_version_string = hhblits.GetHHblitsVersionString()
     except:
         print("No HHblits installation found: skip unit tests")
