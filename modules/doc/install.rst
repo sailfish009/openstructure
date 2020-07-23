@@ -91,7 +91,7 @@ The above command will clone OpenStructure into the directory specified by
 Picking the right branch
 --------------------------------------------------------------------------------
 
-By default you are checking out the master branch. Master is, by definition a
+By default you are checking out the master branch. Master is by definition a
 stable branch. It always points to the latest release. However, there are
 several other branches at your disposal. The main development is happening in
 the develop branch. It contains the newest features and bug fixes. However, we
@@ -337,9 +337,9 @@ to be substituted.
 
 `Homebrew <https://brew.sh/>`_ can be used to conveniently install all
 dependencies. The current Python version, as of writing these instructions, is
-3.8.3 but works so far. Boost comes as 1.72.0 which seems to be OK. Do not
+3.8.5 but works so far. Boost comes as 1.72.0 which seems to be OK. Do not
 forget to also install `boost-python3` (your system may have a lower version of
-Python than 3.8.3 but it seems like `boost-python` was compiled for 3.8.3).
+Python than 3.8.5 but it seems like `boost-python` was compiled for 3.8.5).
 Eigen and SQLite also seem to be unproblematic concerning higher version numbers.
 
 If you want to build the info module or the graphical user interface, make sure
