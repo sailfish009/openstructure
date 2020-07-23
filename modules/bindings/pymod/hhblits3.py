@@ -523,14 +523,6 @@ class HHblits:
     def BuildQueryMSA(self, nrdb, options={}, a3m_file=None, assign_ss=True):
         """Builds the MSA for the query sequence.
 
-        This function directly uses hhblits of hhtools. While in theory it would
-        be possible to do this by PSI-blasting on our own, hhblits is supposed
-        to be faster. Also it is supposed to prevent alignment corruption. The
-        alignment corruption is caused by low-scoring terminal alignments that
-        draw the sequences found by PSI-blast away from the optimum. By removing
-        these low scoring ends, part of the alignment corruption can be
-        suppressed.
-
         The produced A3M file can be parsed by :func:`ParseA3M`. If the file was
         already produced, hhblits is not called again and the existing file path
         is returned (neglecting the *assign_ss* flag!!!).
