@@ -134,9 +134,13 @@ void PDBize::Add(EntityView asu, const geom::Mat4List& transforms,
         last_rnum_ = 0;
       }
       char ins_code = chain.GetResidueCount()>1 ? 'A' : '\0';
-     
+
       for (ResidueViewList::const_iterator k = chain.GetResidueList().begin(),
            e3 = chain.GetResidueList().end(); k != e3; ++k) {
+        if (ins_code == 'Z'+1) {
+          ins_code = 'A';
+          last_rnum_+=1;
+        }
         ResidueHandle new_res = edi.AppendResidue(ligand_chain_, k->GetName(),
                                                   ResNum(last_rnum_+1, ins_code));
         transfer_residue_properties(*k, new_res);
