@@ -7,7 +7,12 @@ def GetHHblitsVersionString():
     version_string = None
 
     # raises if hhblits binary is not in path
-    hhblits_bin = settings.Locate('hhblits')
+    try:
+        hhblits_bin = settings.Locate('hhblits')
+    except:
+        raise RuntimeError('Tried to determine HHblits version string which '\
+                           'requires the hhblits binary to be in your path. '\
+                           'Couldnt find it...')
 
     # run hhblits to determine version
     proc = subprocess.run([hhblits_bin, '-h'], stdout=subprocess.PIPE)
