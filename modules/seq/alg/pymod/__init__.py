@@ -110,6 +110,12 @@ def AlignToSEQRES(chain, seqres, try_resnum_first=False, validate=True):
                      '" at the corresponding position.')
           try_resnum_first = False
           break
+      else:
+        warning = 'Residue with number %i is outside of the range covered by '\
+                  'SEQRES [1, %i]'%(r1.number.num, len(seqres)) 
+        LogWarning(warning)
+        try_resnum_first = False
+        break
   if not try_resnum_first:
     fragments=[residues[0].one_letter_code]
     for r1, r2 in zip(residues[:-1], residues[1:]):
